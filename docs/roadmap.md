@@ -95,6 +95,7 @@
 - 已推进：`packages/generator` CLI 已支持 `--schema-file`，允许从 JSON schema 文件直接生成 staging，并在外部 schema 来源时内联 `.schema.ts`
 - 已推进：`docs/ai-playbooks` 已补 `P5A` 输入模板、输出契约、验收语料与可执行样例 schema 文件
 - 已推进：新增 `p5a:handoff:report` / `p5a:handoff:replay`，形成“失败分类 -> 人工修正 -> 重放 -> 继续 generator”的最小接管骨架
+- 已推进：`p5a:handoff:replay` 已输出结构化 replay 报告，记录 handoff、generator 与生成 artifact 路径，继续补齐 `WP-3` 的最小失败审计证据
 - 已推进：补充“顶层越界元数据 / 非法 JSON / 字段级局部错误”三类失败语料，并把 `retry_ai_generation` 与 `manual_fix_required` 的分界收紧到可执行分类规则
 - 已推进：新增 `p5a:handoff:corpus`，把真实任务输入变体与失败语料收敛为可批量执行的分类回归入口
 - 已推进：CI 新增 `p5a-handoff-corpus` 作业，把 P5A 语料分类回归纳入固定质量链路

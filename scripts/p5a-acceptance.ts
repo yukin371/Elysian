@@ -41,6 +41,8 @@ interface P5aAcceptanceCaseReport {
   status: "passed" | "failed"
   reportPath?: string
   summaryPath?: string
+  handoffReportPath?: string
+  handoffSummaryPath?: string
   generatedSchemaArtifactPath?: string
   outputDir: string
   errorMessage?: string
@@ -201,19 +203,6 @@ export const publishP5aAcceptanceGitHubOutput = async (
 
 const isNonEmptyString = (input: unknown): input is string =>
   typeof input === "string" && input.trim().length > 0
-
-const readModuleNameFromSchemaFile = async (schemaFilePath: string) => {
-  const raw = await readFile(resolve(schemaFilePath), "utf8")
-  const parsed = JSON.parse(raw.replace(/^\uFEFF/, "")) as { name?: unknown }
-
-  if (typeof parsed.name !== "string" || parsed.name.trim().length === 0) {
-    throw new Error(
-      `Replay schema file is missing a valid module name: ${schemaFilePath}`,
-    )
-  }
-
-  return parsed.name
-}
 
 const readP5aAcceptanceCases = async (
   acceptanceCasesPath: string,
@@ -380,25 +369,32 @@ const runAcceptanceCase = async (
       process.stderr.write(replayResult.stderr)
     }
 
-    const reportPath = join(reportDir, "p5a-schema-handoff-report.json")
-    const summaryPath = join(reportDir, "p5a-schema-handoff-summary.md")
+    const reportPath = join(reportDir, "p5a-schema-handoff-replay-report.json")
+    const summaryPath = join(reportDir, "p5a-schema-handoff-replay-summary.md")
     const replayReportRaw = await readFile(reportPath, "utf8")
     const replayReport = JSON.parse(replayReportRaw) as {
       status?: "passed" | "failed"
+      steps?: {
+        handoff?: "passed" | "failed"
+        generator?: "passed" | "failed" | "skipped"
+      }
+      outputs?: {
+        generatedSchemaArtifactPath?: string | null
+        handoffReportPath?: string
+        handoffSummaryPath?: string
+      }
+      generator?: {
+        errorMessage?: string | null
+      }
     }
-    const moduleName = await readModuleNameFromSchemaFile(
-      acceptanceCase.schemaFilePath,
-    )
-    const generatedSchemaArtifactPath = join(
-      outputDir,
-      "modules",
-      moduleName,
-      `${moduleName}.schema.ts`,
-    )
-    const replay = replayReport.status === "passed" ? "passed" : "failed"
-    const generator = replayResult.code === 0 ? "passed" : "failed"
+    const replay =
+      replayReport.steps?.handoff === "passed" ? "passed" : "failed"
+    const generator =
+      replayReport.steps?.generator === "passed" ? "passed" : "failed"
+    const generatedSchemaArtifactPath =
+      replayReport.outputs?.generatedSchemaArtifactPath ?? undefined
 
-    if (generator === "passed") {
+    if (generatedSchemaArtifactPath) {
       await access(generatedSchemaArtifactPath)
     }
 
@@ -413,8 +409,14 @@ const runAcceptanceCase = async (
         replay === "passed" && generator === "passed" ? "passed" : "failed",
       reportPath,
       summaryPath,
+      handoffReportPath: replayReport.outputs?.handoffReportPath,
+      handoffSummaryPath: replayReport.outputs?.handoffSummaryPath,
       generatedSchemaArtifactPath,
       outputDir,
+      errorMessage:
+        replayResult.code !== 0
+          ? (replayReport.generator?.errorMessage ?? replayResult.stderr.trim())
+          : undefined,
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

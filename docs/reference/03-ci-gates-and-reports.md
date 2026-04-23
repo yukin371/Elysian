@@ -17,6 +17,7 @@
 | `e2e-generator-reports-index.json` | generator 汇总索引 | `e2e:generator:reports:index` |
 | `e2e-generator-reports-gate.json` | generator 门禁结论 | `e2e:generator:reports:gate` |
 | `p5a-handoff-corpus-report.json` | P5A 语料分类回归结果 | `p5a:handoff:corpus` |
+| `p5a-schema-handoff-replay-report.json` | P5A 单次人工接管 replay 结果 | `p5a:handoff:replay` |
 | `p5a-acceptance-report.json` | P5A acceptance 执行结果 | `p5a:acceptance` |
 | `p5a-acceptance-gate.json` | P5A acceptance 门禁结论 | `p5a:acceptance:gate` |
 | `p5a-acceptance-index.json` | P5A acceptance 单一索引结论 | `p5a:acceptance:index` |
@@ -32,5 +33,6 @@
 - smoke gate 失败：先看 `e2e-smoke-reports-index.json` 与 attempt 级 diagnosis
 - generator gate 失败：先看 `e2e-generator-reports-index.json`，按 `source=matrix|cli` 回到对应入口
 - P5A corpus 失败：先看 `p5a-handoff-corpus-summary.md`，确认 `retry_ai_generation` / `manual_fix_required` 分界是否漂移
+- P5A replay 失败：先看 `p5a-schema-handoff-replay-report.json`，区分是 handoff 仍未通过还是 generator 步骤失败
 - P5A acceptance gate 失败：先看 `p5a-acceptance-report.json` 与对应 replay summary，再核对 gate policy 是否被手工覆盖
 - P5A acceptance index 失败：先检查 `p5a-acceptance-report.json` 和 `p5a-acceptance-gate.json` 是否存在结论漂移

@@ -106,17 +106,37 @@ describe("p5a-schema-handoff-replay", () => {
 
       expect(replayCode).toBe(0)
 
-      const reportRaw = await readFile(
+      const handoffReportRaw = await readFile(
         join(replayReportDir, "p5a-schema-handoff-report.json"),
         "utf8",
       )
-      const report = JSON.parse(reportRaw) as {
+      const handoffReport = JSON.parse(handoffReportRaw) as {
         decision: string
         status: string
       }
+      const replayReportRaw = await readFile(
+        join(replayReportDir, "p5a-schema-handoff-replay-report.json"),
+        "utf8",
+      )
+      const replayReport = JSON.parse(replayReportRaw) as {
+        status: string
+        steps: {
+          handoff: string
+          generator: string
+        }
+        outputs: {
+          generatedSchemaArtifactPath?: string | null
+        }
+      }
 
-      expect(report.decision).toBe("ready_for_generator")
-      expect(report.status).toBe("passed")
+      expect(handoffReport.decision).toBe("ready_for_generator")
+      expect(handoffReport.status).toBe("passed")
+      expect(replayReport.status).toBe("passed")
+      expect(replayReport.steps.handoff).toBe("passed")
+      expect(replayReport.steps.generator).toBe("passed")
+      expect(replayReport.outputs.generatedSchemaArtifactPath).toContain(
+        "supplier.schema.ts",
+      )
 
       const generatedSchema = await readFile(
         join(
@@ -130,6 +150,13 @@ describe("p5a-schema-handoff-replay", () => {
       )
 
       expect(generatedSchema).toContain("export const supplierModuleSchema")
+      const replaySummary = await readFile(
+        join(replayReportDir, "p5a-schema-handoff-replay-summary.md"),
+        "utf8",
+      )
+
+      expect(replaySummary).toContain("# P5A Handoff Replay Summary")
+      expect(replaySummary).toContain("generator: passed")
     } finally {
       await rm(workspace, { recursive: true, force: true })
     }

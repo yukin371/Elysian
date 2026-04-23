@@ -15,6 +15,8 @@
 
 - `p5a-schema-handoff-report.json`
 - `p5a-schema-handoff-summary.md`
+- `p5a-schema-handoff-replay-report.json`
+- `p5a-schema-handoff-replay-summary.md`
 
 ## 命令
 
@@ -51,6 +53,7 @@ bun run p5a:acceptance:finalize
 - `p5a:acceptance:index` 会把 acceptance 与 gate 收敛成单一结论文件，便于下载 artifact 后只读一个结果。
 - `p5a:acceptance:finalize` 适合本地一键收尾；CI 仍保持 acceptance、gate、index 分步执行，避免丢失页面级可见性。
 - 用于验证 `P5A` 当前主线是否仍满足“语料分类稳定 + 多条成功 handoff 进入 generator”。
+- `p5a:handoff:replay` 现在会额外产出结构化 replay 报告，记录本次人工接管后的 handoff 结果、generator 步骤状态与生成 schema 产物路径。
 
 ## 失败分类
 
@@ -66,6 +69,7 @@ bun run p5a:acceptance:finalize
 ## 当前边界
 
 - 只记录文件级输入、输出与校验结果
+- replay 审计只保留单次接管级别的结构化结果，不记录逐轮对话
 - 不记录对话逐轮 token 级日志
 - 不引入数据库审计或交互式回放 UI
 - handoff JSON 仍然只接受纯 `ModuleSchema`；若出现权限、菜单、流程、UI 私有元数据，必须判定为越界输入并回退修正
