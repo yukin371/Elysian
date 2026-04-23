@@ -103,7 +103,7 @@
 - 已推进：P5A corpus 新增服务工单 mixed 字典/布尔/数字/时间案例，以及字段级越界元数据 failure case，继续压实 `retry_ai_generation` / `manual_fix_required` 分界
 - 已推进：`p5a:acceptance` 改为 manifest 驱动的多成功 replay/generator case 验收，不再只依赖单一样例
 - 已推进：`p5a:acceptance` 新增 Step Summary / GitHub output，CI 页面可直接判读阶段验收状态与 case 数
-- 已推进：`p5a:acceptance` 成功样例覆盖已扩到 `supplier / visitor-pass / asset / service-ticket` 四条 replay/generator case，继续在 `P5A` 范围内扩大真实需求变体
+- 已推进：`p5a:acceptance` 成功样例覆盖已扩到 `manual-fix-supplier` 加 `supplier / visitor-pass / asset / service-ticket` 五条 replay/generator case，继续在 `P5A` 范围内扩大真实需求变体
 - 已推进：新增 `p5a:acceptance:gate`，对 acceptance 报告执行独立门禁，固定“至少 3 条成功 case + generator artifact 证据完整”的当前阶段边界
 - 已推进：CI `p5a-acceptance` 已接入 acceptance gate，并支持 `workflow_dispatch` 参数化最小 case 数与 artifact 证据策略
 - 已推进：新增 `p5a:acceptance:index`，把 acceptance 与 gate 收敛成单一结论文件，降低 artifact 下载后的二次拼装成本

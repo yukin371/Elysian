@@ -7,6 +7,12 @@
       "schemaFilePath": "./docs/ai-playbooks/examples/p5a-fixed.module-schema.json"
     },
     {
+      "id": "supplier-ready",
+      "description": "ready standard CRUD input should pass replay and generator without manual takeover",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-complete-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/supplier.module-schema.json"
+    },
+    {
       "id": "visitor-pass-ready",
       "description": "ready boolean and datetime fields should pass replay and generator",
       "inputFilePath": "./docs/ai-playbooks/examples/p5a-visitor-pass-task-input.txt",
