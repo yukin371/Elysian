@@ -6,6 +6,7 @@ export type FrontendTarget = "vue" | "react"
 
 export interface RenderModuleTemplatesOptions {
   frontendTarget?: FrontendTarget
+  schemaArtifactSource?: "package" | "inline"
 }
 
 const getPageExtension = (frontendTarget: FrontendTarget) =>
@@ -16,16 +17,20 @@ const SYSTEM_FIELD_KEYS = new Set(["id", "createdAt", "updatedAt"])
 const getInputFields = (schema: ModuleSchema) =>
   schema.fields.filter((field) => !SYSTEM_FIELD_KEYS.has(field.key))
 
-const getFieldTypeAnnotation = (schema: ModuleSchema, field: ModuleField) => {
-  const pascalName = toPascalCase(schema.name)
+const getEnumTypeName = (schema: ModuleSchema, field: ModuleField) =>
+  `${toPascalCase(schema.name)}${toPascalCase(field.key)}`
 
+const getRecordTypeName = (schema: ModuleSchema) =>
+  `${toPascalCase(schema.name)}Record`
+
+const getFieldTypeAnnotation = (schema: ModuleSchema, field: ModuleField) => {
   switch (field.kind) {
     case "boolean":
       return "boolean"
     case "number":
       return "number"
     case "enum":
-      return field.key === "status" ? `${pascalName}Status` : "string"
+      return getEnumTypeName(schema, field)
     default:
       return "string"
   }
@@ -66,10 +71,54 @@ const getPrimaryDisplayField = (schema: ModuleSchema) =>
   schema.fields.find((field) => !SYSTEM_FIELD_KEYS.has(field.key)) ??
   schema.fields[0]
 
-export const renderSchemaTemplate = (schema: ModuleSchema) => {
-  const symbolName = `${toCamelCase(schema.name)}ModuleSchema`
+const renderSchemaTypeSection = (schema: ModuleSchema) => {
+  const enumTypeDeclarations = schema.fields
+    .filter((field) => field.kind === "enum")
+    .map((field) => {
+      const optionValues =
+        field.options && field.options.length > 0
+          ? field.options
+              .map((option) => JSON.stringify(option.value))
+              .join(" | ")
+          : "string"
 
-  return `import { ${symbolName} } from "@elysian/schema"
+      return `export type ${getEnumTypeName(schema, field)} = ${optionValues}`
+    })
+    .join("\n\n")
+  const recordTypeName = getRecordTypeName(schema)
+  const recordDeclaration = `export interface ${recordTypeName} {\n${schema.fields
+    .map((field) => `  ${field.key}: ${getFieldTypeAnnotation(schema, field)}`)
+    .join("\n")}\n}`
+
+  return [enumTypeDeclarations, recordDeclaration]
+    .filter((section) => section.trim().length > 0)
+    .join("\n\n")
+}
+
+export const renderSchemaTemplate = (
+  schema: ModuleSchema,
+  options: RenderModuleTemplatesOptions = {},
+) => {
+  const symbolName = `${toCamelCase(schema.name)}ModuleSchema`
+  const typeSection = renderSchemaTypeSection(schema)
+
+  if (options.schemaArtifactSource === "inline") {
+    return `import type { ModuleSchema } from "@elysian/schema"
+
+${typeSection}
+
+export const ${symbolName}: ModuleSchema = ${JSON.stringify(schema, null, 2)}
+
+export const moduleSchema = ${symbolName}
+`
+  }
+
+  return `import { ${symbolName} as sourceModuleSchema } from "@elysian/schema"
+import type { ModuleSchema } from "@elysian/schema"
+
+${typeSection}
+
+export const ${symbolName}: ModuleSchema = sourceModuleSchema
 
 export const moduleSchema = ${symbolName}
 `
@@ -77,15 +126,18 @@ export const moduleSchema = ${symbolName}
 
 export const renderRepositoryTemplate = (schema: ModuleSchema) => {
   const pascalName = toPascalCase(schema.name)
-  const recordTypeName = `${pascalName}Record`
+  const recordTypeName = getRecordTypeName(schema)
   const repositoryName = `${pascalName}Repository`
   const createInputName = `Create${pascalName}Input`
   const createFields = renderCreateInputFields(schema)
-  const statusField = schema.fields.find((field) => field.key === "status")
+  const importedTypes = [
+    recordTypeName,
+    ...schema.fields
+      .filter((field) => field.kind === "enum")
+      .map((field) => getEnumTypeName(schema, field)),
+  ]
 
-  return `import type { ${recordTypeName}${
-    statusField ? `, ${pascalName}Status` : ""
-  } } from "@elysian/schema"
+  return `import type { ${importedTypes.join(", ")} } from "./${schema.name}.schema"
 
 export interface ${createInputName} {
 ${createFields}
@@ -224,6 +276,7 @@ ${bodyFields}
 
 export const renderVuePageTemplate = (schema: ModuleSchema) => {
   const pascalName = toPascalCase(schema.name)
+  const recordTypeName = getRecordTypeName(schema)
   const collectionName = `${toCamelCase(schema.name)}Items`
   const endpoint = `/${schema.name}s`
   const primaryDisplayField = getPrimaryDisplayField(schema)?.key ?? "id"
@@ -231,9 +284,9 @@ export const renderVuePageTemplate = (schema: ModuleSchema) => {
   return `<script setup lang="ts">
 import { onMounted, ref } from "vue"
 
-import type { ${pascalName}Record } from "@elysian/schema"
+import type { ${recordTypeName} } from "./${schema.name}.schema"
 
-const ${collectionName} = ref<${pascalName}Record[]>([])
+const ${collectionName} = ref<${recordTypeName}[]>([])
 const loading = ref(true)
 const errorMessage = ref("")
 
@@ -248,7 +301,7 @@ const loadItems = async () => {
       throw new Error("${pascalName} request failed")
     }
 
-    const payload = (await response.json()) as { items: ${pascalName}Record[] }
+    const payload = (await response.json()) as { items: ${recordTypeName}[] }
     ${collectionName}.value = payload.items
   } catch (error) {
     errorMessage.value =
@@ -278,15 +331,16 @@ onMounted(loadItems)
 
 export const renderReactPageTemplate = (schema: ModuleSchema) => {
   const pascalName = toPascalCase(schema.name)
+  const recordTypeName = getRecordTypeName(schema)
   const endpoint = `/${schema.name}s`
   const primaryDisplayField = getPrimaryDisplayField(schema)?.key ?? "id"
 
   return `import { useEffect, useState } from "react"
 
-import type { ${pascalName}Record } from "@elysian/schema"
+import type { ${recordTypeName} } from "./${schema.name}.schema"
 
 export const ${pascalName}Page = () => {
-  const [items, setItems] = useState<${pascalName}Record[]>([])
+  const [items, setItems] = useState<${recordTypeName}[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
 
@@ -299,7 +353,7 @@ export const ${pascalName}Page = () => {
           throw new Error("${pascalName} request failed")
         }
 
-        const payload = (await response.json()) as { items: ${pascalName}Record[] }
+        const payload = (await response.json()) as { items: ${recordTypeName}[] }
         setItems(payload.items)
       } catch (error) {
         setErrorMessage(

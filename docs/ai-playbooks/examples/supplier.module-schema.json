@@ -1,0 +1,55 @@
+{
+  "name": "supplier",
+  "label": "Supplier",
+  "fields": [
+    {
+      "key": "id",
+      "label": "ID",
+      "kind": "id",
+      "required": true
+    },
+    {
+      "key": "name",
+      "label": "Name",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "key": "contactEmail",
+      "label": "Contact Email",
+      "kind": "string",
+      "searchable": true
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "kind": "enum",
+      "required": true,
+      "searchable": true,
+      "dictionaryTypeCode": "supplier_status",
+      "options": [
+        {
+          "label": "active",
+          "value": "active"
+        },
+        {
+          "label": "inactive",
+          "value": "inactive"
+        }
+      ]
+    },
+    {
+      "key": "createdAt",
+      "label": "Created At",
+      "kind": "datetime",
+      "required": true
+    },
+    {
+      "key": "updatedAt",
+      "label": "Updated At",
+      "kind": "datetime",
+      "required": true
+    }
+  ]
+}

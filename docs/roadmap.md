@@ -90,6 +90,9 @@
   - `WP-1` 需求输入模板与 `AI -> Schema` 验收语料
   - `WP-2` 结构化输出校验与 handoff 边界
   - `WP-3` 人工兜底、回放与失败审计最小骨架
+- 已推进：`packages/schema` 已补 `validateModuleSchema` / `isModuleSchema` runtime 校验，固定外部 schema handoff 的最小硬约束
+- 已推进：`packages/generator` CLI 已支持 `--schema-file`，允许从 JSON schema 文件直接生成 staging，并在外部 schema 来源时内联 `.schema.ts`
+- 已推进：`docs/ai-playbooks` 已补 `P5A` 输入模板、输出契约、验收语料与可执行样例 schema 文件
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 ### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
@@ -219,5 +222,5 @@
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
 6. 启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。
-7. 设计 `AI -> Schema -> generator` 的最小闭环，但不提前进入 `P5B/P5C` 或交互式 AI 助手。
+7. 在 `P5A` 基础上补“AI 输出失败 -> 人工修正 -> 继续 handoff”的回放与接管骨架，但不提前进入 `P5B/P5C`。
 8. 保持 `Phase 6B` 为后续候选主线，待 `P5A` 形成稳定入口后再回到企业增强能力。

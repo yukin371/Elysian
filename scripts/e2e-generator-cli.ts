@@ -213,6 +213,47 @@ const run = async (): Promise<CliCheckResult[]> => {
         )
       },
     )
+
+    await recordCheck(
+      "schema-file handoff generates inline schema artifacts",
+      async () => {
+        const schemaFileRun = await runGeneratorCli(
+          [
+            "--schema-file",
+            "./docs/ai-playbooks/examples/supplier.module-schema.json",
+            "--out",
+            join(workspace, "schema-file-output"),
+            "--frontend",
+            "vue",
+          ],
+          process.cwd(),
+        )
+        assert(
+          schemaFileRun.code === 0,
+          `Expected schema-file handoff success, got ${schemaFileRun.code}`,
+        )
+
+        const generatedSchemaPath = join(
+          workspace,
+          "schema-file-output",
+          "modules/supplier/supplier.schema.ts",
+        )
+        const generatedSchema = await Bun.file(generatedSchemaPath).text()
+
+        assert(
+          generatedSchema.includes(
+            "export const supplierModuleSchema: ModuleSchema = {",
+          ),
+          "Expected external schema handoff to inline the schema artifact",
+        )
+        assert(
+          !generatedSchema.includes(
+            'import { supplierModuleSchema } from "@elysian/schema"',
+          ),
+          "Expected external schema handoff to avoid package import references",
+        )
+      },
+    )
   } finally {
     await rm(workspace, { recursive: true, force: true })
   }

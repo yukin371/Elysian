@@ -27,6 +27,10 @@ const getFrontendTarget = (
   options: RenderModuleTemplatesOptions = {},
 ): FrontendTarget => options.frontendTarget ?? "vue"
 
+const getSchemaArtifactSource = (
+  options: RenderModuleTemplatesOptions = {},
+): "package" | "inline" => options.schemaArtifactSource ?? "package"
+
 export const planModuleFiles = (
   schema: ModuleSchema,
   options: RenderModuleTemplatesOptions = {},
@@ -69,14 +73,23 @@ export const renderModuleFiles = (
   options: RenderModuleTemplatesOptions = {},
 ): RenderedModuleFile[] => {
   const frontendTarget = getFrontendTarget(options)
-  const plans = planModuleFiles(schema, { frontendTarget })
+  const schemaArtifactSource = getSchemaArtifactSource(options)
+  const plans = planModuleFiles(schema, {
+    frontendTarget,
+    schemaArtifactSource,
+  })
 
   return plans.map((plan) => ({
     ...plan,
     contents: withGeneratedHeader(
       schema,
       plan.path,
-      renderTemplateForPath(schema, plan.path, frontendTarget),
+      renderTemplateForPath(
+        schema,
+        plan.path,
+        frontendTarget,
+        schemaArtifactSource,
+      ),
       plan.mergeStrategy,
     ),
   }))
@@ -86,9 +99,13 @@ const renderTemplateForPath = (
   schema: ModuleSchema,
   path: string,
   frontendTarget: FrontendTarget,
+  schemaArtifactSource: "package" | "inline",
 ) => {
   if (path.endsWith(".schema.ts")) {
-    return renderSchemaTemplate(schema)
+    return renderSchemaTemplate(schema, {
+      frontendTarget,
+      schemaArtifactSource,
+    })
   }
 
   if (path.endsWith(".repository.ts")) {

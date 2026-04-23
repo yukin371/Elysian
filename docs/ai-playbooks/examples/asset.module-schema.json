@@ -1,0 +1,70 @@
+{
+  "name": "asset",
+  "label": "Asset",
+  "fields": [
+    {
+      "key": "id",
+      "label": "ID",
+      "kind": "id",
+      "required": true
+    },
+    {
+      "key": "assetCode",
+      "label": "Asset Code",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "key": "name",
+      "label": "Name",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "key": "originalValue",
+      "label": "Original Value",
+      "kind": "number",
+      "required": true
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "kind": "enum",
+      "required": true,
+      "options": [
+        {
+          "label": "in_use",
+          "value": "in_use"
+        },
+        {
+          "label": "idle",
+          "value": "idle"
+        },
+        {
+          "label": "retired",
+          "value": "retired"
+        }
+      ]
+    },
+    {
+      "key": "purchasedAt",
+      "label": "Purchased At",
+      "kind": "datetime",
+      "required": true
+    },
+    {
+      "key": "createdAt",
+      "label": "Created At",
+      "kind": "datetime",
+      "required": true
+    },
+    {
+      "key": "updatedAt",
+      "label": "Updated At",
+      "kind": "datetime",
+      "required": true
+    }
+  ]
+}

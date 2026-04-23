@@ -20,6 +20,7 @@ export type WriteConflictStrategy =
 export interface WriteModuleFilesOptions {
   outputDir: string
   frontendTarget?: FrontendTarget
+  schemaArtifactSource?: "package" | "inline"
   conflictStrategy?: WriteConflictStrategy
   writeManifest?: boolean
   targetPreset?: GenerationTargetPreset
@@ -113,6 +114,7 @@ export const writeModuleFiles = async (
   const conflictStrategy = options.conflictStrategy ?? "skip"
   const renderedFiles = renderModuleFiles(schema, {
     frontendTarget,
+    schemaArtifactSource: options.schemaArtifactSource,
   })
   const filesToWrite = await Promise.all(
     renderedFiles.map(async (file) => {

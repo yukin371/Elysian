@@ -1,12 +1,28 @@
 export const moduleSchemaVersion = 1
 
-export type ModuleFieldKind =
-  | "id"
-  | "string"
-  | "number"
-  | "boolean"
-  | "enum"
-  | "datetime"
+export const moduleFieldKinds = [
+  "id",
+  "string",
+  "number",
+  "boolean",
+  "enum",
+  "datetime",
+] as const
+
+export type ModuleFieldKind = (typeof moduleFieldKinds)[number]
+
+export interface ModuleSchemaValidationIssue {
+  path: string
+  message: string
+}
+
+const moduleFieldKindSet = new Set<ModuleFieldKind>(moduleFieldKinds)
+
+const isRecord = (input: unknown): input is Record<string, unknown> =>
+  typeof input === "object" && input !== null && !Array.isArray(input)
+
+const isNonEmptyString = (input: unknown): input is string =>
+  typeof input === "string" && input.trim().length > 0
 
 export interface ModuleFieldOption {
   label: string
@@ -28,6 +44,203 @@ export interface ModuleSchema {
   label: string
   fields: ModuleField[]
 }
+
+export const validateModuleSchema = (
+  input: unknown,
+): ModuleSchemaValidationIssue[] => {
+  const issues: ModuleSchemaValidationIssue[] = []
+
+  if (!isRecord(input)) {
+    return [
+      {
+        path: "$",
+        message: "Module schema must be a JSON object.",
+      },
+    ]
+  }
+
+  if (!isNonEmptyString(input.name)) {
+    issues.push({
+      path: "name",
+      message: "Module name must be a non-empty string.",
+    })
+  }
+
+  if (!isNonEmptyString(input.label)) {
+    issues.push({
+      path: "label",
+      message: "Module label must be a non-empty string.",
+    })
+  }
+
+  if (!Array.isArray(input.fields) || input.fields.length === 0) {
+    issues.push({
+      path: "fields",
+      message: "Module fields must be a non-empty array.",
+    })
+    return issues
+  }
+
+  const seenKeys = new Map<string, number>()
+  const idFieldIndexes: number[] = []
+
+  for (const [index, field] of input.fields.entries()) {
+    const fieldPath = `fields[${index}]`
+
+    if (!isRecord(field)) {
+      issues.push({
+        path: fieldPath,
+        message: "Field must be an object.",
+      })
+      continue
+    }
+
+    if (!isNonEmptyString(field.key)) {
+      issues.push({
+        path: `${fieldPath}.key`,
+        message: "Field key must be a non-empty string.",
+      })
+    } else {
+      const previousIndex = seenKeys.get(field.key)
+
+      if (previousIndex !== undefined) {
+        issues.push({
+          path: `${fieldPath}.key`,
+          message: `Field key "${field.key}" duplicates fields[${previousIndex}].key.`,
+        })
+      } else {
+        seenKeys.set(field.key, index)
+      }
+
+      if (field.key === "id") {
+        idFieldIndexes.push(index)
+      }
+    }
+
+    if (!isNonEmptyString(field.label)) {
+      issues.push({
+        path: `${fieldPath}.label`,
+        message: "Field label must be a non-empty string.",
+      })
+    }
+
+    if (
+      typeof field.kind !== "string" ||
+      !moduleFieldKindSet.has(field.kind as ModuleFieldKind)
+    ) {
+      issues.push({
+        path: `${fieldPath}.kind`,
+        message: `Field kind must be one of: ${moduleFieldKinds.join(", ")}.`,
+      })
+    }
+
+    if (
+      "required" in field &&
+      field.required !== undefined &&
+      typeof field.required !== "boolean"
+    ) {
+      issues.push({
+        path: `${fieldPath}.required`,
+        message: "Field required flag must be a boolean when provided.",
+      })
+    }
+
+    if (
+      "searchable" in field &&
+      field.searchable !== undefined &&
+      typeof field.searchable !== "boolean"
+    ) {
+      issues.push({
+        path: `${fieldPath}.searchable`,
+        message: "Field searchable flag must be a boolean when provided.",
+      })
+    }
+
+    if (
+      "dictionaryTypeCode" in field &&
+      field.dictionaryTypeCode !== undefined &&
+      !isNonEmptyString(field.dictionaryTypeCode)
+    ) {
+      issues.push({
+        path: `${fieldPath}.dictionaryTypeCode`,
+        message: "dictionaryTypeCode must be a non-empty string when provided.",
+      })
+    }
+
+    if ("options" in field && field.options !== undefined) {
+      if (!Array.isArray(field.options)) {
+        issues.push({
+          path: `${fieldPath}.options`,
+          message: "Field options must be an array when provided.",
+        })
+      } else {
+        for (const [optionIndex, option] of field.options.entries()) {
+          const optionPath = `${fieldPath}.options[${optionIndex}]`
+
+          if (!isRecord(option)) {
+            issues.push({
+              path: optionPath,
+              message: "Field option must be an object.",
+            })
+            continue
+          }
+
+          if (!isNonEmptyString(option.label)) {
+            issues.push({
+              path: `${optionPath}.label`,
+              message: "Field option label must be a non-empty string.",
+            })
+          }
+
+          if (!isNonEmptyString(option.value)) {
+            issues.push({
+              path: `${optionPath}.value`,
+              message: "Field option value must be a non-empty string.",
+            })
+          }
+        }
+      }
+    }
+  }
+
+  if (idFieldIndexes.length === 0) {
+    issues.push({
+      path: "fields",
+      message: 'Module schema must contain exactly one "id" field.',
+    })
+  }
+
+  if (idFieldIndexes.length > 1) {
+    issues.push({
+      path: "fields",
+      message: 'Module schema must not contain more than one "id" field.',
+    })
+  }
+
+  if (idFieldIndexes.length === 1) {
+    const idFieldIndex = idFieldIndexes[0] as number
+    const idField = input.fields[idFieldIndex]
+
+    if (isRecord(idField) && idField.kind !== "id") {
+      issues.push({
+        path: `fields[${idFieldIndex}].kind`,
+        message: 'The "id" field must use kind "id".',
+      })
+    }
+
+    if (isRecord(idField) && idField.required !== true) {
+      issues.push({
+        path: `fields[${idFieldIndex}].required`,
+        message: 'The "id" field must set required=true.',
+      })
+    }
+  }
+
+  return issues
+}
+
+export const isModuleSchema = (input: unknown): input is ModuleSchema =>
+  validateModuleSchema(input).length === 0
 
 export {
   customerModuleSchema,

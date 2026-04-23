@@ -44,6 +44,24 @@ describe("parseCliArgs", () => {
     })
   })
 
+  it("parses schema-file handoff input", () => {
+    const result = parseCliArgs([
+      "--schema-file",
+      "./docs/ai-playbooks/examples/supplier.module-schema.json",
+      "--target",
+      "staging",
+    ])
+
+    expect(result).toEqual({
+      schemaFilePath:
+        "./docs/ai-playbooks/examples/supplier.module-schema.json",
+      outputDir: resolveTargetPresetOutputDir("staging"),
+      targetPreset: "staging",
+      frontendTarget: "vue",
+      conflictStrategy: "skip",
+    })
+  })
+
   it("lets --conflict override --overwrite shortcut", () => {
     const result = parseCliArgs([
       "--schema",
@@ -73,6 +91,19 @@ describe("parseCliArgs", () => {
 
   it("returns null when schema is missing", () => {
     const result = parseCliArgs(["--target", "staging"])
+
+    expect(result).toBeNull()
+  })
+
+  it("returns null when schema and schema-file are both provided", () => {
+    const result = parseCliArgs([
+      "--schema",
+      "customer",
+      "--schema-file",
+      "./schema.json",
+      "--target",
+      "staging",
+    ])
 
     expect(result).toBeNull()
   })

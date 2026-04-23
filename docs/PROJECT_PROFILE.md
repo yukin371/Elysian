@@ -61,6 +61,8 @@
 - `packages/persistence` 的 `bun run db:migrate` 已可正常执行已提交的 SQL migrations。
 - `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试。
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
+- `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
+- `packages/generator` 已支持 `--schema-file` 直接消费外部 JSON `ModuleSchema`；当 schema 来源为外部文件时，会在生成目录内联 `.schema.ts`，不假设该模块已注册到 `@elysian/schema`。
 - generator 当前已具备 `skip / overwrite / overwrite-generated-only / fail` 冲突策略与 manifest 输出。
 - generator 写入流程已收敛“冲突预检 + 原子写入（temp + rename）”，降低部分写入和中断损坏风险。
 - generator 当前官方 staging 落点是仓库根 `generated/`。
@@ -100,6 +102,7 @@
 - 仓库已采用 `main / dev / feature-*` 的轻量分支模型，并提供 `CONTRIBUTING.md` 与 PR 模板。
 - 仓库已补发布流转文档与发布检查清单，用于 `dev -> main` 的阶段发布。
 - 仓库已建立双轨文档与 AI 模板骨架：`docs/quickstart`（简略版）、`docs/reference`（详细版）、`docs/ai-playbooks`（AI 剧本）、`skills/templates`（Codex/Claude skill 模板）。
+- `docs/ai-playbooks` 已补 `P5A` 专用输入模板、输出契约、验收语料与样例 schema 文件，用于约束 `AI -> Schema` 的最小执行协议。
 
 ## 当前未确认项
 
@@ -212,6 +215,7 @@
 - 生成模块模板：`bun --filter @elysian/generator generate --schema customer --out ./generated --frontend vue`
 - 指定冲突策略：`bun --filter @elysian/generator generate --schema customer --out ./generated --frontend vue --conflict fail`
 - 使用官方 staging 目录：`bun --filter @elysian/generator generate --schema customer --target staging --frontend vue`
+- 从外部 schema 文件生成：`bun --filter @elysian/generator generate --schema-file ./docs/ai-playbooks/examples/supplier.module-schema.json --target staging --frontend vue`
 
 ## 维护规则
 
