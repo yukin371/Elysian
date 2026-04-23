@@ -52,11 +52,22 @@ describe("p5a-acceptance", () => {
       await readFile(join(reportDir, "p5a-acceptance-report.json"), "utf8"),
     ) as {
       status: string
-      cases: Array<{ caseId: string; generatedSchemaArtifactPath?: string }>
+      cases: Array<{
+        caseId: string
+        reportPath?: string
+        summaryPath?: string
+        generatedSchemaArtifactPath?: string
+      }>
     }
 
     expect(acceptanceReport.status).toBe("passed")
     expect(acceptanceReport.cases).toHaveLength(6)
+    expect(acceptanceReport.cases[0]?.reportPath).toContain(
+      "p5a-schema-handoff-replay-report.json",
+    )
+    expect(acceptanceReport.cases[0]?.summaryPath).toContain(
+      "p5a-schema-handoff-replay-summary.md",
+    )
     expect(acceptanceReport.cases[0]?.generatedSchemaArtifactPath).toContain(
       "supplier.schema.ts",
     )
