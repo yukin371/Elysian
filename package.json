@@ -10,6 +10,7 @@
     "p5a:handoff:report": "bun scripts/p5a-schema-handoff-report.ts",
     "p5a:handoff:replay": "bun scripts/p5a-schema-handoff-replay.ts",
     "p5a:handoff:corpus": "bun scripts/p5a-handoff-corpus-run.ts",
+    "p5a:acceptance": "bun scripts/p5a-acceptance.ts",
     "dev:server": "bun --filter @elysian/server dev",
     "dev:vue": "bun --filter @elysian/example-vue dev",
     "server": "bun --filter @elysian/server start",

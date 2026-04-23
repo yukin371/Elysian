@@ -30,6 +30,17 @@ bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-complet
 bun run p5a:handoff:replay --input-file ./docs/ai-playbooks/examples/p5a-complete-task-input.txt --schema-file ./docs/ai-playbooks/examples/p5a-fixed.module-schema.json --generate --out ./generated/p5a-replay
 ```
 
+### 3. 阶段最小闭环验收
+
+```powershell
+bun run p5a:acceptance
+```
+
+- 当前默认会同时执行：
+  - `p5a:handoff:corpus`
+  - `p5a-fixed.module-schema.json` 的 replay + generator
+- 用于验证 `P5A` 当前主线是否仍满足“语料分类稳定 + 至少一条成功 handoff 进入 generator”。
+
 ## 失败分类
 
 - `rollback_to_template`
