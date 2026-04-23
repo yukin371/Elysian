@@ -99,6 +99,7 @@
 - 已推进：CI 新增 `p5a-handoff-corpus` 作业，把 P5A 语料分类回归纳入固定质量链路
 - 已推进：`p5a:handoff:corpus` 新增 Step Summary / GitHub output，失败时可直接定位 case 级分界偏差
 - 已推进：新增 `p5a:acceptance`，把 corpus 与成功 replay/generator 串成统一阶段验收入口
+- 已推进：CI 新增 `p5a-acceptance` 作业，把 P5A 最小闭环验收纳入固定阶段门禁
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 ### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
