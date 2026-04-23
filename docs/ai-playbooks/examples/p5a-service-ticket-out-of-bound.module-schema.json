@@ -1,0 +1,101 @@
+{
+  "name": "serviceTicket",
+  "label": "Service Ticket",
+  "fields": [
+    {
+      "key": "id",
+      "label": "ID",
+      "kind": "id",
+      "required": true
+    },
+    {
+      "key": "ticketNo",
+      "label": "Ticket No",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "key": "title",
+      "label": "Title",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "kind": "enum",
+      "required": true,
+      "searchable": true,
+      "dictionaryTypeCode": "ticket_priority",
+      "uiWidget": "select",
+      "options": [
+        {
+          "label": "high",
+          "value": "high",
+          "color": "red"
+        },
+        {
+          "label": "medium",
+          "value": "medium"
+        },
+        {
+          "label": "low",
+          "value": "low"
+        }
+      ]
+    },
+    {
+      "key": "requiresOnsite",
+      "label": "Requires Onsite",
+      "kind": "boolean",
+      "required": true
+    },
+    {
+      "key": "estimatedHours",
+      "label": "Estimated Hours",
+      "kind": "number",
+      "required": true
+    },
+    {
+      "key": "plannedAt",
+      "label": "Planned At",
+      "kind": "datetime",
+      "required": true
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "kind": "enum",
+      "required": true,
+      "searchable": true,
+      "options": [
+        {
+          "label": "open",
+          "value": "open"
+        },
+        {
+          "label": "in_progress",
+          "value": "in_progress"
+        },
+        {
+          "label": "closed",
+          "value": "closed"
+        }
+      ]
+    },
+    {
+      "key": "createdAt",
+      "label": "Created At",
+      "kind": "datetime",
+      "required": true
+    },
+    {
+      "key": "updatedAt",
+      "label": "Updated At",
+      "kind": "datetime",
+      "required": true
+    }
+  ]
+}

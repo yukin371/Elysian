@@ -53,6 +53,20 @@
 - 额外要求：
   - 权限/菜单需求只能记为评审备注，不进入当前 handoff JSON
 
+## Case 4: 带字典映射与混合字段类型的模块
+
+- 目标：验证字典字段、布尔字段、数字字段和时间字段可以稳定混合进入 handoff，而不会把 UI 私有配置混进 JSON。
+- 输入摘要：
+  - 模块：服务工单
+  - 需要工单编号、标题、优先级、是否上门、预计处理时长、计划处理时间、当前状态
+  - 业务方还要求自动通知、工单看板和权限菜单
+- 对应任务输入：
+  - [p5a-service-ticket-task-input.txt](./examples/p5a-service-ticket-task-input.txt)
+- 期望 handoff：
+  - [service-ticket.module-schema.json](./examples/service-ticket.module-schema.json)
+- 额外要求：
+  - `priority` 保持字典映射能力，但不把通知、看板、权限菜单写进 handoff JSON
+
 ## Failure Case 1: 顶层越界元数据
 
 - 目标：验证 AI 把权限、菜单、流程元数据直接塞进 handoff JSON 时，会被判定为 `retry_ai_generation`，而不是误判为人工微调。
@@ -84,6 +98,14 @@
   - 首次报告：`manual_fix_required`
   - 修正后重放：`ready_for_generator`
 
+## Failure Case 4: 字段级越界元数据
+
+- 目标：验证字段级或 option 级的 UI 私有配置越界时，仍然落到 `manual_fix_required`，而不是误判成需要重试 AI。
+- 失败样例：
+  - [p5a-service-ticket-out-of-bound.module-schema.json](./examples/p5a-service-ticket-out-of-bound.module-schema.json)
+- 期望决策：
+  - `manual_fix_required`
+
 ## 通过标准
 
 1. 所有样例 JSON 均通过 `ModuleSchema` runtime 校验。
@@ -91,4 +113,5 @@
 3. 任一含超界需求的 case，都必须把“超出当前 handoff 的要求”留在文档层，而不是改写 schema owner。
 4. 顶层越界元数据和非法 JSON 必须稳定落入 `retry_ai_generation`。
 5. 字段级局部错误必须稳定落入 `manual_fix_required`，并可通过人工修正后进入 replay。
-6. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
+6. 字段级或 option 级越界元数据必须稳定落入 `manual_fix_required`，不能被误分类为 `retry_ai_generation`。
+7. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。

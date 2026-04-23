@@ -86,6 +86,20 @@ describe("decideP5aHandoff", () => {
       ),
     ).toBe("manual_fix_required")
   })
+
+  test("returns manual_fix_required for field-level out-of-bound metadata", () => {
+    expect(
+      decideP5aHandoff(
+        [],
+        [
+          {
+            path: "fields[1].uiWidget",
+            message: 'Field does not allow unknown property "uiWidget".',
+          },
+        ],
+      ),
+    ).toBe("manual_fix_required")
+  })
 })
 
 describe("generateP5aHandoffReport", () => {

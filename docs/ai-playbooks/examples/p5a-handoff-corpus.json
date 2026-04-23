@@ -25,6 +25,14 @@
       "expectedStatus": "passed"
     },
     {
+      "id": "service-ticket-ready-dictionary-mixed-types",
+      "description": "mixed dictionary, boolean, number, and datetime fields should stay within the current ModuleSchema boundary",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-service-ticket-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/service-ticket.module-schema.json",
+      "expectedDecision": "ready_for_generator",
+      "expectedStatus": "passed"
+    },
+    {
       "id": "rollback-missing-template-sections",
       "description": "missing required input sections should force rollback_to_template",
       "inputFilePath": "./docs/ai-playbooks/examples/p5a-failed-task-input.txt",
@@ -53,6 +61,14 @@
       "description": "field-level duplicate and enum option issues should allow manual takeover",
       "inputFilePath": "./docs/ai-playbooks/examples/p5a-complete-task-input.txt",
       "schemaFilePath": "./docs/ai-playbooks/examples/p5a-failed.module-schema.json",
+      "expectedDecision": "manual_fix_required",
+      "expectedStatus": "failed"
+    },
+    {
+      "id": "manual-fix-field-level-out-of-bound",
+      "description": "field-level and option-level out-of-bound metadata should require manual takeover",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-service-ticket-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/p5a-service-ticket-out-of-bound.module-schema.json",
       "expectedDecision": "manual_fix_required",
       "expectedStatus": "failed"
     }

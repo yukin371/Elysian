@@ -1,0 +1,22 @@
+任务目标：
+为服务工单模块生成可进入 generator 的最小 schema 文件
+
+业务背景：
+需要维护工单编号、标题、优先级、是否上门、预计处理时长、计划处理时间和当前状态，并保留通知、看板和权限菜单的后续需求备注
+
+范围边界（必须/禁止）：
+必须只输出当前 ModuleSchema 能表达的字段；禁止把自动通知、工单看板、值班分配和权限菜单直接写进 handoff JSON
+
+影响模块：
+packages/schema
+packages/generator
+docs/ai-playbooks
+
+验收标准：
+schema 通过 validateModuleSchema，且 priority 仍可通过 dictionaryTypeCode 进入前端字典映射，mixed 字段类型不被降级
+
+验证命令：
+bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-service-ticket-task-input.txt --schema-file ./docs/ai-playbooks/examples/service-ticket.module-schema.json
+
+文档同步要求：
+若输入模板或字典字段约定变化，同步 roadmap、PROJECT_PROFILE 和 ai-playbooks

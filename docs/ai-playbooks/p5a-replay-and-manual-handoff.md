@@ -62,6 +62,7 @@ bun run p5a:acceptance
   - `p5a-top-level-out-of-bound.module-schema.json` -> `retry_ai_generation`
   - `p5a-malformed.module-schema.txt` -> `retry_ai_generation`
   - `p5a-failed.module-schema.json` -> `manual_fix_required`
+  - `p5a-service-ticket-out-of-bound.module-schema.json` -> `manual_fix_required`
 
 ## 推荐流程
 
