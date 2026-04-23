@@ -46,6 +46,7 @@ describe("p5a-acceptance-finalize", () => {
     expect(report.status).toBe("passed")
     expect(report.steps.acceptance).toBe("passed")
     expect(report.steps.gate).toBe("passed")
+    expect(report.steps.index).toBe("passed")
 
     const acceptanceReport = JSON.parse(
       await readFile(report.outputs.acceptanceReportPath, "utf8"),
@@ -53,10 +54,16 @@ describe("p5a-acceptance-finalize", () => {
     const gateReport = JSON.parse(
       await readFile(report.outputs.gateReportPath, "utf8"),
     ) as { status: string; summary: { caseCount: number } }
+    const indexReport = JSON.parse(
+      await readFile(report.outputs.indexReportPath, "utf8"),
+    ) as { status: string; summary: { caseCount: number; gateStatus: string } }
 
     expect(acceptanceReport.status).toBe("passed")
     expect(acceptanceReport.cases).toHaveLength(3)
     expect(gateReport.status).toBe("passed")
     expect(gateReport.summary.caseCount).toBe(3)
+    expect(indexReport.status).toBe("passed")
+    expect(indexReport.summary.caseCount).toBe(3)
+    expect(indexReport.summary.gateStatus).toBe("passed")
   })
 })

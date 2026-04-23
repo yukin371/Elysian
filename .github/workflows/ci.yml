@@ -322,6 +322,9 @@ jobs:
           ELYSIAN_P5A_ACCEPTANCE_GATE_REQUIRE_GENERATED_ARTIFACTS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.p5a_acceptance_gate_require_generated_artifacts || 'true' }}
         run: bun run p5a:acceptance:gate
 
+      - name: Build P5A acceptance index
+        run: bun run p5a:acceptance:index
+
       - name: Upload P5A acceptance report
         if: always()
         uses: actions/upload-artifact@v6
