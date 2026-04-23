@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-04-23`
+更新时间：`2026-04-24`
 
 ## 项目类型
 
@@ -69,7 +69,7 @@
 - P5A corpus 已新增服务工单 mixed 字典/布尔/数字/时间案例，以及字段级越界元数据 failure case，用于继续压实 `retry_ai_generation` / `manual_fix_required` 分界。
 - `p5a:acceptance` 已改为 manifest 驱动的多成功 replay/generator case 验收，阶段闭环不再只依赖单一样例。
 - `p5a:acceptance` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，CI 页面可直接查看阶段验收状态与 case 数。
-- `p5a:acceptance` 成功样例覆盖已扩到 `manual-fix-supplier` 加 `supplier / visitor-pass / asset / service-ticket` 五条 replay/generator case，继续压实真实需求变体的 handoff 稳定性。
+- `p5a:acceptance` 成功样例覆盖已扩到 `manual-fix-supplier` 加 `supplier / visitor-pass / asset / service-ticket / meeting-booking` 六条 replay/generator case，继续压实真实需求变体的 handoff 稳定性。
 - 已新增 `bun run p5a:acceptance:gate`，基于 acceptance 报告执行后置门禁，固定最小成功 case 数与 generator artifact 证据完整性。
 - CI `p5a-acceptance` 作业已接入 acceptance gate，并支持 `workflow_dispatch` 参数化最小 case 数与 artifact 证据策略。
 - 已新增 `bun run p5a:acceptance:index`，把 acceptance 与 gate 收敛成单一索引结论文件。

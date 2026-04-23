@@ -19,7 +19,7 @@
 - `bun run p5a:acceptance:finalize`
 - 当前 acceptance 会同时执行：
   - `p5a:handoff:corpus`
-  - `p5a-acceptance-cases.json` 中的 `manual-fix-supplier` 加 `supplier / visitor-pass / asset / service-ticket` 五条 replay + generator case
+  - `p5a-acceptance-cases.json` 中的 `manual-fix-supplier` 加 `supplier / visitor-pass / asset / service-ticket / meeting-booking` 六条 replay + generator case
 - 当前 finalize 会顺序执行：
   - `p5a:acceptance`
   - `p5a:acceptance:gate`
@@ -109,6 +109,23 @@
 - 额外要求：
   - `priority` 保持字典映射能力，但不把通知、看板、权限菜单写进 handoff JSON
 
+## Case 5: 纯运行时字典映射模块
+
+- 目标：验证枚举字段只保留 `dictionaryTypeCode`、不内联静态 `options` 时，仍能稳定 handoff 并进入 generator。
+- 输入摘要：
+  - 模块：会议室预订
+  - 需要预订单号、申请人、会议室类型、预订时间、当前状态
+  - 业务方还要求审批流、日历同步和通知提醒
+- 对应任务输入：
+  - [p5a-meeting-booking-task-input.txt](./examples/p5a-meeting-booking-task-input.txt)
+- 期望 handoff：
+  - [meeting-booking.module-schema.json](./examples/meeting-booking.module-schema.json)
+- 额外要求：
+  - `roomType` 与 `status` 只保留 `dictionaryTypeCode`，不要求 handoff JSON 内联静态 `options`
+  - 审批流、日历同步和通知提醒只能保留在备注层，不进入 handoff JSON
+- 当前 acceptance 覆盖：
+  - 已纳入 `p5a-acceptance-cases.json`，要求 replay + generator 稳定通过
+
 ## Failure Case 1: 顶层越界元数据
 
 - 目标：验证 AI 把权限、菜单、流程元数据直接塞进 handoff JSON 时，会被判定为 `retry_ai_generation`，而不是误判为人工微调。
@@ -158,6 +175,6 @@
 6. 字段级或 option 级越界元数据必须稳定落入 `manual_fix_required`，不能被误分类为 `retry_ai_generation`。
 7. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
 8. `p5a:acceptance:gate` 必须维持至少 `3` 条成功 acceptance case，且 generator 成功 case 的 artifact 证据完整。
-   当前 acceptance 实际覆盖 `5` 条成功 case，但默认 gate 仍维持“至少 `3` 条”为本阶段下限，不在本次推进中抬高出口边界。
+   当前 acceptance 实际覆盖 `6` 条成功 case，但默认 gate 仍维持“至少 `3` 条”为本阶段下限，不在本次推进中抬高出口边界。
 9. `p5a:acceptance:index` 必须把 acceptance 与 gate 收敛为单一结论文件，而不引入第二套验收来源。
 10. `p5a:acceptance:finalize` 必须能稳定串联 acceptance、gate 与 index。

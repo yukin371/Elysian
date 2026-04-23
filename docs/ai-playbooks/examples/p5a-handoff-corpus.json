@@ -33,6 +33,14 @@
       "expectedStatus": "passed"
     },
     {
+      "id": "meeting-booking-ready-runtime-dictionary-only",
+      "description": "dictionary-backed enum fields should stay within handoff scope even when static options are omitted",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-meeting-booking-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/meeting-booking.module-schema.json",
+      "expectedDecision": "ready_for_generator",
+      "expectedStatus": "passed"
+    },
+    {
       "id": "rollback-missing-template-sections",
       "description": "missing required input sections should force rollback_to_template",
       "inputFilePath": "./docs/ai-playbooks/examples/p5a-failed-task-input.txt",
