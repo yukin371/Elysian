@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "id": "manual-fix-supplier",
+      "description": "manual-fix replay should still produce a generator-ready supplier module",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-complete-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/p5a-fixed.module-schema.json"
+    },
+    {
+      "id": "visitor-pass-ready",
+      "description": "ready boolean and datetime fields should pass replay and generator",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-visitor-pass-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/visitor-pass.module-schema.json"
+    },
+    {
+      "id": "service-ticket-ready",
+      "description": "ready mixed dictionary and typed fields should pass replay and generator",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-service-ticket-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/service-ticket.module-schema.json"
+    }
+  ]
+}

@@ -67,6 +67,7 @@
 - 已新增 `bun run p5a:handoff:corpus`，用于批量执行 `P5A` 输入/输出语料并校验预期分类边界。
 - `p5a:handoff:corpus` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，失败时可直接在 CI 页面查看 case 级摘要。
 - P5A corpus 已新增服务工单 mixed 字典/布尔/数字/时间案例，以及字段级越界元数据 failure case，用于继续压实 `retry_ai_generation` / `manual_fix_required` 分界。
+- `p5a:acceptance` 已改为 manifest 驱动的多成功 replay/generator case 验收，阶段闭环不再只依赖单一样例。
 - generator 当前已具备 `skip / overwrite / overwrite-generated-only / fail` 冲突策略与 manifest 输出。
 - generator 写入流程已收敛“冲突预检 + 原子写入（temp + rename）”，降低部分写入和中断损坏风险。
 - generator 当前官方 staging 落点是仓库根 `generated/`。

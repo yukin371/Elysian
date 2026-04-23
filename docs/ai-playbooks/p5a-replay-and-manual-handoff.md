@@ -38,8 +38,10 @@ bun run p5a:acceptance
 
 - 当前默认会同时执行：
   - `p5a:handoff:corpus`
-  - `p5a-fixed.module-schema.json` 的 replay + generator
-- 用于验证 `P5A` 当前主线是否仍满足“语料分类稳定 + 至少一条成功 handoff 进入 generator”。
+  - `p5a-acceptance-cases.json` 中的多条 replay + generator
+- 当前 acceptance case manifest：
+  - [p5a-acceptance-cases.json](./examples/p5a-acceptance-cases.json)
+- 用于验证 `P5A` 当前主线是否仍满足“语料分类稳定 + 多条成功 handoff 进入 generator”。
 
 ## 失败分类
 

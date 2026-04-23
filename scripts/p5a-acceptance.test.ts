@@ -21,7 +21,7 @@ const createTempDir = async (prefix: string) => {
 }
 
 describe("p5a-acceptance", () => {
-  test("runs corpus and replay/generator as a single acceptance flow", async () => {
+  test("runs corpus and multiple replay/generator cases as a single acceptance flow", async () => {
     const reportDir = await createTempDir("elysian-p5a-acceptance-report-")
     const outputDir = await createTempDir("elysian-p5a-acceptance-output-")
 
@@ -34,26 +34,65 @@ describe("p5a-acceptance", () => {
     expect(report.steps.corpus).toBe("passed")
     expect(report.steps.replay).toBe("passed")
     expect(report.steps.generator).toBe("passed")
+    expect(report.cases).toHaveLength(3)
+    expect(report.cases.map((item) => item.caseId)).toEqual([
+      "manual-fix-supplier",
+      "visitor-pass-ready",
+      "service-ticket-ready",
+    ])
 
     const acceptanceReport = JSON.parse(
       await readFile(join(reportDir, "p5a-acceptance-report.json"), "utf8"),
     ) as {
       status: string
-      outputs: { generatedSchemaArtifactPath: string }
+      cases: Array<{ caseId: string; generatedSchemaArtifactPath?: string }>
     }
 
     expect(acceptanceReport.status).toBe("passed")
-    expect(acceptanceReport.outputs.generatedSchemaArtifactPath).toContain(
+    expect(acceptanceReport.cases).toHaveLength(3)
+    expect(acceptanceReport.cases[0]?.generatedSchemaArtifactPath).toContain(
       "supplier.schema.ts",
     )
 
-    const generatedSchemaArtifact = await readFile(
-      join(outputDir, "modules", "supplier", "supplier.schema.ts"),
+    const supplierSchemaArtifact = await readFile(
+      join(
+        outputDir,
+        "manual-fix-supplier",
+        "modules",
+        "supplier",
+        "supplier.schema.ts",
+      ),
+      "utf8",
+    )
+    const visitorPassSchemaArtifact = await readFile(
+      join(
+        outputDir,
+        "visitor-pass-ready",
+        "modules",
+        "visitorPass",
+        "visitorPass.schema.ts",
+      ),
+      "utf8",
+    )
+    const serviceTicketSchemaArtifact = await readFile(
+      join(
+        outputDir,
+        "service-ticket-ready",
+        "modules",
+        "serviceTicket",
+        "serviceTicket.schema.ts",
+      ),
       "utf8",
     )
 
-    expect(generatedSchemaArtifact).toContain(
+    expect(supplierSchemaArtifact).toContain(
       "export const supplierModuleSchema",
+    )
+    expect(visitorPassSchemaArtifact).toContain(
+      "export const visitorPassModuleSchema",
+    )
+    expect(serviceTicketSchemaArtifact).toContain(
+      "export const serviceTicketModuleSchema",
     )
   })
 })

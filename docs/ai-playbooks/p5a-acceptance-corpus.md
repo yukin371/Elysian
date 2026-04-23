@@ -11,6 +11,15 @@
   - `retry_ai_generation`
   - `manual_fix_required`
 
+## 阶段验收命令
+
+- `bun run p5a:acceptance`
+- 当前 acceptance 会同时执行：
+  - `p5a:handoff:corpus`
+  - `p5a-acceptance-cases.json` 中的多条 replay + generator case
+- 当前 acceptance manifest：
+  - [p5a-acceptance-cases.json](./examples/p5a-acceptance-cases.json)
+
 ## Case 1: 标准 CRUD 模块
 
 - 目标：验证标准文本 + 状态枚举模块可以稳定 handoff。
@@ -109,7 +118,7 @@
 ## 通过标准
 
 1. 所有样例 JSON 均通过 `ModuleSchema` runtime 校验。
-2. 至少 `supplier.module-schema.json` 能通过 `--schema-file` 走完整 generator CLI。
+2. `p5a:acceptance` 必须能稳定跑通多条 replay/generator case，而不只是一条单例样例。
 3. 任一含超界需求的 case，都必须把“超出当前 handoff 的要求”留在文档层，而不是改写 schema owner。
 4. 顶层越界元数据和非法 JSON 必须稳定落入 `retry_ai_generation`。
 5. 字段级局部错误必须稳定落入 `manual_fix_required`，并可通过人工修正后进入 replay。
