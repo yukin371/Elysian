@@ -115,6 +115,20 @@
 3. 至少 1 条样例链路能进入既有 generator 流程，而不突破既有 owner 边界。
 4. 阶段文档、验证命令与风险约束同步到 `roadmap`。
 
+## 首轮已落地产物
+
+- `packages/schema/src/index.ts`
+  - `validateModuleSchema`
+  - `isModuleSchema`
+- `packages/generator`
+  - CLI 新增 `--schema-file`
+  - 外部 schema handoff 改为内联 `.schema.ts`
+- `docs/ai-playbooks`
+  - `p5a-input-template.md`
+  - `p5a-output-contract.md`
+  - `p5a-acceptance-corpus.md`
+  - `examples/*.module-schema.json`
+
 ## 暂缓事项
 
 - `P5B` 的字段建议、表单建议、测试数据建议

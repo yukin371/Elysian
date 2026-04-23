@@ -5,7 +5,8 @@ import {
 } from "./conventions"
 
 export interface CliOptions {
-  schemaName: string
+  schemaName?: string
+  schemaFilePath?: string
   outputDir: string
   targetPreset: GenerationTargetPreset | "custom"
   frontendTarget: "vue" | "react"
@@ -14,6 +15,7 @@ export interface CliOptions {
 
 export const parseCliArgs = (args: string[]): CliOptions | null => {
   let schemaName = ""
+  let schemaFilePath = ""
   let outputDir = resolveTargetPresetOutputDir(DEFAULT_GENERATION_TARGET)
   let targetPreset: GenerationTargetPreset | "custom" =
     DEFAULT_GENERATION_TARGET
@@ -29,6 +31,12 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
 
     if (current === "--schema") {
       schemaName = args[index + 1] ?? ""
+      index += 1
+      continue
+    }
+
+    if (current === "--schema-file") {
+      schemaFilePath = args[index + 1] ?? ""
       index += 1
       continue
     }
@@ -88,12 +96,16 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
     }
   }
 
-  if (!schemaName || !outputDir) {
+  const hasSchemaName = schemaName.length > 0
+  const hasSchemaFilePath = schemaFilePath.length > 0
+
+  if (hasSchemaName === hasSchemaFilePath || !outputDir) {
     return null
   }
 
   return {
-    schemaName,
+    ...(hasSchemaName ? { schemaName } : {}),
+    ...(hasSchemaFilePath ? { schemaFilePath } : {}),
     outputDir,
     targetPreset,
     frontendTarget,

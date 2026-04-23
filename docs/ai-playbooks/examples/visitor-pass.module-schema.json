@@ -1,0 +1,63 @@
+{
+  "name": "visitorPass",
+  "label": "Visitor Pass",
+  "fields": [
+    {
+      "key": "id",
+      "label": "ID",
+      "kind": "id",
+      "required": true
+    },
+    {
+      "key": "visitorName",
+      "label": "Visitor Name",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "key": "hasNda",
+      "label": "NDA Signed",
+      "kind": "boolean",
+      "required": true
+    },
+    {
+      "key": "visitAt",
+      "label": "Visit At",
+      "kind": "datetime",
+      "required": true
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "kind": "enum",
+      "required": true,
+      "options": [
+        {
+          "label": "pending",
+          "value": "pending"
+        },
+        {
+          "label": "approved",
+          "value": "approved"
+        },
+        {
+          "label": "expired",
+          "value": "expired"
+        }
+      ]
+    },
+    {
+      "key": "createdAt",
+      "label": "Created At",
+      "kind": "datetime",
+      "required": true
+    },
+    {
+      "key": "updatedAt",
+      "label": "Updated At",
+      "kind": "datetime",
+      "required": true
+    }
+  ]
+}
