@@ -61,6 +61,28 @@ describe("validateModuleSchema", () => {
     })
   })
 
+  it("rejects enum fields without options or dictionary type code", () => {
+    const issues = validateModuleSchema({
+      name: "meetingBooking",
+      label: "Meeting Booking",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        {
+          key: "status",
+          label: "Status",
+          kind: "enum",
+          required: true,
+        },
+      ],
+    })
+
+    expect(issues).toContainEqual({
+      path: "fields[1]",
+      message:
+        "Enum field must provide non-empty options or dictionaryTypeCode.",
+    })
+  })
+
   it("rejects out-of-bound top-level metadata", () => {
     const issues = validateModuleSchema({
       name: "supplier",

@@ -91,6 +91,7 @@
   - `WP-2` 结构化输出校验与 handoff 边界
   - `WP-3` 人工兜底、回放与失败审计最小骨架
 - 已推进：`packages/schema` 已补 `validateModuleSchema` / `isModuleSchema` runtime 校验，固定外部 schema handoff 的最小硬约束
+- 已推进：`packages/schema` 已把“`enum` 字段必须提供 `options` 或 `dictionaryTypeCode`”收紧为 runtime 硬约束，避免裸 enum 误过 P5A handoff
 - 已推进：`packages/generator` CLI 已支持 `--schema-file`，允许从 JSON schema 文件直接生成 staging，并在外部 schema 来源时内联 `.schema.ts`
 - 已推进：`docs/ai-playbooks` 已补 `P5A` 输入模板、输出契约、验收语料与可执行样例 schema 文件
 - 已推进：新增 `p5a:handoff:report` / `p5a:handoff:replay`，形成“失败分类 -> 人工修正 -> 重放 -> 继续 generator”的最小接管骨架

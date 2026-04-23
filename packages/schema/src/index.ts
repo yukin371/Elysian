@@ -248,6 +248,20 @@ export const validateModuleSchema = (
         }
       }
     }
+
+    if (field.kind === "enum") {
+      const hasDictionaryTypeCode = isNonEmptyString(field.dictionaryTypeCode)
+      const hasStaticOptions =
+        Array.isArray(field.options) && field.options.length > 0
+
+      if (!hasDictionaryTypeCode && !hasStaticOptions) {
+        issues.push({
+          path: fieldPath,
+          message:
+            "Enum field must provide non-empty options or dictionaryTypeCode.",
+        })
+      }
+    }
   }
 
   if (idFieldIndexes.length === 0) {

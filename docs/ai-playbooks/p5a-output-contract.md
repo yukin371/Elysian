@@ -46,6 +46,9 @@
   - `dictionaryTypeCode`
 - `options` 若存在，必须是 `{ label, value }[]`。
 - `options` 项只允许出现 `label`、`value`。
+- `enum` 字段必须至少提供以下其一：
+  - 非空 `options`
+  - 非空 `dictionaryTypeCode`
 - 任何越出上述集合的键都会被视为 handoff 越界并直接校验失败。
 
 ## generator handoff 命令

@@ -165,6 +165,14 @@
 - 期望决策：
   - `manual_fix_required`
 
+## Failure Case 5: enum 字段缺少枚举来源
+
+- 目标：验证 `enum` 字段既没有静态 `options`、也没有 `dictionaryTypeCode` 时，会被判定为 `manual_fix_required`，而不是误过 handoff。
+- 失败样例：
+  - [p5a-enum-missing-source.module-schema.json](./examples/p5a-enum-missing-source.module-schema.json)
+- 期望决策：
+  - `manual_fix_required`
+
 ## 通过标准
 
 1. 所有样例 JSON 均通过 `ModuleSchema` runtime 校验。
@@ -173,8 +181,9 @@
 4. 顶层越界元数据和非法 JSON 必须稳定落入 `retry_ai_generation`。
 5. 字段级局部错误必须稳定落入 `manual_fix_required`，并可通过人工修正后进入 replay。
 6. 字段级或 option 级越界元数据必须稳定落入 `manual_fix_required`，不能被误分类为 `retry_ai_generation`。
-7. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
-8. `p5a:acceptance:gate` 必须维持至少 `3` 条成功 acceptance case，且 generator 成功 case 的 artifact 证据完整。
+7. `enum` 字段若缺少 `options` 与 `dictionaryTypeCode`，必须稳定落入 `manual_fix_required`。
+8. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
+9. `p5a:acceptance:gate` 必须维持至少 `3` 条成功 acceptance case，且 generator 成功 case 的 artifact 证据完整。
    当前 acceptance 实际覆盖 `6` 条成功 case，但默认 gate 仍维持“至少 `3` 条”为本阶段下限，不在本次推进中抬高出口边界。
-9. `p5a:acceptance:index` 必须把 acceptance 与 gate 收敛为单一结论文件，而不引入第二套验收来源。
-10. `p5a:acceptance:finalize` 必须能稳定串联 acceptance、gate 与 index。
+10. `p5a:acceptance:index` 必须把 acceptance 与 gate 收敛为单一结论文件，而不引入第二套验收来源。
+11. `p5a:acceptance:finalize` 必须能稳定串联 acceptance、gate 与 index。
