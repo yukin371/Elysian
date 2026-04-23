@@ -54,6 +54,7 @@
 - 第二轮已推进：新增阶段收尾一键闭环（`e2e:smoke:phase:finalize`），串联 evidence/decision/gate 降低执行遗漏
 - 第二轮已推进：新增快照收集脚本（`e2e:smoke:stability:collect`），用于将下载 artifact 归拢为 evidence 输入
 - 第二轮已推进：新增从下载包直接收尾命令（`e2e:smoke:phase:finalize:from-downloads`），串联 collect/evidence/decision/gate
+- 第二轮已推进：基于最近 5 次 `dev` 相关成功运行（runIds: `24831519539`、`24831463736`、`24831405348`、`24831362661`、`24831277528`）生成稳定性证据，窗口已达标且阶段出口门禁通过
 - 第二轮已推进：限流响应头观测增强（`x-ratelimit-limit`/`remaining`/`reset` + `retry-after`），为分布式限流评估提供运行期信号
 - 第二轮已推进：已建立双轨文档与 skill 模板骨架（`docs/quickstart`、`docs/reference`、`docs/ai-playbooks`、`skills/templates`）
 - 第二轮计划文档：[2026-04-22-phase-6a-round2-baseline-hardening.md](./plans/2026-04-22-phase-6a-round2-baseline-hardening.md)
@@ -69,7 +70,7 @@
 - [x] `WP-5` smoke 稳定性：报告（attempt1/2）+ 诊断 + 索引 + 门禁 + CI Summary/outputs + workflow_dispatch 参数化
 - [x] `WP-5` 策略边界回归：`allowRecoveredByRetry`、`maxAttempts`、非法输入已覆盖测试
 - [x] `WP-6` 分布式限流评估：门槛与切换条件已文档化
-- [ ] 最近连续 CI 运行稳定性观察窗口达标（建议最少 5 次，且无系统性 smoke 阻断）
+- [x] 最近连续 CI 运行稳定性观察窗口达标（建议最少 5 次，且无系统性 smoke 阻断）
 - [ ] 基于观察窗口输出“进入 `Phase 6B` 或 `Phase 5`”的主线决策记录
 
 ### 5. Phase 4 Completion: P4D Apply / Merge ✅ 已完成

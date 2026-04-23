@@ -16,6 +16,7 @@ generated/
 .turbo/
 .cache/
 coverage/
+artifacts/
 docs/superpowers/
 *.log
 .env
