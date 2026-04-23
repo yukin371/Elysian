@@ -4,7 +4,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import {
+  buildP5aHandoffCorpusGitHubOutputLines,
   readP5aHandoffCorpusManifest,
+  renderP5aHandoffCorpusStepSummaryMarkdown,
   runP5aHandoffCorpus,
 } from "./p5a-handoff-corpus"
 
@@ -177,5 +179,63 @@ describe("runP5aHandoffCorpus", () => {
     } finally {
       await rm(workspace, { recursive: true, force: true })
     }
+  })
+})
+
+describe("p5a-handoff-corpus presentation helpers", () => {
+  test("renders failed case details for GitHub step summary", () => {
+    const markdown = renderP5aHandoffCorpusStepSummaryMarkdown({
+      generatedAt: "2026-04-23T00:00:00.000Z",
+      manifestPath: "corpus.json",
+      reportDir: "report-dir",
+      status: "failed",
+      passedCount: 2,
+      failedCount: 1,
+      cases: [
+        {
+          caseId: "retry-case",
+          description: "retry case",
+          expectedDecision: "retry_ai_generation",
+          actualDecision: "manual_fix_required",
+          expectedStatus: "failed",
+          actualStatus: "failed",
+          status: "failed",
+          reportMarkdownPath:
+            "report-dir/retry-case/p5a-schema-handoff-summary.md",
+          reportJsonPath:
+            "report-dir/retry-case/p5a-schema-handoff-report.json",
+          mismatchReasons: [
+            "Expected decision=retry_ai_generation, got manual_fix_required.",
+          ],
+        },
+      ],
+    })
+
+    expect(markdown).toContain("### P5A Handoff Corpus")
+    expect(markdown).toContain("- status: `failed`")
+    expect(markdown).toContain(
+      "report-dir/retry-case/p5a-schema-handoff-summary.md",
+    )
+    expect(markdown).toContain(
+      "Expected decision=retry_ai_generation, got manual_fix_required.",
+    )
+  })
+
+  test("builds GitHub output lines for corpus status", () => {
+    expect(
+      buildP5aHandoffCorpusGitHubOutputLines({
+        generatedAt: "2026-04-23T00:00:00.000Z",
+        manifestPath: "corpus.json",
+        reportDir: "report-dir",
+        status: "passed",
+        passedCount: 7,
+        failedCount: 0,
+        cases: [],
+      }),
+    ).toEqual([
+      "p5a_corpus_status=passed",
+      "p5a_corpus_passed_count=7",
+      "p5a_corpus_failed_count=0",
+    ])
   })
 })

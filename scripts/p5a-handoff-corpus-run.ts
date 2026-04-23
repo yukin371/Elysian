@@ -1,4 +1,6 @@
 import {
+  publishP5aHandoffCorpusGitHubOutput,
+  publishP5aHandoffCorpusGitHubSummary,
   runP5aHandoffCorpus,
   writeP5aHandoffCorpusReport,
 } from "./p5a-handoff-corpus"
@@ -53,9 +55,17 @@ try {
       options.reportDir || undefined,
     )
     const paths = await writeP5aHandoffCorpusReport(report)
+    const summaryPath = await publishP5aHandoffCorpusGitHubSummary(report)
+    const githubOutputPath = await publishP5aHandoffCorpusGitHubOutput(report)
 
     console.log(`[p5a-handoff-corpus] report: ${paths.jsonPath}`)
     console.log(`[p5a-handoff-corpus] summary: ${paths.markdownPath}`)
+    if (summaryPath) {
+      console.log(`[p5a-handoff-corpus] github-summary: ${summaryPath}`)
+    }
+    if (githubOutputPath) {
+      console.log(`[p5a-handoff-corpus] github-output: ${githubOutputPath}`)
+    }
     console.log(
       `[p5a-handoff-corpus] status=${report.status} passed=${report.passedCount} failed=${report.failedCount}`,
     )

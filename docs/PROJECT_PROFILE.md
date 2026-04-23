@@ -65,6 +65,7 @@
 - `packages/generator` 已支持 `--schema-file` 直接消费外部 JSON `ModuleSchema`；当 schema 来源为外部文件时，会在生成目录内联 `.schema.ts`，不假设该模块已注册到 `@elysian/schema`。
 - 已新增 `bun run p5a:handoff:report` 与 `bun run p5a:handoff:replay`，用于 `P5A` 的失败分类、人工接管和修正后重放。
 - 已新增 `bun run p5a:handoff:corpus`，用于批量执行 `P5A` 输入/输出语料并校验预期分类边界。
+- `p5a:handoff:corpus` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，失败时可直接在 CI 页面查看 case 级摘要。
 - generator 当前已具备 `skip / overwrite / overwrite-generated-only / fail` 冲突策略与 manifest 输出。
 - generator 写入流程已收敛“冲突预检 + 原子写入（temp + rename）”，降低部分写入和中断损坏风险。
 - generator 当前官方 staging 落点是仓库根 `generated/`。

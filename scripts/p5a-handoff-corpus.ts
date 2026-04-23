@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises"
 import { join, resolve } from "node:path"
 
 import {
@@ -46,6 +46,9 @@ export interface P5aHandoffCorpusReport {
   failedCount: number
   cases: P5aHandoffCorpusCaseResult[]
 }
+
+const resolveSummaryPath = () => process.env.GITHUB_STEP_SUMMARY ?? null
+const resolveGitHubOutputPath = () => process.env.GITHUB_OUTPUT ?? null
 
 const isNonEmptyString = (input: unknown): input is string =>
   typeof input === "string" && input.trim().length > 0
@@ -229,9 +232,61 @@ export const renderP5aHandoffCorpusSummaryMarkdown = (
         details.push(`  error=${item.errorMessage}`)
       }
 
+      if (item.reportMarkdownPath) {
+        details.push(`  summary=${item.reportMarkdownPath}`)
+      }
+
+      if (item.reportJsonPath) {
+        details.push(`  report=${item.reportJsonPath}`)
+      }
+
       return details.join("\n")
     }),
   ].join("\n")
+
+export const renderP5aHandoffCorpusStepSummaryMarkdown = (
+  report: P5aHandoffCorpusReport,
+) => {
+  const failedCases = report.cases.filter((item) => item.status === "failed")
+  const lines = [
+    "### P5A Handoff Corpus",
+    "",
+    `- status: \`${report.status}\``,
+    `- passedCount: \`${String(report.passedCount)}\``,
+    `- failedCount: \`${String(report.failedCount)}\``,
+    `- manifestPath: \`${report.manifestPath}\``,
+    "",
+  ]
+
+  if (failedCases.length === 0) {
+    lines.push("All corpus cases matched the expected decision and status.", "")
+    return `${lines.join("\n")}\n`
+  }
+
+  lines.push("Failed cases:")
+  lines.push(
+    ...failedCases.map((item) => {
+      const mismatchText =
+        item.mismatchReasons.length > 0
+          ? item.mismatchReasons.join(" | ")
+          : (item.errorMessage ?? "unknown failure")
+      const reportHint = item.reportMarkdownPath ?? item.reportJsonPath ?? "n/a"
+
+      return `- ${item.caseId}: expected=${item.expectedDecision}/${item.expectedStatus}, actual=${item.actualDecision ?? "unavailable"}/${item.actualStatus ?? "unavailable"}, report=${reportHint}, mismatch=${mismatchText}`
+    }),
+  )
+  lines.push("")
+
+  return `${lines.join("\n")}\n`
+}
+
+export const buildP5aHandoffCorpusGitHubOutputLines = (
+  report: P5aHandoffCorpusReport,
+) => [
+  `p5a_corpus_status=${report.status}`,
+  `p5a_corpus_passed_count=${String(report.passedCount)}`,
+  `p5a_corpus_failed_count=${String(report.failedCount)}`,
+]
 
 export const writeP5aHandoffCorpusReport = async (
   report: P5aHandoffCorpusReport,
@@ -252,6 +307,42 @@ export const writeP5aHandoffCorpusReport = async (
     jsonPath,
     markdownPath,
   }
+}
+
+export const publishP5aHandoffCorpusGitHubSummary = async (
+  report: P5aHandoffCorpusReport,
+) => {
+  const summaryPath = resolveSummaryPath()
+
+  if (!summaryPath) {
+    return null
+  }
+
+  await appendFile(
+    summaryPath,
+    renderP5aHandoffCorpusStepSummaryMarkdown(report),
+    "utf8",
+  )
+
+  return summaryPath
+}
+
+export const publishP5aHandoffCorpusGitHubOutput = async (
+  report: P5aHandoffCorpusReport,
+) => {
+  const outputPath = resolveGitHubOutputPath()
+
+  if (!outputPath) {
+    return null
+  }
+
+  await appendFile(
+    outputPath,
+    `${buildP5aHandoffCorpusGitHubOutputLines(report).join("\n")}\n`,
+    "utf8",
+  )
+
+  return outputPath
 }
 
 export const runP5aHandoffCorpus = async (
