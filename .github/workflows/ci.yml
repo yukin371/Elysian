@@ -36,6 +36,11 @@ on:
         required: false
         default: "3"
         type: string
+      p5a_acceptance_gate_require_generated_artifacts:
+        description: "P5A acceptance 门禁是否要求 generator artifact 证据完整（默认 true）"
+        required: false
+        default: "true"
+        type: string
 
 permissions:
   contents: read
@@ -314,6 +319,7 @@ jobs:
       - name: Evaluate P5A acceptance gate
         env:
           ELYSIAN_P5A_ACCEPTANCE_GATE_MIN_CASE_COUNT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.p5a_acceptance_gate_min_case_count || '3' }}
+          ELYSIAN_P5A_ACCEPTANCE_GATE_REQUIRE_GENERATED_ARTIFACTS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.p5a_acceptance_gate_require_generated_artifacts || 'true' }}
         run: bun run p5a:acceptance:gate
 
       - name: Upload P5A acceptance report

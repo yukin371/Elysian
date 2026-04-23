@@ -45,6 +45,7 @@ bun run p5a:acceptance:finalize
   - [p5a-acceptance-cases.json](./examples/p5a-acceptance-cases.json)
 - CI 页面可直接查看 acceptance Step Summary 和 `GITHUB_OUTPUT`，不必先下载 artifact 才能判断阶段结果。
 - `p5a:acceptance:gate` 会对 acceptance 报告执行独立门禁，当前默认要求至少 `3` 条成功 case，且 generator 成功 case 的 artifact 证据完整。
+- CI `workflow_dispatch` 可覆盖 gate 的最小 case 数与 artifact 证据要求，用于手工策略演练，但默认值仍应保持当前阶段边界。
 - `p5a:acceptance:finalize` 适合本地一键收尾；CI 仍保持 acceptance 与 gate 分步执行，避免丢失页面级可见性。
 - 用于验证 `P5A` 当前主线是否仍满足“语料分类稳定 + 多条成功 handoff 进入 generator”。
 

@@ -70,7 +70,7 @@
 - `p5a:acceptance` 已改为 manifest 驱动的多成功 replay/generator case 验收，阶段闭环不再只依赖单一样例。
 - `p5a:acceptance` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，CI 页面可直接查看阶段验收状态与 case 数。
 - 已新增 `bun run p5a:acceptance:gate`，基于 acceptance 报告执行后置门禁，固定最小成功 case 数与 generator artifact 证据完整性。
-- CI `p5a-acceptance` 作业已接入 acceptance gate，并支持 `workflow_dispatch` 参数化最小 case 数策略。
+- CI `p5a-acceptance` 作业已接入 acceptance gate，并支持 `workflow_dispatch` 参数化最小 case 数与 artifact 证据策略。
 - 已新增 `bun run p5a:acceptance:finalize`，把 acceptance 与 gate 串成一键收尾入口，降低本地执行遗漏而不改变 CI 的分步可见性。
 - generator 当前已具备 `skip / overwrite / overwrite-generated-only / fail` 冲突策略与 manifest 输出。
 - generator 写入流程已收敛“冲突预检 + 原子写入（temp + rename）”，降低部分写入和中断损坏风险。

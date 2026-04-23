@@ -38,6 +38,9 @@
 - 当前默认 gate policy：
   - 至少 `3` 条成功 replay + generator case
   - 每条 generator 成功 case 都必须保留 `generatedSchemaArtifactPath`
+- 当前 `workflow_dispatch` 可调参数：
+  - `p5a_acceptance_gate_min_case_count`
+  - `p5a_acceptance_gate_require_generated_artifacts`
 
 ## Case 1: 标准 CRUD 模块
 

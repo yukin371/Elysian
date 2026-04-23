@@ -153,6 +153,62 @@ describe("p5a-acceptance-gate", () => {
     expect(report.status).toBe("failed")
     expect(report.conclusion).toContain("caseCount=1")
   })
+
+  test("allows incomplete artifact coverage when policy disables artifact requirement", async () => {
+    const reportDir = await createTempDir(
+      "elysian-p5a-acceptance-gate-artifact-policy-",
+    )
+    const acceptanceReportPath = join(reportDir, "p5a-acceptance-report.json")
+
+    await writeFile(
+      acceptanceReportPath,
+      JSON.stringify(
+        {
+          generatedAt: "2026-04-23T00:00:00.000Z",
+          status: "passed",
+          steps: {
+            corpus: "passed",
+            replay: "passed",
+            generator: "passed",
+          },
+          cases: [
+            {
+              caseId: "manual-fix-supplier",
+              replay: "passed",
+              generator: "passed",
+              status: "passed",
+            },
+            {
+              caseId: "visitor-pass-ready",
+              replay: "passed",
+              generator: "passed",
+              status: "passed",
+            },
+            {
+              caseId: "service-ticket-ready",
+              replay: "passed",
+              generator: "passed",
+              status: "passed",
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    )
+
+    process.env.ELYSIAN_P5A_ACCEPTANCE_REPORT_PATH = acceptanceReportPath
+    process.env.ELYSIAN_P5A_ACCEPTANCE_GATE_REQUIRE_GENERATED_ARTIFACTS =
+      "false"
+    process.env.ELYSIAN_REPORT_DIR = reportDir
+
+    const report = await run()
+
+    expect(report.status).toBe("passed")
+    expect(report.summary.generatedArtifactCoverage).toBe("incomplete")
+    expect(report.policy.requireGeneratedArtifacts).toBe(false)
+  })
 })
 
 describe("p5a-acceptance-gate helpers", () => {
