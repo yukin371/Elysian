@@ -11,6 +11,7 @@ NC='\033[0m'
 FORBIDDEN_PATH_PATTERN='^(\.claude/|\.cursor/|\.windsurf/|\.codeium/|\.copilot/|\.aider/|\.roo/|\.augment/|docs/superpowers/)'
 CONTENT_PATTERN='(Co-Authored-By:|Generated with .*(Claude|Anthropic|Copilot|Cursor|Windsurf|Codex)|>\s*\*\*For (Claude|Codex|Copilot|Cursor|Windsurf):\*\*)'
 COMMIT_MSG_PATTERN='(^Co-Authored-By:|Generated with .*(Claude|Anthropic|Copilot|Cursor|Windsurf|Codex))'
+WATERMARK_RULE_PATH_PATTERN='^(\.githooks/|scripts/validate-pr-metadata\.ts|scripts/validate-pr-metadata\.test\.ts)$'
 ZERO_SHA='0000000000000000000000000000000000000000'
 
 HAS_ERROR=0
@@ -61,6 +62,10 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         for file in "${CHANGED_FILES[@]}"; do
             if [[ "$file" =~ $FORBIDDEN_PATH_PATTERN ]]; then
                 error "提交 $commit 包含禁止推送的协作者目录: $file"
+            fi
+
+            if [[ "$file" =~ $WATERMARK_RULE_PATH_PATTERN ]]; then
+                continue
             fi
 
             case "$file" in

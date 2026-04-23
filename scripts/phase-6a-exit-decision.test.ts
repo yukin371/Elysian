@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test"
 
 import {
-  decidePhase6aExit,
   type Phase6aExitDecision,
-  type SmokeSignal,
-  type RuntimeMetricsSignal,
   type RateLimitSignal,
+  type RuntimeMetricsSignal,
+  type SmokeSignal,
+  decidePhase6aExit,
 } from "./phase-6a-exit-decision"
 
 describe("decidePhase6aExit", () => {
