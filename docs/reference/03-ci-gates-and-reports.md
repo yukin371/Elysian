@@ -17,6 +17,7 @@
 | `e2e-generator-reports-index.json` | generator 汇总索引 | `e2e:generator:reports:index` |
 | `e2e-generator-reports-gate.json` | generator 门禁结论 | `e2e:generator:reports:gate` |
 | `p5a-handoff-corpus-report.json` | P5A 语料分类回归结果 | `p5a:handoff:corpus` |
+| `GITHUB_STEP_SUMMARY` / `GITHUB_OUTPUT`（handoff） | P5A 单次 handoff / replay 的页面级结论与 step outputs | `p5a:handoff:report` / `p5a:handoff:replay` |
 | `p5a-schema-handoff-replay-report.json` | P5A 单次人工接管 replay 结果 | `p5a:handoff:replay` |
 | `p5a-acceptance-report.json` | P5A acceptance 执行结果 | `p5a:acceptance` |
 | `p5a-acceptance-gate.json` | P5A acceptance 门禁结论 | `p5a:acceptance:gate` |

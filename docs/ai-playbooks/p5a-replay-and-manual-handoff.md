@@ -47,6 +47,7 @@ bun run p5a:acceptance:finalize
 - 当前 acceptance case manifest：
   - [p5a-acceptance-cases.json](./examples/p5a-acceptance-cases.json)
 - CI 页面可直接查看 acceptance Step Summary 和 `GITHUB_OUTPUT`，不必先下载 artifact 才能判断阶段结果。
+- 单次 `p5a:handoff:report` 与 `p5a:handoff:replay` 现在也支持写入 GitHub Step Summary 与 `GITHUB_OUTPUT`，便于在手工 workflow 或临时 CI 诊断里直接看单次结论。
 - `p5a:acceptance:gate` 会对 acceptance 报告执行独立门禁，当前默认要求至少 `3` 条成功 case，且 generator 成功 case 的 artifact 证据完整。
 - 当前 acceptance 覆盖已扩到 `6` 条成功 case，但 gate 默认值仍保持 `3`，作为 `P5A` 当前阶段下限而不是最新覆盖数。
 - CI `workflow_dispatch` 可覆盖 gate 的最小 case 数与 artifact 证据要求，用于手工策略演练，但默认值仍应保持当前阶段边界。

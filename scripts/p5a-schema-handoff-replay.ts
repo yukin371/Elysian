@@ -1,4 +1,11 @@
-import { access, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises"
+import {
+  access,
+  appendFile,
+  mkdir,
+  mkdtemp,
+  readFile,
+  writeFile,
+} from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
@@ -43,6 +50,8 @@ interface P5aHandoffReplayReport {
 
 const replayReportFileName = "p5a-schema-handoff-replay-report.json"
 const replaySummaryFileName = "p5a-schema-handoff-replay-summary.md"
+const resolveSummaryPath = () => process.env.GITHUB_STEP_SUMMARY ?? null
+const resolveGitHubOutputPath = () => process.env.GITHUB_OUTPUT ?? null
 
 const parseArgs = (args: string[]) => {
   let inputFilePath = ""
@@ -234,6 +243,79 @@ const writeP5aHandoffReplayReport = async (report: P5aHandoffReplayReport) => {
   }
 }
 
+const renderP5aReplayStepSummaryMarkdown = (report: P5aHandoffReplayReport) => {
+  const lines = [
+    "### P5A Handoff Replay",
+    "",
+    `- status: \`${report.status}\``,
+    `- decision: \`${report.decision}\``,
+    `- handoff: \`${report.steps.handoff}\``,
+    `- generator: \`${report.steps.generator}\``,
+    `- shouldGenerate: \`${String(report.inputs.shouldGenerate)}\``,
+    `- inputFilePath: \`${report.inputs.inputFilePath}\``,
+    `- schemaFilePath: \`${report.inputs.schemaFilePath}\``,
+    "",
+  ]
+
+  if (report.status === "passed") {
+    lines.push(
+      "Replay completed with the current handoff and generator boundary.",
+      "",
+    )
+    return `${lines.join("\n")}\n`
+  }
+
+  lines.push("Recommended actions:")
+  lines.push(...report.recommendedActions.map((action) => `- ${action}`))
+  if (report.generator.errorMessage) {
+    lines.push(`- generatorError: ${report.generator.errorMessage}`)
+  }
+  lines.push("")
+
+  return `${lines.join("\n")}\n`
+}
+
+const buildP5aReplayGitHubOutputLines = (report: P5aHandoffReplayReport) => [
+  `p5a_replay_status=${report.status}`,
+  `p5a_replay_decision=${report.decision}`,
+  `p5a_replay_handoff=${report.steps.handoff}`,
+  `p5a_replay_generator=${report.steps.generator}`,
+]
+
+const publishP5aReplayGitHubSummary = async (
+  report: P5aHandoffReplayReport,
+) => {
+  const summaryPath = resolveSummaryPath()
+
+  if (!summaryPath) {
+    return null
+  }
+
+  await appendFile(
+    summaryPath,
+    renderP5aReplayStepSummaryMarkdown(report),
+    "utf8",
+  )
+
+  return summaryPath
+}
+
+const publishP5aReplayGitHubOutput = async (report: P5aHandoffReplayReport) => {
+  const outputPath = resolveGitHubOutputPath()
+
+  if (!outputPath) {
+    return null
+  }
+
+  await appendFile(
+    outputPath,
+    `${buildP5aReplayGitHubOutputLines(report).join("\n")}\n`,
+    "utf8",
+  )
+
+  return outputPath
+}
+
 try {
   const options = parseArgs(Bun.argv.slice(2))
 
@@ -345,11 +427,19 @@ try {
           : report.recommendedActions,
     }
     const replayPaths = await writeP5aHandoffReplayReport(replayReport)
+    const githubSummaryPath = await publishP5aReplayGitHubSummary(replayReport)
+    const githubOutputPath = await publishP5aReplayGitHubOutput(replayReport)
 
     console.log(`[p5a-handoff-replay] replay-report: ${replayPaths.reportPath}`)
     console.log(
       `[p5a-handoff-replay] replay-summary: ${replayPaths.summaryPath}`,
     )
+    if (githubSummaryPath) {
+      console.log(`[p5a-handoff-replay] github-summary: ${githubSummaryPath}`)
+    }
+    if (githubOutputPath) {
+      console.log(`[p5a-handoff-replay] github-output: ${githubOutputPath}`)
+    }
     console.log(
       `[p5a-handoff-replay] replay-status=${replayReport.status} handoff=${replayReport.steps.handoff} generator=${replayReport.steps.generator}`,
     )

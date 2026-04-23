@@ -13,6 +13,10 @@ describe("p5a-schema-handoff-replay", () => {
       const fixedSchemaPath = join(workspace, "fixed.module-schema.json")
       const invalidReportDir = join(workspace, "invalid-report")
       const replayReportDir = join(workspace, "replay-report")
+      const reportSummaryPath = join(workspace, "report-step-summary.md")
+      const reportOutputPath = join(workspace, "report-github-output.txt")
+      const replaySummaryPath = join(workspace, "replay-step-summary.md")
+      const replayOutputPath = join(workspace, "replay-github-output.txt")
 
       await writeFile(
         inputPath,
@@ -74,6 +78,11 @@ describe("p5a-schema-handoff-replay", () => {
         ],
         {
           cwd: process.cwd(),
+          env: {
+            ...process.env,
+            GITHUB_STEP_SUMMARY: reportSummaryPath,
+            GITHUB_OUTPUT: reportOutputPath,
+          },
           stdout: "pipe",
           stderr: "pipe",
         },
@@ -98,6 +107,11 @@ describe("p5a-schema-handoff-replay", () => {
         ],
         {
           cwd: process.cwd(),
+          env: {
+            ...process.env,
+            GITHUB_STEP_SUMMARY: replaySummaryPath,
+            GITHUB_OUTPUT: replayOutputPath,
+          },
           stdout: "pipe",
           stderr: "pipe",
         },
@@ -157,6 +171,18 @@ describe("p5a-schema-handoff-replay", () => {
 
       expect(replaySummary).toContain("# P5A Handoff Replay Summary")
       expect(replaySummary).toContain("generator: passed")
+      const reportStepSummary = await readFile(reportSummaryPath, "utf8")
+      const reportGitHubOutput = await readFile(reportOutputPath, "utf8")
+      const replayStepSummary = await readFile(replaySummaryPath, "utf8")
+      const replayGitHubOutput = await readFile(replayOutputPath, "utf8")
+
+      expect(reportStepSummary).toContain("### P5A Schema Handoff")
+      expect(reportGitHubOutput).toContain(
+        "p5a_handoff_decision=retry_ai_generation",
+      )
+      expect(replayStepSummary).toContain("### P5A Handoff Replay")
+      expect(replayGitHubOutput).toContain("p5a_replay_status=passed")
+      expect(replayGitHubOutput).toContain("p5a_replay_generator=passed")
     } finally {
       await rm(workspace, { recursive: true, force: true })
     }

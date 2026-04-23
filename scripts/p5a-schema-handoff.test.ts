@@ -4,9 +4,11 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import {
+  buildP5aHandoffGitHubOutputLines,
   buildP5aRecommendedActions,
   decideP5aHandoff,
   generateP5aHandoffReport,
+  renderP5aHandoffStepSummaryMarkdown,
   renderP5aSummaryMarkdown,
   validateTaskInputTemplate,
 } from "./p5a-schema-handoff"
@@ -170,5 +172,46 @@ describe("renderP5aSummaryMarkdown", () => {
     expect(markdown).toContain("# P5A Schema Handoff Summary")
     expect(markdown).toContain("- decision: manual_fix_required")
     expect(markdown).toContain("- Fix duplicate field key.")
+  })
+})
+
+describe("p5a handoff presentation helpers", () => {
+  test("renders compact GitHub step summary markdown", () => {
+    const markdown = renderP5aHandoffStepSummaryMarkdown({
+      generatedAt: "2026-04-24T00:00:00.000Z",
+      inputFilePath: "input.txt",
+      schemaFilePath: "schema.json",
+      reportDir: "report-dir",
+      status: "failed",
+      decision: "manual_fix_required",
+      taskInputIssues: [],
+      schemaIssues: [{ path: "fields[1].key", message: "duplicate" }],
+      recommendedActions: ["Fix duplicate field key."],
+    })
+
+    expect(markdown).toContain("### P5A Schema Handoff")
+    expect(markdown).toContain("- status: `failed`")
+    expect(markdown).toContain("- Fix duplicate field key.")
+  })
+
+  test("builds GitHub output lines for handoff status", () => {
+    expect(
+      buildP5aHandoffGitHubOutputLines({
+        generatedAt: "2026-04-24T00:00:00.000Z",
+        inputFilePath: "input.txt",
+        schemaFilePath: "schema.json",
+        reportDir: "report-dir",
+        status: "passed",
+        decision: "ready_for_generator",
+        taskInputIssues: [],
+        schemaIssues: [],
+        recommendedActions: ["Continue with generator."],
+      }),
+    ).toEqual([
+      "p5a_handoff_status=passed",
+      "p5a_handoff_decision=ready_for_generator",
+      "p5a_handoff_task_input_issue_count=0",
+      "p5a_handoff_schema_issue_count=0",
+    ])
   })
 })
