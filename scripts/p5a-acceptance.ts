@@ -1,4 +1,10 @@
-import { access, mkdir, readFile, writeFile } from "node:fs/promises"
+import {
+  access,
+  appendFile,
+  mkdir,
+  readFile,
+  writeFile,
+} from "node:fs/promises"
 import { join, resolve } from "node:path"
 
 import {
@@ -67,6 +73,8 @@ const defaultManifestPath =
   "./docs/ai-playbooks/examples/p5a-handoff-corpus.json"
 const defaultAcceptanceCasesPath =
   "./docs/ai-playbooks/examples/p5a-acceptance-cases.json"
+const resolveSummaryPath = () => process.env.GITHUB_STEP_SUMMARY ?? null
+const resolveGitHubOutputPath = () => process.env.GITHUB_OUTPUT ?? null
 
 const renderP5aAcceptanceSummaryMarkdown = (report: P5aAcceptanceReport) =>
   [
@@ -109,6 +117,87 @@ const renderP5aAcceptanceSummaryMarkdown = (report: P5aAcceptanceReport) =>
         .join("\n"),
     ),
   ].join("\n")
+
+export const renderP5aAcceptanceStepSummaryMarkdown = (
+  report: P5aAcceptanceReport,
+) => {
+  const failedCases = report.cases.filter((item) => item.status === "failed")
+  const lines = [
+    "### P5A Acceptance",
+    "",
+    `- status: \`${report.status}\``,
+    `- corpus: \`${report.steps.corpus}\``,
+    `- replay: \`${report.steps.replay}\``,
+    `- generator: \`${report.steps.generator}\``,
+    `- caseCount: \`${String(report.cases.length)}\``,
+    `- acceptanceCasesPath: \`${report.inputs.acceptanceCasesPath ?? "inline-single-case"}\``,
+    "",
+  ]
+
+  if (failedCases.length === 0) {
+    lines.push("All acceptance cases passed replay and generator.", "")
+    return `${lines.join("\n")}\n`
+  }
+
+  lines.push("Failed cases:")
+  lines.push(
+    ...failedCases.map((item) => {
+      const detail =
+        item.errorMessage ??
+        `${item.replay}/${item.generator} report=${item.summaryPath ?? item.reportPath ?? "n/a"}`
+
+      return `- ${item.caseId}: replay=${item.replay}, generator=${item.generator}, detail=${detail}`
+    }),
+  )
+  lines.push("")
+
+  return `${lines.join("\n")}\n`
+}
+
+export const buildP5aAcceptanceGitHubOutputLines = (
+  report: P5aAcceptanceReport,
+) => [
+  `p5a_acceptance_status=${report.status}`,
+  `p5a_acceptance_case_count=${String(report.cases.length)}`,
+  `p5a_acceptance_replay=${report.steps.replay}`,
+  `p5a_acceptance_generator=${report.steps.generator}`,
+]
+
+export const publishP5aAcceptanceGitHubSummary = async (
+  report: P5aAcceptanceReport,
+) => {
+  const summaryPath = resolveSummaryPath()
+
+  if (!summaryPath) {
+    return null
+  }
+
+  await appendFile(
+    summaryPath,
+    renderP5aAcceptanceStepSummaryMarkdown(report),
+    "utf8",
+  )
+
+  return summaryPath
+}
+
+export const publishP5aAcceptanceGitHubOutput = async (
+  report: P5aAcceptanceReport,
+) => {
+  const outputPath = resolveGitHubOutputPath()
+
+  if (!outputPath) {
+    return null
+  }
+
+  await appendFile(
+    outputPath,
+    `${buildP5aAcceptanceGitHubOutputLines(report).join("\n")}\n`,
+    "utf8",
+  )
+
+  return outputPath
+}
 
 const isNonEmptyString = (input: unknown): input is string =>
   typeof input === "string" && input.trim().length > 0
@@ -425,12 +514,20 @@ export const run = async (
     renderP5aAcceptanceSummaryMarkdown(report),
     "utf8",
   )
+  const githubSummaryPath = await publishP5aAcceptanceGitHubSummary(report)
+  const githubOutputPath = await publishP5aAcceptanceGitHubOutput(report)
 
   console.log(
     `[p5a-acceptance] status=${report.status} corpus=${report.steps.corpus} replay=${report.steps.replay} generator=${report.steps.generator} cases=${String(report.cases.length)}`,
   )
   console.log(`[p5a-acceptance] report: ${reportPath}`)
   console.log(`[p5a-acceptance] summary: ${summaryPath}`)
+  if (githubSummaryPath) {
+    console.log(`[p5a-acceptance] github-summary: ${githubSummaryPath}`)
+  }
+  if (githubOutputPath) {
+    console.log(`[p5a-acceptance] github-output: ${githubOutputPath}`)
+  }
 
   for (const caseReport of report.cases) {
     console.log(

@@ -19,6 +19,9 @@
   - `p5a-acceptance-cases.json` 中的多条 replay + generator case
 - 当前 acceptance manifest：
   - [p5a-acceptance-cases.json](./examples/p5a-acceptance-cases.json)
+- CI 运行时还会输出：
+  - GitHub Step Summary
+  - `p5a_acceptance_status` / `p5a_acceptance_case_count` / `p5a_acceptance_replay` / `p5a_acceptance_generator`
 
 ## Case 1: 标准 CRUD 模块
 

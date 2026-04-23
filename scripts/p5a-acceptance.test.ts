@@ -3,7 +3,11 @@ import { mkdtemp, readFile, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { run } from "./p5a-acceptance"
+import {
+  buildP5aAcceptanceGitHubOutputLines,
+  renderP5aAcceptanceStepSummaryMarkdown,
+  run,
+} from "./p5a-acceptance"
 
 const tempDirs: string[] = []
 
@@ -94,5 +98,95 @@ describe("p5a-acceptance", () => {
     expect(serviceTicketSchemaArtifact).toContain(
       "export const serviceTicketModuleSchema",
     )
+  })
+})
+
+describe("p5a-acceptance presentation helpers", () => {
+  test("renders failed case details for GitHub step summary", () => {
+    const markdown = renderP5aAcceptanceStepSummaryMarkdown({
+      generatedAt: "2026-04-23T00:00:00.000Z",
+      status: "failed",
+      steps: {
+        corpus: "passed",
+        replay: "failed",
+        generator: "failed",
+      },
+      inputs: {
+        manifestPath: "corpus.json",
+        acceptanceCasesPath: "acceptance.json",
+        frontendTarget: "vue",
+        conflictStrategy: "skip",
+      },
+      outputs: {
+        reportDir: "report-dir",
+        corpusReportPath: "report-dir/corpus.json",
+        corpusSummaryPath: "report-dir/corpus.md",
+        outputDir: "report-dir/generated",
+      },
+      cases: [
+        {
+          caseId: "service-ticket-ready",
+          description: "service ticket",
+          inputFilePath: "service-ticket-input.txt",
+          schemaFilePath: "service-ticket.module-schema.json",
+          replay: "failed",
+          generator: "failed",
+          status: "failed",
+          summaryPath:
+            "report-dir/replay/service-ticket-ready/p5a-schema-handoff-summary.md",
+          outputDir: "report-dir/generated/service-ticket-ready",
+        },
+      ],
+    })
+
+    expect(markdown).toContain("### P5A Acceptance")
+    expect(markdown).toContain("- status: `failed`")
+    expect(markdown).toContain("service-ticket-ready")
+    expect(markdown).toContain(
+      "report-dir/replay/service-ticket-ready/p5a-schema-handoff-summary.md",
+    )
+  })
+
+  test("builds GitHub output lines for acceptance status", () => {
+    expect(
+      buildP5aAcceptanceGitHubOutputLines({
+        generatedAt: "2026-04-23T00:00:00.000Z",
+        status: "passed",
+        steps: {
+          corpus: "passed",
+          replay: "passed",
+          generator: "passed",
+        },
+        inputs: {
+          manifestPath: "corpus.json",
+          acceptanceCasesPath: "acceptance.json",
+          frontendTarget: "vue",
+          conflictStrategy: "skip",
+        },
+        outputs: {
+          reportDir: "report-dir",
+          corpusReportPath: "report-dir/corpus.json",
+          corpusSummaryPath: "report-dir/corpus.md",
+          outputDir: "report-dir/generated",
+        },
+        cases: [
+          {
+            caseId: "supplier",
+            description: "supplier",
+            inputFilePath: "supplier-input.txt",
+            schemaFilePath: "supplier.module-schema.json",
+            replay: "passed",
+            generator: "passed",
+            status: "passed",
+            outputDir: "report-dir/generated/supplier",
+          },
+        ],
+      }),
+    ).toEqual([
+      "p5a_acceptance_status=passed",
+      "p5a_acceptance_case_count=1",
+      "p5a_acceptance_replay=passed",
+      "p5a_acceptance_generator=passed",
+    ])
   })
 })
