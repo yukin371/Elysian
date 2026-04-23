@@ -38,9 +38,10 @@ describe("p5a-acceptance", () => {
     expect(report.steps.corpus).toBe("passed")
     expect(report.steps.replay).toBe("passed")
     expect(report.steps.generator).toBe("passed")
-    expect(report.cases).toHaveLength(4)
+    expect(report.cases).toHaveLength(5)
     expect(report.cases.map((item) => item.caseId)).toEqual([
       "manual-fix-supplier",
+      "supplier-ready",
       "visitor-pass-ready",
       "asset-ready",
       "service-ticket-ready",
@@ -54,7 +55,7 @@ describe("p5a-acceptance", () => {
     }
 
     expect(acceptanceReport.status).toBe("passed")
-    expect(acceptanceReport.cases).toHaveLength(4)
+    expect(acceptanceReport.cases).toHaveLength(5)
     expect(acceptanceReport.cases[0]?.generatedSchemaArtifactPath).toContain(
       "supplier.schema.ts",
     )
@@ -79,6 +80,16 @@ describe("p5a-acceptance", () => {
       ),
       "utf8",
     )
+    const supplierReadySchemaArtifact = await readFile(
+      join(
+        outputDir,
+        "supplier-ready",
+        "modules",
+        "supplier",
+        "supplier.schema.ts",
+      ),
+      "utf8",
+    )
     const assetSchemaArtifact = await readFile(
       join(outputDir, "asset-ready", "modules", "asset", "asset.schema.ts"),
       "utf8",
@@ -95,6 +106,9 @@ describe("p5a-acceptance", () => {
     )
 
     expect(supplierSchemaArtifact).toContain(
+      "export const supplierModuleSchema",
+    )
+    expect(supplierReadySchemaArtifact).toContain(
       "export const supplierModuleSchema",
     )
     expect(visitorPassSchemaArtifact).toContain(
