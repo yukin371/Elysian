@@ -19,7 +19,7 @@
 - `bun run p5a:acceptance:finalize`
 - 当前 acceptance 会同时执行：
   - `p5a:handoff:corpus`
-  - `p5a-acceptance-cases.json` 中的多条 replay + generator case
+  - `p5a-acceptance-cases.json` 中的 `supplier / visitor-pass / asset / service-ticket` 四条 replay + generator case
 - 当前 finalize 会顺序执行：
   - `p5a:acceptance`
   - `p5a:acceptance:gate`
@@ -90,6 +90,8 @@
   - [asset.module-schema.json](./examples/asset.module-schema.json)
 - 额外要求：
   - 权限/菜单需求只能记为评审备注，不进入当前 handoff JSON
+- 当前 acceptance 覆盖：
+  - 已纳入 `p5a-acceptance-cases.json`，要求 replay + generator 稳定通过
 
 ## Case 4: 带字典映射与混合字段类型的模块
 
@@ -154,5 +156,6 @@
 6. 字段级或 option 级越界元数据必须稳定落入 `manual_fix_required`，不能被误分类为 `retry_ai_generation`。
 7. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
 8. `p5a:acceptance:gate` 必须维持至少 `3` 条成功 acceptance case，且 generator 成功 case 的 artifact 证据完整。
+   当前 acceptance 实际覆盖 `4` 条成功 case，但默认 gate 仍维持“至少 `3` 条”为本阶段下限，不在本次推进中抬高出口边界。
 9. `p5a:acceptance:index` 必须把 acceptance 与 gate 收敛为单一结论文件，而不引入第二套验收来源。
 10. `p5a:acceptance:finalize` 必须能稳定串联 acceptance、gate 与 index。

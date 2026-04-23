@@ -13,6 +13,12 @@
       "schemaFilePath": "./docs/ai-playbooks/examples/visitor-pass.module-schema.json"
     },
     {
+      "id": "asset-ready",
+      "description": "ready numeric fields should pass replay and generator while out-of-bound notes stay outside handoff JSON",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-asset-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/asset.module-schema.json"
+    },
+    {
       "id": "service-ticket-ready",
       "description": "ready mixed dictionary and typed fields should pass replay and generator",
       "inputFilePath": "./docs/ai-playbooks/examples/p5a-service-ticket-task-input.txt",
