@@ -67,9 +67,13 @@ export const decideP5aHandoff = (
     return "ready_for_generator"
   }
 
-  const hasTopLevelShapeIssues = schemaIssues.some((issue) =>
-    ["$", "name", "label", "fields"].includes(issue.path),
-  )
+  const hasTopLevelShapeIssues = schemaIssues.some((issue) => {
+    if (issue.path === "$") {
+      return true
+    }
+
+    return !issue.path.includes(".") && !issue.path.includes("[")
+  })
 
   if (hasTopLevelShapeIssues) {
     return "retry_ai_generation"

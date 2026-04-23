@@ -1,8 +1,12 @@
 import { describe, expect, test } from "bun:test"
+import { mkdtemp, rm, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 
 import {
   buildP5aRecommendedActions,
   decideP5aHandoff,
+  generateP5aHandoffReport,
   renderP5aSummaryMarkdown,
   validateTaskInputTemplate,
 } from "./p5a-schema-handoff"
@@ -54,6 +58,21 @@ describe("decideP5aHandoff", () => {
     ).toBe("retry_ai_generation")
   })
 
+  test("returns retry_ai_generation for top-level out-of-bound metadata", () => {
+    expect(
+      decideP5aHandoff(
+        [],
+        [
+          {
+            path: "permissions",
+            message:
+              'Module schema does not allow unknown property "permissions".',
+          },
+        ],
+      ),
+    ).toBe("retry_ai_generation")
+  })
+
   test("returns manual_fix_required for field-level schema issues", () => {
     expect(
       decideP5aHandoff(
@@ -66,6 +85,48 @@ describe("decideP5aHandoff", () => {
         ],
       ),
     ).toBe("manual_fix_required")
+  })
+})
+
+describe("generateP5aHandoffReport", () => {
+  test("returns retry_ai_generation when schema file is malformed JSON", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "elysian-p5a-report-"))
+
+    try {
+      const inputPath = join(workspace, "task-input.txt")
+      const schemaPath = join(workspace, "broken.module-schema.json")
+
+      await writeFile(
+        inputPath,
+        `任务目标：
+业务背景：
+范围边界（必须/禁止）：
+影响模块：
+验收标准：
+验证命令：
+文档同步要求：`,
+        "utf8",
+      )
+      await writeFile(
+        schemaPath,
+        `{
+  "name": "supplier",
+  "label": "Supplier",
+  "fields": [`,
+        "utf8",
+      )
+
+      const report = await generateP5aHandoffReport(inputPath, schemaPath)
+
+      expect(report.status).toBe("failed")
+      expect(report.decision).toBe("retry_ai_generation")
+      expect(report.schemaIssues).toContainEqual({
+        path: "$",
+        message: expect.stringContaining("Schema file is not valid JSON:"),
+      })
+    } finally {
+      await rm(workspace, { recursive: true, force: true })
+    }
   })
 })
 

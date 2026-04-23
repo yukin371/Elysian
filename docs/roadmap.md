@@ -94,6 +94,7 @@
 - 已推进：`packages/generator` CLI 已支持 `--schema-file`，允许从 JSON schema 文件直接生成 staging，并在外部 schema 来源时内联 `.schema.ts`
 - 已推进：`docs/ai-playbooks` 已补 `P5A` 输入模板、输出契约、验收语料与可执行样例 schema 文件
 - 已推进：新增 `p5a:handoff:report` / `p5a:handoff:replay`，形成“失败分类 -> 人工修正 -> 重放 -> 继续 generator”的最小接管骨架
+- 已推进：补充“顶层越界元数据 / 非法 JSON / 字段级局部错误”三类失败语料，并把 `retry_ai_generation` 与 `manual_fix_required` 的分界收紧到可执行分类规则
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 ### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
@@ -223,5 +224,5 @@
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
 6. 启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。
-7. 基于 `p5a:handoff:report` / `replay` 补更多失败语料，验证分类边界是否足够稳定。
+7. 继续基于 `p5a:handoff:report` / `replay` 扩充失败语料，验证更多真实需求变体下的分类边界稳定性。
 8. 保持 `Phase 6B` 为后续候选主线，待 `P5A` 形成稳定入口后再回到企业增强能力。

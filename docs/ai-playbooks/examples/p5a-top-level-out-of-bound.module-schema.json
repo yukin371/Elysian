@@ -1,0 +1,29 @@
+{
+  "name": "asset",
+  "label": "Asset",
+  "permissions": ["asset:view", "asset:create"],
+  "menus": [
+    {
+      "code": "asset-management",
+      "label": "Asset Management"
+    }
+  ],
+  "workflow": {
+    "approvalRequired": true
+  },
+  "fields": [
+    {
+      "key": "id",
+      "label": "ID",
+      "kind": "id",
+      "required": true
+    },
+    {
+      "key": "assetCode",
+      "label": "Asset Code",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    }
+  ]
+}

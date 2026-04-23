@@ -35,7 +35,7 @@ bun run p5a:handoff:replay --input-file ./docs/ai-playbooks/examples/p5a-complet
 - `rollback_to_template`
   - 任务输入模板缺段落，说明问题在输入协议层，先回退到模板补齐
 - `retry_ai_generation`
-  - 顶层 `ModuleSchema` 形态错误，说明 AI 输出失真，先重试 AI
+  - 顶层 `ModuleSchema` 形态错误，或混入顶层越界元数据，说明 AI 输出失真，先重试 AI
 - `manual_fix_required`
   - 顶层结构基本正确，但字段细节有问题，允许人工直接修正 JSON 后重放
 - `ready_for_generator`
@@ -47,6 +47,10 @@ bun run p5a:handoff:replay --input-file ./docs/ai-playbooks/examples/p5a-complet
 - 不记录对话逐轮 token 级日志
 - 不引入数据库审计或交互式回放 UI
 - handoff JSON 仍然只接受纯 `ModuleSchema`；若出现权限、菜单、流程、UI 私有元数据，必须判定为越界输入并回退修正
+- 失败语料基线：
+  - `p5a-top-level-out-of-bound.module-schema.json` -> `retry_ai_generation`
+  - `p5a-malformed.module-schema.txt` -> `retry_ai_generation`
+  - `p5a-failed.module-schema.json` -> `manual_fix_required`
 
 ## 推荐流程
 
