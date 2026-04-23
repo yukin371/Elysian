@@ -59,11 +59,11 @@ describe("p5a-acceptance-finalize", () => {
     ) as { status: string; summary: { caseCount: number; gateStatus: string } }
 
     expect(acceptanceReport.status).toBe("passed")
-    expect(acceptanceReport.cases).toHaveLength(3)
+    expect(acceptanceReport.cases).toHaveLength(4)
     expect(gateReport.status).toBe("passed")
-    expect(gateReport.summary.caseCount).toBe(3)
+    expect(gateReport.summary.caseCount).toBe(4)
     expect(indexReport.status).toBe("passed")
-    expect(indexReport.summary.caseCount).toBe(3)
+    expect(indexReport.summary.caseCount).toBe(4)
     expect(indexReport.summary.gateStatus).toBe("passed")
   })
 })
