@@ -96,6 +96,7 @@
 - 已推进：新增 `p5a:handoff:report` / `p5a:handoff:replay`，形成“失败分类 -> 人工修正 -> 重放 -> 继续 generator”的最小接管骨架
 - 已推进：补充“顶层越界元数据 / 非法 JSON / 字段级局部错误”三类失败语料，并把 `retry_ai_generation` 与 `manual_fix_required` 的分界收紧到可执行分类规则
 - 已推进：新增 `p5a:handoff:corpus`，把真实任务输入变体与失败语料收敛为可批量执行的分类回归入口
+- 已推进：CI 新增 `p5a-handoff-corpus` 作业，把 P5A 语料分类回归纳入固定质量链路
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 ### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
