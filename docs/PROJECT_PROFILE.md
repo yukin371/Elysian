@@ -64,6 +64,7 @@
 - `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
 - `packages/generator` 已支持 `--schema-file` 直接消费外部 JSON `ModuleSchema`；当 schema 来源为外部文件时，会在生成目录内联 `.schema.ts`，不假设该模块已注册到 `@elysian/schema`。
 - 已新增 `bun run p5a:handoff:report` 与 `bun run p5a:handoff:replay`，用于 `P5A` 的失败分类、人工接管和修正后重放。
+- 已新增 `bun run p5a:handoff:corpus`，用于批量执行 `P5A` 输入/输出语料并校验预期分类边界。
 - generator 当前已具备 `skip / overwrite / overwrite-generated-only / fail` 冲突策略与 manifest 输出。
 - generator 写入流程已收敛“冲突预检 + 原子写入（temp + rename）”，降低部分写入和中断损坏风险。
 - generator 当前官方 staging 落点是仓库根 `generated/`。
@@ -219,6 +220,7 @@
 - 从外部 schema 文件生成：`bun --filter @elysian/generator generate --schema-file ./docs/ai-playbooks/examples/supplier.module-schema.json --target staging --frontend vue`
 - P5A handoff 报告：`bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-complete-task-input.txt --schema-file ./docs/ai-playbooks/examples/p5a-failed.module-schema.json`
 - P5A handoff 重放：`bun run p5a:handoff:replay --input-file ./docs/ai-playbooks/examples/p5a-complete-task-input.txt --schema-file ./docs/ai-playbooks/examples/p5a-fixed.module-schema.json --generate --out ./generated/p5a-replay`
+- P5A handoff 语料批跑：`bun run p5a:handoff:corpus --manifest ./docs/ai-playbooks/examples/p5a-handoff-corpus.json`
 
 ## 维护规则
 

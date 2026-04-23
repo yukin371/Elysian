@@ -9,6 +9,7 @@
     "pr:validate": "bun scripts/validate-pr-metadata.ts",
     "p5a:handoff:report": "bun scripts/p5a-schema-handoff-report.ts",
     "p5a:handoff:replay": "bun scripts/p5a-schema-handoff-replay.ts",
+    "p5a:handoff:corpus": "bun scripts/p5a-handoff-corpus-run.ts",
     "dev:server": "bun --filter @elysian/server dev",
     "dev:vue": "bun --filter @elysian/example-vue dev",
     "server": "bun --filter @elysian/server start",

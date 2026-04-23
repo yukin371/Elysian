@@ -1,0 +1,22 @@
+任务目标：
+为资产台账模块生成可进入 generator 的最小 schema 文件
+
+业务背景：
+需要维护资产编号、资产名称、原值、状态、采购日期，并保留后续扩展菜单和权限的需求备注
+
+范围边界（必须/禁止）：
+必须只输出当前 ModuleSchema 能表达的字段；禁止把自动挂菜单、角色权限映射、审批流和看板配置直接写进 handoff JSON
+
+影响模块：
+packages/schema
+packages/generator
+docs/ai-playbooks
+
+验收标准：
+schema 通过 validateModuleSchema，且 out-of-bound 需求仍保留在文档层，不侵入 handoff JSON
+
+验证命令：
+bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-asset-task-input.txt --schema-file ./docs/ai-playbooks/examples/asset.module-schema.json
+
+文档同步要求：
+若 handoff 语料基线或边界说明变化，同步 roadmap、PROJECT_PROFILE 和 ai-playbooks

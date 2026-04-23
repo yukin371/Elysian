@@ -1,0 +1,60 @@
+{
+  "cases": [
+    {
+      "id": "supplier-ready",
+      "description": "standard CRUD input should stay within the current ModuleSchema boundary",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-complete-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/supplier.module-schema.json",
+      "expectedDecision": "ready_for_generator",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "visitor-pass-ready",
+      "description": "boolean and datetime fields should remain within handoff scope",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-visitor-pass-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/visitor-pass.module-schema.json",
+      "expectedDecision": "ready_for_generator",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "asset-ready-with-out-of-bound-notes",
+      "description": "out-of-bound requirements can exist in the task input but must not leak into schema JSON",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-asset-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/asset.module-schema.json",
+      "expectedDecision": "ready_for_generator",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "rollback-missing-template-sections",
+      "description": "missing required input sections should force rollback_to_template",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-failed-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/supplier.module-schema.json",
+      "expectedDecision": "rollback_to_template",
+      "expectedStatus": "failed"
+    },
+    {
+      "id": "retry-top-level-out-of-bound",
+      "description": "top-level out-of-bound metadata should force retry_ai_generation",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-asset-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/p5a-top-level-out-of-bound.module-schema.json",
+      "expectedDecision": "retry_ai_generation",
+      "expectedStatus": "failed"
+    },
+    {
+      "id": "retry-malformed-json",
+      "description": "malformed schema files should force retry_ai_generation",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-complete-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/p5a-malformed.module-schema.txt",
+      "expectedDecision": "retry_ai_generation",
+      "expectedStatus": "failed"
+    },
+    {
+      "id": "manual-fix-field-level-issues",
+      "description": "field-level duplicate and enum option issues should allow manual takeover",
+      "inputFilePath": "./docs/ai-playbooks/examples/p5a-complete-task-input.txt",
+      "schemaFilePath": "./docs/ai-playbooks/examples/p5a-failed.module-schema.json",
+      "expectedDecision": "manual_fix_required",
+      "expectedStatus": "failed"
+    }
+  ]
+}

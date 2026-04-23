@@ -1,0 +1,22 @@
+任务目标：
+为访客通行证模块生成可进入 generator 的最小 schema 文件
+
+业务背景：
+需要登记访客姓名、来访时间、是否签署保密协议和当前状态
+
+范围边界（必须/禁止）：
+必须保留 boolean 与 datetime 字段类型；禁止把门禁联动、短信通知和审批流直接写进 handoff JSON
+
+影响模块：
+packages/schema
+packages/generator
+docs/ai-playbooks
+
+验收标准：
+schema 通过 validateModuleSchema，且 hasNda 保持 boolean、visitAt 保持 datetime
+
+验证命令：
+bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-visitor-pass-task-input.txt --schema-file ./docs/ai-playbooks/examples/visitor-pass.module-schema.json
+
+文档同步要求：
+若 P5A 输入模板或失败分类规则变化，同步 roadmap、PROJECT_PROFILE 和 ai-playbooks

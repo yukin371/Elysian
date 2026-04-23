@@ -2,6 +2,15 @@
 
 用于验证 `AI -> Schema -> generator` 的最小闭环。当前语料只覆盖仓库已经具备 canonical owner 的 `ModuleSchema` 范围。
 
+## 批量回归命令
+
+- `bun run p5a:handoff:corpus --manifest ./docs/ai-playbooks/examples/p5a-handoff-corpus.json`
+- 当前 corpus 会同时覆盖：
+  - `ready_for_generator`
+  - `rollback_to_template`
+  - `retry_ai_generation`
+  - `manual_fix_required`
+
 ## Case 1: 标准 CRUD 模块
 
 - 目标：验证标准文本 + 状态枚举模块可以稳定 handoff。
@@ -11,6 +20,8 @@
   - 列表页支持按名称和状态搜索
 - 期望 handoff：
   - [supplier.module-schema.json](./examples/supplier.module-schema.json)
+- 对应任务输入：
+  - [p5a-complete-task-input.txt](./examples/p5a-complete-task-input.txt)
 - 验收命令：
   - `bun --filter @elysian/generator generate --schema-file ./docs/ai-playbooks/examples/supplier.module-schema.json --target staging --frontend vue`
 
@@ -20,6 +31,8 @@
 - 输入摘要：
   - 模块：访客通行证
   - 需要访客姓名、是否已签署保密协议、到访时间、状态
+- 对应任务输入：
+  - [p5a-visitor-pass-task-input.txt](./examples/p5a-visitor-pass-task-input.txt)
 - 期望 handoff：
   - [visitor-pass.module-schema.json](./examples/visitor-pass.module-schema.json)
 - 验收重点：
@@ -33,6 +46,8 @@
   - 模块：资产台账
   - 需要资产编号、资产名称、状态、原值、采购日期
   - 业务方还要求“自动挂菜单、自动生成角色权限”
+- 对应任务输入：
+  - [p5a-asset-task-input.txt](./examples/p5a-asset-task-input.txt)
 - 期望 handoff：
   - [asset.module-schema.json](./examples/asset.module-schema.json)
 - 额外要求：
@@ -76,3 +91,4 @@
 3. 任一含超界需求的 case，都必须把“超出当前 handoff 的要求”留在文档层，而不是改写 schema owner。
 4. 顶层越界元数据和非法 JSON 必须稳定落入 `retry_ai_generation`。
 5. 字段级局部错误必须稳定落入 `manual_fix_required`，并可通过人工修正后进入 replay。
+6. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
