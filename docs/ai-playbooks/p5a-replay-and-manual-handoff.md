@@ -46,6 +46,7 @@ bun run p5a:handoff:replay --input-file ./docs/ai-playbooks/examples/p5a-complet
 - 只记录文件级输入、输出与校验结果
 - 不记录对话逐轮 token 级日志
 - 不引入数据库审计或交互式回放 UI
+- handoff JSON 仍然只接受纯 `ModuleSchema`；若出现权限、菜单、流程、UI 私有元数据，必须判定为越界输入并回退修正
 
 ## 推荐流程
 

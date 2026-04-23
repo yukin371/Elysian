@@ -17,12 +17,47 @@ export interface ModuleSchemaValidationIssue {
 }
 
 const moduleFieldKindSet = new Set<ModuleFieldKind>(moduleFieldKinds)
+const moduleSchemaKeySet = new Set<keyof ModuleSchema>([
+  "name",
+  "label",
+  "fields",
+])
+const moduleFieldKeySet = new Set<keyof ModuleField>([
+  "key",
+  "label",
+  "kind",
+  "required",
+  "searchable",
+  "options",
+  "dictionaryTypeCode",
+])
+const moduleFieldOptionKeySet = new Set<keyof ModuleFieldOption>([
+  "label",
+  "value",
+])
 
 const isRecord = (input: unknown): input is Record<string, unknown> =>
   typeof input === "object" && input !== null && !Array.isArray(input)
 
 const isNonEmptyString = (input: unknown): input is string =>
   typeof input === "string" && input.trim().length > 0
+
+const pushUnknownKeyIssues = (
+  issues: ModuleSchemaValidationIssue[],
+  input: Record<string, unknown>,
+  allowedKeys: ReadonlySet<string>,
+  pathPrefix: string,
+  ownerName: string,
+) => {
+  for (const key of Object.keys(input)) {
+    if (!allowedKeys.has(key)) {
+      issues.push({
+        path: pathPrefix ? `${pathPrefix}.${key}` : key,
+        message: `${ownerName} does not allow unknown property "${key}".`,
+      })
+    }
+  }
+}
 
 export interface ModuleFieldOption {
   label: string
@@ -59,6 +94,8 @@ export const validateModuleSchema = (
     ]
   }
 
+  pushUnknownKeyIssues(issues, input, moduleSchemaKeySet, "", "Module schema")
+
   if (!isNonEmptyString(input.name)) {
     issues.push({
       path: "name",
@@ -94,6 +131,8 @@ export const validateModuleSchema = (
       })
       continue
     }
+
+    pushUnknownKeyIssues(issues, field, moduleFieldKeySet, fieldPath, "Field")
 
     if (!isNonEmptyString(field.key)) {
       issues.push({
@@ -184,6 +223,14 @@ export const validateModuleSchema = (
             })
             continue
           }
+
+          pushUnknownKeyIssues(
+            issues,
+            option,
+            moduleFieldOptionKeySet,
+            optionPath,
+            "Field option",
+          )
 
           if (!isNonEmptyString(option.label)) {
             issues.push({
