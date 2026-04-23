@@ -69,6 +69,8 @@
 - P5A corpus 已新增服务工单 mixed 字典/布尔/数字/时间案例，以及字段级越界元数据 failure case，用于继续压实 `retry_ai_generation` / `manual_fix_required` 分界。
 - `p5a:acceptance` 已改为 manifest 驱动的多成功 replay/generator case 验收，阶段闭环不再只依赖单一样例。
 - `p5a:acceptance` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，CI 页面可直接查看阶段验收状态与 case 数。
+- 已新增 `bun run p5a:acceptance:gate`，基于 acceptance 报告执行后置门禁，固定最小成功 case 数与 generator artifact 证据完整性。
+- CI `p5a-acceptance` 作业已接入 acceptance gate，并支持 `workflow_dispatch` 参数化最小 case 数策略。
 - generator 当前已具备 `skip / overwrite / overwrite-generated-only / fail` 冲突策略与 manifest 输出。
 - generator 写入流程已收敛“冲突预检 + 原子写入（temp + rename）”，降低部分写入和中断损坏风险。
 - generator 当前官方 staging 落点是仓库根 `generated/`。
@@ -226,6 +228,7 @@
 - P5A handoff 重放：`bun run p5a:handoff:replay --input-file ./docs/ai-playbooks/examples/p5a-complete-task-input.txt --schema-file ./docs/ai-playbooks/examples/p5a-fixed.module-schema.json --generate --out ./generated/p5a-replay`
 - P5A handoff 语料批跑：`bun run p5a:handoff:corpus --manifest ./docs/ai-playbooks/examples/p5a-handoff-corpus.json`
 - P5A 阶段最小闭环验收：`bun run p5a:acceptance`
+- P5A 阶段验收门禁：`bun run p5a:acceptance:gate`
 
 ## 维护规则
 

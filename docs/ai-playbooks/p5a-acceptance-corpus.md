@@ -14,6 +14,7 @@
 ## 阶段验收命令
 
 - `bun run p5a:acceptance`
+- `bun run p5a:acceptance:gate`
 - 当前 acceptance 会同时执行：
   - `p5a:handoff:corpus`
   - `p5a-acceptance-cases.json` 中的多条 replay + generator case
@@ -22,6 +23,14 @@
 - CI 运行时还会输出：
   - GitHub Step Summary
   - `p5a_acceptance_status` / `p5a_acceptance_case_count` / `p5a_acceptance_replay` / `p5a_acceptance_generator`
+- 当前 acceptance gate 会额外输出：
+  - `p5a_acceptance_gate_status`
+  - `p5a_acceptance_gate_case_count`
+  - `p5a_acceptance_gate_min_case_count`
+  - `p5a_acceptance_gate_generated_artifact_coverage`
+- 当前默认 gate policy：
+  - 至少 `3` 条成功 replay + generator case
+  - 每条 generator 成功 case 都必须保留 `generatedSchemaArtifactPath`
 
 ## Case 1: 标准 CRUD 模块
 
@@ -127,3 +136,4 @@
 5. 字段级局部错误必须稳定落入 `manual_fix_required`，并可通过人工修正后进入 replay。
 6. 字段级或 option 级越界元数据必须稳定落入 `manual_fix_required`，不能被误分类为 `retry_ai_generation`。
 7. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
+8. `p5a:acceptance:gate` 必须维持至少 `3` 条成功 acceptance case，且 generator 成功 case 的 artifact 证据完整。

@@ -103,6 +103,8 @@
 - 已推进：P5A corpus 新增服务工单 mixed 字典/布尔/数字/时间案例，以及字段级越界元数据 failure case，继续压实 `retry_ai_generation` / `manual_fix_required` 分界
 - 已推进：`p5a:acceptance` 改为 manifest 驱动的多成功 replay/generator case 验收，不再只依赖单一样例
 - 已推进：`p5a:acceptance` 新增 Step Summary / GitHub output，CI 页面可直接判读阶段验收状态与 case 数
+- 已推进：新增 `p5a:acceptance:gate`，对 acceptance 报告执行独立门禁，固定“至少 3 条成功 case + generator artifact 证据完整”的当前阶段边界
+- 已推进：CI `p5a-acceptance` 已接入 acceptance gate，并支持 `workflow_dispatch` 参数化最小 case 数策略
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 ### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成

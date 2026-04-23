@@ -31,6 +31,11 @@ on:
         required: false
         default: "2"
         type: string
+      p5a_acceptance_gate_min_case_count:
+        description: "P5A acceptance 门禁最小成功 case 数（默认 3）"
+        required: false
+        default: "3"
+        type: string
 
 permissions:
   contents: read
@@ -288,6 +293,8 @@ jobs:
     needs:
       - validate
       - p5a-handoff-corpus
+    env:
+      ELYSIAN_REPORT_DIR: ${{ github.workspace }}/.ci-reports/p5a-handoff
 
     steps:
       - name: Checkout
@@ -303,6 +310,11 @@ jobs:
 
       - name: Run P5A acceptance
         run: bun run p5a:acceptance
+
+      - name: Evaluate P5A acceptance gate
+        env:
+          ELYSIAN_P5A_ACCEPTANCE_GATE_MIN_CASE_COUNT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.p5a_acceptance_gate_min_case_count || '3' }}
+        run: bun run p5a:acceptance:gate
 
       - name: Upload P5A acceptance report
         if: always()
