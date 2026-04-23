@@ -38,9 +38,10 @@
 
 ### B. 进行中（本阶段主线）
 
-1. Phase 6A Round-2 收尾：
-   - 用真实最近 5 次远端 artifact 执行 `phase:finalize:from-downloads`。
-   - 形成阶段结论并更新 roadmap exit checklist。
+1. Phase 5 / P5A 启动：
+   - 固定自然语言输入模板、验收语料与 `AI -> Schema` 结构化输出边界。
+   - 打通“AI 输出可校验 schema，再交给 generator”的最小入口。
+   - 暂不进入交互式 AI 助手与 `Phase 6B` 企业增强范围。
 
 ### C. 待补（对标差距）
 
@@ -58,20 +59,26 @@
 
 ### WP-1 真实窗口判定落地
 
-- [ ] 下载最近 5 次 `e2e-smoke-report` artifact。
-- [ ] 执行 `bun run e2e:smoke:phase:finalize:from-downloads`。
-- [ ] 产出并归档：
+- [x] 下载最近 5 次 `e2e-smoke-report` artifact。
+- [x] 执行 `bun run e2e:smoke:phase:finalize:from-downloads`。
+- [x] 产出并归档：
   - `e2e-smoke-stability-evidence.json`
   - `e2e-smoke-phase-transition-decision.md`
-- [ ] 在 `docs/roadmap.md` 勾选/更新 Round-2 Exit Checklist。
+- [x] 在 `docs/roadmap.md` 勾选/更新 Round-2 Exit Checklist。
 
-### WP-2 开发体验增强（CLI 引导）
+### WP-2 `P5A` 入口约束
+
+- [ ] 固定需求输入模板与样例语料。
+- [ ] 明确 `AI -> Schema -> generator` handoff 边界。
+- [ ] 定义失败时的人工接管与回放最小要求。
+
+### WP-3 开发体验增强（CLI 引导）
 
 - [ ] 新增“需求输入模板 + 生成命令模板”。
 - [ ] 增加 `doctor`/`status` 子命令（检查环境与阶段状态）。
 - [ ] 增加“首次运行最短路径”文档与脚本。
 
-### WP-3 交付体验增强（部署模板）
+### WP-4 交付体验增强（部署模板）
 
 - [ ] 提供最小部署模板（server + db + migrate + health check）。
 - [ ] 提供环境配置清单与示例。
@@ -90,4 +97,4 @@
 
 ## 结论
 
-Elysian 当前差异化优势已明确：`工程可控 + 阶段治理 + 质量可追溯`。下一阶段重点不在继续堆底层能力，而在“体验层与交付层”补齐，确保外部 AI 与开发者可以更快、更稳地复用。
+Elysian 当前差异化优势已明确：`工程可控 + 阶段治理 + 质量可追溯`。在 `Phase 6A Round-2` 收尾后，下一阶段主线已切到 `Phase 5 / P5A`，重点仍然是“体验层与交付层”补齐，但必须通过 schema / generator 边界推进，而不是直接放大 AI 自由度。

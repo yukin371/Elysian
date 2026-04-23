@@ -39,11 +39,11 @@
   最近 5 次 `dev` 相关运行全部通过 smoke gate；`failedGateCount=0`、`maxConsecutiveFailedGates=0`、`recoveredByRetryCount=0`
 - 阻断项（如有）：
   无
-- 建议主线：`Phase 6B` / `Phase 5`（待评审确认）
+- 已决策主线：`Phase 5`（仅启动 `P5A: AI -> Schema`；见 [2026-04-23-phase-5-mainline-decision-and-kickoff.md](./2026-04-23-phase-5-mainline-decision-and-kickoff.md)）
 - 进入下一阶段前置动作：
-  1. 组织主线评审，确认进入 `Phase 6B` 或 `Phase 5`
-  2. 将阶段结论同步到 roadmap 的下一阶段主线决策记录
-  3. 冻结当前 smoke gate 策略参数，避免阶段切换前漂移
+  1. 将阶段结论同步到 roadmap 的下一阶段主线决策记录
+  2. 冻结当前 smoke gate 策略参数，避免阶段切换前漂移
+  3. 以 `P5A` 首轮 WBS 启动下一阶段，而非直接跳到 `P5B/P5C` 或 `Phase 6B`
 
 ## 证据产物
 
@@ -58,7 +58,7 @@
 3. 执行 `bun run e2e:smoke:stability:evidence`（可用 `ELYSIAN_SMOKE_STABILITY_EVIDENCE_INPUT_DIR` 指向收集目录）。
 4. 执行 `bun run e2e:smoke:phase:decision`，从 evidence 自动生成阶段切换决策记录（Markdown）。
 5. 执行 `bun run e2e:smoke:phase:gate`，做阶段出口硬门禁判定（失败时退出码非 0）。
-6. 使用输出的决策记录更新“窗口结论”，并在 roadmap 对应 checklist 勾选。
+6. 使用输出的决策记录更新“窗口结论”，并在 roadmap 对应 checklist 勾选；当前已完成并进入 `Phase 5 / P5A`。
 
 也可使用一键命令：
 
