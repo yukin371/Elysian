@@ -1,0 +1,8 @@
+{
+  "name": "@elysian/ui-core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

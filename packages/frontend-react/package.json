@@ -1,0 +1,11 @@
+{
+  "name": "@elysian/frontend-react",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@elysian/schema": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

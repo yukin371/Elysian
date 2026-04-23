@@ -1,0 +1,13 @@
+{
+  "name": "@elysian/frontend-vue",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@elysian/schema": "workspace:*",
+    "@elysian/ui-core": "workspace:*",
+    "vue": "^3.5.18"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

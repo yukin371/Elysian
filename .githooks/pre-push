@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# pre-push hook - 推送前兜底检查
+# 检查: 协作者标识、协作者目录、历史中遗留的水印内容
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+FORBIDDEN_PATH_PATTERN='^(\.claude/|\.cursor/|\.windsurf/|\.codeium/|\.copilot/|\.aider/|\.roo/|\.augment/|docs/superpowers/)'
+CONTENT_PATTERN='(Co-Authored-By:|Generated with .*(Claude|Anthropic|Copilot|Cursor|Windsurf|Codex)|>\s*\*\*For (Claude|Codex|Copilot|Cursor|Windsurf):\*\*)'
+COMMIT_MSG_PATTERN='(^Co-Authored-By:|Generated with .*(Claude|Anthropic|Copilot|Cursor|Windsurf|Codex))'
+ZERO_SHA='0000000000000000000000000000000000000000'
+
+HAS_ERROR=0
+
+error() {
+    echo -e "${RED}[XX]${NC} $1"
+    HAS_ERROR=1
+}
+
+collect_commits() {
+    local local_sha="$1"
+    local remote_sha="$2"
+
+    if [ "$local_sha" = "$ZERO_SHA" ]; then
+        return 0
+    fi
+
+    if [ "$remote_sha" = "$ZERO_SHA" ]; then
+        git rev-list "$local_sha" --not --remotes
+        return 0
+    fi
+
+    git rev-list "${remote_sha}..${local_sha}"
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [ -z "$local_ref" ] && continue
+
+    mapfile -t COMMITS < <(collect_commits "$local_sha" "$remote_sha")
+
+    for commit in "${COMMITS[@]}"; do
+        if git log --format=%B -n 1 "$commit" | grep -qE "$COMMIT_MSG_PATTERN"; then
+            error "提交 $commit 的提交信息包含协作者水印"
+        fi
+
+        mapfile -d '' CHANGED_FILES < <(git diff-tree --no-commit-id --diff-filter=ACMR --name-only -r -z "$commit")
+
+        if [ "${#CHANGED_FILES[@]}" -eq 0 ]; then
+            continue
+        fi
+
+        CHECK_FILES=()
+        for file in "${CHANGED_FILES[@]}"; do
+            if [[ "$file" =~ $FORBIDDEN_PATH_PATTERN ]]; then
+                error "提交 $commit 包含禁止推送的协作者目录: $file"
+            fi
+
+            case "$file" in
+                .githooks/*) continue ;;
+            esac
+
+            CHECK_FILES+=("$file")
+        done
+
+        if [ "${#CHECK_FILES[@]}" -gt 0 ]; then
+            if MATCHES=$(git grep -n -I -E "$CONTENT_PATTERN" "$commit" -- "${CHECK_FILES[@]}" 2>/dev/null); then
+                error "提交 $commit 包含协作者标识或水印内容"
+                echo "$MATCHES"
+            fi
+        fi
+    done
+done
+
+if [ "$HAS_ERROR" -gt 0 ]; then
+    echo -e "${RED}推送检查失败，请先清理协作者标识${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}[OK] 推送检查通过${NC}"
+exit 0

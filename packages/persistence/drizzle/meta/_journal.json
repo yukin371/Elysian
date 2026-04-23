@@ -1,0 +1,62 @@
+{
+  "version": "5",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1745221836927,
+      "tag": "0000_customer",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1776739200000,
+      "tag": "0001_auth_rbac",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1776816000000,
+      "tag": "0002_auth_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1776902400000,
+      "tag": "0003_auth_departments",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1776988800000,
+      "tag": "0004_dictionary",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1777075200000,
+      "tag": "0005_setting",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1777161600000,
+      "tag": "0006_file",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1777248000000,
+      "tag": "0007_notification",
+      "breakpoints": true
+    }
+  ]
+}

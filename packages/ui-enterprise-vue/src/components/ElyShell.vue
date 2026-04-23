@@ -1,0 +1,431 @@
+<script setup lang="ts">
+import "@arco-design/web-vue/dist/arco.css"
+
+import {
+  Avatar as AAvatar,
+  Card as ACard,
+  Layout as ALayout,
+  LayoutContent as ALayoutContent,
+  LayoutHeader as ALayoutHeader,
+  LayoutSider as ALayoutSider,
+  Menu as AMenu,
+  Space as ASpace,
+} from "@arco-design/web-vue"
+import { computed } from "vue"
+
+import type { ElyShellProps } from "../contracts"
+import ElyNavNodes from "./ElyNavNodes.vue"
+
+const props = withDefaults(defineProps<ElyShellProps>(), {
+  selectedMenuKey: null,
+  selectedTabKey: null,
+  user: null,
+})
+
+const selectedKeys = computed(() =>
+  props.selectedMenuKey ? [props.selectedMenuKey] : [],
+)
+
+const userInitial = computed(
+  () => props.user?.displayName.trim().charAt(0).toUpperCase() ?? "E",
+)
+
+const selectedTabKey = computed(
+  () => props.selectedTabKey ?? props.tabs?.[0]?.key ?? null,
+)
+</script>
+
+<template>
+  <div class="ely-shell">
+    <a-layout class="ely-shell-layout">
+      <a-layout-sider :width="272" class="ely-shell-sider">
+        <div class="ely-brand">
+          <div class="ely-brand-mark">E</div>
+          <div class="ely-brand-copy">
+            <p>{{ title }}</p>
+            <span>{{ subtitle }}</span>
+          </div>
+        </div>
+
+        <div class="ely-sidebar-label">
+          <span>Navigation</span>
+          <small>{{ presetLabel }}</small>
+        </div>
+
+        <a-menu
+          class="ely-nav"
+          :selected-keys="selectedKeys"
+          auto-open
+        >
+          <ElyNavNodes :items="navigation" />
+        </a-menu>
+
+        <div class="ely-sidebar-foot">
+          <p>Environment</p>
+          <strong>{{ environment }}</strong>
+          <span>{{ status }}</span>
+        </div>
+
+        <slot name="sidebar-extra" />
+      </a-layout-sider>
+
+      <a-layout class="ely-shell-main">
+        <a-layout-header class="ely-shell-header">
+          <div>
+            <p class="ely-overline">Enterprise Preset</p>
+            <h2>{{ workspaceTitle }}</h2>
+            <p>{{ workspaceDescription }}</p>
+          </div>
+
+          <div class="ely-header-actions">
+            <a-space>
+              <slot name="header-actions" />
+            </a-space>
+
+            <div v-if="user" class="ely-user">
+              <a-avatar :size="42" class="ely-user-avatar">
+                {{ userInitial }}
+              </a-avatar>
+              <div>
+                <strong>{{ user.displayName }}</strong>
+                <span>{{ user.username }}</span>
+              </div>
+            </div>
+          </div>
+        </a-layout-header>
+
+        <div v-if="tabs && tabs.length > 0" class="ely-shell-tabs">
+          <article
+            v-for="tab in tabs"
+            :key="tab.key"
+            class="ely-shell-tab"
+            :class="{ 'ely-shell-tab-active': tab.key === selectedTabKey }"
+          >
+            <strong>{{ tab.label }}</strong>
+            <span v-if="tab.hint">{{ tab.hint }}</span>
+          </article>
+        </div>
+
+        <a-layout-content class="ely-shell-content">
+          <div v-if="stats.length > 0" class="ely-stat-grid">
+            <a-card
+              v-for="stat in stats"
+              :key="stat.key"
+              class="ely-stat-card"
+              :bordered="false"
+            >
+              <p class="ely-stat-label">{{ stat.label }}</p>
+              <h3 class="ely-stat-value">{{ stat.value }}</h3>
+              <p v-if="stat.hint" class="ely-stat-hint">
+                {{ stat.hint }}
+              </p>
+            </a-card>
+          </div>
+
+          <div
+            class="ely-workspace-grid"
+            :class="{
+              'ely-workspace-single': !$slots.secondary,
+            }"
+          >
+            <section class="ely-workspace-main">
+              <slot name="workspace">
+                <a-card :bordered="false" class="ely-fallback-card">
+                  Workspace content goes here.
+                </a-card>
+              </slot>
+            </section>
+
+            <aside v-if="$slots.secondary" class="ely-workspace-side">
+              <slot name="secondary" />
+            </aside>
+          </div>
+        </a-layout-content>
+      </a-layout>
+    </a-layout>
+  </div>
+</template>
+
+<style scoped>
+.ely-shell {
+  --elysian-ely-ink: #0f172a;
+  --elysian-ely-slate: #5f6b7a;
+  --elysian-ely-border: rgba(15, 23, 42, 0.08);
+  --elysian-ely-panel: rgba(255, 255, 255, 0.82);
+  --elysian-ely-accent: #1d4ed8;
+  --elysian-ely-accent-soft: rgba(29, 78, 216, 0.1);
+  background:
+    radial-gradient(circle at top left, rgba(191, 219, 254, 0.65), transparent 34%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 28px;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+  color: var(--elysian-ely-ink);
+  overflow: hidden;
+}
+
+.ely-shell-layout {
+  min-height: 820px;
+  background: transparent;
+}
+
+.ely-shell-sider {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.4rem 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 247, 251, 0.96));
+  border-right: 1px solid var(--elysian-ely-border);
+}
+
+.ely-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.45rem 0.35rem 1rem;
+}
+
+.ely-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0f172a, #1d4ed8);
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 700;
+  box-shadow: 0 18px 30px rgba(29, 78, 216, 0.22);
+}
+
+.ely-brand-copy p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--elysian-ely-ink);
+}
+
+.ely-brand-copy span {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--elysian-ely-slate);
+}
+
+.ely-sidebar-label,
+.ely-sidebar-foot {
+  padding: 0 0.45rem;
+}
+
+.ely-sidebar-label span,
+.ely-overline,
+.ely-stat-label,
+.ely-sidebar-foot p {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.ely-sidebar-label small,
+.ely-sidebar-foot span {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.ely-sidebar-foot strong {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 1rem;
+  color: var(--elysian-ely-ink);
+}
+
+.ely-nav {
+  flex: 1;
+  background: transparent;
+  border: 0;
+}
+
+.ely-shell-main {
+  background: transparent;
+}
+
+.ely-shell-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: auto;
+  padding: 2rem 2rem 1.4rem;
+  background: transparent;
+}
+
+.ely-shell-header h2 {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1.8rem, 2vw, 2.45rem);
+  line-height: 1.05;
+  color: var(--elysian-ely-ink);
+}
+
+.ely-shell-header p {
+  max-width: 52rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.96rem;
+  line-height: 1.7;
+  color: var(--elysian-ely-slate);
+}
+
+.ely-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ely-user {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--elysian-ely-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.ely-user strong {
+  display: block;
+  color: var(--elysian-ely-ink);
+}
+
+.ely-user span {
+  display: block;
+  margin-top: 0.18rem;
+  font-size: 0.8rem;
+  color: var(--elysian-ely-slate);
+}
+
+.ely-user-avatar {
+  background: var(--elysian-ely-accent-soft);
+  color: var(--elysian-ely-accent);
+  font-weight: 700;
+}
+
+.ely-shell-content {
+  padding: 0 2rem 2rem;
+  background: transparent;
+}
+
+.ely-shell-tabs {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0 2rem 0.6rem;
+  overflow-x: auto;
+}
+
+.ely-shell-tab {
+  min-width: 180px;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--elysian-ely-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.ely-shell-tab strong,
+.ely-shell-tab span {
+  display: block;
+}
+
+.ely-shell-tab strong {
+  color: var(--elysian-ely-ink);
+}
+
+.ely-shell-tab span {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--elysian-ely-slate);
+}
+
+.ely-shell-tab-active {
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.16), rgba(15, 23, 42, 0.08));
+  border-color: rgba(29, 78, 216, 0.22);
+}
+
+.ely-stat-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-stat-card,
+.ely-fallback-card {
+  border: 1px solid var(--elysian-ely-border);
+  border-radius: 22px;
+  background: var(--elysian-ely-panel);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.ely-stat-value {
+  margin: 0.85rem 0 0;
+  font-size: 1.8rem;
+  color: var(--elysian-ely-ink);
+}
+
+.ely-stat-hint {
+  margin: 0.65rem 0 0;
+  color: var(--elysian-ely-slate);
+}
+
+.ely-workspace-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  margin-top: 1rem;
+}
+
+.ely-workspace-single {
+  grid-template-columns: 1fr;
+}
+
+.ely-workspace-main,
+.ely-workspace-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .ely-shell-layout {
+    min-height: auto;
+  }
+
+  .ely-stat-grid,
+  .ely-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-shell-header {
+    flex-direction: column;
+  }
+
+  .ely-header-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 860px) {
+  .ely-shell-layout {
+    display: block;
+  }
+
+  .ely-shell-sider {
+    width: 100% !important;
+    border-right: 0;
+    border-bottom: 1px solid var(--elysian-ely-border);
+  }
+}
+</style>

@@ -1,0 +1,17 @@
+{
+  "name": "@elysian/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "bun src/index.ts"
+  },
+  "dependencies": {
+    "@elysian/core": "workspace:*",
+    "@elysian/persistence": "workspace:*",
+    "@elysian/schema": "workspace:*",
+    "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/openapi": "^1.4.10",
+    "elysia": "^1.4.16"
+  }
+}

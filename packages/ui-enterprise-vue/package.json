@@ -1,0 +1,13 @@
+{
+  "name": "@elysian/ui-enterprise-vue",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@arco-design/web-vue": "^2.57.0",
+    "vue": "^3.5.18",
+    "@elysian/ui-core": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

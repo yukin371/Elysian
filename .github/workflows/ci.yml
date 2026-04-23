@@ -1,0 +1,340 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+    inputs:
+      gate_max_failed_reports:
+        description: "允许的失败报告数量（默认 0）"
+        required: false
+        default: "0"
+        type: string
+      gate_allow_failed_sources:
+        description: "允许失败来源，逗号分隔：matrix,cli,unknown（默认空）"
+        required: false
+        default: ""
+        type: string
+      smoke_gate_allow_recovered_by_retry:
+        description: "smoke 门禁是否允许重试恢复（默认 true）"
+        required: false
+        default: "true"
+        type: string
+      smoke_gate_max_attempts:
+        description: "smoke 门禁允许的最大尝试次数（默认 2）"
+        required: false
+        default: "2"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-format:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Validate PR metadata
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: bun run pr:validate
+
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Quality Check
+        run: bun run check
+
+      - name: Build Vue Example
+        run: bun run build:vue
+
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    needs: validate
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: elysian
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d elysian"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      APP_ENV: test
+      PORT: 3100
+      ACCESS_TOKEN_SECRET: ci-test-access-secret
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/elysian
+      ELYSIAN_ADMIN_USERNAME: admin
+      ELYSIAN_ADMIN_PASSWORD: admin123
+      ELYSIAN_ADMIN_DISPLAY_NAME: Administrator
+      ELYSIAN_SMOKE_REPORT_DIR: ${{ github.workspace }}/.ci-reports/smoke
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run smoke e2e
+        id: smoke_run
+        continue-on-error: true
+        env:
+          ELYSIAN_SMOKE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/smoke/e2e-smoke-report-attempt1.json
+        run: bun run e2e:smoke:full
+
+      - name: Diagnose smoke report
+        id: smoke_diagnose
+        if: always()
+        env:
+          ELYSIAN_SMOKE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/smoke/e2e-smoke-report-attempt1.json
+          ELYSIAN_SMOKE_DIAGNOSIS_PATH: ${{ github.workspace }}/.ci-reports/smoke/e2e-smoke-diagnosis-attempt1.json
+        run: bun run e2e:smoke:diagnose
+
+      - name: Retry smoke e2e once on dependency failure
+        id: smoke_retry
+        if: steps.smoke_run.outcome == 'failure' && steps.smoke_diagnose.outputs.smoke_should_retry == 'true'
+        continue-on-error: true
+        env:
+          ELYSIAN_SMOKE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/smoke/e2e-smoke-report-attempt2.json
+        run: bun run e2e:smoke:full
+
+      - name: Re-diagnose smoke report after retry
+        id: smoke_diagnose_retry
+        if: always() && steps.smoke_retry.outcome != 'skipped'
+        env:
+          ELYSIAN_SMOKE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/smoke/e2e-smoke-report-attempt2.json
+          ELYSIAN_SMOKE_DIAGNOSIS_PATH: ${{ github.workspace }}/.ci-reports/smoke/e2e-smoke-diagnosis-attempt2.json
+        run: bun run e2e:smoke:diagnose
+
+      - name: Build smoke reports index
+        id: smoke_index
+        if: always()
+        run: bun run e2e:smoke:reports:index
+
+      - name: Evaluate smoke reports gate
+        if: always()
+        env:
+          ELYSIAN_SMOKE_GATE_INDEX_PATH: ${{ github.workspace }}/.ci-reports/smoke/e2e-smoke-reports-index.json
+          ELYSIAN_SMOKE_GATE_ALLOW_RECOVERED_BY_RETRY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.smoke_gate_allow_recovered_by_retry || 'true' }}
+          ELYSIAN_SMOKE_GATE_MAX_ATTEMPTS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.smoke_gate_max_attempts || '2' }}
+        run: bun run e2e:smoke:reports:gate
+
+      - name: Build smoke stability snapshot
+        if: always()
+        run: bun run e2e:smoke:stability:snapshot
+
+      - name: Build smoke stability window report
+        if: always()
+        run: bun run e2e:smoke:stability:window
+
+      - name: Upload smoke report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-smoke-report
+          path: ${{ github.workspace }}/.ci-reports/smoke/*.json
+          if-no-files-found: warn
+
+  e2e-generator-safe-apply:
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run generator safe-apply e2e
+        run: bun run e2e:generator:safe-apply
+
+  e2e-generator-matrix:
+    runs-on: ubuntu-latest
+    needs: validate
+    env:
+      ELYSIAN_REPORT_DIR: ${{ github.workspace }}/.ci-reports/matrix
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run generator regression matrix
+        run: bun run e2e:generator:matrix
+
+      - name: Upload generator matrix report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-generator-matrix-report
+          path: ${{ github.workspace }}/.ci-reports/matrix/*.json
+          if-no-files-found: warn
+
+  e2e-generator-cli:
+    runs-on: ubuntu-latest
+    needs: validate
+    env:
+      ELYSIAN_REPORT_DIR: ${{ github.workspace }}/.ci-reports/cli
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run generator cli e2e
+        run: bun run e2e:generator:cli
+
+      - name: Upload generator cli report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-generator-cli-report
+          path: ${{ github.workspace }}/.ci-reports/cli/*.json
+          if-no-files-found: warn
+
+  e2e-generator-report-index:
+    runs-on: ubuntu-latest
+    needs:
+      - e2e-generator-matrix
+      - e2e-generator-cli
+    env:
+      ELYSIAN_REPORT_INDEX_INPUT_DIR: ${{ github.workspace }}/.ci-reports/inputs
+      ELYSIAN_REPORT_DIR: ${{ github.workspace }}/.ci-reports/index
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download matrix report artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: e2e-generator-matrix-report
+          path: ${{ github.workspace }}/.ci-reports/inputs/matrix
+
+      - name: Download cli report artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: e2e-generator-cli-report
+          path: ${{ github.workspace }}/.ci-reports/inputs/cli
+
+      - name: Build generator reports index
+        run: bun run e2e:generator:reports:index
+
+      - name: Upload generator reports index
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-generator-reports-index
+          path: ${{ github.workspace }}/.ci-reports/index/*.json
+          if-no-files-found: warn
+
+  e2e-generator-report-gate:
+    runs-on: ubuntu-latest
+    needs:
+      - e2e-generator-report-index
+    env:
+      ELYSIAN_REPORT_DIR: ${{ github.workspace }}/.ci-reports/gate
+      ELYSIAN_REPORT_GATE_INDEX_PATH: ${{ github.workspace }}/.ci-reports/index-input/e2e-generator-reports-index.json
+      ELYSIAN_REPORT_GATE_MAX_FAILED_REPORTS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.gate_max_failed_reports || '0' }}
+      ELYSIAN_REPORT_GATE_ALLOW_FAILED_SOURCES: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.gate_allow_failed_sources || '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download generator reports index artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: e2e-generator-reports-index
+          path: ${{ github.workspace }}/.ci-reports/index-input
+
+      - name: Evaluate generator reports gate
+        run: bun run e2e:generator:reports:gate
+
+      - name: Upload generator reports gate
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-generator-reports-gate
+          path: ${{ github.workspace }}/.ci-reports/gate/*.json
+          if-no-files-found: warn

@@ -1,0 +1,17 @@
+{
+  "name": "@elysian/generator",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "elysian-generator": "./src/cli.ts"
+  },
+  "scripts": {
+    "generate": "bun src/cli.ts"
+  },
+  "dependencies": {
+    "@elysian/schema": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
