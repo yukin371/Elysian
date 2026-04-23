@@ -1,5 +1,7 @@
 import {
   generateP5aHandoffReport,
+  publishP5aHandoffGitHubOutput,
+  publishP5aHandoffGitHubSummary,
   resolveP5aReportDir,
   writeP5aHandoffReport,
 } from "./p5a-schema-handoff"
@@ -63,9 +65,17 @@ try {
       options.reportDir,
     )
     const paths = await writeP5aHandoffReport(report)
+    const githubSummaryPath = await publishP5aHandoffGitHubSummary(report)
+    const githubOutputPath = await publishP5aHandoffGitHubOutput(report)
 
     console.log(`[p5a-handoff-report] report: ${paths.jsonPath}`)
     console.log(`[p5a-handoff-report] summary: ${paths.markdownPath}`)
+    if (githubSummaryPath) {
+      console.log(`[p5a-handoff-report] github-summary: ${githubSummaryPath}`)
+    }
+    if (githubOutputPath) {
+      console.log(`[p5a-handoff-report] github-output: ${githubOutputPath}`)
+    }
     console.log(
       `[p5a-handoff-report] decision=${report.decision} status=${report.status}`,
     )

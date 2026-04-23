@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
@@ -30,6 +30,9 @@ export interface P5aHandoffReport {
   }>
   recommendedActions: string[]
 }
+
+const resolveSummaryPath = () => process.env.GITHUB_STEP_SUMMARY ?? null
+const resolveGitHubOutputPath = () => process.env.GITHUB_OUTPUT ?? null
 
 export const requiredTaskInputSections = [
   "任务目标：",
@@ -134,6 +137,40 @@ export const renderP5aSummaryMarkdown = (report: P5aHandoffReport) =>
     ...report.recommendedActions.map((action) => `- ${action}`),
   ].join("\n")
 
+export const renderP5aHandoffStepSummaryMarkdown = (
+  report: P5aHandoffReport,
+) => {
+  const lines = [
+    "### P5A Schema Handoff",
+    "",
+    `- status: \`${report.status}\``,
+    `- decision: \`${report.decision}\``,
+    `- taskInputIssueCount: \`${String(report.taskInputIssues.length)}\``,
+    `- schemaIssueCount: \`${String(report.schemaIssues.length)}\``,
+    `- inputFilePath: \`${report.inputFilePath}\``,
+    `- schemaFilePath: \`${report.schemaFilePath}\``,
+    "",
+  ]
+
+  if (report.status === "passed") {
+    lines.push("Handoff passed and is ready for generator.", "")
+    return `${lines.join("\n")}\n`
+  }
+
+  lines.push("Recommended actions:")
+  lines.push(...report.recommendedActions.map((action) => `- ${action}`))
+  lines.push("")
+
+  return `${lines.join("\n")}\n`
+}
+
+export const buildP5aHandoffGitHubOutputLines = (report: P5aHandoffReport) => [
+  `p5a_handoff_status=${report.status}`,
+  `p5a_handoff_decision=${report.decision}`,
+  `p5a_handoff_task_input_issue_count=${String(report.taskInputIssues.length)}`,
+  `p5a_handoff_schema_issue_count=${String(report.schemaIssues.length)}`,
+]
+
 export const generateP5aHandoffReport = async (
   inputFilePath: string,
   schemaFilePath: string,
@@ -195,4 +232,40 @@ export const writeP5aHandoffReport = async (report: P5aHandoffReport) => {
     jsonPath,
     markdownPath,
   }
+}
+
+export const publishP5aHandoffGitHubSummary = async (
+  report: P5aHandoffReport,
+) => {
+  const summaryPath = resolveSummaryPath()
+
+  if (!summaryPath) {
+    return null
+  }
+
+  await appendFile(
+    summaryPath,
+    renderP5aHandoffStepSummaryMarkdown(report),
+    "utf8",
+  )
+
+  return summaryPath
+}
+
+export const publishP5aHandoffGitHubOutput = async (
+  report: P5aHandoffReport,
+) => {
+  const outputPath = resolveGitHubOutputPath()
+
+  if (!outputPath) {
+    return null
+  }
+
+  await appendFile(
+    outputPath,
+    `${buildP5aHandoffGitHubOutputLines(report).join("\n")}\n`,
+    "utf8",
+  )
+
+  return outputPath
 }

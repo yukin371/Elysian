@@ -66,6 +66,7 @@
 - `packages/generator` 已支持 `--schema-file` 直接消费外部 JSON `ModuleSchema`；当 schema 来源为外部文件时，会在生成目录内联 `.schema.ts`，不假设该模块已注册到 `@elysian/schema`。
 - 已新增 `bun run p5a:handoff:report` 与 `bun run p5a:handoff:replay`，用于 `P5A` 的失败分类、人工接管和修正后重放。
 - `p5a:handoff:replay` 现已输出结构化 replay report，记录 handoff、generator 与生成 schema artifact 证据，补齐 `P5A / WP-3` 的最小文件级审计骨架。
+- `p5a:handoff:report` 与 `p5a:handoff:replay` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，便于单次 handoff / replay 诊断直接在 CI 页面判读。
 - 已新增 `bun run p5a:handoff:corpus`，用于批量执行 `P5A` 输入/输出语料并校验预期分类边界。
 - `p5a:handoff:corpus` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，失败时可直接在 CI 页面查看 case 级摘要。
 - P5A corpus 已新增服务工单 mixed 字典/布尔/数字/时间案例，以及字段级越界元数据 failure case，用于继续压实 `retry_ai_generation` / `manual_fix_required` 分界。
