@@ -15,6 +15,7 @@
 
 - `bun run p5a:acceptance`
 - `bun run p5a:acceptance:gate`
+- `bun run p5a:acceptance:index`
 - `bun run p5a:acceptance:finalize`
 - 当前 acceptance 会同时执行：
   - `p5a:handoff:corpus`
@@ -22,6 +23,7 @@
 - 当前 finalize 会顺序执行：
   - `p5a:acceptance`
   - `p5a:acceptance:gate`
+  - `p5a:acceptance:index`
 - 适用边界：
   - 本地或脚本侧一键收尾，避免只跑 acceptance 忘记补 gate
   - CI 仍保留分步执行，保证作业页面可直接看到 acceptance 与 gate 的独立结果
@@ -35,6 +37,11 @@
   - `p5a_acceptance_gate_case_count`
   - `p5a_acceptance_gate_min_case_count`
   - `p5a_acceptance_gate_generated_artifact_coverage`
+- 当前 acceptance index 会额外输出：
+  - `p5a_acceptance_index_status`
+  - `p5a_acceptance_index_case_count`
+  - `p5a_acceptance_index_gate_status`
+  - `p5a_acceptance_index_generated_artifact_coverage`
 - 当前默认 gate policy：
   - 至少 `3` 条成功 replay + generator case
   - 每条 generator 成功 case 都必须保留 `generatedSchemaArtifactPath`
@@ -147,4 +154,5 @@
 6. 字段级或 option 级越界元数据必须稳定落入 `manual_fix_required`，不能被误分类为 `retry_ai_generation`。
 7. `p5a-handoff-corpus.json` 中的所有 case 必须通过预期分类校验。
 8. `p5a:acceptance:gate` 必须维持至少 `3` 条成功 acceptance case，且 generator 成功 case 的 artifact 证据完整。
-9. `p5a:acceptance:finalize` 必须能稳定串联 acceptance 与 gate，而不引入第二套验收来源。
+9. `p5a:acceptance:index` 必须把 acceptance 与 gate 收敛为单一结论文件，而不引入第二套验收来源。
+10. `p5a:acceptance:finalize` 必须能稳定串联 acceptance、gate 与 index。
