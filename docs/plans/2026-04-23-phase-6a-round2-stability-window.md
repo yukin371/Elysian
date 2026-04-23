@@ -18,11 +18,11 @@
 
 | # | 日期 | 触发来源 | smoke 首次结果 | 是否触发 retry | gate 结果 | 分类/结论 | 备注 |
 |---|---|---|---|---|---|---|---|
-| 1 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| 2 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| 3 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| 4 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| 5 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| 1 | 2026-04-23 19:00 UTC+8 | `workflow_dispatch` / `dev` | passed | 否 | passed | 稳定 | runId `24831519539` |
+| 2 | 2026-04-23 18:59 UTC+8 | `workflow_dispatch` / `dev` | passed | 否 | passed | 稳定 | runId `24831463736` |
+| 3 | 2026-04-23 18:57 UTC+8 | `workflow_dispatch` / `dev` | passed | 否 | passed | 稳定 | runId `24831405348` |
+| 4 | 2026-04-23 18:56 UTC+8 | `workflow_dispatch` / `dev` | passed | 否 | passed | 稳定 | runId `24831362661` |
+| 5 | 2026-04-23 18:54 UTC+8 | `push` / `dev` | passed | 否 | passed | 稳定 | merge PR #3, runId `24831277528` |
 
 ## 达标规则（建议）
 
@@ -31,16 +31,25 @@
   - 不出现需要人工临时放宽 gate 策略才能通过的情况。
 - 若出现单次依赖抖动但 retry 恢复，记录为“可接受波动”，不直接阻断出阶段。
 
-## 输出结论模板
+## 输出结论
 
-```text
 窗口结论：
-- 是否达标：是 / 否
+- 是否达标：是
 - 主要证据：
+  最近 5 次 `dev` 相关运行全部通过 smoke gate；`failedGateCount=0`、`maxConsecutiveFailedGates=0`、`recoveredByRetryCount=0`
 - 阻断项（如有）：
-- 建议主线：Phase 6B / Phase 5
+  无
+- 建议主线：`Phase 6B` / `Phase 5`（待评审确认）
 - 进入下一阶段前置动作：
-```
+  1. 组织主线评审，确认进入 `Phase 6B` 或 `Phase 5`
+  2. 将阶段结论同步到 roadmap 的下一阶段主线决策记录
+  3. 冻结当前 smoke gate 策略参数，避免阶段切换前漂移
+
+## 证据产物
+
+- `artifacts/smoke/phase6a-window/e2e-smoke-stability-collect-report.json`
+- `artifacts/stability-evidence/phase6a-window/e2e-smoke-stability-evidence.json`
+- `artifacts/stability-evidence/phase6a-window/e2e-smoke-phase-transition-decision.md`
 
 ## 建议执行方式
 
