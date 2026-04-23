@@ -1,0 +1,35 @@
+{
+  "name": "supplier",
+  "label": "Supplier",
+  "fields": [
+    {
+      "key": "id",
+      "label": "ID",
+      "kind": "id",
+      "required": true
+    },
+    {
+      "key": "name",
+      "label": "Name",
+      "kind": "string",
+      "required": true,
+      "searchable": true
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "kind": "enum",
+      "required": true,
+      "options": [
+        {
+          "label": "active",
+          "value": "active"
+        },
+        {
+          "label": "inactive",
+          "value": "inactive"
+        }
+      ]
+    }
+  ]
+}

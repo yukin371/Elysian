@@ -1,0 +1,29 @@
+{
+  "name": "supplier",
+  "label": "Supplier",
+  "fields": [
+    {
+      "key": "id",
+      "label": "ID",
+      "kind": "id",
+      "required": true
+    },
+    {
+      "key": "name",
+      "label": "Name",
+      "kind": "string",
+      "required": true
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "kind": "enum",
+      "options": [{}]
+    },
+    {
+      "key": "status",
+      "label": "Status Duplicate",
+      "kind": "enum"
+    }
+  ]
+}
