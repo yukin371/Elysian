@@ -12,6 +12,7 @@
     "p5a:handoff:corpus": "bun scripts/p5a-handoff-corpus-run.ts",
     "p5a:acceptance": "bun scripts/p5a-acceptance.ts",
     "p5a:acceptance:gate": "bun scripts/p5a-acceptance-gate.ts",
+    "p5a:acceptance:finalize": "bun scripts/p5a-acceptance-finalize.ts",
     "dev:server": "bun --filter @elysian/server dev",
     "dev:vue": "bun --filter @elysian/example-vue dev",
     "server": "bun --filter @elysian/server start",

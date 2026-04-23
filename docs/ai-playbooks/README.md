@@ -19,6 +19,7 @@
 - `bun run p5a:handoff:corpus --manifest ./docs/ai-playbooks/examples/p5a-handoff-corpus.json`
 - `bun run p5a:acceptance`
 - `bun run p5a:acceptance:gate`
+- `bun run p5a:acceptance:finalize`
 
 ## 规则
 

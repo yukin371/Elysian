@@ -35,6 +35,7 @@ bun run p5a:handoff:replay --input-file ./docs/ai-playbooks/examples/p5a-complet
 ```powershell
 bun run p5a:acceptance
 bun run p5a:acceptance:gate
+bun run p5a:acceptance:finalize
 ```
 
 - 当前默认会同时执行：
@@ -44,6 +45,7 @@ bun run p5a:acceptance:gate
   - [p5a-acceptance-cases.json](./examples/p5a-acceptance-cases.json)
 - CI 页面可直接查看 acceptance Step Summary 和 `GITHUB_OUTPUT`，不必先下载 artifact 才能判断阶段结果。
 - `p5a:acceptance:gate` 会对 acceptance 报告执行独立门禁，当前默认要求至少 `3` 条成功 case，且 generator 成功 case 的 artifact 证据完整。
+- `p5a:acceptance:finalize` 适合本地一键收尾；CI 仍保持 acceptance 与 gate 分步执行，避免丢失页面级可见性。
 - 用于验证 `P5A` 当前主线是否仍满足“语料分类稳定 + 多条成功 handoff 进入 generator”。
 
 ## 失败分类

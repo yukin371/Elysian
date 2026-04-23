@@ -105,6 +105,7 @@
 - 已推进：`p5a:acceptance` 新增 Step Summary / GitHub output，CI 页面可直接判读阶段验收状态与 case 数
 - 已推进：新增 `p5a:acceptance:gate`，对 acceptance 报告执行独立门禁，固定“至少 3 条成功 case + generator artifact 证据完整”的当前阶段边界
 - 已推进：CI `p5a-acceptance` 已接入 acceptance gate，并支持 `workflow_dispatch` 参数化最小 case 数策略
+- 已推进：新增 `p5a:acceptance:finalize`，把 acceptance 与 gate 串成一键收尾入口，降低本地执行遗漏
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 ### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
