@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3` 已完成状态；`Phase 4`（`P4D/P4E`）已完成收口，当前进入 `Phase 6A` 第二轮生产基线增强。
+保持 `Phase 2`、`Phase 3` 已完成状态；`Phase 4`（`P4D/P4E`）已完成收口，`Phase 6A Round-2` 已完成收尾，当前进入 `Phase 5 / P5A`（`AI -> Schema`）启动阶段。
 
 ## Active Tracks
 
@@ -27,7 +27,7 @@
 
 - 已完成：`productModuleSchema` 落地、generator 模板硬编码修复（`CustomerStatus` → `{PascalName}Status`、`input.name` → 动态字段检测）、product 生成验证零残留通过
 
-### 4. Phase 6A: 生产基线准备 ✅ 首轮完成
+### 4. Phase 6A: 生产基线准备 ✅ Round-2 收口
 
 - 已决定：下一阶段优先进入 `Phase 6A`，先补部署、观测、安全和 E2E 基线，避免将工程风险后置
 - 已启动计划文档：[2026-04-22-phase-6a-production-baseline-kickoff.md](./plans/2026-04-22-phase-6a-production-baseline-kickoff.md)
@@ -55,6 +55,7 @@
 - 第二轮已推进：新增快照收集脚本（`e2e:smoke:stability:collect`），用于将下载 artifact 归拢为 evidence 输入
 - 第二轮已推进：新增从下载包直接收尾命令（`e2e:smoke:phase:finalize:from-downloads`），串联 collect/evidence/decision/gate
 - 第二轮已推进：基于最近 5 次 `dev` 相关成功运行（runIds: `24831519539`、`24831463736`、`24831405348`、`24831362661`、`24831277528`）生成稳定性证据，窗口已达标且阶段出口门禁通过
+- 第二轮已完成：主线决策已归档为 `Phase 5`，仅启动 `P5A: AI -> Schema`，暂不进入 `Phase 6B`
 - 第二轮已推进：限流响应头观测增强（`x-ratelimit-limit`/`remaining`/`reset` + `retry-after`），为分布式限流评估提供运行期信号
 - 第二轮已推进：已建立双轨文档与 skill 模板骨架（`docs/quickstart`、`docs/reference`、`docs/ai-playbooks`、`skills/templates`）
 - 第二轮计划文档：[2026-04-22-phase-6a-round2-baseline-hardening.md](./plans/2026-04-22-phase-6a-round2-baseline-hardening.md)
@@ -63,6 +64,7 @@
 - 阶段执行基线：[2026-04-23-phase-execution-gates-and-wbs.md](./plans/2026-04-23-phase-execution-gates-and-wbs.md)
 - 稳定性观察窗口：[2026-04-23-phase-6a-round2-stability-window.md](./plans/2026-04-23-phase-6a-round2-stability-window.md)
 - 对标与功能清单：[2026-04-23-competitive-benchmark-and-dev-feature-checklist.md](./plans/2026-04-23-competitive-benchmark-and-dev-feature-checklist.md)
+- 主线决策与启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 #### Phase 6A Round-2 Exit Checklist
 
@@ -71,9 +73,26 @@
 - [x] `WP-5` 策略边界回归：`allowRecoveredByRetry`、`maxAttempts`、非法输入已覆盖测试
 - [x] `WP-6` 分布式限流评估：门槛与切换条件已文档化
 - [x] 最近连续 CI 运行稳定性观察窗口达标（建议最少 5 次，且无系统性 smoke 阻断）
-- [ ] 基于观察窗口输出“进入 `Phase 6B` 或 `Phase 5`”的主线决策记录
+- [x] 基于观察窗口输出“进入 `Phase 6B` 或 `Phase 5`”的主线决策记录
 
-### 5. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
+### 5. Phase 5: AI 辅助开发 🚧 P5A 启动
+
+- 已决定：下一主线进入 `Phase 5`，但当前只启动 `P5A: AI -> Schema`
+- 选择依据：
+  - `Phase 4` 已完成，满足 `Phase 5` 入口条件
+  - `03-ai-codegen-strategy.md` 已明确推荐顺序为“schema 驱动生成 -> AI 生成 schema -> 交互式 AI 助手”
+  - `Phase 6A Round-2` 已完成最小生产基线收尾，当前短板更偏体验层与交付层，而非继续追加 `Phase 6B` 重型企业能力
+- 当前约束：
+  - 不启动 `P5B/P5C`
+  - 不做交互式 AI 助手
+  - 不允许 AI 绕过 schema / generator 直接改平台核心基础设施
+- 当前工作包：
+  - `WP-1` 需求输入模板与 `AI -> Schema` 验收语料
+  - `WP-2` 结构化输出校验与 handoff 边界
+  - `WP-3` 人工兜底、回放与失败审计最小骨架
+- 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
+
+### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
 
 - 已启动：生成写入冲突策略增强，新增 `overwrite-generated-only`，仅允许覆盖受管生成文件
 - 已完成：空文件也纳入冲突检测，避免“空文件被误判为可覆盖”
@@ -84,7 +103,7 @@
 - 收口结论：P4D 安全基线已完成，可进入 `P4E` 回归验证阶段
 - 计划文档：[2026-04-22-phase-4d-safe-apply-kickoff.md](./plans/2026-04-22-phase-4d-safe-apply-kickoff.md)
 
-### 6. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
+### 7. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
 
 - 已启动：`P4E` 生成一致性回归矩阵
 - 当前范围：`schema × frontendTarget × conflictStrategy` 多轮回归（含 deterministic 校验）
@@ -174,6 +193,7 @@
 - 已新增仓库根 `docker-compose.yml` 与 `stack:*` 脚本，形成 `server + PostgreSQL` 一键启动基线（含 migrate + seed）
 - 已新增 `e2e:smoke` 与 `e2e:smoke:full` 脚本，并在 CI 接入 `e2e-smoke` job（统一走 full 入口，执行 migrate + seed + 登录/customer CRUD 冒烟）
 - 已补 `WP-3` 最小基线：`/metrics` 运行时指标快照、可配置 CORS 白名单、内存限流策略（生产环境默认启用）
+- 已完成 `Phase 6A Round-2` 退出判定，并将下一主线切换为 `Phase 5 / P5A`
 
 ## 待验证项
 
@@ -198,6 +218,6 @@
 3. ~~以 `ui-core` 为边界，把更多页面行为从 `example-vue` 收敛到 `frontend-vue` 预设层。~~ ✅ 已完成
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
-6. 推进 `Phase 6A` 第二轮范围：分布式限流评估、Prometheus 指标标准化、CI 远端 smoke 稳定性观察。
-7. 基于 `Phase 6A` 第二轮结果，明确下一阶段主线是 `Phase 6B` 企业增强还是 `Phase 5` AI 辅助落地。
-8. 启动“人类文档 + AI 文档”双轨文档基线（目录约定、模板与维护责任）。
+6. 启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。
+7. 设计 `AI -> Schema -> generator` 的最小闭环，但不提前进入 `P5B/P5C` 或交互式 AI 助手。
+8. 保持 `Phase 6B` 为后续候选主线，待 `P5A` 形成稳定入口后再回到企业增强能力。
