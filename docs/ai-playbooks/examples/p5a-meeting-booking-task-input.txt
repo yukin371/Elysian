@@ -1,0 +1,22 @@
+任务目标：
+为会议室预订模块生成可进入 generator 的最小 schema 文件
+
+业务背景：
+需要维护预订单号、申请人、会议室类型、预订时间和当前状态，并保留审批流、日历同步和通知提醒的后续需求备注
+
+范围边界（必须/禁止）：
+必须只输出当前 ModuleSchema 能表达的字段；禁止把审批流、企业日历同步、消息提醒和权限菜单直接写进 handoff JSON
+
+影响模块：
+packages/schema
+packages/generator
+docs/ai-playbooks
+
+验收标准：
+schema 通过 validateModuleSchema，且 roomType/status 仅通过 dictionaryTypeCode 进入运行时字典映射，不要求在 handoff JSON 内静态枚举 options
+
+验证命令：
+bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-meeting-booking-task-input.txt --schema-file ./docs/ai-playbooks/examples/meeting-booking.module-schema.json
+
+文档同步要求：
+若字典字段 handoff 边界变化，同步 roadmap、PROJECT_PROFILE 和 ai-playbooks

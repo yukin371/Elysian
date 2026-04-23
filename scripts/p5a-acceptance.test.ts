@@ -38,13 +38,14 @@ describe("p5a-acceptance", () => {
     expect(report.steps.corpus).toBe("passed")
     expect(report.steps.replay).toBe("passed")
     expect(report.steps.generator).toBe("passed")
-    expect(report.cases).toHaveLength(5)
+    expect(report.cases).toHaveLength(6)
     expect(report.cases.map((item) => item.caseId)).toEqual([
       "manual-fix-supplier",
       "supplier-ready",
       "visitor-pass-ready",
       "asset-ready",
       "service-ticket-ready",
+      "meeting-booking-ready",
     ])
 
     const acceptanceReport = JSON.parse(
@@ -55,7 +56,7 @@ describe("p5a-acceptance", () => {
     }
 
     expect(acceptanceReport.status).toBe("passed")
-    expect(acceptanceReport.cases).toHaveLength(5)
+    expect(acceptanceReport.cases).toHaveLength(6)
     expect(acceptanceReport.cases[0]?.generatedSchemaArtifactPath).toContain(
       "supplier.schema.ts",
     )
@@ -104,6 +105,16 @@ describe("p5a-acceptance", () => {
       ),
       "utf8",
     )
+    const meetingBookingSchemaArtifact = await readFile(
+      join(
+        outputDir,
+        "meeting-booking-ready",
+        "modules",
+        "meetingBooking",
+        "meetingBooking.schema.ts",
+      ),
+      "utf8",
+    )
 
     expect(supplierSchemaArtifact).toContain(
       "export const supplierModuleSchema",
@@ -117,6 +128,9 @@ describe("p5a-acceptance", () => {
     expect(assetSchemaArtifact).toContain("export const assetModuleSchema")
     expect(serviceTicketSchemaArtifact).toContain(
       "export const serviceTicketModuleSchema",
+    )
+    expect(meetingBookingSchemaArtifact).toContain(
+      "export const meetingBookingModuleSchema",
     )
   })
 })
