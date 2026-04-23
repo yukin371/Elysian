@@ -7,6 +7,8 @@
     "hooks:install": "bun scripts/setup-git-hooks.ts",
     "postinstall": "bun run hooks:install",
     "pr:validate": "bun scripts/validate-pr-metadata.ts",
+    "p5a:handoff:report": "bun scripts/p5a-schema-handoff-report.ts",
+    "p5a:handoff:replay": "bun scripts/p5a-schema-handoff-replay.ts",
     "dev:server": "bun --filter @elysian/server dev",
     "dev:vue": "bun --filter @elysian/example-vue dev",
     "server": "bun --filter @elysian/server start",

@@ -1,0 +1,22 @@
+任务目标：
+为供应商管理模块生成可进入 generator 的最小 schema 文件
+
+业务背景：
+需要一个标准 CRUD 模块，用于维护供应商名称和状态
+
+范围边界（必须/禁止）：
+必须产出符合当前 ModuleSchema 契约的 JSON；禁止把权限、菜单和审批流直接写进 handoff JSON
+
+影响模块：
+packages/schema
+packages/generator
+docs/ai-playbooks
+
+验收标准：
+schema 通过 validateModuleSchema，且可被 --schema-file 正常消费
+
+验证命令：
+bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-complete-task-input.txt --schema-file ./docs/ai-playbooks/examples/p5a-failed.module-schema.json
+
+文档同步要求：
+若 handoff 协议变化，同步 roadmap、PROJECT_PROFILE 和 ai-playbooks

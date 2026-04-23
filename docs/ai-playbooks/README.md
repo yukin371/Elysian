@@ -10,6 +10,7 @@
 - [p5a-input-template.md](./p5a-input-template.md)
 - [p5a-output-contract.md](./p5a-output-contract.md)
 - [p5a-acceptance-corpus.md](./p5a-acceptance-corpus.md)
+- [p5a-replay-and-manual-handoff.md](./p5a-replay-and-manual-handoff.md)
 
 ## 规则
 

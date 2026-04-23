@@ -128,6 +128,9 @@
   - `p5a-output-contract.md`
   - `p5a-acceptance-corpus.md`
   - `examples/*.module-schema.json`
+- `scripts`
+  - `p5a-schema-handoff-report.ts`
+  - `p5a-schema-handoff-replay.ts`
 
 ## 暂缓事项
 
