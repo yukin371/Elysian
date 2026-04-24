@@ -80,6 +80,7 @@
 
 若本次同时执行 tenant release rehearsal：
 
+- [ ] 已按 runbook 的“GitHub 手动演练速用步骤”或等价 shell 流程执行
 - [ ] 已记录 `tenant:release:*` 仅为 rehearsal 入口，不代表生产平台命令
 - [ ] 若使用 GitHub `Tenant Release Rehearsal`，已记录 workflow run id、artifact 位置、最终 blocker 数与是否只剩真实人工前提项
 - [ ] 已归档 `tenant-release-report.json`

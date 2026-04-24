@@ -177,6 +177,44 @@ bun run tenant:release:finalize
 - 其余布尔输入本质上仍是人工确认项，只是从 shell env 改为 GitHub 表单输入，不改变责任归属。
 - 若环境 owner、DBA owner 或发布负责人尚未完成确认，不应把对应输入改成 `true`。
 
+### GitHub 手动演练速用步骤
+
+值班时可按下面顺序执行：
+
+1. 打开 GitHub Actions `Tenant Release Rehearsal`
+2. 保持 evidence 默认值：
+   - `evidence_branch=dev`
+   - `evidence_limit=5`
+   - `evidence_scan_limit=15`
+3. 填写发布元数据：
+   - `source_branch=dev`
+   - `target_branch=main`
+   - `release_environment=<本次演练环境>`
+   - `release_commit=<待演练 commit>`
+   - `release_pr=<PR 编号>`
+   - `release_migrations=<逗号分隔的 migration 列表>`
+4. 只把已人工确认的布尔项改成 `true`
+   - 最小保守失败演练通常只勾：
+     - `head_matches_window`
+     - `docs_synced`
+     - `rollback_prepared`
+     - `check_passed`
+     - `build_vue_passed`
+   - 数据库角色、备份、`tenant_full_passed` 与发布后最小验证五项，未确认前保持 `false`
+5. 运行后按结果判读：
+   - 若 workflow 只在最后 `Fail when rehearsal gate is blocked` 失败，说明结构链路正常，失败来自 gate blocker
+   - 进入 artifact `tenant-release-rehearsal-report`，查看 `release/tenant-release-report.json` 与 `release/tenant-release-gate-report.json`
+6. 归档时至少记录：
+   - workflow run id
+   - artifact 名称
+   - blocker 数
+   - blocker 是否只剩真实人工前提项
+
+当前参考样例：
+
+- 结构已验证的真实 run：`24894806843`
+- 该 run 的结论：`gitWorktreeClean=true`，最终仅剩 `8` 个目标环境确认与发布后验证 blocker
+
 ## 执行顺序
 
 ### 1. 冻结发布范围
