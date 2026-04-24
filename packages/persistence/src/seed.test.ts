@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test"
 
-import { createDefaultAuthSeedConfig, createDefaultAuthSeedSpec } from "./seed"
+import {
+  createDefaultAuthSeedConfig,
+  createDefaultAuthSeedSpec,
+  createTenantBootstrapSeedSpec,
+  normalizeTenantInitOptions,
+} from "./seed"
 
 const defaultAdminPassword = ["admin", "123"].join("")
 
@@ -71,6 +76,9 @@ describe("createDefaultAuthSeedSpec", () => {
       "system:notification:list",
       "system:notification:create",
       "system:notification:update",
+      "system:tenant:list",
+      "system:tenant:create",
+      "system:tenant:update",
       "customer:customer:list",
       "customer:customer:create",
       "customer:customer:update",
@@ -87,6 +95,7 @@ describe("createDefaultAuthSeedSpec", () => {
       "system-operation-logs",
       "system-files",
       "system-notifications",
+      "system-tenants",
       "customer-root",
       "customer-list",
     ])
@@ -139,5 +148,66 @@ describe("createDefaultAuthSeedSpec", () => {
     expect(spec.adminUser.username).toBe("ops-admin")
     expect(spec.adminUser.password).toBe(["ops", "secret"].join("-"))
     expect(spec.adminUser.displayName).toBe("Ops Admin")
+  })
+})
+
+describe("createTenantBootstrapSeedSpec", () => {
+  it("drops tenant-management permission and menu exposure for tenant admins", () => {
+    const spec = createTenantBootstrapSeedSpec()
+
+    expect(spec.permissions.map((permission) => permission.code)).not.toContain(
+      "system:tenant:list",
+    )
+    expect(spec.permissions.map((permission) => permission.code)).not.toContain(
+      "system:tenant:create",
+    )
+    expect(spec.permissions.map((permission) => permission.code)).not.toContain(
+      "system:tenant:update",
+    )
+    expect(spec.menus.map((menu) => menu.code)).not.toContain("system-tenants")
+    expect(spec.adminUser.isSuperAdmin).toBe(false)
+  })
+})
+
+describe("normalizeTenantInitOptions", () => {
+  it("trims values and applies tenant admin defaults", () => {
+    expect(
+      normalizeTenantInitOptions({
+        tenantCode: " tenant-alpha ",
+        tenantName: " Tenant Alpha ",
+        adminPassword: " secret-pass ",
+      }),
+    ).toEqual({
+      tenantCode: "tenant-alpha",
+      tenantName: "Tenant Alpha",
+      tenantStatus: "active",
+      adminUsername: "admin",
+      adminPassword: "secret-pass",
+      adminDisplayName: "Tenant Administrator",
+    })
+  })
+
+  it("rejects missing required fields", () => {
+    expect(() =>
+      normalizeTenantInitOptions({
+        tenantCode: " ",
+        tenantName: "Tenant Alpha",
+        adminPassword: "secret-pass",
+      }),
+    ).toThrow("tenantCode is required")
+    expect(() =>
+      normalizeTenantInitOptions({
+        tenantCode: "tenant-alpha",
+        tenantName: " ",
+        adminPassword: "secret-pass",
+      }),
+    ).toThrow("tenantName is required")
+    expect(() =>
+      normalizeTenantInitOptions({
+        tenantCode: "tenant-alpha",
+        tenantName: "Tenant Alpha",
+        adminPassword: " ",
+      }),
+    ).toThrow("adminPassword is required")
   })
 })

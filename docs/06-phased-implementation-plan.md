@@ -230,69 +230,93 @@ AI 辅助开发  ──→ 生产强化  ──→ 平台扩展
 
 ## Phase 5：AI 辅助开发
 
-> **状态**：未开始
+> **状态**：P5A 已完成（2026-04-24），P5B/P5C 未开始
 > **目标**：让 AI 参与规格生成和实现补全，而非直接生成最终代码
 
 ### 前置条件
 
-- Phase 4 完成
+- Phase 4 完成 ✅
 
 ### 建议拆分
 
-| Subphase | 目标 | 入口条件 | 出口标准 |
-|---|---|---|---|
-| `P5A` AI -> Schema | 把自然语言稳定转换为可校验 schema | Phase 4 完成 | AI 输出结构化结果可进入生成流程 |
-| `P5B` AI 建议器 | 字段、查询项、表单布局、测试数据建议 | `P5A` 可用 | AI 明显减少重复配置工作量 |
-| `P5C` 交互与审计 | `--ai` 工作流、回放、失败兜底 | `P5A`、`P5B` 基本稳定 | AI 交互可追踪、可回退、可人工接管 |
+| Subphase | 目标 | 入口条件 | 出口标准 | 状态 |
+|---|---|---|---|---|
+| `P5A` AI -> Schema | 把自然语言稳定转换为可校验 schema | Phase 4 完成 | AI 输出结构化结果可进入生成流程 | ✅ 已完成 |
+| `P5B` AI 建议器 | 字段、查询项、表单布局、测试数据建议 | `P5A` 可用 | AI 明显减少重复配置工作量 | 未开始 |
+| `P5C` 交互与审计 | `--ai` 工作流、回放、失败兜底 | `P5A`、`P5B` 基本稳定 | AI 交互可追踪、可回退、可人工接管 | 未开始 |
+
+### P5A 已落地产物
+
+- `packages/schema`: `validateModuleSchema`、`isModuleSchema`、enum source 硬约束
+- `packages/generator`: CLI `--schema-file`、外部 schema 内联 `.schema.ts`
+- `docs/ai-playbooks`: 输入模板、输出契约、验收语料、回放与人工接管说明
+- `scripts`: `p5a-schema-handoff`、`p5a-schema-handoff-report`、`p5a-schema-handoff-replay`、`p5a-handoff-corpus`、`p5a-acceptance` / `gate` / `index` / `finalize`
+- CI: `p5a-handoff-corpus` + `p5a-acceptance` 作业
+- 收尾文档：[2026-04-24-phase-5a-completion.md](./plans/2026-04-24-phase-5a-completion.md)
 
 ### 完成标准
 
-- [ ] 从自然语言描述到可运行模块的链路可跑通
-- [ ] AI 输出的 schema 通过结构化校验
-- [ ] AI 失败时，人工可直接编辑 schema 继续推进
-- [ ] AI 每次交互有审计记录可回放
+- [x] 从自然语言描述到可运行模块的链路可跑通（P5A 6 case 全绿）
+- [x] AI 输出的 schema 通过结构化校验（`validateModuleSchema` + enum 硬约束）
+- [x] AI 失败时，人工可直接编辑 schema 继续推进（handoff report + replay）
+- [x] AI 每次交互有审计记录可回放（replay report + corpus + acceptance）
 
 ---
 
 ## Phase 6：生产强化
 
-> **状态**：未开始
+> **状态**：P6A 已完成，P6B 已启动规划
 > **目标**：让平台具备真正的生产部署和运营能力
 
 ### 前置条件
 
-- Phase 3 完成
-- Phase 4 完成
+- Phase 3 完成 ✅
+- Phase 4 完成 ✅
 
 ### 范围
 
-| # | 交付物 | 说明 |
-|---|---|---|
-| 6.1 | 多租户模型 | 租户隔离策略、租户级配置 |
-| 6.2 | 数据权限 | 行级数据权限控制（部门、个人、自定义） |
-| 6.3 | 定时任务 | 任务调度框架、Cron 管理、执行日志 |
-| 6.4 | 可观测性 | 健康检查、指标暴露、链路追踪接入点 |
-| 6.5 | 部署方案 | Docker 镜像、docker-compose、环境配置模板 |
-| 6.6 | 缓存策略 | Redis 接入、缓存抽象层、热点数据缓存 |
-| 6.7 | 安全加固 | CORS、Rate Limit、SQL 注入防护、XSS 防护、CSRF |
-| 6.8 | 数据导入导出 | Excel/CSV 导入导出通用能力 |
-| 6.9 | 灰度与特性开关 | 功能开关框架、灰度发布支持 |
-| 6.10 | E2E 测试 | 关键用户流程的端到端自动化测试 |
+| # | 交付物 | 说明 | 状态 |
+|---|---|---|---|
+| 6.1 | 多租户模型 | 租户隔离策略、租户级配置 | P6B 启动 |
+| 6.2 | 数据权限 | 行级数据权限控制（部门、个人、自定义） | P6B 启动 |
+| 6.3 | 定时任务 | 任务调度框架、Cron 管理、执行日志 | 后续阶段 |
+| 6.4 | 可观测性 | 健康检查、指标暴露、链路追踪接入点 | ✅ P6A 已完成 |
+| 6.5 | 部署方案 | Docker 镜像、docker-compose、环境配置模板 | ✅ P6A 已完成 |
+| 6.6 | 缓存策略 | Redis 接入、缓存抽象层、热点数据缓存 | 后续阶段 |
+| 6.7 | 安全加固 | CORS、Rate Limit、SQL 注入防护、XSS 防护、CSRF | ✅ P6A 已完成 |
+| 6.8 | 数据导入导出 | Excel/CSV 导入导出通用能力 | 后续阶段 |
+| 6.9 | 灰度与特性开关 | 功能开关框架、灰度发布支持 | 后续阶段 |
+| 6.10 | E2E 测试 | 关键用户流程的端到端自动化测试 | ✅ P6A 已完成 |
 
 ### 建议拆分
 
-| Subphase | 目标 | 入口条件 | 出口标准 |
-|---|---|---|---|
-| `P6A` 生产基线 | Docker、env、健康检查、指标、安全、E2E | Phase 3、Phase 4 完成 | 平台具备可部署、可观测、可回归的最小生产能力 |
-| `P6B` 企业增强 | 多租户、数据权限、缓存、定时任务、导入导出、特性开关 | `P6A` 完成 | 平台可承接更复杂的企业运行场景 |
+| Subphase | 目标 | 入口条件 | 出口标准 | 状态 |
+|---|---|---|---|---|
+| `P6A` 生产基线 | Docker、env、健康检查、指标、安全、E2E | Phase 3、Phase 4 完成 | 平台具备可部署、可观测、可回归的最小生产能力 | ✅ 已完成 |
+| `P6B1` 租户模型与查询隔离 | `tenants` 表 + `tenant_id` + PostgreSQL RLS + JWT `tid` | `P6A` 完成 | 所有现有模块自动按租户过滤，现有 helper 零改动 | 🚧 规划完成 |
+| `P6B2` 数据权限框架 | 角色 `data_scope` 5 档 + 部门树过滤 + 业务表接入 | `P6B1` 完成 | 全部/自定义/本部门/本部门及下级/仅本人 5 档可通过测试验证 | 未开始 |
+| `P6B3` 租户管理与治理 | 租户 CRUD + 初始化脚本 + 配置覆盖 + 升级路径 ADR | `P6B1` 完成 | 超级管理员可创建管理租户，一键初始化新租户 | 未开始 |
+
+### P6B 设计文档
+
+- [2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
+
+### P6B 设计决策
+
+| 决策 | 选择 | 理由 |
+|---|---|---|
+| 租户隔离策略 | 共享数据库 + `tenant_id` 字段 | 与现有 Drizzle ORM + Bun SQL 兼容，保留升级路径 |
+| 租户过滤机制 | PostgreSQL RLS（`current_setting` 会话变量） | 数据库层强制隔离，现有 30+ persistence helper 零改动 |
+| 数据权限模式 | RuoYi `data_scope` 5 档 | 企业后台最成熟的数据权限模式 |
+| 多角色冲突 | 取最宽松（OR 组合） | 与 RuoYi 一致 |
 
 ### 完成标准
 
-- [ ] 平台可通过 Docker 部署到生产环境
-- [ ] 关键接口有 Rate Limit 和认证保护
-- [ ] 健康检查和指标可被监控系统采集
+- [x] 平台可通过 Docker 部署到生产环境
+- [x] 关键接口有 Rate Limit 和认证保护
+- [x] 健康检查和指标可被监控系统采集
 - [ ] 数据权限可按组织 / 角色粒度控制
-- [ ] 核心用户流程有 E2E 测试覆盖
+- [x] 核心用户流程有 E2E 测试覆盖
 
 ---
 
@@ -355,12 +379,11 @@ Phase 1 (垂直切片)
 1. ✅ 已完成 `P6A` `WP-1`：容器化启动与环境模板基线（server + db 一键启动）。
 2. ✅ 已完成 `P6A` `WP-2`：关键流程 E2E smoke（登录 + customer CRUD），并已接入 CI。
 3. ✅ 已完成 `P6A` `WP-3`：健康检查/指标与最小安全基线（`/metrics` + CORS 白名单 + 内存限流）。
-4. ✅ 已完成 `Phase 4` 收口（`P4D/P4E`），生成链路已进入“可回归、可门禁”状态。
-5. 🚧 正在执行 `P6A` Round-2（见 `docs/roadmap.md` 与 `docs/plans/2026-04-23-phase-execution-gates-and-wbs.md`）：
-   - 指标标准化：Prometheus/JSON 进程级指标对齐
-   - smoke 稳定性：诊断、重试、索引、门禁、参数化策略
-   - 分布式限流：只做评估门槛，不提前引入重型基础设施
-6. `P6A` Round-2 Exit Gate 达成后，再进行 `Phase 5` 与 `Phase 6B` 主线优先级决策，避免阶段依赖被隐式跳过。
+4. ✅ 已完成 `Phase 4` 收口（`P4D/P4E`），生成链路已进入”可回归、可门禁”状态。
+5. ✅ 已完成 `P6A` Round-2：指标标准化、smoke 稳定性、分布式限流评估均已达标。
+6. ✅ 已完成 `Phase 5 / P5A`（`AI -> Schema`）：4 项出口条件全部达标，6 case 验收全绿，收尾文档已归档。
+7. ✅ 已完成 `Phase 5 / P5A`（`AI -> Schema`）：4 项出口条件全部达标，6 case 验收全绿，收尾文档已归档。
+8. 🚧 已启动 `Phase 6B` 规划：多租户（PostgreSQL RLS）与数据权限（RuoYi `data_scope` 5 档），拆为 P6B1 → P6B2 → P6B3 三个串行子阶段。
 
 ### 文档产物要求
 

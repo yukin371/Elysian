@@ -1,10 +1,14 @@
 import {
+  type DataAccessContext,
   type DatabaseClient,
   type FileRow,
+  buildDataAccessCondition,
   deleteFile,
+  files,
   getFileById,
   insertFile,
   listFiles,
+  matchesDataAccess,
 } from "@elysian/persistence"
 import type { FileRecord } from "@elysian/schema"
 
@@ -14,31 +18,63 @@ export interface CreateFileInput {
   mimeType?: string
   size: number
   uploaderUserId?: string | null
+  deptId?: string | null
 }
 
 export interface StoredFileRecord extends FileRecord {
   storageKey: string
+  deptId?: string | null
 }
 
 export interface FileRepository {
-  list: () => Promise<FileRecord[]>
-  getById: (id: string) => Promise<FileRecord | null>
-  getStoredById: (id: string) => Promise<StoredFileRecord | null>
+  list: (dataAccess?: DataAccessContext) => Promise<FileRecord[]>
+  getById: (
+    id: string,
+    dataAccess?: DataAccessContext,
+  ) => Promise<FileRecord | null>
+  getStoredById: (
+    id: string,
+    dataAccess?: DataAccessContext,
+  ) => Promise<StoredFileRecord | null>
   create: (input: CreateFileInput) => Promise<StoredFileRecord>
-  delete: (id: string) => Promise<StoredFileRecord | null>
+  delete: (
+    id: string,
+    dataAccess?: DataAccessContext,
+  ) => Promise<StoredFileRecord | null>
 }
 
 export const createFileRepository = (db: DatabaseClient): FileRepository => ({
-  async list() {
-    const rows = await listFiles(db)
+  async list(dataAccess) {
+    const rows = await listFiles(db, {
+      accessCondition: dataAccess
+        ? buildDataAccessCondition(dataAccess, {
+            deptColumn: files.deptId,
+            creatorColumn: files.uploaderUserId,
+          })
+        : undefined,
+    })
     return rows.map(mapPublicFileRow)
   },
-  async getById(id) {
-    const row = await getFileById(db, id)
+  async getById(id, dataAccess) {
+    const row = await getFileById(db, id, {
+      accessCondition: dataAccess
+        ? buildDataAccessCondition(dataAccess, {
+            deptColumn: files.deptId,
+            creatorColumn: files.uploaderUserId,
+          })
+        : undefined,
+    })
     return row ? mapPublicFileRow(row) : null
   },
-  async getStoredById(id) {
-    const row = await getFileById(db, id)
+  async getStoredById(id, dataAccess) {
+    const row = await getFileById(db, id, {
+      accessCondition: dataAccess
+        ? buildDataAccessCondition(dataAccess, {
+            deptColumn: files.deptId,
+            creatorColumn: files.uploaderUserId,
+          })
+        : undefined,
+    })
     return row ? mapStoredFileRow(row) : null
   },
   async create(input) {
@@ -48,12 +84,20 @@ export const createFileRepository = (db: DatabaseClient): FileRepository => ({
       mimeType: input.mimeType ?? null,
       size: input.size,
       uploaderUserId: input.uploaderUserId ?? null,
+      deptId: input.deptId ?? null,
     })
 
     return mapStoredFileRow(row)
   },
-  async delete(id) {
-    const row = await deleteFile(db, id)
+  async delete(id, dataAccess) {
+    const row = await deleteFile(db, id, {
+      accessCondition: dataAccess
+        ? buildDataAccessCondition(dataAccess, {
+            deptColumn: files.deptId,
+            creatorColumn: files.uploaderUserId,
+          })
+        : undefined,
+    })
     return row ? mapStoredFileRow(row) : null
   },
 })
@@ -64,15 +108,48 @@ export const createInMemoryFileRepository = (
   const items = new Map(seed.map((item) => [item.id, item]))
 
   return {
-    async list() {
-      return [...items.values()].sort(compareFiles).map(mapPublicStoredFile)
+    async list(dataAccess) {
+      return [...items.values()]
+        .filter((item) =>
+          dataAccess
+            ? matchesDataAccess(dataAccess, {
+                deptId: item.deptId,
+                creatorId: item.uploaderUserId,
+              })
+            : true,
+        )
+        .sort(compareFiles)
+        .map(mapPublicStoredFile)
     },
-    async getById(id) {
+    async getById(id, dataAccess) {
       const item = items.get(id)
+      if (
+        item &&
+        dataAccess &&
+        !matchesDataAccess(dataAccess, {
+          deptId: item.deptId,
+          creatorId: item.uploaderUserId,
+        })
+      ) {
+        return null
+      }
+
       return item ? mapPublicStoredFile(item) : null
     },
-    async getStoredById(id) {
-      return items.get(id) ?? null
+    async getStoredById(id, dataAccess) {
+      const item = items.get(id)
+      if (
+        item &&
+        dataAccess &&
+        !matchesDataAccess(dataAccess, {
+          deptId: item.deptId,
+          creatorId: item.uploaderUserId,
+        })
+      ) {
+        return null
+      }
+
+      return item ?? null
     },
     async create(input) {
       const file: StoredFileRecord = {
@@ -82,14 +159,26 @@ export const createInMemoryFileRepository = (
         mimeType: input.mimeType,
         size: input.size,
         uploaderUserId: input.uploaderUserId ?? undefined,
+        deptId: input.deptId ?? null,
         createdAt: new Date().toISOString(),
       }
 
       items.set(file.id, file)
       return file
     },
-    async delete(id) {
+    async delete(id, dataAccess) {
       const existing = items.get(id) ?? null
+      if (
+        existing &&
+        dataAccess &&
+        !matchesDataAccess(dataAccess, {
+          deptId: existing.deptId,
+          creatorId: existing.uploaderUserId,
+        })
+      ) {
+        return null
+      }
+
       if (existing) {
         items.delete(id)
       }

@@ -1,3 +1,4 @@
+import type { DataAccessContext } from "@elysian/persistence"
 import { AppError } from "../../errors"
 
 import type {
@@ -7,9 +8,9 @@ import type {
 } from "./repository"
 
 export const createCustomerService = (repository: CustomerRepository) => ({
-  list: () => repository.list(),
-  async getById(id: string) {
-    const customer = await repository.getById(id)
+  list: (dataAccess?: DataAccessContext) => repository.list(dataAccess),
+  async getById(id: string, dataAccess?: DataAccessContext) {
+    const customer = await repository.getById(id, dataAccess)
 
     if (!customer) {
       throw new AppError({
@@ -42,7 +43,11 @@ export const createCustomerService = (repository: CustomerRepository) => ({
       name,
     })
   },
-  async update(id: string, input: UpdateCustomerInput) {
+  async update(
+    id: string,
+    input: UpdateCustomerInput,
+    dataAccess?: DataAccessContext,
+  ) {
     const name = input.name?.trim()
     if (name !== undefined && name.length === 0) {
       throw new AppError({
@@ -53,10 +58,14 @@ export const createCustomerService = (repository: CustomerRepository) => ({
       })
     }
 
-    const updated = await repository.update(id, {
-      ...input,
-      ...(name !== undefined ? { name } : {}),
-    })
+    const updated = await repository.update(
+      id,
+      {
+        ...input,
+        ...(name !== undefined ? { name } : {}),
+      },
+      dataAccess,
+    )
 
     if (!updated) {
       throw new AppError({
@@ -70,8 +79,8 @@ export const createCustomerService = (repository: CustomerRepository) => ({
 
     return updated
   },
-  async remove(id: string) {
-    const deleted = await repository.remove(id)
+  async remove(id: string, dataAccess?: DataAccessContext) {
+    const deleted = await repository.remove(id, dataAccess)
 
     if (!deleted) {
       throw new AppError({

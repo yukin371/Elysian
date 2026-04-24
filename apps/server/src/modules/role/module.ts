@@ -6,6 +6,14 @@ import type { ServerModule } from "../module"
 import type { RoleRepository } from "./repository"
 import { createRoleService } from "./service"
 
+const roleDataScopeSchema = t.Union([
+  t.Literal(1),
+  t.Literal(2),
+  t.Literal(3),
+  t.Literal(4),
+  t.Literal(5),
+])
+
 export interface RoleModuleOptions {
   authGuard?: AuthGuard
 }
@@ -87,8 +95,10 @@ export const createRoleModule = (
               t.Union([t.Literal("active"), t.Literal("disabled")]),
             ),
             isSystem: t.Optional(t.Boolean()),
+            dataScope: t.Optional(roleDataScopeSchema),
             permissionCodes: t.Optional(t.Array(t.String({ minLength: 1 }))),
             userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+            deptIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
           }),
           detail: {
             tags: ["role"],
@@ -115,8 +125,10 @@ export const createRoleModule = (
               t.Union([t.Literal("active"), t.Literal("disabled")]),
             ),
             isSystem: t.Optional(t.Boolean()),
+            dataScope: t.Optional(roleDataScopeSchema),
             permissionCodes: t.Optional(t.Array(t.String({ minLength: 1 }))),
             userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+            deptIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
           }),
           detail: {
             tags: ["role"],

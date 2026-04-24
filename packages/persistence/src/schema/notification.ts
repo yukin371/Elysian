@@ -1,7 +1,8 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-import { users } from "./auth"
+import { departments, users } from "./auth"
+import { tenants } from "./tenant"
 
 export const notificationLevel = pgEnum("notification_level", [
   "info",
@@ -17,6 +18,9 @@ export const notificationStatus = pgEnum("notification_status", [
 
 export const notifications = pgTable("notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   recipientUserId: uuid("recipient_user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -25,6 +29,9 @@ export const notifications = pgTable("notifications", {
   level: notificationLevel("level").notNull().default("info"),
   status: notificationStatus("status").notNull().default("unread"),
   createdByUserId: uuid("created_by_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  deptId: uuid("dept_id").references(() => departments.id, {
     onDelete: "set null",
   }),
   readAt: timestamp("read_at", { withTimezone: true }),

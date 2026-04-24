@@ -1,4 +1,9 @@
-import { createDatabaseClient } from "@elysian/persistence"
+import {
+  clearTenantContext,
+  createDatabaseClient,
+  getTenantByCode,
+  resetTenantContext,
+} from "@elysian/persistence"
 
 import { createServerApp } from "./app"
 import { loadServerConfig, resolveAccessTokenSecret } from "./config"
@@ -26,6 +31,9 @@ import {
   createRoleRepository,
   createSettingModule,
   createSettingRepository,
+  createTenantContextModule,
+  createTenantModule,
+  createTenantRepository,
   createUserModule,
   createUserRepository,
   systemModule,
@@ -49,14 +57,38 @@ if (process.env.DATABASE_URL) {
   const operationLogRepository = createOperationLogRepository(db)
   const roleRepository = createRoleRepository(db)
   const settingRepository = createSettingRepository(db)
+  const tenantRepository = createTenantRepository(db)
   const userRepository = createUserRepository(db)
   const authGuard = createAuthGuard(authRepository, {
     accessTokenSecret,
   })
   modules.push(
+    createTenantContextModule(db, {
+      accessTokenSecret,
+    }),
+  )
+  modules.push(
     createAuthModule(authRepository, {
       accessTokenSecret,
       secureCookies: config.env === "production",
+      tenantContextDb: db,
+      resolveTenantIdByCode: (tenantCode) =>
+        db.transaction(async (tx) => {
+          const scopedDb = tx as unknown as typeof db
+
+          await clearTenantContext(scopedDb)
+
+          try {
+            return (await getTenantByCode(scopedDb, tenantCode))?.id ?? null
+          } finally {
+            await resetTenantContext(scopedDb)
+          }
+        }),
+    }),
+  )
+  modules.push(
+    createTenantModule(tenantRepository, {
+      authGuard,
     }),
   )
   modules.push(
@@ -111,7 +143,7 @@ if (process.env.DATABASE_URL) {
   )
 } else {
   logger.warn(
-    "DATABASE_URL is not configured; auth, customer, dictionary, department, file, menu, notification, operation-log, role, setting, and user modules are not registered",
+    "DATABASE_URL is not configured; auth, tenant, customer, dictionary, department, file, menu, notification, operation-log, role, setting, and user modules are not registered",
   )
 }
 

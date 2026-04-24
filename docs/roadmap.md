@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3` 已完成状态；`Phase 4`（`P4D/P4E`）已完成收口，`Phase 6A Round-2` 已完成收尾，当前进入 `Phase 5 / P5A`（`AI -> Schema`）启动阶段。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口；在 `5/5` 真实观察窗口达标后，已完成首轮 `10/10` 分支级滚动观察，当前结论仍为 `candidate_for_next_step`，但主线级滚动观察仍受 `dev/main` 尚未接入 `e2e-tenant` job 阻断。
 
 ## Active Tracks
 
@@ -75,9 +75,9 @@
 - [x] 最近连续 CI 运行稳定性观察窗口达标（建议最少 5 次，且无系统性 smoke 阻断）
 - [x] 基于观察窗口输出“进入 `Phase 6B` 或 `Phase 5`”的主线决策记录
 
-### 5. Phase 5: AI 辅助开发 🚧 P5A 启动
+### 5. Phase 5: AI 辅助开发 ✅ P5A 已归档
 
-- 已决定：下一主线进入 `Phase 5`，但当前只启动 `P5A: AI -> Schema`
+- 已归档：`P5A: AI -> Schema` 最小闭环已完成，当前不再作为主线推进
 - 选择依据：
   - `Phase 4` 已完成，满足 `Phase 5` 入口条件
   - `03-ai-codegen-strategy.md` 已明确推荐顺序为“schema 驱动生成 -> AI 生成 schema -> 交互式 AI 助手”
@@ -113,7 +113,37 @@
 - 已推进：新增 `p5a:acceptance:finalize`，把 acceptance 与 gate 串成一键收尾入口，降低本地执行遗漏
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
-### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
+### 6. Phase 6B: 企业增强 🚧 P6B3 进行中
+
+- 已完成：`P6B1` 租户模型与查询隔离，包含 `tenants` schema、既有业务表 `tenant_id`、PostgreSQL RLS、JWT `tid`、tenant middleware、租户感知 seed 与基础测试覆盖
+- 已完成：`P6B1` 修复收口，修正租户登录、上下文重置与多租户约束边界，已提交到功能分支
+- 已完成：`P6B2` 数据权限框架，已落 `roles.data_scope`、`role_depts`、`departments.ancestors`、`customer/file/notification` 数据访问过滤与 `AuthIdentity.dataAccess`
+- 已接入：角色管理创建/更新支持 `dataScope` 与 `deptIds`，多角色权限按“最宽松”组合
+- 已完成：`P6B3 / WP-1` 租户管理模块，已补 `/system/tenants` 列表/详情/创建/更新/状态更新接口，且仅允许 super-admin 操作
+- 已完成：`P6B3 / WP-2 tenant:init`，已补 persistence owner 内的租户初始化 CLI，支持按 tenant 幂等补齐角色/权限/菜单/字典/tenant admin，且 tenant admin 不再误授超管能力
+- 已完成：`P6B3 / WP-3` 租户配置回退，已补“当前 tenant 优先，默认 tenant 回退”的 setting 查询语义，并显式阻断跨租户 override 泄漏
+- 已清理风险：认证侧请求租户上下文模块已更名为 `tenant-context` / `createTenantContextModule`，避免与真实租户业务模块重名
+- 已清理风险：`db:seed` 已补 tenant context 设置与 tenant-aware conflict 目标，降低真实 PostgreSQL 下的 RLS/唯一约束错位风险
+- 已清理风险：customer 创建链路已补 `identity.user.tenantId` 透传，避免写入错误回退到 `DEFAULT_TENANT_ID`
+- 已清理风险：`db:seed`、`tenant:init` 与 tenant e2e harness 已补显式数据库连接回收，降低重复执行时的连接耗尽风险
+- 已完成验证：`bun run check` 与 `bun run e2e:tenant:full` 已通过，覆盖 tenant init 幂等、super-admin 租户管理授权、customer 跨租户隔离、RLS 与 `tenant_id` 外键约束
+- 已完成：`P6B3 / WP-4 ADR-0009`，已归档多租户升级与验证策略，固定默认租户/非默认租户初始化分离、真实 PostgreSQL 验证门槛与连接回收要求
+- 已完成：CI 已接入 `e2e-tenant` 作业，复用 `e2e:tenant:full` 与 PostgreSQL service 执行真实租户隔离验证并归档报告
+- 已完成：新增 `e2e:tenant:stability:snapshot` 与 `e2e:tenant:stability:evidence`，用于单次 tenant e2e 快照沉淀与多次 artifact 观察窗口证据汇总
+- 已接入：CI `e2e-tenant` 已在单次 tenant e2e 后产出稳定性快照并随 artifact 归档
+- 已完成：新增 `e2e:tenant:stability:collect`、`e2e:tenant:upgrade:decision`、`e2e:tenant:upgrade:gate`、`e2e:tenant:upgrade:finalize` 与 `e2e:tenant:upgrade:finalize:from-downloads`，将下载 artifact 到升级结论的收尾链路固定为脚本化流程
+- 已完成：新增 `e2e:tenant:stability:download` 与 `e2e:tenant:upgrade:finalize:from-github`，可直接从 GitHub 下载 tenant artifact 并落升级结论
+- 已完成：基于 `workflow_dispatch` 连续 5 次真实样本 `24886462252 / 24886403317 / 24886352160 / 24886285868 / 24886175279` 输出 tenant observation evidence；当前 `selectedWindowRuns=5`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`，门禁返回 `candidate_for_next_step`
+- 已完成：基于 `ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10` 与最近 `10` 次 tenant artifact（`24887191148 / 24887139395 / 24887089834 / 24887032527 / 24886462252 / 24886403317 / 24886352160 / 24886285868 / 24886175279 / 24885957451`）输出首轮滚动观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
+- 已确认阻断：尝试按同一策略迁移到 `dev/main` 时，`gh run download` 在 `origin/dev` / `origin/main` 的最近成功 CI 上均返回 `no artifact matches`；核对后确认两条分支当前 `.github/workflows/ci.yml` 尚未包含 `e2e-tenant` job
+- 下一步：先把当前功能分支的 tenant CI 变更晋级到 `dev/main`，再执行主线级 `10` 次滚动观察；生产部署平台确定后再补平台级发布命令与责任边界
+- 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
+- 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
+- 迁移/发布手册：[2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md)
+- 观察策略：[2026-04-24-phase-6b-tenant-scale-observation-strategy.md](./plans/2026-04-24-phase-6b-tenant-scale-observation-strategy.md)
+- 滚动观察记录：[2026-04-24-phase-6b-tenant-rolling-window.md](./plans/2026-04-24-phase-6b-tenant-rolling-window.md)
+
+### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
 
 - 已启动：生成写入冲突策略增强，新增 `overwrite-generated-only`，仅允许覆盖受管生成文件
 - 已完成：空文件也纳入冲突检测，避免“空文件被误判为可覆盖”
@@ -124,7 +154,7 @@
 - 收口结论：P4D 安全基线已完成，可进入 `P4E` 回归验证阶段
 - 计划文档：[2026-04-22-phase-4d-safe-apply-kickoff.md](./plans/2026-04-22-phase-4d-safe-apply-kickoff.md)
 
-### 7. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
+### 8. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
 
 - 已启动：`P4E` 生成一致性回归矩阵
 - 当前范围：`schema × frontendTarget × conflictStrategy` 多轮回归（含 deterministic 校验）
@@ -239,6 +269,6 @@
 3. ~~以 `ui-core` 为边界，把更多页面行为从 `example-vue` 收敛到 `frontend-vue` 预设层。~~ ✅ 已完成
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
-6. 启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。
-7. 在 `p5a:handoff:corpus` 基础上继续扩充真实需求变体，验证更多业务输入下的分类边界稳定性。
-8. 保持 `Phase 6B` 为后续候选主线，待 `P5A` 形成稳定入口后再回到企业增强能力。
+6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
+7. 为 `e2e-tenant` 增加稳定性观察与执行策略，避免“已进 CI”被误判为“长期稳定”。
+8. 基于 `ADR-0009` 补多租户迁移/发布 runbook 或后续阶段实施文档。

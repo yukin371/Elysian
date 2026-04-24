@@ -13,6 +13,7 @@ import {
   menus,
   permissions,
   refreshSessions,
+  roleDepts,
   roleMenus,
   rolePermissions,
   roles,
@@ -20,8 +21,15 @@ import {
   userRoles,
   users,
 } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export type AuditLogResult = "success" | "failure"
+export type RoleDataScopeValue = 1 | 2 | 3 | 4 | 5
+
+export interface DataScopeAssignment {
+  scope: RoleDataScopeValue
+  customDeptIds?: string[]
+}
 
 export interface CreateRefreshSessionPersistenceInput {
   id?: string
@@ -30,6 +38,7 @@ export interface CreateRefreshSessionPersistenceInput {
   userAgent?: string | null
   ip?: string | null
   expiresAt: Date
+  tenantId?: string
 }
 
 export interface CreateUserPersistenceInput {
@@ -41,6 +50,7 @@ export interface CreateUserPersistenceInput {
   passwordHash: string
   status?: "active" | "disabled"
   isSuperAdmin?: boolean
+  tenantId?: string
 }
 
 export interface UpdateUserPersistenceInput {
@@ -59,6 +69,8 @@ export interface CreateRolePersistenceInput {
   description?: string | null
   status?: "active" | "disabled"
   isSystem?: boolean
+  dataScope?: RoleDataScopeValue
+  tenantId?: string
 }
 
 export interface UpdateRolePersistenceInput {
@@ -67,6 +79,7 @@ export interface UpdateRolePersistenceInput {
   description?: string | null
   status?: "active" | "disabled"
   isSystem?: boolean
+  dataScope?: RoleDataScopeValue
 }
 
 export interface CreateMenuPersistenceInput {
@@ -82,6 +95,7 @@ export interface CreateMenuPersistenceInput {
   isVisible?: boolean
   status?: "active" | "disabled"
   permissionCode?: string | null
+  tenantId?: string
 }
 
 export interface UpdateMenuPersistenceInput {
@@ -105,6 +119,7 @@ export interface CreateDepartmentPersistenceInput {
   name: string
   sort?: number
   status?: "active" | "disabled"
+  tenantId?: string
 }
 
 export interface UpdateDepartmentPersistenceInput {
@@ -128,6 +143,7 @@ export interface CreateAuditLogPersistenceInput {
   userAgent?: string | null
   details?: Record<string, unknown> | null
   createdAt?: Date
+  tenantId?: string
 }
 
 export interface ListAuditLogsPersistenceFilter {
@@ -191,6 +207,7 @@ export const insertUser = async (
       passwordHash: input.passwordHash,
       status: input.status ?? "active",
       isSuperAdmin: input.isSuperAdmin ?? false,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -315,6 +332,8 @@ export const insertRole = async (
       description: input.description ?? null,
       status: input.status ?? "active",
       isSystem: input.isSystem ?? false,
+      dataScope: input.dataScope ?? 1,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -510,6 +529,7 @@ export const insertMenu = async (
       isVisible: input.isVisible ?? true,
       status: input.status ?? "active",
       permissionCode: input.permissionCode ?? null,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -622,6 +642,7 @@ export const insertDepartment = async (
   db: DatabaseClient,
   input: CreateDepartmentPersistenceInput,
 ): Promise<DepartmentRow> => {
+  const ancestors = await resolveDepartmentAncestors(db, input.parentId ?? null)
   const [row] = await db
     .insert(departments)
     .values({
@@ -629,8 +650,10 @@ export const insertDepartment = async (
       parentId: input.parentId ?? null,
       code: input.code,
       name: input.name,
+      ancestors,
       sort: input.sort ?? 0,
       status: input.status ?? "active",
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -646,24 +669,44 @@ export const updateDepartment = async (
   departmentId: string,
   input: UpdateDepartmentPersistenceInput,
 ): Promise<DepartmentRow | null> => {
+  const current = await getDepartmentById(db, departmentId)
+
+  if (!current) {
+    return null
+  }
+
   const entries = Object.entries(input).filter(
     ([, value]) => value !== undefined,
   )
 
   if (entries.length === 0) {
-    return getDepartmentById(db, departmentId)
+    return current
   }
 
-  const [row] = await db
+  const parentId =
+    input.parentId !== undefined ? (input.parentId ?? null) : current.parentId
+  const ancestors = await resolveDepartmentAncestors(db, parentId)
+
+  const [updatedRow] = await db
     .update(departments)
     .set({
       ...Object.fromEntries(entries),
+      ancestors,
       updatedAt: new Date(),
     })
     .where(eq(departments.id, departmentId))
     .returning()
 
-  return row ?? null
+  if (!updatedRow) {
+    return null
+  }
+
+  if (parentId !== current.parentId) {
+    await rebuildDepartmentAncestors(db)
+    return getDepartmentById(db, departmentId)
+  }
+
+  return updatedRow
 }
 
 export const listUserIdsForDepartment = async (
@@ -703,6 +746,74 @@ export const replaceDepartmentUserIds = async (
   )
 }
 
+export const listDepartmentIdsForUser = async (
+  db: DatabaseClient,
+  userId: string,
+): Promise<string[]> => {
+  const rows = await db
+    .select({
+      departmentId: userDepartments.departmentId,
+    })
+    .from(userDepartments)
+    .where(eq(userDepartments.userId, userId))
+    .orderBy(asc(userDepartments.departmentId))
+
+  return rows.map((row) => row.departmentId)
+}
+
+export const listExistingDepartmentIds = async (
+  db: DatabaseClient,
+  departmentIds: string[],
+): Promise<string[]> => {
+  if (departmentIds.length === 0) {
+    return []
+  }
+
+  const rows = await db
+    .select({
+      id: departments.id,
+    })
+    .from(departments)
+    .where(inArray(departments.id, [...new Set(departmentIds)]))
+
+  return rows.map((row) => row.id).sort()
+}
+
+export const listDepartmentIdsForRole = async (
+  db: DatabaseClient,
+  roleId: string,
+): Promise<string[]> => {
+  const rows = await db
+    .select({
+      deptId: roleDepts.deptId,
+    })
+    .from(roleDepts)
+    .where(eq(roleDepts.roleId, roleId))
+    .orderBy(asc(roleDepts.deptId))
+
+  return rows.map((row) => row.deptId)
+}
+
+export const replaceRoleDepartmentIds = async (
+  db: DatabaseClient,
+  roleId: string,
+  departmentIds: string[],
+): Promise<void> => {
+  await db.delete(roleDepts).where(eq(roleDepts.roleId, roleId))
+
+  const normalizedDepartmentIds = [...new Set(departmentIds)]
+  if (normalizedDepartmentIds.length === 0) {
+    return
+  }
+
+  await db.insert(roleDepts).values(
+    normalizedDepartmentIds.map((deptId) => ({
+      roleId,
+      deptId,
+    })),
+  )
+}
+
 export const listUserIdsForRole = async (
   db: DatabaseClient,
   roleId: string,
@@ -734,6 +845,110 @@ export const listExistingUserIds = async (
     .where(inArray(users.id, [...new Set(userIds)]))
 
   return rows.map((row) => row.id).sort()
+}
+
+export const listDataScopesForUser = async (
+  db: DatabaseClient,
+  userId: string,
+): Promise<DataScopeAssignment[]> => {
+  const rows = await db
+    .select({
+      roleId: roles.id,
+      dataScope: roles.dataScope,
+      code: roles.code,
+    })
+    .from(userRoles)
+    .innerJoin(roles, eq(userRoles.roleId, roles.id))
+    .where(and(eq(userRoles.userId, userId), eq(roles.status, "active")))
+    .orderBy(asc(roles.code))
+
+  const customScopeRoleIds = rows
+    .filter((row) => row.dataScope === 2)
+    .map((row) => row.roleId)
+  const customDeptRows =
+    customScopeRoleIds.length === 0
+      ? []
+      : await db
+          .select({
+            roleId: roleDepts.roleId,
+            deptId: roleDepts.deptId,
+          })
+          .from(roleDepts)
+          .where(inArray(roleDepts.roleId, customScopeRoleIds))
+          .orderBy(asc(roleDepts.roleId), asc(roleDepts.deptId))
+
+  const customDeptIdsByRole = new Map<string, string[]>()
+  for (const row of customDeptRows) {
+    const ids = customDeptIdsByRole.get(row.roleId) ?? []
+    ids.push(row.deptId)
+    customDeptIdsByRole.set(row.roleId, ids)
+  }
+
+  return rows.map((row) => ({
+    scope: row.dataScope as RoleDataScopeValue,
+    customDeptIds:
+      row.dataScope === 2
+        ? [...new Set(customDeptIdsByRole.get(row.roleId) ?? [])].sort()
+        : undefined,
+  }))
+}
+
+const resolveDepartmentAncestors = async (
+  db: DatabaseClient,
+  parentId: string | null,
+) => {
+  if (!parentId) {
+    return ""
+  }
+
+  const parent = await getDepartmentById(db, parentId)
+  if (!parent) {
+    throw new Error("Department parent does not exist")
+  }
+
+  return parent.ancestors ? `${parent.ancestors},${parent.id}` : parent.id
+}
+
+const rebuildDepartmentAncestors = async (db: DatabaseClient) => {
+  const rows = await listDepartments(db)
+  const rowsById = new Map(rows.map((row) => [row.id, row]))
+  const resolved = new Map<string, string>()
+
+  const resolveAncestors = (departmentId: string): string => {
+    const cached = resolved.get(departmentId)
+    if (cached !== undefined) {
+      return cached
+    }
+
+    const row = rowsById.get(departmentId)
+    if (!row || !row.parentId) {
+      resolved.set(departmentId, "")
+      return ""
+    }
+
+    const parentAncestors = resolveAncestors(row.parentId)
+    const ancestors = parentAncestors
+      ? `${parentAncestors},${row.parentId}`
+      : row.parentId
+
+    resolved.set(departmentId, ancestors)
+    return ancestors
+  }
+
+  for (const row of rows) {
+    const ancestors = resolveAncestors(row.id)
+    if (ancestors === row.ancestors) {
+      continue
+    }
+
+    await db
+      .update(departments)
+      .set({
+        ancestors,
+        updatedAt: new Date(),
+      })
+      .where(eq(departments.id, row.id))
+  }
 }
 
 export const replaceRoleUserIds = async (
@@ -769,6 +984,7 @@ export const insertRefreshSession = async (
       userAgent: input.userAgent ?? null,
       ip: input.ip ?? null,
       expiresAt: input.expiresAt,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -841,6 +1057,7 @@ export const insertAuditLog = async (
       userAgent: input.userAgent ?? null,
       details: input.details ?? null,
       ...(input.createdAt ? { createdAt: input.createdAt } : {}),
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 

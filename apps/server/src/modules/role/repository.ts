@@ -4,16 +4,24 @@ import {
   getRoleByCode,
   getRoleById,
   insertRole,
+  listDepartmentIdsForRole,
+  listExistingDepartmentIds,
   listExistingPermissionCodes,
   listExistingUserIds,
   listPermissionCodesForRole,
   listRoles,
   listUserIdsForRole,
+  replaceRoleDepartmentIds,
   replaceRolePermissionCodes,
   replaceRoleUserIds,
   updateRole,
 } from "@elysian/persistence"
-import type { RoleDetailRecord, RoleRecord, RoleStatus } from "@elysian/schema"
+import type {
+  RoleDataScope,
+  RoleDetailRecord,
+  RoleRecord,
+  RoleStatus,
+} from "@elysian/schema"
 
 export interface CreateRoleInput {
   code: string
@@ -21,8 +29,10 @@ export interface CreateRoleInput {
   description?: string
   status?: RoleStatus
   isSystem?: boolean
+  dataScope?: RoleDataScope
   permissionCodes?: string[]
   userIds?: string[]
+  deptIds?: string[]
 }
 
 export interface UpdateRoleInput {
@@ -31,8 +41,10 @@ export interface UpdateRoleInput {
   description?: string
   status?: RoleStatus
   isSystem?: boolean
+  dataScope?: RoleDataScope
   permissionCodes?: string[]
   userIds?: string[]
+  deptIds?: string[]
 }
 
 export interface RoleRepository {
@@ -46,12 +58,14 @@ export interface RoleRepository {
   ) => Promise<RoleDetailRecord | null>
   listExistingPermissionCodes: (codes: string[]) => Promise<string[]>
   listExistingUserIds: (userIds: string[]) => Promise<string[]>
+  listExistingDepartmentIds: (departmentIds: string[]) => Promise<string[]>
 }
 
 export interface InMemoryRoleRepositorySeed {
   roles?: RoleDetailRecord[]
   availablePermissionCodes?: string[]
   availableUserIds?: string[]
+  availableDepartmentIds?: string[]
 }
 
 export const createRoleRepository = (db: DatabaseClient): RoleRepository => ({
@@ -74,10 +88,12 @@ export const createRoleRepository = (db: DatabaseClient): RoleRepository => ({
       description: input.description ?? null,
       status: input.status,
       isSystem: input.isSystem,
+      dataScope: input.dataScope,
     })
 
     await replaceRolePermissionCodes(db, row.id, input.permissionCodes ?? [])
     await replaceRoleUserIds(db, row.id, input.userIds ?? [])
+    await replaceRoleDepartmentIds(db, row.id, input.deptIds ?? [])
 
     return buildRoleDetailRecord(db, row)
   },
@@ -88,6 +104,7 @@ export const createRoleRepository = (db: DatabaseClient): RoleRepository => ({
       description: input.description,
       status: input.status,
       isSystem: input.isSystem,
+      dataScope: input.dataScope,
     })
 
     if (!row) {
@@ -102,11 +119,17 @@ export const createRoleRepository = (db: DatabaseClient): RoleRepository => ({
       await replaceRoleUserIds(db, id, input.userIds)
     }
 
+    if (input.deptIds !== undefined) {
+      await replaceRoleDepartmentIds(db, id, input.deptIds)
+    }
+
     return buildRoleDetailRecord(db, row)
   },
   listExistingPermissionCodes: (codes) =>
     listExistingPermissionCodes(db, codes),
   listExistingUserIds: (userIds) => listExistingUserIds(db, userIds),
+  listExistingDepartmentIds: (departmentIds) =>
+    listExistingDepartmentIds(db, departmentIds),
 })
 
 export const createInMemoryRoleRepository = (
@@ -120,6 +143,7 @@ export const createInMemoryRoleRepository = (
   )
   const availablePermissionCodes = new Set(seed.availablePermissionCodes ?? [])
   const availableUserIds = new Set(seed.availableUserIds ?? [])
+  const availableDepartmentIds = new Set(seed.availableDepartmentIds ?? [])
 
   return {
     async list() {
@@ -144,8 +168,10 @@ export const createInMemoryRoleRepository = (
         description: input.description,
         status: input.status ?? "active",
         isSystem: input.isSystem ?? false,
+        dataScope: input.dataScope ?? 1,
         permissionCodes: [...new Set(input.permissionCodes ?? [])].sort(),
         userIds: [...new Set(input.userIds ?? [])].sort(),
+        deptIds: [...new Set(input.deptIds ?? [])].sort(),
         createdAt: now,
         updatedAt: now,
       }
@@ -168,6 +194,7 @@ export const createInMemoryRoleRepository = (
             description: input.description,
             status: input.status,
             isSystem: input.isSystem,
+            dataScope: input.dataScope,
           }).filter(([, value]) => value !== undefined),
         ),
         permissionCodes:
@@ -178,6 +205,10 @@ export const createInMemoryRoleRepository = (
           input.userIds !== undefined
             ? [...new Set(input.userIds)].sort()
             : existing.userIds,
+        deptIds:
+          input.deptIds !== undefined
+            ? [...new Set(input.deptIds)].sort()
+            : existing.deptIds,
         updatedAt: new Date().toISOString(),
       }
 
@@ -194,6 +225,11 @@ export const createInMemoryRoleRepository = (
         .filter((id) => availableUserIds.has(id))
         .sort()
     },
+    async listExistingDepartmentIds(departmentIds) {
+      return [...new Set(departmentIds)]
+        .filter((id) => availableDepartmentIds.has(id))
+        .sort()
+    },
   }
 }
 
@@ -206,6 +242,7 @@ const buildRoleDetailRecord = async (
   ...mapRoleRow(row),
   permissionCodes: await listPermissionCodesForRole(db, row.id),
   userIds: await listUserIdsForRole(db, row.id),
+  deptIds: await listDepartmentIdsForRole(db, row.id),
 })
 
 const mapRoleRow = (row: RoleRow): RoleRecord => ({
@@ -215,6 +252,7 @@ const mapRoleRow = (row: RoleRow): RoleRecord => ({
   description: row.description ?? undefined,
   status: row.status,
   isSystem: row.isSystem,
+  dataScope: row.dataScope as RoleDataScope,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })
@@ -225,6 +263,7 @@ const mapRoleDetailToStoredRole = (
   ...role,
   permissionCodes: [...role.permissionCodes].sort(),
   userIds: [...role.userIds].sort(),
+  deptIds: [...role.deptIds].sort(),
 })
 
 const mapStoredRoleToRoleRecord = (role: StoredRoleRecord): RoleRecord => ({
@@ -234,6 +273,7 @@ const mapStoredRoleToRoleRecord = (role: StoredRoleRecord): RoleRecord => ({
   description: role.description,
   status: role.status,
   isSystem: role.isSystem,
+  dataScope: role.dataScope,
   createdAt: role.createdAt,
   updatedAt: role.updatedAt,
 })
@@ -244,4 +284,5 @@ const mapStoredRoleToRoleDetail = (
   ...mapStoredRoleToRoleRecord(role),
   permissionCodes: [...role.permissionCodes],
   userIds: [...role.userIds],
+  deptIds: [...role.deptIds],
 })

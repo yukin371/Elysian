@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm"
+import { and, eq, inArray } from "drizzle-orm"
 
 import { type DatabaseClient, createDatabaseClient } from "./client"
 import {
@@ -12,6 +12,13 @@ import {
   userRoles,
   users,
 } from "./schema"
+import {
+  DEFAULT_TENANT_ID,
+  getTenantByCode,
+  insertTenant,
+  resetTenantContext,
+  setTenantContext,
+} from "./tenant"
 
 export interface DefaultAuthSeedConfig {
   adminUsername: string
@@ -92,6 +99,57 @@ export interface DefaultAuthSeedSpec {
   }>
 }
 
+type DefaultRoleSeed = DefaultAuthSeedSpec["roles"][number]
+type DefaultPermissionSeed = DefaultAuthSeedSpec["permissions"][number]
+type DefaultMenuSeed = DefaultAuthSeedSpec["menus"][number]
+type DefaultDictionaryTypeSeed = DefaultAuthSeedSpec["dictionaryTypes"][number]
+type DefaultDictionaryItemSeed = DefaultAuthSeedSpec["dictionaryItems"][number]
+
+export interface TenantBootstrapSeedSpec {
+  roles: Array<Omit<DefaultRoleSeed, "id">>
+  permissions: Array<Omit<DefaultPermissionSeed, "id">>
+  menus: Array<
+    Omit<DefaultMenuSeed, "id" | "parentId"> & { parentCode: string | null }
+  >
+  dictionaryTypes: Array<Omit<DefaultDictionaryTypeSeed, "id">>
+  dictionaryItems: Array<
+    Omit<DefaultDictionaryItemSeed, "id" | "typeId"> & { typeCode: string }
+  >
+  adminUser: Omit<DefaultAuthSeedSpec["adminUser"], "id" | "isSuperAdmin"> & {
+    isSuperAdmin: boolean
+  }
+  userRoles: Array<{
+    username: string
+    roleCode: string
+  }>
+  rolePermissions: Array<{
+    roleCode: string
+    permissionCode: string
+  }>
+  roleMenus: Array<{
+    roleCode: string
+    menuCode: string
+  }>
+}
+
+export interface TenantInitOptions {
+  tenantCode: string
+  tenantName: string
+  tenantStatus?: "active" | "suspended"
+  adminUsername?: string
+  adminPassword: string
+  adminDisplayName?: string
+}
+
+interface NormalizedTenantInitOptions {
+  tenantCode: string
+  tenantName: string
+  tenantStatus: "active" | "suspended"
+  adminUsername: string
+  adminPassword: string
+  adminDisplayName: string
+}
+
 const defaultAuthSeedIds = {
   roles: {
     admin: "00000000-0000-0000-0000-000000000001",
@@ -125,6 +183,9 @@ const defaultAuthSeedIds = {
     systemNotificationList: "00000000-0000-0000-0000-000000000181",
     systemNotificationCreate: "00000000-0000-0000-0000-000000000182",
     systemNotificationUpdate: "00000000-0000-0000-0000-000000000183",
+    systemTenantList: "00000000-0000-0000-0000-000000000191",
+    systemTenantCreate: "00000000-0000-0000-0000-000000000192",
+    systemTenantUpdate: "00000000-0000-0000-0000-000000000193",
     customerList: "00000000-0000-0000-0000-000000000201",
     customerCreate: "00000000-0000-0000-0000-000000000202",
     customerUpdate: "00000000-0000-0000-0000-000000000203",
@@ -143,6 +204,7 @@ const defaultAuthSeedIds = {
     customerRoot: "00000000-0000-0000-0000-000000000310",
     customerList: "00000000-0000-0000-0000-000000000311",
     systemNotifications: "00000000-0000-0000-0000-000000000312",
+    systemTenants: "00000000-0000-0000-0000-000000000313",
   },
   dictionaryTypes: {
     customerStatus: "00000000-0000-0000-0000-000000000501",
@@ -459,6 +521,33 @@ export const createDefaultAuthSeedSpec = (
         description: "Mark notifications as read",
       },
       {
+        id: defaultAuthSeedIds.permissions.systemTenantList,
+        code: "system:tenant:list",
+        module: "system",
+        resource: "tenant",
+        action: "list",
+        name: "List tenants",
+        description: "View tenant records",
+      },
+      {
+        id: defaultAuthSeedIds.permissions.systemTenantCreate,
+        code: "system:tenant:create",
+        module: "system",
+        resource: "tenant",
+        action: "create",
+        name: "Create tenant",
+        description: "Create tenant records",
+      },
+      {
+        id: defaultAuthSeedIds.permissions.systemTenantUpdate,
+        code: "system:tenant:update",
+        module: "system",
+        resource: "tenant",
+        action: "update",
+        name: "Update tenant",
+        description: "Update tenant records",
+      },
+      {
         id: defaultAuthSeedIds.permissions.customerList,
         code: "customer:customer:list",
         module: "customer",
@@ -637,6 +726,20 @@ export const createDefaultAuthSeedSpec = (
         permissionCode: "system:notification:list",
       },
       {
+        id: defaultAuthSeedIds.menus.systemTenants,
+        parentId: defaultAuthSeedIds.menus.systemRoot,
+        type: "menu",
+        code: "system-tenants",
+        name: "Tenants",
+        path: "/system/tenants",
+        component: "system/tenants/index",
+        icon: "cluster",
+        sort: 20,
+        isVisible: true,
+        status: "active",
+        permissionCode: "system:tenant:list",
+      },
+      {
         id: defaultAuthSeedIds.menus.customerRoot,
         parentId: null,
         type: "directory",
@@ -645,7 +748,7 @@ export const createDefaultAuthSeedSpec = (
         path: "/customer",
         component: null,
         icon: "briefcase",
-        sort: 20,
+        sort: 21,
         isVisible: true,
         status: "active",
         permissionCode: null,
@@ -659,7 +762,7 @@ export const createDefaultAuthSeedSpec = (
         path: "/customers",
         component: "customer/index",
         icon: "briefcase",
-        sort: 21,
+        sort: 22,
         isVisible: true,
         status: "active",
         permissionCode: "customer:customer:list",
@@ -819,6 +922,18 @@ export const createDefaultAuthSeedSpec = (
       },
       {
         roleId: defaultAuthSeedIds.roles.admin,
+        permissionId: defaultAuthSeedIds.permissions.systemTenantList,
+      },
+      {
+        roleId: defaultAuthSeedIds.roles.admin,
+        permissionId: defaultAuthSeedIds.permissions.systemTenantCreate,
+      },
+      {
+        roleId: defaultAuthSeedIds.roles.admin,
+        permissionId: defaultAuthSeedIds.permissions.systemTenantUpdate,
+      },
+      {
+        roleId: defaultAuthSeedIds.roles.admin,
         permissionId: defaultAuthSeedIds.permissions.customerList,
       },
       {
@@ -877,6 +992,10 @@ export const createDefaultAuthSeedSpec = (
       },
       {
         roleId: defaultAuthSeedIds.roles.admin,
+        menuId: defaultAuthSeedIds.menus.systemTenants,
+      },
+      {
+        roleId: defaultAuthSeedIds.roles.admin,
         menuId: defaultAuthSeedIds.menus.customerRoot,
       },
       {
@@ -887,84 +1006,587 @@ export const createDefaultAuthSeedSpec = (
   }
 }
 
+export const createTenantBootstrapSeedSpec = (
+  config: Partial<DefaultAuthSeedConfig> = {},
+): TenantBootstrapSeedSpec => {
+  const base = createDefaultAuthSeedSpec(config)
+  const roleCodeById = new Map(base.roles.map((role) => [role.id, role.code]))
+  const permissionCodeById = new Map(
+    base.permissions.map((permission) => [permission.id, permission.code]),
+  )
+  const menuCodeById = new Map(base.menus.map((menu) => [menu.id, menu.code]))
+  const dictionaryTypeCodeById = new Map(
+    base.dictionaryTypes.map((type) => [type.id, type.code]),
+  )
+  const permissions = base.permissions
+    .filter((permission) => !permission.code.startsWith("system:tenant:"))
+    .map(({ id: _id, ...permission }) => permission)
+  const permissionCodes = new Set(
+    permissions.map((permission) => permission.code),
+  )
+  const menus = base.menus
+    .filter((menu) => menu.code !== "system-tenants")
+    .map(({ id: _id, parentId, ...menu }) => ({
+      ...menu,
+      parentCode: parentId ? (menuCodeById.get(parentId) ?? null) : null,
+    }))
+    .filter(
+      (menu) =>
+        menu.permissionCode === null ||
+        permissionCodes.has(menu.permissionCode),
+    )
+  const menuCodes = new Set(menus.map((menu) => menu.code))
+
+  return {
+    roles: base.roles.map(({ id: _id, ...role }) => role),
+    permissions,
+    menus,
+    dictionaryTypes: base.dictionaryTypes.map(({ id: _id, ...type }) => type),
+    dictionaryItems: base.dictionaryItems.map(
+      ({ id: _id, typeId, ...item }) => ({
+        ...item,
+        typeCode:
+          dictionaryTypeCodeById.get(typeId) ??
+          throwMissingSeedRelation("dictionary type", typeId),
+      }),
+    ),
+    adminUser: {
+      username: base.adminUser.username,
+      displayName: base.adminUser.displayName,
+      password: base.adminUser.password,
+      status: base.adminUser.status,
+      isSuperAdmin: false,
+    },
+    userRoles: base.userRoles.map((assignment) => ({
+      username: base.adminUser.username,
+      roleCode:
+        roleCodeById.get(assignment.roleId) ??
+        throwMissingSeedRelation("role", assignment.roleId),
+    })),
+    rolePermissions: base.rolePermissions
+      .map((assignment) => ({
+        roleCode:
+          roleCodeById.get(assignment.roleId) ??
+          throwMissingSeedRelation("role", assignment.roleId),
+        permissionCode:
+          permissionCodeById.get(assignment.permissionId) ??
+          throwMissingSeedRelation("permission", assignment.permissionId),
+      }))
+      .filter((assignment) => permissionCodes.has(assignment.permissionCode)),
+    roleMenus: base.roleMenus
+      .map((assignment) => ({
+        roleCode:
+          roleCodeById.get(assignment.roleId) ??
+          throwMissingSeedRelation("role", assignment.roleId),
+        menuCode:
+          menuCodeById.get(assignment.menuId) ??
+          throwMissingSeedRelation("menu", assignment.menuId),
+      }))
+      .filter((assignment) => menuCodes.has(assignment.menuCode)),
+  }
+}
+
+export const normalizeTenantInitOptions = (
+  input: TenantInitOptions,
+): NormalizedTenantInitOptions => {
+  const tenantCode = input.tenantCode.trim()
+  const tenantName = input.tenantName.trim()
+  const adminUsername = (input.adminUsername ?? "admin").trim()
+  const adminPassword = input.adminPassword.trim()
+  const adminDisplayName = (
+    input.adminDisplayName ?? "Tenant Administrator"
+  ).trim()
+
+  if (!tenantCode) {
+    throw new Error("tenantCode is required")
+  }
+
+  if (!tenantName) {
+    throw new Error("tenantName is required")
+  }
+
+  if (!adminUsername) {
+    throw new Error("adminUsername is required")
+  }
+
+  if (!adminPassword) {
+    throw new Error("adminPassword is required")
+  }
+
+  if (!adminDisplayName) {
+    throw new Error("adminDisplayName is required")
+  }
+
+  return {
+    tenantCode,
+    tenantName,
+    tenantStatus: input.tenantStatus ?? "active",
+    adminUsername,
+    adminPassword,
+    adminDisplayName,
+  }
+}
+
 export const seedDefaultAuthData = async (
   db: DatabaseClient,
   config: Partial<DefaultAuthSeedConfig> = {},
 ) => {
   const spec = createDefaultAuthSeedSpec(config)
+  const tid = DEFAULT_TENANT_ID
 
-  await db
-    .insert(roles)
-    .values(spec.roles)
-    .onConflictDoNothing({ target: roles.code })
-  await db
-    .insert(permissions)
-    .values(spec.permissions)
-    .onConflictDoNothing({ target: permissions.code })
-  await db
-    .insert(menus)
-    .values(spec.menus)
-    .onConflictDoNothing({ target: menus.code })
-  await db
-    .insert(dictionaryTypes)
-    .values(spec.dictionaryTypes)
-    .onConflictDoNothing({ target: dictionaryTypes.code })
-  await db
-    .insert(dictionaryItems)
-    .values(spec.dictionaryItems)
-    .onConflictDoNothing({
-      target: [dictionaryItems.typeId, dictionaryItems.value],
-    })
+  return withTenantSeedContext(db, tid, async () => {
+    await db
+      .insert(roles)
+      .values(spec.roles.map((role) => ({ ...role, tenantId: tid })))
+      .onConflictDoNothing({ target: [roles.tenantId, roles.code] })
+    await db
+      .insert(permissions)
+      .values(
+        spec.permissions.map((permission) => ({
+          ...permission,
+          tenantId: tid,
+        })),
+      )
+      .onConflictDoNothing({
+        target: [permissions.tenantId, permissions.code],
+      })
+    await db
+      .insert(menus)
+      .values(spec.menus.map((menu) => ({ ...menu, tenantId: tid })))
+      .onConflictDoNothing({ target: [menus.tenantId, menus.code] })
+    await db
+      .insert(dictionaryTypes)
+      .values(spec.dictionaryTypes.map((type) => ({ ...type, tenantId: tid })))
+      .onConflictDoNothing({
+        target: [dictionaryTypes.tenantId, dictionaryTypes.code],
+      })
+    await db
+      .insert(dictionaryItems)
+      .values(spec.dictionaryItems.map((item) => ({ ...item, tenantId: tid })))
+      .onConflictDoNothing({
+        target: [dictionaryItems.typeId, dictionaryItems.value],
+      })
 
-  const existingAdmin = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.username, spec.adminUser.username))
-    .limit(1)
+    const existingAdmin = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          eq(users.tenantId, tid),
+          eq(users.username, spec.adminUser.username),
+        ),
+      )
+      .limit(1)
 
-  if (!existingAdmin[0]) {
-    const adminPasswordHash = await Bun.password.hash(spec.adminUser.password)
+    if (!existingAdmin[0]) {
+      const adminPasswordHash = await Bun.password.hash(spec.adminUser.password)
 
-    await db.insert(users).values({
-      id: spec.adminUser.id,
-      username: spec.adminUser.username,
-      displayName: spec.adminUser.displayName,
-      passwordHash: adminPasswordHash,
-      status: spec.adminUser.status,
-      isSuperAdmin: spec.adminUser.isSuperAdmin,
-    })
+      await db.insert(users).values({
+        id: spec.adminUser.id,
+        tenantId: tid,
+        username: spec.adminUser.username,
+        displayName: spec.adminUser.displayName,
+        passwordHash: adminPasswordHash,
+        status: spec.adminUser.status,
+        isSuperAdmin: spec.adminUser.isSuperAdmin,
+      })
+    }
+
+    await db
+      .insert(userRoles)
+      .values(spec.userRoles)
+      .onConflictDoNothing({ target: [userRoles.userId, userRoles.roleId] })
+    await db
+      .insert(rolePermissions)
+      .values(spec.rolePermissions)
+      .onConflictDoNothing({
+        target: [rolePermissions.roleId, rolePermissions.permissionId],
+      })
+    await db
+      .insert(roleMenus)
+      .values(spec.roleMenus)
+      .onConflictDoNothing({ target: [roleMenus.roleId, roleMenus.menuId] })
+
+    return {
+      adminUsername: spec.adminUser.username,
+      insertedAdmin: !existingAdmin[0],
+    }
+  })
+}
+
+export const initializeTenant = async (
+  db: DatabaseClient,
+  input: TenantInitOptions,
+) => {
+  const options = normalizeTenantInitOptions(input)
+  const existingTenant = await getTenantByCode(db, options.tenantCode)
+
+  if (
+    existingTenant?.id === DEFAULT_TENANT_ID ||
+    options.tenantCode === "default"
+  ) {
+    throw new Error(
+      "Default tenant must be initialized with bun run db:seed, not tenant:init",
+    )
   }
 
-  await db
-    .insert(userRoles)
-    .values(spec.userRoles)
-    .onConflictDoNothing({ target: [userRoles.userId, userRoles.roleId] })
-  await db
-    .insert(rolePermissions)
-    .values(spec.rolePermissions)
-    .onConflictDoNothing({
-      target: [rolePermissions.roleId, rolePermissions.permissionId],
-    })
-  await db
-    .insert(roleMenus)
-    .values(spec.roleMenus)
-    .onConflictDoNothing({ target: [roleMenus.roleId, roleMenus.menuId] })
+  const tenant =
+    existingTenant ??
+    (await insertTenant(db, {
+      code: options.tenantCode,
+      name: options.tenantName,
+      status: options.tenantStatus,
+    }))
+  const spec = createTenantBootstrapSeedSpec({
+    adminUsername: options.adminUsername,
+    adminPassword: options.adminPassword,
+    adminDisplayName: options.adminDisplayName,
+  })
+  const seedResult = await seedTenantBootstrapData(db, tenant.id, spec)
 
   return {
-    adminUsername: spec.adminUser.username,
-    insertedAdmin: !existingAdmin[0],
+    tenantId: tenant.id,
+    tenantCode: tenant.code,
+    tenantName: tenant.name,
+    tenantStatus: tenant.status,
+    createdTenant: !existingTenant,
+    insertedAdmin: seedResult.insertedAdmin,
+    adminUsername: seedResult.adminUsername,
   }
 }
+
 export const runDefaultSeed = async (
   env: Record<string, string | undefined> = process.env,
 ) => {
   const db = createDatabaseClient(env)
-  const config = createDefaultAuthSeedConfig(env)
-  const result = await seedDefaultAuthData(db, config)
+  try {
+    const config = createDefaultAuthSeedConfig(env)
+    const result = await seedDefaultAuthData(db, config)
 
-  console.log(
-    `[elysian] default auth seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin})`,
-  )
+    console.log(
+      `[elysian] default auth seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin})`,
+    )
+  } finally {
+    await db.$client.end()
+  }
+}
+
+const seedTenantBootstrapData = async (
+  db: DatabaseClient,
+  tenantId: string,
+  spec: TenantBootstrapSeedSpec,
+) =>
+  withTenantSeedContext(db, tenantId, async () => {
+    await db
+      .insert(roles)
+      .values(spec.roles.map((role) => ({ ...role, tenantId })))
+      .onConflictDoNothing({ target: [roles.tenantId, roles.code] })
+    await db
+      .insert(permissions)
+      .values(
+        spec.permissions.map((permission) => ({
+          ...permission,
+          tenantId,
+        })),
+      )
+      .onConflictDoNothing({
+        target: [permissions.tenantId, permissions.code],
+      })
+    await insertTenantBootstrapMenus(db, tenantId, spec.menus)
+    await db
+      .insert(dictionaryTypes)
+      .values(spec.dictionaryTypes.map((type) => ({ ...type, tenantId })))
+      .onConflictDoNothing({
+        target: [dictionaryTypes.tenantId, dictionaryTypes.code],
+      })
+
+    const dictionaryTypeRows =
+      spec.dictionaryTypes.length === 0
+        ? []
+        : await db
+            .select({
+              id: dictionaryTypes.id,
+              code: dictionaryTypes.code,
+            })
+            .from(dictionaryTypes)
+            .where(
+              and(
+                eq(dictionaryTypes.tenantId, tenantId),
+                inArray(
+                  dictionaryTypes.code,
+                  spec.dictionaryTypes.map((type) => type.code),
+                ),
+              ),
+            )
+    const dictionaryTypeIdByCode = new Map(
+      dictionaryTypeRows.map((row) => [row.code, row.id]),
+    )
+
+    for (const item of spec.dictionaryItems) {
+      const typeId =
+        dictionaryTypeIdByCode.get(item.typeCode) ??
+        throwMissingSeedRelation("dictionary type code", item.typeCode)
+
+      await db
+        .insert(dictionaryItems)
+        .values({
+          typeId,
+          value: item.value,
+          label: item.label,
+          sort: item.sort,
+          isDefault: item.isDefault,
+          status: item.status,
+          tenantId,
+        })
+        .onConflictDoNothing({
+          target: [dictionaryItems.typeId, dictionaryItems.value],
+        })
+    }
+
+    const existingAdmin = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          eq(users.tenantId, tenantId),
+          eq(users.username, spec.adminUser.username),
+        ),
+      )
+      .limit(1)
+
+    if (!existingAdmin[0]) {
+      const adminPasswordHash = await Bun.password.hash(spec.adminUser.password)
+
+      await db.insert(users).values({
+        tenantId,
+        username: spec.adminUser.username,
+        displayName: spec.adminUser.displayName,
+        passwordHash: adminPasswordHash,
+        status: spec.adminUser.status,
+        isSuperAdmin: spec.adminUser.isSuperAdmin,
+      })
+    }
+
+    const roleRows =
+      spec.roles.length === 0
+        ? []
+        : await db
+            .select({
+              id: roles.id,
+              code: roles.code,
+            })
+            .from(roles)
+            .where(
+              and(
+                eq(roles.tenantId, tenantId),
+                inArray(
+                  roles.code,
+                  spec.roles.map((role) => role.code),
+                ),
+              ),
+            )
+    const permissionRows =
+      spec.permissions.length === 0
+        ? []
+        : await db
+            .select({
+              id: permissions.id,
+              code: permissions.code,
+            })
+            .from(permissions)
+            .where(
+              and(
+                eq(permissions.tenantId, tenantId),
+                inArray(
+                  permissions.code,
+                  spec.permissions.map((permission) => permission.code),
+                ),
+              ),
+            )
+    const menuRows =
+      spec.menus.length === 0
+        ? []
+        : await db
+            .select({
+              id: menus.id,
+              code: menus.code,
+            })
+            .from(menus)
+            .where(
+              and(
+                eq(menus.tenantId, tenantId),
+                inArray(
+                  menus.code,
+                  spec.menus.map((menu) => menu.code),
+                ),
+              ),
+            )
+    const adminRows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+      })
+      .from(users)
+      .where(
+        and(
+          eq(users.tenantId, tenantId),
+          eq(users.username, spec.adminUser.username),
+        ),
+      )
+      .limit(1)
+    const adminUserId =
+      adminRows[0]?.id ??
+      throwMissingSeedRelation("admin user", spec.adminUser.username)
+    const roleIdByCode = new Map(roleRows.map((row) => [row.code, row.id]))
+    const permissionIdByCode = new Map(
+      permissionRows.map((row) => [row.code, row.id]),
+    )
+    const menuIdByCode = new Map(menuRows.map((row) => [row.code, row.id]))
+
+    await db
+      .insert(userRoles)
+      .values(
+        spec.userRoles.map((assignment) => ({
+          userId: adminUserId,
+          roleId:
+            roleIdByCode.get(assignment.roleCode) ??
+            throwMissingSeedRelation("role code", assignment.roleCode),
+        })),
+      )
+      .onConflictDoNothing({ target: [userRoles.userId, userRoles.roleId] })
+    await db
+      .insert(rolePermissions)
+      .values(
+        spec.rolePermissions.map((assignment) => ({
+          roleId:
+            roleIdByCode.get(assignment.roleCode) ??
+            throwMissingSeedRelation("role code", assignment.roleCode),
+          permissionId:
+            permissionIdByCode.get(assignment.permissionCode) ??
+            throwMissingSeedRelation(
+              "permission code",
+              assignment.permissionCode,
+            ),
+        })),
+      )
+      .onConflictDoNothing({
+        target: [rolePermissions.roleId, rolePermissions.permissionId],
+      })
+    await db
+      .insert(roleMenus)
+      .values(
+        spec.roleMenus.map((assignment) => ({
+          roleId:
+            roleIdByCode.get(assignment.roleCode) ??
+            throwMissingSeedRelation("role code", assignment.roleCode),
+          menuId:
+            menuIdByCode.get(assignment.menuCode) ??
+            throwMissingSeedRelation("menu code", assignment.menuCode),
+        })),
+      )
+      .onConflictDoNothing({ target: [roleMenus.roleId, roleMenus.menuId] })
+
+    return {
+      adminUsername: spec.adminUser.username,
+      insertedAdmin: !existingAdmin[0],
+    }
+  })
+
+const insertTenantBootstrapMenus = async (
+  db: DatabaseClient,
+  tenantId: string,
+  menuSpecs: TenantBootstrapSeedSpec["menus"],
+) => {
+  const pending = [...menuSpecs]
+  const resolvedMenuIds = new Map<string, string>()
+
+  while (pending.length > 0) {
+    let progressed = false
+
+    for (let index = 0; index < pending.length; ) {
+      const current = pending[index]
+      if (!current) {
+        index += 1
+        continue
+      }
+      const parentId = current.parentCode
+        ? (resolvedMenuIds.get(current.parentCode) ??
+          (await resolveTenantMenuIdByCode(db, tenantId, current.parentCode)))
+        : null
+
+      if (current.parentCode && !parentId) {
+        index += 1
+        continue
+      }
+
+      await db
+        .insert(menus)
+        .values({
+          parentId,
+          type: current.type,
+          code: current.code,
+          name: current.name,
+          path: current.path,
+          component: current.component,
+          icon: current.icon,
+          sort: current.sort,
+          isVisible: current.isVisible,
+          status: current.status,
+          permissionCode: current.permissionCode,
+          tenantId,
+        })
+        .onConflictDoNothing({ target: [menus.tenantId, menus.code] })
+
+      const menuId =
+        (await resolveTenantMenuIdByCode(db, tenantId, current.code)) ??
+        throwMissingSeedRelation("menu code", current.code)
+      resolvedMenuIds.set(current.code, menuId)
+      pending.splice(index, 1)
+      progressed = true
+    }
+
+    if (!progressed) {
+      throw new Error(
+        `Unable to resolve tenant bootstrap menu parent chain: ${pending
+          .map((menu) => menu.code)
+          .join(", ")}`,
+      )
+    }
+  }
+}
+
+const resolveTenantMenuIdByCode = async (
+  db: DatabaseClient,
+  tenantId: string,
+  code: string,
+): Promise<string | null> => {
+  const [row] = await db
+    .select({
+      id: menus.id,
+    })
+    .from(menus)
+    .where(and(eq(menus.tenantId, tenantId), eq(menus.code, code)))
+    .limit(1)
+
+  return row?.id ?? null
+}
+
+const withTenantSeedContext = async <T>(
+  db: DatabaseClient,
+  tenantId: string,
+  action: () => Promise<T>,
+) => {
+  await setTenantContext(db, tenantId)
+
+  try {
+    return await action()
+  } finally {
+    await resetTenantContext(db)
+  }
+}
+
+const throwMissingSeedRelation = (type: string, value: string): never => {
+  throw new Error(`Missing seed relation for ${type}: ${value}`)
 }
 
 if (import.meta.main) {
