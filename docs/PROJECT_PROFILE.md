@@ -166,7 +166,7 @@
 
 - 前端适配层尚未定稿，容易过早耦合到某一个框架。
 - 认证策略已初步固定，但复杂组织权限、数据范围和跨部门隔离仍未进入实现，后续阶段容易出现边界膨胀。
-- 多租户基础能力已接入 `feature/dev/main` 的 CI tenant e2e 作业，并已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察；当前无系统性失败信号，但生产发布平台、数据库快照编排与发布后演练仍未固化到仓库自动化。
+- 多租户基础能力已接入 `feature/dev/main` 的 CI tenant e2e 作业，并已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察；当前无系统性失败信号，且仓库已补 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 作为 release rehearsal 执行层自动化，但生产发布平台、数据库快照编排与发布后演练仍未固化到平台级自动化。
 - 文件模块当前只验证了本地磁盘存储适配器，尚未进入对象存储、多副本或生产级生命周期治理。
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。
@@ -194,6 +194,9 @@
 - `bun run e2e:tenant:upgrade:finalize`
 - `bun run e2e:tenant:upgrade:finalize:from-downloads`
 - `bun run e2e:tenant:upgrade:finalize:from-github`（需本机已安装并登录 `gh` CLI）
+- `bun run tenant:release:report`（既有 tenant migration/release runbook 的 rehearsal report 自动化；不等于生产平台发布命令）
+- `bun run tenant:release:gate`（既有 tenant migration/release runbook 的 rehearsal gate 自动化；不等于生产平台发布命令）
+- `bun run tenant:release:finalize`（既有 tenant migration/release runbook 的 rehearsal finalize 自动化；不等于生产平台发布命令）
 - `bun run e2e:generator:safe-apply`
 - `bun run e2e:generator:matrix`
 - `bun run e2e:generator:cli`
@@ -240,6 +243,9 @@
 - Tenant 升级收尾：`bun run e2e:tenant:upgrade:finalize`
 - Tenant 从下载包收尾：`bun run e2e:tenant:upgrade:finalize:from-downloads`
 - Tenant 从 GitHub 一键收尾：`bun run e2e:tenant:upgrade:finalize:from-github`
+- Tenant 发布演练报告：`bun run tenant:release:report`
+- Tenant 发布演练门禁：`bun run tenant:release:gate`
+- Tenant 发布演练收尾：`bun run tenant:release:finalize`
 - E2E 冒烟报告诊断：`bun run e2e:smoke:diagnose`
 - E2E 冒烟报告索引：`bun run e2e:smoke:reports:index`
 - E2E 冒烟报告门禁：`bun run e2e:smoke:reports:gate`

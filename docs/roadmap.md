@@ -138,6 +138,7 @@
 - 已完成：`feature-p6b1-tenant-isolation -> dev -> main` 已全部晋级，`dev` push / workflow_dispatch 与 `main` push / workflow_dispatch 均已包含 `e2e-tenant` job 与 artifact
 - 已完成：基于 `dev` 最近 `10` 次 tenant artifact（含 `24888296758 / 24888362434 / 24888586126 / 24888651338 / 24888706653 / 24888757984 / 24888812971 / 24888870698 / 24888923973 / 24888972790`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
+- 已完成最小执行层自动化：新增 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize`，把既有 tenant migration/release runbook 收敛为 rehearsal report / gate / finalize 三段式入口；这些脚本仅服务发布演练，不代表生产平台命令、owner 边界或发布责任已变更
 - 下一步：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)

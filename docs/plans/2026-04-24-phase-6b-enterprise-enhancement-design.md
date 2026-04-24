@@ -97,12 +97,16 @@
 - `bun run e2e:tenant:upgrade:finalize`
 - `bun run e2e:tenant:upgrade:finalize:from-downloads`
 - `bun run e2e:tenant:upgrade:finalize:from-github`
+- `bun run tenant:release:report`
+- `bun run tenant:release:gate`
+- `bun run tenant:release:finalize`
 - `.github/workflows/ci.yml` 已接入 `e2e-tenant` 作业，复用 PostgreSQL service + `bun run e2e:tenant:full`，并在单次 tenant e2e 后生成稳定性快照 artifact
 
 ## 待补验证
 
 - 生产环境迁移 / 放量 / 回滚演练
 - 升级执行 runbook、回滚路径与冻结阈值后的操作演练
+- 真实生产平台、数据库快照编排与自动化回滚责任边界
 
 ## 真实观察窗口达标记录
 
@@ -149,6 +153,7 @@
 1. 基于 `ADR-0009` 和当前 `feature/dev/main` 全部 `candidate_for_next_step` 结论，进入多租户迁移/发布 runbook 与升级执行评审。
 2. 冻结当前 tenant e2e 与稳定性观察阈值，避免升级执行前策略漂移。
 3. 将后续观察重点从“主线拿到 artifact”切换为“生产发布演练与发布后观察责任边界”。
+4. 继续把发布演练重点放在目标环境执行、数据库快照编排与回滚责任边界；已落地的 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 仅服务 runbook 演练，不等于生产平台命令。
 
 执行手册：
 - [2026-04-24-phase-6b-tenant-upgrade-runbook.md](./2026-04-24-phase-6b-tenant-upgrade-runbook.md)

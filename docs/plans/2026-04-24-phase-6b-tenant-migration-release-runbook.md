@@ -20,6 +20,14 @@
 
 因此，本手册只定义“当前人工可执行的发布顺序与门槛”，不虚构平台命令。
 
+为减少发布演练时的人工拼装，仓库当前已提供一组“执行层自动化”脚本入口：
+
+- `tenant:release:report`
+- `tenant:release:gate`
+- `tenant:release:finalize`
+
+这些入口当前只表示“把既有 runbook 步骤收敛为 rehearsal report / gate / finalize 三段式入口”的执行层自动化；它们不表示仓库已存在生产平台发布脚本，也不改变既有 owner 边界。
+
 ## 适用范围
 
 适用于触及以下任一项且准备进入 `dev -> main` 发布评审的改动：
@@ -57,6 +65,9 @@
    - roadmap
    - 阶段计划
    - 相关 runbook
+5. 若使用 release rehearsal 自动化脚本辅助演练：
+   - 只能把 `tenant:release:report` / `tenant:release:gate` / `tenant:release:finalize` 视为本手册步骤的执行层映射
+   - 不得把这些脚本解释为生产平台发布命令
 
 ## 发布输入
 
@@ -184,6 +195,12 @@ bun run tenant:init -- --code <tenant-code> --name <tenant-name> --admin-passwor
 - 发布后验证结果
 - 风险、未验证区域、回滚路径
 
+若本次同时做了 release rehearsal 演练，还应附带记录：
+
+- 使用的执行入口（`tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize`）
+- 每一步映射到本手册的哪一段人工检查
+- 是否仍存在需要人工确认的平台级空白
+
 ## 回滚路径
 
 ### 场景 1：迁移前发现问题
@@ -221,6 +238,7 @@ bun run tenant:init -- --code <tenant-code> --name <tenant-name> --admin-passwor
 
 ## 后续待补
 
+- 为 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 继续补 GitHub/manual release rehearsal 接线、目标环境输入与失败分类时，前提仍是生产平台边界先被确认
 - 生产部署平台确定后的平台级命令与责任边界
 - 历史单租户到多租户的数据迁移与回填策略
 - 更高规模 tenant 样本、发布频率与灰度节奏
