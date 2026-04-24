@@ -317,7 +317,7 @@ AI 辅助开发  ──→ 生产强化  ──→ 平台扩展
 - [x] 健康检查和指标可被监控系统采集
 - [x] 数据权限可按组织 / 角色粒度控制
 - [x] 核心用户流程有 E2E 测试覆盖
-- [ ] 发布值班手册入口与 `Tenant 发布 blocker 确认单` 的 `8` 个真实 blocker 证据已收口
+- [ ] `Tenant 发布 blocker 确认单` 的 `8` 个真实 blocker 证据已收口
 
 ---
 
@@ -382,7 +382,7 @@ Phase 1 (垂直切片)
 3. ✅ 已完成 `P6A` 与 `P6A Round-2`：容器化、smoke、指标、安全、稳定性观察与出口判定均已达标。
 4. ✅ 已完成 `P6B1`：多租户 schema、`tenant_id`、PostgreSQL RLS、JWT `tid`、tenant context、tenant-aware seed 已收口。
 5. ✅ 已完成 `P6B2`：`data_scope` 5 档、部门树过滤与业务表接入已落地并有测试覆盖。
-6. 🚧 正在推进 `P6B3`：租户管理、`tenant:init`、setting fallback、ADR-0009、真实 PostgreSQL 验证、CI、滚动观察、迁移/发布演练 runbook、checklist、样例与 GitHub manual rehearsal 已完成；剩余重点为是否固化到发布值班手册，以及 `Tenant 发布 blocker 确认单` 的 `8` 个真实 blocker 证据。
+6. 🚧 正在推进 `P6B3`：租户管理、`tenant:init`、setting fallback、ADR-0009、真实 PostgreSQL 验证、CI、滚动观察、迁移/发布演练 runbook、checklist、样例与 GitHub manual rehearsal 已完成；GitHub `Tenant Release Rehearsal` 现已固定为默认 rehearsal 入口，剩余重点为 `Tenant 发布 blocker 确认单` 的 `8` 个真实 blocker 证据。
 7. 🚧 已补最小 release rehearsal 执行层自动化：`tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 与 GitHub `Tenant Release Rehearsal` workflow，当前仅用于 runbook 演练，不等于生产平台命令。
 
 ### 文档产物要求

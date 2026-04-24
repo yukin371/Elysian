@@ -210,6 +210,6 @@ GitHub 手动演练又额外证明了两件事：
 
 ## 下一步
 
-1. 决定是否把 `Tenant Release Rehearsal` 固化进发布值班手册，作为默认的 rehearsal 入口。
+1. GitHub `Tenant Release Rehearsal` 已固定为默认的 rehearsal 入口；若 GitHub 手动入口不可用，再回退到 runbook + shell env 路径。
 2. 若继续逼近真实发布评审，只补目标环境数据库角色、备份回滚、`e2e:tenant:full` 与发布后最小验证这 `8` 个真实 blocker。
 3. 在引入任何平台级发布命令前，继续维持 `tenant:release:*` 与 `Tenant Release Rehearsal` 只服务 rehearsal，不拥有生产审批与回滚能力。

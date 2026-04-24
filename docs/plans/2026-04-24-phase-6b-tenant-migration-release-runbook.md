@@ -40,6 +40,12 @@
 
 该 workflow 明确不表示生产发布平台或自动回滚平台已落地。
 
+当前决定：
+
+- 对于触及 tenant 发布评审的改动，GitHub `Tenant Release Rehearsal` 作为默认 rehearsal 入口
+- `tenant:release:*` 的 shell env 路径保留为备用入口，仅在 GitHub 手动入口不可用或不适合当前环境时使用
+- 无论使用哪条路径，都不改变“rehearsal-only”的边界
+
 ## 适用范围
 
 适用于触及以下任一项且准备进入 `dev -> main` 发布评审的改动：
@@ -164,9 +170,15 @@ bun run tenant:release:finalize
 
 ### GitHub 手动演练入口
 
-若不想手工拼装环境变量，可使用：
+当前默认入口：
 
 - GitHub Actions: `Tenant Release Rehearsal`
+
+备用入口：
+
+- `tenant:release:report`
+- `tenant:release:gate`
+- `tenant:release:finalize`
 
 使用约束：
 
@@ -176,6 +188,7 @@ bun run tenant:release:finalize
 - 该 workflow 会在 checkout 后立即捕获一次 git worktree 基线，避免后续 `.ci-reports` 或依赖安装副作用污染 `gitWorktreeClean` 判定。
 - 其余布尔输入本质上仍是人工确认项，只是从 shell env 改为 GitHub 表单输入，不改变责任归属。
 - 若环境 owner、DBA owner 或发布负责人尚未完成确认，不应把对应输入改成 `true`。
+- 若 GitHub 手动入口不可用，才回退到本手册前述 shell env 路径，不再把两条路径都视为默认流程。
 
 ### GitHub 手动演练速用步骤
 
@@ -210,6 +223,12 @@ bun run tenant:release:finalize
    - blocker 数
    - blocker 是否只剩真实人工前提项
 7. 若准备从“保守失败演练”推进到“通过态评审”，直接使用 [release-checklist.md](../release-checklist.md) 中的 `Tenant 发布 blocker 确认单` 逐项补齐剩余 `8` 个 blocker
+
+若需回退到 shell env 路径，应额外记录：
+
+- 为什么当前不能使用 GitHub 手动入口
+- 本次改走了哪一组 `tenant:release:*` 命令
+- shell env 输入与 GitHub 表单输入如何一一对应
 
 当前参考样例：
 
@@ -407,7 +426,7 @@ bun run tenant:init -- --code <tenant-code> --name <tenant-name> --admin-passwor
 
 ## 后续待补
 
-- 为 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 继续补 GitHub/manual release rehearsal 接线、目标环境输入与失败分类时，前提仍是生产平台边界先被确认
+- 为默认 rehearsal 入口继续补目标环境输入模板、失败分类与归档示例时，前提仍是生产平台边界先被确认
 - 生产部署平台确定后的平台级命令与责任边界
 - 历史单租户到多租户的数据迁移与回填策略
 - 更高规模 tenant 样本、发布频率与灰度节奏

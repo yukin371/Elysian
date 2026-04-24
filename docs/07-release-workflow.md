@@ -1,6 +1,6 @@
 # 发布流转
 
-更新时间：`2026-04-21`
+更新时间：`2026-04-24`
 
 本文档定义 `Elysian` 当前阶段的标准开发与发布流转，目标是让团队在不引入复杂发布平台的前提下，保持：
 
@@ -75,6 +75,13 @@
 2. 按 [release-checklist.md](./release-checklist.md) 执行
 3. 发起 `dev -> main` PR
 4. 合并后记录版本说明
+
+若本次发布触及 tenant 相关能力，补充约束：
+
+1. 默认先执行 GitHub Actions `Tenant Release Rehearsal`
+2. 以 [2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md) 的“GitHub 手动演练速用步骤”为准
+3. 仅当 GitHub 手动入口不可用或不适合当前环境时，才回退到 runbook + shell env 路径
+4. 无论使用哪条路径，`tenant:release:*` 都只表示 rehearsal 入口，不表示生产发布平台命令
 
 ### 文档/治理改动
 

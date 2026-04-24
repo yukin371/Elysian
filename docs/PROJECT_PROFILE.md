@@ -101,7 +101,7 @@
 - 仓库已具备最小质量链路：`Biome + GitHub Actions CI`。
 - CI workflow 已升级至 Node 24 兼容 action 版本（`actions/checkout@v5`、`actions/download-artifact@v7`、`actions/upload-artifact@v6`）。
 - 仓库 CI 已新增 `e2e-smoke` 作业（PostgreSQL service + migrate/seed + 登录/customer CRUD 冒烟）、`e2e-tenant` 作业（真实 PostgreSQL 下 tenant init 幂等、super-admin 授权、跨租户隔离、RLS/FK 验证 + artifact 归档）、`e2e-generator-safe-apply` 作业（生成安全覆盖三场景冒烟）、`e2e-generator-matrix` 作业（多 schema / 多策略回归矩阵）、`e2e-generator-cli` 作业（CLI 真实执行路径回归）、`p5a-handoff-corpus` 作业（P5A 语料分类回归 + artifact 归档）、`p5a-acceptance` 作业（P5A 阶段最小闭环验收 + artifact 归档）、`e2e-generator-report-index` 作业（汇总报告索引 artifact）与 `e2e-generator-report-gate` 作业（门禁判定 artifact）。
-- GitHub Actions 当前还提供 `Tenant Release Rehearsal` 手动工作流：先从 GitHub 下载 tenant artifact 生成 evidence / decision，再把人工确认项映射给 `tenant:release:finalize`；该入口仅服务 release rehearsal，不代表生产发布平台命令。
+- GitHub Actions 当前还提供 `Tenant Release Rehearsal` 手动工作流：先从 GitHub 下载 tenant artifact 生成 evidence / decision，再把人工确认项映射给 `tenant:release:finalize`；该入口仅服务 release rehearsal，不代表生产发布平台命令，当前已固定为 tenant 发布演练默认入口。
 - `Tenant Release Rehearsal` 已完成一次真实 GitHub `workflow_dispatch` 验证（run `24894806843`）：workflow 可稳定下载 tenant artifact、生成 evidence / decision、执行 release gate 并上传 rehearsal artifact；在固定 checkout 后 git 基线后，gate 仅保留目标环境与发布后验证相关的 `8` 个预期 blocker。
 - `scripts/e2e-smoke.ts` 已支持输出 `e2e-smoke-report.json`（状态、阶段、失败分类、失败信息），CI `e2e-smoke` 作业已归档 smoke report artifact。
 - 已新增 `bun run e2e:smoke:diagnose`，可基于 smoke 报告输出诊断结论与建议动作；CI `e2e-smoke` 已接入该诊断步骤并归档诊断结果。

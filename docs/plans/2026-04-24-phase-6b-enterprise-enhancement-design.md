@@ -162,7 +162,7 @@
 
 ## 下一步
 
-1. 决定是否把已验证的 GitHub `Tenant Release Rehearsal` 固化进发布值班手册，作为默认的 rehearsal 入口。
+1. 已把 GitHub `Tenant Release Rehearsal` 固化为默认的 rehearsal 入口；若 GitHub 手动入口不可用，再回退到 runbook + shell env 路径。
 2. 若继续逼近真实发布评审，只补目标环境数据库角色、备份回滚、`e2e:tenant:full` 与发布后最小验证这 `8` 个真实 blocker。
 3. 冻结当前 tenant e2e 与稳定性观察阈值，避免升级执行前策略漂移。
 4. 继续维持 `tenant:release:*` 与 GitHub `Tenant Release Rehearsal` 的 rehearsal-only 边界，不把它们写成生产平台命令。
