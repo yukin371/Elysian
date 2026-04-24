@@ -101,29 +101,28 @@
 
 ## 待补验证
 
-- tenant e2e 的稳定性观察窗口样本积累与 evidence 结论
 - 更高规模 tenant 样本与回归频率策略
+- 升级执行 runbook、回滚路径与冻结阈值后的操作演练
 
-## 首次真实观察记录
+## 真实观察窗口达标记录
 
 - 样本来源：`workflow_dispatch` / `feature-p6b1-tenant-isolation`
-- GitHub runId：`24885957451`
-- 执行方式：`bun run e2e:tenant:upgrade:finalize:from-github -- --branch feature-p6b1-tenant-isolation --limit 1 --scan-limit 10`
+- GitHub runIds：`24886462252`、`24886403317`、`24886352160`、`24886285868`、`24886175279`
+- 执行方式：`bun run e2e:tenant:upgrade:finalize:from-github -- --branch feature-p6b1-tenant-isolation --limit 5 --scan-limit 15`
 - 结论：
-  - `selectedWindowRuns=1`
+  - `selectedWindowRuns=5`
   - `windowSize=5`
   - `failedRunCount=0`
+  - `maxConsecutiveFailedRuns=0`
   - `systemicBlockerDetected=false`
-  - `qualifiedForNextStep=false`
-  - `recommendation=continue_observation`
-- 当前阻断项：
-  - 样本不足：仅 `1/5`，尚未达到升级执行门禁
+  - `qualifiedForNextStep=true`
+  - `recommendation=candidate_for_next_step`
 - 当前判断：
-  - 真实 tenant artifact 下载、collect、evidence、decision、gate 链路均已跑通
-  - 当前尚不存在系统性失败信号，但还不能把单次成功误判为长期稳定
+  - 真实 tenant artifact 下载、collect、evidence、decision、gate 链路已在 `5/5` 窗口下闭环跑通
+  - 当前不存在系统性失败、依赖失败或环境失败信号，可进入下一步升级执行评审
 
 ## 下一步
 
-1. 连续积累 tenant 稳定性快照 artifact，并优先用 `e2e:tenant:upgrade:finalize:from-github` 或 `e2e:tenant:upgrade:finalize:from-downloads` 输出统一的 evidence / decision / gate 结论。
-2. 基于 `ADR-0009` 和升级决策结论设计后续多租户迁移/发布 runbook 或 CI 策略。
+1. 基于 `ADR-0009` 和当前 `candidate_for_next_step` 结论，进入多租户迁移/发布 runbook 与升级执行评审。
+2. 冻结当前 tenant e2e 与稳定性观察阈值，避免升级执行前策略漂移。
 3. 在更高规模 tenant 样本下继续压实回归频率与执行窗口。
