@@ -60,6 +60,49 @@
 
 这说明 GitHub 手动演练入口已经达到可归档状态：workflow 自身结构风险已收口，当前 gate 只阻断真实目标环境确认与发布后验证缺失。
 
+### 预填版 Blocker 确认单
+
+可直接在本段基础上补人工证据：
+
+```text
+Tenant 发布 blocker 确认单
+
+- release environment: staging-rehearsal-github
+- release commit / PR: 9593301864efb6d36fe98c03b9662731bbbe40a2 / #3
+- workflow run id: 24894806843
+
+- databaseRoleConfirmed: false
+  evidence:
+- backupReady: false
+  evidence:
+- tenantFullPassed: false
+  evidence:
+- defaultTenantLoginVerified: false
+  evidence:
+- superAdminTenantAccessVerified: false
+  evidence:
+- tenantAdminDeniedVerified: false
+  evidence:
+- nonDefaultTenantLoginVerified: false
+  evidence:
+- crossTenantIsolationVerified: false
+  evidence:
+```
+
+当前这份预填版对应的状态是：
+
+- 已确认：
+  - `headMatchesObservationWindow=true`
+  - `docsSynced=true`
+  - `rollbackPrepared=true`
+  - `checkPassed=true`
+  - `buildVuePassed=true`
+- 待补真实证据：
+  - 数据库角色
+  - 备份回滚
+  - `e2e:tenant:full`
+  - 发布后最小验证五项
+
 ## 输入说明
 
 本次样例采用“保守失败”策略：
