@@ -66,12 +66,12 @@
 
 ### WP-4 ADR-0009 多租户升级路径
 
-状态：待实现
+状态：已完成（决策归档）
 
 当前约束：
 
 - 仅在需要固定长期升级/迁移策略时新增 ADR
-- 本轮先记录实现边界，不提前冻结仍在演进中的细节
+- 本轮已归档 [ADR-0009](../decisions/ADR-0009-tenant-upgrade-and-validation-strategy.md)，固定默认租户与非默认租户初始化分离、tenant bootstrap 幂等、真实 PostgreSQL 验证门槛与连接回收要求
 
 ## 风险清理
 
@@ -92,11 +92,10 @@
 ## 待补验证
 
 - 将 `e2e:tenant:full` 纳入 CI 或阶段门禁
-- `WP-4 ADR-0009` 的升级/迁移策略固化
 - 更高规模 tenant 样本与回归频率策略
 
 ## 下一步
 
-1. 收口并提交当前 `P6B3/WP-1 + WP-2 + WP-3` 与真实 PostgreSQL 验证修复。
-2. 进入 `WP-4 ADR-0009`，固化多租户升级与迁移策略。
-3. 评估 `e2e:tenant:full` 的 CI 化或阶段门禁接入方式。
+1. 评估 `e2e:tenant:full` 的 CI 化或阶段门禁接入方式。
+2. 基于 `ADR-0009` 设计后续多租户迁移/发布 runbook 或 CI 策略。
+3. 在更高规模 tenant 样本下继续压实回归频率与执行窗口。
