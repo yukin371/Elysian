@@ -142,7 +142,8 @@
 - 已完成：发布检查清单已补 tenant 发布演练附加检查、输入映射与补充记录模板，`P6B3` 的 runbook 与 release checklist 已形成同一执行口径
 - 已完成：已产出一份可归档的 tenant release rehearsal 样例记录，证明在目标环境确认和发布后验证缺失时，rehearsal gate 会按预期阻断
 - 已完成：新增 `Tenant Release Rehearsal` GitHub 手动工作流，用表单化输入承接既有 `ELYSIAN_TENANT_RELEASE_*` 人工确认项；该工作流仅服务 rehearsal，不代表生产发布入口
-- 下一步：先用一次真实的 GitHub manual rehearsal 验证新 workflow 的输入、artifact 与 gate 结论；若结果稳定，再决定是否将该入口固化进发布值班手册，继续保持其 rehearsal-only 边界
+- 已完成：真实 GitHub manual rehearsal（run `24894806843`）已验证新 workflow 的输入、artifact 与 gate 行为；在 `gitWorktreeClean=true` 前提下，最终只保留目标环境确认与发布后验证相关的 `8` 个预期 blocker
+- 下一步：决定是否把该 workflow 固定进发布值班手册；若继续推进真实发布评审，则只补目标环境确认、备份回滚与发布后最小验证，不再额外处理 workflow 结构风险
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
 - 迁移/发布手册：[2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md)
