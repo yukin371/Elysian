@@ -14,15 +14,15 @@
 
 - 默认 rehearsal 入口：GitHub `Tenant Release Rehearsal`
 - 备用 rehearsal 入口：`tenant:release:report` / `tenant:release:gate` / `tenant:release:finalize`
-- 已验证 workflow run：`24894806843`
-- 当前已知状态：workflow 结构链路稳定，最终只剩 `8` 个真实 blocker
+- 已验证 workflow run：`24902244089`
+- 当前已知状态：已自动补齐最新 head `ad29f09` 的 `5/5` tenant 观察窗口，workflow 结构链路稳定，最终只剩 `7` 个真实 blocker
 
 ## 当前发布元数据
 
 ```text
 release environment: staging-rehearsal-github
-release commit / PR: 9593301864efb6d36fe98c03b9662731bbbe40a2 / #3
-workflow run id: 24894806843
+release commit / PR: ad29f09e9a6f6be3cc75730a4d284a71c60c989a / #3
+workflow run id: 24902244089
 artifact: tenant-release-rehearsal-report
 release report path: release/tenant-release-report.json
 release gate report path: release/tenant-release-gate-report.json
@@ -32,7 +32,7 @@ fallback reason:
 
 ## 已确认的非 blocker 前提
 
-这些项已经在最新已验证的 manual rehearsal 样例中成立，不属于当前剩余 `8` 个 blocker：
+这些项已经在最新已验证的 GitHub rehearsal 样例中成立，不属于当前剩余 `7` 个 blocker：
 
 ```text
 headMatchesObservationWindow: true
@@ -43,6 +43,19 @@ buildVuePassed: true
 gitWorktreeClean: true
 qualifiedForNextStep: true
 recommendation: candidate_for_next_step
+```
+
+最新自动化取证：
+
+```text
+latest 5/5 observation runs:
+- 24902162100
+- 24902107795
+- 24902051892
+- 24901998931
+- 24901849209
+latest release rehearsal artifact dir:
+- .ci-reports/gh-rehearsal-run-24902244089
 ```
 
 ## 收证顺序
