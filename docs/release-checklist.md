@@ -81,6 +81,7 @@
 若本次同时执行 tenant release rehearsal：
 
 - [ ] 已记录 `tenant:release:*` 仅为 rehearsal 入口，不代表生产平台命令
+- [ ] 若使用 GitHub `Tenant Release Rehearsal`，已记录 workflow run id、artifact 位置、最终 blocker 数与是否只剩真实人工前提项
 - [ ] 已归档 `tenant-release-report.json`
 - [ ] 已归档 `tenant-release-gate-report.json`
 - [ ] 已记录仍需人工确认的平台级空白

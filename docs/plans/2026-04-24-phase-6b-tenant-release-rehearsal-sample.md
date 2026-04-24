@@ -8,7 +8,7 @@
 - runbook、release checklist 与脚本环境变量契约已对齐
 - 在目标环境确认与发布后验证未完成时，gate 会按预期阻断
 
-本记录是演练样例，不代表真实生产发布。
+本记录是演练样例与手动演练实录，不代表真实生产发布。
 
 ## 样例范围
 
@@ -20,6 +20,45 @@
 - 输出产物：
   - `artifacts/tenant-release-rehearsal/sample-doc-run/tenant-release-report.json`
   - `artifacts/tenant-release-rehearsal/sample-doc-run/tenant-release-gate-report.json`
+
+## GitHub 手动演练实录
+
+在本地样例验证完成后，仓库又进行了真实 GitHub `workflow_dispatch` 演练，用于确认：
+
+- `Tenant Release Rehearsal` workflow 本身可被成功分发执行
+- GitHub artifact 下载、evidence / decision 生成、release gate 与 artifact 上传链路可闭环
+- 最终 blocker 只剩真实人工前提项，而不是 workflow 自身噪音
+
+### 关键运行记录
+
+1. `run 24894377156`
+   - 首次真实触发后进入执行，但失败在 `Build tenant evidence from GitHub artifacts`
+   - 暴露问题：脚本仍按仓库默认 `artifacts/tenant-stability-evidence/*` 读取 evidence，未兼容 workflow 实际使用的 `.ci-reports/...` 输出路径
+2. `run 24894637803`
+   - evidence / decision / release gate / artifact 上传已全部跑通
+   - 暴露问题：`gitWorktreeClean` 被 `.ci-reports/` 与 hooks 安装副作用污染，额外多出 1 个非业务 blocker
+3. `run 24894806843`
+   - 在修复 `workflow_dispatch` 输入上限、evidence 路径解析与 git worktree 基线后完成最终验证
+   - `Build tenant evidence from GitHub artifacts` 成功
+   - `Run tenant release rehearsal` 成功
+   - `Upload tenant release rehearsal artifacts` 成功
+   - workflow 仅在最后 `Fail when rehearsal gate is blocked` 步骤按预期退出 `1`
+
+### 最终 GitHub 演练结论
+
+- workflow run: `24894806843`
+- workflow URL: `https://github.com/yukin371/Elysian/actions/runs/24894806843`
+- release report:
+  - `status=failed`
+  - `gitWorktreeClean=true`
+  - `qualifiedForNextStep=true`
+  - `recommendation=candidate_for_next_step`
+  - `blockers=8`
+- release gate:
+  - `status=failed`
+  - `conclusion=Tenant release rehearsal gate failed with 8 blocker(s).`
+
+这说明 GitHub 手动演练入口已经达到可归档状态：workflow 自身结构风险已收口，当前 gate 只阻断真实目标环境确认与发布后验证缺失。
 
 ## 输入说明
 
@@ -104,7 +143,13 @@ bun run tenant:release:gate
 1. 当前 rehearsal 输入契约、runbook 与 release checklist 已经能收敛成同一条执行路径。
 2. 在缺少目标环境确认和发布后验证时，`tenant:release:*` 会按预期阻断，而不会把“观察窗口已达标”误判成“可直接发布”。
 
+GitHub 手动演练又额外证明了两件事：
+
+1. `Tenant Release Rehearsal` workflow 已可真实下载 tenant artifact、生成 evidence / decision、执行 release gate 并上传归档 artifact。
+2. 在固定 `workflow_dispatch` 输入上限、evidence 输出路径与 git worktree 基线后，GitHub 手动演练不会再引入额外的非业务 blocker。
+
 ## 下一步
 
-1. 若需要继续降低人工拼装成本，可评估新增仅用于 rehearsal 的 `workflow_dispatch` 入口，把这些输入项表单化。
-2. 在引入任何平台级发布命令前，继续维持 `tenant:release:*` 只服务 rehearsal，不拥有生产审批与回滚能力。
+1. 决定是否把 `Tenant Release Rehearsal` 固化进发布值班手册，作为默认的 rehearsal 入口。
+2. 若继续逼近真实发布评审，只补目标环境数据库角色、备份回滚、`e2e:tenant:full` 与发布后最小验证这 `8` 个真实 blocker。
+3. 在引入任何平台级发布命令前，继续维持 `tenant:release:*` 与 `Tenant Release Rehearsal` 只服务 rehearsal，不拥有生产审批与回滚能力。
