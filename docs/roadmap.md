@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性单次快照已收口，下一步转向观察窗口证据积累与升级执行策略。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口，下一步转向观察窗口样本积累与升级执行评审。
 
 ## Active Tracks
 
@@ -131,7 +131,8 @@
 - 已完成：CI 已接入 `e2e-tenant` 作业，复用 `e2e:tenant:full` 与 PostgreSQL service 执行真实租户隔离验证并归档报告
 - 已完成：新增 `e2e:tenant:stability:snapshot` 与 `e2e:tenant:stability:evidence`，用于单次 tenant e2e 快照沉淀与多次 artifact 观察窗口证据汇总
 - 已接入：CI `e2e-tenant` 已在单次 tenant e2e 后产出稳定性快照并随 artifact 归档
-- 下一步：积累 tenant 稳定性观察窗口样本，并基于 evidence 决定下一阶段升级执行策略与更高规模样本计划
+- 已完成：新增 `e2e:tenant:stability:collect`、`e2e:tenant:upgrade:decision`、`e2e:tenant:upgrade:gate`、`e2e:tenant:upgrade:finalize` 与 `e2e:tenant:upgrade:finalize:from-downloads`，将下载 artifact 到升级结论的收尾链路固定为脚本化流程
+- 下一步：积累 tenant 稳定性观察窗口样本，并基于脚本化 evidence / decision / gate 结论决定下一阶段升级执行策略与更高规模样本计划
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 
 ### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成

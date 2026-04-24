@@ -6,7 +6,7 @@
 
 - `P6B1` 已完成：租户模型、`tenant_id`、RLS、JWT `tid`、tenant context middleware、tenant-aware seed 与基础测试已落地。
 - `P6B2` 已完成：数据权限框架已落 `roles.data_scope`、`role_depts`、`departments.ancestors` 与 server 侧数据访问过滤。
-- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入与稳定性单次快照已完成，不在本轮引入额外基础设施 owner。
+- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入与稳定性观察收尾链路已完成，不在本轮引入额外基础设施 owner。
 
 ## 边界摘要
 
@@ -88,8 +88,13 @@
 - `bun test`
 - `bun run check`
 - `bun run e2e:tenant:full`（本地 Docker PostgreSQL，已验证 tenant init 幂等、super-admin 授权、customer 隔离、RLS 与 `tenant_id` FK）
+- `bun run e2e:tenant:stability:collect`
 - `bun run e2e:tenant:stability:snapshot`
 - `bun run e2e:tenant:stability:evidence`
+- `bun run e2e:tenant:upgrade:decision`
+- `bun run e2e:tenant:upgrade:gate`
+- `bun run e2e:tenant:upgrade:finalize`
+- `bun run e2e:tenant:upgrade:finalize:from-downloads`
 - `.github/workflows/ci.yml` 已接入 `e2e-tenant` 作业，复用 PostgreSQL service + `bun run e2e:tenant:full`，并在单次 tenant e2e 后生成稳定性快照 artifact
 
 ## 待补验证
@@ -99,6 +104,6 @@
 
 ## 下一步
 
-1. 连续积累 tenant 稳定性快照 artifact，并用 `e2e:tenant:stability:evidence` 汇总观察窗口结论。
-2. 基于 `ADR-0009` 和观察窗口 evidence 设计后续多租户迁移/发布 runbook 或 CI 策略。
+1. 连续积累 tenant 稳定性快照 artifact，并用 `e2e:tenant:upgrade:finalize:from-downloads` 输出统一的 evidence / decision / gate 结论。
+2. 基于 `ADR-0009` 和升级决策结论设计后续多租户迁移/发布 runbook 或 CI 策略。
 3. 在更高规模 tenant 样本下继续压实回归频率与执行窗口。
