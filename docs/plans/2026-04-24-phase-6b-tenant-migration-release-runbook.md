@@ -82,6 +82,74 @@
   - 新增非默认租户初始化
   - 仅代码 / 配置升级
 
+### 目标环境输入契约
+
+若使用 `tenant:release:report` / `tenant:release:finalize` 做演练收尾，以下输入必须先被人工确认，再映射到环境变量；脚本只负责归档与门禁，不负责替代人工审批。
+
+| 输入项 | 环境变量 / 元数据 | 要求 | 典型来源 |
+|---|---|---|---|
+| 发布源分支 | `ELYSIAN_TENANT_RELEASE_SOURCE_BRANCH` | 当前基线应为 `dev` | PR / 分支流转记录 |
+| 发布目标分支 | `ELYSIAN_TENANT_RELEASE_TARGET_BRANCH` | 当前基线应为 `main` | PR / 分支流转记录 |
+| 目标环境标识 | `ELYSIAN_TENANT_RELEASE_ENVIRONMENT` | 必须是本次演练/发布实际目标 | 环境命名约定 |
+| 发布 commit | `ELYSIAN_TENANT_RELEASE_COMMIT` | 建议固定到单一 commit SHA | PR head / merge commit |
+| 发布 PR | `ELYSIAN_TENANT_RELEASE_PR` | 建议记录 PR 编号 | GitHub PR |
+| migration 列表 | `ELYSIAN_TENANT_RELEASE_MIGRATIONS` | 逗号分隔；只列本次实际涉及 migration | `drizzle/*.sql` / 变更清单 |
+| 非默认租户初始化列表 | `ELYSIAN_TENANT_RELEASE_TENANT_INIT_CODES` | 逗号分隔；无则留空 | 租户开通计划 |
+| 是否需默认租户 seed | `ELYSIAN_TENANT_RELEASE_DEFAULT_SEED_REQUIRED` | `true/false`；只在新环境首发为 `true` | 环境类型判断 |
+| 待发布 head 与观察窗口 head 是否一致 | `ELYSIAN_TENANT_RELEASE_HEAD_MATCHES_WINDOW` | `true/false` | evidence / decision 对照 |
+| 文档是否同步 | `ELYSIAN_TENANT_RELEASE_DOCS_SYNCED` | `true/false` | 文档审查 |
+| 回滚是否已准备 | `ELYSIAN_TENANT_RELEASE_ROLLBACK_PREPARED` | `true/false` | 发布评审结论 |
+| 数据库角色是否确认 | `ELYSIAN_TENANT_RELEASE_DATABASE_ROLE_CONFIRMED` | `true/false`；需满足 `NOSUPERUSER + NOBYPASSRLS` | DBA / 环境配置确认 |
+| 备份是否就绪 | `ELYSIAN_TENANT_RELEASE_BACKUP_READY` | `true/false` | DBA / 平台方确认 |
+| `bun run check` 是否通过 | `ELYSIAN_TENANT_RELEASE_CHECK_PASSED` | `true/false` | 本地 / CI 记录 |
+| `bun run build:vue` 是否通过 | `ELYSIAN_TENANT_RELEASE_BUILD_VUE_PASSED` | `true/false` | 本地 / CI 记录 |
+| `bun run e2e:tenant:full` 是否通过 | `ELYSIAN_TENANT_RELEASE_TENANT_FULL_PASSED` | `true/false` | 本地 / CI 记录 |
+| 默认租户登录验证 | `ELYSIAN_TENANT_RELEASE_DEFAULT_TENANT_LOGIN_VERIFIED` | `true/false` | 发布后人工验证 |
+| super-admin 访问 `/system/tenants` 验证 | `ELYSIAN_TENANT_RELEASE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED` | `true/false` | 发布后人工验证 |
+| tenant admin 禁止访问 `/system/tenants` 验证 | `ELYSIAN_TENANT_RELEASE_TENANT_ADMIN_DENIED_VERIFIED` | `true/false` | 发布后人工验证 |
+| 非默认租户登录验证 | `ELYSIAN_TENANT_RELEASE_NON_DEFAULT_TENANT_LOGIN_VERIFIED` | `true/false` | 发布后人工验证 |
+| 跨租户隔离验证 | `ELYSIAN_TENANT_RELEASE_CROSS_TENANT_ISOLATION_VERIFIED` | `true/false` | 发布后人工验证 |
+
+说明：
+
+- 若没有人工确认来源，不应先把变量填成 `true` 再补证据。
+- 若目标环境输入缺失，优先阻断发布演练，而不是放宽 gate。
+- `tenant-release-report.ts` 会把这些输入沉淀到 `tenant-release-report.json`，后续评审应以该报告为准，而不是口头确认。
+
+### 最小演练示例
+
+以下命令只表示“把本手册中的人工确认结果喂给 rehearsal 脚本”，不代表生产平台发布入口：
+
+```powershell
+$env:ELYSIAN_TENANT_RELEASE_SOURCE_BRANCH='dev'
+$env:ELYSIAN_TENANT_RELEASE_TARGET_BRANCH='main'
+$env:ELYSIAN_TENANT_RELEASE_ENVIRONMENT='staging-rehearsal'
+$env:ELYSIAN_TENANT_RELEASE_COMMIT='<commit-sha>'
+$env:ELYSIAN_TENANT_RELEASE_PR='PR-3'
+$env:ELYSIAN_TENANT_RELEASE_MIGRATIONS='0008_tenants.sql,0009_tenant_id_columns.sql,0010_rls_policies.sql'
+$env:ELYSIAN_TENANT_RELEASE_TENANT_INIT_CODES='tenant-alpha'
+$env:ELYSIAN_TENANT_RELEASE_DEFAULT_SEED_REQUIRED='false'
+$env:ELYSIAN_TENANT_RELEASE_HEAD_MATCHES_WINDOW='true'
+$env:ELYSIAN_TENANT_RELEASE_DOCS_SYNCED='true'
+$env:ELYSIAN_TENANT_RELEASE_ROLLBACK_PREPARED='true'
+$env:ELYSIAN_TENANT_RELEASE_DATABASE_ROLE_CONFIRMED='true'
+$env:ELYSIAN_TENANT_RELEASE_BACKUP_READY='true'
+$env:ELYSIAN_TENANT_RELEASE_CHECK_PASSED='true'
+$env:ELYSIAN_TENANT_RELEASE_BUILD_VUE_PASSED='true'
+$env:ELYSIAN_TENANT_RELEASE_TENANT_FULL_PASSED='true'
+$env:ELYSIAN_TENANT_RELEASE_DEFAULT_TENANT_LOGIN_VERIFIED='true'
+$env:ELYSIAN_TENANT_RELEASE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED='true'
+$env:ELYSIAN_TENANT_RELEASE_TENANT_ADMIN_DENIED_VERIFIED='true'
+$env:ELYSIAN_TENANT_RELEASE_NON_DEFAULT_TENANT_LOGIN_VERIFIED='true'
+$env:ELYSIAN_TENANT_RELEASE_CROSS_TENANT_ISOLATION_VERIFIED='true'
+bun run tenant:release:finalize
+```
+
+执行前提：
+
+- 必须先完成本手册中的人工检查与发布后验证。
+- 若只是预演发布前门禁，也可以先执行 `tenant:release:report`，待发布后验证补齐后再执行 `tenant:release:gate` / `finalize`。
+
 ## 执行顺序
 
 ### 1. 冻结发布范围
@@ -200,6 +268,41 @@ bun run tenant:init -- --code <tenant-code> --name <tenant-name> --admin-passwor
 - 使用的执行入口（`tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize`）
 - 每一步映射到本手册的哪一段人工检查
 - 是否仍存在需要人工确认的平台级空白
+
+## 责任边界
+
+### 角色与责任矩阵
+
+| 事项 | owner / 责任方 | 说明 |
+|---|---|---|
+| migration 内容正确性 | `packages/persistence` owner | 确认 schema / RLS / seed / tenant:init 语义 |
+| server 鉴权与租户边界正确性 | `apps/server` owner | 确认 JWT `tid`、tenant context、super-admin 边界 |
+| 文档与 runbook 同步 | 文档 owner / 当前实施 owner | 确认 roadmap、plans、runbook 口径一致 |
+| 目标环境数据库角色确认 | 环境 / DBA owner | 确认 `NOSUPERUSER + NOBYPASSRLS` |
+| 目标环境备份与恢复能力 | 环境 / DBA owner | 提供快照、恢复点或等价能力 |
+| 发布执行审批 | 发布负责人 | 决定是否进入 `dev -> main` |
+| 发布后最小验证执行 | 发布负责人 + 模块 owner | 完成登录、权限、隔离验证 |
+| 回滚执行 | 发布负责人协调，环境 / DBA owner 执行数据库恢复，模块 owner 提供技术判断 | 当前仓库未把回滚自动化平台化，因此必须保留人工协调责任 |
+
+责任约束：
+
+- `tenant:release:*` 不拥有审批权，也不拥有数据库恢复权。
+- rehearsal 脚本只能输出“当前输入是否满足本手册门槛”，不能代替 owner 对环境真实性背书。
+- 若数据库恢复、环境切换或发布审批 owner 未明确，发布演练应直接阻断。
+
+### Rehearsal 命令边界
+
+| 命令 | 当前角色 | 明确不做 |
+|---|---|---|
+| `bun run tenant:release:report` | 读取 evidence + 手工确认输入，生成 rehearsal 报告 | 不执行 `db:migrate`，不切换应用版本，不做数据库备份 |
+| `bun run tenant:release:gate` | 基于 rehearsal 报告做门禁判定 | 不替代人工审批，不直接放行生产发布 |
+| `bun run tenant:release:finalize` | 串联 report + gate，收尾本次演练 | 不代表一键生产发布，不拥有回滚能力 |
+
+与未来平台级命令的关系：
+
+- 未来若引入真实发布平台命令，应另行定义 owner、审批点、失败分类与回滚入口。
+- 届时可以复用本 runbook 的输入/门禁语义，但不能直接把 `tenant:release:*` 重命名为生产命令后继续使用。
+- 若生产平台命令落地，需同步 `07-release-workflow.md`、`PROJECT_PROFILE.md`，必要时补 ADR。
 
 ## 回滚路径
 
