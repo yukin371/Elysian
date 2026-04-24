@@ -4,7 +4,15 @@ export {
   createAuthRepository,
   createInMemoryAuthRepository,
   createPasswordHash,
+  createTenantContextModule,
+  extractTenantIdFromRefreshToken,
+  verifyAccessToken,
 } from "./auth"
+export { createTenantModule } from "./tenant"
+export {
+  createInMemoryTenantRepository,
+  createTenantRepository,
+} from "./tenant"
 export { createCustomerModule } from "./customer"
 export {
   createCustomerRepository,

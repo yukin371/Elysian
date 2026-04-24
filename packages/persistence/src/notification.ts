@@ -1,7 +1,8 @@
-import { and, desc, eq } from "drizzle-orm"
+import { type SQL, and, desc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type NotificationRow, notifications } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export interface CreateNotificationPersistenceInput {
   id?: string
@@ -11,12 +12,15 @@ export interface CreateNotificationPersistenceInput {
   level?: "info" | "success" | "warning" | "error"
   status?: "unread" | "read"
   createdByUserId?: string | null
+  deptId?: string | null
   readAt?: Date | null
+  tenantId?: string
 }
 
 export interface ListNotificationsPersistenceFilter {
   recipientUserId?: string
   status?: "unread" | "read"
+  accessCondition?: SQL<unknown>
 }
 
 export const listNotifications = async (
@@ -28,6 +32,7 @@ export const listNotifications = async (
       ? eq(notifications.recipientUserId, filter.recipientUserId)
       : undefined,
     filter.status ? eq(notifications.status, filter.status) : undefined,
+    filter.accessCondition,
   ].filter(Boolean)
 
   if (conditions.length === 0) {
@@ -47,11 +52,13 @@ export const listNotifications = async (
 export const getNotificationById = async (
   db: DatabaseClient,
   id: string,
+  accessCondition?: SQL<unknown>,
 ): Promise<NotificationRow | null> => {
+  const conditions = [eq(notifications.id, id), accessCondition].filter(Boolean)
   const [row] = await db
     .select()
     .from(notifications)
-    .where(eq(notifications.id, id))
+    .where(and(...conditions))
     .limit(1)
 
   return row ?? null
@@ -71,7 +78,9 @@ export const insertNotification = async (
       level: input.level ?? "info",
       status: input.status ?? "unread",
       createdByUserId: input.createdByUserId ?? null,
+      deptId: input.deptId ?? null,
       readAt: input.readAt ?? null,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -86,14 +95,16 @@ export const markNotificationAsRead = async (
   db: DatabaseClient,
   id: string,
   readAt: Date = new Date(),
+  accessCondition?: SQL<unknown>,
 ): Promise<NotificationRow | null> => {
+  const conditions = [eq(notifications.id, id), accessCondition].filter(Boolean)
   const [row] = await db
     .update(notifications)
     .set({
       status: "read",
       readAt,
     })
-    .where(eq(notifications.id, id))
+    .where(and(...conditions))
     .returning()
 
   return row ?? null

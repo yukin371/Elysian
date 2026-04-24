@@ -1,6 +1,9 @@
 import {
   type AuditLogResult,
   type AuditLogRow,
+  DEFAULT_TENANT_ID,
+  type DataAccessContext,
+  type DataScopeGrant,
   type DatabaseClient,
   type MenuRow,
   type RefreshSessionRow,
@@ -11,9 +14,12 @@ import {
   insertAuditLog,
   insertRefreshSession,
   listAuditLogs,
+  listDataScopesForUser,
+  listDepartmentIdsForUser,
   listMenusForUser,
   listPermissionCodesForUser,
   listRoleCodesForUser,
+  resolveDataAccessContext,
   revokeRefreshSession,
   touchRefreshSession,
   updateUserLastLoginAt,
@@ -33,6 +39,7 @@ export interface AuthUserRecord {
   passwordHash: string
   status: AuthUserStatus
   isSuperAdmin: boolean
+  tenantId: string
   lastLoginAt: string | null
   createdAt: string
   updatedAt: string
@@ -43,6 +50,7 @@ export interface AuthRoleRecord {
   code: string
   name: string
   status: AuthRoleStatus
+  dataScope: 1 | 2 | 3 | 4 | 5
 }
 
 export interface AuthPermissionRecord {
@@ -71,6 +79,7 @@ export interface AuthMenuRecord {
 
 export interface RefreshSessionRecord {
   id: string
+  tenantId: string
   userId: string
   tokenHash: string
   userAgent: string | null
@@ -85,6 +94,7 @@ export interface RefreshSessionRecord {
 
 export interface CreateRefreshSessionInput {
   id?: string
+  tenantId: string
   userId: string
   tokenHash: string
   userAgent?: string | null
@@ -110,6 +120,7 @@ export interface AuthAuditLogRecord {
 export interface CreateAuthAuditLogInput {
   id?: string
   category: string
+  tenantId?: string | null
   action: string
   actorUserId?: string | null
   targetType?: string | null
@@ -122,6 +133,12 @@ export interface CreateAuthAuditLogInput {
   createdAt?: string
 }
 
+export interface AuthDataScopeProfile {
+  deptIds: string[]
+  dataScopes: DataScopeGrant[]
+  dataAccess: DataAccessContext
+}
+
 export interface AuthRepository {
   findUserByUsername: (username: string) => Promise<AuthUserRecord | null>
   getUserById: (id: string) => Promise<AuthUserRecord | null>
@@ -129,6 +146,7 @@ export interface AuthRepository {
   listRoleCodesForUser: (userId: string) => Promise<string[]>
   listPermissionCodesForUser: (userId: string) => Promise<string[]>
   listMenusForUser: (userId: string) => Promise<AuthMenuRecord[]>
+  getDataScopeProfileForUser: (userId: string) => Promise<AuthDataScopeProfile>
   createRefreshSession: (
     input: CreateRefreshSessionInput,
   ) => Promise<RefreshSessionRecord>
@@ -161,6 +179,21 @@ interface RoleMenuAssignment {
   menuId: string
 }
 
+interface UserDepartmentAssignment {
+  userId: string
+  departmentId: string
+}
+
+interface RoleDepartmentAssignment {
+  roleId: string
+  deptId: string
+}
+
+interface InMemoryDepartmentNode {
+  id: string
+  parentId: string | null
+}
+
 export interface InMemoryAuthRepositorySeed {
   users?: AuthUserRecord[]
   roles?: AuthRoleRecord[]
@@ -169,6 +202,9 @@ export interface InMemoryAuthRepositorySeed {
   userRoles?: UserRoleAssignment[]
   rolePermissions?: RolePermissionAssignment[]
   roleMenus?: RoleMenuAssignment[]
+  userDepartments?: UserDepartmentAssignment[]
+  roleDepts?: RoleDepartmentAssignment[]
+  departments?: InMemoryDepartmentNode[]
   refreshSessions?: RefreshSessionRecord[]
   auditLogs?: AuthAuditLogRecord[]
 }
@@ -192,6 +228,20 @@ export const createAuthRepository = (db: DatabaseClient): AuthRepository => ({
     const rows = await listMenusForUser(db, userId)
     return rows.map(mapMenuRow)
   },
+  async getDataScopeProfileForUser(userId) {
+    const deptIds = await listDepartmentIdsForUser(db, userId)
+    const dataScopes = await listDataScopesForUser(db, userId)
+
+    return {
+      deptIds,
+      dataScopes,
+      dataAccess: await resolveDataAccessContext(db, {
+        userId,
+        deptIds,
+        dataScopes,
+      }),
+    }
+  },
   async createRefreshSession(input) {
     const row = await insertRefreshSession(db, {
       ...input,
@@ -212,6 +262,7 @@ export const createAuthRepository = (db: DatabaseClient): AuthRepository => ({
   async createAuditLog(input) {
     const row = await insertAuditLog(db, {
       id: input.id,
+      tenantId: input.tenantId ?? undefined,
       category: input.category,
       action: input.action,
       actorUserId: input.actorUserId,
@@ -249,6 +300,9 @@ export const createInMemoryAuthRepository = (
   const userRoles = [...(seed.userRoles ?? [])]
   const rolePermissions = [...(seed.rolePermissions ?? [])]
   const roleMenus = [...(seed.roleMenus ?? [])]
+  const userDepartments = [...(seed.userDepartments ?? [])]
+  const roleDepts = [...(seed.roleDepts ?? [])]
+  const departments = [...(seed.departments ?? [])]
 
   return {
     async findUserByUsername(username) {
@@ -317,10 +371,47 @@ export const createInMemoryAuthRepository = (
         )
         .sort((left, right) => left.sort - right.sort)
     },
+    async getDataScopeProfileForUser(userId) {
+      const deptIds = userDepartments
+        .filter((assignment) => assignment.userId === userId)
+        .map((assignment) => assignment.departmentId)
+        .sort()
+      const roleIds = userRoles
+        .filter((assignment) => assignment.userId === userId)
+        .map((assignment) => assignment.roleId)
+      const activeRoles = roleIds
+        .map((roleId) => roles.get(roleId))
+        .filter(
+          (role): role is AuthRoleRecord =>
+            role !== undefined && role.status === "active",
+        )
+      const dataScopes = activeRoles.map((role) => ({
+        scope: role.dataScope,
+        customDeptIds:
+          role.dataScope === 2
+            ? roleDepts
+                .filter((assignment) => assignment.roleId === role.id)
+                .map((assignment) => assignment.deptId)
+                .sort()
+            : undefined,
+      }))
+
+      return {
+        deptIds,
+        dataScopes,
+        dataAccess: resolveInMemoryDataAccess({
+          userId,
+          deptIds,
+          dataScopes,
+          departments,
+        }),
+      }
+    },
     async createRefreshSession(input) {
       const now = new Date().toISOString()
       const session: RefreshSessionRecord = {
         id: input.id ?? crypto.randomUUID(),
+        tenantId: input.tenantId,
         userId: input.userId,
         tokenHash: input.tokenHash,
         userAgent: input.userAgent ?? null,
@@ -409,10 +500,85 @@ const mapUserRow = (row: UserRow): AuthUserRecord => ({
   passwordHash: row.passwordHash,
   status: row.status,
   isSuperAdmin: row.isSuperAdmin,
+  tenantId: row.tenantId,
   lastLoginAt: row.lastLoginAt?.toISOString() ?? null,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })
+
+const resolveInMemoryDataAccess = (input: {
+  userId: string
+  deptIds: string[]
+  dataScopes: DataScopeGrant[]
+  departments: InMemoryDepartmentNode[]
+}): DataAccessContext => {
+  const deptIds = [...new Set(input.deptIds)].sort()
+  const hasAllAccess = input.dataScopes.some((grant) => grant.scope === 1)
+  const allowSelf = input.dataScopes.some((grant) => grant.scope === 5)
+  const accessibleDeptIds = new Set<string>()
+
+  for (const grant of input.dataScopes) {
+    if (grant.scope === 2) {
+      for (const deptId of grant.customDeptIds ?? []) {
+        accessibleDeptIds.add(deptId)
+      }
+      continue
+    }
+
+    if (grant.scope === 3) {
+      for (const deptId of deptIds) {
+        accessibleDeptIds.add(deptId)
+      }
+      continue
+    }
+
+    if (grant.scope === 4) {
+      for (const deptId of listInMemoryDescendantDeptIds(
+        input.departments,
+        deptIds,
+      )) {
+        accessibleDeptIds.add(deptId)
+      }
+    }
+  }
+
+  return {
+    userId: input.userId,
+    hasAllAccess,
+    accessibleDeptIds: [...accessibleDeptIds].sort(),
+    allowSelf,
+  }
+}
+
+const listInMemoryDescendantDeptIds = (
+  departments: InMemoryDepartmentNode[],
+  rootDeptIds: string[],
+) => {
+  const normalizedRootDeptIds = new Set(rootDeptIds)
+
+  return departments
+    .filter((department) => {
+      let cursor = department.parentId
+
+      if (normalizedRootDeptIds.has(department.id)) {
+        return true
+      }
+
+      while (cursor) {
+        if (normalizedRootDeptIds.has(cursor)) {
+          return true
+        }
+
+        cursor =
+          departments.find((departmentNode) => departmentNode.id === cursor)
+            ?.parentId ?? null
+      }
+
+      return false
+    })
+    .map((department) => department.id)
+    .sort()
+}
 
 const mapMenuRow = (row: MenuRow): AuthMenuRecord => ({
   id: row.id,
@@ -433,6 +599,7 @@ const mapRefreshSessionRow = (
   row: RefreshSessionRow,
 ): RefreshSessionRecord => ({
   id: row.id,
+  tenantId: row.tenantId,
   userId: row.userId,
   tokenHash: row.tokenHash,
   userAgent: row.userAgent ?? null,

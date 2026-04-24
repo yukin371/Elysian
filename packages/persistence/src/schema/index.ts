@@ -1,4 +1,10 @@
 export {
+  tenantStatus,
+  tenants,
+  type NewTenantRow,
+  type TenantRow,
+} from "./tenant"
+export {
   auditLogs,
   auditResult,
   departments,
@@ -10,6 +16,7 @@ export {
   refreshSessions,
   userDepartments,
   roleMenus,
+  roleDepts,
   rolePermissions,
   roles,
   roleStatus,
@@ -25,6 +32,7 @@ export {
   type NewPermissionRow,
   type NewRefreshSessionRow,
   type NewRoleMenuRow,
+  type NewRoleDeptRow,
   type NewRolePermissionRow,
   type NewUserDepartmentRow,
   type NewRoleRow,
@@ -33,6 +41,7 @@ export {
   type PermissionRow,
   type RefreshSessionRow,
   type RoleMenuRow,
+  type RoleDeptRow,
   type RolePermissionRow,
   type RoleRow,
   type UserDepartmentRow,

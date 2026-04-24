@@ -7,6 +7,7 @@ import {
   dictionaryItems,
   dictionaryTypes,
 } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export interface CreateDictionaryTypePersistenceInput {
   id?: string
@@ -14,6 +15,7 @@ export interface CreateDictionaryTypePersistenceInput {
   name: string
   description?: string | null
   status?: "active" | "disabled"
+  tenantId?: string
 }
 
 export interface UpdateDictionaryTypePersistenceInput {
@@ -31,6 +33,7 @@ export interface CreateDictionaryItemPersistenceInput {
   sort?: number
   isDefault?: boolean
   status?: "active" | "disabled"
+  tenantId?: string
 }
 
 export interface UpdateDictionaryItemPersistenceInput {
@@ -88,6 +91,7 @@ export const insertDictionaryType = async (
       name: input.name,
       description: input.description ?? null,
       status: input.status ?? "active",
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -173,6 +177,7 @@ export const insertDictionaryItem = async (
       sort: input.sort ?? 0,
       isDefault: input.isDefault ?? false,
       status: input.status ?? "active",
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 

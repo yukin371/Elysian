@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { DEFAULT_TENANT_ID, type DatabaseClient } from "@elysian/persistence"
 
 import { createServerApp } from "./app"
 import {
@@ -27,6 +28,7 @@ import {
   createInMemoryOperationLogRepository,
   createInMemoryRoleRepository,
   createInMemorySettingRepository,
+  createInMemoryTenantRepository,
   createInMemoryUserRepository,
   createMenuModule,
   createNotificationModule,
@@ -34,8 +36,15 @@ import {
   createPasswordHash,
   createRoleModule,
   createSettingModule,
+  createTenantContextModule,
+  createTenantModule,
   createUserModule,
+  verifyAccessToken,
 } from "./modules"
+import type {
+  CreateCustomerInput,
+  CustomerRepository,
+} from "./modules/customer"
 
 const testAccessTokenSecret = ["test", "access", "secret"].join("-")
 const testAdminPassword = ["admin", "123"].join("")
@@ -68,6 +77,13 @@ const createAuthTestFixture = async (
     permissions?: string[]
     isSuperAdmin?: boolean
     secureCookies?: boolean
+    tenantId?: string
+    dataScope?: 1 | 2 | 3 | 4 | 5
+    userDepartmentIds?: string[]
+    roleDepartmentIds?: string[]
+    departments?: Array<{ id: string; parentId: string | null }>
+    tenantContextDb?: DatabaseClient
+    resolveTenantIdByCode?: (tenantCode: string) => Promise<string | null>
   } = {},
 ) => {
   const adminRoleId = crypto.randomUUID()
@@ -103,6 +119,7 @@ const createAuthTestFixture = async (
         passwordHash,
         status: "active",
         isSuperAdmin: options.isSuperAdmin ?? true,
+        tenantId: options.tenantId ?? DEFAULT_TENANT_ID,
         lastLoginAt: null,
         createdAt: "2026-04-21T00:00:00.000Z",
         updatedAt: "2026-04-21T00:00:00.000Z",
@@ -114,6 +131,7 @@ const createAuthTestFixture = async (
         code: "admin",
         name: "Admin",
         status: "active",
+        dataScope: options.dataScope ?? 1,
       },
     ],
     permissions,
@@ -137,22 +155,46 @@ const createAuthTestFixture = async (
       : [],
     userRoles: [{ userId, roleId: adminRoleId }],
     rolePermissions,
+    roleDepts: (options.roleDepartmentIds ?? []).map((deptId) => ({
+      roleId: adminRoleId,
+      deptId,
+    })),
     roleMenus: userMenuPermission
       ? [{ roleId: adminRoleId, menuId: userMenuId }]
       : [],
+    userDepartments: (options.userDepartmentIds ?? []).map((departmentId) => ({
+      userId,
+      departmentId,
+    })),
+    departments: options.departments,
   })
 
   return {
+    userId,
     repository,
     authModule: createAuthModule(repository, {
       accessTokenSecret: testAccessTokenSecret,
       refreshCookieName: "elysian_refresh_token",
       secureCookies: options.secureCookies,
+      tenantContextDb: options.tenantContextDb,
+      resolveTenantIdByCode: options.resolveTenantIdByCode,
     }),
     authGuard: createAuthGuard(repository, {
       accessTokenSecret: testAccessTokenSecret,
     }),
   }
+}
+
+const createTenantContextRecorder = () => {
+  const statements: string[] = []
+  const db = {
+    execute: async (statement: string) => {
+      statements.push(statement)
+      return []
+    },
+  } as unknown as DatabaseClient
+
+  return { db, statements }
 }
 
 const createUserSeedRecords = async () => {
@@ -197,12 +239,14 @@ const createRoleSeedRecords = () => [
     description: "System administrator",
     status: "active" as const,
     isSystem: true,
+    dataScope: 1 as const,
     permissionCodes: [
       "system:user:list",
       "system:role:list",
       "system:role:update",
     ],
     userIds: ["user_admin_1"],
+    deptIds: [],
     createdAt: "2026-04-21T00:00:00.000Z",
     updatedAt: "2026-04-21T00:00:00.000Z",
   },
@@ -213,8 +257,10 @@ const createRoleSeedRecords = () => [
     description: "Operator role",
     status: "active" as const,
     isSystem: false,
+    dataScope: 1 as const,
     permissionCodes: ["customer:customer:list"],
     userIds: ["user_ops_1"],
+    deptIds: [],
     createdAt: "2026-04-20T00:00:00.000Z",
     updatedAt: "2026-04-20T00:00:00.000Z",
   },
@@ -434,6 +480,25 @@ const createNotificationSeedRecords = () => [
     createdByUserId: "user_admin_1",
     readAt: "2026-04-21T05:30:00.000Z",
     createdAt: "2026-04-21T05:00:00.000Z",
+  },
+]
+
+const createTenantSeedRecords = () => [
+  {
+    id: DEFAULT_TENANT_ID,
+    code: "default",
+    name: "Default Tenant",
+    status: "active" as const,
+    createdAt: "2026-04-21T00:00:00.000Z",
+    updatedAt: "2026-04-21T00:00:00.000Z",
+  },
+  {
+    id: "11111111-1111-4111-8111-111111111111",
+    code: "tenant-alpha",
+    name: "Tenant Alpha",
+    status: "active" as const,
+    createdAt: "2026-04-21T01:00:00.000Z",
+    updatedAt: "2026-04-21T01:00:00.000Z",
   },
 ]
 
@@ -848,6 +913,7 @@ describe("createServerApp", () => {
       accessToken: string
       user: {
         username: string
+        tenantId: string
       }
       roles: string[]
       permissionCodes: string[]
@@ -856,6 +922,7 @@ describe("createServerApp", () => {
     const setCookie = loginResponse.headers.get("set-cookie")
 
     expect(loginBody.user.username).toBe("admin")
+    expect(loginBody.user.tenantId).toBe(DEFAULT_TENANT_ID)
     expect(loginBody.roles).toEqual(["admin"])
     expect(loginBody.permissionCodes).toEqual(["system:user:list"])
     expect(loginBody.menus.map((menu) => menu.code)).toEqual(["system-user"])
@@ -877,6 +944,19 @@ describe("createServerApp", () => {
         username: "admin",
         displayName: "Administrator",
         isSuperAdmin: true,
+        tenantId: DEFAULT_TENANT_ID,
+      },
+      deptIds: [],
+      dataScopes: [
+        {
+          scope: 1,
+        },
+      ],
+      dataAccess: {
+        userId: expect.any(String),
+        hasAllAccess: true,
+        accessibleDeptIds: [],
+        allowSelf: false,
       },
       roles: ["admin"],
       permissionCodes: ["system:user:list"],
@@ -897,6 +977,141 @@ describe("createServerApp", () => {
         },
       ],
     })
+  })
+
+  it("includes tid in the JWT access token after login", async () => {
+    const fixture = await createAuthTestFixture()
+    const app = createTestApp({
+      modules: [fixture.authModule],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+
+    const loginBody = (await loginResponse.json()) as { accessToken: string }
+    const payload = await verifyAccessToken(
+      loginBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(payload.tid).toBe(DEFAULT_TENANT_ID)
+  })
+
+  it("includes tid in the JWT access token after refresh", async () => {
+    const fixture = await createAuthTestFixture()
+    const app = createTestApp({
+      modules: [fixture.authModule],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const refreshResponse = await app.handle(
+      new Request("http://localhost/auth/refresh", {
+        method: "POST",
+        headers: {
+          cookie: toCookieHeader(loginResponse.headers.get("set-cookie")),
+        },
+      }),
+    )
+
+    expect(refreshResponse.status).toBe(200)
+    const refreshBody = (await refreshResponse.json()) as {
+      accessToken: string
+    }
+    const payload = await verifyAccessToken(
+      refreshBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(payload.tid).toBe(DEFAULT_TENANT_ID)
+  })
+
+  it("supports non-default tenant login and refresh with tenant-scoped context", async () => {
+    const tenantId = "11111111-1111-4111-8111-111111111111"
+    const tenantCode = "tenant-alpha"
+    const tenantContext = createTenantContextRecorder()
+    const fixture = await createAuthTestFixture({
+      tenantId,
+      isSuperAdmin: false,
+      tenantContextDb: tenantContext.db,
+      resolveTenantIdByCode: async (code) =>
+        code === tenantCode ? tenantId : null,
+    })
+    const app = createTestApp({
+      modules: [
+        createTenantContextModule(tenantContext.db, {
+          accessTokenSecret: testAccessTokenSecret,
+        }),
+        fixture.authModule,
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+          tenantCode,
+        }),
+      }),
+    )
+
+    expect(loginResponse.status).toBe(200)
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+      user: {
+        tenantId: string
+      }
+    }
+    expect(loginBody.user.tenantId).toBe(tenantId)
+    const loginPayload = await verifyAccessToken(
+      loginBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(loginPayload.tid).toBe(tenantId)
+
+    const setCookie = loginResponse.headers.get("set-cookie")
+    expect(setCookie).not.toBeNull()
+    expect(setCookie).toContain(`elysian_refresh_token=${tenantId}.`)
+
+    const refreshResponse = await app.handle(
+      new Request("http://localhost/auth/refresh", {
+        method: "POST",
+        headers: {
+          cookie: toCookieHeader(setCookie),
+        },
+      }),
+    )
+
+    expect(refreshResponse.status).toBe(200)
+    const refreshBody = (await refreshResponse.json()) as {
+      accessToken: string
+      user: {
+        tenantId: string
+      }
+    }
+    expect(refreshBody.user.tenantId).toBe(tenantId)
+    const refreshPayload = await verifyAccessToken(
+      refreshBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(refreshPayload.tid).toBe(tenantId)
+    expect(tenantContext.statements).toContain(
+      `SET app.current_tenant = '${tenantId}'`,
+    )
   })
 
   it("refreshes tokens and rotates the refresh session", async () => {
@@ -1345,6 +1560,168 @@ describe("createServerApp", () => {
     })
   })
 
+  it("filters customers by department-scoped data access", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["customer:customer:list"],
+      isSuperAdmin: false,
+      dataScope: 3,
+      userDepartmentIds: ["department_ops_1"],
+      departments: [
+        {
+          id: "department_root_1",
+          parentId: null,
+        },
+        {
+          id: "department_ops_1",
+          parentId: "department_root_1",
+        },
+      ],
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createCustomerModule(
+          createInMemoryCustomerRepository([
+            {
+              id: "cust_visible_1",
+              name: "Ops Customer",
+              status: "active",
+              deptId: "department_ops_1",
+              creatorId: "user_external_1",
+              createdAt: "2026-04-21T00:00:00.000Z",
+              updatedAt: "2026-04-21T00:00:00.000Z",
+            },
+            {
+              id: "cust_hidden_1",
+              name: "Root Customer",
+              status: "active",
+              deptId: "department_root_1",
+              creatorId: "user_external_2",
+              createdAt: "2026-04-21T01:00:00.000Z",
+              updatedAt: "2026-04-21T01:00:00.000Z",
+            },
+          ]),
+          {
+            authGuard: fixture.authGuard,
+          },
+        ),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+    const response = await app.handle(
+      new Request("http://localhost/customers", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      items: [
+        {
+          id: "cust_visible_1",
+          name: "Ops Customer",
+          status: "active",
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        },
+      ],
+    })
+  })
+
+  it("passes tenant identity into customer creation", async () => {
+    const tenantId = "11111111-1111-4111-8111-111111111111"
+    const fixture = await createAuthTestFixture({
+      permissions: ["customer:customer:create"],
+      isSuperAdmin: false,
+      tenantId,
+      userDepartmentIds: ["department_ops_1"],
+    })
+    let receivedCreateInput: CreateCustomerInput | null = null
+    const customerRepository: CustomerRepository = {
+      list: async () => [],
+      getById: async () => null,
+      create: async (input) => {
+        receivedCreateInput = input
+
+        return {
+          id: "cust_created_1",
+          name: input.name,
+          status: input.status ?? "active",
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        }
+      },
+      update: async () => null,
+      remove: async () => false,
+    }
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createCustomerModule(customerRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const response = await app.handle(
+      new Request("http://localhost/customers", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: " Tenant Scoped Customer ",
+          status: "inactive",
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(201)
+    if (!receivedCreateInput) {
+      throw new Error("Expected customer repository create to be called")
+    }
+    const actualCreateInput: CreateCustomerInput = receivedCreateInput
+    expect(actualCreateInput).toEqual({
+      name: "Tenant Scoped Customer",
+      status: "inactive",
+      deptId: "department_ops_1",
+      creatorId: fixture.userId,
+      tenantId,
+    })
+  })
+
   it("lists and gets system users when the access token has user-list permission", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:user:list"],
@@ -1680,6 +2057,7 @@ describe("createServerApp", () => {
           description: "System administrator",
           status: "active",
           isSystem: true,
+          dataScope: 1,
           createdAt: "2026-04-21T00:00:00.000Z",
           updatedAt: "2026-04-21T00:00:00.000Z",
         },
@@ -1690,6 +2068,7 @@ describe("createServerApp", () => {
           description: "Operator role",
           status: "active",
           isSystem: false,
+          dataScope: 1,
           createdAt: "2026-04-20T00:00:00.000Z",
           updatedAt: "2026-04-20T00:00:00.000Z",
         },
@@ -1712,8 +2091,10 @@ describe("createServerApp", () => {
       description: "Operator role",
       status: "active",
       isSystem: false,
+      dataScope: 1,
       permissionCodes: ["customer:customer:list"],
       userIds: ["user_ops_1"],
+      deptIds: [],
       createdAt: "2026-04-20T00:00:00.000Z",
       updatedAt: "2026-04-20T00:00:00.000Z",
     })
@@ -1739,6 +2120,7 @@ describe("createServerApp", () => {
         "customer:customer:update",
       ],
       availableUserIds: ["user_admin_1", "user_ops_1"],
+      availableDepartmentIds: ["department_root_1", "department_ops_1"],
     })
     const app = createTestApp({
       modules: [
@@ -1775,11 +2157,13 @@ describe("createServerApp", () => {
           code: "auditor",
           name: "Auditor",
           description: "Audit role",
+          dataScope: 2,
           permissionCodes: [
             "customer:customer:list",
             "customer:customer:update",
           ],
           userIds: ["user_ops_1"],
+          deptIds: ["department_ops_1"],
         }),
       }),
     )
@@ -1793,8 +2177,10 @@ describe("createServerApp", () => {
       description: string
       status: string
       isSystem: boolean
+      dataScope: number
       permissionCodes: string[]
       userIds: string[]
+      deptIds: string[]
       createdAt: string
       updatedAt: string
     }
@@ -1806,8 +2192,10 @@ describe("createServerApp", () => {
       description: "Audit role",
       status: "active",
       isSystem: false,
+      dataScope: 2,
       permissionCodes: ["customer:customer:list", "customer:customer:update"],
       userIds: ["user_ops_1"],
+      deptIds: ["department_ops_1"],
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     })
@@ -1821,8 +2209,10 @@ describe("createServerApp", () => {
         },
         body: JSON.stringify({
           name: "Lead Auditor",
+          dataScope: 3,
           permissionCodes: ["system:user:list"],
           userIds: ["user_admin_1", "user_ops_1"],
+          deptIds: ["department_root_1"],
         }),
       }),
     )
@@ -1831,8 +2221,10 @@ describe("createServerApp", () => {
     expect(await updateResponse.json()).toEqual({
       ...createdRole,
       name: "Lead Auditor",
+      dataScope: 3,
       permissionCodes: ["system:user:list"],
       userIds: ["user_admin_1", "user_ops_1"],
+      deptIds: ["department_root_1"],
       updatedAt: expect.any(String),
     })
   })
@@ -3235,6 +3627,195 @@ describe("createServerApp", () => {
     })
   })
 
+  it("lists, gets, creates, and updates tenants for super admins", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: [
+        "system:tenant:list",
+        "system:tenant:create",
+        "system:tenant:update",
+      ],
+      isSuperAdmin: true,
+    })
+    const tenantRepository = createInMemoryTenantRepository(
+      createTenantSeedRecords(),
+    )
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createTenantModule(tenantRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const listResponse = await app.handle(
+      new Request("http://localhost/system/tenants", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(listResponse.status).toBe(200)
+    expect(await listResponse.json()).toEqual({
+      items: [createTenantSeedRecords()[1], createTenantSeedRecords()[0]],
+    })
+
+    const getResponse = await app.handle(
+      new Request(`http://localhost/system/tenants/${DEFAULT_TENANT_ID}`, {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(getResponse.status).toBe(200)
+    expect(await getResponse.json()).toEqual(createTenantSeedRecords()[0])
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/system/tenants", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          code: "tenant-beta",
+          name: "Tenant Beta",
+        }),
+      }),
+    )
+
+    expect(createResponse.status).toBe(201)
+    const createdTenant = (await createResponse.json()) as {
+      id: string
+      code: string
+      name: string
+      status: string
+      createdAt: string
+      updatedAt: string
+    }
+    expect(createdTenant).toEqual({
+      id: expect.any(String),
+      code: "tenant-beta",
+      name: "Tenant Beta",
+      status: "active",
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    })
+
+    const updateResponse = await app.handle(
+      new Request(`http://localhost/system/tenants/${createdTenant.id}`, {
+        method: "PUT",
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Tenant Beta Updated",
+          status: "suspended",
+        }),
+      }),
+    )
+
+    expect(updateResponse.status).toBe(200)
+    expect(await updateResponse.json()).toEqual({
+      ...createdTenant,
+      name: "Tenant Beta Updated",
+      status: "suspended",
+      updatedAt: expect.any(String),
+    })
+
+    const statusResponse = await app.handle(
+      new Request(
+        `http://localhost/system/tenants/${createdTenant.id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            authorization: `Bearer ${loginBody.accessToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            status: "active",
+          }),
+        },
+      ),
+    )
+
+    expect(statusResponse.status).toBe(200)
+    expect(await statusResponse.json()).toEqual({
+      ...createdTenant,
+      name: "Tenant Beta Updated",
+      status: "active",
+      updatedAt: expect.any(String),
+    })
+  })
+
+  it("requires super admin privileges for tenant management", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:tenant:list"],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createTenantModule(
+          createInMemoryTenantRepository(createTenantSeedRecords()),
+          {
+            authGuard: fixture.authGuard,
+          },
+        ),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const response = await app.handle(
+      new Request("http://localhost/system/tenants", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(403)
+    expect(await response.json()).toEqual({
+      error: {
+        code: "TENANT_SUPER_ADMIN_REQUIRED",
+        message: "Tenant management requires a super admin",
+        status: 403,
+      },
+    })
+  })
+
   it("lists, filters, and gets operation logs", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:operation-log:list"],
@@ -3611,6 +4192,82 @@ describe("createServerApp", () => {
     })
   })
 
+  it("filters files by self-only data access", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:file:list"],
+      isSuperAdmin: false,
+      dataScope: 5,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createFileModule(
+          createInMemoryFileRepository([
+            {
+              id: "file_visible_self_1",
+              originalName: "my-file.txt",
+              storageKey: "storage_visible_self_1",
+              mimeType: "text/plain",
+              size: 12,
+              uploaderUserId: fixture.userId,
+              createdAt: "2026-04-21T03:00:00.000Z",
+            },
+            {
+              id: "file_hidden_other_1",
+              originalName: "other-file.txt",
+              storageKey: "storage_hidden_other_1",
+              mimeType: "text/plain",
+              size: 18,
+              uploaderUserId: "user_other_1",
+              createdAt: "2026-04-21T04:00:00.000Z",
+            },
+          ]),
+          createInMemoryFileStorage(),
+          {
+            authGuard: fixture.authGuard,
+          },
+        ),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const response = await app.handle(
+      new Request("http://localhost/system/files", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      items: [
+        {
+          id: "file_visible_self_1",
+          originalName: "my-file.txt",
+          mimeType: "text/plain",
+          size: 12,
+          uploaderUserId: fixture.userId,
+          createdAt: "2026-04-21T03:00:00.000Z",
+        },
+      ],
+    })
+  })
+
   it("lists, filters, gets, creates, and marks notifications as read", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [
@@ -3749,6 +4406,144 @@ describe("createServerApp", () => {
       status: "read",
       readAt: expect.any(String),
     })
+  })
+
+  it("keeps department-scoped notifications visible after creation", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:notification:list", "system:notification:create"],
+      isSuperAdmin: false,
+      dataScope: 4,
+      userDepartmentIds: ["department_root_1"],
+      departments: [
+        {
+          id: "department_root_1",
+          parentId: null,
+        },
+        {
+          id: "department_ops_1",
+          parentId: "department_root_1",
+        },
+      ],
+    })
+    const notificationRepository = createInMemoryNotificationRepository({
+      notifications: [
+        {
+          id: "notification_visible_ops_1",
+          recipientUserId: "user_ops_1",
+          title: "Ops Notice",
+          content: "Visible to root descendants.",
+          level: "info",
+          status: "unread",
+          createdByUserId: "user_other_1",
+          deptId: "department_ops_1",
+          createdAt: "2026-04-21T04:00:00.000Z",
+        },
+        {
+          id: "notification_hidden_other_1",
+          recipientUserId: "user_ops_1",
+          title: "Other Notice",
+          content: "Should stay hidden.",
+          level: "warning",
+          status: "unread",
+          createdByUserId: "user_other_2",
+          deptId: "department_other_1",
+          createdAt: "2026-04-21T05:00:00.000Z",
+        },
+      ],
+      availableUserIds: [fixture.userId, "user_ops_1"],
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createNotificationModule(notificationRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const listBeforeCreateResponse = await app.handle(
+      new Request("http://localhost/system/notifications", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(listBeforeCreateResponse.status).toBe(200)
+    expect(await listBeforeCreateResponse.json()).toEqual({
+      items: [
+        {
+          id: "notification_visible_ops_1",
+          recipientUserId: "user_ops_1",
+          title: "Ops Notice",
+          content: "Visible to root descendants.",
+          level: "info",
+          status: "unread",
+          createdByUserId: "user_other_1",
+          createdAt: "2026-04-21T04:00:00.000Z",
+        },
+      ],
+    })
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/system/notifications", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientUserId: "user_ops_1",
+          title: "Root Notice",
+          content: "Created inside root scope.",
+          level: "success",
+        }),
+      }),
+    )
+
+    expect(createResponse.status).toBe(201)
+    const createdNotification = (await createResponse.json()) as {
+      id: string
+      recipientUserId: string
+      title: string
+      content: string
+      level: string
+      status: string
+      createdByUserId?: string
+      createdAt: string
+    }
+
+    const listAfterCreateResponse = await app.handle(
+      new Request("http://localhost/system/notifications", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(listAfterCreateResponse.status).toBe(200)
+    const listAfterCreateBody = (await listAfterCreateResponse.json()) as {
+      items: Array<{ id: string }>
+    }
+    expect(listAfterCreateBody.items.map((item) => item.id)).toEqual([
+      createdNotification.id,
+      "notification_visible_ops_1",
+    ])
   })
 
   it("rejects invalid notification recipients", async () => {

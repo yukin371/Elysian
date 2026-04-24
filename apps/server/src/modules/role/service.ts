@@ -1,3 +1,4 @@
+import type { RoleDataScope } from "@elysian/schema"
 import { AppError } from "../../errors"
 import type {
   CreateRoleInput,
@@ -66,8 +67,11 @@ export const createRoleService = (repository: RoleRepository) => ({
 
     const permissionCodes = normalizeStringArray(input.permissionCodes)
     const userIds = normalizeStringArray(input.userIds)
+    const deptIds = normalizeStringArray(input.deptIds)
 
-    await assertRoleRelations(repository, permissionCodes, userIds)
+    assertValidDataScope(input.dataScope)
+
+    await assertRoleRelations(repository, permissionCodes, userIds, deptIds)
 
     return repository.create({
       code,
@@ -75,8 +79,10 @@ export const createRoleService = (repository: RoleRepository) => ({
       description: normalizeOptionalText(input.description),
       status: input.status,
       isSystem: input.isSystem,
+      dataScope: input.dataScope,
       permissionCodes,
       userIds,
+      deptIds,
     })
   },
   async update(id: string, input: UpdateRolePayload) {
@@ -167,8 +173,14 @@ export const createRoleService = (repository: RoleRepository) => ({
       input.userIds !== undefined
         ? normalizeStringArray(input.userIds)
         : undefined
+    const deptIds =
+      input.deptIds !== undefined
+        ? normalizeStringArray(input.deptIds)
+        : undefined
 
-    await assertRoleRelations(repository, permissionCodes, userIds)
+    assertValidDataScope(input.dataScope)
+
+    await assertRoleRelations(repository, permissionCodes, userIds, deptIds)
 
     const updated = await repository.update(id, {
       code,
@@ -179,8 +191,10 @@ export const createRoleService = (repository: RoleRepository) => ({
           : undefined,
       status: input.status,
       isSystem: input.isSystem,
+      dataScope: input.dataScope,
       permissionCodes,
       userIds,
+      deptIds,
     })
 
     if (!updated) {
@@ -201,6 +215,7 @@ const assertRoleRelations = async (
   repository: RoleRepository,
   permissionCodes?: string[],
   userIds?: string[],
+  deptIds?: string[],
 ) => {
   if (permissionCodes !== undefined) {
     const existingPermissionCodes =
@@ -240,6 +255,26 @@ const assertRoleRelations = async (
       })
     }
   }
+
+  if (deptIds !== undefined) {
+    const existingDepartmentIds =
+      await repository.listExistingDepartmentIds(deptIds)
+    const missingDepartmentIds = deptIds.filter(
+      (departmentId) => !existingDepartmentIds.includes(departmentId),
+    )
+
+    if (missingDepartmentIds.length > 0) {
+      throw new AppError({
+        code: "ROLE_DEPARTMENT_IDS_INVALID",
+        message: "Role contains unknown department ids",
+        status: 400,
+        expose: true,
+        details: {
+          deptIds: missingDepartmentIds,
+        },
+      })
+    }
+  }
 }
 
 const normalizeOptionalText = (value: string | undefined) => {
@@ -251,5 +286,21 @@ const normalizeStringArray = (values: string[] | undefined) =>
   [
     ...new Set((values ?? []).map((value) => value.trim()).filter(Boolean)),
   ].sort()
+
+const assertValidDataScope = (value: RoleDataScope | undefined) => {
+  if (value === undefined) {
+    return
+  }
+
+  if (![1, 2, 3, 4, 5].includes(value)) {
+    throw new AppError({
+      code: "ROLE_DATA_SCOPE_INVALID",
+      message: "Role data scope is invalid",
+      status: 400,
+      expose: true,
+      details: { dataScope: value },
+    })
+  }
+}
 
 export type RoleService = ReturnType<typeof createRoleService>

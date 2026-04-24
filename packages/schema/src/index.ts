@@ -347,6 +347,7 @@ export {
 } from "./product"
 export {
   roleModuleSchema,
+  type RoleDataScope,
   type RoleDetailRecord,
   type RoleRecord,
   type RoleStatus,
@@ -356,6 +357,11 @@ export {
   type SettingRecord,
   type SettingStatus,
 } from "./setting"
+export {
+  tenantModuleSchema,
+  type TenantRecord,
+  type TenantStatus,
+} from "./tenant"
 export {
   userModuleSchema,
   type UserRecord,

@@ -2,7 +2,7 @@ import { fileModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
-import type { AuthGuard } from "../auth"
+import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { FileRepository } from "./repository"
 import { createFileService } from "./service"
@@ -28,7 +28,10 @@ export const createFileModule = (
   name: fileModuleSchema.name,
   register: (app, context) => {
     const service = createFileService(repository, storage)
-    const authorize = async (headers: Headers, permissionCode: string) => {
+    const authorize = async (
+      headers: Headers,
+      permissionCode: string,
+    ): Promise<AuthIdentity | undefined> => {
       if (!options.authGuard) {
         return undefined
       }
@@ -44,10 +47,13 @@ export const createFileModule = (
       .get(
         "/system/files",
         async ({ request }) => {
-          await authorize(request.headers, filePermissions.list)
+          const identity = await authorize(
+            request.headers,
+            filePermissions.list,
+          )
 
           return {
-            items: await service.list(),
+            items: await service.list(identity?.dataAccess),
           }
         },
         {
@@ -60,9 +66,9 @@ export const createFileModule = (
       .get(
         "/system/files/:id",
         async ({ params, request }) => {
-          await authorize(request.headers, filePermissions.get)
+          const identity = await authorize(request.headers, filePermissions.get)
 
-          return service.getById(params.id)
+          return service.getById(params.id, identity?.dataAccess)
         },
         {
           params: t.Object({
@@ -97,6 +103,7 @@ export const createFileModule = (
           return service.upload({
             file: uploadedFile,
             uploaderUserId: identity?.user.id ?? null,
+            deptId: identity?.deptIds[0] ?? null,
           })
         },
         {
@@ -109,8 +116,14 @@ export const createFileModule = (
       .get(
         "/system/files/:id/download",
         async ({ params, request, set }) => {
-          await authorize(request.headers, filePermissions.download)
-          const { file, bytes } = await service.download(params.id)
+          const identity = await authorize(
+            request.headers,
+            filePermissions.download,
+          )
+          const { file, bytes } = await service.download(
+            params.id,
+            identity?.dataAccess,
+          )
 
           set.headers["content-type"] =
             file.mimeType ?? "application/octet-stream"
@@ -136,8 +149,11 @@ export const createFileModule = (
       .delete(
         "/system/files/:id",
         async ({ params, request, set }) => {
-          await authorize(request.headers, filePermissions.delete)
-          await service.remove(params.id)
+          const identity = await authorize(
+            request.headers,
+            filePermissions.delete,
+          )
+          await service.remove(params.id, identity?.dataAccess)
           set.status = 204
         },
         {
