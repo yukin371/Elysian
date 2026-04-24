@@ -1,3 +1,4 @@
+import type { DataAccessContext } from "@elysian/persistence"
 import { AppError } from "../../errors"
 import type { FileRepository } from "./repository"
 import type { FileStorage } from "./storage"
@@ -5,15 +6,16 @@ import type { FileStorage } from "./storage"
 export interface UploadFilePayload {
   file: File
   uploaderUserId?: string | null
+  deptId?: string | null
 }
 
 export const createFileService = (
   repository: FileRepository,
   storage: FileStorage,
 ) => ({
-  list: () => repository.list(),
-  async getById(id: string) {
-    const file = await repository.getById(id)
+  list: (dataAccess?: DataAccessContext) => repository.list(dataAccess),
+  async getById(id: string, dataAccess?: DataAccessContext) {
+    const file = await repository.getById(id, dataAccess)
 
     if (!file) {
       throw buildFileNotFoundError(id)
@@ -29,6 +31,7 @@ export const createFileService = (
       mimeType: saved.mimeType,
       size: saved.size,
       uploaderUserId: payload.uploaderUserId ?? null,
+      deptId: payload.deptId ?? null,
     })
 
     return {
@@ -40,8 +43,8 @@ export const createFileService = (
       createdAt: record.createdAt,
     }
   },
-  async download(id: string) {
-    const file = await repository.getStoredById(id)
+  async download(id: string, dataAccess?: DataAccessContext) {
+    const file = await repository.getStoredById(id, dataAccess)
 
     if (!file) {
       throw buildFileNotFoundError(id)
@@ -54,15 +57,15 @@ export const createFileService = (
       bytes: stored.bytes,
     }
   },
-  async remove(id: string) {
-    const file = await repository.getStoredById(id)
+  async remove(id: string, dataAccess?: DataAccessContext) {
+    const file = await repository.getStoredById(id, dataAccess)
 
     if (!file) {
       throw buildFileNotFoundError(id)
     }
 
     await storage.remove(file.storageKey)
-    await repository.delete(id)
+    await repository.delete(id, dataAccess)
   },
 })
 

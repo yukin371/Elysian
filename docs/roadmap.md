@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3` 已完成状态；`Phase 4`（`P4D/P4E`）已完成收口，`Phase 6A Round-2` 已完成收尾，当前进入 `Phase 5 / P5A`（`AI -> Schema`）启动阶段。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1` 已完成并完成修复收口，正在推进 `P6B2` 数据权限框架。
 
 ## Active Tracks
 
@@ -75,9 +75,9 @@
 - [x] 最近连续 CI 运行稳定性观察窗口达标（建议最少 5 次，且无系统性 smoke 阻断）
 - [x] 基于观察窗口输出“进入 `Phase 6B` 或 `Phase 5`”的主线决策记录
 
-### 5. Phase 5: AI 辅助开发 🚧 P5A 启动
+### 5. Phase 5: AI 辅助开发 ✅ P5A 已归档
 
-- 已决定：下一主线进入 `Phase 5`，但当前只启动 `P5A: AI -> Schema`
+- 已归档：`P5A: AI -> Schema` 最小闭环已完成，当前不再作为主线推进
 - 选择依据：
   - `Phase 4` 已完成，满足 `Phase 5` 入口条件
   - `03-ai-codegen-strategy.md` 已明确推荐顺序为“schema 驱动生成 -> AI 生成 schema -> 交互式 AI 助手”
@@ -113,7 +113,16 @@
 - 已推进：新增 `p5a:acceptance:finalize`，把 acceptance 与 gate 串成一键收尾入口，降低本地执行遗漏
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
-### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
+### 6. Phase 6B: 企业增强 🚧 P6B2 进行中
+
+- 已完成：`P6B1` 租户模型与查询隔离，包含 `tenants` schema、既有业务表 `tenant_id`、PostgreSQL RLS、JWT `tid`、tenant middleware、租户感知 seed 与基础测试覆盖
+- 已完成：`P6B1` 修复收口，修正租户登录、上下文重置与多租户约束边界，已提交到功能分支
+- 正在推进：`P6B2` 数据权限框架，已落 `roles.data_scope`、`role_depts`、`departments.ancestors`、`customer/file/notification` 数据访问过滤与 `AuthIdentity.dataAccess`
+- 已接入：角色管理创建/更新支持 `dataScope` 与 `deptIds`，多角色权限按“最宽松”组合
+- 当前验证：`bun run typecheck`、`bun test`、`bun run check` 已通过；真实 PostgreSQL 下的 RLS/跨租户/外键约束联调保留到 `P6B3`
+- 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
+
+### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
 
 - 已启动：生成写入冲突策略增强，新增 `overwrite-generated-only`，仅允许覆盖受管生成文件
 - 已完成：空文件也纳入冲突检测，避免“空文件被误判为可覆盖”
@@ -124,7 +133,7 @@
 - 收口结论：P4D 安全基线已完成，可进入 `P4E` 回归验证阶段
 - 计划文档：[2026-04-22-phase-4d-safe-apply-kickoff.md](./plans/2026-04-22-phase-4d-safe-apply-kickoff.md)
 
-### 7. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
+### 8. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
 
 - 已启动：`P4E` 生成一致性回归矩阵
 - 当前范围：`schema × frontendTarget × conflictStrategy` 多轮回归（含 deterministic 校验）
@@ -239,6 +248,6 @@
 3. ~~以 `ui-core` 为边界，把更多页面行为从 `example-vue` 收敛到 `frontend-vue` 预设层。~~ ✅ 已完成
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
-6. 启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。
-7. 在 `p5a:handoff:corpus` 基础上继续扩充真实需求变体，验证更多业务输入下的分类边界稳定性。
-8. 保持 `Phase 6B` 为后续候选主线，待 `P5A` 形成稳定入口后再回到企业增强能力。
+6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
+7. 完成 `P6B2` 的覆盖收口，继续验证 5 档数据范围、多角色取最宽松，以及 `customer/file/notification` 模块接入稳定性。
+8. 启动 `P6B3`：租户管理与治理，并补真实 PostgreSQL 下的 RLS、跨租户隔离与外键约束集成验证。

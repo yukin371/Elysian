@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm"
+import { type SQL, and, asc, desc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type FileRow, files } from "./schema"
@@ -11,20 +11,40 @@ export interface CreateFilePersistenceInput {
   mimeType?: string | null
   size: number
   uploaderUserId?: string | null
+  deptId?: string | null
   tenantId?: string
 }
 
-export const listFiles = async (db: DatabaseClient): Promise<FileRow[]> =>
-  db
-    .select()
-    .from(files)
-    .orderBy(desc(files.createdAt), asc(files.originalName))
+export interface FilePersistenceQueryOptions {
+  accessCondition?: SQL<unknown>
+}
+
+export const listFiles = async (
+  db: DatabaseClient,
+  options: FilePersistenceQueryOptions = {},
+): Promise<FileRow[]> =>
+  options.accessCondition
+    ? db
+        .select()
+        .from(files)
+        .where(options.accessCondition)
+        .orderBy(desc(files.createdAt), asc(files.originalName))
+    : db
+        .select()
+        .from(files)
+        .orderBy(desc(files.createdAt), asc(files.originalName))
 
 export const getFileById = async (
   db: DatabaseClient,
   id: string,
+  options: FilePersistenceQueryOptions = {},
 ): Promise<FileRow | null> => {
-  const [row] = await db.select().from(files).where(eq(files.id, id)).limit(1)
+  const conditions = [eq(files.id, id), options.accessCondition].filter(Boolean)
+  const [row] = await db
+    .select()
+    .from(files)
+    .where(and(...conditions))
+    .limit(1)
 
   return row ?? null
 }
@@ -42,6 +62,7 @@ export const insertFile = async (
       mimeType: input.mimeType ?? null,
       size: input.size,
       uploaderUserId: input.uploaderUserId ?? null,
+      deptId: input.deptId ?? null,
       tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
@@ -56,8 +77,13 @@ export const insertFile = async (
 export const deleteFile = async (
   db: DatabaseClient,
   id: string,
+  options: FilePersistenceQueryOptions = {},
 ): Promise<FileRow | null> => {
-  const [row] = await db.delete(files).where(eq(files.id, id)).returning()
+  const conditions = [eq(files.id, id), options.accessCondition].filter(Boolean)
+  const [row] = await db
+    .delete(files)
+    .where(and(...conditions))
+    .returning()
 
   return row ?? null
 }

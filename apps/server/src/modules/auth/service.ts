@@ -1,6 +1,7 @@
 import { AppError } from "../../errors"
 import { verifyPasswordHash } from "./password"
 import type {
+  AuthDataScopeProfile,
   AuthMenuRecord,
   AuthRepository,
   AuthUserRecord,
@@ -39,6 +40,9 @@ export interface AuthIdentity {
     isSuperAdmin: boolean
     tenantId: string
   }
+  deptIds: string[]
+  dataScopes: AuthDataScopeProfile["dataScopes"]
+  dataAccess: AuthDataScopeProfile["dataAccess"]
   roles: string[]
   permissionCodes: string[]
   menus: AuthMenuRecord[]
@@ -83,6 +87,9 @@ export const createAuthService = (
     const roles = await repository.listRoleCodesForUser(user.id)
     const permissionCodes = await repository.listPermissionCodesForUser(user.id)
     const menus = await repository.listMenusForUser(user.id)
+    const dataScopeProfile = await repository.getDataScopeProfileForUser(
+      user.id,
+    )
 
     return {
       user: {
@@ -92,6 +99,9 @@ export const createAuthService = (
         isSuperAdmin: user.isSuperAdmin,
         tenantId: user.tenantId,
       },
+      deptIds: dataScopeProfile.deptIds,
+      dataScopes: dataScopeProfile.dataScopes,
+      dataAccess: dataScopeProfile.dataAccess,
       roles,
       permissionCodes,
       menus,

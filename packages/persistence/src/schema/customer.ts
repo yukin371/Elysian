@@ -1,6 +1,7 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
+import { departments, users } from "./auth"
 import { tenants } from "./tenant"
 
 export const customerStatus = pgEnum("customer_status", ["active", "inactive"])
@@ -12,6 +13,12 @@ export const customers = pgTable("customers", {
     .references(() => tenants.id, { onDelete: "restrict" }),
   name: text("name").notNull(),
   status: customerStatus("status").notNull().default("active"),
+  deptId: uuid("dept_id").references(() => departments.id, {
+    onDelete: "set null",
+  }),
+  creatorId: uuid("creator_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

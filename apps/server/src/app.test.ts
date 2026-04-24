@@ -72,6 +72,10 @@ const createAuthTestFixture = async (
     isSuperAdmin?: boolean
     secureCookies?: boolean
     tenantId?: string
+    dataScope?: 1 | 2 | 3 | 4 | 5
+    userDepartmentIds?: string[]
+    roleDepartmentIds?: string[]
+    departments?: Array<{ id: string; parentId: string | null }>
     tenantContextDb?: DatabaseClient
     resolveTenantIdByCode?: (tenantCode: string) => Promise<string | null>
   } = {},
@@ -121,6 +125,7 @@ const createAuthTestFixture = async (
         code: "admin",
         name: "Admin",
         status: "active",
+        dataScope: options.dataScope ?? 1,
       },
     ],
     permissions,
@@ -144,12 +149,22 @@ const createAuthTestFixture = async (
       : [],
     userRoles: [{ userId, roleId: adminRoleId }],
     rolePermissions,
+    roleDepts: (options.roleDepartmentIds ?? []).map((deptId) => ({
+      roleId: adminRoleId,
+      deptId,
+    })),
     roleMenus: userMenuPermission
       ? [{ roleId: adminRoleId, menuId: userMenuId }]
       : [],
+    userDepartments: (options.userDepartmentIds ?? []).map((departmentId) => ({
+      userId,
+      departmentId,
+    })),
+    departments: options.departments,
   })
 
   return {
+    userId,
     repository,
     authModule: createAuthModule(repository, {
       accessTokenSecret: testAccessTokenSecret,
@@ -218,12 +233,14 @@ const createRoleSeedRecords = () => [
     description: "System administrator",
     status: "active" as const,
     isSystem: true,
+    dataScope: 1 as const,
     permissionCodes: [
       "system:user:list",
       "system:role:list",
       "system:role:update",
     ],
     userIds: ["user_admin_1"],
+    deptIds: [],
     createdAt: "2026-04-21T00:00:00.000Z",
     updatedAt: "2026-04-21T00:00:00.000Z",
   },
@@ -234,8 +251,10 @@ const createRoleSeedRecords = () => [
     description: "Operator role",
     status: "active" as const,
     isSystem: false,
+    dataScope: 1 as const,
     permissionCodes: ["customer:customer:list"],
     userIds: ["user_ops_1"],
+    deptIds: [],
     createdAt: "2026-04-20T00:00:00.000Z",
     updatedAt: "2026-04-20T00:00:00.000Z",
   },
@@ -902,6 +921,18 @@ describe("createServerApp", () => {
         isSuperAdmin: true,
         tenantId: DEFAULT_TENANT_ID,
       },
+      deptIds: [],
+      dataScopes: [
+        {
+          scope: 1,
+        },
+      ],
+      dataAccess: {
+        userId: expect.any(String),
+        hasAllAccess: true,
+        accessibleDeptIds: [],
+        allowSelf: false,
+      },
       roles: ["admin"],
       permissionCodes: ["system:user:list"],
       menus: [
@@ -1504,6 +1535,90 @@ describe("createServerApp", () => {
     })
   })
 
+  it("filters customers by department-scoped data access", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["customer:customer:list"],
+      isSuperAdmin: false,
+      dataScope: 3,
+      userDepartmentIds: ["department_ops_1"],
+      departments: [
+        {
+          id: "department_root_1",
+          parentId: null,
+        },
+        {
+          id: "department_ops_1",
+          parentId: "department_root_1",
+        },
+      ],
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createCustomerModule(
+          createInMemoryCustomerRepository([
+            {
+              id: "cust_visible_1",
+              name: "Ops Customer",
+              status: "active",
+              deptId: "department_ops_1",
+              creatorId: "user_external_1",
+              createdAt: "2026-04-21T00:00:00.000Z",
+              updatedAt: "2026-04-21T00:00:00.000Z",
+            },
+            {
+              id: "cust_hidden_1",
+              name: "Root Customer",
+              status: "active",
+              deptId: "department_root_1",
+              creatorId: "user_external_2",
+              createdAt: "2026-04-21T01:00:00.000Z",
+              updatedAt: "2026-04-21T01:00:00.000Z",
+            },
+          ]),
+          {
+            authGuard: fixture.authGuard,
+          },
+        ),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+    const response = await app.handle(
+      new Request("http://localhost/customers", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      items: [
+        {
+          id: "cust_visible_1",
+          name: "Ops Customer",
+          status: "active",
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        },
+      ],
+    })
+  })
+
   it("lists and gets system users when the access token has user-list permission", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:user:list"],
@@ -1839,6 +1954,7 @@ describe("createServerApp", () => {
           description: "System administrator",
           status: "active",
           isSystem: true,
+          dataScope: 1,
           createdAt: "2026-04-21T00:00:00.000Z",
           updatedAt: "2026-04-21T00:00:00.000Z",
         },
@@ -1849,6 +1965,7 @@ describe("createServerApp", () => {
           description: "Operator role",
           status: "active",
           isSystem: false,
+          dataScope: 1,
           createdAt: "2026-04-20T00:00:00.000Z",
           updatedAt: "2026-04-20T00:00:00.000Z",
         },
@@ -1871,8 +1988,10 @@ describe("createServerApp", () => {
       description: "Operator role",
       status: "active",
       isSystem: false,
+      dataScope: 1,
       permissionCodes: ["customer:customer:list"],
       userIds: ["user_ops_1"],
+      deptIds: [],
       createdAt: "2026-04-20T00:00:00.000Z",
       updatedAt: "2026-04-20T00:00:00.000Z",
     })
@@ -1898,6 +2017,7 @@ describe("createServerApp", () => {
         "customer:customer:update",
       ],
       availableUserIds: ["user_admin_1", "user_ops_1"],
+      availableDepartmentIds: ["department_root_1", "department_ops_1"],
     })
     const app = createTestApp({
       modules: [
@@ -1934,11 +2054,13 @@ describe("createServerApp", () => {
           code: "auditor",
           name: "Auditor",
           description: "Audit role",
+          dataScope: 2,
           permissionCodes: [
             "customer:customer:list",
             "customer:customer:update",
           ],
           userIds: ["user_ops_1"],
+          deptIds: ["department_ops_1"],
         }),
       }),
     )
@@ -1952,8 +2074,10 @@ describe("createServerApp", () => {
       description: string
       status: string
       isSystem: boolean
+      dataScope: number
       permissionCodes: string[]
       userIds: string[]
+      deptIds: string[]
       createdAt: string
       updatedAt: string
     }
@@ -1965,8 +2089,10 @@ describe("createServerApp", () => {
       description: "Audit role",
       status: "active",
       isSystem: false,
+      dataScope: 2,
       permissionCodes: ["customer:customer:list", "customer:customer:update"],
       userIds: ["user_ops_1"],
+      deptIds: ["department_ops_1"],
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     })
@@ -1980,8 +2106,10 @@ describe("createServerApp", () => {
         },
         body: JSON.stringify({
           name: "Lead Auditor",
+          dataScope: 3,
           permissionCodes: ["system:user:list"],
           userIds: ["user_admin_1", "user_ops_1"],
+          deptIds: ["department_root_1"],
         }),
       }),
     )
@@ -1990,8 +2118,10 @@ describe("createServerApp", () => {
     expect(await updateResponse.json()).toEqual({
       ...createdRole,
       name: "Lead Auditor",
+      dataScope: 3,
       permissionCodes: ["system:user:list"],
       userIds: ["user_admin_1", "user_ops_1"],
+      deptIds: ["department_root_1"],
       updatedAt: expect.any(String),
     })
   })
@@ -3770,6 +3900,82 @@ describe("createServerApp", () => {
     })
   })
 
+  it("filters files by self-only data access", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:file:list"],
+      isSuperAdmin: false,
+      dataScope: 5,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createFileModule(
+          createInMemoryFileRepository([
+            {
+              id: "file_visible_self_1",
+              originalName: "my-file.txt",
+              storageKey: "storage_visible_self_1",
+              mimeType: "text/plain",
+              size: 12,
+              uploaderUserId: fixture.userId,
+              createdAt: "2026-04-21T03:00:00.000Z",
+            },
+            {
+              id: "file_hidden_other_1",
+              originalName: "other-file.txt",
+              storageKey: "storage_hidden_other_1",
+              mimeType: "text/plain",
+              size: 18,
+              uploaderUserId: "user_other_1",
+              createdAt: "2026-04-21T04:00:00.000Z",
+            },
+          ]),
+          createInMemoryFileStorage(),
+          {
+            authGuard: fixture.authGuard,
+          },
+        ),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const response = await app.handle(
+      new Request("http://localhost/system/files", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      items: [
+        {
+          id: "file_visible_self_1",
+          originalName: "my-file.txt",
+          mimeType: "text/plain",
+          size: 12,
+          uploaderUserId: fixture.userId,
+          createdAt: "2026-04-21T03:00:00.000Z",
+        },
+      ],
+    })
+  })
+
   it("lists, filters, gets, creates, and marks notifications as read", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [
@@ -3908,6 +4114,144 @@ describe("createServerApp", () => {
       status: "read",
       readAt: expect.any(String),
     })
+  })
+
+  it("keeps department-scoped notifications visible after creation", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:notification:list", "system:notification:create"],
+      isSuperAdmin: false,
+      dataScope: 4,
+      userDepartmentIds: ["department_root_1"],
+      departments: [
+        {
+          id: "department_root_1",
+          parentId: null,
+        },
+        {
+          id: "department_ops_1",
+          parentId: "department_root_1",
+        },
+      ],
+    })
+    const notificationRepository = createInMemoryNotificationRepository({
+      notifications: [
+        {
+          id: "notification_visible_ops_1",
+          recipientUserId: "user_ops_1",
+          title: "Ops Notice",
+          content: "Visible to root descendants.",
+          level: "info",
+          status: "unread",
+          createdByUserId: "user_other_1",
+          deptId: "department_ops_1",
+          createdAt: "2026-04-21T04:00:00.000Z",
+        },
+        {
+          id: "notification_hidden_other_1",
+          recipientUserId: "user_ops_1",
+          title: "Other Notice",
+          content: "Should stay hidden.",
+          level: "warning",
+          status: "unread",
+          createdByUserId: "user_other_2",
+          deptId: "department_other_1",
+          createdAt: "2026-04-21T05:00:00.000Z",
+        },
+      ],
+      availableUserIds: [fixture.userId, "user_ops_1"],
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createNotificationModule(notificationRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const listBeforeCreateResponse = await app.handle(
+      new Request("http://localhost/system/notifications", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(listBeforeCreateResponse.status).toBe(200)
+    expect(await listBeforeCreateResponse.json()).toEqual({
+      items: [
+        {
+          id: "notification_visible_ops_1",
+          recipientUserId: "user_ops_1",
+          title: "Ops Notice",
+          content: "Visible to root descendants.",
+          level: "info",
+          status: "unread",
+          createdByUserId: "user_other_1",
+          createdAt: "2026-04-21T04:00:00.000Z",
+        },
+      ],
+    })
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/system/notifications", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientUserId: "user_ops_1",
+          title: "Root Notice",
+          content: "Created inside root scope.",
+          level: "success",
+        }),
+      }),
+    )
+
+    expect(createResponse.status).toBe(201)
+    const createdNotification = (await createResponse.json()) as {
+      id: string
+      recipientUserId: string
+      title: string
+      content: string
+      level: string
+      status: string
+      createdByUserId?: string
+      createdAt: string
+    }
+
+    const listAfterCreateResponse = await app.handle(
+      new Request("http://localhost/system/notifications", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(listAfterCreateResponse.status).toBe(200)
+    const listAfterCreateBody = (await listAfterCreateResponse.json()) as {
+      items: Array<{ id: string }>
+    }
+    expect(listAfterCreateBody.items.map((item) => item.id)).toEqual([
+      createdNotification.id,
+      "notification_visible_ops_1",
+    ])
   })
 
   it("rejects invalid notification recipients", async () => {

@@ -1,7 +1,7 @@
 import { customerModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
-import type { AuthGuard } from "../auth/guard"
+import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { CustomerRepository, UpdateCustomerInput } from "./repository"
 import { createCustomerService } from "./service"
@@ -25,12 +25,15 @@ export const createCustomerModule = (
   name: customerModuleSchema.name,
   register: (app, context) => {
     const service = createCustomerService(repository)
-    const authorize = async (headers: Headers, permissionCode: string) => {
+    const authorize = async (
+      headers: Headers,
+      permissionCode: string,
+    ): Promise<AuthIdentity | undefined> => {
       if (!options.authGuard) {
-        return
+        return undefined
       }
 
-      await options.authGuard.authorize(headers, permissionCode)
+      return options.authGuard.authorize(headers, permissionCode)
     }
 
     context.logger.info("Registering customer module", {
@@ -41,10 +44,13 @@ export const createCustomerModule = (
       .get(
         "/customers",
         async ({ request }) => {
-          await authorize(request.headers, customerPermissions.list)
+          const identity = await authorize(
+            request.headers,
+            customerPermissions.list,
+          )
 
           return {
-            items: await service.list(),
+            items: await service.list(identity?.dataAccess),
           }
         },
         {
@@ -57,9 +63,12 @@ export const createCustomerModule = (
       .get(
         "/customers/:id",
         async ({ params, request }) => {
-          await authorize(request.headers, customerPermissions.get)
+          const identity = await authorize(
+            request.headers,
+            customerPermissions.get,
+          )
 
-          return service.getById(params.id)
+          return service.getById(params.id, identity?.dataAccess)
         },
         {
           params: t.Object({
@@ -74,9 +83,16 @@ export const createCustomerModule = (
       .post(
         "/customers",
         async ({ body, request, set }) => {
-          await authorize(request.headers, customerPermissions.create)
+          const identity = await authorize(
+            request.headers,
+            customerPermissions.create,
+          )
           set.status = 201
-          return service.create(body)
+          return service.create({
+            ...body,
+            deptId: identity?.deptIds[0] ?? null,
+            creatorId: identity?.user.id ?? null,
+          })
         },
         {
           body: t.Object({
@@ -94,9 +110,12 @@ export const createCustomerModule = (
       .put(
         "/customers/:id",
         async ({ params, body, request }) => {
-          await authorize(request.headers, customerPermissions.update)
+          const identity = await authorize(
+            request.headers,
+            customerPermissions.update,
+          )
 
-          return service.update(params.id, body)
+          return service.update(params.id, body, identity?.dataAccess)
         },
         {
           params: t.Object({
@@ -117,9 +136,12 @@ export const createCustomerModule = (
       .delete(
         "/customers/:id",
         async ({ params, request, set }) => {
-          await authorize(request.headers, customerPermissions.delete)
+          const identity = await authorize(
+            request.headers,
+            customerPermissions.delete,
+          )
 
-          await service.remove(params.id)
+          await service.remove(params.id, identity?.dataAccess)
           set.status = 204
         },
         {

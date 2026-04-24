@@ -1,7 +1,7 @@
 import { notificationModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
-import type { AuthGuard } from "../auth"
+import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { NotificationRepository } from "./repository"
 import { createNotificationService } from "./service"
@@ -29,7 +29,10 @@ export const createNotificationModule = (
   name: notificationModuleSchema.name,
   register: (app, context) => {
     const service = createNotificationService(repository)
-    const authorize = async (headers: Headers, permissionCode: string) => {
+    const authorize = async (
+      headers: Headers,
+      permissionCode: string,
+    ): Promise<AuthIdentity | undefined> => {
       if (!options.authGuard) {
         return undefined
       }
@@ -45,10 +48,13 @@ export const createNotificationModule = (
       .get(
         "/system/notifications",
         async ({ query, request }) => {
-          await authorize(request.headers, notificationPermissions.list)
+          const identity = await authorize(
+            request.headers,
+            notificationPermissions.list,
+          )
 
           return {
-            items: await service.list(query),
+            items: await service.list(query, identity?.dataAccess),
           }
         },
         {
@@ -62,9 +68,12 @@ export const createNotificationModule = (
       .get(
         "/system/notifications/:id",
         async ({ params, request }) => {
-          await authorize(request.headers, notificationPermissions.get)
+          const identity = await authorize(
+            request.headers,
+            notificationPermissions.get,
+          )
 
-          return service.getById(params.id)
+          return service.getById(params.id, identity?.dataAccess)
         },
         {
           params: t.Object({
@@ -88,6 +97,7 @@ export const createNotificationModule = (
           return service.create({
             ...body,
             createdByUserId: identity?.user.id ?? null,
+            deptId: identity?.deptIds[0] ?? null,
           })
         },
         {
@@ -113,9 +123,12 @@ export const createNotificationModule = (
       .post(
         "/system/notifications/:id/read",
         async ({ params, request }) => {
-          await authorize(request.headers, notificationPermissions.update)
+          const identity = await authorize(
+            request.headers,
+            notificationPermissions.update,
+          )
 
-          return service.markAsRead(params.id)
+          return service.markAsRead(params.id, identity?.dataAccess)
         },
         {
           params: t.Object({

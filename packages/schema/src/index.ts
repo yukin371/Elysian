@@ -347,6 +347,7 @@ export {
 } from "./product"
 export {
   roleModuleSchema,
+  type RoleDataScope,
   type RoleDetailRecord,
   type RoleRecord,
   type RoleStatus,

@@ -1,3 +1,4 @@
+import type { DataAccessContext } from "@elysian/persistence"
 import { AppError } from "../../errors"
 import type {
   CreateNotificationInput,
@@ -20,9 +21,10 @@ export interface ListNotificationsPayload extends ListNotificationsInput {}
 export const createNotificationService = (
   repository: NotificationRepository,
 ) => ({
-  list: (filter?: ListNotificationsPayload) => repository.list(filter),
-  async getById(id: string) {
-    const notification = await repository.getById(id)
+  list: (filter?: ListNotificationsPayload, dataAccess?: DataAccessContext) =>
+    repository.list(filter, dataAccess),
+  async getById(id: string, dataAccess?: DataAccessContext) {
+    const notification = await repository.getById(id, dataAccess)
 
     if (!notification) {
       throw new AppError({
@@ -84,10 +86,11 @@ export const createNotificationService = (
       content,
       level: input.level,
       createdByUserId: input.createdByUserId ?? null,
+      deptId: input.deptId ?? null,
     })
   },
-  async markAsRead(id: string) {
-    const current = await repository.getById(id)
+  async markAsRead(id: string, dataAccess?: DataAccessContext) {
+    const current = await repository.getById(id, dataAccess)
 
     if (!current) {
       throw new AppError({
@@ -103,7 +106,7 @@ export const createNotificationService = (
       return current
     }
 
-    const updated = await repository.markAsRead(id)
+    const updated = await repository.markAsRead(id, dataAccess)
 
     if (!updated) {
       throw new AppError({

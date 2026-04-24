@@ -1,6 +1,7 @@
 import type { ModuleSchema } from "./index"
 
 export type RoleStatus = "active" | "disabled"
+export type RoleDataScope = 1 | 2 | 3 | 4 | 5
 
 export interface RoleRecord {
   id: string
@@ -9,6 +10,7 @@ export interface RoleRecord {
   description?: string
   status: RoleStatus
   isSystem: boolean
+  dataScope: RoleDataScope
   createdAt: string
   updatedAt: string
 }
@@ -16,6 +18,7 @@ export interface RoleRecord {
 export interface RoleDetailRecord extends RoleRecord {
   permissionCodes: string[]
   userIds: string[]
+  deptIds: string[]
 }
 
 export const roleModuleSchema: ModuleSchema = {
@@ -58,6 +61,12 @@ export const roleModuleSchema: ModuleSchema = {
       key: "isSystem",
       label: "System Role",
       kind: "boolean",
+      required: true,
+    },
+    {
+      key: "dataScope",
+      label: "Data Scope",
+      kind: "number",
       required: true,
     },
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },

@@ -6,6 +6,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  smallint,
   text,
   timestamp,
   unique,
@@ -65,6 +66,7 @@ export const roles = pgTable(
     description: text("description"),
     status: roleStatus("status").notNull().default("active"),
     isSystem: boolean("is_system").notNull().default(false),
+    dataScope: smallint("data_scope").notNull().default(1),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -192,6 +194,7 @@ export const departments = pgTable(
     parentId: uuid("parent_id"),
     code: text("code").notNull(),
     name: text("name").notNull(),
+    ancestors: text("ancestors").notNull().default(""),
     sort: integer("sort").notNull().default(0),
     status: departmentStatus("status").notNull().default("active"),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -214,6 +217,18 @@ export const userDepartments = pgTable("user_departments", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   departmentId: uuid("department_id")
+    .notNull()
+    .references(() => departments.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
+export const roleDepts = pgTable("role_depts", {
+  roleId: uuid("role_id")
+    .notNull()
+    .references(() => roles.id, { onDelete: "cascade" }),
+  deptId: uuid("dept_id")
     .notNull()
     .references(() => departments.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -284,6 +299,8 @@ export type DepartmentRow = InferSelectModel<typeof departments>
 export type NewDepartmentRow = InferInsertModel<typeof departments>
 export type UserDepartmentRow = InferSelectModel<typeof userDepartments>
 export type NewUserDepartmentRow = InferInsertModel<typeof userDepartments>
+export type RoleDeptRow = InferSelectModel<typeof roleDepts>
+export type NewRoleDeptRow = InferInsertModel<typeof roleDepts>
 export type RefreshSessionRow = InferSelectModel<typeof refreshSessions>
 export type NewRefreshSessionRow = InferInsertModel<typeof refreshSessions>
 export type AuditLogRow = InferSelectModel<typeof auditLogs>
