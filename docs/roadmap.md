@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3` 已完成状态；`Phase 4`（`P4D/P4E`）已完成收口，`Phase 6A Round-2` 已完成收尾，当前进入 `Phase 5 / P5A`（`AI -> Schema`）启动阶段。
+保持 `Phase 2`、`Phase 3` 已完成状态；`Phase 4`（`P4D/P4E`）已完成收口，`Phase 6A Round-2` 已完成收尾，`Phase 5 / P5A`（`AI -> Schema`）已完成归档，当前启动 `Phase 6B`（多租户与数据权限）。
 
 ## Active Tracks
 
@@ -75,21 +75,23 @@
 - [x] 最近连续 CI 运行稳定性观察窗口达标（建议最少 5 次，且无系统性 smoke 阻断）
 - [x] 基于观察窗口输出“进入 `Phase 6B` 或 `Phase 5`”的主线决策记录
 
-### 5. Phase 5: AI 辅助开发 🚧 P5A 启动
+### 5. Phase 5: AI 辅助开发 ✅ P5A 归档
 
 - 已决定：下一主线进入 `Phase 5`，但当前只启动 `P5A: AI -> Schema`
 - 选择依据：
   - `Phase 4` 已完成，满足 `Phase 5` 入口条件
-  - `03-ai-codegen-strategy.md` 已明确推荐顺序为“schema 驱动生成 -> AI 生成 schema -> 交互式 AI 助手”
+  - `03-ai-codegen-strategy.md` 已明确推荐顺序为”schema 驱动生成 -> AI 生成 schema -> 交互式 AI 助手”
   - `Phase 6A Round-2` 已完成最小生产基线收尾，当前短板更偏体验层与交付层，而非继续追加 `Phase 6B` 重型企业能力
+- 归档依据：P5A 4 项出口条件全部达标，`p5a:acceptance:finalize` 一键收尾通过（6 case 全绿）
 - 当前约束：
   - 不启动 `P5B/P5C`
   - 不做交互式 AI 助手
   - 不允许 AI 绕过 schema / generator 直接改平台核心基础设施
-- 当前工作包：
-  - `WP-1` 需求输入模板与 `AI -> Schema` 验收语料
-  - `WP-2` 结构化输出校验与 handoff 边界
-  - `WP-3` 人工兜底、回放与失败审计最小骨架
+- 已完成工作包：
+  - `WP-1` 需求输入模板与 `AI -> Schema` 验收语料 ✅
+  - `WP-2` 结构化输出校验与 handoff 边界 ✅
+  - `WP-3` 人工兜底、回放与失败审计最小骨架 ✅
+  - `WP-4` generator handoff 最小闭环（acceptance + gate + index + finalize）✅
 - 已推进：`packages/schema` 已补 `validateModuleSchema` / `isModuleSchema` runtime 校验，固定外部 schema handoff 的最小硬约束
 - 已推进：`packages/schema` 已把“`enum` 字段必须提供 `options` 或 `dictionaryTypeCode`”收紧为 runtime 硬约束，避免裸 enum 误过 P5A handoff
 - 已推进：`packages/generator` CLI 已支持 `--schema-file`，允许从 JSON schema 文件直接生成 staging，并在外部 schema 来源时内联 `.schema.ts`
@@ -112,8 +114,40 @@
 - 已推进：新增 `p5a:acceptance:index`，把 acceptance 与 gate 收敛成单一结论文件，降低 artifact 下载后的二次拼装成本
 - 已推进：新增 `p5a:acceptance:finalize`，把 acceptance 与 gate 串成一键收尾入口，降低本地执行遗漏
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
+- 收尾文档：[2026-04-24-phase-5a-completion.md](./plans/2026-04-24-phase-5a-completion.md)
 
-### 6. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
+#### Phase 5A Exit Checklist
+
+- [x] `WP-1` 输入契约与验收语料：输入模板 + 6 组任务输入 + 验收语料文档
+- [x] `WP-2` 结构化输出与校验边界：`validateModuleSchema` / `isModuleSchema` / enum 硬约束 / `--schema-file`
+- [x] `WP-3` 回放与人工接管最小骨架：`p5a:handoff:report` / `replay` / `corpus` + 失败分类规则
+- [x] `WP-4` generator handoff 最小闭环：`p5a:acceptance` / `gate` / `index` / `finalize` + CI 门禁
+- [x] `p5a:acceptance:finalize` 一键收尾通过（acceptance=passed / gate=passed / index=passed / cases=6）
+- [x] `bun run test` 全绿（180 pass / 0 fail）
+- [x] `bun run check` 通过
+- [x] 阶段文档同步完成（roadmap + PROJECT_PROFILE + completion plan）
+
+### 6. Phase 6B: 多租户与数据权限 🚧 规划完成
+
+- 已决定：启动 `Phase 6B`，聚焦多租户隔离与行级数据权限
+- 选择依据：
+  - `P6A` 生产基线已完成，`P5A` AI 入口已归档，平台已具备多租户的工程基础
+  - 多租户是后续企业客户交付的前置条件，优先级高于 `P5B` AI 建议器
+- 当前约束：
+  - 不启动缓存（Redis）、定时任务、导入导出、特性开关
+  - 不做独立数据库 / 独立 schema 隔离，仅文档化升级路径
+- 子阶段拆分：
+  - `P6B1` 租户模型与查询隔离（PostgreSQL RLS）
+  - `P6B2` 数据权限框架（RuoYi `data_scope` 5 档模式）
+  - `P6B3` 租户管理与治理（CRUD + 初始化脚本 + 配置覆盖）
+- 设计决策：
+  - 租户隔离策略：共享数据库 + `tenant_id` 字段
+  - 租户过滤机制：PostgreSQL RLS（`current_setting` 会话变量），现有 30+ persistence helper 零改动
+  - 数据权限模式：角色表 `data_scope` 5 档（全部 / 自定义 / 本部门 / 本部门及下级 / 仅本人）
+  - 多角色冲突：取最宽松（OR 组合）
+- 设计文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
+
+### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
 
 - 已启动：生成写入冲突策略增强，新增 `overwrite-generated-only`，仅允许覆盖受管生成文件
 - 已完成：空文件也纳入冲突检测，避免“空文件被误判为可覆盖”
@@ -124,7 +158,7 @@
 - 收口结论：P4D 安全基线已完成，可进入 `P4E` 回归验证阶段
 - 计划文档：[2026-04-22-phase-4d-safe-apply-kickoff.md](./plans/2026-04-22-phase-4d-safe-apply-kickoff.md)
 
-### 7. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
+### 8. Phase 4 Completion: P4E Regression Matrix ✅ 已完成
 
 - 已启动：`P4E` 生成一致性回归矩阵
 - 当前范围：`schema × frontendTarget × conflictStrategy` 多轮回归（含 deterministic 校验）
@@ -239,6 +273,9 @@
 3. ~~以 `ui-core` 为边界，把更多页面行为从 `example-vue` 收敛到 `frontend-vue` 预设层。~~ ✅ 已完成
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
-6. 启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。
-7. 在 `p5a:handoff:corpus` 基础上继续扩充真实需求变体，验证更多业务输入下的分类边界稳定性。
-8. 保持 `Phase 6B` 为后续候选主线，待 `P5A` 形成稳定入口后再回到企业增强能力。
+6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
+7. ~~在 `p5a:handoff:corpus` 基础上继续扩充真实需求变体，验证更多业务输入下的分类边界稳定性。~~ ✅ 已完成（6 case 全绿）
+8. ~~决定下一主线方向：`P5B`（AI 建议器）或 `Phase 6B`（企业增强），待业务优先级确认后启动。~~ → 已选择 `Phase 6B`
+9. 启动 `P6B1`：租户模型与查询隔离（`tenants` 表 + 14 张表 `tenant_id` + PostgreSQL RLS + JWT `tid`）。
+10. `P6B1` 完成后推进 `P6B2`（数据权限框架）→ `P6B3`（租户管理与治理）。
+11. 保持 `P5B`（AI 建议器）为后续候选主线，待 `Phase 6B` 完成后再回到 AI 增强方向。
