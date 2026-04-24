@@ -6,7 +6,7 @@
 
 - `P6B1` 已完成：租户模型、`tenant_id`、RLS、JWT `tid`、tenant context middleware、tenant-aware seed 与基础测试已落地。
 - `P6B2` 已完成：数据权限框架已落 `roles.data_scope`、`role_depts`、`departments.ancestors` 与 server 侧数据访问过滤。
-- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入与稳定性观察收尾链路已完成，且 `feature/dev/main` 三条分支均已完成 `10/10` tenant 滚动观察达标，不在本轮引入额外基础设施 owner。
+- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入、稳定性观察收尾链路，以及迁移/发布演练 runbook、checklist、样例与 GitHub manual rehearsal 已完成；`feature/dev/main` 三条分支均已完成 `10/10` tenant 滚动观察达标，不在本轮引入额外基础设施 owner。
 
 ## 边界摘要
 
@@ -72,6 +72,18 @@
 
 - 仅在需要固定长期升级/迁移策略时新增 ADR
 - 本轮已归档 [ADR-0009](../decisions/ADR-0009-tenant-upgrade-and-validation-strategy.md)，固定默认租户与非默认租户初始化分离、tenant bootstrap 幂等、真实 PostgreSQL 验证门槛与连接回收要求
+
+### WP-5 迁移 / 发布演练与责任边界
+
+状态：已完成（演练入口与文档口径已收口）
+
+已完成：
+
+- 已补 [2026-04-24-phase-6b-tenant-migration-release-runbook.md](./2026-04-24-phase-6b-tenant-migration-release-runbook.md)，固定迁移顺序、目标环境输入、回滚路径与责任边界。
+- 已补 [release-checklist.md](../release-checklist.md) 的 tenant 发布附加检查、输入映射与 `Tenant 发布 blocker 确认单`。
+- 已补 [2026-04-24-phase-6b-tenant-release-rehearsal-sample.md](./2026-04-24-phase-6b-tenant-release-rehearsal-sample.md)，归档本地保守失败样例与 GitHub manual rehearsal 实录。
+- 已补 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 与 `.github/workflows/tenant-release-rehearsal.yml`，用于 rehearsal-only 的执行层自动化。
+- GitHub manual rehearsal `24894806843` 已验证 workflow 结构链路稳定，最终只剩目标环境确认与发布后验证相关的 `8` 个真实 blocker。
 
 ## 风险清理
 
@@ -150,10 +162,10 @@
 
 ## 下一步
 
-1. 基于 `ADR-0009` 和当前 `feature/dev/main` 全部 `candidate_for_next_step` 结论，进入多租户迁移/发布 runbook 与升级执行评审。
-2. 冻结当前 tenant e2e 与稳定性观察阈值，避免升级执行前策略漂移。
-3. 将后续观察重点从“主线拿到 artifact”切换为“生产发布演练与发布后观察责任边界”。
-4. 继续把发布演练重点放在目标环境执行、数据库快照编排与回滚责任边界；已落地的 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 仅服务 runbook 演练，不等于生产平台命令。
+1. 决定是否把已验证的 GitHub `Tenant Release Rehearsal` 固化进发布值班手册，作为默认的 rehearsal 入口。
+2. 若继续逼近真实发布评审，只补目标环境数据库角色、备份回滚、`e2e:tenant:full` 与发布后最小验证这 `8` 个真实 blocker。
+3. 冻结当前 tenant e2e 与稳定性观察阈值，避免升级执行前策略漂移。
+4. 继续维持 `tenant:release:*` 与 GitHub `Tenant Release Rehearsal` 的 rehearsal-only 边界，不把它们写成生产平台命令。
 
 执行手册：
 - [2026-04-24-phase-6b-tenant-upgrade-runbook.md](./2026-04-24-phase-6b-tenant-upgrade-runbook.md)

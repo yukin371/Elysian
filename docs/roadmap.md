@@ -143,7 +143,8 @@
 - 已完成：已产出一份可归档的 tenant release rehearsal 样例记录，证明在目标环境确认和发布后验证缺失时，rehearsal gate 会按预期阻断
 - 已完成：新增 `Tenant Release Rehearsal` GitHub 手动工作流，用表单化输入承接既有 `ELYSIAN_TENANT_RELEASE_*` 人工确认项；该工作流仅服务 rehearsal，不代表生产发布入口
 - 已完成：真实 GitHub manual rehearsal（run `24894806843`）已验证新 workflow 的输入、artifact 与 gate 行为；在 `gitWorktreeClean=true` 前提下，最终只保留目标环境确认与发布后验证相关的 `8` 个预期 blocker
-- 下一步：决定是否把该 workflow 固定进发布值班手册；若继续推进真实发布评审，则只补目标环境确认、备份回滚与发布后最小验证，不再额外处理 workflow 结构风险
+- 已完成：`P6B3 / WP-5` 迁移 / 发布演练与责任边界已完成最小收口，runbook、release checklist、rehearsal sample 与 GitHub manual rehearsal 已统一到同一执行口径
+- 下一步：决定是否把该 workflow 固定进发布值班手册；若继续推进真实发布评审，则按 `Tenant 发布 blocker 确认单` 收集剩余 `8` 个真实 blocker 证据，不再额外处理 workflow 结构风险
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
 - 迁移/发布手册：[2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md)
@@ -271,6 +272,6 @@
 
 ## 下一步
 
-1. 用一次真实的 GitHub manual rehearsal 运行验证新 workflow 的输入、artifact 与 gate 结论是否与本地样例一致。
-2. 若 manual rehearsal 运行稳定，再决定是否把该 workflow 固定进发布值班手册；若不稳定，则回退到 runbook + shell env 路径。
+1. 决定是否把已验证的 GitHub `Tenant Release Rehearsal` 固定进发布值班手册；若不固定，则保留 runbook + shell env 路径作为备用 rehearsal 入口。
+2. 若继续推进真实发布评审，按 `Tenant 发布 blocker 确认单` 收集目标环境确认、备份回滚、`e2e:tenant:full` 与发布后最小验证这 `8` 个真实 blocker 证据。
 3. 在 `P6B3` 收尾后，再评估 `P5B/P5C` 与后续 `Phase 6`/`Phase 7` backlog 的重新排期。
