@@ -20,14 +20,29 @@
 ## 当前发布元数据
 
 ```text
-release environment:
-release commit / PR:
-workflow run id:
-artifact:
-release report path:
-release gate report path:
-fallback to shell env:
+release environment: staging-rehearsal-github
+release commit / PR: 9593301864efb6d36fe98c03b9662731bbbe40a2 / #3
+workflow run id: 24894806843
+artifact: tenant-release-rehearsal-report
+release report path: release/tenant-release-report.json
+release gate report path: release/tenant-release-gate-report.json
+fallback to shell env: false
 fallback reason:
+```
+
+## 已确认的非 blocker 前提
+
+这些项已经在最新已验证的 manual rehearsal 样例中成立，不属于当前剩余 `8` 个 blocker：
+
+```text
+headMatchesObservationWindow: true
+docsSynced: true
+rollbackPrepared: true
+checkPassed: true
+buildVuePassed: true
+gitWorktreeClean: true
+qualifiedForNextStep: true
+recommendation: candidate_for_next_step
 ```
 
 ## 收证顺序
@@ -158,8 +173,19 @@ notes:
 ## 当前结论
 
 ```text
-blockerCount:
-ready for tenant:release:finalize:
+blockerCount: 8
+ready for tenant:release:finalize: no
 remaining blockers:
+- databaseRoleConfirmed
+- backupReady
+- tenantFullPassed
+- defaultTenantLoginVerified
+- superAdminTenantAccessVerified
+- tenantAdminDeniedVerified
+- nonDefaultTenantLoginVerified
+- crossTenantIsolationVerified
 next action:
+- 先补环境 / DBA 前置证据
+- 再补 `bun run e2e:tenant:full`
+- 最后补发布后最小验证五项
 ```
