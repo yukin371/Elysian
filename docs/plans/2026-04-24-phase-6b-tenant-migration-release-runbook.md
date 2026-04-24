@@ -28,6 +28,18 @@
 
 这些入口当前只表示“把既有 runbook 步骤收敛为 rehearsal report / gate / finalize 三段式入口”的执行层自动化；它们不表示仓库已存在生产平台发布脚本，也不改变既有 owner 边界。
 
+当前仓库还额外提供一个仅用于演练的 GitHub 手动入口：
+
+- `.github/workflows/tenant-release-rehearsal.yml`
+
+该 workflow 只负责：
+
+- 从 GitHub 下载既有 tenant artifact 并生成最新 evidence / decision
+- 把人工确认项映射为 `ELYSIAN_TENANT_RELEASE_*` 输入
+- 执行 `tenant:release:finalize` 并归档 rehearsal 产物
+
+该 workflow 明确不表示生产发布平台或自动回滚平台已落地。
+
 ## 适用范围
 
 适用于触及以下任一项且准备进入 `dev -> main` 发布评审的改动：
@@ -149,6 +161,19 @@ bun run tenant:release:finalize
 
 - 必须先完成本手册中的人工检查与发布后验证。
 - 若只是预演发布前门禁，也可以先执行 `tenant:release:report`，待发布后验证补齐后再执行 `tenant:release:gate` / `finalize`。
+
+### GitHub 手动演练入口
+
+若不想手工拼装环境变量，可使用：
+
+- GitHub Actions: `Tenant Release Rehearsal`
+
+使用约束：
+
+- 该 workflow 只用于 rehearsal，不用于真实生产发布。
+- `evidence_branch` / `evidence_limit` / `evidence_scan_limit` 只控制 artifact 收集与 evidence 生成。
+- 其余布尔输入本质上仍是人工确认项，只是从 shell env 改为 GitHub 表单输入，不改变责任归属。
+- 若环境 owner、DBA owner 或发布负责人尚未完成确认，不应把对应输入改成 `true`。
 
 ## 执行顺序
 
