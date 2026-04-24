@@ -71,6 +71,9 @@ describe("createDefaultAuthSeedSpec", () => {
       "system:notification:list",
       "system:notification:create",
       "system:notification:update",
+      "system:tenant:list",
+      "system:tenant:create",
+      "system:tenant:update",
       "customer:customer:list",
       "customer:customer:create",
       "customer:customer:update",
@@ -87,6 +90,7 @@ describe("createDefaultAuthSeedSpec", () => {
       "system-operation-logs",
       "system-files",
       "system-notifications",
+      "system-tenants",
       "customer-root",
       "customer-list",
     ])

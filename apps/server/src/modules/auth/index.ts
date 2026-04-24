@@ -1,7 +1,10 @@
 export { createAuthGuard, type AuthGuard } from "./guard"
 export { createAuthModule, type AuthModuleOptions } from "./module"
 export { createPasswordHash, verifyPasswordHash } from "./password"
-export { createTenantModule, type TenantModuleOptions } from "./tenant"
+export {
+  createTenantContextModule,
+  type TenantModuleOptions,
+} from "./tenant"
 export {
   createAuthRepository,
   createInMemoryAuthRepository,

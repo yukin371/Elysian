@@ -11,12 +11,16 @@ export {
 } from "./data-scope"
 export {
   clearTenantContext,
+  type CreateTenantPersistenceInput,
   DEFAULT_TENANT_ID,
   getTenantByCode,
   getTenantById,
+  insertTenant,
   listTenants,
   resetTenantContext,
   setTenantContext,
+  type UpdateTenantPersistenceInput,
+  updateTenant,
 } from "./tenant"
 export {
   type CreateDictionaryItemPersistenceInput,
@@ -39,6 +43,7 @@ export {
   type CreateSettingPersistenceInput,
   getSettingById,
   getSettingByKey,
+  getSettingWithTenantFallback,
   insertSetting,
   listSettings,
   type UpdateSettingPersistenceInput,

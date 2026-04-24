@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm"
+import { and, asc, desc, eq, or } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type SettingRow, systemSettings } from "./schema"
@@ -47,6 +47,33 @@ export const getSettingByKey = async (
     .select()
     .from(systemSettings)
     .where(eq(systemSettings.key, key))
+    .limit(1)
+
+  return row ?? null
+}
+
+export const getSettingWithTenantFallback = async (
+  db: DatabaseClient,
+  key: string,
+  tenantId: string,
+): Promise<SettingRow | null> => {
+  const [row] = await db
+    .select()
+    .from(systemSettings)
+    .where(
+      and(
+        eq(systemSettings.key, key),
+        or(
+          eq(systemSettings.tenantId, tenantId),
+          eq(systemSettings.tenantId, DEFAULT_TENANT_ID),
+        ),
+      ),
+    )
+    .orderBy(
+      desc(eq(systemSettings.tenantId, tenantId)),
+      desc(eq(systemSettings.tenantId, DEFAULT_TENANT_ID)),
+      desc(systemSettings.updatedAt),
+    )
     .limit(1)
 
   return row ?? null

@@ -26,7 +26,9 @@ import {
   createRoleRepository,
   createSettingModule,
   createSettingRepository,
+  createTenantContextModule,
   createTenantModule,
+  createTenantRepository,
   createUserModule,
   createUserRepository,
   systemModule,
@@ -50,12 +52,13 @@ if (process.env.DATABASE_URL) {
   const operationLogRepository = createOperationLogRepository(db)
   const roleRepository = createRoleRepository(db)
   const settingRepository = createSettingRepository(db)
+  const tenantRepository = createTenantRepository(db)
   const userRepository = createUserRepository(db)
   const authGuard = createAuthGuard(authRepository, {
     accessTokenSecret,
   })
   modules.push(
-    createTenantModule(db, {
+    createTenantContextModule(db, {
       accessTokenSecret,
     }),
   )
@@ -66,6 +69,11 @@ if (process.env.DATABASE_URL) {
       tenantContextDb: db,
       resolveTenantIdByCode: async (tenantCode) =>
         (await getTenantByCode(db, tenantCode))?.id ?? null,
+    }),
+  )
+  modules.push(
+    createTenantModule(tenantRepository, {
+      authGuard,
     }),
   )
   modules.push(
@@ -120,7 +128,7 @@ if (process.env.DATABASE_URL) {
   )
 } else {
   logger.warn(
-    "DATABASE_URL is not configured; auth, customer, dictionary, department, file, menu, notification, operation-log, role, setting, and user modules are not registered",
+    "DATABASE_URL is not configured; auth, tenant, customer, dictionary, department, file, menu, notification, operation-log, role, setting, and user modules are not registered",
   )
 }
 

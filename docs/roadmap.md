@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1` 已完成并完成修复收口，正在推进 `P6B2` 数据权限框架。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，正在推进 `P6B3` 租户管理与治理。
 
 ## Active Tracks
 
@@ -113,13 +113,16 @@
 - 已推进：新增 `p5a:acceptance:finalize`，把 acceptance 与 gate 串成一键收尾入口，降低本地执行遗漏
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
-### 6. Phase 6B: 企业增强 🚧 P6B2 进行中
+### 6. Phase 6B: 企业增强 🚧 P6B3 进行中
 
 - 已完成：`P6B1` 租户模型与查询隔离，包含 `tenants` schema、既有业务表 `tenant_id`、PostgreSQL RLS、JWT `tid`、tenant middleware、租户感知 seed 与基础测试覆盖
 - 已完成：`P6B1` 修复收口，修正租户登录、上下文重置与多租户约束边界，已提交到功能分支
-- 正在推进：`P6B2` 数据权限框架，已落 `roles.data_scope`、`role_depts`、`departments.ancestors`、`customer/file/notification` 数据访问过滤与 `AuthIdentity.dataAccess`
+- 已完成：`P6B2` 数据权限框架，已落 `roles.data_scope`、`role_depts`、`departments.ancestors`、`customer/file/notification` 数据访问过滤与 `AuthIdentity.dataAccess`
 - 已接入：角色管理创建/更新支持 `dataScope` 与 `deptIds`，多角色权限按“最宽松”组合
-- 当前验证：`bun run typecheck`、`bun test`、`bun run check` 已通过；真实 PostgreSQL 下的 RLS/跨租户/外键约束联调保留到 `P6B3`
+- 正在推进：`P6B3 / WP-1` 租户管理模块，已补 `/system/tenants` 列表/详情/创建/更新/状态更新接口，且仅允许 super-admin 操作
+- 正在推进：`P6B3 / WP-3` 租户配置回退，已补“当前 tenant 优先，默认 tenant 回退”的 setting 查询语义，并显式阻断跨租户 override 泄漏
+- 已清理风险：认证侧请求租户上下文模块已更名为 `tenant-context` / `createTenantContextModule`，避免与真实租户业务模块重名
+- 当前验证：`bun run typecheck`、`bun test`、`bun run check` 已通过；真实 PostgreSQL 下的 RLS/跨租户/外键约束联调，以及 `P6B3 / WP-2 tenant:init`、`WP-4 ADR-0009` 仍待推进
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 
 ### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
@@ -249,5 +252,5 @@
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
 6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
-7. 完成 `P6B2` 的覆盖收口，继续验证 5 档数据范围、多角色取最宽松，以及 `customer/file/notification` 模块接入稳定性。
-8. 启动 `P6B3`：租户管理与治理，并补真实 PostgreSQL 下的 RLS、跨租户隔离与外键约束集成验证。
+7. 完成 `P6B3 / WP-1` 的覆盖收口，继续补租户冲突语义、tenant context 命名收敛后的回归与 setting fallback 稳定性。
+8. 推进 `P6B3 / WP-2` 与真实 PostgreSQL 下的 RLS、跨租户隔离、外键约束集成验证，并在边界稳定后补 `ADR-0009`。

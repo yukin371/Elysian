@@ -6,7 +6,7 @@
 
 - 绿地仓库
 - 目标形态是企业级快速开发平台
-- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾，并已启动 `Phase 5 / P5A`（`AI -> Schema`）主线
+- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾与 `Phase 5 / P5A` 归档，并已启动 `Phase 6B`（当前进入 `P6B3` 租户管理与治理）
 
 ## 已确认事实
 
@@ -33,12 +33,13 @@
 - 服务端已落部门管理模块：`department`，并已提供 `GET /system/departments`、`GET /system/departments/:id`、`POST /system/departments`、`PUT /system/departments/:id`。
 - 服务端已落字典管理模块：`dictionary`，并已提供 `GET /system/dictionaries/types`、`GET /system/dictionaries/types/:id`、`POST /system/dictionaries/types`、`PUT /system/dictionaries/types/:id`、`GET /system/dictionaries/items`、`GET /system/dictionaries/items/:id`、`POST /system/dictionaries/items`、`PUT /system/dictionaries/items/:id`。
 - 服务端已落系统配置模块：`setting`，并已提供 `GET /system/settings`、`GET /system/settings/:id`、`POST /system/settings`、`PUT /system/settings/:id`。
+- 服务端已落租户管理模块：`tenant`，并已提供 `GET /system/tenants`、`GET /system/tenants/:id`、`POST /system/tenants`、`PUT /system/tenants/:id`、`PUT /system/tenants/:id/status`。
 - 服务端已落操作日志模块：`operation-log`，并已提供 `GET /system/operation-logs`、`GET /system/operation-logs/:id`、`GET /system/operation-logs/export`。
 - 服务端已落文件管理模块：`file`，并已提供 `GET /system/files`、`GET /system/files/:id`、`POST /system/files`、`GET /system/files/:id/download`、`DELETE /system/files/:id`。
 - 服务端已落通知管理模块：`notification`，并已提供 `GET /system/notifications`、`GET /system/notifications/:id`、`POST /system/notifications`、`POST /system/notifications/:id/read`。
 - `customer` 模块已接入 auth guard，401 / 403 语义已有测试覆盖。
 - auth 模块当前已对 `login / refresh / logout / permission denied` 写入最小审计记录，并保留 `request id / ip / user agent / actor / target / result` 字段。
-- 在存在 `DATABASE_URL` 时，server 会自动注册 `auth`、`customer`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 模块。
+- 在存在 `DATABASE_URL` 时，server 会自动注册 `tenant-context`、`auth`、`tenant`、`customer`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 模块。
 - 服务端已启用 CORS，可直接支撑本地 `dev:server` + `dev:vue` 双端口开发。
 - 服务端已支持基于环境变量的最小 CORS 白名单和内存限流策略（生产环境默认启用限流）。
 - 限流开启时服务端会返回 `x-ratelimit-limit`、`x-ratelimit-remaining`、`x-ratelimit-reset` 响应头，并在超限时保留 `retry-after`。
@@ -55,6 +56,7 @@
 - `packages/persistence` 已补 `departments / user_departments` 关系型 schema、migration 与部门 CRUD / 用户关联 helper，并保持在既有 auth/persistence owner 内。
 - `packages/persistence` 已补 `dictionary_types / dictionary_items` 关系型 schema、migration 与字典类型 / 字典项 CRUD helper，并保持在 `packages/persistence` owner 内。
 - `packages/persistence` 已补 `system_settings` 关系型 schema、migration 与系统配置 CRUD / key 查询 helper，并保持在 `packages/persistence` owner 内。
+- `packages/persistence` 已补 `tenants` 查询/创建/更新 helper、请求级 tenant context SQL helper，以及“当前 tenant 优先 + 默认 tenant 回退”的 setting 查询 helper，并保持在 `packages/persistence` owner 内。
 - `packages/persistence` 已沿用既有 `audit_logs` owner 补充操作日志按条件查询、详情读取能力，未引入第二套日志表或重复 owner。
 - `packages/persistence` 已补 `files` 关系型 schema、migration 与文件元数据 CRUD helper；文件二进制存储仍保持在 `apps/server` runtime owner，不侵入 persistence。
 - `packages/persistence` 已补 `notifications` 关系型 schema、migration 与通知 CRUD / 标记已读 helper，并保持在 `packages/persistence` owner 内，不复用 `audit_logs`。
@@ -154,6 +156,7 @@
 
 - 前端适配层尚未定稿，容易过早耦合到某一个框架。
 - 认证策略已初步固定，但复杂组织权限、数据范围和跨部门隔离仍未进入实现，后续阶段容易出现边界膨胀。
+- 多租户基础能力已进入实现，但真实 PostgreSQL 下的 RLS 执行、跨租户隔离与 `tenant_id` 约束联调仍未完成，后续阶段需要防止“测试替代真实隔离验证”。
 - 文件模块当前只验证了本地磁盘存储适配器，尚未进入对象存储、多副本或生产级生命周期治理。
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。

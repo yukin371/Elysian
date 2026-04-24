@@ -60,11 +60,11 @@ const resolveTenantIdForRequest = async (
   return extractTenantIdFromRefreshToken(refreshToken)
 }
 
-export const createTenantModule = (
+export const createTenantContextModule = (
   db: DatabaseClient,
   options: TenantModuleOptions,
 ): ServerModule => ({
-  name: "tenant",
+  name: "tenant-context",
   register: (app: AnyServerApp) =>
     app
       .onBeforeHandle(async ({ request }) => {

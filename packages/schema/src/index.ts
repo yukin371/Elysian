@@ -358,6 +358,11 @@ export {
   type SettingStatus,
 } from "./setting"
 export {
+  tenantModuleSchema,
+  type TenantRecord,
+  type TenantStatus,
+} from "./tenant"
+export {
   userModuleSchema,
   type UserRecord,
   type UserStatus,
