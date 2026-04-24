@@ -14,6 +14,7 @@ import {
   createAuthGuard,
   createAuthModule,
   createCustomerModule,
+  parseTenantFromToken,
   createDepartmentModule,
   createDictionaryModule,
   createFileModule,
@@ -850,6 +851,7 @@ describe("createServerApp", () => {
       accessToken: string
       user: {
         username: string
+        tenantId: string
       }
       roles: string[]
       permissionCodes: string[]
@@ -858,6 +860,7 @@ describe("createServerApp", () => {
     const setCookie = loginResponse.headers.get("set-cookie")
 
     expect(loginBody.user.username).toBe("admin")
+    expect(loginBody.user.tenantId).toBe(DEFAULT_TENANT_ID)
     expect(loginBody.roles).toEqual(["admin"])
     expect(loginBody.permissionCodes).toEqual(["system:user:list"])
     expect(loginBody.menus.map((menu) => menu.code)).toEqual(["system-user"])
@@ -900,6 +903,57 @@ describe("createServerApp", () => {
         },
       ],
     })
+  })
+
+  it("includes tid in the JWT access token after login", async () => {
+    const fixture = await createAuthTestFixture()
+    const app = createTestApp({
+      modules: [fixture.authModule],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+
+    const loginBody = (await loginResponse.json()) as { accessToken: string }
+    const tid = parseTenantFromToken(`Bearer ${loginBody.accessToken}`)
+    expect(tid).toBe(DEFAULT_TENANT_ID)
+  })
+
+  it("includes tid in the JWT access token after refresh", async () => {
+    const fixture = await createAuthTestFixture()
+    const app = createTestApp({
+      modules: [fixture.authModule],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const refreshResponse = await app.handle(
+      new Request("http://localhost/auth/refresh", {
+        method: "POST",
+        headers: {
+          cookie: toCookieHeader(loginResponse.headers.get("set-cookie")),
+        },
+      }),
+    )
+
+    expect(refreshResponse.status).toBe(200)
+    const refreshBody = (await refreshResponse.json()) as { accessToken: string }
+    const tid = parseTenantFromToken(`Bearer ${refreshBody.accessToken}`)
+    expect(tid).toBe(DEFAULT_TENANT_ID)
   })
 
   it("refreshes tokens and rotates the refresh session", async () => {

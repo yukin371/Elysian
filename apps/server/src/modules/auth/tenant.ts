@@ -11,7 +11,7 @@ interface TenantClaims {
   tid?: string
 }
 
-const parseTenantFromToken = (authorization: string | null): string | null => {
+export const parseTenantFromToken = (authorization: string | null): string | null => {
   if (!authorization?.startsWith("Bearer ")) {
     return null
   }
