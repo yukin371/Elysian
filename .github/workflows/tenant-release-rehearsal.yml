@@ -169,6 +169,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Capture git worktree baseline
+        shell: bash
+        run: |
+          {
+            echo "ELYSIAN_TENANT_RELEASE_GIT_STATUS_OUTPUT<<EOF"
+            git status --short
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:

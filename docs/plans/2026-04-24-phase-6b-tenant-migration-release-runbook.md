@@ -173,6 +173,7 @@ bun run tenant:release:finalize
 - 该 workflow 只用于 rehearsal，不用于真实生产发布。
 - `evidence_branch` / `evidence_limit` / `evidence_scan_limit` 只控制 artifact 收集与 evidence 生成。
 - 为避免超过 GitHub `workflow_dispatch` 的输入上限，该 workflow 固定使用 `ci.yml`、`push,workflow_dispatch` 与窗口大小 `5` 作为 evidence 默认值，不再对这三项开放表单输入。
+- 该 workflow 会在 checkout 后立即捕获一次 git worktree 基线，避免后续 `.ci-reports` 或依赖安装副作用污染 `gitWorktreeClean` 判定。
 - 其余布尔输入本质上仍是人工确认项，只是从 shell env 改为 GitHub 表单输入，不改变责任归属。
 - 若环境 owner、DBA owner 或发布负责人尚未完成确认，不应把对应输入改成 `true`。
 
