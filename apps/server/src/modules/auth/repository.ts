@@ -33,6 +33,7 @@ export interface AuthUserRecord {
   passwordHash: string
   status: AuthUserStatus
   isSuperAdmin: boolean
+  tenantId: string
   lastLoginAt: string | null
   createdAt: string
   updatedAt: string
@@ -409,6 +410,7 @@ const mapUserRow = (row: UserRow): AuthUserRecord => ({
   passwordHash: row.passwordHash,
   status: row.status,
   isSuperAdmin: row.isSuperAdmin,
+  tenantId: row.tenantId,
   lastLoginAt: row.lastLoginAt?.toISOString() ?? null,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),

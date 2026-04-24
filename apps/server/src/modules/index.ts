@@ -4,6 +4,7 @@ export {
   createAuthRepository,
   createInMemoryAuthRepository,
   createPasswordHash,
+  createTenantModule,
 } from "./auth"
 export { createCustomerModule } from "./customer"
 export {

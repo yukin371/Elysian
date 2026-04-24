@@ -36,6 +36,7 @@ export interface AuthIdentity {
     username: string
     displayName: string
     isSuperAdmin: boolean
+    tenantId: string
   }
   roles: string[]
   permissionCodes: string[]
@@ -88,6 +89,7 @@ export const createAuthService = (
         username: user.username,
         displayName: user.displayName,
         isSuperAdmin: user.isSuperAdmin,
+        tenantId: user.tenantId,
       },
       roles,
       permissionCodes,
@@ -105,6 +107,7 @@ export const createAuthService = (
       {
         sub: user.id,
         sid: sessionId,
+        tid: user.tenantId,
         roles: identity.roles,
       },
       options.accessTokenSecret,

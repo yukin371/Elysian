@@ -1,3 +1,4 @@
+import { DEFAULT_TENANT_ID } from "@elysian/persistence"
 import { describe, expect, it } from "bun:test"
 
 import { createServerApp } from "./app"
@@ -103,6 +104,7 @@ const createAuthTestFixture = async (
         passwordHash,
         status: "active",
         isSuperAdmin: options.isSuperAdmin ?? true,
+        tenantId: DEFAULT_TENANT_ID,
         lastLoginAt: null,
         createdAt: "2026-04-21T00:00:00.000Z",
         updatedAt: "2026-04-21T00:00:00.000Z",
@@ -877,6 +879,7 @@ describe("createServerApp", () => {
         username: "admin",
         displayName: "Administrator",
         isSuperAdmin: true,
+        tenantId: DEFAULT_TENANT_ID,
       },
       roles: ["admin"],
       permissionCodes: ["system:user:list"],

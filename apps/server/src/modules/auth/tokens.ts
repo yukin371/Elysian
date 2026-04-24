@@ -3,6 +3,7 @@ const encoder = new TextEncoder()
 export interface AccessTokenPayload {
   sub: string
   sid: string
+  tid: string
   roles: string[]
   iat: number
   exp: number
@@ -15,7 +16,7 @@ const base64UrlEncode = (value: string | Uint8Array) =>
     .replaceAll("/", "_")
     .replaceAll("=", "")
 
-const base64UrlDecode = (value: string) => {
+export const base64UrlDecode = (value: string) => {
   const padded = value.padEnd(
     value.length + ((4 - (value.length % 4)) % 4),
     "=",

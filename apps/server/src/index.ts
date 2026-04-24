@@ -26,6 +26,7 @@ import {
   createRoleRepository,
   createSettingModule,
   createSettingRepository,
+  createTenantModule,
   createUserModule,
   createUserRepository,
   systemModule,
@@ -53,6 +54,7 @@ if (process.env.DATABASE_URL) {
   const authGuard = createAuthGuard(authRepository, {
     accessTokenSecret,
   })
+  modules.push(createTenantModule(db))
   modules.push(
     createAuthModule(authRepository, {
       accessTokenSecret,
