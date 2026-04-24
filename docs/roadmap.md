@@ -139,6 +139,7 @@
 - 已完成：基于 `dev` 最近 `10` 次 tenant artifact（含 `24888296758 / 24888362434 / 24888586126 / 24888651338 / 24888706653 / 24888757984 / 24888812971 / 24888870698 / 24888923973 / 24888972790`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已完成最小执行层自动化：新增 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize`，把既有 tenant migration/release runbook 收敛为 rehearsal report / gate / finalize 三段式入口；这些脚本仅服务发布演练，不代表生产平台命令、owner 边界或发布责任已变更
+- 已完成：发布检查清单已补 tenant 发布演练附加检查、输入映射与补充记录模板，`P6B3` 的 runbook 与 release checklist 已形成同一执行口径
 - 下一步：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
@@ -267,7 +268,6 @@
 
 ## 下一步
 
-1. 按 tenant migration/release runbook 收敛目标环境输入清单与 rehearsal 执行记录，补齐 `P6B3` 剩余的发布演练证据。
-2. 明确 `tenant:release:*` 与未来平台级发布命令的责任边界，避免把 rehearsal 脚本误用为生产发布入口。
-3. 收敛回滚 owner、审批点、回滚证据与收尾 checklist，作为 `P6B3` 的最后退出条件。
-4. 在 `P6B3` 收尾后，再评估 `P5B/P5C` 与后续 `Phase 6`/`Phase 7` backlog 的重新排期。
+1. 基于现有 runbook + release checklist，产出至少一份可归档的 tenant release rehearsal 样例记录，验证执行口径可复用。
+2. 评估是否需要补仅用于 rehearsal 的 `workflow_dispatch` 入口，把人工确认项固化为 GitHub 输入表单，但继续禁止把它当生产发布命令。
+3. 在 `P6B3` 收尾后，再评估 `P5B/P5C` 与后续 `Phase 6`/`Phase 7` backlog 的重新排期。
