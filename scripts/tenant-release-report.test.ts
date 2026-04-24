@@ -18,6 +18,7 @@ afterEach(async () => {
     }
   }
   process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_PATH = ""
+  process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR = ""
   process.exitCode = 0
 })
 
@@ -163,5 +164,22 @@ describe("tenant-release-report", () => {
     expect(markdown).toContain("### Tenant Release Rehearsal")
     expect(markdown).toContain("- status: `passed`")
     expect(markdown).toContain("- blockers: `0`")
+  })
+
+  test("falls back to evidence output dir when explicit evidence path is absent", async () => {
+    const dir = await createTempDir("elysian-tenant-release-report-output-dir-")
+    await writeEvidence(dir, true)
+    process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR = dir
+    setPassingReleaseEnv(dir)
+
+    const report = await run()
+
+    expect(report.status).toBe("passed")
+    expect(report.evidencePath).toBe(
+      join(dir, "e2e-tenant-stability-evidence.json"),
+    )
+    expect(report.decisionPath).toBe(
+      join(dir, "e2e-tenant-upgrade-decision.md"),
+    )
   })
 })

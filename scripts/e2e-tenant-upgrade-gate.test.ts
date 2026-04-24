@@ -12,6 +12,7 @@ afterEach(async () => {
     await rm(dir, { recursive: true, force: true })
   }
   process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_PATH = ""
+  process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR = ""
   process.exitCode = 0
 })
 
@@ -102,5 +103,36 @@ describe("e2e-tenant-upgrade-gate", () => {
     expect(markdown).toContain("### Tenant Upgrade Gate")
     expect(markdown).toContain("- status: `failed`")
     expect(markdown).toContain("- recommendation: `continue_observation`")
+  })
+
+  test("falls back to evidence output dir when explicit evidence path is absent", async () => {
+    const dir = await createTempDir("elysian-tenant-upgrade-gate-output-dir-")
+    process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR = dir
+
+    await writeFile(
+      join(dir, "e2e-tenant-stability-evidence.json"),
+      JSON.stringify({
+        generatedAt: "2026-04-24T00:00:00.000Z",
+        windowSize: 5,
+        totalSnapshots: 5,
+        selectedWindowRuns: 5,
+        hasMinimumRuns: true,
+        failedRunCount: 0,
+        maxConsecutiveFailedRuns: 0,
+        dependencyFailureCount: 0,
+        environmentFailureCount: 0,
+        systemicBlockerDetected: false,
+        qualifiedForNextStep: true,
+        recommendation: "candidate_for_next_step",
+        topRunIds: ["8205", "8204", "8203", "8202", "8201"],
+      }),
+      "utf8",
+    )
+
+    const report = await run()
+    expect(report.status).toBe("passed")
+    expect(report.evidencePath).toBe(
+      join(dir, "e2e-tenant-stability-evidence.json"),
+    )
   })
 })

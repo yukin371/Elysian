@@ -96,8 +96,17 @@ const readCsvEnv = (key: string) => {
 
 const resolveSummaryPath = () => readNonEmptyEnv("GITHUB_STEP_SUMMARY")
 
+const resolveEvidenceOutputDir = () =>
+  readNonEmptyEnv("ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR")
+
 const resolveEvidencePath = () =>
   readNonEmptyEnv("ELYSIAN_TENANT_STABILITY_EVIDENCE_PATH") ??
+  (resolveEvidenceOutputDir()
+    ? join(
+        resolveEvidenceOutputDir() as string,
+        "e2e-tenant-stability-evidence.json",
+      )
+    : null) ??
   join(
     process.cwd(),
     "artifacts",
