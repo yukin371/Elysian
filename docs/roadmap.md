@@ -119,10 +119,12 @@
 - 已完成：`P6B1` 修复收口，修正租户登录、上下文重置与多租户约束边界，已提交到功能分支
 - 已完成：`P6B2` 数据权限框架，已落 `roles.data_scope`、`role_depts`、`departments.ancestors`、`customer/file/notification` 数据访问过滤与 `AuthIdentity.dataAccess`
 - 已接入：角色管理创建/更新支持 `dataScope` 与 `deptIds`，多角色权限按“最宽松”组合
-- 正在推进：`P6B3 / WP-1` 租户管理模块，已补 `/system/tenants` 列表/详情/创建/更新/状态更新接口，且仅允许 super-admin 操作
-- 正在推进：`P6B3 / WP-3` 租户配置回退，已补“当前 tenant 优先，默认 tenant 回退”的 setting 查询语义，并显式阻断跨租户 override 泄漏
+- 已完成：`P6B3 / WP-1` 租户管理模块，已补 `/system/tenants` 列表/详情/创建/更新/状态更新接口，且仅允许 super-admin 操作
+- 已完成：`P6B3 / WP-2 tenant:init`，已补 persistence owner 内的租户初始化 CLI，支持按 tenant 幂等补齐角色/权限/菜单/字典/tenant admin，且 tenant admin 不再误授超管能力
+- 已完成：`P6B3 / WP-3` 租户配置回退，已补“当前 tenant 优先，默认 tenant 回退”的 setting 查询语义，并显式阻断跨租户 override 泄漏
 - 已清理风险：认证侧请求租户上下文模块已更名为 `tenant-context` / `createTenantContextModule`，避免与真实租户业务模块重名
-- 当前验证：`bun run typecheck`、`bun test`、`bun run check` 已通过；真实 PostgreSQL 下的 RLS/跨租户/外键约束联调，以及 `P6B3 / WP-2 tenant:init`、`WP-4 ADR-0009` 仍待推进
+- 已清理风险：`db:seed` 已补 tenant context 设置与 tenant-aware conflict 目标，降低真实 PostgreSQL 下的 RLS/唯一约束错位风险
+- 当前验证：`bun run typecheck`、`bun test`、`bun run check` 已通过；真实 PostgreSQL 下的 RLS/跨租户/外键约束联调与 `WP-4 ADR-0009` 仍待推进
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 
 ### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
@@ -252,5 +254,5 @@
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
 6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
-7. 完成 `P6B3 / WP-1` 的覆盖收口，继续补租户冲突语义、tenant context 命名收敛后的回归与 setting fallback 稳定性。
-8. 推进 `P6B3 / WP-2` 与真实 PostgreSQL 下的 RLS、跨租户隔离、外键约束集成验证，并在边界稳定后补 `ADR-0009`。
+7. 完成 `P6B3 / WP-2` 的真实 PostgreSQL 集成验证，覆盖 tenant init、RLS、跨租户隔离与外键约束。
+8. 在多租户初始化与升级路径稳定后补 `ADR-0009`。

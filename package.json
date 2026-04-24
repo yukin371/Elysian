@@ -21,6 +21,7 @@
     "db:generate": "bun --filter @elysian/persistence db:generate",
     "db:migrate": "bun --filter @elysian/persistence db:migrate",
     "db:seed": "bun --filter @elysian/persistence db:seed",
+    "tenant:init": "bun --filter @elysian/persistence db:tenant:init",
     "db:studio": "bun --filter @elysian/persistence db:studio",
     "stack:up": "docker compose up --build",
     "stack:down": "docker compose down",

@@ -57,10 +57,13 @@
 - `packages/persistence` 已补 `dictionary_types / dictionary_items` 关系型 schema、migration 与字典类型 / 字典项 CRUD helper，并保持在 `packages/persistence` owner 内。
 - `packages/persistence` 已补 `system_settings` 关系型 schema、migration 与系统配置 CRUD / key 查询 helper，并保持在 `packages/persistence` owner 内。
 - `packages/persistence` 已补 `tenants` 查询/创建/更新 helper、请求级 tenant context SQL helper，以及“当前 tenant 优先 + 默认 tenant 回退”的 setting 查询 helper，并保持在 `packages/persistence` owner 内。
+- `packages/persistence` 已补 `tenant:init` CLI，可在 persistence owner 内完成“创建 tenant + 幂等补齐租户级角色/权限/菜单/字典/tenant admin”。
+- `packages/persistence` 已把默认 `db:seed` 收紧为 tenant-aware 执行路径，显式设置 tenant context，并按 tenant 组合键处理 conflict。
 - `packages/persistence` 已沿用既有 `audit_logs` owner 补充操作日志按条件查询、详情读取能力，未引入第二套日志表或重复 owner。
 - `packages/persistence` 已补 `files` 关系型 schema、migration 与文件元数据 CRUD helper；文件二进制存储仍保持在 `apps/server` runtime owner，不侵入 persistence。
 - `packages/persistence` 已补 `notifications` 关系型 schema、migration 与通知 CRUD / 标记已读 helper，并保持在 `packages/persistence` owner 内，不复用 `audit_logs`。
 - `packages/persistence` 的 `bun run db:migrate` 已可正常执行已提交的 SQL migrations。
+- `packages/persistence` 已支持 `bun run db:tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>` 初始化非默认租户。
 - `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试。
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
 - `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
@@ -180,6 +183,7 @@
 - `bun run e2e:generator:reports:gate`
 - `bun run build:vue`
 - `bun run db:migrate`（需配置 `DATABASE_URL`）
+- `bun run tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>`（需配置 `DATABASE_URL`）
 - `bun run server`
 - `bun run dev:vue`
 - `bun run build:vue`
@@ -225,6 +229,7 @@
 - Generator 报告门禁：`bun run e2e:generator:reports:gate`
 - 生成数据库迁移：`bun run db:generate`
 - 执行数据库迁移：`bun run db:migrate`
+- 初始化非默认租户：`bun run tenant:init -- --code tenant-alpha --name "Tenant Alpha" --admin-password "replace-me"`
 - 启动本地容器栈：`bun run stack:up`
 - 停止本地容器栈：`bun run stack:down`
 - 停止并清空容器数据卷：`bun run stack:reset`

@@ -6,7 +6,7 @@
 
 - `P6B1` 已完成：租户模型、`tenant_id`、RLS、JWT `tid`、tenant context middleware、tenant-aware seed 与基础测试已落地。
 - `P6B2` 已完成：数据权限框架已落 `roles.data_scope`、`role_depts`、`departments.ancestors` 与 server 侧数据访问过滤。
-- `P6B3` 已启动：当前先推进“租户管理与治理”的最小后端闭环，不在本轮引入额外基础设施 owner。
+- `P6B3` 已推进到 `WP-2`：租户管理最小后端闭环与 `tenant:init` CLI 已落地，不在本轮引入额外基础设施 owner。
 
 ## 边界摘要
 
@@ -44,12 +44,15 @@
 
 ### WP-2 tenant:init CLI
 
-状态：待实现
+状态：已完成
 
-当前约束：
+已完成：
 
-- 仅在明确初始化输入、输出和幂等语义后落地
-- 不在本轮绕过既有 `packages/persistence` owner 直接写 SQL 脚本到别处
+- `packages/persistence` 新增 `bun run tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>`
+- CLI 负责创建 tenant 并为该 tenant 幂等补齐角色、权限、菜单、字典和 tenant admin
+- tenant admin 固定为 `isSuperAdmin=false`，且不会带出 `system:tenant:*` 权限和 `/system/tenants` 菜单
+- 重跑时会复用既有 tenant，并以 additive 方式补齐缺失数据，不覆盖已存在 tenant 记录
+- 默认 tenant 明确要求继续走 `bun run db:seed`，不与 `tenant:init` 混用
 
 ### WP-3 租户配置回退
 
@@ -75,6 +78,7 @@
 - 命名风险：原 auth tenant middleware 已从 `createTenantModule` 更名为 `createTenantContextModule`，避免与真实租户业务模块重名。
 - 越权风险：tenant table 管理查询显式绕过请求级 tenant context，但只在 tenant repository 内部封装，避免跨模块滥用。
 - 跨租户读取风险：setting fallback 只允许命中当前 tenant 或 `DEFAULT_TENANT_ID`，不允许读取其他 tenant 的 override。
+- 种子风险：`db:seed` 已补 request-scoped tenant context，且 `onConflict` 目标改为 tenant-aware 组合键，避免 RLS 与复合唯一约束错位。
 
 ## 当前验证
 
@@ -87,10 +91,10 @@
 - 真实 PostgreSQL 下的 RLS 执行验证
 - 多 tenant 种子数据下的跨租户隔离验证
 - `tenant_id` 外键与约束联调
-- `tenant:init` CLI 的输入/幂等/回滚语义
+- `tenant:init` 在真实 PostgreSQL 下的端到端初始化验证
 
 ## 下一步
 
-1. 收口并提交当前 `P6B3/WP-1 + WP-3` 实现。
-2. 在不新增 owner 的前提下补 `WP-2 tenant:init`。
-3. 进入真实 PostgreSQL 下的 RLS / 隔离 / FK 集成验证。
+1. 收口并提交当前 `P6B3/WP-1 + WP-2 + WP-3` 实现。
+2. 进入真实 PostgreSQL 下的 RLS / 隔离 / FK 集成验证。
+3. 在边界稳定后补 `WP-4 ADR-0009`。

@@ -130,10 +130,15 @@ export {
 export {
   createDefaultAuthSeedConfig,
   createDefaultAuthSeedSpec,
+  createTenantBootstrapSeedSpec,
+  initializeTenant,
+  normalizeTenantInitOptions,
   runDefaultSeed,
   seedDefaultAuthData,
   type DefaultAuthSeedConfig,
   type DefaultAuthSeedSpec,
+  type TenantBootstrapSeedSpec,
+  type TenantInitOptions,
 } from "./seed"
 export {
   deleteCustomer,
