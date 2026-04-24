@@ -231,6 +231,10 @@ jobs:
       - name: Run tenant isolation e2e
         run: bun run e2e:tenant:full
 
+      - name: Build tenant stability snapshot
+        if: always()
+        run: bun run e2e:tenant:stability:snapshot
+
       - name: Upload tenant e2e report
         if: always()
         uses: actions/upload-artifact@v6

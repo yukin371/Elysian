@@ -6,7 +6,7 @@
 
 - 绿地仓库
 - 目标形态是企业级快速开发平台
-- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾与 `Phase 5 / P5A` 归档，并已启动 `Phase 6B`（`P6B3` 真实 PostgreSQL 验证、`ADR-0009` 与 CI 接入已收口，下一步进入稳定性观察与升级执行策略）
+- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾与 `Phase 5 / P5A` 归档，并已启动 `Phase 6B`（`P6B3` 真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性单次快照已收口，下一步进入观察窗口证据积累与升级执行策略）
 
 ## 已确认事实
 
@@ -104,6 +104,8 @@
 - `scripts/e2e-smoke.ts` 已支持输出 `e2e-smoke-report.json`（状态、阶段、失败分类、失败信息），CI `e2e-smoke` 作业已归档 smoke report artifact。
 - 已新增 `bun run e2e:smoke:diagnose`，可基于 smoke 报告输出诊断结论与建议动作；CI `e2e-smoke` 已接入该诊断步骤并归档诊断结果。
 - 已新增 `bun run e2e:tenant` 与 `bun run e2e:tenant:full`，用于真实 PostgreSQL 下验证 tenant init 幂等、super-admin 租户管理授权、customer 跨租户隔离、RLS 与 `tenant_id` 外键约束。
+- 已新增 `bun run e2e:tenant:stability:snapshot`，用于把单次 tenant e2e 结果沉淀为稳定性快照（含 run 元数据）；CI `e2e-tenant` 已接入并随 artifact 归档。
+- 已新增 `bun run e2e:tenant:stability:evidence`，用于对多次下载的 tenant 稳定性快照做窗口汇总并输出“继续观察 / 可进入下一步”的证据报告。
 - `e2e:smoke:diagnose` 现已支持输出 GitHub Step Summary（状态、阶段、失败分类、建议动作），失败排查无需先下载 artifact。
 - `e2e:smoke:diagnose` 已补 `retryRecommendation`（是否建议先重试 + 原因），用于区分瞬时依赖故障与需先修复的问题。
 - CI `e2e-smoke` 已接入“依赖类失败自动重试一次”策略：首次失败且 `retryRecommendation.shouldRetry=true` 时自动执行一次重试，并由终态门禁步骤统一判定成功/失败。
@@ -161,7 +163,7 @@
 
 - 前端适配层尚未定稿，容易过早耦合到某一个框架。
 - 认证策略已初步固定，但复杂组织权限、数据范围和跨部门隔离仍未进入实现，后续阶段容易出现边界膨胀。
-- 多租户基础能力已接入 CI tenant e2e 作业，但尚未建立稳定性观察窗口与更高规模样本策略，后续阶段需要防止“单次接入 CI 即误判长期稳定”。
+- 多租户基础能力已接入 CI tenant e2e 作业，且已建立单次稳定性快照脚本；但观察窗口样本仍未积累完成，后续阶段需要防止“单次接入 CI 即误判长期稳定”。
 - 文件模块当前只验证了本地磁盘存储适配器，尚未进入对象存储、多副本或生产级生命周期治理。
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。
@@ -180,6 +182,8 @@
 - `bun run check`
 - `bun run e2e:tenant`（需配置 `DATABASE_URL`、`ACCESS_TOKEN_SECRET` 与本地 PostgreSQL）
 - `bun run e2e:tenant:full`（需配置 `DATABASE_URL`、`ACCESS_TOKEN_SECRET` 与本地 PostgreSQL）
+- `bun run e2e:tenant:stability:snapshot`
+- `bun run e2e:tenant:stability:evidence`
 - `bun run e2e:generator:safe-apply`
 - `bun run e2e:generator:matrix`
 - `bun run e2e:generator:cli`
@@ -217,6 +221,8 @@
 - E2E 冒烟（含前置）：`bun run e2e:smoke:full`
 - Tenant 隔离 E2E（仅执行用例）：`bun run e2e:tenant`
 - Tenant 隔离 E2E（含前置 migrate/seed）：`bun run e2e:tenant:full`
+- Tenant 稳定性快照：`bun run e2e:tenant:stability:snapshot`
+- Tenant 稳定性证据汇总：`bun run e2e:tenant:stability:evidence`
 - E2E 冒烟报告诊断：`bun run e2e:smoke:diagnose`
 - E2E 冒烟报告索引：`bun run e2e:smoke:reports:index`
 - E2E 冒烟报告门禁：`bun run e2e:smoke:reports:gate`
