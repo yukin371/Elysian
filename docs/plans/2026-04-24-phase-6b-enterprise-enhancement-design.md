@@ -126,3 +126,6 @@
 1. 基于 `ADR-0009` 和当前 `candidate_for_next_step` 结论，进入多租户迁移/发布 runbook 与升级执行评审。
 2. 冻结当前 tenant e2e 与稳定性观察阈值，避免升级执行前策略漂移。
 3. 在更高规模 tenant 样本下继续压实回归频率与执行窗口。
+
+执行手册：
+- [2026-04-24-phase-6b-tenant-upgrade-runbook.md](./2026-04-24-phase-6b-tenant-upgrade-runbook.md)
