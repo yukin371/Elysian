@@ -209,6 +209,7 @@ bun run tenant:release:finalize
    - artifact 名称
    - blocker 数
    - blocker 是否只剩真实人工前提项
+7. 若准备从“保守失败演练”推进到“通过态评审”，直接使用 [release-checklist.md](../release-checklist.md) 中的 `Tenant 发布 blocker 确认单` 逐项补齐剩余 `8` 个 blocker
 
 当前参考样例：
 

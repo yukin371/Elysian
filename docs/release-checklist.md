@@ -161,3 +161,45 @@ Rehearsal 归档：
 - tenant-release-gate-report.json:
 - 仍需人工确认的平台级空白:
 ```
+
+## Tenant 发布 Blocker 确认单
+
+当 GitHub `Tenant Release Rehearsal` 已进入“只剩真实人工前提项 blocker”状态时，可直接用这份确认单推进：
+
+| Blocker | 对应变量 | 确认方式 | 证据 / 备注 |
+|---|---|---|---|
+| 数据库角色满足 `NOSUPERUSER + NOBYPASSRLS` | `ELYSIAN_TENANT_RELEASE_DATABASE_ROLE_CONFIRMED` | 由环境 owner / DBA 在目标环境确认 | |
+| 备份快照或等价回退手段已就绪 | `ELYSIAN_TENANT_RELEASE_BACKUP_READY` | 记录快照时间、恢复点或回退方案 | |
+| `bun run e2e:tenant:full` 已通过 | `ELYSIAN_TENANT_RELEASE_TENANT_FULL_PASSED` | 记录命令时间、执行人、结果 | |
+| 默认租户登录可用 | `ELYSIAN_TENANT_RELEASE_DEFAULT_TENANT_LOGIN_VERIFIED` | 记录账号、环境与验证时间 | |
+| super-admin 可访问 `/system/tenants` | `ELYSIAN_TENANT_RELEASE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED` | 记录验证账号与结果 | |
+| tenant admin 不可访问 `/system/tenants` | `ELYSIAN_TENANT_RELEASE_TENANT_ADMIN_DENIED_VERIFIED` | 记录验证账号与结果 | |
+| 至少一个非默认 tenant admin 登录可用 | `ELYSIAN_TENANT_RELEASE_NON_DEFAULT_TENANT_LOGIN_VERIFIED` | 记录 tenant code、账号与结果 | |
+| 至少一个真实业务实体跨租户隔离仍成立 | `ELYSIAN_TENANT_RELEASE_CROSS_TENANT_ISOLATION_VERIFIED` | 记录验证实体、tenant A/B 与结果 | |
+
+可直接复制：
+
+```text
+Tenant 发布 blocker 确认单
+
+- release environment:
+- release commit / PR:
+- workflow run id:
+
+- databaseRoleConfirmed:
+  evidence:
+- backupReady:
+  evidence:
+- tenantFullPassed:
+  evidence:
+- defaultTenantLoginVerified:
+  evidence:
+- superAdminTenantAccessVerified:
+  evidence:
+- tenantAdminDeniedVerified:
+  evidence:
+- nonDefaultTenantLoginVerified:
+  evidence:
+- crossTenantIsolationVerified:
+  evidence:
+```
