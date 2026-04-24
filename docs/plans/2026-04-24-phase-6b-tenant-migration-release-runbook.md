@@ -235,6 +235,28 @@ bun run tenant:release:finalize
 - 结构已验证的真实 run：`24894806843`
 - 该 run 的结论：`gitWorktreeClean=true`，最终仅剩 `8` 个目标环境确认与发布后验证 blocker
 
+### 真实 blocker 取证顺序建议
+
+当 workflow 已进入“只剩真实人工前提项 blocker”状态时，建议按下面顺序补证据：
+
+1. 先补环境 / DBA 侧前置：
+   - `databaseRoleConfirmed`
+   - `backupReady`
+2. 再补发布前基线验证：
+   - `tenantFullPassed`
+3. 最后补发布后最小验证：
+   - `defaultTenantLoginVerified`
+   - `superAdminTenantAccessVerified`
+   - `tenantAdminDeniedVerified`
+   - `nonDefaultTenantLoginVerified`
+   - `crossTenantIsolationVerified`
+
+排序理由：
+
+- 若数据库角色或备份未确认，继续做后续验证没有发布意义。
+- 若 `bun run e2e:tenant:full` 未过，发布后最小验证的失败会混入实现问题与环境问题，证据不干净。
+- 发布后最小验证应先验证默认租户与 super-admin，再验证 tenant admin 限制与非默认租户，最后做真实业务实体隔离确认，避免账号、权限或环境问题把跨租户隔离验证污染成假阴性。
+
 ## 执行顺序
 
 ### 1. 冻结发布范围
