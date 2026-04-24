@@ -234,6 +234,7 @@ bun run tenant:release:finalize
 
 - 结构已验证的真实 run：`24894806843`
 - 该 run 的结论：`gitWorktreeClean=true`，最终仅剩 `8` 个目标环境确认与发布后验证 blocker
+- 当前执行记录建议直接维护在 [2026-04-24-phase-6b-tenant-release-blocker-tracker.md](./2026-04-24-phase-6b-tenant-release-blocker-tracker.md)
 
 ### 真实 blocker 取证顺序建议
 
