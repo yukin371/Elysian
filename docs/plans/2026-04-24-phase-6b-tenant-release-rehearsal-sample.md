@@ -103,6 +103,23 @@ Tenant 发布 blocker 确认单
   - `e2e:tenant:full`
   - 发布后最小验证五项
 
+### 预填版责任分配
+
+本次预填版建议直接按下表追证据：
+
+| Blocker | 默认责任方 | 说明 |
+|---|---|---|
+| `databaseRoleConfirmed` | 环境 / DBA owner | 确认目标环境数据库角色满足 `NOSUPERUSER + NOBYPASSRLS` |
+| `backupReady` | 环境 / DBA owner | 提供快照时间、恢复点或等价回退方案 |
+| `tenantFullPassed` | 当前实施 owner / 模块 owner | 提供 `bun run e2e:tenant:full` 执行结果 |
+| `defaultTenantLoginVerified` | 发布负责人 + 模块 owner | 提供默认租户登录验证证据 |
+| `superAdminTenantAccessVerified` | 发布负责人 + `apps/server` owner | 提供 super-admin 访问 `/system/tenants` 验证证据 |
+| `tenantAdminDeniedVerified` | 发布负责人 + `apps/server` owner | 提供 tenant admin 禁止访问 `/system/tenants` 验证证据 |
+| `nonDefaultTenantLoginVerified` | 发布负责人 + 模块 owner | 提供至少一个非默认 tenant admin 登录验证证据 |
+| `crossTenantIsolationVerified` | 发布负责人 + 模块 owner | 提供至少一个真实业务实体跨租户隔离验证证据 |
+
+若发布负责人、环境 / DBA owner 或模块 owner 还未明确，本次发布评审不应继续推进。
+
 ## 输入说明
 
 本次样例采用“保守失败”策略：
