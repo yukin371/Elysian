@@ -6,7 +6,7 @@
 
 - `P6B1` 已完成：租户模型、`tenant_id`、RLS、JWT `tid`、tenant context middleware、tenant-aware seed 与基础测试已落地。
 - `P6B2` 已完成：数据权限框架已落 `roles.data_scope`、`role_depts`、`departments.ancestors` 与 server 侧数据访问过滤。
-- `P6B3` 已推进到 `WP-2`：租户管理最小后端闭环与 `tenant:init` CLI 已落地，不在本轮引入额外基础设施 owner。
+- `P6B3` 已推进到 `WP-4` 前置收口：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback 与真实 PostgreSQL 集成验证已完成，不在本轮引入额外基础设施 owner。
 
 ## 边界摘要
 
@@ -79,22 +79,24 @@
 - 越权风险：tenant table 管理查询显式绕过请求级 tenant context，但只在 tenant repository 内部封装，避免跨模块滥用。
 - 跨租户读取风险：setting fallback 只允许命中当前 tenant 或 `DEFAULT_TENANT_ID`，不允许读取其他 tenant 的 override。
 - 种子风险：`db:seed` 已补 request-scoped tenant context，且 `onConflict` 目标改为 tenant-aware 组合键，避免 RLS 与复合唯一约束错位。
+- 写入风险：customer 创建链路已补 `identity.user.tenantId` 透传，避免真实 PostgreSQL 下误写回默认租户。
+- 连接风险：`db:seed`、`tenant:init` 与 tenant e2e harness 已补显式数据库连接回收，降低重复执行时的连接耗尽风险。
 
 ## 当前验证
 
 - `bun run typecheck`
 - `bun test`
 - `bun run check`
+- `bun run e2e:tenant:full`（本地 Docker PostgreSQL，已验证 tenant init 幂等、super-admin 授权、customer 隔离、RLS 与 `tenant_id` FK）
 
 ## 待补验证
 
-- 真实 PostgreSQL 下的 RLS 执行验证
-- 多 tenant 种子数据下的跨租户隔离验证
-- `tenant_id` 外键与约束联调
-- `tenant:init` 在真实 PostgreSQL 下的端到端初始化验证
+- 将 `e2e:tenant:full` 纳入 CI 或阶段门禁
+- `WP-4 ADR-0009` 的升级/迁移策略固化
+- 更高规模 tenant 样本与回归频率策略
 
 ## 下一步
 
-1. 收口并提交当前 `P6B3/WP-1 + WP-2 + WP-3` 实现。
-2. 进入真实 PostgreSQL 下的 RLS / 隔离 / FK 集成验证。
-3. 在边界稳定后补 `WP-4 ADR-0009`。
+1. 收口并提交当前 `P6B3/WP-1 + WP-2 + WP-3` 与真实 PostgreSQL 验证修复。
+2. 进入 `WP-4 ADR-0009`，固化多租户升级与迁移策略。
+3. 评估 `e2e:tenant:full` 的 CI 化或阶段门禁接入方式。

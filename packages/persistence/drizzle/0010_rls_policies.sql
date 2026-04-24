@@ -71,6 +71,6 @@ CREATE POLICY "tenant_isolation" ON "refresh_sessions" USING ("tenant_id" = curr
 ALTER TABLE "tenants" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "tenant_isolation" ON "tenants" USING (
   current_setting('app.current_tenant', true) IS NULL
-  OR current_setting('app.current_tenant', true) = ''
-  OR "id" = current_setting('app.current_tenant', true)::uuid
+  OR NULLIF(current_setting('app.current_tenant', true), '') IS NULL
+  OR "id" = NULLIF(current_setting('app.current_tenant', true), '')::uuid
 );

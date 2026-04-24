@@ -92,6 +92,7 @@ export const createCustomerModule = (
             ...body,
             deptId: identity?.deptIds[0] ?? null,
             creatorId: identity?.user.id ?? null,
+            tenantId: identity?.user.tenantId,
           })
         },
         {

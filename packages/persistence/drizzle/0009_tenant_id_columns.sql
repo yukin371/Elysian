@@ -46,9 +46,9 @@ ALTER TABLE "refresh_sessions" ALTER COLUMN "tenant_id" SET NOT NULL;
 -- Step 3.1: Rebuild tenant-aware unique constraints
 ALTER TABLE "users" DROP CONSTRAINT "users_username_unique";
 ALTER TABLE "roles" DROP CONSTRAINT "roles_code_unique";
+ALTER TABLE "menus" DROP CONSTRAINT "menus_permission_code_permissions_code_fk";
 ALTER TABLE "permissions" DROP CONSTRAINT "permissions_code_unique";
 ALTER TABLE "menus" DROP CONSTRAINT "menus_code_unique";
-ALTER TABLE "menus" DROP CONSTRAINT "menus_permission_code_permissions_code_fk";
 ALTER TABLE "departments" DROP CONSTRAINT "departments_code_unique";
 ALTER TABLE "dictionary_types" DROP CONSTRAINT "dictionary_types_code_unique";
 ALTER TABLE "system_settings" DROP CONSTRAINT "system_settings_key_unique";

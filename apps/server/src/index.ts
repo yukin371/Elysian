@@ -1,4 +1,9 @@
-import { createDatabaseClient, getTenantByCode } from "@elysian/persistence"
+import {
+  clearTenantContext,
+  createDatabaseClient,
+  getTenantByCode,
+  resetTenantContext,
+} from "@elysian/persistence"
 
 import { createServerApp } from "./app"
 import { loadServerConfig, resolveAccessTokenSecret } from "./config"
@@ -67,8 +72,18 @@ if (process.env.DATABASE_URL) {
       accessTokenSecret,
       secureCookies: config.env === "production",
       tenantContextDb: db,
-      resolveTenantIdByCode: async (tenantCode) =>
-        (await getTenantByCode(db, tenantCode))?.id ?? null,
+      resolveTenantIdByCode: (tenantCode) =>
+        db.transaction(async (tx) => {
+          const scopedDb = tx as unknown as typeof db
+
+          await clearTenantContext(scopedDb)
+
+          try {
+            return (await getTenantByCode(scopedDb, tenantCode))?.id ?? null
+          } finally {
+            await resetTenantContext(scopedDb)
+          }
+        }),
     }),
   )
   modules.push(

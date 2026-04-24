@@ -18,6 +18,7 @@ export interface CreateCustomerInput {
   status?: CustomerStatus
   deptId?: string | null
   creatorId?: string | null
+  tenantId?: string
 }
 
 export interface UpdateCustomerInput {
@@ -141,6 +142,7 @@ export const createInMemoryCustomerRepository = (
         status: input.status ?? "active",
         deptId: input.deptId ?? null,
         creatorId: input.creatorId ?? null,
+        tenantId: input.tenantId ?? null,
         createdAt: now,
         updatedAt: now,
       }
@@ -192,6 +194,7 @@ export const createInMemoryCustomerRepository = (
 interface StoredCustomerRecord extends CustomerRecord {
   deptId?: string | null
   creatorId?: string | null
+  tenantId?: string | null
 }
 
 const mapCustomerRow = (row: CustomerRow): CustomerRecord => ({
@@ -206,11 +209,13 @@ const mapPublicCustomerToStored = (
   row: CustomerRecord & {
     deptId?: string | null
     creatorId?: string | null
+    tenantId?: string | null
   },
 ): StoredCustomerRecord => ({
   ...row,
   deptId: row.deptId ?? null,
   creatorId: row.creatorId ?? null,
+  tenantId: row.tenantId ?? null,
 })
 
 const mapStoredCustomerToPublic = (

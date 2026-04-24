@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，正在推进 `P6B3` 租户管理与治理。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证已收口，准备进入 `WP-4 ADR-0009`。
 
 ## Active Tracks
 
@@ -124,7 +124,10 @@
 - 已完成：`P6B3 / WP-3` 租户配置回退，已补“当前 tenant 优先，默认 tenant 回退”的 setting 查询语义，并显式阻断跨租户 override 泄漏
 - 已清理风险：认证侧请求租户上下文模块已更名为 `tenant-context` / `createTenantContextModule`，避免与真实租户业务模块重名
 - 已清理风险：`db:seed` 已补 tenant context 设置与 tenant-aware conflict 目标，降低真实 PostgreSQL 下的 RLS/唯一约束错位风险
-- 当前验证：`bun run typecheck`、`bun test`、`bun run check` 已通过；真实 PostgreSQL 下的 RLS/跨租户/外键约束联调与 `WP-4 ADR-0009` 仍待推进
+- 已清理风险：customer 创建链路已补 `identity.user.tenantId` 透传，避免写入错误回退到 `DEFAULT_TENANT_ID`
+- 已清理风险：`db:seed`、`tenant:init` 与 tenant e2e harness 已补显式数据库连接回收，降低重复执行时的连接耗尽风险
+- 已完成验证：`bun run check` 与 `bun run e2e:tenant:full` 已通过，覆盖 tenant init 幂等、super-admin 租户管理授权、customer 跨租户隔离、RLS 与 `tenant_id` 外键约束
+- 下一步：进入 `P6B3 / WP-4 ADR-0009`，收敛多租户升级与持续验证策略
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 
 ### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
@@ -254,5 +257,5 @@
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
 6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
-7. 完成 `P6B3 / WP-2` 的真实 PostgreSQL 集成验证，覆盖 tenant init、RLS、跨租户隔离与外键约束。
-8. 在多租户初始化与升级路径稳定后补 `ADR-0009`。
+7. 启动 `P6B3 / WP-4 ADR-0009`，固化多租户升级、迁移与持续验证边界。
+8. 评估是否将 `e2e:tenant:full` 纳入 CI 或阶段门禁，避免真实 PostgreSQL 隔离回归重新只靠人工执行。

@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm"
+import { and, eq, inArray } from "drizzle-orm"
 
 import { type DatabaseClient, createDatabaseClient } from "./client"
 import {
@@ -1170,7 +1170,12 @@ export const seedDefaultAuthData = async (
     const existingAdmin = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.username, spec.adminUser.username))
+      .where(
+        and(
+          eq(users.tenantId, tid),
+          eq(users.username, spec.adminUser.username),
+        ),
+      )
       .limit(1)
 
     if (!existingAdmin[0]) {
@@ -1254,16 +1259,16 @@ export const runDefaultSeed = async (
   env: Record<string, string | undefined> = process.env,
 ) => {
   const db = createDatabaseClient(env)
-  const config = createDefaultAuthSeedConfig(env)
-  const result = await seedDefaultAuthData(db, config)
+  try {
+    const config = createDefaultAuthSeedConfig(env)
+    const result = await seedDefaultAuthData(db, config)
 
-  console.log(
-    `[elysian] default auth seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin})`,
-  )
-}
-
-if (import.meta.main) {
-  await runDefaultSeed()
+    console.log(
+      `[elysian] default auth seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin})`,
+    )
+  } finally {
+    await db.$client.end()
+  }
 }
 
 const seedTenantBootstrapData = async (
@@ -1305,9 +1310,12 @@ const seedTenantBootstrapData = async (
             })
             .from(dictionaryTypes)
             .where(
-              inArray(
-                dictionaryTypes.code,
-                spec.dictionaryTypes.map((type) => type.code),
+              and(
+                eq(dictionaryTypes.tenantId, tenantId),
+                inArray(
+                  dictionaryTypes.code,
+                  spec.dictionaryTypes.map((type) => type.code),
+                ),
               ),
             )
     const dictionaryTypeIdByCode = new Map(
@@ -1338,7 +1346,12 @@ const seedTenantBootstrapData = async (
     const existingAdmin = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.username, spec.adminUser.username))
+      .where(
+        and(
+          eq(users.tenantId, tenantId),
+          eq(users.username, spec.adminUser.username),
+        ),
+      )
       .limit(1)
 
     if (!existingAdmin[0]) {
@@ -1364,9 +1377,12 @@ const seedTenantBootstrapData = async (
             })
             .from(roles)
             .where(
-              inArray(
-                roles.code,
-                spec.roles.map((role) => role.code),
+              and(
+                eq(roles.tenantId, tenantId),
+                inArray(
+                  roles.code,
+                  spec.roles.map((role) => role.code),
+                ),
               ),
             )
     const permissionRows =
@@ -1379,9 +1395,12 @@ const seedTenantBootstrapData = async (
             })
             .from(permissions)
             .where(
-              inArray(
-                permissions.code,
-                spec.permissions.map((permission) => permission.code),
+              and(
+                eq(permissions.tenantId, tenantId),
+                inArray(
+                  permissions.code,
+                  spec.permissions.map((permission) => permission.code),
+                ),
               ),
             )
     const menuRows =
@@ -1394,9 +1413,12 @@ const seedTenantBootstrapData = async (
             })
             .from(menus)
             .where(
-              inArray(
-                menus.code,
-                spec.menus.map((menu) => menu.code),
+              and(
+                eq(menus.tenantId, tenantId),
+                inArray(
+                  menus.code,
+                  spec.menus.map((menu) => menu.code),
+                ),
               ),
             )
     const adminRows = await db
@@ -1405,7 +1427,12 @@ const seedTenantBootstrapData = async (
         username: users.username,
       })
       .from(users)
-      .where(eq(users.username, spec.adminUser.username))
+      .where(
+        and(
+          eq(users.tenantId, tenantId),
+          eq(users.username, spec.adminUser.username),
+        ),
+      )
       .limit(1)
     const adminUserId =
       adminRows[0]?.id ??
@@ -1484,7 +1511,7 @@ const insertTenantBootstrapMenus = async (
       }
       const parentId = current.parentCode
         ? (resolvedMenuIds.get(current.parentCode) ??
-          (await resolveTenantMenuIdByCode(db, current.parentCode)))
+          (await resolveTenantMenuIdByCode(db, tenantId, current.parentCode)))
         : null
 
       if (current.parentCode && !parentId) {
@@ -1511,7 +1538,7 @@ const insertTenantBootstrapMenus = async (
         .onConflictDoNothing({ target: [menus.tenantId, menus.code] })
 
       const menuId =
-        (await resolveTenantMenuIdByCode(db, current.code)) ??
+        (await resolveTenantMenuIdByCode(db, tenantId, current.code)) ??
         throwMissingSeedRelation("menu code", current.code)
       resolvedMenuIds.set(current.code, menuId)
       pending.splice(index, 1)
@@ -1530,6 +1557,7 @@ const insertTenantBootstrapMenus = async (
 
 const resolveTenantMenuIdByCode = async (
   db: DatabaseClient,
+  tenantId: string,
   code: string,
 ): Promise<string | null> => {
   const [row] = await db
@@ -1537,7 +1565,7 @@ const resolveTenantMenuIdByCode = async (
       id: menus.id,
     })
     .from(menus)
-    .where(eq(menus.code, code))
+    .where(and(eq(menus.tenantId, tenantId), eq(menus.code, code)))
     .limit(1)
 
   return row?.id ?? null
@@ -1559,4 +1587,8 @@ const withTenantSeedContext = async <T>(
 
 const throwMissingSeedRelation = (type: string, value: string): never => {
   throw new Error(`Missing seed relation for ${type}: ${value}`)
+}
+
+if (import.meta.main) {
+  await runDefaultSeed()
 }

@@ -41,6 +41,10 @@ import {
   createUserModule,
   verifyAccessToken,
 } from "./modules"
+import type {
+  CreateCustomerInput,
+  CustomerRepository,
+} from "./modules/customer"
 
 const testAccessTokenSecret = ["test", "access", "secret"].join("-")
 const testAdminPassword = ["admin", "123"].join("")
@@ -1637,6 +1641,84 @@ describe("createServerApp", () => {
           updatedAt: "2026-04-21T00:00:00.000Z",
         },
       ],
+    })
+  })
+
+  it("passes tenant identity into customer creation", async () => {
+    const tenantId = "11111111-1111-4111-8111-111111111111"
+    const fixture = await createAuthTestFixture({
+      permissions: ["customer:customer:create"],
+      isSuperAdmin: false,
+      tenantId,
+      userDepartmentIds: ["department_ops_1"],
+    })
+    let receivedCreateInput: CreateCustomerInput | null = null
+    const customerRepository: CustomerRepository = {
+      list: async () => [],
+      getById: async () => null,
+      create: async (input) => {
+        receivedCreateInput = input
+
+        return {
+          id: "cust_created_1",
+          name: input.name,
+          status: input.status ?? "active",
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        }
+      },
+      update: async () => null,
+      remove: async () => false,
+    }
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createCustomerModule(customerRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+    }
+
+    const response = await app.handle(
+      new Request("http://localhost/customers", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: " Tenant Scoped Customer ",
+          status: "inactive",
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(201)
+    if (!receivedCreateInput) {
+      throw new Error("Expected customer repository create to be called")
+    }
+    const actualCreateInput: CreateCustomerInput = receivedCreateInput
+    expect(actualCreateInput).toEqual({
+      name: "Tenant Scoped Customer",
+      status: "inactive",
+      deptId: "department_ops_1",
+      creatorId: fixture.userId,
+      tenantId,
     })
   })
 

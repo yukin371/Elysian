@@ -100,11 +100,15 @@ if (import.meta.main) {
       process.exitCode = 1
     } else {
       const db = createDatabaseClient()
-      const result = await initializeTenant(db, options)
+      try {
+        const result = await initializeTenant(db, options)
 
-      console.log(
-        `[elysian] tenant init complete (code=${result.tenantCode}, tenantId=${result.tenantId}, createdTenant=${result.createdTenant}, admin=${result.adminUsername}, insertedAdmin=${result.insertedAdmin})`,
-      )
+        console.log(
+          `[elysian] tenant init complete (code=${result.tenantCode}, tenantId=${result.tenantId}, createdTenant=${result.createdTenant}, admin=${result.adminUsername}, insertedAdmin=${result.insertedAdmin})`,
+        )
+      } finally {
+        await db.$client.end()
+      }
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
