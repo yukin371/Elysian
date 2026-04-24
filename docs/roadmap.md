@@ -55,7 +55,7 @@
 - 第二轮已推进：新增快照收集脚本（`e2e:smoke:stability:collect`），用于将下载 artifact 归拢为 evidence 输入
 - 第二轮已推进：新增从下载包直接收尾命令（`e2e:smoke:phase:finalize:from-downloads`），串联 collect/evidence/decision/gate
 - 第二轮已推进：基于最近 5 次 `dev` 相关成功运行（runIds: `24831519539`、`24831463736`、`24831405348`、`24831362661`、`24831277528`）生成稳定性证据，窗口已达标且阶段出口门禁通过
-- 第二轮已完成：主线决策已归档为 `Phase 5`，仅启动 `P5A: AI -> Schema`，暂不进入 `Phase 6B`
+- 第二轮已完成：曾输出“主线进入 `Phase 5 / P5A`”的阶段决策；该决策现已完成历史使命，当前主线已切换到 `Phase 6B`
 - 第二轮已推进：限流响应头观测增强（`x-ratelimit-limit`/`remaining`/`reset` + `retry-after`），为分布式限流评估提供运行期信号
 - 第二轮已推进：已建立双轨文档与 skill 模板骨架（`docs/quickstart`、`docs/reference`、`docs/ai-playbooks`、`skills/templates`）
 - 第二轮计划文档：[2026-04-22-phase-6a-round2-baseline-hardening.md](./plans/2026-04-22-phase-6a-round2-baseline-hardening.md)
@@ -64,7 +64,7 @@
 - 阶段执行基线：[2026-04-23-phase-execution-gates-and-wbs.md](./plans/2026-04-23-phase-execution-gates-and-wbs.md)
 - 稳定性观察窗口：[2026-04-23-phase-6a-round2-stability-window.md](./plans/2026-04-23-phase-6a-round2-stability-window.md)
 - 对标与功能清单：[2026-04-23-competitive-benchmark-and-dev-feature-checklist.md](./plans/2026-04-23-competitive-benchmark-and-dev-feature-checklist.md)
-- 主线决策与启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
+- 历史主线决策文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 #### Phase 6A Round-2 Exit Checklist
 
@@ -77,16 +77,16 @@
 
 ### 5. Phase 5: AI 辅助开发 ✅ P5A 已归档
 
-- 已归档：`P5A: AI -> Schema` 最小闭环已完成，当前不再作为主线推进
-- 选择依据：
+- 已归档：`P5A: AI -> Schema` 最小闭环已完成；该阶段现作为已完成能力保留，不再定义当前主线优先级
+- 归档说明：
   - `Phase 4` 已完成，满足 `Phase 5` 入口条件
   - `03-ai-codegen-strategy.md` 已明确推荐顺序为“schema 驱动生成 -> AI 生成 schema -> 交互式 AI 助手”
-  - `Phase 6A Round-2` 已完成最小生产基线收尾，当前短板更偏体验层与交付层，而非继续追加 `Phase 6B` 重型企业能力
-- 当前约束：
+  - `P5A` 收尾后，仓库已按最新主计划切换到 `Phase 6B / P6B3`；`P5B/P5C` 保留为后续 backlog，而非当前执行主线
+- 归档边界：
   - 不启动 `P5B/P5C`
   - 不做交互式 AI 助手
   - 不允许 AI 绕过 schema / generator 直接改平台核心基础设施
-- 当前工作包：
+- 已完成工作包：
   - `WP-1` 需求输入模板与 `AI -> Schema` 验收语料
   - `WP-2` 结构化输出校验与 handoff 边界
   - `WP-3` 人工兜底、回放与失败审计最小骨架
@@ -247,7 +247,7 @@
 - 已新增仓库根 `docker-compose.yml` 与 `stack:*` 脚本，形成 `server + PostgreSQL` 一键启动基线（含 migrate + seed）
 - 已新增 `e2e:smoke` 与 `e2e:smoke:full` 脚本，并在 CI 接入 `e2e-smoke` job（统一走 full 入口，执行 migrate + seed + 登录/customer CRUD 冒烟）
 - 已补 `WP-3` 最小基线：`/metrics` 运行时指标快照、可配置 CORS 白名单、内存限流策略（生产环境默认启用）
-- 已完成 `Phase 6A Round-2` 退出判定，并将下一主线切换为 `Phase 5 / P5A`
+- 已完成 `Phase 6A Round-2` 退出判定；先前已切到 `Phase 5 / P5A`，当前已进一步推进到 `Phase 6B / P6B3`
 
 ## 待验证项
 
@@ -267,11 +267,7 @@
 
 ## 下一步
 
-1. ~~在至少一个受保护业务路由上正式接入 auth guard，验证 401 / 403 语义和 middleware 挂载边界。~~ ✅ 已完成
-2. ~~收敛 `/auth/me` 与 login/refresh 返回结构的复用方式，避免 server 与 frontend 重复定义 identity contract。~~ ✅ 已完成
-3. ~~以 `ui-core` 为边界，把更多页面行为从 `example-vue` 收敛到 `frontend-vue` 预设层。~~ ✅ 已完成
-4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
-5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
-6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
-7. 为 `e2e-tenant` 增加稳定性观察与执行策略，避免“已进 CI”被误判为“长期稳定”。
-8. 基于 `ADR-0009` 补多租户迁移/发布 runbook 或后续阶段实施文档。
+1. 按 tenant migration/release runbook 收敛目标环境输入清单与 rehearsal 执行记录，补齐 `P6B3` 剩余的发布演练证据。
+2. 明确 `tenant:release:*` 与未来平台级发布命令的责任边界，避免把 rehearsal 脚本误用为生产发布入口。
+3. 收敛回滚 owner、审批点、回滚证据与收尾 checklist，作为 `P6B3` 的最后退出条件。
+4. 在 `P6B3` 收尾后，再评估 `P5B/P5C` 与后续 `Phase 6`/`Phase 7` backlog 的重新排期。

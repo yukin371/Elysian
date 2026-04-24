@@ -74,18 +74,13 @@
 
 ## 下一阶段方向建议
 
-P5A 完成后，有两条候选主线：
+本文档只保留 `P5A` 的出口证据与归档结论，不再承载当前主线优先级判断。
 
-1. **Phase 5 继续（P5B AI 建议器）**：在 P5A 的 schema handoff 基础上，让 AI 参与字段建议、查询项建议、表单布局建议和测试数据建议。
-2. **Phase 6B 企业增强**：多租户、数据权限、缓存（Redis）、定时任务、导入导出、特性开关。
+后续状态更新：
 
-当前判断：建议先推进 P5B，理由：
-
-- P5A 已建立稳定的 AI -> Schema -> Generator 通道，P5B 可直接复用 handoff 基础设施
-- Phase 6B 涉及重型基础设施变更（多租户、Redis），对当前仓库的 owner 复杂度影响较大
-- 先完成 Phase 5 全部子阶段，再做 Phase 6B，可以避免两个方向同时膨胀
-
-但最终决策应取决于当前业务优先级和资源情况。
+- 仓库已在 `P5A` 收尾后切换到 `Phase 6B`，当前主线为 `P6B3`。
+- `P5B/P5C` 仍保留在 backlog，但不再是本轮优先执行项。
+- 当前优先级以 [06-phased-implementation-plan.md](../06-phased-implementation-plan.md) 与 [roadmap.md](../roadmap.md) 为准。
 
 ## 文档同步
 
