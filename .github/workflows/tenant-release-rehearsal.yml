@@ -8,11 +8,6 @@ on:
         required: false
         default: "dev"
         type: string
-      evidence_workflow:
-        description: "提供 tenant artifact 的 workflow 文件名"
-        required: false
-        default: "ci.yml"
-        type: string
       evidence_limit:
         description: "收集的 tenant 运行样本数（默认 5）"
         required: false
@@ -22,16 +17,6 @@ on:
         description: "扫描的 tenant 运行上限（默认 15）"
         required: false
         default: "15"
-        type: string
-      evidence_events:
-        description: "过滤事件，逗号分隔；默认 push,workflow_dispatch"
-        required: false
-        default: "push,workflow_dispatch"
-        type: string
-      evidence_window_size:
-        description: "tenant stability evidence 窗口大小（默认 5）"
-        required: false
-        default: "5"
         type: string
       source_branch:
         description: "发布源分支"
@@ -150,12 +135,12 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GITHUB_TOKEN: ${{ github.token }}
       ELYSIAN_TENANT_STABILITY_DOWNLOAD_REPOSITORY: ${{ github.repository }}
-      ELYSIAN_TENANT_STABILITY_DOWNLOAD_WORKFLOW: ${{ inputs.evidence_workflow }}
-      ELYSIAN_TENANT_STABILITY_DOWNLOAD_EVENTS: ${{ inputs.evidence_events }}
+      ELYSIAN_TENANT_STABILITY_DOWNLOAD_WORKFLOW: ci.yml
+      ELYSIAN_TENANT_STABILITY_DOWNLOAD_EVENTS: push,workflow_dispatch
       ELYSIAN_TENANT_STABILITY_DOWNLOAD_OUTPUT_DIR: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/downloads
       ELYSIAN_TENANT_STABILITY_EVIDENCE_INPUT_DIR: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/tenant
       ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/evidence
-      ELYSIAN_TENANT_STABILITY_WINDOW_SIZE: ${{ inputs.evidence_window_size }}
+      ELYSIAN_TENANT_STABILITY_WINDOW_SIZE: 5
       ELYSIAN_TENANT_RELEASE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/release/tenant-release-report.json
       ELYSIAN_TENANT_RELEASE_GATE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/release/tenant-release-gate-report.json
       ELYSIAN_TENANT_RELEASE_SOURCE_BRANCH: ${{ inputs.source_branch }}
