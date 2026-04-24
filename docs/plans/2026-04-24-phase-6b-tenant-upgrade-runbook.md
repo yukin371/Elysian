@@ -21,11 +21,15 @@
 
 ## 当前基线
 
-- 分支：`feature-p6b1-tenant-isolation`
-- 观察窗口实现头：`154e3439bdcb8bb76967d773fa4cf727a9766124`
-- 观察窗口 runIds：`24886462252`、`24886403317`、`24886352160`、`24886285868`、`24886175279`
-- evidence 结论：
-  - `selectedWindowRuns=5`
+- 最低真实门槛仍是同一实现头的 `5/5`
+- 首个达标窗口：
+  - 分支：`feature-p6b1-tenant-isolation`
+  - 观察窗口实现头：`154e3439bdcb8bb76967d773fa4cf727a9766124`
+  - 观察窗口 runIds：`24886462252`、`24886403317`、`24886352160`、`24886285868`、`24886175279`
+- 当前主线状态：
+  - `dev` 最近 `10` 次 tenant artifact 已达标
+  - `main` 最近 `10` 次 tenant artifact 已达标
+- evidence 共识结论：
   - `failedRunCount=0`
   - `maxConsecutiveFailedRuns=0`
   - `dependencyFailureCount=0`

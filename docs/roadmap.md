@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口；在 `5/5` 真实观察窗口达标后，已完成首轮 `10/10` 分支级滚动观察，当前结论仍为 `candidate_for_next_step`，但主线级滚动观察仍受 `dev/main` 尚未接入 `e2e-tenant` job 阻断。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口；在 `5/5` 真实观察窗口达标后，已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察，当前结论仍为 `candidate_for_next_step`。
 
 ## Active Tracks
 
@@ -135,8 +135,10 @@
 - 已完成：新增 `e2e:tenant:stability:download` 与 `e2e:tenant:upgrade:finalize:from-github`，可直接从 GitHub 下载 tenant artifact 并落升级结论
 - 已完成：基于 `workflow_dispatch` 连续 5 次真实样本 `24886462252 / 24886403317 / 24886352160 / 24886285868 / 24886175279` 输出 tenant observation evidence；当前 `selectedWindowRuns=5`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`，门禁返回 `candidate_for_next_step`
 - 已完成：基于 `ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10` 与最近 `10` 次 tenant artifact（`24887191148 / 24887139395 / 24887089834 / 24887032527 / 24886462252 / 24886403317 / 24886352160 / 24886285868 / 24886175279 / 24885957451`）输出首轮滚动观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
-- 已确认阻断：尝试按同一策略迁移到 `dev/main` 时，`gh run download` 在 `origin/dev` / `origin/main` 的最近成功 CI 上均返回 `no artifact matches`；核对后确认两条分支当前 `.github/workflows/ci.yml` 尚未包含 `e2e-tenant` job
-- 下一步：先把当前功能分支的 tenant CI 变更晋级到 `dev/main`，再执行主线级 `10` 次滚动观察；生产部署平台确定后再补平台级发布命令与责任边界
+- 已完成：`feature-p6b1-tenant-isolation -> dev -> main` 已全部晋级，`dev` push / workflow_dispatch 与 `main` push / workflow_dispatch 均已包含 `e2e-tenant` job 与 artifact
+- 已完成：基于 `dev` 最近 `10` 次 tenant artifact（含 `24888296758 / 24888362434 / 24888586126 / 24888651338 / 24888706653 / 24888757984 / 24888812971 / 24888870698 / 24888923973 / 24888972790`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
+- 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
+- 下一步：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
 - 迁移/发布手册：[2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md)

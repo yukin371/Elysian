@@ -6,7 +6,7 @@
 
 - `P6B1` 已完成：租户模型、`tenant_id`、RLS、JWT `tid`、tenant context middleware、tenant-aware seed 与基础测试已落地。
 - `P6B2` 已完成：数据权限框架已落 `roles.data_scope`、`role_depts`、`departments.ancestors` 与 server 侧数据访问过滤。
-- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入与稳定性观察收尾链路已完成，不在本轮引入额外基础设施 owner。
+- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入与稳定性观察收尾链路已完成，且 `feature/dev/main` 三条分支均已完成 `10/10` tenant 滚动观察达标，不在本轮引入额外基础设施 owner。
 
 ## 边界摘要
 
@@ -101,8 +101,7 @@
 
 ## 待补验证
 
-- `dev/main` 上最近 `10` 次 tenant artifact 的滚动观察记录与结论
-  - 当前阻断：`origin/dev` 与 `origin/main` 尚未包含 `e2e-tenant` job，最近成功 CI 无 `e2e-tenant-report` artifact
+- 生产环境迁移 / 放量 / 回滚演练
 - 升级执行 runbook、回滚路径与冻结阈值后的操作演练
 
 ## 真实观察窗口达标记录
@@ -122,11 +121,34 @@
   - 真实 tenant artifact 下载、collect、evidence、decision、gate 链路已在 `5/5` 窗口下闭环跑通
   - 当前不存在系统性失败、依赖失败或环境失败信号，可进入下一步升级执行评审
 
+## 主线级滚动观察达标记录
+
+- `dev` 分支：
+  - 执行方式：`ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from-github -- --branch dev --limit 10 --scan-limit 20`
+  - GitHub runIds：`24888296758`、`24888362434`、`24888586126`、`24888651338`、`24888706653`、`24888757984`、`24888812971`、`24888870698`、`24888923973`、`24888972790`
+  - 结论：
+    - `selectedWindowRuns=10`
+    - `failedRunCount=0`
+    - `maxConsecutiveFailedRuns=0`
+    - `systemicBlockerDetected=false`
+    - `qualifiedForNextStep=true`
+    - `recommendation=candidate_for_next_step`
+- `main` 分支：
+  - 执行方式：`ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from-github -- --branch main --limit 10 --scan-limit 20`
+  - GitHub runIds：`24889218600`、`24889284909`、`24889342252`、`24889396810`、`24889454355`、`24889506795`、`24889562531`、`24889627339`、`24889689643`、`24889747211`
+  - 结论：
+    - `selectedWindowRuns=10`
+    - `failedRunCount=0`
+    - `maxConsecutiveFailedRuns=0`
+    - `systemicBlockerDetected=false`
+    - `qualifiedForNextStep=true`
+    - `recommendation=candidate_for_next_step`
+
 ## 下一步
 
-1. 基于 `ADR-0009` 和当前 `candidate_for_next_step` 结论，进入多租户迁移/发布 runbook 与升级执行评审。
+1. 基于 `ADR-0009` 和当前 `feature/dev/main` 全部 `candidate_for_next_step` 结论，进入多租户迁移/发布 runbook 与升级执行评审。
 2. 冻结当前 tenant e2e 与稳定性观察阈值，避免升级执行前策略漂移。
-3. 在更高规模 tenant 样本下继续压实回归频率与执行窗口。
+3. 将后续观察重点从“主线拿到 artifact”切换为“生产发布演练与发布后观察责任边界”。
 
 执行手册：
 - [2026-04-24-phase-6b-tenant-upgrade-runbook.md](./2026-04-24-phase-6b-tenant-upgrade-runbook.md)

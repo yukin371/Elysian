@@ -19,6 +19,9 @@
   - `failedRunCount=0`
   - `systemicBlockerDetected=false`
   - `recommendation=candidate_for_next_step`
+- 已完成主线级首轮滚动观察：
+  - `dev` 最近 `10` 次 tenant artifact：`selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`
+  - `main` 最近 `10` 次 tenant artifact：`selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`
 
 ## 适用范围
 
@@ -196,11 +199,10 @@ ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from
 1. 保持 Level 1 的 `5/5` 作为 tenant 改动进入发布评审前的最低门槛
 2. 把最近 `10` 次 tenant artifact 的滚动观察作为下一阶段新增策略
 3. 在生产部署平台明确前，不再引入更重的线上稳定性 owner
-4. 等 `dev/main` 上 tenant artifact 积累到足够密度后，再决定是否把 Level 2 从“建议”升级为硬门槛
+4. 当前 `dev/main` 已具备第一版 `10/10` 记录，暂时保持 Level 2 为“建议级持续健康度信号”，待生产发布演练完成后再判断是否升级为硬门槛
 
 ## 后续待补
 
-- 基于真实 `dev/main` 数据补第一版 `10` 次滚动观察记录
-  - 当前前提：先把包含 `e2e-tenant` job 的 CI workflow 晋级到 `dev/main`
+- 基于真实 `dev/main` 数据补第二版 `10` 次滚动观察记录（当后续出现新的 tenant 高风险改动时）
 - 明确 Level 2 是否需要单独的 decision / gate 产物命名
 - 在生产部署平台确定后，补 CI 观察到发布后观察的责任切分
