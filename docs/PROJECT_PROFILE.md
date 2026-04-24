@@ -6,7 +6,7 @@
 
 - 绿地仓库
 - 目标形态是企业级快速开发平台
-- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾与 `Phase 5 / P5A` 归档，并已启动 `Phase 6B`（`P6B3` 真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口，下一步进入观察窗口样本积累与升级执行评审）
+- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾与 `Phase 5 / P5A` 归档，并已启动 `Phase 6B`（`P6B3` 真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口；首个真实观察样本 `runId 24885957451` 已采集，当前窗口为 `1/5`，推荐仍为 `continue_observation`）
 
 ## 已确认事实
 
@@ -108,6 +108,7 @@
 - 已新增 `bun run e2e:tenant:stability:evidence`，用于对多次下载的 tenant 稳定性快照做窗口汇总并输出“继续观察 / 可进入下一步”的证据报告。
 - 已新增 `bun run e2e:tenant:stability:collect` 与 `bun run e2e:tenant:upgrade:finalize:from-downloads`，用于把下载的 tenant snapshot artifact 归拢后串联 evidence / decision / gate，减少观察窗口收尾遗漏。
 - 已新增 `bun run e2e:tenant:stability:download` 与 `bun run e2e:tenant:upgrade:finalize:from-github`，复用本机 `gh` CLI 直接下载最近 tenant CI artifact 并串联升级结论，降低人工逐个下载成本。
+- 已完成一次真实 GitHub 样本回放：`workflow_dispatch` run `24885957451` 成功下载并完成 evidence / decision / gate 收尾；当前结论为 `selectedWindowRuns=1`、`failedRunCount=0`、`systemicBlockerDetected=false`、`recommendation=continue_observation`。
 - `e2e:smoke:diagnose` 现已支持输出 GitHub Step Summary（状态、阶段、失败分类、建议动作），失败排查无需先下载 artifact。
 - `e2e:smoke:diagnose` 已补 `retryRecommendation`（是否建议先重试 + 原因），用于区分瞬时依赖故障与需先修复的问题。
 - CI `e2e-smoke` 已接入“依赖类失败自动重试一次”策略：首次失败且 `retryRecommendation.shouldRetry=true` 时自动执行一次重试，并由终态门禁步骤统一判定成功/失败。
@@ -165,7 +166,7 @@
 
 - 前端适配层尚未定稿，容易过早耦合到某一个框架。
 - 认证策略已初步固定，但复杂组织权限、数据范围和跨部门隔离仍未进入实现，后续阶段容易出现边界膨胀。
-- 多租户基础能力已接入 CI tenant e2e 作业，且已建立单次稳定性快照脚本；但观察窗口样本仍未积累完成，后续阶段需要防止“单次接入 CI 即误判长期稳定”。
+- 多租户基础能力已接入 CI tenant e2e 作业，且已建立单次稳定性快照脚本；当前已拿到首个真实观察样本，但窗口仍仅 `1/5`，后续阶段需要防止“单次接入 CI 即误判长期稳定”。
 - 文件模块当前只验证了本地磁盘存储适配器，尚未进入对象存储、多副本或生产级生命周期治理。
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。

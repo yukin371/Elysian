@@ -104,6 +104,24 @@
 - tenant e2e 的稳定性观察窗口样本积累与 evidence 结论
 - 更高规模 tenant 样本与回归频率策略
 
+## 首次真实观察记录
+
+- 样本来源：`workflow_dispatch` / `feature-p6b1-tenant-isolation`
+- GitHub runId：`24885957451`
+- 执行方式：`bun run e2e:tenant:upgrade:finalize:from-github -- --branch feature-p6b1-tenant-isolation --limit 1 --scan-limit 10`
+- 结论：
+  - `selectedWindowRuns=1`
+  - `windowSize=5`
+  - `failedRunCount=0`
+  - `systemicBlockerDetected=false`
+  - `qualifiedForNextStep=false`
+  - `recommendation=continue_observation`
+- 当前阻断项：
+  - 样本不足：仅 `1/5`，尚未达到升级执行门禁
+- 当前判断：
+  - 真实 tenant artifact 下载、collect、evidence、decision、gate 链路均已跑通
+  - 当前尚不存在系统性失败信号，但还不能把单次成功误判为长期稳定
+
 ## 下一步
 
 1. 连续积累 tenant 稳定性快照 artifact，并优先用 `e2e:tenant:upgrade:finalize:from-github` 或 `e2e:tenant:upgrade:finalize:from-downloads` 输出统一的 evidence / decision / gate 结论。

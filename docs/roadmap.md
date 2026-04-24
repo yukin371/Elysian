@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口，下一步转向观察窗口样本积累与升级执行评审。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口；当前已拿到首个真实观察样本 `runId 24885957451`，窗口仍为 `1/5`，下一步继续积累样本并评审升级执行策略。
 
 ## Active Tracks
 
@@ -133,6 +133,7 @@
 - 已接入：CI `e2e-tenant` 已在单次 tenant e2e 后产出稳定性快照并随 artifact 归档
 - 已完成：新增 `e2e:tenant:stability:collect`、`e2e:tenant:upgrade:decision`、`e2e:tenant:upgrade:gate`、`e2e:tenant:upgrade:finalize` 与 `e2e:tenant:upgrade:finalize:from-downloads`，将下载 artifact 到升级结论的收尾链路固定为脚本化流程
 - 已完成：新增 `e2e:tenant:stability:download` 与 `e2e:tenant:upgrade:finalize:from-github`，可直接从 GitHub 下载 tenant artifact 并落升级结论
+- 已完成：基于 `workflow_dispatch` run `24885957451` 跑通首个真实 tenant observation evidence；当前 `selectedWindowRuns=1`、`failedRunCount=0`、`systemicBlockerDetected=false`，门禁因 `hasMinimumRuns=false` 返回 `continue_observation`
 - 下一步：积累 tenant 稳定性观察窗口样本，并基于脚本化 evidence / decision / gate 结论决定下一阶段升级执行策略与更高规模样本计划
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 
