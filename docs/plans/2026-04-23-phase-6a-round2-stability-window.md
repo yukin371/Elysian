@@ -1,5 +1,7 @@
 # 2026-04-23 Phase 6A Round-2 CI 稳定性观察窗口
 
+> 历史说明：本文记录 `2026-04-23` 时点 `Phase 6A Round-2` 的观察窗口结论。该窗口已完成并已先后推动仓库进入 `Phase 5 / P5A`，随后进一步切换到当前主线 `Phase 6B / P6B3`；当前优先级以 [06-phased-implementation-plan.md](../06-phased-implementation-plan.md) 与 [roadmap.md](../roadmap.md) 为准。
+
 ## 目标
 
 为 `Phase 6A Round-2 Exit Checklist` 中的“稳定性观察窗口达标”提供统一记录模板，避免口径不一致。
@@ -45,6 +47,9 @@
   2. 冻结当前 smoke gate 策略参数，避免阶段切换前漂移
   3. 以 `P5A` 首轮 WBS 启动下一阶段，而非直接跳到 `P5B/P5C` 或 `Phase 6B`
 
+补充说明：
+- 上述“已决策主线”与“前置动作”均为当时时点结论，现已完成历史使命，不再代表当前执行方向。
+
 ## 证据产物
 
 - `artifacts/smoke/phase6a-window/e2e-smoke-stability-collect-report.json`
@@ -64,3 +69,8 @@
 
 - `bun run e2e:smoke:phase:finalize`（按顺序执行 evidence -> decision -> phase gate；建议先执行 collect）
 - `bun run e2e:smoke:phase:finalize:from-downloads`（按顺序执行 collect -> evidence -> decision -> phase gate）
+
+当前状态补记：
+
+- `Phase 6A Round-2` 已归档。
+- 当前活跃阶段不是本文，而是 `Phase 6B / P6B3` 的迁移/发布演练与责任边界收口。
