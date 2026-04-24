@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证与 `ADR-0009` 已收口，下一步转向持续门禁与升级执行策略。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009` 与 CI 接入已收口，下一步转向稳定性观察与升级执行策略。
 
 ## Active Tracks
 
@@ -128,7 +128,8 @@
 - 已清理风险：`db:seed`、`tenant:init` 与 tenant e2e harness 已补显式数据库连接回收，降低重复执行时的连接耗尽风险
 - 已完成验证：`bun run check` 与 `bun run e2e:tenant:full` 已通过，覆盖 tenant init 幂等、super-admin 租户管理授权、customer 跨租户隔离、RLS 与 `tenant_id` 外键约束
 - 已完成：`P6B3 / WP-4 ADR-0009`，已归档多租户升级与验证策略，固定默认租户/非默认租户初始化分离、真实 PostgreSQL 验证门槛与连接回收要求
-- 下一步：评估 `e2e:tenant:full` 的 CI 化或阶段门禁接入方式
+- 已完成：CI 已接入 `e2e-tenant` 作业，复用 `e2e:tenant:full` 与 PostgreSQL service 执行真实租户隔离验证并归档报告
+- 下一步：为 tenant e2e 增加稳定性观察与更高规模样本策略
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 
 ### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
@@ -258,5 +259,5 @@
 4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
 5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
 6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
-7. 评估是否将 `e2e:tenant:full` 纳入 CI 或阶段门禁，避免真实 PostgreSQL 隔离回归重新只靠人工执行。
+7. 为 `e2e-tenant` 增加稳定性观察与执行策略，避免“已进 CI”被误判为“长期稳定”。
 8. 基于 `ADR-0009` 补多租户迁移/发布 runbook 或后续阶段实施文档。
