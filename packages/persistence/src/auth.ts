@@ -20,6 +20,7 @@ import {
   userRoles,
   users,
 } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export type AuditLogResult = "success" | "failure"
 
@@ -30,6 +31,7 @@ export interface CreateRefreshSessionPersistenceInput {
   userAgent?: string | null
   ip?: string | null
   expiresAt: Date
+  tenantId?: string
 }
 
 export interface CreateUserPersistenceInput {
@@ -41,6 +43,7 @@ export interface CreateUserPersistenceInput {
   passwordHash: string
   status?: "active" | "disabled"
   isSuperAdmin?: boolean
+  tenantId?: string
 }
 
 export interface UpdateUserPersistenceInput {
@@ -59,6 +62,7 @@ export interface CreateRolePersistenceInput {
   description?: string | null
   status?: "active" | "disabled"
   isSystem?: boolean
+  tenantId?: string
 }
 
 export interface UpdateRolePersistenceInput {
@@ -82,6 +86,7 @@ export interface CreateMenuPersistenceInput {
   isVisible?: boolean
   status?: "active" | "disabled"
   permissionCode?: string | null
+  tenantId?: string
 }
 
 export interface UpdateMenuPersistenceInput {
@@ -105,6 +110,7 @@ export interface CreateDepartmentPersistenceInput {
   name: string
   sort?: number
   status?: "active" | "disabled"
+  tenantId?: string
 }
 
 export interface UpdateDepartmentPersistenceInput {
@@ -128,6 +134,7 @@ export interface CreateAuditLogPersistenceInput {
   userAgent?: string | null
   details?: Record<string, unknown> | null
   createdAt?: Date
+  tenantId?: string
 }
 
 export interface ListAuditLogsPersistenceFilter {
@@ -191,6 +198,7 @@ export const insertUser = async (
       passwordHash: input.passwordHash,
       status: input.status ?? "active",
       isSuperAdmin: input.isSuperAdmin ?? false,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -315,6 +323,7 @@ export const insertRole = async (
       description: input.description ?? null,
       status: input.status ?? "active",
       isSystem: input.isSystem ?? false,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -510,6 +519,7 @@ export const insertMenu = async (
       isVisible: input.isVisible ?? true,
       status: input.status ?? "active",
       permissionCode: input.permissionCode ?? null,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -631,6 +641,7 @@ export const insertDepartment = async (
       name: input.name,
       sort: input.sort ?? 0,
       status: input.status ?? "active",
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -769,6 +780,7 @@ export const insertRefreshSession = async (
       userAgent: input.userAgent ?? null,
       ip: input.ip ?? null,
       expiresAt: input.expiresAt,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 
@@ -841,6 +853,7 @@ export const insertAuditLog = async (
       userAgent: input.userAgent ?? null,
       details: input.details ?? null,
       ...(input.createdAt ? { createdAt: input.createdAt } : {}),
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 

@@ -9,6 +9,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core"
+import { tenants } from "./tenant"
 
 export const userStatus = pgEnum("user_status", ["active", "disabled"])
 export const roleStatus = pgEnum("role_status", ["active", "disabled"])
@@ -22,6 +23,9 @@ export const auditResult = pgEnum("audit_result", ["success", "failure"])
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   username: text("username").notNull().unique(),
   displayName: text("display_name").notNull(),
   email: text("email"),
@@ -40,6 +44,9 @@ export const users = pgTable("users", {
 
 export const roles = pgTable("roles", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   description: text("description"),
@@ -55,6 +62,9 @@ export const roles = pgTable("roles", {
 
 export const permissions = pgTable("permissions", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   code: text("code").notNull().unique(),
   module: text("module").notNull(),
   resource: text("resource").notNull(),
@@ -95,6 +105,9 @@ export const rolePermissions = pgTable("role_permissions", {
 
 export const menus = pgTable("menus", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   parentId: uuid("parent_id"),
   type: menuType("type").notNull(),
   code: text("code").notNull().unique(),
@@ -128,6 +141,9 @@ export const roleMenus = pgTable("role_menus", {
 
 export const departments = pgTable("departments", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   parentId: uuid("parent_id"),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
@@ -155,6 +171,9 @@ export const userDepartments = pgTable("user_departments", {
 
 export const refreshSessions = pgTable("refresh_sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -175,6 +194,9 @@ export const refreshSessions = pgTable("refresh_sessions", {
 
 export const auditLogs = pgTable("audit_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   category: text("category").notNull(),
   action: text("action").notNull(),
   actorUserId: uuid("actor_user_id").references(() => users.id, {

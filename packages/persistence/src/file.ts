@@ -2,6 +2,7 @@ import { asc, desc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type FileRow, files } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export interface CreateFilePersistenceInput {
   id?: string
@@ -10,6 +11,7 @@ export interface CreateFilePersistenceInput {
   mimeType?: string | null
   size: number
   uploaderUserId?: string | null
+  tenantId?: string
 }
 
 export const listFiles = async (db: DatabaseClient): Promise<FileRow[]> =>
@@ -40,6 +42,7 @@ export const insertFile = async (
       mimeType: input.mimeType ?? null,
       size: input.size,
       uploaderUserId: input.uploaderUserId ?? null,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 

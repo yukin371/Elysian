@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm"
 
+import { DEFAULT_TENANT_ID } from "./tenant"
 import { type DatabaseClient, createDatabaseClient } from "./client"
 import {
   dictionaryItems,
@@ -892,26 +893,27 @@ export const seedDefaultAuthData = async (
   config: Partial<DefaultAuthSeedConfig> = {},
 ) => {
   const spec = createDefaultAuthSeedSpec(config)
+  const tid = DEFAULT_TENANT_ID
 
   await db
     .insert(roles)
-    .values(spec.roles)
+    .values(spec.roles.map((r) => ({ ...r, tenantId: tid })))
     .onConflictDoNothing({ target: roles.code })
   await db
     .insert(permissions)
-    .values(spec.permissions)
+    .values(spec.permissions.map((p) => ({ ...p, tenantId: tid })))
     .onConflictDoNothing({ target: permissions.code })
   await db
     .insert(menus)
-    .values(spec.menus)
+    .values(spec.menus.map((m) => ({ ...m, tenantId: tid })))
     .onConflictDoNothing({ target: menus.code })
   await db
     .insert(dictionaryTypes)
-    .values(spec.dictionaryTypes)
+    .values(spec.dictionaryTypes.map((d) => ({ ...d, tenantId: tid })))
     .onConflictDoNothing({ target: dictionaryTypes.code })
   await db
     .insert(dictionaryItems)
-    .values(spec.dictionaryItems)
+    .values(spec.dictionaryItems.map((d) => ({ ...d, tenantId: tid })))
     .onConflictDoNothing({
       target: [dictionaryItems.typeId, dictionaryItems.value],
     })
@@ -927,6 +929,7 @@ export const seedDefaultAuthData = async (
 
     await db.insert(users).values({
       id: spec.adminUser.id,
+      tenantId: tid,
       username: spec.adminUser.username,
       displayName: spec.adminUser.displayName,
       passwordHash: adminPasswordHash,

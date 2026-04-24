@@ -2,6 +2,7 @@ import { asc, desc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type SettingRow, systemSettings } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export interface CreateSettingPersistenceInput {
   id?: string
@@ -9,6 +10,7 @@ export interface CreateSettingPersistenceInput {
   value: string
   description?: string | null
   status?: "active" | "disabled"
+  tenantId?: string
 }
 
 export interface UpdateSettingPersistenceInput {
@@ -62,6 +64,7 @@ export const insertSetting = async (
       value: input.value,
       description: input.description ?? null,
       status: input.status ?? "active",
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 

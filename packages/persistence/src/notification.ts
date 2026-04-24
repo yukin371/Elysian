@@ -2,6 +2,7 @@ import { and, desc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type NotificationRow, notifications } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export interface CreateNotificationPersistenceInput {
   id?: string
@@ -12,6 +13,7 @@ export interface CreateNotificationPersistenceInput {
   status?: "unread" | "read"
   createdByUserId?: string | null
   readAt?: Date | null
+  tenantId?: string
 }
 
 export interface ListNotificationsPersistenceFilter {
@@ -72,6 +74,7 @@ export const insertNotification = async (
       status: input.status ?? "unread",
       createdByUserId: input.createdByUserId ?? null,
       readAt: input.readAt ?? null,
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 

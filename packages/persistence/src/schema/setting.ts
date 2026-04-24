@@ -1,10 +1,15 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
+import { tenants } from "./tenant"
+
 export const settingStatus = pgEnum("setting_status", ["active", "disabled"])
 
 export const systemSettings = pgTable("system_settings", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   key: text("key").notNull().unique(),
   value: text("value").notNull(),
   description: text("description"),

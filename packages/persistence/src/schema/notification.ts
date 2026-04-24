@@ -2,6 +2,7 @@ import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { users } from "./auth"
+import { tenants } from "./tenant"
 
 export const notificationLevel = pgEnum("notification_level", [
   "info",
@@ -17,6 +18,9 @@ export const notificationStatus = pgEnum("notification_status", [
 
 export const notifications = pgTable("notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   recipientUserId: uuid("recipient_user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

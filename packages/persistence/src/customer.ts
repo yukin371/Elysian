@@ -2,10 +2,12 @@ import { desc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type CustomerRow, customers } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export interface CreateCustomerPersistenceInput {
   name: string
   status?: CustomerRow["status"]
+  tenantId?: string
 }
 
 export const listCustomers = async (
@@ -35,6 +37,7 @@ export const insertCustomer = async (
     .values({
       name: input.name,
       status: input.status ?? "active",
+      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
     })
     .returning()
 

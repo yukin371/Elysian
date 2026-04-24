@@ -10,6 +10,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core"
 
+import { tenants } from "./tenant"
+
 export const dictionaryStatus = pgEnum("dictionary_status", [
   "active",
   "disabled",
@@ -17,6 +19,9 @@ export const dictionaryStatus = pgEnum("dictionary_status", [
 
 export const dictionaryTypes = pgTable("dictionary_types", {
   id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "restrict" }),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   description: text("description"),
@@ -33,6 +38,9 @@ export const dictionaryItems = pgTable(
   "dictionary_items",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "restrict" }),
     typeId: uuid("type_id")
       .notNull()
       .references(() => dictionaryTypes.id, { onDelete: "cascade" }),

@@ -1,6 +1,15 @@
 export { createDatabaseConfig, type DatabaseConfig } from "./config"
 export { createDatabaseClient, type DatabaseClient } from "./client"
 export {
+  clearTenantContext,
+  DEFAULT_TENANT_ID,
+  getTenantByCode,
+  getTenantById,
+  listTenants,
+  resetTenantContext,
+  setTenantContext,
+} from "./tenant"
+export {
   type CreateDictionaryItemPersistenceInput,
   type CreateDictionaryTypePersistenceInput,
   getDictionaryItemById,
@@ -171,6 +180,10 @@ export {
   type RolePermissionRow,
   type RoleRow,
   type SettingRow,
+  tenantStatus,
+  tenants,
+  type TenantRow,
+  type NewTenantRow,
   type UserDepartmentRow,
   type UserRoleRow,
   type UserRow,

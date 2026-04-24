@@ -1,4 +1,10 @@
 export {
+  tenantStatus,
+  tenants,
+  type NewTenantRow,
+  type TenantRow,
+} from "./tenant"
+export {
   auditLogs,
   auditResult,
   departments,
