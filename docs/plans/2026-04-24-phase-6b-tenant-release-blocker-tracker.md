@@ -57,14 +57,14 @@ recommendation: candidate_for_next_step
 
 | Blocker | 当前状态 | 默认责任方 | 证据要求 | 当前证据 / 备注 |
 |---|---|---|---|---|
-| `databaseRoleConfirmed` | pending | 环境 / DBA owner | 目标环境满足 `NOSUPERUSER + NOBYPASSRLS` | |
-| `backupReady` | pending | 环境 / DBA owner | 快照时间、恢复点或等价回退方案 | |
-| `tenantFullPassed` | pending | 当前实施 owner / 模块 owner | `bun run e2e:tenant:full` 执行结果 | |
-| `defaultTenantLoginVerified` | pending | 发布负责人 + 模块 owner | 默认租户登录验证证据 | |
-| `superAdminTenantAccessVerified` | pending | 发布负责人 + `apps/server` owner | super-admin 访问 `/system/tenants` 证据 | |
-| `tenantAdminDeniedVerified` | pending | 发布负责人 + `apps/server` owner | tenant admin 禁止访问 `/system/tenants` 证据 | |
-| `nonDefaultTenantLoginVerified` | pending | 发布负责人 + 模块 owner | 至少一个非默认 tenant admin 登录证据 | |
-| `crossTenantIsolationVerified` | pending | 发布负责人 + 模块 owner | 至少一个真实业务实体跨租户隔离证据 | |
+| `databaseRoleConfirmed` | blocked | 环境 / DBA owner | 目标环境满足 `NOSUPERUSER + NOBYPASSRLS` | 当前工作区无目标环境角色取证权限；需环境 / DBA owner 在目标环境确认。 |
+| `backupReady` | blocked | 环境 / DBA owner | 快照时间、恢复点或等价回退方案 | 当前工作区无目标环境备份/快照编排权限；需环境 / DBA owner 提供恢复点或等价回退方案。 |
+| `tenantFullPassed` | done | 当前实施 owner / 模块 owner | `bun run e2e:tenant:full` 执行结果 | `2026-04-25 00:08:35 +08:00` 本地执行通过；报告：`.ci-reports/local-tenant-e2e/e2e-tenant-report.json` |
+| `defaultTenantLoginVerified` | blocked | 发布负责人 + 模块 owner | 默认租户登录验证证据 | 尚未在目标环境执行发布后验证；本地 `e2e:tenant:full` 不能替代目标环境登录证据。 |
+| `superAdminTenantAccessVerified` | blocked | 发布负责人 + `apps/server` owner | super-admin 访问 `/system/tenants` 证据 | 尚未在目标环境执行发布后验证；需发布后以 super-admin 账号取证。 |
+| `tenantAdminDeniedVerified` | blocked | 发布负责人 + `apps/server` owner | tenant admin 禁止访问 `/system/tenants` 证据 | 尚未在目标环境执行发布后验证；需发布后以 tenant admin 账号取证。 |
+| `nonDefaultTenantLoginVerified` | blocked | 发布负责人 + 模块 owner | 至少一个非默认 tenant admin 登录证据 | 尚未在目标环境执行发布后验证；需发布后选择至少一个非默认 tenant 取证。 |
+| `crossTenantIsolationVerified` | blocked | 发布负责人 + 模块 owner | 至少一个真实业务实体跨租户隔离证据 | 尚未在目标环境执行发布后验证；需发布后选定实体与 tenant A/B 取证。 |
 
 状态约定：
 
@@ -80,21 +80,21 @@ recommendation: candidate_for_next_step
 #### `databaseRoleConfirmed`
 
 ```text
-status:
-owner:
-checked at:
+status: blocked
+owner: 环境 / DBA owner
+checked at: 2026-04-25 00:14:44 +08:00
 evidence:
-notes:
+notes: 当前工作区仅具备本地 PostgreSQL 与 GitHub artifact 取证能力，无法直接读取目标环境数据库角色属性；需环境 / DBA owner 在目标环境确认 `NOSUPERUSER + NOBYPASSRLS`。
 ```
 
 #### `backupReady`
 
 ```text
-status:
-owner:
-checked at:
+status: blocked
+owner: 环境 / DBA owner
+checked at: 2026-04-25 00:14:44 +08:00
 evidence:
-notes:
+notes: 当前工作区无法直接确认目标环境快照、恢复点或等价回退手段；需环境 / DBA owner 提供可追溯备份证据。
 ```
 
 ### 2. 发布前基线验证
@@ -102,12 +102,12 @@ notes:
 #### `tenantFullPassed`
 
 ```text
-status:
-owner:
-checked at:
-command:
-evidence:
-notes:
+status: done
+owner: 当前实施 owner / 模块 owner
+checked at: 2026-04-25 00:08:35 +08:00
+command: DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/elysian ACCESS_TOKEN_SECRET=<local-secret> ELYSIAN_TENANT_E2E_REPORT_DIR=.ci-reports/local-tenant-e2e bun run e2e:tenant:full
+evidence: .ci-reports/local-tenant-e2e/e2e-tenant-report.json（status=passed, lastStage=db_fk_constraint, durationMs=4825）
+notes: 复用本机容器 `elysian-tenant-e2e-pg`（127.0.0.1:55432）；执行链路已覆盖 migrate + seed + tenant init 幂等、super-admin 授权、customer 跨租户隔离、RLS 与 tenant_id FK。
 ```
 
 ### 3. 发布后最小验证
@@ -115,77 +115,75 @@ notes:
 #### `defaultTenantLoginVerified`
 
 ```text
-status:
-owner:
-checked at:
+status: blocked
+owner: 发布负责人 + 模块 owner
+checked at: 2026-04-25 00:14:44 +08:00
 account:
 evidence:
-notes:
+notes: 尚未在目标环境完成实际发布；当前本地 `e2e:tenant:full` 只证明实现链路与本地 PostgreSQL 环境，不替代发布后默认租户登录证据。
 ```
 
 #### `superAdminTenantAccessVerified`
 
 ```text
-status:
-owner:
-checked at:
+status: blocked
+owner: 发布负责人 + `apps/server` owner
+checked at: 2026-04-25 00:14:44 +08:00
 account:
 evidence:
-notes:
+notes: 尚未在目标环境完成实际发布；需发布后以 super-admin 账号验证 `/system/tenants` 可访问。
 ```
 
 #### `tenantAdminDeniedVerified`
 
 ```text
-status:
-owner:
-checked at:
+status: blocked
+owner: 发布负责人 + `apps/server` owner
+checked at: 2026-04-25 00:14:44 +08:00
 account:
 evidence:
-notes:
+notes: 尚未在目标环境完成实际发布；需发布后以 tenant admin 账号验证 `/system/tenants` 继续返回拒绝结果。
 ```
 
 #### `nonDefaultTenantLoginVerified`
 
 ```text
-status:
-owner:
-checked at:
+status: blocked
+owner: 发布负责人 + 模块 owner
+checked at: 2026-04-25 00:14:44 +08:00
 tenant code:
 account:
 evidence:
-notes:
+notes: 尚未在目标环境完成实际发布；需发布后选择至少一个非默认 tenant admin 完成登录取证。
 ```
 
 #### `crossTenantIsolationVerified`
 
 ```text
-status:
-owner:
-checked at:
+status: blocked
+owner: 发布负责人 + 模块 owner
+checked at: 2026-04-25 00:14:44 +08:00
 entity:
 tenant A:
 tenant B:
 evidence:
-notes:
+notes: 尚未在目标环境完成实际发布；需发布后选定至少一个真实业务实体，并提供 tenant A / tenant B 的隔离取证。
 ```
 
 ## 当前结论
 
 ```text
-blockerCount: 8
+blockerCount: 7
 ready for tenant:release:finalize: no
 remaining blockers:
 - databaseRoleConfirmed
 - backupReady
-- tenantFullPassed
 - defaultTenantLoginVerified
 - superAdminTenantAccessVerified
 - tenantAdminDeniedVerified
 - nonDefaultTenantLoginVerified
 - crossTenantIsolationVerified
 next action:
-- 先补环境 / DBA 前置证据
-- 再补 `bun run e2e:tenant:full`
-- 最后补发布后最小验证五项
+- 先由环境 / DBA owner 补 `databaseRoleConfirmed` 与 `backupReady`
+- 再在目标环境完成发布后最小验证五项
 ```
