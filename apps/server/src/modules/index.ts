@@ -5,7 +5,8 @@ export {
   createInMemoryAuthRepository,
   createPasswordHash,
   createTenantModule,
-  parseTenantFromToken,
+  extractTenantIdFromRefreshToken,
+  verifyAccessToken,
 } from "./auth"
 export { createCustomerModule } from "./customer"
 export {

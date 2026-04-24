@@ -1,4 +1,6 @@
 const encoder = new TextEncoder()
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export interface AccessTokenPayload {
   sub: string
@@ -93,8 +95,26 @@ export const verifyAccessToken = async (
   return payload
 }
 
-export const createRefreshToken = () =>
+const createOpaqueRefreshToken = () =>
   `${crypto.randomUUID().replaceAll("-", "")}${crypto.randomUUID().replaceAll("-", "")}`
+
+export const createRefreshToken = (tenantId?: string) =>
+  tenantId
+    ? `${tenantId}.${createOpaqueRefreshToken()}`
+    : createOpaqueRefreshToken()
+
+export const extractTenantIdFromRefreshToken = (token: string | null) => {
+  if (!token) {
+    return null
+  }
+
+  const [tenantId] = token.split(".", 2)
+  if (!tenantId || !UUID_PATTERN.test(tenantId)) {
+    return null
+  }
+
+  return tenantId
+}
 
 export const hashToken = async (token: string) => {
   const digest = await crypto.subtle.digest("SHA-256", encoder.encode(token))

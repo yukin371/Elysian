@@ -22,6 +22,7 @@ export interface AuthIdentityResponse {
     username: string
     displayName: string
     isSuperAdmin: boolean
+    tenantId: string
   }
   roles: string[]
   permissionCodes: string[]
@@ -186,6 +187,7 @@ export const fetchSystemModules = () =>
 export const login = async (input: {
   username: string
   password: string
+  tenantCode?: string
 }): Promise<AuthIdentityResponse> => {
   const payload = await requestJson<LoginResponse>("/auth/login", {
     method: "POST",

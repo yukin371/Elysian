@@ -1,8 +1,10 @@
+CREATE TYPE "tenant_status" AS ENUM ('active', 'suspended');
+
 CREATE TABLE "tenants" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "code" varchar(64) NOT NULL,
   "name" varchar(128) NOT NULL,
-  "status" varchar(16) DEFAULT 'active' NOT NULL,
+  "status" "tenant_status" DEFAULT 'active' NOT NULL,
   "created_at" timestamp with time zone DEFAULT now() NOT NULL,
   "updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );

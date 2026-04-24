@@ -1,8 +1,11 @@
 import { eq } from "drizzle-orm"
+
 import type { DatabaseClient } from "./client"
 import { tenants } from "./schema"
 
 export const DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000"
+const TENANT_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function getTenantById(db: DatabaseClient, id: string) {
   const rows = await db
@@ -27,13 +30,20 @@ export async function listTenants(db: DatabaseClient) {
 }
 
 export async function setTenantContext(db: DatabaseClient, tenantId: string) {
+  assertTenantId(tenantId)
   await db.execute(`SET app.current_tenant = '${tenantId}'`)
 }
 
 export async function resetTenantContext(db: DatabaseClient) {
-  await db.execute(`RESET app.current_tenant`)
+  await db.execute("RESET app.current_tenant")
 }
 
 export async function clearTenantContext(db: DatabaseClient) {
   await db.execute(`SET app.current_tenant = ''`)
+}
+
+const assertTenantId = (tenantId: string) => {
+  if (!TENANT_ID_PATTERN.test(tenantId)) {
+    throw new Error(`Invalid tenant id: ${tenantId}`)
+  }
 }

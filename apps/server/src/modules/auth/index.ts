@@ -1,7 +1,7 @@
 export { createAuthGuard, type AuthGuard } from "./guard"
 export { createAuthModule, type AuthModuleOptions } from "./module"
 export { createPasswordHash, verifyPasswordHash } from "./password"
-export { createTenantModule, parseTenantFromToken } from "./tenant"
+export { createTenantModule, type TenantModuleOptions } from "./tenant"
 export {
   createAuthRepository,
   createInMemoryAuthRepository,
@@ -21,3 +21,8 @@ export {
   type AuthLoginResponse,
   type AuthService,
 } from "./service"
+export {
+  createRefreshToken,
+  extractTenantIdFromRefreshToken,
+  verifyAccessToken,
+} from "./tokens"

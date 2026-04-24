@@ -1,3 +1,8 @@
+import {
+  type DatabaseClient,
+  resetTenantContext,
+  setTenantContext,
+} from "@elysian/persistence"
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
@@ -5,6 +10,7 @@ import type { ServerModule } from "../module"
 import type { AuthRepository } from "./repository"
 import type { AuthLoginResponse } from "./service"
 import { createAuthService } from "./service"
+import { extractTenantIdFromRefreshToken } from "./tokens"
 
 const DEFAULT_REFRESH_COOKIE_NAME = "elysian_refresh_token"
 const DEFAULT_REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
@@ -15,6 +21,8 @@ export interface AuthModuleOptions {
   refreshTokenTtlSeconds?: number
   refreshCookieName?: string
   secureCookies?: boolean
+  tenantContextDb?: DatabaseClient
+  resolveTenantIdByCode?: (tenantCode: string) => Promise<string | null>
 }
 
 export const createAuthModule = (
@@ -43,11 +51,24 @@ export const createAuthModule = (
       .post(
         "/auth/login",
         async ({ body, request, set }) => {
-          const result = await service.login(
-            body.username,
-            body.password,
-            buildAuthRequestContext(request),
+          const requestContext = buildAuthRequestContext(
+            request,
+            refreshCookieName,
           )
+          const tenantId = body.tenantCode
+            ? await resolveTenantIdByCodeOrThrow(body.tenantCode, options)
+            : null
+          const result = tenantId
+            ? await withTenantContext(
+                options.tenantContextDb ?? throwMissingTenantContextDb(),
+                tenantId,
+                () =>
+                  service.login(body.username, body.password, {
+                    ...requestContext,
+                    tenantId,
+                  }),
+              )
+            : await service.login(body.username, body.password, requestContext)
 
           set.headers["set-cookie"] = serializeRefreshCookie(
             refreshCookieName,
@@ -70,6 +91,7 @@ export const createAuthModule = (
           body: t.Object({
             username: t.String({ minLength: 1 }),
             password: t.String({ minLength: 1 }),
+            tenantCode: t.Optional(t.String({ minLength: 1 })),
           }),
           detail: {
             tags: ["auth"],
@@ -96,7 +118,7 @@ export const createAuthModule = (
             throwAuthRefreshRequired()
           const result = await service.refresh(
             safeRefreshToken,
-            buildAuthRequestContext(request),
+            buildAuthRequestContext(request, refreshCookieName),
           )
 
           set.headers["set-cookie"] = serializeRefreshCookie(
@@ -128,7 +150,7 @@ export const createAuthModule = (
         async ({ request, set }) => {
           await service.logout(
             readCookie(request.headers.get("cookie"), refreshCookieName),
-            buildAuthRequestContext(request),
+            buildAuthRequestContext(request, refreshCookieName),
           )
 
           set.status = 204
@@ -178,11 +200,61 @@ const serializeRefreshCookie = (
 const clearRefreshCookie = (name: string, secure: boolean) =>
   `${name}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`
 
-const buildAuthRequestContext = (request: Request) => ({
+const buildAuthRequestContext = (
+  request: Request,
+  refreshCookieName: string,
+) => ({
   requestId: request.headers.get("x-request-id"),
   userAgent: request.headers.get("user-agent"),
   ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+  tenantId: extractTenantIdFromRefreshToken(
+    readCookie(request.headers.get("cookie"), refreshCookieName),
+  ),
 })
+
+const withTenantContext = async <T>(
+  db: DatabaseClient,
+  tenantId: string,
+  action: () => Promise<T>,
+) => {
+  await setTenantContext(db, tenantId)
+
+  try {
+    return await action()
+  } finally {
+    await resetTenantContext(db)
+  }
+}
+
+const resolveTenantIdByCodeOrThrow = async (
+  tenantCode: string,
+  options: AuthModuleOptions,
+) => {
+  const normalizedTenantCode = tenantCode.trim()
+  if (!normalizedTenantCode) {
+    throw new AppError({
+      code: "AUTH_TENANT_REQUIRED",
+      message: "Tenant code is required",
+      status: 400,
+      expose: true,
+    })
+  }
+
+  const tenantId = await options.resolveTenantIdByCode?.(normalizedTenantCode)
+  if (!tenantId) {
+    throw new AppError({
+      code: "AUTH_TENANT_INVALID",
+      message: "Tenant is invalid",
+      status: 401,
+      expose: true,
+      details: {
+        tenantCode: normalizedTenantCode,
+      },
+    })
+  }
+
+  return tenantId
+}
 
 const throwAuthRefreshRequired = (): never => {
   throw new AppError({
@@ -200,5 +272,16 @@ const throwMissingAccessTokenSecret = (): never => {
     status: 500,
     expose: true,
     details: { key: "ACCESS_TOKEN_SECRET" },
+  })
+}
+
+const throwMissingTenantContextDb = (): never => {
+  throw new AppError({
+    code: "CONFIG_INVALID",
+    message:
+      "Auth module requires a tenant context database to resolve tenant login",
+    status: 500,
+    expose: true,
+    details: { key: "tenantContextDb" },
   })
 }

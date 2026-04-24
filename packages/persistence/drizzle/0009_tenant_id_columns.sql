@@ -43,11 +43,30 @@ ALTER TABLE "system_settings" ALTER COLUMN "tenant_id" SET NOT NULL;
 ALTER TABLE "audit_logs" ALTER COLUMN "tenant_id" SET NOT NULL;
 ALTER TABLE "refresh_sessions" ALTER COLUMN "tenant_id" SET NOT NULL;
 
+-- Step 3.1: Rebuild tenant-aware unique constraints
+ALTER TABLE "users" DROP CONSTRAINT "users_username_unique";
+ALTER TABLE "roles" DROP CONSTRAINT "roles_code_unique";
+ALTER TABLE "permissions" DROP CONSTRAINT "permissions_code_unique";
+ALTER TABLE "menus" DROP CONSTRAINT "menus_code_unique";
+ALTER TABLE "menus" DROP CONSTRAINT "menus_permission_code_permissions_code_fk";
+ALTER TABLE "departments" DROP CONSTRAINT "departments_code_unique";
+ALTER TABLE "dictionary_types" DROP CONSTRAINT "dictionary_types_code_unique";
+ALTER TABLE "system_settings" DROP CONSTRAINT "system_settings_key_unique";
+
+ALTER TABLE "users" ADD CONSTRAINT "users_tenant_username_unique" UNIQUE ("tenant_id", "username");
+ALTER TABLE "roles" ADD CONSTRAINT "roles_tenant_code_unique" UNIQUE ("tenant_id", "code");
+ALTER TABLE "permissions" ADD CONSTRAINT "permissions_tenant_code_unique" UNIQUE ("tenant_id", "code");
+ALTER TABLE "menus" ADD CONSTRAINT "menus_tenant_code_unique" UNIQUE ("tenant_id", "code");
+ALTER TABLE "departments" ADD CONSTRAINT "departments_tenant_code_unique" UNIQUE ("tenant_id", "code");
+ALTER TABLE "dictionary_types" ADD CONSTRAINT "dictionary_types_tenant_code_unique" UNIQUE ("tenant_id", "code");
+ALTER TABLE "system_settings" ADD CONSTRAINT "system_settings_tenant_key_unique" UNIQUE ("tenant_id", "key");
+
 -- Step 4: Foreign keys
 ALTER TABLE "users" ADD CONSTRAINT "users_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE restrict ON UPDATE no action;
 ALTER TABLE "roles" ADD CONSTRAINT "roles_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE restrict ON UPDATE no action;
 ALTER TABLE "permissions" ADD CONSTRAINT "permissions_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE restrict ON UPDATE no action;
 ALTER TABLE "menus" ADD CONSTRAINT "menus_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE restrict ON UPDATE no action;
+ALTER TABLE "menus" ADD CONSTRAINT "menus_tenant_id_permission_code_permissions_tenant_code_fk" FOREIGN KEY ("tenant_id", "permission_code") REFERENCES "public"."permissions"("tenant_id", "code") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "departments" ADD CONSTRAINT "departments_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE restrict ON UPDATE no action;
 ALTER TABLE "customers" ADD CONSTRAINT "customers_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE restrict ON UPDATE no action;
 ALTER TABLE "files" ADD CONSTRAINT "files_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE restrict ON UPDATE no action;

@@ -1,6 +1,7 @@
 import {
   type AuditLogResult,
   type AuditLogRow,
+  DEFAULT_TENANT_ID,
   type DatabaseClient,
   type MenuRow,
   type RefreshSessionRow,
@@ -72,6 +73,7 @@ export interface AuthMenuRecord {
 
 export interface RefreshSessionRecord {
   id: string
+  tenantId: string
   userId: string
   tokenHash: string
   userAgent: string | null
@@ -86,6 +88,7 @@ export interface RefreshSessionRecord {
 
 export interface CreateRefreshSessionInput {
   id?: string
+  tenantId: string
   userId: string
   tokenHash: string
   userAgent?: string | null
@@ -111,6 +114,7 @@ export interface AuthAuditLogRecord {
 export interface CreateAuthAuditLogInput {
   id?: string
   category: string
+  tenantId?: string | null
   action: string
   actorUserId?: string | null
   targetType?: string | null
@@ -213,6 +217,7 @@ export const createAuthRepository = (db: DatabaseClient): AuthRepository => ({
   async createAuditLog(input) {
     const row = await insertAuditLog(db, {
       id: input.id,
+      tenantId: input.tenantId ?? undefined,
       category: input.category,
       action: input.action,
       actorUserId: input.actorUserId,
@@ -322,6 +327,7 @@ export const createInMemoryAuthRepository = (
       const now = new Date().toISOString()
       const session: RefreshSessionRecord = {
         id: input.id ?? crypto.randomUUID(),
+        tenantId: input.tenantId,
         userId: input.userId,
         tokenHash: input.tokenHash,
         userAgent: input.userAgent ?? null,
@@ -435,6 +441,7 @@ const mapRefreshSessionRow = (
   row: RefreshSessionRow,
 ): RefreshSessionRecord => ({
   id: row.id,
+  tenantId: row.tenantId,
   userId: row.userId,
   tokenHash: row.tokenHash,
   userAgent: row.userAgent ?? null,

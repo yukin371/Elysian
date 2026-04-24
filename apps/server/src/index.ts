@@ -1,4 +1,4 @@
-import { createDatabaseClient } from "@elysian/persistence"
+import { createDatabaseClient, getTenantByCode } from "@elysian/persistence"
 
 import { createServerApp } from "./app"
 import { loadServerConfig, resolveAccessTokenSecret } from "./config"
@@ -54,11 +54,18 @@ if (process.env.DATABASE_URL) {
   const authGuard = createAuthGuard(authRepository, {
     accessTokenSecret,
   })
-  modules.push(createTenantModule(db))
+  modules.push(
+    createTenantModule(db, {
+      accessTokenSecret,
+    }),
+  )
   modules.push(
     createAuthModule(authRepository, {
       accessTokenSecret,
       secureCookies: config.env === "production",
+      tenantContextDb: db,
+      resolveTenantIdByCode: async (tenantCode) =>
+        (await getTenantByCode(db, tenantCode))?.id ?? null,
     }),
   )
   modules.push(

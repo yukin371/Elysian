@@ -1,63 +1,14 @@
-import { DEFAULT_TENANT_ID } from "@elysian/persistence"
 import { describe, expect, it } from "bun:test"
+import { DEFAULT_TENANT_ID } from "@elysian/persistence"
 
-import { signAccessToken, verifyAccessToken } from "./tokens"
-import { parseTenantFromToken } from "./tenant"
+import {
+  createRefreshToken,
+  extractTenantIdFromRefreshToken,
+  signAccessToken,
+  verifyAccessToken,
+} from "./tokens"
 
 const testSecret = "test-tenant-secret"
-
-describe("parseTenantFromToken", () => {
-  it("extracts tid from a valid JWT", async () => {
-    const token = await signAccessToken(
-      { sub: "user-1", sid: "session-1", tid: "tenant-abc", roles: [] },
-      testSecret,
-      300,
-    )
-    const result = parseTenantFromToken(`Bearer ${token}`)
-    expect(result).toBe("tenant-abc")
-  })
-
-  it("returns null when JWT has no tid claim", async () => {
-    const token = await signAccessToken(
-      { sub: "user-1", sid: "session-1", tid: DEFAULT_TENANT_ID, roles: [] },
-      testSecret,
-      300,
-    )
-    const parts = token.split(".")
-    const payloadStr = Buffer.from(parts[1]!, "base64").toString("utf8")
-    const payload = JSON.parse(payloadStr) as Record<string, unknown>
-    delete payload.tid
-    const modifiedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url")
-    const modifiedToken = `${parts[0]}.${modifiedPayload}.${parts[2]}`
-
-    const result = parseTenantFromToken(`Bearer ${modifiedToken}`)
-    expect(result).toBeNull()
-  })
-
-  it("returns null when authorization header is null", () => {
-    expect(parseTenantFromToken(null)).toBeNull()
-  })
-
-  it("returns null for non-Bearer authorization", () => {
-    expect(parseTenantFromToken("Basic dXNlcjpwYXNz")).toBeNull()
-  })
-
-  it("returns null for empty Bearer token", () => {
-    expect(parseTenantFromToken("Bearer ")).toBeNull()
-  })
-
-  it("returns null for malformed JWT with wrong number of parts", () => {
-    expect(parseTenantFromToken("Bearer abc.def")).toBeNull()
-    expect(parseTenantFromToken("Bearer a.b.c.d")).toBeNull()
-  })
-
-  it("returns null for non-JSON JWT payload", () => {
-    const header = Buffer.from(JSON.stringify({ alg: "HS256" })).toString("base64url")
-    const payload = Buffer.from("not-json").toString("base64url")
-    const sig = Buffer.from("sig").toString("base64url")
-    expect(parseTenantFromToken(`Bearer ${header}.${payload}.${sig}`)).toBeNull()
-  })
-})
 
 describe("signAccessToken / verifyAccessToken with tid", () => {
   it("includes tid in the signed JWT payload", async () => {
@@ -86,5 +37,23 @@ describe("signAccessToken / verifyAccessToken with tid", () => {
     const payload = await verifyAccessToken(token, testSecret)
 
     expect(payload.tid).toBe(DEFAULT_TENANT_ID)
+  })
+})
+
+describe("createRefreshToken / extractTenantIdFromRefreshToken", () => {
+  it("embeds tenant id into the refresh token when provided", () => {
+    const token = createRefreshToken(DEFAULT_TENANT_ID)
+
+    expect(token.startsWith(`${DEFAULT_TENANT_ID}.`)).toBe(true)
+    expect(extractTenantIdFromRefreshToken(token)).toBe(DEFAULT_TENANT_ID)
+  })
+
+  it("returns null when refresh token has no tenant prefix", () => {
+    expect(extractTenantIdFromRefreshToken(createRefreshToken())).toBeNull()
+  })
+
+  it("returns null for malformed tenant prefixes", () => {
+    expect(extractTenantIdFromRefreshToken("not-a-uuid.token")).toBeNull()
+    expect(extractTenantIdFromRefreshToken(null)).toBeNull()
   })
 })

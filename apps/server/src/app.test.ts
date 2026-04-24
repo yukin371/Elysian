@@ -1,5 +1,5 @@
-import { DEFAULT_TENANT_ID } from "@elysian/persistence"
 import { describe, expect, it } from "bun:test"
+import { DEFAULT_TENANT_ID, type DatabaseClient } from "@elysian/persistence"
 
 import { createServerApp } from "./app"
 import {
@@ -14,7 +14,6 @@ import {
   createAuthGuard,
   createAuthModule,
   createCustomerModule,
-  parseTenantFromToken,
   createDepartmentModule,
   createDictionaryModule,
   createFileModule,
@@ -36,7 +35,9 @@ import {
   createPasswordHash,
   createRoleModule,
   createSettingModule,
+  createTenantModule,
   createUserModule,
+  verifyAccessToken,
 } from "./modules"
 
 const testAccessTokenSecret = ["test", "access", "secret"].join("-")
@@ -70,6 +71,9 @@ const createAuthTestFixture = async (
     permissions?: string[]
     isSuperAdmin?: boolean
     secureCookies?: boolean
+    tenantId?: string
+    tenantContextDb?: DatabaseClient
+    resolveTenantIdByCode?: (tenantCode: string) => Promise<string | null>
   } = {},
 ) => {
   const adminRoleId = crypto.randomUUID()
@@ -105,7 +109,7 @@ const createAuthTestFixture = async (
         passwordHash,
         status: "active",
         isSuperAdmin: options.isSuperAdmin ?? true,
-        tenantId: DEFAULT_TENANT_ID,
+        tenantId: options.tenantId ?? DEFAULT_TENANT_ID,
         lastLoginAt: null,
         createdAt: "2026-04-21T00:00:00.000Z",
         updatedAt: "2026-04-21T00:00:00.000Z",
@@ -151,11 +155,25 @@ const createAuthTestFixture = async (
       accessTokenSecret: testAccessTokenSecret,
       refreshCookieName: "elysian_refresh_token",
       secureCookies: options.secureCookies,
+      tenantContextDb: options.tenantContextDb,
+      resolveTenantIdByCode: options.resolveTenantIdByCode,
     }),
     authGuard: createAuthGuard(repository, {
       accessTokenSecret: testAccessTokenSecret,
     }),
   }
+}
+
+const createTenantContextRecorder = () => {
+  const statements: string[] = []
+  const db = {
+    execute: async (statement: string) => {
+      statements.push(statement)
+      return []
+    },
+  } as unknown as DatabaseClient
+
+  return { db, statements }
 }
 
 const createUserSeedRecords = async () => {
@@ -922,8 +940,11 @@ describe("createServerApp", () => {
     )
 
     const loginBody = (await loginResponse.json()) as { accessToken: string }
-    const tid = parseTenantFromToken(`Bearer ${loginBody.accessToken}`)
-    expect(tid).toBe(DEFAULT_TENANT_ID)
+    const payload = await verifyAccessToken(
+      loginBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(payload.tid).toBe(DEFAULT_TENANT_ID)
   })
 
   it("includes tid in the JWT access token after refresh", async () => {
@@ -951,9 +972,90 @@ describe("createServerApp", () => {
     )
 
     expect(refreshResponse.status).toBe(200)
-    const refreshBody = (await refreshResponse.json()) as { accessToken: string }
-    const tid = parseTenantFromToken(`Bearer ${refreshBody.accessToken}`)
-    expect(tid).toBe(DEFAULT_TENANT_ID)
+    const refreshBody = (await refreshResponse.json()) as {
+      accessToken: string
+    }
+    const payload = await verifyAccessToken(
+      refreshBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(payload.tid).toBe(DEFAULT_TENANT_ID)
+  })
+
+  it("supports non-default tenant login and refresh with tenant-scoped context", async () => {
+    const tenantId = "11111111-1111-4111-8111-111111111111"
+    const tenantCode = "tenant-alpha"
+    const tenantContext = createTenantContextRecorder()
+    const fixture = await createAuthTestFixture({
+      tenantId,
+      isSuperAdmin: false,
+      tenantContextDb: tenantContext.db,
+      resolveTenantIdByCode: async (code) =>
+        code === tenantCode ? tenantId : null,
+    })
+    const app = createTestApp({
+      modules: [
+        createTenantModule(tenantContext.db, {
+          accessTokenSecret: testAccessTokenSecret,
+        }),
+        fixture.authModule,
+      ],
+    })
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+          tenantCode,
+        }),
+      }),
+    )
+
+    expect(loginResponse.status).toBe(200)
+    const loginBody = (await loginResponse.json()) as {
+      accessToken: string
+      user: {
+        tenantId: string
+      }
+    }
+    expect(loginBody.user.tenantId).toBe(tenantId)
+    const loginPayload = await verifyAccessToken(
+      loginBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(loginPayload.tid).toBe(tenantId)
+
+    const setCookie = loginResponse.headers.get("set-cookie")
+    expect(setCookie).not.toBeNull()
+    expect(setCookie).toContain(`elysian_refresh_token=${tenantId}.`)
+
+    const refreshResponse = await app.handle(
+      new Request("http://localhost/auth/refresh", {
+        method: "POST",
+        headers: {
+          cookie: toCookieHeader(setCookie),
+        },
+      }),
+    )
+
+    expect(refreshResponse.status).toBe(200)
+    const refreshBody = (await refreshResponse.json()) as {
+      accessToken: string
+      user: {
+        tenantId: string
+      }
+    }
+    expect(refreshBody.user.tenantId).toBe(tenantId)
+    const refreshPayload = await verifyAccessToken(
+      refreshBody.accessToken,
+      testAccessTokenSecret,
+    )
+    expect(refreshPayload.tid).toBe(tenantId)
+    expect(tenantContext.statements).toContain(
+      `SET app.current_tenant = '${tenantId}'`,
+    )
   })
 
   it("refreshes tokens and rotates the refresh session", async () => {

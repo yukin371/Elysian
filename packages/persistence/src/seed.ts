@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm"
 
-import { DEFAULT_TENANT_ID } from "./tenant"
 import { type DatabaseClient, createDatabaseClient } from "./client"
 import {
   dictionaryItems,
@@ -13,6 +12,7 @@ import {
   userRoles,
   users,
 } from "./schema"
+import { DEFAULT_TENANT_ID } from "./tenant"
 
 export interface DefaultAuthSeedConfig {
   adminUsername: string

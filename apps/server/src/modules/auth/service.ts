@@ -23,6 +23,7 @@ export interface AuthSessionContext {
   requestId?: string | null
   userAgent?: string | null
   ip?: string | null
+  tenantId?: string | null
 }
 
 /**
@@ -163,6 +164,7 @@ export const createAuthService = (
 
       if (!user) {
         await recordAudit({
+          tenantId: context.tenantId ?? null,
           action: "login",
           result: "failure",
           requestId: context.requestId ?? null,
@@ -184,6 +186,7 @@ export const createAuthService = (
 
       if (user.status !== "active") {
         await recordAudit({
+          tenantId: user.tenantId,
           action: "login",
           actorUserId: user.id,
           result: "failure",
@@ -211,6 +214,7 @@ export const createAuthService = (
 
       if (!isPasswordValid) {
         await recordAudit({
+          tenantId: user.tenantId,
           action: "login",
           actorUserId: user.id,
           result: "failure",
@@ -231,12 +235,13 @@ export const createAuthService = (
         })
       }
 
-      const refreshToken = createRefreshToken()
+      const refreshToken = createRefreshToken(user.tenantId)
       const refreshTokenHash = await hashToken(refreshToken)
       const expiresAt = new Date(
         Date.now() + refreshTokenTtlSeconds * 1000,
       ).toISOString()
       const session = await repository.createRefreshSession({
+        tenantId: user.tenantId,
         userId: user.id,
         tokenHash: refreshTokenHash,
         expiresAt,
@@ -247,6 +252,7 @@ export const createAuthService = (
 
       await repository.updateLastLoginAt(user.id, now)
       await recordAudit({
+        tenantId: user.tenantId,
         action: "login",
         actorUserId: user.id,
         targetType: "session",
@@ -285,6 +291,7 @@ export const createAuthService = (
         !identity.permissionCodes.includes(permissionCode)
       ) {
         await recordAudit({
+          tenantId: identity.user.tenantId,
           action: "authorize",
           actorUserId: identity.user.id,
           targetType: "permission",
@@ -320,6 +327,7 @@ export const createAuthService = (
 
       if (!session) {
         await recordAudit({
+          tenantId: context.tenantId ?? null,
           action: "refresh",
           result: "failure",
           requestId: context.requestId ?? null,
@@ -342,6 +350,7 @@ export const createAuthService = (
         new Date(session.expiresAt) <= new Date()
       ) {
         await recordAudit({
+          tenantId: session.tenantId,
           action: "refresh",
           actorUserId: session.userId,
           targetType: "session",
@@ -372,9 +381,10 @@ export const createAuthService = (
           sessionId: session.id,
         },
       )
-      const newRefreshToken = createRefreshToken()
+      const newRefreshToken = createRefreshToken(user.tenantId)
       const newRefreshTokenHash = await hashToken(newRefreshToken)
       const nextSession = await repository.createRefreshSession({
+        tenantId: user.tenantId,
         userId: user.id,
         tokenHash: newRefreshTokenHash,
         expiresAt: new Date(
@@ -388,6 +398,7 @@ export const createAuthService = (
       await repository.touchRefreshSession(session.id, now)
       await repository.revokeRefreshSession(session.id, nextSession.id)
       await recordAudit({
+        tenantId: user.tenantId,
         action: "refresh",
         actorUserId: user.id,
         targetType: "session",
@@ -421,6 +432,7 @@ export const createAuthService = (
 
       await repository.revokeRefreshSession(session.id)
       await recordAudit({
+        tenantId: session.tenantId,
         action: "logout",
         actorUserId: session.userId,
         targetType: "session",
