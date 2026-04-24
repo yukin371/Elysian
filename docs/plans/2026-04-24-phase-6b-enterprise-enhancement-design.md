@@ -101,7 +101,7 @@
 
 ## 待补验证
 
-- 更高规模 tenant 样本与回归频率策略
+- `dev/main` 上最近 `10` 次 tenant artifact 的滚动观察记录与结论
 - 升级执行 runbook、回滚路径与冻结阈值后的操作演练
 
 ## 真实观察窗口达标记录
@@ -132,3 +132,9 @@
 
 迁移/发布手册：
 - [2026-04-24-phase-6b-tenant-migration-release-runbook.md](./2026-04-24-phase-6b-tenant-migration-release-runbook.md)
+
+观察策略：
+- [2026-04-24-phase-6b-tenant-scale-observation-strategy.md](./2026-04-24-phase-6b-tenant-scale-observation-strategy.md)
+
+滚动观察记录：
+- [2026-04-24-phase-6b-tenant-rolling-window.md](./2026-04-24-phase-6b-tenant-rolling-window.md)
