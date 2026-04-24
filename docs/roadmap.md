@@ -134,9 +134,10 @@
 - 已完成：新增 `e2e:tenant:stability:collect`、`e2e:tenant:upgrade:decision`、`e2e:tenant:upgrade:gate`、`e2e:tenant:upgrade:finalize` 与 `e2e:tenant:upgrade:finalize:from-downloads`，将下载 artifact 到升级结论的收尾链路固定为脚本化流程
 - 已完成：新增 `e2e:tenant:stability:download` 与 `e2e:tenant:upgrade:finalize:from-github`，可直接从 GitHub 下载 tenant artifact 并落升级结论
 - 已完成：基于 `workflow_dispatch` 连续 5 次真实样本 `24886462252 / 24886403317 / 24886352160 / 24886285868 / 24886175279` 输出 tenant observation evidence；当前 `selectedWindowRuns=5`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`，门禁返回 `candidate_for_next_step`
-- 下一步：进入多租户升级执行评审，冻结当前 tenant e2e 与观察阈值，并补齐 runbook、回滚路径与更高规模样本计划
+- 下一步：基于已补齐的升级执行与迁移/发布手册，继续明确更高规模 tenant 样本计划，并在生产部署平台确定后补平台级发布命令与责任边界
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
+- 迁移/发布手册：[2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md)
 
 ### 7. Phase 4 Completion: P4D Apply / Merge ✅ 已完成
 

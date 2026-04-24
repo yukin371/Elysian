@@ -129,3 +129,6 @@
 
 执行手册：
 - [2026-04-24-phase-6b-tenant-upgrade-runbook.md](./2026-04-24-phase-6b-tenant-upgrade-runbook.md)
+
+迁移/发布手册：
+- [2026-04-24-phase-6b-tenant-migration-release-runbook.md](./2026-04-24-phase-6b-tenant-migration-release-runbook.md)
