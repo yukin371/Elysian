@@ -62,6 +62,7 @@ ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from
 
 ## 下一步
 
-1. 把同一 `10` 次滚动观察策略迁移到 `dev/main`，形成主线级第一版记录。
-2. 等 `dev/main` 的 tenant artifact 密度稳定后，再判断是否把 Level 2 从“建议”升级为硬门槛。
-3. 在生产部署平台明确后，再补发布后观察的责任边界与平台级命令。
+1. 先把包含 `e2e-tenant` job 的 CI workflow 晋级到 `dev/main`；当前尝试下载 `origin/dev` / `origin/main` 的 tenant artifact 时返回 `no artifact matches`，说明主线级样本尚未具备。
+2. 在 `dev/main` 具备 tenant artifact 后，再形成主线级第一版 `10` 次滚动观察记录。
+3. 等 `dev/main` 的 tenant artifact 密度稳定后，再判断是否把 Level 2 从“建议”升级为硬门槛。
+4. 在生产部署平台明确后，再补发布后观察的责任边界与平台级命令。

@@ -102,6 +102,7 @@
 ## 待补验证
 
 - `dev/main` 上最近 `10` 次 tenant artifact 的滚动观察记录与结论
+  - 当前阻断：`origin/dev` 与 `origin/main` 尚未包含 `e2e-tenant` job，最近成功 CI 无 `e2e-tenant-report` artifact
 - 升级执行 runbook、回滚路径与冻结阈值后的操作演练
 
 ## 真实观察窗口达标记录

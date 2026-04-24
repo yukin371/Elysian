@@ -201,5 +201,6 @@ ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from
 ## 后续待补
 
 - 基于真实 `dev/main` 数据补第一版 `10` 次滚动观察记录
+  - 当前前提：先把包含 `e2e-tenant` job 的 CI workflow 晋级到 `dev/main`
 - 明确 Level 2 是否需要单独的 decision / gate 产物命名
 - 在生产部署平台确定后，补 CI 观察到发布后观察的责任切分
