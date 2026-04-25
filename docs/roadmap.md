@@ -18,6 +18,7 @@
 - 已推进：最小审批动作闭环已落地，当前支持 `approved / rejected` 完成、实例取消、done 列表与实例历史任务读取；仍保持“简化自编排工具”定位，不引入 claim、并行网关或独立调度器
 - 已推进：`WP-4` 最小条件分支已落地，当前支持基于实例变量的白名单比较表达式与 `default` 分支，不引入脚本执行器
 - 已推进：workflow 权限已拆分为 definition / instance / task 三组最小权限点，并补 server 403 覆盖与默认 seed
+- 已完成：`2026-04-26` 本地自动化回归复验通过，`bun run check`、workflow 定向测试与 `bun run build:vue` 均已通过；详见 [2026-04-26-round-regression-closeout.md](./plans/2026-04-26-round-regression-closeout.md)
 - 当前待推进：更复杂任务语义与是否继续细拆权限颗粒度
 - PRD 文档：[2026-04-24-system-design-v2-prd.md](./plans/2026-04-24-system-design-v2-prd.md)
 - 启动文档：[2026-04-25-phase-7a-workflow-engine-kickoff.md](./plans/2026-04-25-phase-7a-workflow-engine-kickoff.md)
@@ -155,6 +156,7 @@
 - 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已新增前期文档草案：[2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md) 与 [2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md)，用于在当前 `Phase 6B` runbook 收尾后评估 `Arco -> TDesign` 迁移窗口
 - 已推进：`packages/ui-enterprise-vue` 与 `apps/example-vue` 已完成当前 POC 范围内的 `TDesign Vue Next` 收口，`ElyShell / ElyTable / ElyQueryBar / ElyForm / ElyCrudWorkspace / ElyPreviewSkeleton` 已不再依赖 `Arco` runtime；示例页默认语言已切到 `zh-CN`，并保留 `en-US` 回退
+- 已完成：`2026-04-26` 自动化回归整理，已补 `P7A Round-1` 与 `TDesign` 迁移的统一回归收口文档，并明确当前仍待真实环境与手工 UI 验证
 - 已完成阶段出口复验：`2026-04-25` 本地 `bun run check` 与 `bun run e2e:tenant:full` 通过，可将 `Phase 6B` 作为已归档阶段处理
 - 归档后残留运营收尾：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
@@ -225,7 +227,7 @@
 - `apps/server/src/modules/auth/module.ts` 中 `/auth/login` 与 `/auth/refresh` 返回体已通过 `AuthLoginResponse` 类型化
 - `apps/example-vue/src/lib/platform-api.ts` 中 `login()` / `refreshAuth()` 已简化为直接解构 `LoginResponse` 而非重复拷贝字段
 - `packages/frontend-vue` 新增 `usePermissions` composable 和 `buildPermissionGates` 工具函数，`App.vue` 中的 customer action 权限判断已迁移到预设层消费
-- `packages/ui-enterprise-vue` 新增 `ElyShell`、`ElyNavNodes`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyPreviewSkeleton` 六个组件；首版曾以 `Arco Design Vue` 起步，当前迁移 POC 已收敛到 `TDesign Vue Next` 运行时；新增 `useElyCrudPage` composable 把 `ui-core` 的 `UiCrudPageDefinition` 映射为企业组件 contracts；组件命名从 `ElysianEnterprise*` 收敛为 `Ely*`
+- `packages/ui-enterprise-vue` 新增 `ElyShell`、`ElyNavNodes`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyPreviewSkeleton` 六个组件；首版曾以 `Arco Design Vue` 起步，当前已完成 `TDesign Vue Next` 运行时收口；新增 `useElyCrudPage` composable 把 `ui-core` 的 `UiCrudPageDefinition` 映射为企业组件 contracts；组件命名从 `ElysianEnterprise*` 收敛为 `Ely*`
 - `packages/schema` 新增 `productModuleSchema`，包含 `name/sku/price/category/status` 字段，`productModuleSchema` 已注册为 generator 可用 schema
 - `packages/generator/src/templates.ts` 中 `renderRepositoryTemplate` 的 `CustomerStatus` 硬编码已修复为 `{PascalName}Status`，`renderServiceTemplate` 的 `input.name` 硬编码已修复为动态检测第一个 `string/id` 字段
 - 已用 `product` 实体验证 generator 模板抽象稳定性，`bun --filter @elysian/generator generate --schema product` 零残留通过

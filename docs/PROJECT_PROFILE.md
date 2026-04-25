@@ -101,7 +101,8 @@
 - `packages/schema` 已补 workflow definition / instance / task 的最小 contract，并补实例历史任务视图、任务结果字段与条件表达式白名单校验，用于当前 agent 自编排辅助工具的流程定义与运行态数据交换。
 - `packages/frontend-vue` 已提供最小 Vue 预设层，并包含导航构建、权限 gate helper 与供 enterprise preset 消费的页面协议映射。
 - `packages/ui-core` 已承接菜单树、CRUD 页面契约与权限相关 UI 协议。
-- `packages/ui-enterprise-vue` 已落地 `ElyShell`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyCrudWorkspace`、`ElyPreviewSkeleton` 等企业预设组件；当前实现已进入 `TDesign Vue Next` 迁移 POC，并已具备 tabs、标准列表页、标准表单页与只读详情视图。
+- `packages/ui-enterprise-vue` 已落地 `ElyShell`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyCrudWorkspace`、`ElyPreviewSkeleton` 等企业预设组件；当前运行时底座已完成 `TDesign Vue Next` 收口，并已具备 tabs、标准列表页、标准表单页与只读详情视图。
+- `2026-04-26` 已完成本地自动化回归整理：`bun run check`、workflow 定向测试与 `bun run build:vue` 通过；当前仍待补真实环境 E2E 与浏览器手工回归。
 - `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace。
 - 仓库已具备最小质量链路：`Biome + GitHub Actions CI`。
 - 仓库当前已使用 `Husky` 托管 `pre-commit / commit-msg / pre-push` 本地 hooks；`bun install` 会自动执行 `prepare` 完成安装，并保留 `bun run hooks:install` 作为手动修复入口。

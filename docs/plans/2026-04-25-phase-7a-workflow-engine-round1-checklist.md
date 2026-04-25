@@ -150,11 +150,12 @@
 - [x] 线性审批链可跑通
 - [x] 单条件分支可跑通
 - [x] workflow 数据受 tenant 隔离
-- [ ] `bun run check` 通过
+- [x] `bun run check` 通过
 - [x] 新增 workflow 相关测试通过
 
 ## 文档同步
 
 - [x] `roadmap.md` 已挂计划文档入口
 - [x] `PROJECT_PROFILE.md` 仅在新增实现事实时再同步
+- [x] 自动化回归收尾文档已补：[2026-04-26-round-regression-closeout.md](./2026-04-26-round-regression-closeout.md)
 - [ ] 若 owner、依赖方向或基础设施前提发生变化，再补 `ARCHITECTURE_GUARDRAILS` 或 ADR
