@@ -1,5 +1,12 @@
 import type { UiNavigationNode } from "@elysian/ui-core"
 
+export interface ElyShellCopy {
+  navigationLabel?: string
+  environmentLabel?: string
+  presetEyebrow?: string
+  fallbackWorkspace?: string
+}
+
 export interface ElyShellStat {
   key: string
   label: string
@@ -30,11 +37,42 @@ export interface ElyShellProps {
   status: string
   navigation: UiNavigationNode[]
   stats: ElyShellStat[]
+  navigationLabel?: string
+  environmentLabel?: string
+  presetEyebrow?: string
+  fallbackWorkspace?: string
   selectedMenuKey?: string | null
   tabs?: ElyShellTab[]
   selectedTabKey?: string | null
   user?: ElyShellUserSummary | null
+  copy?: ElyShellCopy
 }
+
+export interface ResolvedElyShellCopy {
+  navigationLabel: string
+  environmentLabel: string
+  presetEyebrow: string
+  fallbackWorkspace: string
+}
+
+export const resolveElyShellCopy = (options: {
+  navigationLabel?: string
+  environmentLabel?: string
+  presetEyebrow?: string
+  fallbackWorkspace?: string
+  copy?: ElyShellCopy
+}): ResolvedElyShellCopy => ({
+  navigationLabel:
+    options.navigationLabel ?? options.copy?.navigationLabel ?? "导航",
+  environmentLabel:
+    options.environmentLabel ?? options.copy?.environmentLabel ?? "环境",
+  presetEyebrow:
+    options.presetEyebrow ?? options.copy?.presetEyebrow ?? "企业预设",
+  fallbackWorkspace:
+    options.fallbackWorkspace ??
+    options.copy?.fallbackWorkspace ??
+    "工作区内容待接入。",
+})
 
 export interface ElyPreviewSkeletonProps {
   environment: string
@@ -66,12 +104,20 @@ export interface ElyTableAction {
   enabled?: boolean
 }
 
+export interface ElyTableCopy {
+  actionsTitle?: string
+  statusActive?: string
+  statusInactive?: string
+  statusUnknown?: string
+}
+
 export interface ElyTableProps {
   columns: ElyTableColumn[]
   items: Record<string, unknown>[]
   rowKey?: string
   loading?: boolean
   actions?: ElyTableAction[]
+  copy?: ElyTableCopy
 }
 
 export interface ElyTableEmits {
@@ -92,9 +138,19 @@ export interface ElyQueryField {
   dictionaryTypeCode?: string
 }
 
+export interface ElyQueryBarCopy {
+  searchPlaceholderPrefix?: string
+  statusPlaceholder?: string
+  statusActive?: string
+  statusInactive?: string
+  searchButton?: string
+  resetButton?: string
+}
+
 export interface ElyQueryBarProps {
   fields: ElyQueryField[]
   loading?: boolean
+  copy?: ElyQueryBarCopy
 }
 
 export interface ElyQueryValues {
@@ -129,12 +185,20 @@ export interface ElyFormField {
   disabled?: boolean
 }
 
+export interface ElyFormCopy {
+  submitButton?: string
+  cancelButton?: string
+  switchEnabled?: string
+  switchDisabled?: string
+}
+
 export interface ElyFormProps {
   fields: ElyFormField[]
   values?: ElyFormValues
   loading?: boolean
   /** Set to show a read-only detail view instead of editable inputs. */
   readonly?: boolean
+  copy?: ElyFormCopy
 }
 
 export interface ElyFormValues {
@@ -162,6 +226,15 @@ export interface ElyCrudWorkspaceProps {
   itemCountLabel?: string
   emptyTitle?: string
   emptyDescription?: string
+  copy?: {
+    gridTitle?: string
+    liveContractLabel?: string
+    rowsInScopeSuffix?: string
+    emptyTitle?: string
+    emptyDescription?: string
+    queryBarCopy?: ElyQueryBarCopy
+    tableCopy?: ElyTableCopy
+  }
 }
 
 export interface ElyCrudWorkspaceEmits {

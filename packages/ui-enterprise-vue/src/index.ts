@@ -20,7 +20,9 @@ import type {
   ElyTableColumn,
   ElyTableEmits,
   ElyTableProps,
+  ResolvedElyShellCopy,
 } from "./contracts"
+import { resolveElyShellCopy } from "./contracts"
 
 export { default as ElyForm } from "./components/ElyForm.vue"
 export { default as ElyCrudWorkspace } from "./components/ElyCrudWorkspace.vue"
@@ -49,7 +51,10 @@ export type {
   ElyTableColumn,
   ElyTableEmits,
   ElyTableProps,
+  ResolvedElyShellCopy,
 }
+
+export { resolveElyShellCopy }
 
 export const vueEnterprisePresetManifest: UiPresetManifest = {
   key: "vue-enterprise",
@@ -58,13 +63,13 @@ export const vueEnterprisePresetManifest: UiPresetManifest = {
   status: "prototype",
   displayName: "Vue Enterprise",
   description:
-    "Official enterprise preset for Vue, with an Arco-based admin shell and reusable CRUD workspace templates.",
+    "Official enterprise preset for Vue, with a TDesign-based admin shell and reusable CRUD workspace templates.",
 }
 
 export const vueEnterprisePresetFoundation = {
-  designSystem: "arco-design-vue",
-  selectionDate: "2026-04-21",
-  status: "accepted",
+  designSystem: "tdesign-vue-next",
+  selectionDate: "2026-04-25",
+  status: "prototype",
 } as const
 
 /**

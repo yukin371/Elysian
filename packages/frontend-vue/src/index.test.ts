@@ -6,6 +6,7 @@ import {
   applyCrudDictionaryOptions,
   buildCrudDictionaryOptionCatalog,
   buildVueCustomCrudPage,
+  createVueLocaleRuntime,
   getCrudPageDictionaryTypeCodes,
   usePermissions,
 } from "./index"
@@ -244,5 +245,31 @@ describe("frontend-vue preset helpers", () => {
     permissionCodes.value = ["ticket:ticket:create"]
     expect(gates.create.value).toBe(true)
     expect(gates.delete.value).toBe(false)
+  })
+
+  it("switches locale reactively and falls back when a key is missing", () => {
+    const runtime = createVueLocaleRuntime({
+      defaultLocale: "zh-CN",
+      fallbackLocale: "en-US",
+      messages: {
+        "zh-CN": {
+          greeting: "你好，{name}",
+        },
+        "en-US": {
+          greeting: "Hello, {name}",
+          shellNavigation: "Navigation",
+        },
+      },
+    })
+
+    expect(runtime.t("greeting", { name: "Elysian" })).toBe("你好，Elysian")
+    expect(runtime.t("shellNavigation")).toBe("Navigation")
+
+    runtime.setLocale("en-US")
+
+    expect(runtime.locale.value).toBe("en-US")
+    expect(runtime.t("greeting", { name: "Elysian" })).toBe("Hello, Elysian")
+    expect(runtime.t("shellNavigation")).toBe("Navigation")
+    expect(runtime.t("missing.key")).toBe("missing.key")
   })
 })

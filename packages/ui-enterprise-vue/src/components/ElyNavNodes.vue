@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {
-  MenuItem as AMenuItem,
-  SubMenu as ASubMenu,
-} from "@arco-design/web-vue"
 import type { UiNavigationNode } from "@elysian/ui-core"
+import {
+  MenuItem as TMenuItem,
+  Submenu as TSubmenu,
+} from "tdesign-vue-next/es/menu"
 import { computed } from "vue"
 
 defineOptions({
@@ -21,9 +21,9 @@ const visibleItems = computed(() =>
 
 <template>
   <template v-for="item in visibleItems" :key="item.id">
-    <a-sub-menu
+    <TSubmenu
       v-if="item.children.length > 0 || item.type === 'directory'"
-      :key="item.id"
+      :value="item.id"
     >
       <template #title>
         <div class="ely-nav-title">
@@ -32,14 +32,14 @@ const visibleItems = computed(() =>
         </div>
       </template>
       <ElyNavNodes :items="item.children" />
-    </a-sub-menu>
+    </TSubmenu>
 
-    <a-menu-item v-else :key="item.id">
+    <TMenuItem v-else :value="item.id">
       <div class="ely-nav-title">
         <span>{{ item.name }}</span>
         <small>{{ item.path ?? item.code }}</small>
       </div>
-    </a-menu-item>
+    </TMenuItem>
   </template>
 </template>
 
@@ -49,16 +49,19 @@ const visibleItems = computed(() =>
   flex-direction: column;
   gap: 0.15rem;
   min-width: 0;
+  line-height: 1.25;
 }
 
 .ely-nav-title span {
   font-size: 0.92rem;
   font-weight: 600;
+  line-height: 1.3;
   color: #132238;
 }
 
 .ely-nav-title small {
   font-size: 0.66rem;
+  line-height: 1.2;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #6b7280;

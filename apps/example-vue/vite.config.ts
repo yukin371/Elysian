@@ -2,6 +2,8 @@ import tailwindcss from "@tailwindcss/vite"
 import vue from "@vitejs/plugin-vue"
 import { defineConfig } from "vite"
 
+const toPosixPath = (id: string) => id.replaceAll("\\", "/")
+
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   server: {
@@ -11,22 +13,19 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("@arco-design/web-vue")) {
-            return "vendor-arco"
-          }
-
-          if (id.includes("/packages/ui-enterprise-vue/")) {
-            return "ely-enterprise"
-          }
+          const normalizedId = toPosixPath(id)
 
           if (
-            id.includes("/packages/frontend-vue/") ||
-            id.includes("/packages/ui-core/")
+            normalizedId.includes("/packages/frontend-vue/") ||
+            normalizedId.includes("/packages/ui-core/")
           ) {
             return "ely-frontend"
           }
 
-          if (id.includes("/node_modules/") && id.includes("/vue/")) {
+          if (
+            normalizedId.includes("/node_modules/") &&
+            normalizedId.includes("/vue/")
+          ) {
             return "vendor-vue"
           }
         },

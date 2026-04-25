@@ -11,7 +11,7 @@ NC='\033[0m'
 FORBIDDEN_PATH_PATTERN='^(\.claude/|\.cursor/|\.windsurf/|\.codeium/|\.copilot/|\.aider/|\.roo/|\.augment/|docs/superpowers/)'
 CONTENT_PATTERN='(Co-Authored-By:|Generated with .*(Claude|Anthropic|Copilot|Cursor|Windsurf|Codex)|>\s*\*\*For (Claude|Codex|Copilot|Cursor|Windsurf):\*\*)'
 COMMIT_MSG_PATTERN='(^Co-Authored-By:|Generated with .*(Claude|Anthropic|Copilot|Cursor|Windsurf|Codex))'
-WATERMARK_RULE_PATH_PATTERN='^(\.githooks/|scripts/validate-pr-metadata\.ts|scripts/validate-pr-metadata\.test\.ts)$'
+WATERMARK_RULE_PATH_PATTERN='^(\.husky/|scripts/validate-pr-metadata\.ts|scripts/validate-pr-metadata\.test\.ts)$'
 ZERO_SHA='0000000000000000000000000000000000000000'
 
 HAS_ERROR=0
@@ -69,17 +69,21 @@ while read -r local_ref local_sha remote_ref remote_sha; do
             fi
 
             case "$file" in
-                .githooks/*) continue ;;
+                .husky/*) continue ;;
             esac
 
             CHECK_FILES+=("$file")
         done
 
         if [ "${#CHECK_FILES[@]}" -gt 0 ]; then
-            if MATCHES=$(git grep -n -I -E "$CONTENT_PATTERN" "$commit" -- "${CHECK_FILES[@]}" 2>/dev/null); then
-                error "提交 $commit 包含协作者标识或水印内容"
-                echo "$MATCHES"
-            fi
+            for file in "${CHECK_FILES[@]}"; do
+                if MATCHES=$(git show --format= --unified=0 "$commit" -- "$file" \
+                    | grep -E '^\+[^+]' \
+                    | grep -n -E "$CONTENT_PATTERN" 2>/dev/null); then
+                    error "提交 $commit 包含协作者标识或水印内容: $file"
+                    echo "$MATCHES"
+                fi
+            done
         fi
     done
 done

@@ -33,7 +33,7 @@
 bun install
 ```
 
-`bun install` 会自动执行 `bun run hooks:install`，把仓库 hooks 安装到 `.githooks`。若本地 Git 配置被其他工具覆盖，可手动补一次：
+`bun install` 会自动执行 `prepare`，由 `husky` 安装仓库 hooks。若本地 hooks 配置被其他工具覆盖，可手动补一次：
 
 ```bash
 bun run hooks:install

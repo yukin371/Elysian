@@ -1,6 +1,6 @@
 # ADR-0008 采用 Arco Design 作为 Vue 企业预设底座
 
-状态：`accepted`
+状态：`superseded by ADR-0010`
 
 日期：`2026-04-21`
 
@@ -25,8 +25,9 @@
 
 ### 1. Vue 企业预设底座采用 `Arco Design Vue`
 
-- `ui-enterprise-vue` 的官方组件库底座固定为 `Arco Design Vue`
-- 后续企业风格页面、后台布局、表格页、表单页和详情页优先围绕 `Arco` 封装
+- 本 ADR 在 `2026-04-21` 至 `2026-04-25` 期间作为 `ui-enterprise-vue` 的首版基线决策
+- 该基线已在后续被 [ADR-0010](./ADR-0010-vue-enterprise-preset-tdesign-migration.md) 替代
+- `ui-enterprise-vue` 当前官方组件库底座不再是 `Arco Design Vue`
 
 ### 2. 自建风格预设继续独立维护
 

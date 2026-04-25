@@ -12,12 +12,19 @@
   },
   "files": {
     "ignore": [
+      ".worktrees/**",
+      ".ci-reports/**",
       "**/node_modules/**",
       "**/dist/**",
       "**/build/**",
       "generated/**",
+      "artifacts/**",
       ".server.stdout.log",
-      ".server.stderr.log"
+      ".server.stderr.log",
+      ".codex-dev-*.err",
+      ".codex-dev-*.out",
+      ".codex-vite-preview.err",
+      ".codex-vite-preview.out"
     ]
   },
   "javascript": {

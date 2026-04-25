@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import "@arco-design/web-vue/dist/arco.css"
-
+import { Avatar as TAvatar } from "tdesign-vue-next/es/avatar"
+import { Card as TCard } from "tdesign-vue-next/es/card"
 import {
-  Avatar as AAvatar,
-  Card as ACard,
-  Layout as ALayout,
-  LayoutContent as ALayoutContent,
-  LayoutHeader as ALayoutHeader,
-  LayoutSider as ALayoutSider,
-  Menu as AMenu,
-  Space as ASpace,
-} from "@arco-design/web-vue"
+  Aside as TAside,
+  Content as TContent,
+  Header as THeader,
+  Layout as TLayout,
+} from "tdesign-vue-next/es/layout"
+import { Menu as TMenu } from "tdesign-vue-next/es/menu"
+import { Space as TSpace } from "tdesign-vue-next/es/space"
 import { computed } from "vue"
 
-import type { ElyShellProps } from "../contracts"
+import { type ElyShellProps, resolveElyShellCopy } from "../contracts"
 import ElyNavNodes from "./ElyNavNodes.vue"
 
 const props = withDefaults(defineProps<ElyShellProps>(), {
+  navigationLabel: undefined,
+  environmentLabel: undefined,
+  presetEyebrow: undefined,
+  fallbackWorkspace: undefined,
   selectedMenuKey: null,
   selectedTabKey: null,
   user: null,
+  copy: () => ({}),
 })
 
-const selectedKeys = computed(() =>
-  props.selectedMenuKey ? [props.selectedMenuKey] : [],
-)
+const selectedMenuValue = computed(() => props.selectedMenuKey ?? undefined)
 
 const userInitial = computed(
   () => props.user?.displayName.trim().charAt(0).toUpperCase() ?? "E",
@@ -33,12 +34,37 @@ const userInitial = computed(
 const selectedTabKey = computed(
   () => props.selectedTabKey ?? props.tabs?.[0]?.key ?? null,
 )
+
+const expandedMenuValues = computed(() => {
+  const values: string[] = []
+  const visit = (items: ElyShellProps["navigation"]) => {
+    for (const item of items) {
+      if (item.children.length > 0 || item.type === "directory") {
+        values.push(item.id)
+        visit(item.children)
+      }
+    }
+  }
+
+  visit(props.navigation)
+  return values
+})
+
+const resolvedCopy = computed(() =>
+  resolveElyShellCopy({
+    navigationLabel: props.navigationLabel,
+    environmentLabel: props.environmentLabel,
+    presetEyebrow: props.presetEyebrow,
+    fallbackWorkspace: props.fallbackWorkspace,
+    copy: props.copy,
+  }),
+)
 </script>
 
 <template>
   <div class="ely-shell">
-    <a-layout class="ely-shell-layout">
-      <a-layout-sider :width="272" class="ely-shell-sider">
+    <TLayout class="ely-shell-layout">
+      <TAside width="272px" class="ely-shell-sider">
         <div class="ely-brand">
           <div class="ely-brand-mark">E</div>
           <div class="ely-brand-copy">
@@ -48,51 +74,53 @@ const selectedTabKey = computed(
         </div>
 
         <div class="ely-sidebar-label">
-          <span>Navigation</span>
+          <span>{{ resolvedCopy.navigationLabel }}</span>
           <small>{{ presetLabel }}</small>
         </div>
 
-        <a-menu
+        <TMenu
           class="ely-nav"
-          :selected-keys="selectedKeys"
-          auto-open
+          theme="light"
+          expand-type="normal"
+          :value="selectedMenuValue"
+          :expanded="expandedMenuValues"
         >
           <ElyNavNodes :items="navigation" />
-        </a-menu>
+        </TMenu>
 
         <div class="ely-sidebar-foot">
-          <p>Environment</p>
+          <p>{{ resolvedCopy.environmentLabel }}</p>
           <strong>{{ environment }}</strong>
           <span>{{ status }}</span>
         </div>
 
         <slot name="sidebar-extra" />
-      </a-layout-sider>
+      </TAside>
 
-      <a-layout class="ely-shell-main">
-        <a-layout-header class="ely-shell-header">
+      <TLayout class="ely-shell-main">
+        <THeader height="auto" class="ely-shell-header">
           <div>
-            <p class="ely-overline">Enterprise Preset</p>
+            <p class="ely-overline">{{ resolvedCopy.presetEyebrow }}</p>
             <h2>{{ workspaceTitle }}</h2>
             <p>{{ workspaceDescription }}</p>
           </div>
 
           <div class="ely-header-actions">
-            <a-space>
+            <TSpace>
               <slot name="header-actions" />
-            </a-space>
+            </TSpace>
 
             <div v-if="user" class="ely-user">
-              <a-avatar :size="42" class="ely-user-avatar">
+              <TAvatar size="42px" class="ely-user-avatar">
                 {{ userInitial }}
-              </a-avatar>
+              </TAvatar>
               <div>
                 <strong>{{ user.displayName }}</strong>
                 <span>{{ user.username }}</span>
               </div>
             </div>
           </div>
-        </a-layout-header>
+        </THeader>
 
         <div v-if="tabs && tabs.length > 0" class="ely-shell-tabs">
           <article
@@ -106,9 +134,9 @@ const selectedTabKey = computed(
           </article>
         </div>
 
-        <a-layout-content class="ely-shell-content">
+        <TContent class="ely-shell-content">
           <div v-if="stats.length > 0" class="ely-stat-grid">
-            <a-card
+            <TCard
               v-for="stat in stats"
               :key="stat.key"
               class="ely-stat-card"
@@ -119,7 +147,7 @@ const selectedTabKey = computed(
               <p v-if="stat.hint" class="ely-stat-hint">
                 {{ stat.hint }}
               </p>
-            </a-card>
+            </TCard>
           </div>
 
           <div
@@ -130,9 +158,9 @@ const selectedTabKey = computed(
           >
             <section class="ely-workspace-main">
               <slot name="workspace">
-                <a-card :bordered="false" class="ely-fallback-card">
-                  Workspace content goes here.
-                </a-card>
+                <TCard :bordered="false" class="ely-fallback-card">
+                  {{ resolvedCopy.fallbackWorkspace }}
+                </TCard>
               </slot>
             </section>
 
@@ -140,9 +168,9 @@ const selectedTabKey = computed(
               <slot name="secondary" />
             </aside>
           </div>
-        </a-layout-content>
-      </a-layout>
-    </a-layout>
+        </TContent>
+      </TLayout>
+    </TLayout>
   </div>
 </template>
 
@@ -248,6 +276,34 @@ const selectedTabKey = computed(
   flex: 1;
   background: transparent;
   border: 0;
+}
+
+.ely-nav :deep(.t-default-menu),
+.ely-nav :deep(.t-default-menu__inner) {
+  background: transparent;
+}
+
+.ely-nav :deep(.t-menu__item),
+.ely-nav :deep(.t-submenu__title) {
+  border-radius: 14px;
+  min-height: 56px;
+  height: auto;
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+}
+
+.ely-nav :deep(.t-menu__content) {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.ely-nav :deep(.t-fake-arrow) {
+  flex-shrink: 0;
+  margin-top: 0.35rem;
 }
 
 .ely-shell-main {
@@ -356,7 +412,7 @@ const selectedTabKey = computed(
 .ely-stat-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
 .ely-stat-card,
@@ -369,12 +425,15 @@ const selectedTabKey = computed(
 
 .ely-stat-value {
   margin: 0.85rem 0 0;
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 1.2rem + 0.7vw, 1.8rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
   color: var(--elysian-ely-ink);
 }
 
 .ely-stat-hint {
   margin: 0.65rem 0 0;
+  line-height: 1.45;
   color: var(--elysian-ely-slate);
 }
 

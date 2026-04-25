@@ -14,7 +14,7 @@ HAS_WARNING=0
 
 FORBIDDEN_PATH_PATTERN='^(\.claude/|\.cursor/|\.windsurf/|\.codeium/|\.copilot/|\.aider/|\.roo/|\.augment/|docs/superpowers/)'
 WATERMARK_PATTERN='(Co-Authored-By:|Generated with .*(Claude|Anthropic|Copilot|Cursor|Windsurf|Codex)|>\s*\*\*For (Claude|Codex|Copilot|Cursor|Windsurf):\*\*)'
-WATERMARK_RULE_PATH_PATTERN='^(\.githooks/|scripts/validate-pr-metadata\.ts|scripts/validate-pr-metadata\.test\.ts)$'
+WATERMARK_RULE_PATH_PATTERN='^(\.husky/|scripts/validate-pr-metadata\.ts|scripts/validate-pr-metadata\.test\.ts)$'
 
 info() {
     echo -e "${GREEN}[OK]${NC} $1"
@@ -36,7 +36,6 @@ if [ "${#STAGED_FILES[@]}" -eq 0 ]; then
     exit 0
 fi
 
-# 判断索引中的文件是否为二进制文件，避免把二进制内容直接 grep。
 is_binary_in_index() {
     local file="$1"
     local numstat
@@ -44,9 +43,6 @@ is_binary_in_index() {
     [[ "$numstat" == "-	-"* ]] || [[ "$numstat" == "- -"* ]]
 }
 
-# ============================================================
-# 1. 检查协作者/AI 标识（排除 .githooks 目录自身）
-# ============================================================
 CHECKED_FILES=()
 for file in "${STAGED_FILES[@]}"; do
     if [[ "$file" =~ $FORBIDDEN_PATH_PATTERN ]]; then
@@ -58,22 +54,23 @@ for file in "${STAGED_FILES[@]}"; do
     fi
 
     case "$file" in
-        .githooks/*) continue ;;
+        .husky/*) continue ;;
     esac
 
     CHECKED_FILES+=("$file")
 done
 
 if [ "${#CHECKED_FILES[@]}" -gt 0 ]; then
-    if WATERMARK_MATCHES=$(git grep -n -I -E --cached "$WATERMARK_PATTERN" -- "${CHECKED_FILES[@]}" 2>/dev/null); then
-        error "检测到协作者标识或水印内容"
-        echo "$WATERMARK_MATCHES"
-    fi
+    for file in "${CHECKED_FILES[@]}"; do
+        if WATERMARK_MATCHES=$(git diff --cached --unified=0 --no-color -- "$file" \
+            | grep -E '^\+[^+]' \
+            | grep -n -E "$WATERMARK_PATTERN" 2>/dev/null); then
+            error "检测到协作者标识或水印内容: $file"
+            echo "$WATERMARK_MATCHES"
+        fi
+    done
 fi
 
-# ============================================================
-# 2. 检查敏感文件
-# ============================================================
 SENSITIVE_FILES=(
     ".env"
     ".env.local"
@@ -107,9 +104,6 @@ for file in "${STAGED_FILES[@]}"; do
     fi
 done
 
-# ============================================================
-# 3. 检查不应提交的产物
-# ============================================================
 for file in "${STAGED_FILES[@]}"; do
     case "$file" in
         dist/*|build/*|coverage/*|.nyc_output/*|__pycache__/*|.pytest_cache/*)
@@ -121,9 +115,6 @@ for file in "${STAGED_FILES[@]}"; do
     esac
 done
 
-# ============================================================
-# 4. 检查大文件 (>1MB)
-# ============================================================
 for file in "${STAGED_FILES[@]}"; do
     if [ ! -f "$file" ]; then continue; fi
     size=$(wc -c < "$file" 2>/dev/null || echo "0")
@@ -132,9 +123,6 @@ for file in "${STAGED_FILES[@]}"; do
     fi
 done
 
-# ============================================================
-# 结果
-# ============================================================
 echo ""
 if [ "$HAS_ERROR" -gt 0 ]; then
     echo -e "${RED}提交检查失败，请修复上述问题${NC}"

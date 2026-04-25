@@ -4,8 +4,8 @@
   "packageManager": "bun@1.3.10",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "hooks:install": "bun scripts/setup-git-hooks.ts",
-    "postinstall": "bun run hooks:install",
+    "hooks:install": "husky",
+    "prepare": "husky",
     "pr:validate": "bun scripts/validate-pr-metadata.ts",
     "p5a:handoff:report": "bun scripts/p5a-schema-handoff-report.ts",
     "p5a:handoff:replay": "bun scripts/p5a-schema-handoff-replay.ts",
@@ -64,6 +64,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "^1.3.2",
+    "husky": "^9.1.7",
     "typescript": "^5.9.3"
   }
 }

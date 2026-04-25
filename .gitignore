@@ -10,6 +10,13 @@ node_modules/
 .roo/
 .augment/
 .serena/
+.husky/_/
+.codex-dev-*.err
+.codex-dev-*.out
+.codex-vite-preview.err
+.codex-vite-preview.out
+.codex-*.png
+.ci-reports/
 dist/
 build/
 generated/

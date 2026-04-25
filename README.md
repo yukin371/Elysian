@@ -178,7 +178,7 @@ bun run stack:up
   `main` 保持可发布，`dev` 作为日常集成分支，功能开发从 `feature/*` 或 `fix/*` 分支切出
 - GitHub 保护规则：
   `main` 需要 PR + `pr-format`/`validate` 通过 + conversation 已解决；`dev` 需要 `pr-format`/`validate` 通过，二者都禁止 force push 和删除
-- 首次 clone 后执行 `bun install` 会自动安装仓库 hooks；若本地 Git 配置被覆盖，可手动修复：
+- 首次 clone 后执行 `bun install` 会自动通过 `husky` 安装仓库 hooks；若本地 hooks 配置被覆盖，可手动修复：
 
 ```bash
 bun run hooks:install

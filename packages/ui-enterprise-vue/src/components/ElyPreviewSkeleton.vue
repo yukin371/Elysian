@@ -1,16 +1,15 @@
 <script setup lang="ts">
+import { Button as TButton } from "tdesign-vue-next/es/button"
+import { Card as TCard } from "tdesign-vue-next/es/card"
 import {
-  Button as AButton,
-  Card as ACard,
-  Descriptions as ADescriptions,
-  DescriptionsItem as ADescriptionsItem,
-  List as AList,
-  ListItem as AListItem,
-  Space as ASpace,
-  Tag as ATag,
-  Timeline as ATimeline,
-  TimelineItem as ATimelineItem,
-} from "@arco-design/web-vue"
+  Descriptions as TDescriptions,
+  DescriptionsItem as TDescriptionsItem,
+} from "tdesign-vue-next/es/descriptions"
+import { Space as TSpace } from "tdesign-vue-next/es/space"
+import {
+  Timeline as TTimeline,
+  TimelineItem as TTimelineItem,
+} from "tdesign-vue-next/es/timeline"
 
 import type { ElyPreviewSkeletonProps } from "../contracts"
 import { vueEnterprisePresetFoundation } from "../index"
@@ -25,7 +24,7 @@ defineProps<ElyPreviewSkeletonProps>()
     subtitle="Official Vue preset"
     workspace-title="Customer operations"
     workspace-description="A structured enterprise shell for role-based workspaces, generator-produced list pages, and future layout templates."
-    preset-label="Arco Design Vue"
+    preset-label="TDesign Vue Next"
     :environment="environment"
     :status="status"
     :navigation="navigation"
@@ -34,78 +33,80 @@ defineProps<ElyPreviewSkeletonProps>()
     :user="user"
   >
     <template #header-actions>
-      <AButton type="primary">Create policy</AButton>
-      <AButton>Export report</AButton>
+      <TButton theme="primary">Create policy</TButton>
+      <TButton variant="outline">Export report</TButton>
     </template>
 
     <template #workspace>
-      <ACard :bordered="false" class="ely-preview-card">
-        <template #title>Preset contract alignment</template>
-        <AList :bordered="false" size="small">
-          <AListItem>
-            `ui-core` navigation tree drives the sidebar structure.
-          </AListItem>
-          <AListItem>
-            CRUD page metadata still comes from the same customer schema.
-          </AListItem>
-          <AListItem>
+      <TCard :bordered="false" class="ely-preview-card">
+        <h3 class="ely-preview-heading">Preset contract alignment</h3>
+        <ul class="ely-preview-list">
+          <li>`ui-core` navigation tree drives the sidebar structure.</li>
+          <li>CRUD page metadata still comes from the same customer schema.</li>
+          <li>
             Future generator output can target this shell without rewriting
             business protocols.
-          </AListItem>
-        </AList>
-      </ACard>
+          </li>
+        </ul>
+      </TCard>
 
-      <ACard :bordered="false" class="ely-preview-card">
-        <template #title>Current customer capability</template>
-        <ADescriptions :column="2" bordered size="large">
-          <ADescriptionsItem label="List">
+      <TCard :bordered="false" class="ely-preview-card">
+        <h3 class="ely-preview-heading">Current customer capability</h3>
+        <TDescriptions :column="2" bordered size="large">
+          <TDescriptionsItem label="List">
             {{ canViewCustomers ? "enabled" : "denied" }}
-          </ADescriptionsItem>
-          <ADescriptionsItem label="Create">
+          </TDescriptionsItem>
+          <TDescriptionsItem label="Create">
             {{ canCreateCustomers ? "enabled" : "denied" }}
-          </ADescriptionsItem>
-          <ADescriptionsItem label="Update">
+          </TDescriptionsItem>
+          <TDescriptionsItem label="Update">
             {{ canUpdateCustomers ? "enabled" : "denied" }}
-          </ADescriptionsItem>
-          <ADescriptionsItem label="Delete">
+          </TDescriptionsItem>
+          <TDescriptionsItem label="Delete">
             {{ canDeleteCustomers ? "enabled" : "denied" }}
-          </ADescriptionsItem>
-        </ADescriptions>
-      </ACard>
+          </TDescriptionsItem>
+        </TDescriptions>
+      </TCard>
     </template>
 
     <template #secondary>
-      <ACard :bordered="false" class="ely-preview-card">
-        <template #title>Theme foundation</template>
-        <ASpace direction="vertical" fill>
-          <ATag color="arcoblue">Arco shell</ATag>
-          <ATag color="green">Protocol stable</ATag>
-          <ATag color="gold">Generator ready</ATag>
-        </ASpace>
-      </ACard>
+      <TCard :bordered="false" class="ely-preview-card">
+        <h3 class="ely-preview-heading">Theme foundation</h3>
+        <TSpace direction="vertical" style="width: 100%">
+          <span class="ely-preview-pill ely-preview-pill-primary">
+            TDesign shell
+          </span>
+          <span class="ely-preview-pill ely-preview-pill-success">
+            Protocol stable
+          </span>
+          <span class="ely-preview-pill ely-preview-pill-warning">
+            Generator ready
+          </span>
+        </TSpace>
+      </TCard>
 
-      <ACard :bordered="false" class="ely-preview-card">
-        <template #title>Next extraction targets</template>
-        <ATimeline>
-          <ATimelineItem>
+      <TCard :bordered="false" class="ely-preview-card">
+        <h3 class="ely-preview-heading">Next extraction targets</h3>
+        <TTimeline>
+          <TTimelineItem>
             Workspace table + query bar wrappers
-          </ATimelineItem>
-          <ATimelineItem>
+          </TTimelineItem>
+          <TTimelineItem>
             Enterprise form layout sections
-          </ATimelineItem>
-          <ATimelineItem>
+          </TTimelineItem>
+          <TTimelineItem>
             Generator-facing page template mapping
-          </ATimelineItem>
-        </ATimeline>
-      </ACard>
+          </TTimelineItem>
+        </TTimeline>
+      </TCard>
 
-      <ACard :bordered="false" class="ely-preview-card">
-        <template #title>Foundation lock</template>
+      <TCard :bordered="false" class="ely-preview-card">
+        <h3 class="ely-preview-heading">Foundation lock</h3>
         <p class="ely-preview-copy">
           {{ vueEnterprisePresetFoundation.designSystem }} was fixed on
           {{ vueEnterprisePresetFoundation.selectionDate }}.
         </p>
-      </ACard>
+      </TCard>
     </template>
   </ElyShell>
 </template>
@@ -115,9 +116,50 @@ defineProps<ElyPreviewSkeletonProps>()
   border-radius: 22px;
 }
 
+.ely-preview-heading {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
 .ely-preview-copy {
   margin: 0;
   line-height: 1.75;
   color: #5f6b7a;
+}
+
+.ely-preview-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: #475569;
+}
+
+.ely-preview-list li + li {
+  margin-top: 0.65rem;
+}
+
+.ely-preview-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ely-preview-pill-primary {
+  background: rgba(29, 78, 216, 0.1);
+  color: #1d4ed8;
+}
+
+.ely-preview-pill-success {
+  background: rgba(22, 163, 74, 0.1);
+  color: #15803d;
+}
+
+.ely-preview-pill-warning {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
 }
 </style>

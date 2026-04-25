@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import type { UiCrudPageDefinition } from "@elysian/ui-core"
 import { computed, ref } from "vue"
 
-import { useElyCrudPage } from "./index"
+import { resolveElyShellCopy, useElyCrudPage } from "./index"
 
 const definition: UiCrudPageDefinition = {
   key: "ticket-crud",
@@ -144,5 +144,50 @@ describe("ui-enterprise-vue adapters", () => {
     expect(page.formFields.value[1]?.options).toEqual([
       { label: "Runtime", value: "runtime" },
     ])
+  })
+
+  it("resolves shell copy with explicit props, copy fallback, and built-in defaults", () => {
+    expect(
+      resolveElyShellCopy({
+        navigationLabel: "Navigation",
+        environmentLabel: "Environment",
+        presetEyebrow: "Enterprise Preset",
+        fallbackWorkspace: "Empty state",
+        copy: {
+          navigationLabel: "Ignored nav copy",
+          environmentLabel: "Ignored env copy",
+          presetEyebrow: "Ignored eyebrow copy",
+          fallbackWorkspace: "Ignored fallback copy",
+        },
+      }),
+    ).toEqual({
+      navigationLabel: "Navigation",
+      environmentLabel: "Environment",
+      presetEyebrow: "Enterprise Preset",
+      fallbackWorkspace: "Empty state",
+    })
+
+    expect(
+      resolveElyShellCopy({
+        copy: {
+          navigationLabel: "导航",
+          environmentLabel: "环境",
+          presetEyebrow: "企业预设",
+          fallbackWorkspace: "暂无数据",
+        },
+      }),
+    ).toEqual({
+      navigationLabel: "导航",
+      environmentLabel: "环境",
+      presetEyebrow: "企业预设",
+      fallbackWorkspace: "暂无数据",
+    })
+
+    expect(resolveElyShellCopy({})).toEqual({
+      navigationLabel: "导航",
+      environmentLabel: "环境",
+      presetEyebrow: "企业预设",
+      fallbackWorkspace: "工作区内容待接入。",
+    })
   })
 })

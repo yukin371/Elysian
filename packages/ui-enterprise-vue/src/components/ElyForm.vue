@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import {
-  Button as AButton,
-  DatePicker as ADatePicker,
-  Form as AForm,
-  FormItem as AFormItem,
-  Input as AInput,
-  InputNumber as AInputNumber,
-  Option as AOption,
-  Select as ASelect,
-  Space as ASpace,
-  Switch as ASwitch,
-} from "@arco-design/web-vue"
+import { Button as TButton } from "tdesign-vue-next/es/button"
+import { DatePicker as TDatePicker } from "tdesign-vue-next/es/date-picker"
+import { Form as TForm, FormItem as TFormItem } from "tdesign-vue-next/es/form"
+import { Input as TInput } from "tdesign-vue-next/es/input"
+import { InputNumber as TInputNumber } from "tdesign-vue-next/es/input-number"
+import { Select as TSelect } from "tdesign-vue-next/es/select"
+import { Space as TSpace } from "tdesign-vue-next/es/space"
+import { Switch as TSwitch } from "tdesign-vue-next/es/switch"
+import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 import { reactive, watch } from "vue"
 
 import type {
@@ -53,7 +50,9 @@ const formatReadonlyValue = (field: ElyFormField, value: unknown) => {
   }
 
   if (field.input === "switch") {
-    return value ? "Enabled" : "Disabled"
+    return value
+      ? (props.copy?.switchEnabled ?? "启用")
+      : (props.copy?.switchDisabled ?? "停用")
   }
 
   if (field.input === "select" && field.options) {
@@ -87,18 +86,18 @@ const handleCancel = () => emit("cancel")
 
 <template>
   <div class="ely-form">
-    <AForm
-      :model="form"
+    <TForm
+      :data="form"
       layout="vertical"
       class="ely-form-inner"
-      @submit="handleSubmit"
+      :on-submit="({ validateResult }) => validateResult === true && handleSubmit()"
     >
-      <AFormItem
+      <TFormItem
         v-for="field in fields"
         :key="field.key"
-        :field="field.key"
+        :name="field.key"
         :label="field.label"
-        :required="field.required"
+        :required-mark="field.required"
       >
         <template v-if="readonly">
           <div class="ely-readonly-value">
@@ -107,27 +106,25 @@ const handleCancel = () => emit("cancel")
         </template>
 
         <template v-else-if="field.input === 'text'">
-          <AInput
+          <TInput
             v-model="form[field.key]"
             :placeholder="field.placeholder"
             :disabled="field.disabled || loading"
-            allow-clear
+            clearable
           />
         </template>
 
         <template v-else-if="field.input === 'textarea'">
-          <AInput
+          <TTextarea
             v-model="form[field.key]"
             :placeholder="field.placeholder"
             :disabled="field.disabled || loading"
-            textarea
-            :auto-size="{ minRows: 3, maxRows: 6 }"
-            allow-clear
+            :autosize="{ minRows: 3, maxRows: 6 }"
           />
         </template>
 
         <template v-else-if="field.input === 'number'">
-          <AInputNumber
+          <TInputNumber
             v-model="form[field.key]"
             :disabled="field.disabled || loading"
             style="width: 100%"
@@ -135,53 +132,51 @@ const handleCancel = () => emit("cancel")
         </template>
 
         <template v-else-if="field.input === 'switch'">
-          <ASwitch v-model="form[field.key]" :disabled="field.disabled || loading" />
+          <TSwitch v-model="form[field.key]" :disabled="field.disabled || loading" />
         </template>
 
         <template v-else-if="field.input === 'select'">
-          <ASelect
+          <TSelect
             v-model="form[field.key]"
             :placeholder="field.placeholder ?? `Select ${field.label}`"
             :disabled="field.disabled || loading"
+            :options="field.options"
+            clearable
             style="width: 100%"
-          >
-            <AOption
-              v-for="opt in field.options"
-              :key="opt.value"
-              :value="opt.value"
-            >
-              {{ opt.label }}
-            </AOption>
-          </ASelect>
+          />
         </template>
 
         <template v-else-if="field.input === 'date'">
-          <ADatePicker
+          <TDatePicker
             v-model="form[field.key]"
+            clearable
             :disabled="field.disabled || loading"
             style="width: 100%"
           />
         </template>
 
         <template v-else-if="field.input === 'datetime'">
-          <ADatePicker
+          <TDatePicker
             v-model="form[field.key]"
-            show-time
+            enable-time-picker
+            clearable
             :disabled="field.disabled || loading"
             style="width: 100%"
           />
         </template>
-      </AFormItem>
+      </TFormItem>
 
-      <AFormItem v-if="!readonly">
-        <ASpace>
-          <AButton type="primary" html-type="submit" :loading="loading">
-            Submit
-          </AButton>
-          <AButton @click="handleCancel">Cancel</AButton>
-        </ASpace>
-      </AFormItem>
-    </AForm>
+      <TFormItem v-if="!readonly">
+        <TSpace>
+          <TButton theme="primary" type="submit" :loading="loading">
+            {{ copy?.submitButton ?? "提交" }}
+          </TButton>
+          <TButton @click="handleCancel">
+            {{ copy?.cancelButton ?? "取消" }}
+          </TButton>
+        </TSpace>
+      </TFormItem>
+    </TForm>
   </div>
 </template>
 

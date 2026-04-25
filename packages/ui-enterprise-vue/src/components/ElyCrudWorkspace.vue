@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import {
-  Button as AButton,
-  Card as ACard,
-  Empty as AEmpty,
-  Space as ASpace,
-} from "@arco-design/web-vue"
+import { Button as TButton } from "tdesign-vue-next/es/button"
+import { Card as TCard } from "tdesign-vue-next/es/card"
+import { Empty as TEmpty } from "tdesign-vue-next/es/empty"
+import { Space as TSpace } from "tdesign-vue-next/es/space"
 
 import type { ElyCrudWorkspaceEmits, ElyCrudWorkspaceProps } from "../contracts"
 import ElyQueryBar from "./ElyQueryBar.vue"
@@ -28,42 +26,54 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
       </div>
 
       <div class="ely-crud-toolbar">
-        <ASpace>
+        <TSpace>
           <slot name="toolbar" />
-        </ASpace>
+        </TSpace>
       </div>
     </div>
 
     <ElyQueryBar
       :fields="queryFields"
       :loading="queryLoading"
+      :copy="copy?.queryBarCopy"
       @search="emit('search', $event)"
       @reset="emit('reset')"
     />
 
-    <a-card :bordered="false" class="ely-crud-card">
-      <template #title>
-        <div class="ely-crud-card-head">
-          <div>
-            <p class="ely-crud-card-title">Data Grid</p>
-            <span>{{ itemCountLabel ?? `${props.items.length} rows in scope` }}</span>
-          </div>
-
-          <AButton type="text" class="ely-crud-card-button">
-            Live contract
-          </AButton>
+    <TCard :bordered="false" class="ely-crud-card">
+      <div class="ely-crud-card-head">
+        <div>
+          <p class="ely-crud-card-title">{{ copy?.gridTitle ?? "数据列表" }}</p>
+          <span>
+            {{
+              itemCountLabel ??
+              `${props.items.length} ${copy?.rowsInScopeSuffix ?? "条记录"}`
+            }}
+          </span>
         </div>
-      </template>
+
+        <TButton
+          theme="primary"
+          variant="text"
+          class="ely-crud-card-button"
+        >
+          {{ copy?.liveContractLabel ?? "实时契约" }}
+        </TButton>
+      </div>
 
       <div v-if="props.items.length === 0 && !tableLoading" class="ely-crud-empty">
-        <AEmpty :description="emptyDescription ?? 'No data matches the current filters.'">
+        <TEmpty
+          :title="emptyTitle ?? copy?.emptyTitle ?? '当前工作区为空'"
+          :description="
+            emptyDescription ??
+            copy?.emptyDescription ??
+            '当前筛选条件下没有匹配数据。'
+          "
+        >
           <template #image>
             <div class="ely-empty-orbit">∿</div>
           </template>
-          <div class="ely-empty-copy">
-            <strong>{{ emptyTitle ?? 'Workspace is clear' }}</strong>
-          </div>
-        </AEmpty>
+        </TEmpty>
       </div>
 
       <ElyTable
@@ -73,10 +83,11 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
         :row-key="rowKey"
         :loading="tableLoading"
         :actions="tableActions"
+        :copy="copy?.tableCopy"
         @action="handleAction"
         @row-click="emit('row-click', $event)"
       />
-    </a-card>
+    </TCard>
 
     <slot name="footer" />
   </div>

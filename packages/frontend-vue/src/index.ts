@@ -10,7 +10,14 @@ import {
   filterAccessibleMenus,
   hasPermission,
 } from "@elysian/ui-core"
-import { computed } from "vue"
+import {
+  type InjectionKey,
+  type Ref,
+  computed,
+  inject,
+  provide,
+  ref,
+} from "vue"
 
 const SYSTEM_FORM_FIELD_KEYS = new Set(["id", "createdAt", "updatedAt"])
 
@@ -283,3 +290,75 @@ export const usePermissions = (
       ).delete,
   ),
 })
+
+export type SupportedLocale = "zh-CN" | "en-US"
+
+export type VueLocaleMessages = Record<string, string>
+
+export interface VueLocaleRuntime {
+  locale: Ref<SupportedLocale>
+  fallbackLocale: SupportedLocale
+  messages: Record<SupportedLocale, VueLocaleMessages>
+  setLocale: (nextLocale: SupportedLocale) => void
+  t: (key: string, params?: Record<string, string | number | boolean>) => string
+}
+
+const VUE_LOCALE_RUNTIME_KEY: InjectionKey<VueLocaleRuntime> = Symbol(
+  "elysian-vue-locale-runtime",
+)
+
+const interpolateMessage = (
+  template: string,
+  params?: Record<string, string | number | boolean>,
+) => {
+  if (!params) {
+    return template
+  }
+
+  return Object.entries(params).reduce(
+    (message, [paramKey, value]) =>
+      message.replaceAll(`{${paramKey}}`, String(value)),
+    template,
+  )
+}
+
+export const createVueLocaleRuntime = (options: {
+  defaultLocale: SupportedLocale
+  fallbackLocale?: SupportedLocale
+  messages: Record<SupportedLocale, VueLocaleMessages>
+}): VueLocaleRuntime => {
+  const locale = ref<SupportedLocale>(options.defaultLocale)
+  const fallbackLocale = options.fallbackLocale ?? "en-US"
+
+  return {
+    locale,
+    fallbackLocale,
+    messages: options.messages,
+    setLocale: (nextLocale) => {
+      locale.value = nextLocale
+    },
+    t: (key, params) => {
+      const localized =
+        options.messages[locale.value]?.[key] ??
+        options.messages[fallbackLocale]?.[key] ??
+        key
+
+      return interpolateMessage(localized, params)
+    },
+  }
+}
+
+export const provideVueLocaleRuntime = (runtime: VueLocaleRuntime) => {
+  provide(VUE_LOCALE_RUNTIME_KEY, runtime)
+  return runtime
+}
+
+export const useVueLocaleRuntime = () => {
+  const runtime = inject(VUE_LOCALE_RUNTIME_KEY, null)
+
+  if (!runtime) {
+    throw new Error("Vue locale runtime is not provided")
+  }
+
+  return runtime
+}

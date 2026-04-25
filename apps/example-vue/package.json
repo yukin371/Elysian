@@ -11,6 +11,9 @@
     "@elysian/frontend-vue": "workspace:*",
     "@elysian/ui-core": "workspace:*",
     "@elysian/ui-enterprise-vue": "workspace:*",
+    "@fontsource/ibm-plex-sans": "^5.2.8",
+    "@fontsource/newsreader": "^5.2.10",
+    "tdesign-vue-next": "^1.19.1",
     "vue": "^3.5.18"
   },
   "devDependencies": {

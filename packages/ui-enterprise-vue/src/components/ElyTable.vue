@@ -1,26 +1,31 @@
 <script setup lang="ts">
-import {
-  Button as AButton,
-  Space as ASpace,
-  Table as ATable,
-  TableColumn as ATableColumn,
-  Tag as ATag,
-} from "@arco-design/web-vue"
+import { Button as TButton } from "tdesign-vue-next/es/button"
+import { Space as TSpace } from "tdesign-vue-next/es/space"
+import { Table as TTable } from "tdesign-vue-next/es/table"
+import { Tag as TTag } from "tdesign-vue-next/es/tag"
+import { computed, h } from "vue"
 
 import type { ElyTableAction, ElyTableEmits, ElyTableProps } from "../contracts"
 
 const props = defineProps<ElyTableProps>()
 const emit = defineEmits<ElyTableEmits>()
 
-const TONE_MAP: Record<NonNullable<ElyTableAction["tone"]>, string> = {
-  primary: "arcoblue",
-  secondary: "gray",
-  danger: "red",
+const TONE_MAP: Record<
+  NonNullable<ElyTableAction["tone"]>,
+  "default" | "primary" | "danger"
+> = {
+  primary: "primary",
+  secondary: "default",
+  danger: "danger",
 }
 
 const formatCell = (value: unknown): string => {
   if (value === null || value === undefined) return "—"
-  if (typeof value === "boolean") return value ? "active" : "inactive"
+  if (typeof value === "boolean") {
+    return value
+      ? (props.copy?.statusActive ?? "启用")
+      : (props.copy?.statusInactive ?? "停用")
+  }
   if (value instanceof Date) return value.toLocaleString()
   return String(value)
 }
@@ -28,60 +33,84 @@ const formatCell = (value: unknown): string => {
 const handleRowClick = (row: Record<string, unknown>) => {
   emit("row-click", row)
 }
+
+const resolvedColumns = computed(() => {
+  const baseColumns = props.columns.map((col) => ({
+    colKey: col.key,
+    title: col.label,
+    width: col.width,
+    cell: (_h: typeof h, { row }: { row: Record<string, unknown> }) => {
+      if (col.key === "status") {
+        return h(
+          TTag,
+          {
+            theme: row.status === "active" ? "success" : "default",
+            variant: "light",
+          },
+          () =>
+            row.status === "active"
+              ? (props.copy?.statusActive ?? "启用")
+              : row.status === "inactive"
+                ? (props.copy?.statusInactive ?? "停用")
+                : (props.copy?.statusUnknown ?? "未知"),
+        )
+      }
+
+      return formatCell(row[col.key])
+    },
+  }))
+
+  if (!props.actions?.length) {
+    return baseColumns
+  }
+
+  return [
+    ...baseColumns,
+    {
+      colKey: "actions",
+      title: props.copy?.actionsTitle ?? "操作",
+      width: 160,
+      fixed: "right" as const,
+      cell: (_h: typeof h, { row }: { row: Record<string, unknown> }) =>
+        h(TSpace, null, () =>
+          props.actions
+            ?.filter((action) => action.enabled !== false)
+            .map((action) =>
+              h(
+                TButton,
+                {
+                  key: action.key,
+                  size: "small",
+                  theme: TONE_MAP[action.tone ?? "secondary"],
+                  variant: action.tone === "danger" ? "outline" : "text",
+                  onClick: (event: MouseEvent) => {
+                    event.stopPropagation()
+                    emit("action", action.key, row)
+                  },
+                },
+                () => action.label,
+              ),
+            ),
+        ),
+    },
+  ]
+})
 </script>
 
 <template>
   <div class="ely-table">
-    <a-table
-      :columns="columns"
+    <TTable
+      :columns="resolvedColumns"
       :data="props.items"
       :loading="loading"
       :row-key="rowKey ?? 'id'"
       :pagination="false"
       :scroll="{ y: 420 }"
+      table-layout="fixed"
+      hover
       class="ely-table-inner"
-      @row-click="handleRowClick"
-    >
-      <template #columns>
-        <a-table-column
-          v-for="col in columns"
-          :key="col.key"
-          :data-index="col.key"
-          :title="col.label"
-          :width="col.width"
-        >
-          <template #cell="{ record }">
-            <ATag v-if="col.key === 'status'" :color="record.status === 'active' ? 'green' : 'gray'">
-              {{ record.status }}
-            </ATag>
-            <span v-else>{{ formatCell(record[col.key]) }}</span>
-          </template>
-        </a-table-column>
-
-        <a-table-column
-          v-if="actions && actions.length > 0"
-          :width="120"
-          :title="'Actions'"
-          :fixed="'right'"
-        >
-          <template #cell="{ record }">
-            <ASpace>
-              <template v-for="action in actions" :key="action.key">
-                <AButton
-                  v-if="action.enabled !== false"
-                  size="small"
-                  :type="action.tone === 'danger' ? 'outline' : 'text'"
-                  :status="action.tone === 'danger' ? 'danger' : undefined"
-                  @click.stop="emit('action', action.key, record)"
-                >
-                  {{ action.label }}
-                </AButton>
-              </template>
-            </ASpace>
-          </template>
-        </a-table-column>
-      </template>
-    </a-table>
+      :on-row-click="({ row }) => handleRowClick(row)"
+    />
   </div>
 </template>
 
@@ -95,7 +124,7 @@ const handleRowClick = (row: Record<string, unknown>) => {
   border-radius: 16px;
 }
 
-.ely-table-inner :deep(.arco-table-tr) {
+.ely-table-inner :deep(tbody tr) {
   cursor: pointer;
 }
 </style>

@@ -3,15 +3,14 @@ import {
   applyCrudDictionaryOptions,
   buildCrudDictionaryOptionCatalog,
   buildVueNavigation,
+  createVueLocaleRuntime,
   customerWorkspacePageDefinition,
   getCrudPageDictionaryTypeCodes,
+  provideVueLocaleRuntime,
   usePermissions,
-  vueCustomPresetManifest,
 } from "@elysian/frontend-vue"
 import type { UiNavigationNode } from "@elysian/ui-core"
 import {
-  ElyCrudWorkspace,
-  ElyForm,
   type ElyFormField,
   type ElyFormValues,
   type ElyQueryValues,
@@ -20,11 +19,14 @@ import {
   type ElyShellTab,
   type ElyShellUserSummary,
   useElyCrudPage,
-  vueEnterprisePresetFoundation,
   vueEnterprisePresetManifest,
 } from "@elysian/ui-enterprise-vue"
-import { computed, onMounted, ref, watch } from "vue"
+import { ConfigProvider as TConfigProvider } from "tdesign-vue-next/es/config-provider"
+import enUs from "tdesign-vue-next/es/locale/en_US"
+import zhCn from "tdesign-vue-next/es/locale/zh_CN"
+import { computed, defineAsyncComponent, onMounted, ref, watch } from "vue"
 
+import { exampleLocaleMessages } from "./i18n"
 import {
   type AuthIdentityResponse,
   type CustomerRecord,
@@ -43,15 +45,170 @@ import {
   updateCustomer,
 } from "./lib/platform-api"
 
+const ElyCrudWorkspace = defineAsyncComponent(
+  () =>
+    import(
+      "../../../packages/ui-enterprise-vue/src/components/ElyCrudWorkspace.vue"
+    ),
+)
+
+const ElyForm = defineAsyncComponent(
+  () =>
+    import("../../../packages/ui-enterprise-vue/src/components/ElyForm.vue"),
+)
+
 const customerPageDefinition = customerWorkspacePageDefinition
 
-const enterpriseFallbackNavigation: UiNavigationNode[] = [
+const localeRuntime = provideVueLocaleRuntime(
+  createVueLocaleRuntime({
+    defaultLocale: "zh-CN",
+    fallbackLocale: "en-US",
+    messages: exampleLocaleMessages,
+  }),
+)
+
+const { locale, t } = localeRuntime
+
+const tdesignGlobalConfig = computed(() =>
+  locale.value === "zh-CN" ? zhCn : enUs,
+)
+
+const localeOptions = [
+  { key: "zh-CN", labelKey: "app.locale.zhCN" },
+  { key: "en-US", labelKey: "app.locale.enUS" },
+] as const
+
+const flattenNavigation = (items: UiNavigationNode[]): UiNavigationNode[] =>
+  items.flatMap((item) => [item, ...flattenNavigation(item.children)])
+
+const createDefaultCustomerDraft = () => ({
+  name: "",
+  status: "active" as CustomerRecord["status"],
+})
+
+const normalizeCustomerName = (value: unknown) => String(value ?? "").trim()
+const normalizeCustomerStatus = (value: unknown): CustomerRecord["status"] =>
+  value === "inactive" ? "inactive" : "active"
+
+const localizeCustomerStatus = (status: string) => {
+  if (status === "active") {
+    return t("copy.query.statusActive")
+  }
+
+  if (status === "inactive") {
+    return t("copy.query.statusInactive")
+  }
+
+  return status
+}
+
+const localizeFieldLabel = (fieldKey: string) => {
+  switch (fieldKey) {
+    case "id":
+      return t("app.customer.field.id")
+    case "name":
+      return t("app.customer.field.name")
+    case "status":
+      return t("app.customer.field.status")
+    case "createdAt":
+      return t("app.customer.field.createdAt")
+    case "updatedAt":
+      return t("app.customer.field.updatedAt")
+    default:
+      return fieldKey
+  }
+}
+
+const localizeActionLabel = (actionKey: string, fallbackLabel: string) => {
+  switch (actionKey) {
+    case "create":
+      return t("app.customer.action.create")
+    case "update":
+      return t("app.customer.action.update")
+    case "delete":
+      return t("app.customer.action.delete")
+    default:
+      return fallbackLabel
+  }
+}
+
+const localizeNavigationName = (code: string, fallbackName: string) => {
+  switch (code) {
+    case "system-root":
+      return t("app.fallback.system")
+    case "system-users":
+      return t("app.fallback.users")
+    case "system-roles":
+      return t("app.fallback.roles")
+    case "system-menus":
+      return t("app.fallback.menus")
+    case "system-departments":
+      return t("app.fallback.departments")
+    case "system-dictionaries":
+      return t("app.fallback.dictionaries")
+    case "system-settings":
+      return t("app.fallback.settings")
+    case "system-operation-logs":
+      return t("app.fallback.operationLogs")
+    case "system-files":
+      return t("app.fallback.files")
+    case "system-notifications":
+      return t("app.fallback.notifications")
+    case "customer-list":
+      return t("app.fallback.customers")
+    default:
+      return fallbackName
+  }
+}
+
+const localizeNavigationType = (type: UiNavigationNode["type"]) =>
+  type === "directory" ? t("app.map.type.directory") : t("app.map.type.menu")
+
+const localizePlatformStatus = (status: string | null | undefined) => {
+  switch (status) {
+    case "prototype":
+      return t("app.platform.status.prototype")
+    case "accepted":
+      return t("app.platform.status.accepted")
+    case "planned":
+      return t("app.platform.status.planned")
+    case "bootstrap":
+    case "Bootstrap":
+      return t("app.platform.status.bootstrap")
+    default:
+      return status ?? ""
+  }
+}
+
+const localizeCapability = (capability: string) => {
+  switch (capability) {
+    case "schema-first code generation":
+      return t("app.platform.capability.schemaFirstCodegen")
+    case "AI-assisted module specification":
+      return t("app.platform.capability.aiModuleSpec")
+    case "pluggable frontend adapters":
+      return t("app.platform.capability.pluggableFrontendAdapters")
+    default:
+      return capability
+  }
+}
+
+const localizeNavigationItems = (
+  items: UiNavigationNode[],
+): UiNavigationNode[] =>
+  items.map((item) => ({
+    ...item,
+    name: localizeNavigationName(item.code, item.name),
+    children: localizeNavigationItems(item.children),
+  }))
+
+const buildFallbackNavigation = (): UiNavigationNode[] => [
   {
     id: "enterprise-system",
     parentId: null,
     type: "directory",
     code: "system-root",
-    name: "System",
+    name: t("app.fallback.system"),
     path: null,
     component: null,
     icon: "settings",
@@ -66,7 +223,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-users",
-        name: "Users",
+        name: t("app.fallback.users"),
         path: "/system/users",
         component: "system/users/index",
         icon: "users",
@@ -82,7 +239,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-roles",
-        name: "Roles",
+        name: t("app.fallback.roles"),
         path: "/system/roles",
         component: "system/roles/index",
         icon: "shield",
@@ -98,7 +255,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-menus",
-        name: "Menus",
+        name: t("app.fallback.menus"),
         path: "/system/menus",
         component: "system/menus/index",
         icon: "menu",
@@ -114,7 +271,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-departments",
-        name: "Departments",
+        name: t("app.fallback.departments"),
         path: "/system/departments",
         component: "system/departments/index",
         icon: "apartment",
@@ -130,7 +287,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-dictionaries",
-        name: "Dictionaries",
+        name: t("app.fallback.dictionaries"),
         path: "/system/dictionaries",
         component: "system/dictionaries/index",
         icon: "book",
@@ -146,7 +303,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-settings",
-        name: "Settings",
+        name: t("app.fallback.settings"),
         path: "/system/settings",
         component: "system/settings/index",
         icon: "tool",
@@ -162,7 +319,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-operation-logs",
-        name: "Operation Logs",
+        name: t("app.fallback.operationLogs"),
         path: "/system/operation-logs",
         component: "system/operation-logs/index",
         icon: "file",
@@ -178,7 +335,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-files",
-        name: "Files",
+        name: t("app.fallback.files"),
         path: "/system/files",
         component: "system/files/index",
         icon: "attachment",
@@ -194,7 +351,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
         parentId: "enterprise-system",
         type: "menu",
         code: "system-notifications",
-        name: "Notifications",
+        name: t("app.fallback.notifications"),
         path: "/system/notifications",
         component: "system/notifications/index",
         icon: "notification",
@@ -212,7 +369,7 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
     parentId: null,
     type: "menu",
     code: "customer-list",
-    name: "Customers",
+    name: t("app.fallback.customers"),
     path: "/customers",
     component: "customer/index",
     icon: "storage",
@@ -224,18 +381,6 @@ const enterpriseFallbackNavigation: UiNavigationNode[] = [
     children: [],
   },
 ]
-
-const flattenNavigation = (items: UiNavigationNode[]): UiNavigationNode[] =>
-  items.flatMap((item) => [item, ...flattenNavigation(item.children)])
-
-const createDefaultCustomerDraft = () => ({
-  name: "",
-  status: "active" as CustomerRecord["status"],
-})
-
-const normalizeCustomerName = (value: unknown) => String(value ?? "").trim()
-const normalizeCustomerStatus = (value: unknown): CustomerRecord["status"] =>
-  value === "inactive" ? "inactive" : "active"
 
 const platform = ref<PlatformResponse | null>(null)
 const authIdentity = ref<AuthIdentityResponse | null>(null)
@@ -287,21 +432,25 @@ const hiddenPermissionCount = computed(() =>
 
 const navigationTree = computed(() =>
   authIdentity.value
-    ? buildVueNavigation(
-        authIdentity.value.menus,
-        authIdentity.value.permissionCodes,
+    ? localizeNavigationItems(
+        buildVueNavigation(
+          authIdentity.value.menus,
+          authIdentity.value.permissionCodes,
+        ),
       )
     : [],
 )
 
+const fallbackNavigation = computed(() => buildFallbackNavigation())
+
 const navigationItemCount = computed(
-  () => flattenNavigation(navigationTree.value).length,
+  () => flattenNavigation(enterpriseNavigation.value).length,
 )
 
 const enterpriseNavigation = computed(() =>
   navigationTree.value.length > 0
     ? navigationTree.value
-    : enterpriseFallbackNavigation,
+    : fallbackNavigation.value,
 )
 
 const enterpriseSelectedMenuKey = computed(
@@ -405,9 +554,21 @@ const selectedCustomer = computed(
     ) ?? null,
 )
 
+const localizeSelectOptions = (
+  options?: Array<{ label: string; value: string }>,
+) =>
+  options?.map((option) => ({
+    ...option,
+    label:
+      option.value === "active" || option.value === "inactive"
+        ? localizeCustomerStatus(option.value)
+        : option.label,
+  }))
+
 const enterpriseTableColumns = computed(() =>
   enterpriseCustomerPage.tableColumns.value.map((column) => ({
     ...column,
+    label: localizeFieldLabel(column.key),
     width:
       column.key === "id"
         ? "240"
@@ -422,27 +583,44 @@ const enterpriseTableColumns = computed(() =>
 const enterpriseQueryFields = computed(() =>
   enterpriseCustomerPage.queryFields.value.map((field) => ({
     ...field,
+    label: localizeFieldLabel(field.key),
+    options: localizeSelectOptions(field.options),
     placeholder:
-      field.key === "name" ? "Search by name or id" : field.placeholder,
+      field.key === "name"
+        ? t("app.customer.query.namePlaceholder")
+        : field.key === "status"
+          ? t("copy.query.statusPlaceholder")
+          : field.placeholder,
   })),
 )
 
 const enterpriseTableActions = computed(() =>
-  enterpriseCustomerPage.tableActions.value.filter(
-    (action) => action.key !== "create",
-  ),
+  enterpriseCustomerPage.tableActions.value
+    .filter((action) => action.key !== "create")
+    .map((action) => ({
+      ...action,
+      label: localizeActionLabel(action.key, action.label),
+    })),
 )
 
 const enterpriseTableItems = computed(() =>
   filteredCustomerItems.value.map((customer) => ({
     ...customer,
-    createdAt: new Date(customer.createdAt).toLocaleString(),
-    updatedAt: new Date(customer.updatedAt).toLocaleString(),
+    createdAt: new Date(customer.createdAt).toLocaleString(locale.value),
+    updatedAt: new Date(customer.updatedAt).toLocaleString(locale.value),
   })),
 )
 
 const enterpriseFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseCustomerPage.formFields.value
+  const baseFields = enterpriseCustomerPage.formFields.value.map((field) => ({
+    ...field,
+    label: localizeFieldLabel(field.key),
+    options: localizeSelectOptions(field.options),
+    placeholder:
+      field.key === "status"
+        ? t("copy.query.statusPlaceholder")
+        : field.placeholder,
+  }))
 
   if (enterpriseFormMode.value !== "detail") {
     return baseFields
@@ -452,13 +630,13 @@ const enterpriseFormFields = computed<ElyFormField[]>(() => {
     ...baseFields,
     {
       key: "createdAt",
-      label: "Created At",
+      label: t("app.customer.field.createdAt"),
       input: "datetime",
       disabled: true,
     },
     {
       key: "updatedAt",
-      label: "Updated At",
+      label: t("app.customer.field.updatedAt"),
       input: "datetime",
       disabled: true,
     },
@@ -484,90 +662,128 @@ const enterpriseFormValues = computed<ElyFormValues>(() => {
 
 const enterprisePanelTitle = computed(() => {
   if (deleteConfirmId.value && selectedCustomer.value) {
-    return `Delete ${selectedCustomer.value.name}`
+    return t("app.panelTitle.delete", { name: selectedCustomer.value.name })
   }
 
   if (enterpriseFormMode.value === "edit") {
-    return "Edit customer"
+    return t("app.panelTitle.edit")
   }
 
   if (enterpriseFormMode.value === "detail" && selectedCustomer.value) {
     return selectedCustomer.value.name
   }
 
-  return "Create customer"
+  return t("app.panelTitle.create")
 })
 
 const enterprisePanelDescription = computed(() => {
   if (deleteConfirmId.value && selectedCustomer.value) {
-    return "Deletion still goes through the canonical customer API. The preset only owns the view state."
+    return t("app.panelDesc.delete")
   }
 
   if (enterpriseFormMode.value === "edit") {
-    return "The edit form reuses the same schema-derived contract as the list page."
+    return t("app.panelDesc.edit")
   }
 
   if (enterpriseFormMode.value === "detail" && selectedCustomer.value) {
-    return "Readonly detail view proves the standard detail-page template without adding a second owner."
+    return t("app.panelDesc.detail")
   }
 
-  return "Create mode uses the same preset form wrapper that future generator output can target."
+  return t("app.panelDesc.create")
+})
+
+const authStatusState = computed(() => {
+  if (!authModuleReady.value) return "offline"
+  if (authLoading.value) return "checking"
+  return isAuthenticated.value ? "authenticated" : "signin-required"
+})
+
+const authStatusLabel = computed(() => {
+  if (authStatusState.value === "offline") {
+    return t("app.stats.authOffline")
+  }
+
+  if (authStatusState.value === "checking") {
+    return t("app.stats.authChecking")
+  }
+
+  if (authStatusState.value === "authenticated") {
+    return t("app.stats.authSessionLive")
+  }
+
+  return t("app.stats.authSigninRequired")
+})
+
+const authStatusTone = computed(() => {
+  if (authStatusState.value === "authenticated") {
+    return "text-emerald-300"
+  }
+
+  if (authStatusState.value === "offline") {
+    return "text-amber-300"
+  }
+
+  return "text-cyan-300"
 })
 
 const enterpriseShellStats = computed<ElyShellStat[]>(() => [
   {
     key: "runtime",
-    label: "Runtime",
+    label: t("app.badge.runtime"),
     value: platform.value?.manifest.runtime ?? "bun-first",
-    hint: "Shared platform runtime",
+    hint: t("app.stats.runtimeHint"),
   },
   {
     key: "auth",
-    label: "Auth",
-    value: authModuleReady.value
-      ? isAuthenticated.value
-        ? "session live"
-        : "signin required"
-      : "offline",
-    hint: "RBAC gate source",
+    label: t("app.badge.auth"),
+    value: authStatusLabel.value,
+    hint: t("app.stats.authHint"),
   },
   {
     key: "navigation",
-    label: "Navigation",
-    value: `${navigationItemCount.value.toString().padStart(2, "0")} nodes`,
-    hint: "Server-driven menu tree",
+    label: t("app.stats.navigation"),
+    value: t("app.stats.navigationCount", {
+      count: navigationItemCount.value,
+    }),
+    hint: t("app.stats.navigationHint"),
   },
   {
     key: "rows",
-    label: "Rows",
+    label: t("app.badge.rows"),
     value: `${filteredCustomerItems.value.length}`,
-    hint: "Current customer rows in scope",
+    hint: t("app.stats.rowsHint"),
   },
 ])
 
 const enterpriseShellTabs = computed<ElyShellTab[]>(() => [
   {
     key: "workspace",
-    label: "Workspace",
-    hint: `${filteredCustomerItems.value.length} rows visible`,
+    label: t("app.tabs.workspace"),
+    hint: t("app.tabs.workspaceHint", {
+      count: filteredCustomerItems.value.length,
+    }),
   },
   {
     key: "form",
     label:
       enterpriseFormMode.value === "detail"
-        ? "Detail"
+        ? t("app.tabs.detail")
         : enterpriseFormMode.value === "edit"
-          ? "Edit"
-          : "Create",
+          ? t("app.tabs.edit")
+          : t("app.tabs.create"),
     hint:
       enterpriseFormMode.value === "detail"
-        ? (selectedCustomer.value?.status ?? "selection")
-        : "schema-driven form",
+        ? localizeCustomerStatus(
+            selectedCustomer.value?.status ?? t("app.tabs.formHintSelection"),
+          )
+        : t("app.tabs.formHintSchema"),
   },
   {
     key: "runtime",
-    label: "Runtime",
-    hint: authModuleReady.value ? "session-aware" : "preview mode",
+    label: t("app.tabs.runtime"),
+    hint: authModuleReady.value
+      ? t("app.tabs.runtimeSessionAware")
+      : t("app.tabs.runtimePreview"),
   },
 ])
 
@@ -586,21 +802,51 @@ const enterpriseShellUser = computed<ElyShellUserSummary | null>(() =>
         roles: authIdentity.value.roles,
       }
     : {
-        displayName: "Preview Operator",
-        username: "preview@elysian",
+        displayName: t("app.previewUser.name"),
+        username: t("app.previewUser.username"),
         roles: ["preset", "demo"],
       },
 )
 
-const customerCountLabel = computed(
-  () => `${filteredCustomerItems.value.length} rows in scope`,
-)
+const enterpriseCrudCopy = computed(() => ({
+  gridTitle: t("copy.crud.gridTitle"),
+  liveContractLabel: t("copy.crud.liveContract"),
+  rowsInScopeSuffix: t("copy.crud.rowsSuffix"),
+  emptyTitle: t("copy.crud.emptyTitle"),
+  emptyDescription: t("copy.crud.emptyDescription"),
+  queryBarCopy: {
+    searchPlaceholderPrefix: t("copy.query.searchPrefix"),
+    statusPlaceholder: t("copy.query.statusPlaceholder"),
+    statusActive: t("copy.query.statusActive"),
+    statusInactive: t("copy.query.statusInactive"),
+    searchButton: t("copy.query.searchButton"),
+    resetButton: t("copy.query.resetButton"),
+  },
+  tableCopy: {
+    actionsTitle: t("copy.table.actions"),
+    statusActive: t("copy.query.statusActive"),
+    statusInactive: t("copy.query.statusInactive"),
+    statusUnknown: t("copy.table.statusUnknown"),
+  },
+}))
 
-const authStatusLabel = computed(() => {
-  if (!authModuleReady.value) return "offline"
-  if (authLoading.value) return "checking"
-  return isAuthenticated.value ? "authenticated" : "signin required"
-})
+const enterpriseFormCopy = computed(() => ({
+  submitButton: t("copy.form.submit"),
+  cancelButton: t("copy.form.cancel"),
+  switchEnabled: t("copy.form.enabled"),
+  switchDisabled: t("copy.form.disabled"),
+}))
+
+const enterpriseShellCopy = computed(() => ({
+  navigationLabel: t("copy.shell.navigation"),
+  environmentLabel: t("copy.shell.environment"),
+  presetEyebrow: t("copy.shell.presetEyebrow"),
+  fallbackWorkspace: t("copy.crud.emptyDescription"),
+}))
+
+const customerCountLabel = computed(
+  () => `${filteredCustomerItems.value.length} ${t("copy.crud.rowsSuffix")}`,
+)
 
 const currentQuerySummary = computed(() => {
   const fragments: string[] = []
@@ -609,18 +855,44 @@ const currentQuerySummary = computed(() => {
     typeof enterpriseQueryValues.value.name === "string" &&
     enterpriseQueryValues.value.name.trim()
   ) {
-    fragments.push(`name: ${enterpriseQueryValues.value.name.trim()}`)
+    fragments.push(
+      `${t("app.filter.name")}: ${enterpriseQueryValues.value.name.trim()}`,
+    )
   }
 
   if (
     typeof enterpriseQueryValues.value.status === "string" &&
     enterpriseQueryValues.value.status
   ) {
-    fragments.push(`status: ${enterpriseQueryValues.value.status}`)
+    fragments.push(
+      `${t("app.filter.status")}: ${localizeCustomerStatus(
+        enterpriseQueryValues.value.status,
+      )}`,
+    )
   }
 
-  return fragments.length > 0 ? fragments.join(" / ") : "No active filters"
+  return fragments.length > 0 ? fragments.join(" / ") : t("app.filter.none")
 })
+
+const schemaPreviewColumns = computed(() =>
+  customerPageDefinition.columns.map((column) => ({
+    key: column.key,
+    label: localizeFieldLabel(column.key),
+  })),
+)
+
+const schemaPreviewActions = computed(() =>
+  customerPageDefinition.actions.map((action) => ({
+    key: action.key,
+    label: localizeActionLabel(action.key, action.label),
+  })),
+)
+
+const localizedPlatformCapabilities = computed(() =>
+  (platform.value?.capabilities ?? []).map((capability) =>
+    localizeCapability(capability),
+  ),
+)
 
 watch(
   filteredCustomerItems,
@@ -738,7 +1010,7 @@ const restoreSession = async () => {
 
     if (!isRecoverableAuthError(error)) {
       authErrorMessage.value =
-        error instanceof Error ? error.message : "Failed to restore session"
+        error instanceof Error ? error.message : t("app.error.restoreSession")
     }
   } finally {
     authLoading.value = false
@@ -774,7 +1046,7 @@ const reloadCustomers = async () => {
     }
 
     customerErrorMessage.value =
-      error instanceof Error ? error.message : "Failed to load customers"
+      error instanceof Error ? error.message : t("app.error.loadCustomers")
   } finally {
     customerLoading.value = false
   }
@@ -795,7 +1067,7 @@ const submitLogin = async () => {
   } catch (error) {
     authIdentity.value = null
     authErrorMessage.value =
-      error instanceof Error ? error.message : "Failed to sign in"
+      error instanceof Error ? error.message : t("app.error.signIn")
   } finally {
     authLoading.value = false
   }
@@ -813,7 +1085,7 @@ const submitLogout = async () => {
     await logout()
   } catch (error) {
     authErrorMessage.value =
-      error instanceof Error ? error.message : "Failed to sign out"
+      error instanceof Error ? error.message : t("app.error.signOut")
   } finally {
     authIdentity.value = null
     clearAccessToken()
@@ -837,7 +1109,7 @@ const submitCustomerForm = async (values: ElyFormValues) => {
   }
 
   if (payload.name.length === 0) {
-    customerErrorMessage.value = "Customer name is required"
+    customerErrorMessage.value = t("app.error.customerNameRequired")
     return
   }
 
@@ -852,7 +1124,7 @@ const submitCustomerForm = async (values: ElyFormValues) => {
     await reloadCustomers()
   } catch (error) {
     customerErrorMessage.value =
-      error instanceof Error ? error.message : "Failed to create customer"
+      error instanceof Error ? error.message : t("app.error.createCustomer")
   } finally {
     customerLoading.value = false
   }
@@ -891,7 +1163,7 @@ const submitEditForm = async (values: ElyFormValues) => {
   }
 
   if (payload.name.length === 0) {
-    customerErrorMessage.value = "Customer name is required"
+    customerErrorMessage.value = t("app.error.customerNameRequired")
     return
   }
 
@@ -906,7 +1178,7 @@ const submitEditForm = async (values: ElyFormValues) => {
     await reloadCustomers()
   } catch (error) {
     customerErrorMessage.value =
-      error instanceof Error ? error.message : "Failed to update customer"
+      error instanceof Error ? error.message : t("app.error.updateCustomer")
   } finally {
     customerLoading.value = false
   }
@@ -948,7 +1220,7 @@ const confirmDelete = async () => {
     await reloadCustomers()
   } catch (error) {
     customerErrorMessage.value =
-      error instanceof Error ? error.message : "Failed to delete customer"
+      error instanceof Error ? error.message : t("app.error.deleteCustomer")
   } finally {
     customerLoading.value = false
   }
@@ -1034,7 +1306,7 @@ onMounted(async () => {
     await reloadCustomers()
   } catch (error) {
     errorMessage.value =
-      error instanceof Error ? error.message : "Failed to load platform view"
+      error instanceof Error ? error.message : t("app.error.loadPlatform")
   } finally {
     loading.value = false
   }
@@ -1042,589 +1314,616 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="app-shell min-h-screen px-5 py-6 text-stone-100 sm:px-8 lg:px-10">
-    <div class="mx-auto flex max-w-7xl flex-col gap-6">
-      <section class="hero-panel overflow-hidden rounded-[2rem] px-6 py-8 lg:px-10">
-        <div class="hero-grid grid gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <div>
-            <p class="eyebrow text-cyan-300">Phase 3 Enterprise Finish</p>
-            <h1 class="hero-title mt-4 max-w-3xl text-4xl leading-tight lg:text-6xl">
-              One CRUD contract, now proven across custom and enterprise Vue surfaces.
-            </h1>
-            <p class="hero-copy mt-5 max-w-2xl text-base leading-8 text-stone-300">
-              The example app keeps the original custom preset reference, but the
-              working customer workspace below now runs through the official
-              `ui-enterprise-vue` shell, query bar, table, and form wrappers.
-            </p>
+  <TConfigProvider :global-config="tdesignGlobalConfig">
+    <main class="app-shell min-h-screen px-5 py-6 text-stone-100 sm:px-8 lg:px-10">
+      <div class="mx-auto flex max-w-7xl flex-col gap-6">
+        <section class="hero-panel overflow-hidden rounded-[2rem] px-6 py-8 lg:px-10">
+          <div class="hero-grid grid gap-8 lg:grid-cols-[1.2fr_1fr]">
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <p class="eyebrow text-cyan-300">{{ t("app.hero.eyebrow") }}</p>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs uppercase tracking-[0.24em] text-stone-400">
+                    {{ t("app.locale.label") }}
+                  </span>
+                  <button
+                    v-for="option in localeOptions"
+                    :key="option.key"
+                    type="button"
+                    class="token-pill token-pill-toggle"
+                    :class="locale === option.key ? 'token-pill-active' : ''"
+                    @click="localeRuntime.setLocale(option.key)"
+                  >
+                    {{ t(option.labelKey) }}
+                  </button>
+                </div>
+              </div>
+              <h1 class="hero-title mt-4 max-w-3xl text-4xl leading-tight lg:text-6xl">
+                {{ t("app.hero.title") }}
+              </h1>
+              <p class="hero-copy mt-5 max-w-2xl text-base leading-8 text-stone-300">
+                {{ t("app.hero.copy") }}
+              </p>
 
-            <div class="mt-6 flex flex-wrap gap-3">
-              <span class="token-pill">{{ vueCustomPresetManifest.displayName }}</span>
-              <span class="token-pill token-pill-active">
-                {{ vueEnterprisePresetManifest.displayName }}
-              </span>
-              <span class="token-pill">
-                {{ vueEnterprisePresetFoundation.designSystem }}
-              </span>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <span class="token-pill">{{ t("app.badge.custom") }}</span>
+                <span class="token-pill token-pill-active">
+                  {{ t("app.badge.enterprise") }}
+                </span>
+                <span class="token-pill">{{ t("app.shell.presetLabel") }}</span>
+              </div>
+            </div>
+
+            <div class="hero-stats grid gap-4 sm:grid-cols-2">
+              <article class="stat-card rounded-[1.75rem] p-5">
+                <p class="stat-label">{{ t("app.badge.runtime") }}</p>
+                <p class="stat-value">
+                  {{ platform?.manifest.runtime ?? t("app.loading.short") }}
+                </p>
+              </article>
+              <article class="stat-card rounded-[1.75rem] p-5">
+                <p class="stat-label">{{ t("app.badge.enterprise") }}</p>
+                <p class="stat-value">
+                  {{ localizePlatformStatus(vueEnterprisePresetManifest.status) }}
+                </p>
+              </article>
+              <article class="stat-card rounded-[1.75rem] p-5">
+                <p class="stat-label">{{ t("app.badge.auth") }}</p>
+                <p class="stat-value" :class="authStatusTone">
+                  {{ authStatusLabel }}
+                </p>
+              </article>
+              <article class="stat-card rounded-[1.75rem] p-5">
+                <p class="stat-label">{{ t("app.badge.rows") }}</p>
+                <p class="stat-value">{{ filteredCustomerItems.length }}</p>
+              </article>
             </div>
           </div>
+        </section>
 
-          <div class="hero-stats grid gap-4 sm:grid-cols-2">
-            <article class="stat-card rounded-[1.75rem] p-5">
-              <p class="stat-label">Runtime</p>
-              <p class="stat-value">
-                {{ platform?.manifest.runtime ?? "loading..." }}
-              </p>
-            </article>
-            <article class="stat-card rounded-[1.75rem] p-5">
-              <p class="stat-label">Enterprise Preset</p>
-              <p class="stat-value">{{ vueEnterprisePresetManifest.status }}</p>
-            </article>
-            <article class="stat-card rounded-[1.75rem] p-5">
-              <p class="stat-label">Auth</p>
-              <p
-                class="stat-value"
-                :class="
-                  authStatusLabel === 'authenticated'
-                    ? 'text-emerald-300'
-                    : authStatusLabel === 'offline'
-                      ? 'text-amber-300'
-                      : 'text-cyan-300'
-                "
-              >
-                {{ authStatusLabel }}
-              </p>
-            </article>
-            <article class="stat-card rounded-[1.75rem] p-5">
-              <p class="stat-label">Visible Rows</p>
-              <p class="stat-value">{{ filteredCustomerItems.length }}</p>
-            </article>
-          </div>
-        </div>
-      </section>
+        <p v-if="loading" class="text-sm uppercase tracking-[0.28em] text-stone-400">
+          {{ t("app.loading.workspace") }}
+        </p>
+        <p
+          v-else-if="errorMessage"
+          class="rounded-3xl border border-rose-400/20 bg-rose-500/10 p-5 text-rose-200"
+        >
+          {{ errorMessage }}
+        </p>
 
-      <p v-if="loading" class="text-sm uppercase tracking-[0.28em] text-stone-400">
-        Loading enterprise workspace...
-      </p>
-      <p
-        v-else-if="errorMessage"
-        class="rounded-3xl border border-rose-400/20 bg-rose-500/10 p-5 text-rose-200"
-      >
-        {{ errorMessage }}
-      </p>
-
-      <template v-else>
-        <section class="grid gap-6 xl:grid-cols-[0.82fr_1.48fr]">
-          <aside class="flex flex-col gap-6">
-            <section class="content-panel rounded-[2rem] p-6 lg:p-7">
-              <div class="flex items-end justify-between gap-4">
-                <div>
-                  <p class="eyebrow text-emerald-300">Workspace Map</p>
-                  <h2 class="mt-3 text-2xl text-white">Navigation shell</h2>
-                </div>
-                <div class="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.3em] text-stone-300">
-                  {{ navigationItemCount.toString().padStart(2, "0") }}
-                </div>
-              </div>
-
-              <div
-                v-if="!isAuthenticated"
-                class="mt-6 rounded-[1.5rem] border border-white/8 bg-black/20 p-4 text-sm leading-7 text-stone-300"
-              >
-                Sign in to receive the RBAC-driven menu tree. Until then, the
-                enterprise shell falls back to a stable preview navigation.
-              </div>
-
-              <div v-else class="mt-6 space-y-3">
-                <article
-                  v-for="item in navigationTree"
-                  :key="item.id"
-                  class="nav-card rounded-[1.5rem] p-4"
-                >
-                  <div
-                    class="nav-item"
-                    :class="item.path === '/customers' ? 'nav-item-active' : ''"
-                  >
-                    <div>
-                      <p class="text-sm font-semibold text-white">{{ item.name }}</p>
-                      <p class="mt-1 text-xs uppercase tracking-[0.24em] text-stone-400">
-                        {{ item.code }}
-                      </p>
-                    </div>
-                    <span
-                      class="rounded-full border border-white/10 px-2 py-1 text-[0.62rem] uppercase tracking-[0.2em] text-stone-300"
-                    >
-                      {{ item.type }}
-                    </span>
+        <template v-else>
+          <section class="grid gap-6 xl:grid-cols-[0.82fr_1.48fr]">
+            <aside class="flex flex-col gap-6">
+              <section class="content-panel rounded-[2rem] p-6 lg:p-7">
+                <div class="flex items-end justify-between gap-4">
+                  <div>
+                    <p class="eyebrow text-emerald-300">{{ t("app.map.eyebrow") }}</p>
+                    <h2 class="mt-3 text-2xl text-white">{{ t("app.map.title") }}</h2>
                   </div>
+                  <div class="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.3em] text-stone-300">
+                    {{ navigationItemCount.toString().padStart(2, "0") }}
+                  </div>
+                </div>
 
-                  <div
-                    v-if="item.children.length > 0"
-                    class="mt-3 space-y-2 border-l border-white/8 pl-3"
+                <div
+                  v-if="!isAuthenticated"
+                  class="mt-6 rounded-[1.5rem] border border-white/8 bg-black/20 p-4 text-sm leading-7 text-stone-300"
+                >
+                  {{ t("app.map.signInHint") }}
+                </div>
+
+                <div v-else class="mt-6 space-y-3">
+                  <article
+                    v-for="item in navigationTree"
+                    :key="item.id"
+                    class="nav-card rounded-[1.5rem] p-4"
                   >
                     <div
-                      v-for="child in item.children"
-                      :key="child.id"
                       class="nav-item"
-                      :class="child.path === '/customers' ? 'nav-item-active' : ''"
+                      :class="item.path === '/customers' ? 'nav-item-active' : ''"
                     >
                       <div>
-                        <p class="text-sm font-semibold text-white">{{ child.name }}</p>
+                        <p class="text-sm font-semibold text-white">{{ item.name }}</p>
                         <p class="mt-1 text-xs uppercase tracking-[0.24em] text-stone-400">
-                          {{ child.path ?? child.code }}
+                          {{ item.code }}
                         </p>
                       </div>
+                      <span
+                        class="rounded-full border border-white/10 px-2 py-1 text-[0.62rem] uppercase tracking-[0.2em] text-stone-300"
+                      >
+                        {{ localizeNavigationType(item.type) }}
+                      </span>
                     </div>
-                  </div>
-                </article>
-              </div>
-            </section>
 
-            <section class="content-panel rounded-[2rem] p-6 lg:p-7">
-              <p class="eyebrow text-cyan-300">Schema Contract</p>
-              <h2 class="mt-3 text-2xl text-white">{{ customerPageDefinition.title }}</h2>
-              <p class="mt-3 text-sm leading-7 text-stone-300">
-                The enterprise preset consumes the same `ui-core` page definition as
-                the custom preset. This panel stays here to show the shared protocol
-                rather than a duplicated page implementation.
-              </p>
-
-              <div class="mt-6">
-                <p class="field-label">Columns</p>
-                <div class="mt-3 flex flex-wrap gap-2">
-                  <span
-                    v-for="column in customerPageDefinition.columns"
-                    :key="column.key"
-                    class="token-pill"
-                  >
-                    {{ column.label }}
-                  </span>
+                    <div
+                      v-if="item.children.length > 0"
+                      class="mt-3 space-y-2 border-l border-white/8 pl-3"
+                    >
+                      <div
+                        v-for="child in item.children"
+                        :key="child.id"
+                        class="nav-item"
+                        :class="child.path === '/customers' ? 'nav-item-active' : ''"
+                      >
+                        <div>
+                          <p class="text-sm font-semibold text-white">{{ child.name }}</p>
+                          <p class="mt-1 text-xs uppercase tracking-[0.24em] text-stone-400">
+                            {{ child.path ?? child.code }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
                 </div>
-              </div>
+              </section>
 
-              <div class="mt-6">
-                <p class="field-label">Actions</p>
-                <div class="mt-3 flex flex-wrap gap-2">
-                  <span
-                    v-for="action in customerPageDefinition.actions"
-                    :key="action.key"
-                    class="token-pill"
-                  >
-                    {{ action.label }}
-                  </span>
-                </div>
-              </div>
-            </section>
+              <section class="content-panel rounded-[2rem] p-6 lg:p-7">
+                <p class="eyebrow text-cyan-300">{{ t("app.schema.eyebrow") }}</p>
+                <h2 class="mt-3 text-2xl text-white">{{ t("app.schema.title") }}</h2>
+                <p class="mt-3 text-sm leading-7 text-stone-300">
+                  {{ t("app.schema.description") }}
+                </p>
 
-            <section class="content-panel rounded-[2rem] p-6 lg:p-7">
-              <p class="eyebrow text-fuchsia-300">Permission Snapshot</p>
-              <h2 class="mt-3 text-2xl text-white">Action gates</h2>
-
-              <div class="mt-6 flex flex-wrap gap-2">
-                <span class="token-pill" :class="canViewCustomers ? 'token-pill-active' : ''">
-                  list
-                </span>
-                <span class="token-pill" :class="canCreateCustomers ? 'token-pill-active' : ''">
-                  create
-                </span>
-                <span class="token-pill" :class="canUpdateCustomers ? 'token-pill-active' : ''">
-                  update
-                </span>
-                <span class="token-pill" :class="canDeleteCustomers ? 'token-pill-active' : ''">
-                  delete
-                </span>
-              </div>
-
-              <div class="mt-6">
-                <p class="field-label">Granted codes</p>
-                <div class="mt-3 flex flex-wrap gap-2">
-                  <span
-                    v-for="code in visiblePermissionCodes"
-                    :key="code"
-                    class="token-pill"
-                  >
-                    {{ code }}
-                  </span>
-                  <span v-if="hiddenPermissionCount > 0" class="token-pill">
-                    +{{ hiddenPermissionCount }} more
-                  </span>
-                </div>
-              </div>
-            </section>
-          </aside>
-
-          <section class="content-panel rounded-[2rem] p-3 lg:p-4">
-            <div class="px-3 py-4 lg:px-4">
-              <p class="eyebrow text-amber-300">Enterprise Preset Workspace</p>
-              <div class="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <h2 class="text-3xl text-white">Arco-backed customer operations</h2>
-                  <p class="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
-                    This is the first working `ui-enterprise-vue` workspace. The shell,
-                    tabs, query bar, list template, form template, and readonly detail
-                    panel all run from the same schema-driven contract path.
-                  </p>
-                </div>
-                <div
-                  class="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.28em] text-stone-300"
-                >
-                  {{ vueEnterprisePresetFoundation.designSystem }}
-                </div>
-              </div>
-            </div>
-
-            <ElyShell
-              title="Elysian Enterprise"
-              subtitle="Official Vue preset"
-              workspace-title="Customer operations"
-              workspace-description="A session-aware admin shell with schema-mapped CRUD templates and a reusable enterprise workspace contract."
-              preset-label="Arco Design Vue"
-              :environment="envName"
-              :status="authModuleReady ? 'session-aware' : 'preview mode'"
-              :navigation="enterpriseNavigation"
-              :stats="enterpriseShellStats"
-              :selected-menu-key="enterpriseSelectedMenuKey"
-              :tabs="enterpriseShellTabs"
-              :selected-tab-key="enterpriseSelectedTabKey"
-              :user="enterpriseShellUser"
-            >
-              <template #header-actions>
-                <button
-                  type="button"
-                  class="action-button-sm"
-                  :disabled="!canCreateCustomers"
-                  @click="openCreatePanel"
-                >
-                  New customer
-                </button>
-                <button
-                  type="button"
-                  class="action-button-sm"
-                  :disabled="customerLoading || !canViewCustomers"
-                  @click="reloadCustomers"
-                >
-                  Refresh
-                </button>
-                <button
-                  v-if="isAuthenticated"
-                  type="button"
-                  class="action-button-sm action-button-ghost"
-                  :disabled="authLoading"
-                  @click="submitLogout"
-                >
-                  Sign out
-                </button>
-              </template>
-
-              <template #workspace>
-                <div
-                  v-if="!customerModuleReady"
-                  class="enterprise-message enterprise-message-warning"
-                >
-                  `customer` module is not registered yet. Add `DATABASE_URL`, run
-                  migrations and seed, then restart the server.
-                </div>
-
-                <div
-                  v-else-if="authModuleReady && !isAuthenticated"
-                  class="enterprise-message enterprise-message-info"
-                >
-                  Sign in from the side panel to load protected customer data.
-                </div>
-
-                <div
-                  v-else-if="canEnterCustomerWorkspace && !canViewCustomers"
-                  class="enterprise-message enterprise-message-warning"
-                >
-                  This identity can enter the workspace but does not have
-                  `customer:customer:list`.
-                </div>
-
-                <div
-                  v-else-if="customerErrorMessage"
-                  class="enterprise-message enterprise-message-danger"
-                >
-                  {{ customerErrorMessage }}
-                </div>
-
-                <ElyCrudWorkspace
-                  v-else
-                  eyebrow="Standard List Page"
-                  title="Customer Register"
-                  description="The table, actions, and query inputs are derived from the shared customer page definition and rendered through the enterprise wrapper."
-                  :query-fields="enterpriseQueryFields"
-                  :query-loading="customerLoading"
-                  :table-columns="enterpriseTableColumns"
-                  :items="enterpriseTableItems"
-                  :table-loading="customerLoading"
-                  :table-actions="enterpriseTableActions"
-                  :item-count-label="customerCountLabel"
-                  empty-title="No customers in scope"
-                  empty-description="Adjust the filters or create a new customer from the side panel."
-                  @search="handleEnterpriseSearch"
-                  @reset="handleEnterpriseReset"
-                  @action="handleEnterpriseAction"
-                  @row-click="handleEnterpriseRowClick"
-                >
-                  <template #toolbar>
-                    <span class="enterprise-toolbar-pill">
-                      {{ currentQuerySummary }}
+                <div class="mt-6">
+                  <p class="field-label">{{ t("app.schema.columns") }}</p>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span
+                      v-for="column in schemaPreviewColumns"
+                      :key="column.key"
+                      class="token-pill"
+                    >
+                      {{ column.label }}
                     </span>
-                  </template>
+                  </div>
+                </div>
 
-                  <template #footer>
-                    <div class="enterprise-footer-note">
-                      <span>Preset status</span>
-                      <strong>{{ vueEnterprisePresetManifest.status }}</strong>
-                      <p>
-                        List, form, and detail modes are now wired through the same
-                        preset owner instead of a preview skeleton.
-                      </p>
-                    </div>
-                  </template>
-                </ElyCrudWorkspace>
-              </template>
+                <div class="mt-6">
+                  <p class="field-label">{{ t("app.schema.actions") }}</p>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span
+                      v-for="action in schemaPreviewActions"
+                      :key="action.key"
+                      class="token-pill"
+                    >
+                      {{ action.label }}
+                    </span>
+                  </div>
+                </div>
+              </section>
 
-              <template #secondary>
-                <section class="enterprise-card">
-                  <p class="enterprise-eyebrow">Standard Form / Detail</p>
-                  <h3 class="enterprise-heading">{{ enterprisePanelTitle }}</h3>
-                  <p class="enterprise-copy">{{ enterprisePanelDescription }}</p>
+              <section class="content-panel rounded-[2rem] p-6 lg:p-7">
+                <p class="eyebrow text-fuchsia-300">{{ t("app.permission.eyebrow") }}</p>
+                <h2 class="mt-3 text-2xl text-white">{{ t("app.permission.title") }}</h2>
 
+                <div class="mt-6 flex flex-wrap gap-2">
+                  <span class="token-pill" :class="canViewCustomers ? 'token-pill-active' : ''">
+                    {{ t("app.permission.list") }}
+                  </span>
+                  <span class="token-pill" :class="canCreateCustomers ? 'token-pill-active' : ''">
+                    {{ t("app.permission.create") }}
+                  </span>
+                  <span class="token-pill" :class="canUpdateCustomers ? 'token-pill-active' : ''">
+                    {{ t("app.permission.update") }}
+                  </span>
+                  <span class="token-pill" :class="canDeleteCustomers ? 'token-pill-active' : ''">
+                    {{ t("app.permission.delete") }}
+                  </span>
+                </div>
+
+                <div class="mt-6">
+                  <p class="field-label">{{ t("app.permission.grantedCodes") }}</p>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span
+                      v-for="code in visiblePermissionCodes"
+                      :key="code"
+                      class="token-pill"
+                    >
+                      {{ code }}
+                    </span>
+                    <span v-if="hiddenPermissionCount > 0" class="token-pill">
+                      +{{ hiddenPermissionCount }} {{ t("app.permission.more") }}
+                    </span>
+                  </div>
+                </div>
+              </section>
+            </aside>
+
+            <section class="content-panel rounded-[2rem] p-3 lg:p-4">
+              <div class="px-3 py-4 lg:px-4">
+                <p class="eyebrow text-amber-300">{{ t("app.section.workspace") }}</p>
+                <div class="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div>
+                    <h2 class="text-3xl text-white">{{ t("app.section.workspaceTitle") }}</h2>
+                    <p class="mt-3 max-w-3xl text-sm leading-7 text-stone-300">
+                      {{ t("app.section.workspaceCopy") }}
+                    </p>
+                  </div>
+                  <div
+                    class="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.28em] text-stone-300"
+                  >
+                    {{ t("app.shell.presetLabel") }}
+                  </div>
+                </div>
+              </div>
+
+              <ElyShell
+                :key="locale"
+                :title="t('app.shell.title')"
+                :subtitle="t('app.shell.subtitle')"
+                :workspace-title="t('app.shell.workspaceTitle')"
+                :workspace-description="t('app.shell.workspaceDescription')"
+                :preset-label="t('app.shell.presetLabel')"
+                :environment="envName"
+                :status="
+                  authModuleReady
+                    ? t('app.shell.status.sessionAware')
+                    : t('app.shell.status.preview')
+                "
+                :copy="enterpriseShellCopy"
+                :navigation="enterpriseNavigation"
+                :stats="enterpriseShellStats"
+                :selected-menu-key="enterpriseSelectedMenuKey"
+                :tabs="enterpriseShellTabs"
+                :selected-tab-key="enterpriseSelectedTabKey"
+                :user="enterpriseShellUser"
+              >
+                <template #header-actions>
+                  <button
+                    type="button"
+                    class="action-button-sm"
+                    :disabled="!canCreateCustomers"
+                    @click="openCreatePanel"
+                  >
+                    {{ t("app.action.newCustomer") }}
+                  </button>
+                  <button
+                    type="button"
+                    class="action-button-sm"
+                    :disabled="customerLoading || !canViewCustomers"
+                    @click="reloadCustomers"
+                  >
+                    {{ t("app.action.refresh") }}
+                  </button>
+                  <button
+                    v-if="isAuthenticated"
+                    type="button"
+                    class="action-button-sm action-button-ghost"
+                    :disabled="authLoading"
+                    @click="submitLogout"
+                  >
+                    {{ t("app.action.signOut") }}
+                  </button>
+                </template>
+
+                <template #workspace>
                   <div
                     v-if="!customerModuleReady"
-                    class="enterprise-inline-warning"
+                    class="enterprise-message enterprise-message-warning"
                   >
-                    Customer module is offline, so the standard form panel stays in
-                    preview mode.
+                    {{ t("app.message.customerModuleOffline") }}
                   </div>
 
                   <div
                     v-else-if="authModuleReady && !isAuthenticated"
-                    class="enterprise-inline-warning"
+                    class="enterprise-message enterprise-message-info"
                   >
-                    Sign in first to unlock the protected customer detail and edit
-                    flows.
+                    {{ t("app.message.signInToLoad") }}
                   </div>
 
                   <div
-                    v-else-if="deleteConfirmId && selectedCustomer"
-                    class="enterprise-danger-zone"
+                    v-else-if="canEnterCustomerWorkspace && !canViewCustomers"
+                    class="enterprise-message enterprise-message-warning"
                   >
-                    <p>
-                      Delete <strong>{{ selectedCustomer.name }}</strong> from the
-                      customer registry?
-                    </p>
-                    <div class="enterprise-button-row">
+                    {{ t("app.message.workspaceNoListPermission") }}
+                  </div>
+
+                  <div
+                    v-else-if="customerErrorMessage"
+                    class="enterprise-message enterprise-message-danger"
+                  >
+                    {{ customerErrorMessage }}
+                  </div>
+
+                  <ElyCrudWorkspace
+                    v-else
+                    :eyebrow="t('app.workspace.eyebrow')"
+                    :title="t('app.workspace.title')"
+                    :description="t('app.workspace.description')"
+                    :query-fields="enterpriseQueryFields"
+                    :query-loading="customerLoading"
+                    :table-columns="enterpriseTableColumns"
+                    :items="enterpriseTableItems"
+                    :table-loading="customerLoading"
+                    :table-actions="enterpriseTableActions"
+                    :item-count-label="customerCountLabel"
+                    :empty-title="t('app.workspace.emptyTitle')"
+                    :empty-description="t('app.workspace.emptyDescription')"
+                    :copy="enterpriseCrudCopy"
+                    @search="handleEnterpriseSearch"
+                    @reset="handleEnterpriseReset"
+                    @action="handleEnterpriseAction"
+                    @row-click="handleEnterpriseRowClick"
+                  >
+                    <template #toolbar>
+                      <span class="enterprise-toolbar-pill">
+                        {{ currentQuerySummary }}
+                      </span>
+                    </template>
+
+                    <template #footer>
+                      <div class="enterprise-footer-note">
+                        <span>{{ t("app.workspace.footerStatus") }}</span>
+                        <strong>{{
+                          localizePlatformStatus(vueEnterprisePresetManifest.status)
+                        }}</strong>
+                        <p>
+                          {{ t("app.workspace.footerCopy") }}
+                        </p>
+                      </div>
+                    </template>
+                  </ElyCrudWorkspace>
+                </template>
+
+                <template #secondary>
+                  <section class="enterprise-card">
+                    <p class="enterprise-eyebrow">{{ t("app.panel.formDetail") }}</p>
+                    <h3 class="enterprise-heading">{{ enterprisePanelTitle }}</h3>
+                    <p class="enterprise-copy">{{ enterprisePanelDescription }}</p>
+
+                    <div
+                      v-if="!customerModuleReady"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ t("app.panel.customerModulePreview") }}
+                    </div>
+
+                    <div
+                      v-else-if="authModuleReady && !isAuthenticated"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ t("app.panel.signInToUnlock") }}
+                    </div>
+
+                    <div
+                      v-else-if="deleteConfirmId && selectedCustomer"
+                      class="enterprise-danger-zone"
+                    >
+                      <p>
+                        {{
+                          t("app.panel.deletePrompt", {
+                            name: selectedCustomer.name,
+                          })
+                        }}
+                      </p>
+                      <div class="enterprise-button-row">
+                        <button
+                          type="button"
+                          class="enterprise-button enterprise-button-danger"
+                          :disabled="customerLoading"
+                          @click="confirmDelete"
+                        >
+                          {{ t("app.panel.deleteConfirm") }}
+                        </button>
+                        <button
+                          type="button"
+                          class="enterprise-button enterprise-button-ghost"
+                          @click="cancelDelete"
+                        >
+                          {{ t("app.panel.cancel") }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      v-else-if="enterpriseFormMode === 'detail' && selectedCustomer"
+                      class="enterprise-button-row"
+                    >
                       <button
+                        v-if="canUpdateCustomers"
+                        type="button"
+                        class="enterprise-button"
+                        :disabled="customerLoading"
+                        @click="startEdit(selectedCustomer)"
+                      >
+                        {{ t("app.panel.editCustomer") }}
+                      </button>
+                      <button
+                        v-if="canDeleteCustomers"
                         type="button"
                         class="enterprise-button enterprise-button-danger"
                         :disabled="customerLoading"
-                        @click="confirmDelete"
+                        @click="requestDelete(selectedCustomer)"
                       >
-                        Confirm delete
+                        {{ t("app.panel.deleteCustomer") }}
                       </button>
                       <button
+                        v-if="canCreateCustomers"
                         type="button"
                         class="enterprise-button enterprise-button-ghost"
-                        @click="cancelDelete"
+                        @click="openCreatePanel"
                       >
-                        Cancel
+                        {{ t("app.panel.newCustomer") }}
                       </button>
                     </div>
-                  </div>
 
-                  <div
-                    v-else-if="enterpriseFormMode === 'detail' && selectedCustomer"
-                    class="enterprise-button-row"
-                  >
-                    <button
-                      v-if="canUpdateCustomers"
-                      type="button"
-                      class="enterprise-button"
-                      :disabled="customerLoading"
-                      @click="startEdit(selectedCustomer)"
+                    <div
+                      v-else-if="enterpriseFormMode === 'create' && !canCreateCustomers"
+                      class="enterprise-inline-warning"
                     >
-                      Edit customer
-                    </button>
-                    <button
-                      v-if="canDeleteCustomers"
-                      type="button"
-                      class="enterprise-button enterprise-button-danger"
-                      :disabled="customerLoading"
-                      @click="requestDelete(selectedCustomer)"
-                    >
-                      Delete customer
-                    </button>
-                    <button
-                      v-if="canCreateCustomers"
-                      type="button"
-                      class="enterprise-button enterprise-button-ghost"
-                      @click="openCreatePanel"
-                    >
-                      New customer
-                    </button>
-                  </div>
-
-                  <div
-                    v-else-if="enterpriseFormMode === 'create' && !canCreateCustomers"
-                    class="enterprise-inline-warning"
-                  >
-                    This role cannot create customers.
-                  </div>
-
-                  <div
-                    v-if="
-                      customerModuleReady &&
-                      (!authModuleReady || isAuthenticated) &&
-                      !(enterpriseFormMode === 'detail' && !selectedCustomer)
-                    "
-                  >
-                    <ElyForm
-                      class="mt-5"
-                      :fields="enterpriseFormFields"
-                      :values="enterpriseFormValues"
-                      :readonly="enterpriseFormMode === 'detail'"
-                      :loading="customerLoading"
-                      @submit="handleEnterpriseFormSubmit"
-                      @cancel="handleEnterpriseFormCancel"
-                    />
-                  </div>
-
-                  <div
-                    v-else-if="
-                      customerModuleReady &&
-                      (!authModuleReady || isAuthenticated) &&
-                      enterpriseFormMode === 'detail' &&
-                      !selectedCustomer
-                    "
-                    class="enterprise-inline-warning mt-5"
-                  >
-                    Select a customer row to inspect details, or create a new record
-                    if the role allows it.
-                  </div>
-                </section>
-
-                <section class="enterprise-card">
-                  <p class="enterprise-eyebrow">Session Control</p>
-                  <h3 class="enterprise-heading">
-                    {{ authModuleReady ? "Access desk" : "Auth offline" }}
-                  </h3>
-
-                  <p v-if="!authModuleReady" class="enterprise-copy">
-                    Auth is not registered on this server yet. Add `DATABASE_URL`, run
-                    `bun run db:migrate` and seed, then restart the server.
-                  </p>
-
-                  <template v-else-if="isAuthenticated">
-                    <p class="enterprise-copy">
-                      Signed in as {{ authIdentity?.user.displayName }} /
-                      {{ authIdentity?.user.username }}
-                    </p>
-
-                    <div class="enterprise-kpi-grid">
-                      <article>
-                        <span>Roles</span>
-                        <strong>{{ authIdentity?.roles.join(", ") }}</strong>
-                      </article>
-                      <article>
-                        <span>Permissions</span>
-                        <strong>{{ permissionCodes.length }}</strong>
-                      </article>
+                      {{ t("app.panel.noCreatePermission") }}
                     </div>
 
-                    <button
-                      type="button"
-                      class="enterprise-button mt-5"
-                      :disabled="authLoading"
-                      @click="submitLogout"
-                    >
-                      {{ authLoading ? "Working..." : "Sign out" }}
-                    </button>
-                  </template>
-
-                  <form v-else class="mt-5 space-y-4" @submit.prevent="submitLogin">
-                    <label class="enterprise-field">
-                      <span>Username</span>
-                      <input
-                        v-model="loginForm.username"
-                        class="enterprise-input"
-                        :disabled="authLoading"
-                        placeholder="admin"
-                      />
-                    </label>
-
-                    <label class="enterprise-field">
-                      <span>Password</span>
-                      <input
-                        v-model="loginForm.password"
-                        class="enterprise-input"
-                        :disabled="authLoading"
-                        type="password"
-                        placeholder="admin123"
-                      />
-                    </label>
-
-                    <button
-                      type="submit"
-                      class="enterprise-button"
-                      :disabled="
-                        authLoading ||
-                        loginForm.username.trim().length === 0 ||
-                        loginForm.password.trim().length === 0
+                    <div
+                      v-if="
+                        customerModuleReady &&
+                        (!authModuleReady || isAuthenticated) &&
+                        !(enterpriseFormMode === 'detail' && !selectedCustomer)
                       "
                     >
-                      {{ authLoading ? "Signing in..." : "Sign in" }}
-                    </button>
-                  </form>
-
-                  <p
-                    v-if="authErrorMessage"
-                    class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-                  >
-                    {{ authErrorMessage }}
-                  </p>
-                </section>
-
-                <section class="enterprise-card">
-                  <p class="enterprise-eyebrow">Platform Capsule</p>
-                  <h3 class="enterprise-heading">
-                    {{ platform?.manifest.displayName }}
-                  </h3>
-
-                  <div class="enterprise-metadata">
-                    <div>
-                      <span>Version</span>
-                      <strong>{{ platform?.manifest.version }}</strong>
+                      <ElyForm
+                        class="mt-5"
+                        :fields="enterpriseFormFields"
+                        :values="enterpriseFormValues"
+                        :readonly="enterpriseFormMode === 'detail'"
+                        :loading="customerLoading"
+                        :copy="enterpriseFormCopy"
+                        @submit="handleEnterpriseFormSubmit"
+                        @cancel="handleEnterpriseFormCancel"
+                      />
                     </div>
-                    <div>
-                      <span>Status</span>
-                      <strong class="capitalize">{{ platform?.manifest.status }}</strong>
-                    </div>
-                    <div>
-                      <span>Environment</span>
-                      <strong>{{ envName }}</strong>
-                    </div>
-                  </div>
 
-                  <div class="mt-5">
-                    <p class="enterprise-subheading">Capabilities</p>
-                    <ul class="enterprise-list">
-                      <li
-                        v-for="capability in platform?.capabilities ?? []"
-                        :key="capability"
+                    <div
+                      v-else-if="
+                        customerModuleReady &&
+                        (!authModuleReady || isAuthenticated) &&
+                        enterpriseFormMode === 'detail' &&
+                        !selectedCustomer
+                      "
+                      class="enterprise-inline-warning mt-5"
+                    >
+                      {{ t("app.panel.selectRowHint") }}
+                    </div>
+                  </section>
+
+                  <section class="enterprise-card">
+                    <p class="enterprise-eyebrow">{{ t("app.session.title.online") }}</p>
+                    <h3 class="enterprise-heading">
+                      {{
+                        authModuleReady
+                          ? t("app.session.title.online")
+                          : t("app.session.title.offline")
+                      }}
+                    </h3>
+
+                    <p v-if="!authModuleReady" class="enterprise-copy">
+                      {{ t("app.session.offlineCopy") }}
+                    </p>
+
+                    <template v-else-if="isAuthenticated">
+                      <p class="enterprise-copy">
+                        {{
+                          t("app.session.signedInAs", {
+                            displayName: authIdentity?.user.displayName ?? "",
+                            username: authIdentity?.user.username ?? "",
+                          })
+                        }}
+                      </p>
+
+                      <div class="enterprise-kpi-grid">
+                        <article>
+                          <span>{{ t("app.session.roles") }}</span>
+                          <strong>{{ authIdentity?.roles.join(", ") }}</strong>
+                        </article>
+                        <article>
+                          <span>{{ t("app.session.permissions") }}</span>
+                          <strong>{{ permissionCodes.length }}</strong>
+                        </article>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="enterprise-button mt-5"
+                        :disabled="authLoading"
+                        @click="submitLogout"
                       >
-                        {{ capability }}
-                      </li>
-                    </ul>
-                  </div>
-                </section>
-              </template>
-            </ElyShell>
+                        {{
+                          authLoading
+                            ? t("app.session.working")
+                            : t("app.session.signOut")
+                        }}
+                      </button>
+                    </template>
+
+                    <form v-else class="mt-5 space-y-4" @submit.prevent="submitLogin">
+                      <label class="enterprise-field">
+                        <span>{{ t("app.session.username") }}</span>
+                        <input
+                          v-model="loginForm.username"
+                          class="enterprise-input"
+                          :disabled="authLoading"
+                          placeholder="admin"
+                        />
+                      </label>
+
+                      <label class="enterprise-field">
+                        <span>{{ t("app.session.password") }}</span>
+                        <input
+                          v-model="loginForm.password"
+                          class="enterprise-input"
+                          :disabled="authLoading"
+                          type="password"
+                          placeholder="admin123"
+                        />
+                      </label>
+
+                      <button
+                        type="submit"
+                        class="enterprise-button"
+                        :disabled="
+                          authLoading ||
+                          loginForm.username.trim().length === 0 ||
+                          loginForm.password.trim().length === 0
+                        "
+                      >
+                        {{
+                          authLoading
+                            ? t("app.session.signingIn")
+                            : t("app.session.signIn")
+                        }}
+                      </button>
+                    </form>
+
+                    <p
+                      v-if="authErrorMessage"
+                      class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+                    >
+                      {{ authErrorMessage }}
+                    </p>
+                  </section>
+
+                  <section class="enterprise-card">
+                    <p class="enterprise-eyebrow">{{ t("app.platform.title") }}</p>
+                    <h3 class="enterprise-heading">
+                      {{ platform?.manifest.displayName }}
+                    </h3>
+
+                    <div class="enterprise-metadata">
+                      <div>
+                        <span>{{ t("app.platform.version") }}</span>
+                        <strong>{{ platform?.manifest.version }}</strong>
+                      </div>
+                      <div>
+                        <span>{{ t("app.platform.status") }}</span>
+                        <strong class="capitalize">{{
+                          localizePlatformStatus(platform?.manifest.status)
+                        }}</strong>
+                      </div>
+                      <div>
+                        <span>{{ t("app.platform.environment") }}</span>
+                        <strong>{{ envName }}</strong>
+                      </div>
+                    </div>
+
+                    <div class="mt-5">
+                      <p class="enterprise-subheading">{{ t("app.platform.capabilities") }}</p>
+                      <ul class="enterprise-list">
+                        <li
+                          v-for="capability in localizedPlatformCapabilities"
+                          :key="capability"
+                        >
+                          {{ capability }}
+                        </li>
+                      </ul>
+                    </div>
+                  </section>
+                </template>
+              </ElyShell>
+            </section>
           </section>
-        </section>
-      </template>
-    </div>
-  </main>
+        </template>
+      </div>
+    </main>
+  </TConfigProvider>
 </template>
 
 <style scoped>
@@ -1712,6 +2011,11 @@ onMounted(async () => {
 
 .enterprise-input:focus {
   border-color: rgba(29, 78, 216, 0.42);
+}
+
+.token-pill-toggle {
+  cursor: pointer;
+  appearance: none;
 }
 
 .enterprise-kpi-grid {

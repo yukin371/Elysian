@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import {
-  Button as AButton,
-  DatePicker as ADatePicker,
-  Form as AForm,
-  FormItem as AFormItem,
-  Input as AInput,
-  Option as AOption,
-  Select as ASelect,
-  Space as ASpace,
-} from "@arco-design/web-vue"
+import { Button as TButton } from "tdesign-vue-next/es/button"
+import { DateRangePicker as TDateRangePicker } from "tdesign-vue-next/es/date-picker"
+import { Input as TInput } from "tdesign-vue-next/es/input"
+import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { reactive } from "vue"
 
 import type {
@@ -34,64 +28,68 @@ const handleReset = () => {
 
 <template>
   <div class="ely-query-bar">
-    <AForm :model="values" layout="inline" @submit="handleSearch">
-      <AFormItem v-for="field in fields" :key="field.key" :field="field.key">
+    <div class="ely-query-fields">
+      <div v-for="field in fields" :key="field.key" class="ely-query-field">
         <template v-if="field.kind === 'text'">
-          <AInput
+          <TInput
             v-model="values[field.key]"
-            :placeholder="field.placeholder ?? `Search ${field.label}…`"
-            allow-clear
+            :placeholder="
+              field.placeholder ??
+              `${copy?.searchPlaceholderPrefix ?? '搜索'} ${field.label}`
+            "
+            clearable
             style="width: 200px"
+            @enter="handleSearch"
           />
         </template>
 
         <template v-else-if="field.kind === 'select'">
-          <ASelect
+          <TSelect
             v-model="values[field.key]"
             :placeholder="field.placeholder ?? field.label"
-            allow-clear
+            :options="field.options"
+            clearable
             style="width: 160px"
-          >
-            <AOption
-              v-for="opt in field.options"
-              :key="opt.value"
-              :value="opt.value"
-            >
-              {{ opt.label }}
-            </AOption>
-          </ASelect>
+          />
         </template>
 
         <template v-else-if="field.kind === 'date-range'">
-          <ADatePicker
+          <TDateRangePicker
             v-model="values[field.key]"
-            range
+            clearable
             style="width: 260px"
           />
         </template>
 
         <template v-else-if="field.kind === 'status'">
-          <ASelect
+          <TSelect
             v-model="values[field.key]"
-            placeholder="Select status"
-            allow-clear
+            :placeholder="copy?.statusPlaceholder ?? '选择状态'"
+            :options="[
+              {
+                label: copy?.statusActive ?? '启用',
+                value: 'active',
+              },
+              {
+                label: copy?.statusInactive ?? '停用',
+                value: 'inactive',
+              },
+            ]"
+            clearable
             style="width: 140px"
-          >
-            <AOption value="active">active</AOption>
-            <AOption value="inactive">inactive</AOption>
-          </ASelect>
+          />
         </template>
-      </AFormItem>
+      </div>
 
-      <AFormItem>
-        <ASpace>
-          <AButton type="primary" html-type="submit" :loading="loading">
-            Search
-          </AButton>
-          <AButton @click="handleReset">Reset</AButton>
-        </ASpace>
-      </AFormItem>
-    </AForm>
+      <div class="ely-query-actions">
+        <TButton theme="primary" :loading="loading" @click="handleSearch">
+          {{ copy?.searchButton ?? "查询" }}
+        </TButton>
+        <TButton variant="outline" @click="handleReset">
+          {{ copy?.resetButton ?? "重置" }}
+        </TButton>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -101,5 +99,17 @@ const handleReset = () => {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 14px;
   border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.ely-query-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.ely-query-field,
+.ely-query-actions {
+  flex-shrink: 0;
 }
 </style>
