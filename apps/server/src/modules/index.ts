@@ -42,6 +42,13 @@ export {
   createInMemoryNotificationRepository,
   createNotificationRepository,
 } from "./notification"
+export { createWorkflowModule } from "./workflow"
+export {
+  createInMemoryWorkflowRepository,
+  createInMemoryWorkflowDefinitionRepository,
+  createWorkflowRepository,
+  createWorkflowDefinitionRepository,
+} from "./workflow"
 export { createRoleModule } from "./role"
 export { createInMemoryRoleRepository, createRoleRepository } from "./role"
 export { createOperationLogModule } from "./operation-log"

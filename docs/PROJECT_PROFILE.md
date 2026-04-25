@@ -1,12 +1,12 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-04-24`
+更新时间：`2026-04-26`
 
 ## 项目类型
 
 - 绿地仓库
 - 目标形态是企业级快速开发平台
-- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾与 `Phase 5 / P5A` 归档，并已启动 `Phase 6B`（`P6B3` 真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口；在 `5/5` 真实观察窗口达标后，已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察，当前结论仍为 `candidate_for_next_step`）
+- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾、`Phase 5 / P5A` 归档与 `Phase 6B` 企业增强收口；`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 完成阶段出口复验；当前主线进入 `Phase 7 / P7A Round-1` 实施
 
 ## 已确认事实
 
@@ -37,6 +37,8 @@
 - 服务端已落操作日志模块：`operation-log`，并已提供 `GET /system/operation-logs`、`GET /system/operation-logs/:id`、`GET /system/operation-logs/export`。
 - 服务端已落文件管理模块：`file`，并已提供 `GET /system/files`、`GET /system/files/:id`、`POST /system/files`、`GET /system/files/:id/download`、`DELETE /system/files/:id`。
 - 服务端已落通知管理模块：`notification`，并已提供 `GET /system/notifications`、`GET /system/notifications/:id`、`POST /system/notifications`、`POST /system/notifications/:id/read`。
+- 服务端已落 `workflow` 简化运行态，当前提供 `GET /workflow/definitions`、`GET /workflow/definitions/:id`、`POST /workflow/definitions`、`PUT /workflow/definitions/:id`、`POST /workflow/instances`、`GET /workflow/instances`、`GET /workflow/instances/:id`、`GET /workflow/tasks/todo`、`GET /workflow/tasks/done`、`POST /workflow/tasks/:id/complete`、`POST /workflow/instances/:id/cancel`，并已支持最小条件分支运行时。
+- workflow 权限已从 definition owner 内拆分为 `workflow:definition:*`、`workflow:instance:*` 与 `workflow:task:*` 三组最小权限点；当前仍未继续细拆到 claim/transfer 等更复杂任务语义。
 - `customer` 模块已接入 auth guard，401 / 403 语义已有测试覆盖。
 - auth 模块当前已对 `login / refresh / logout / permission denied` 写入最小审计记录，并保留 `request id / ip / user agent / actor / target / result` 字段。
 - 在存在 `DATABASE_URL` 时，server 会自动注册 `tenant-context`、`auth`、`tenant`、`customer`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 模块。
@@ -63,6 +65,8 @@
 - `packages/persistence` 已沿用既有 `audit_logs` owner 补充操作日志按条件查询、详情读取能力，未引入第二套日志表或重复 owner。
 - `packages/persistence` 已补 `files` 关系型 schema、migration 与文件元数据 CRUD helper；文件二进制存储仍保持在 `apps/server` runtime owner，不侵入 persistence。
 - `packages/persistence` 已补 `notifications` 关系型 schema、migration 与通知 CRUD / 标记已读 helper，并保持在 `packages/persistence` owner 内，不复用 `audit_logs`。
+- `packages/persistence` 已补 `workflow_definitions / workflow_instances / workflow_tasks` 关系型 schema、migration 与最小查询 / 插入 / 更新 helper，并支持任务结果、实例历史任务读取、待办取消与已办查询，用于当前简化的 workflow 运行态。
+- `packages/persistence` 默认 auth seed 已补 workflow definition / instance / task 的最小权限点，并继续将 workflow 菜单可见性挂在 definition list 权限上。
 - `packages/persistence` 的 `bun run db:migrate` 已可正常执行已提交的 SQL migrations。
 - `packages/persistence` 已支持 `bun run db:tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>` 初始化非默认租户。
 - `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试。
@@ -94,11 +98,13 @@
 - CI 手动触发（`workflow_dispatch`）可动态配置 gate 参数（失败阈值、允许失败来源）。
 - `e2e:generator:matrix` 与 `e2e:generator:cli` 支持通过 `ELYSIAN_REPORT_DIR` 指定报告输出目录。
 - `packages/schema` 当前已注册 `customer`、`product`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 十一个模块 schema。
+- `packages/schema` 已补 workflow definition / instance / task 的最小 contract，并补实例历史任务视图、任务结果字段与条件表达式白名单校验，用于当前 agent 自编排辅助工具的流程定义与运行态数据交换。
 - `packages/frontend-vue` 已提供最小 Vue 预设层，并包含导航构建、权限 gate helper 与供 enterprise preset 消费的页面协议映射。
 - `packages/ui-core` 已承接菜单树、CRUD 页面契约与权限相关 UI 协议。
-- `packages/ui-enterprise-vue` 已基于 `Arco Design Vue` 落地 `ElyShell`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyCrudWorkspace`、`ElyPreviewSkeleton` 等企业预设组件，并已具备 tabs、标准列表页、标准表单页与只读详情视图。
+- `packages/ui-enterprise-vue` 已落地 `ElyShell`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyCrudWorkspace`、`ElyPreviewSkeleton` 等企业预设组件；当前实现已进入 `TDesign Vue Next` 迁移 POC，并已具备 tabs、标准列表页、标准表单页与只读详情视图。
 - `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace。
 - 仓库已具备最小质量链路：`Biome + GitHub Actions CI`。
+- 仓库当前已使用 `Husky` 托管 `pre-commit / commit-msg / pre-push` 本地 hooks；`bun install` 会自动执行 `prepare` 完成安装，并保留 `bun run hooks:install` 作为手动修复入口。
 - CI workflow 已升级至 Node 24 兼容 action 版本（`actions/checkout@v5`、`actions/download-artifact@v7`、`actions/upload-artifact@v6`）。
 - 仓库 CI 已新增 `e2e-smoke` 作业（PostgreSQL service + migrate/seed + 登录/customer CRUD 冒烟）、`e2e-tenant` 作业（真实 PostgreSQL 下 tenant init 幂等、super-admin 授权、跨租户隔离、RLS/FK 验证 + artifact 归档）、`e2e-generator-safe-apply` 作业（生成安全覆盖三场景冒烟）、`e2e-generator-matrix` 作业（多 schema / 多策略回归矩阵）、`e2e-generator-cli` 作业（CLI 真实执行路径回归）、`p5a-handoff-corpus` 作业（P5A 语料分类回归 + artifact 归档）、`p5a-acceptance` 作业（P5A 阶段最小闭环验收 + artifact 归档）、`e2e-generator-report-index` 作业（汇总报告索引 artifact）与 `e2e-generator-report-gate` 作业（门禁判定 artifact）。
 - `scripts/e2e-smoke.ts` 已支持输出 `e2e-smoke-report.json`（状态、阶段、失败分类、失败信息），CI `e2e-smoke` 作业已归档 smoke report artifact。
@@ -108,7 +114,7 @@
 - 已新增 `bun run e2e:tenant:stability:evidence`，用于对多次下载的 tenant 稳定性快照做窗口汇总并输出“继续观察 / 可进入下一步”的证据报告。
 - 已新增 `bun run e2e:tenant:stability:collect` 与 `bun run e2e:tenant:upgrade:finalize:from-downloads`，用于把下载的 tenant snapshot artifact 归拢后串联 evidence / decision / gate，减少观察窗口收尾遗漏。
 - 已新增 `bun run e2e:tenant:stability:download` 与 `bun run e2e:tenant:upgrade:finalize:from-github`，复用本机 `gh` CLI 直接下载最近 tenant CI artifact 并串联升级结论，降低人工逐个下载成本。
-- 已完成 tenant 真实观察收尾：先基于 `workflow_dispatch` 连续 `5/5` 样本得到 `candidate_for_next_step`，随后用 `ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10` 完成首轮 `10/10` 滚动观察；当前结论为 `failedRunCount=0`、`systemicBlockerDetected=false`、`recommendation=candidate_for_next_step`。
+- 已完成 tenant 真实观察收尾：先基于 `workflow_dispatch` 连续 `5/5` 样本得到 `candidate_for_next_step`，随后用 `ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10` 完成首轮 `10/10` 滚动观察；当前结论为 `failedRunCount=0`、`systemicBlockerDetected=false`、`recommendation=candidate_for_next_step`，并已作为 `Phase 6B` 阶段出口证据归档。
 - `e2e:smoke:diagnose` 现已支持输出 GitHub Step Summary（状态、阶段、失败分类、建议动作），失败排查无需先下载 artifact。
 - `e2e:smoke:diagnose` 已补 `retryRecommendation`（是否建议先重试 + 原因），用于区分瞬时依赖故障与需先修复的问题。
 - CI `e2e-smoke` 已接入“依赖类失败自动重试一次”策略：首次失败且 `retryRecommendation.shouldRetry=true` 时自动执行一次重试，并由终态门禁步骤统一判定成功/失败。
@@ -169,6 +175,7 @@
 - 多租户基础能力已接入 `feature/dev/main` 的 CI tenant e2e 作业，并已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察；当前无系统性失败信号，但生产发布平台、数据库快照编排与发布后演练仍未固化到仓库自动化。
 - 文件模块当前只验证了本地磁盘存储适配器，尚未进入对象存储、多副本或生产级生命周期治理。
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
+- workflow 模块当前只验证了线性审批、最小动作闭环与白名单条件分支；独立权限点与更复杂任务语义仍未进入实现。
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。
 - generator 的 apply / merge 机制仍未定稿，二次生成进入正式模块目录的边界还不稳定。
 - 当前已有最小验证命令，但仍缺少自动化 E2E 等更完整的工程验证链路。
@@ -225,6 +232,7 @@
 - lint：`bun run lint`
 - 格式化：`bun run format`
 - 全量检查：`bun run check`
+- 手动重装 hooks：`bun run hooks:install`
 - 类型检查：`bun run typecheck`
 - 测试：`bun run test`
 - E2E 冒烟（仅执行用例）：`bun run e2e:smoke`

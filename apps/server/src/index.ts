@@ -36,6 +36,8 @@ import {
   createTenantRepository,
   createUserModule,
   createUserRepository,
+  createWorkflowDefinitionRepository,
+  createWorkflowModule,
   systemModule,
 } from "./modules"
 
@@ -59,6 +61,7 @@ if (process.env.DATABASE_URL) {
   const settingRepository = createSettingRepository(db)
   const tenantRepository = createTenantRepository(db)
   const userRepository = createUserRepository(db)
+  const workflowDefinitionRepository = createWorkflowDefinitionRepository(db)
   const authGuard = createAuthGuard(authRepository, {
     accessTokenSecret,
   })
@@ -122,6 +125,11 @@ if (process.env.DATABASE_URL) {
     }),
   )
   modules.push(
+    createWorkflowModule(workflowDefinitionRepository, {
+      authGuard,
+    }),
+  )
+  modules.push(
     createRoleModule(roleRepository, {
       authGuard,
     }),
@@ -143,7 +151,7 @@ if (process.env.DATABASE_URL) {
   )
 } else {
   logger.warn(
-    "DATABASE_URL is not configured; auth, tenant, customer, dictionary, department, file, menu, notification, operation-log, role, setting, and user modules are not registered",
+    "DATABASE_URL is not configured; auth, tenant, customer, dictionary, department, file, menu, notification, operation-log, role, setting, user, and workflow modules are not registered",
   )
 }
 

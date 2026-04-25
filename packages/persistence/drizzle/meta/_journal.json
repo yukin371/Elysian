@@ -85,6 +85,27 @@
       "when": 1777593600000,
       "tag": "0011_data_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1777680000000,
+      "tag": "0012_workflow_definitions",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1777766400000,
+      "tag": "0013_workflow_runtime",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1777852800000,
+      "tag": "0014_workflow_task_result",
+      "breakpoints": true
     }
   ]
 }

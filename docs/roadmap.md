@@ -1,12 +1,27 @@
 # roadmap
 
-更新时间：`2026-04-24`
+更新时间：`2026-04-26`
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2` 与 `Phase 5 / P5A` 已归档；当前主线进入 `Phase 6B`，其中 `P6B1`、`P6B2` 已完成，`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已收口；在 `5/5` 真实观察窗口达标后，已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察，当前结论仍为 `candidate_for_next_step`。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；当前主线进入 `Phase 7 / P7A Round-1` 实施。`Phase 6B` 的多租户、数据权限、租户治理、`ADR-0009`、CI tenant e2e、`feature/dev/main` 的 `10/10` 滚动观察均已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 再次确认阶段出口。
+
+### Current Mainline: Phase 7 / P7A 🚧 Round-1 实施中
+
+- 已决定：当前主线从 `Phase 6B` 切换至 `Phase 7 / P7A`
+- 入口依据：`P6B1/P6B2/P6B3` 已完成，`feature/dev/main` 均已达到 `10/10` tenant 滚动观察，且本地 `bun run check` 与 `bun run e2e:tenant:full` 已在 `2026-04-25` 复验通过
+- 当前范围：以简化工作流引擎为首个交付包，先服务 agent 自编排辅助工具，不扩成通用 BPM / agent orchestrator；安全合规与统一消息中心保持在 `Phase 7` 规划范围内，但不提前写成已实现事实
+- 当前约束：tenant 迁移/发布演练、平台级发布命令与回滚责任边界仍作为运营收尾项持续跟踪，不虚构生产平台自动化
+- 已推进：workflow definition 的创建 / 查询 / 版本化、instance 发起 / 查询 / 详情、todo 列表已打通
+- 已推进：最小审批动作闭环已落地，当前支持 `approved / rejected` 完成、实例取消、done 列表与实例历史任务读取；仍保持“简化自编排工具”定位，不引入 claim、并行网关或独立调度器
+- 已推进：`WP-4` 最小条件分支已落地，当前支持基于实例变量的白名单比较表达式与 `default` 分支，不引入脚本执行器
+- 已推进：workflow 权限已拆分为 definition / instance / task 三组最小权限点，并补 server 403 覆盖与默认 seed
+- 当前待推进：更复杂任务语义与是否继续细拆权限颗粒度
+- PRD 文档：[2026-04-24-system-design-v2-prd.md](./plans/2026-04-24-system-design-v2-prd.md)
+- 启动文档：[2026-04-25-phase-7a-workflow-engine-kickoff.md](./plans/2026-04-25-phase-7a-workflow-engine-kickoff.md)
+- 首轮清单：[2026-04-25-phase-7a-workflow-engine-round1-checklist.md](./plans/2026-04-25-phase-7a-workflow-engine-round1-checklist.md)
 
 ## Active Tracks
 
@@ -113,7 +128,7 @@
 - 已推进：新增 `p5a:acceptance:finalize`，把 acceptance 与 gate 串成一键收尾入口，降低本地执行遗漏
 - 启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
-### 6. Phase 6B: 企业增强 🚧 P6B3 进行中
+### 6. Phase 6B: 企业增强 ✅ 已归档
 
 - 已完成：`P6B1` 租户模型与查询隔离，包含 `tenants` schema、既有业务表 `tenant_id`、PostgreSQL RLS、JWT `tid`、tenant middleware、租户感知 seed 与基础测试覆盖
 - 已完成：`P6B1` 修复收口，修正租户登录、上下文重置与多租户约束边界，已提交到功能分支
@@ -138,7 +153,10 @@
 - 已完成：`feature-p6b1-tenant-isolation -> dev -> main` 已全部晋级，`dev` push / workflow_dispatch 与 `main` push / workflow_dispatch 均已包含 `e2e-tenant` job 与 artifact
 - 已完成：基于 `dev` 最近 `10` 次 tenant artifact（含 `24888296758 / 24888362434 / 24888586126 / 24888651338 / 24888706653 / 24888757984 / 24888812971 / 24888870698 / 24888923973 / 24888972790`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
-- 下一步：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
+- 已新增前期文档草案：[2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md) 与 [2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md)，用于在当前 `Phase 6B` runbook 收尾后评估 `Arco -> TDesign` 迁移窗口
+- 已推进：`packages/ui-enterprise-vue` 与 `apps/example-vue` 已完成当前 POC 范围内的 `TDesign Vue Next` 收口，`ElyShell / ElyTable / ElyQueryBar / ElyForm / ElyCrudWorkspace / ElyPreviewSkeleton` 已不再依赖 `Arco` runtime；示例页默认语言已切到 `zh-CN`，并保留 `en-US` 回退
+- 已完成阶段出口复验：`2026-04-25` 本地 `bun run check` 与 `bun run e2e:tenant:full` 通过，可将 `Phase 6B` 作为已归档阶段处理
+- 归档后残留运营收尾：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
 - 迁移/发布手册：[2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md)
@@ -207,7 +225,7 @@
 - `apps/server/src/modules/auth/module.ts` 中 `/auth/login` 与 `/auth/refresh` 返回体已通过 `AuthLoginResponse` 类型化
 - `apps/example-vue/src/lib/platform-api.ts` 中 `login()` / `refreshAuth()` 已简化为直接解构 `LoginResponse` 而非重复拷贝字段
 - `packages/frontend-vue` 新增 `usePermissions` composable 和 `buildPermissionGates` 工具函数，`App.vue` 中的 customer action 权限判断已迁移到预设层消费
-- `packages/ui-enterprise-vue` 新增 `ElyShell`、`ElyNavNodes`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyPreviewSkeleton` 六个组件，Arco Design Vue 为底座；新增 `useElyCrudPage` composable 把 `ui-core` 的 `UiCrudPageDefinition` 映射为企业组件 contracts；组件命名从 `ElysianEnterprise*` 收敛为 `Ely*`
+- `packages/ui-enterprise-vue` 新增 `ElyShell`、`ElyNavNodes`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyPreviewSkeleton` 六个组件；首版曾以 `Arco Design Vue` 起步，当前迁移 POC 已收敛到 `TDesign Vue Next` 运行时；新增 `useElyCrudPage` composable 把 `ui-core` 的 `UiCrudPageDefinition` 映射为企业组件 contracts；组件命名从 `ElysianEnterprise*` 收敛为 `Ely*`
 - `packages/schema` 新增 `productModuleSchema`，包含 `name/sku/price/category/status` 字段，`productModuleSchema` 已注册为 generator 可用 schema
 - `packages/generator/src/templates.ts` 中 `renderRepositoryTemplate` 的 `CustomerStatus` 硬编码已修复为 `{PascalName}Status`，`renderServiceTemplate` 的 `input.name` 硬编码已修复为动态检测第一个 `string/id` 字段
 - 已用 `product` 实体验证 generator 模板抽象稳定性，`bun --filter @elysian/generator generate --schema product` 零残留通过
@@ -266,11 +284,6 @@
 
 ## 下一步
 
-1. ~~在至少一个受保护业务路由上正式接入 auth guard，验证 401 / 403 语义和 middleware 挂载边界。~~ ✅ 已完成
-2. ~~收敛 `/auth/me` 与 login/refresh 返回结构的复用方式，避免 server 与 frontend 重复定义 identity contract。~~ ✅ 已完成
-3. ~~以 `ui-core` 为边界，把更多页面行为从 `example-vue` 收敛到 `frontend-vue` 预设层。~~ ✅ 已完成
-4. ~~基于 `Arco` 起 `ui-enterprise-vue` 的布局、表格和表单封装规范。~~ ✅ 已完成
-5. ~~选择第二个实体，启动 generator 模板复用验证。~~ ✅ 已完成
-6. ~~启动 `Phase 5 / P5A`：先固定自然语言输入模板、验收语料和结构化输出边界。~~ ✅ 已完成
-7. 为 `e2e-tenant` 增加稳定性观察与执行策略，避免“已进 CI”被误判为“长期稳定”。
-8. 基于 `ADR-0009` 补多租户迁移/发布 runbook 或后续阶段实施文档。
+1. 评估 `P7A Round-1` 是否可以收口，还是在进入下一轮前补 workflow 审计与 persistence 侧专项测试。
+2. 若继续推进 workflow，优先限制在简化任务语义内，不提前引入 claim/transfer/delegate。
+3. 再决定是否需要继续细拆 workflow 权限颗粒度，避免过早扩面。

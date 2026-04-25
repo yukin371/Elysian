@@ -4,6 +4,7 @@ import {
   customerModuleSchema,
   isModuleSchema,
   validateModuleSchema,
+  validateWorkflowDefinitionDraft,
 } from "./index"
 
 describe("validateModuleSchema", () => {
@@ -142,6 +143,132 @@ describe("validateModuleSchema", () => {
     expect(issues).toContainEqual({
       path: "fields[1].options[0].color",
       message: 'Field option does not allow unknown property "color".',
+    })
+  })
+})
+
+describe("validateWorkflowDefinitionDraft", () => {
+  it("accepts a minimal round-1 workflow definition draft", () => {
+    expect(
+      validateWorkflowDefinitionDraft({
+        nodes: [
+          { id: "start", type: "start", name: "Start" },
+          {
+            id: "manager-review",
+            type: "approval",
+            name: "Manager Review",
+            assignee: "role:manager",
+          },
+          {
+            id: "amount-check",
+            type: "condition",
+            name: "Amount Check",
+            conditions: [
+              {
+                expression: "${amount > 5000}",
+                target: "finance-review",
+              },
+              {
+                expression: "default",
+                target: "approved",
+              },
+            ],
+          },
+          {
+            id: "finance-review",
+            type: "approval",
+            name: "Finance Review",
+            assignee: "role:finance",
+          },
+          { id: "approved", type: "end", name: "Approved" },
+        ],
+        edges: [
+          { from: "start", to: "manager-review" },
+          { from: "manager-review", to: "amount-check" },
+          { from: "amount-check", to: "finance-review" },
+          { from: "amount-check", to: "approved" },
+          { from: "finance-review", to: "approved" },
+        ],
+      }),
+    ).toEqual([])
+  })
+
+  it("rejects missing start nodes and unknown edge targets", () => {
+    const issues = validateWorkflowDefinitionDraft({
+      nodes: [
+        {
+          id: "manager-review",
+          type: "approval",
+          name: "Manager Review",
+          assignee: "role:manager",
+        },
+        { id: "approved", type: "end", name: "Approved" },
+      ],
+      edges: [
+        { from: "manager-review", to: "approved" },
+        { from: "manager-review", to: "missing-node" },
+      ],
+    })
+
+    expect(issues).toContainEqual({
+      path: "nodes",
+      message: 'Workflow definition must contain exactly one "start" node.',
+    })
+    expect(issues).toContainEqual({
+      path: "edges[1].to",
+      message:
+        'Workflow edge target "missing-node" does not match any node id.',
+    })
+    expect(issues).toContainEqual({
+      path: "nodes[0]",
+      message:
+        'Workflow node "manager-review" must have at least one incoming edge.',
+    })
+  })
+
+  it("rejects unsupported condition expressions and missing default branches", () => {
+    const issues = validateWorkflowDefinitionDraft({
+      nodes: [
+        { id: "start", type: "start", name: "Start" },
+        {
+          id: "amount-check",
+          type: "condition",
+          name: "Amount Check",
+          conditions: [
+            {
+              expression: "${amount + 1}",
+              target: "finance-review",
+            },
+          ],
+        },
+        {
+          id: "finance-review",
+          type: "approval",
+          name: "Finance Review",
+          assignee: "role:finance",
+        },
+        { id: "approved", type: "end", name: "Approved" },
+      ],
+      edges: [
+        { from: "start", to: "amount-check" },
+        { from: "amount-check", to: "finance-review" },
+        { from: "amount-check", to: "approved" },
+      ],
+    })
+
+    expect(issues).toContainEqual({
+      path: "nodes[1].conditions[0].expression",
+      message:
+        'Condition branch expression must be "default" or a comparison like ${amount > 5000}.',
+    })
+    expect(issues).toContainEqual({
+      path: "nodes[1].conditions",
+      message: 'Condition node must provide exactly one "default" branch.',
+    })
+    expect(issues).toContainEqual({
+      path: "nodes[1]",
+      message:
+        "Condition node outgoing edges must match condition branch targets one-to-one.",
     })
   })
 })
