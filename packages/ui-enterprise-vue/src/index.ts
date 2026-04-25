@@ -1,3 +1,4 @@
+import "tdesign-vue-next/es/style/index.css"
 import type { UiCrudPageDefinition, UiPresetManifest } from "@elysian/ui-core"
 import { computed } from "vue"
 import type {

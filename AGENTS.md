@@ -7,9 +7,11 @@
 1. [docs/PROJECT_PROFILE.md](/E:/Github/Elysian/docs/PROJECT_PROFILE.md)
 2. [docs/roadmap.md](/E:/Github/Elysian/docs/roadmap.md)
 3. [docs/ARCHITECTURE_GUARDRAILS.md](/E:/Github/Elysian/docs/ARCHITECTURE_GUARDRAILS.md)
-4. 目标目录下的 `MODULE.md`
-5. 若当前任务已有计划文档，再读对应 `docs/plans/*.md`
-6. 若当前任务触及长期边界决策，再读相关 `docs/decisions/ADR-*.md`
+4. 若任务涉及前端视觉与交互，先读 [packages/ui-enterprise-vue/DESIGN.md](/E:/Github/Elysian/packages/ui-enterprise-vue/DESIGN.md)
+   若任务涉及 `apps/example-vue` 的展示层，再读 [apps/example-vue/DESIGN.md](/E:/Github/Elysian/apps/example-vue/DESIGN.md)
+5. 目标目录下的 `MODULE.md`
+6. 若当前任务已有计划文档，再读对应 `docs/plans/*.md`
+7. 若当前任务触及长期边界决策，再读相关 `docs/decisions/ADR-*.md`
 
 ## 强制规则
 

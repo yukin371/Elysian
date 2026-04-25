@@ -20,11 +20,11 @@ defineProps<ElyPreviewSkeletonProps>()
 
 <template>
   <ElyShell
-    title="Elysian Enterprise"
-    subtitle="Official Vue preset"
-    workspace-title="Customer operations"
-    workspace-description="A structured enterprise shell for role-based workspaces, generator-produced list pages, and future layout templates."
-    preset-label="TDesign Vue Next"
+    title="Elysian 企业预设"
+    subtitle="官方 Vue 预设"
+    workspace-title="客户工作区"
+    workspace-description="一个面向角色工作台、标准列表页和后续生成模板的结构化企业壳层。"
+    preset-label="TDesign Vue 预设"
     :environment="environment"
     :status="status"
     :navigation="navigation"
@@ -33,37 +33,36 @@ defineProps<ElyPreviewSkeletonProps>()
     :user="user"
   >
     <template #header-actions>
-      <TButton theme="primary">Create policy</TButton>
-      <TButton variant="outline">Export report</TButton>
+      <TButton theme="primary">新建策略</TButton>
+      <TButton variant="outline">导出摘要</TButton>
     </template>
 
     <template #workspace>
       <TCard :bordered="false" class="ely-preview-card">
-        <h3 class="ely-preview-heading">Preset contract alignment</h3>
+        <h3 class="ely-preview-heading">预设契约对齐</h3>
         <ul class="ely-preview-list">
-          <li>`ui-core` navigation tree drives the sidebar structure.</li>
-          <li>CRUD page metadata still comes from the same customer schema.</li>
+          <li>`ui-core` 导航树继续驱动侧栏结构。</li>
+          <li>CRUD 页面元数据仍然来自同一份客户 schema。</li>
           <li>
-            Future generator output can target this shell without rewriting
-            business protocols.
+            后续 generator 输出可以直接对接这套壳层，而不需要重写业务协议。
           </li>
         </ul>
       </TCard>
 
       <TCard :bordered="false" class="ely-preview-card">
-        <h3 class="ely-preview-heading">Current customer capability</h3>
+        <h3 class="ely-preview-heading">当前客户能力</h3>
         <TDescriptions :column="2" bordered size="large">
-          <TDescriptionsItem label="List">
-            {{ canViewCustomers ? "enabled" : "denied" }}
+          <TDescriptionsItem label="列表">
+            {{ canViewCustomers ? "已启用" : "未授权" }}
           </TDescriptionsItem>
-          <TDescriptionsItem label="Create">
-            {{ canCreateCustomers ? "enabled" : "denied" }}
+          <TDescriptionsItem label="创建">
+            {{ canCreateCustomers ? "已启用" : "未授权" }}
           </TDescriptionsItem>
-          <TDescriptionsItem label="Update">
-            {{ canUpdateCustomers ? "enabled" : "denied" }}
+          <TDescriptionsItem label="更新">
+            {{ canUpdateCustomers ? "已启用" : "未授权" }}
           </TDescriptionsItem>
-          <TDescriptionsItem label="Delete">
-            {{ canDeleteCustomers ? "enabled" : "denied" }}
+          <TDescriptionsItem label="删除">
+            {{ canDeleteCustomers ? "已启用" : "未授权" }}
           </TDescriptionsItem>
         </TDescriptions>
       </TCard>
@@ -71,40 +70,40 @@ defineProps<ElyPreviewSkeletonProps>()
 
     <template #secondary>
       <TCard :bordered="false" class="ely-preview-card">
-        <h3 class="ely-preview-heading">Theme foundation</h3>
+        <h3 class="ely-preview-heading">基础底座</h3>
         <TSpace direction="vertical" style="width: 100%">
           <span class="ely-preview-pill ely-preview-pill-primary">
-            TDesign shell
+            TDesign 壳层
           </span>
           <span class="ely-preview-pill ely-preview-pill-success">
-            Protocol stable
+            协议稳定
           </span>
           <span class="ely-preview-pill ely-preview-pill-warning">
-            Generator ready
+            可供生成
           </span>
         </TSpace>
       </TCard>
 
       <TCard :bordered="false" class="ely-preview-card">
-        <h3 class="ely-preview-heading">Next extraction targets</h3>
+        <h3 class="ely-preview-heading">下一步抽取目标</h3>
         <TTimeline>
           <TTimelineItem>
-            Workspace table + query bar wrappers
+            工作区表格与查询栏封装
           </TTimelineItem>
           <TTimelineItem>
-            Enterprise form layout sections
+            企业表单布局分区
           </TTimelineItem>
           <TTimelineItem>
-            Generator-facing page template mapping
+            面向 generator 的页面模板映射
           </TTimelineItem>
         </TTimeline>
       </TCard>
 
       <TCard :bordered="false" class="ely-preview-card">
-        <h3 class="ely-preview-heading">Foundation lock</h3>
+        <h3 class="ely-preview-heading">底座锁定</h3>
         <p class="ely-preview-copy">
-          {{ vueEnterprisePresetFoundation.designSystem }} was fixed on
-          {{ vueEnterprisePresetFoundation.selectionDate }}.
+          {{ vueEnterprisePresetFoundation.designSystem }} 已在
+          {{ vueEnterprisePresetFoundation.selectionDate }} 固定为当前企业预设底座。
         </p>
       </TCard>
     </template>
@@ -113,7 +112,7 @@ defineProps<ElyPreviewSkeletonProps>()
 
 <style scoped>
 .ely-preview-card {
-  border-radius: 22px;
+  border-radius: 16px;
 }
 
 .ely-preview-heading {
@@ -149,8 +148,8 @@ defineProps<ElyPreviewSkeletonProps>()
 }
 
 .ely-preview-pill-primary {
-  background: rgba(29, 78, 216, 0.1);
-  color: #1d4ed8;
+  background: rgba(36, 87, 214, 0.1);
+  color: #2457d6;
 }
 
 .ely-preview-pill-success {

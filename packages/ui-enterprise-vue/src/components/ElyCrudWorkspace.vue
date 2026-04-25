@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Button as TButton } from "tdesign-vue-next/es/button"
-import { Card as TCard } from "tdesign-vue-next/es/card"
 import { Empty as TEmpty } from "tdesign-vue-next/es/empty"
 import { Space as TSpace } from "tdesign-vue-next/es/space"
 
@@ -40,7 +39,7 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
       @reset="emit('reset')"
     />
 
-    <TCard :bordered="false" class="ely-crud-card">
+    <section class="ely-crud-card">
       <div class="ely-crud-card-head">
         <div>
           <p class="ely-crud-card-title">{{ copy?.gridTitle ?? "数据列表" }}</p>
@@ -87,7 +86,7 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
         @action="handleAction"
         @row-click="emit('row-click', $event)"
       />
-    </TCard>
+    </section>
 
     <slot name="footer" />
   </div>
@@ -135,9 +134,9 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
 
 .ely-crud-card {
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 1rem 1rem 0.85rem;
 }
 
 .ely-crud-card-head {
@@ -145,6 +144,8 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .ely-crud-card-head span {
@@ -169,9 +170,9 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   place-items: center;
   width: 72px;
   height: 72px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(29, 78, 216, 0.12), rgba(15, 23, 42, 0.08));
-  color: #1d4ed8;
+  border-radius: 14px;
+  background: rgba(36, 87, 214, 0.1);
+  color: #2457d6;
   font-size: 1.8rem;
   font-weight: 700;
 }

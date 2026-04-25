@@ -177,17 +177,18 @@ const resolvedCopy = computed(() =>
 <style scoped>
 .ely-shell {
   --elysian-ely-ink: #0f172a;
-  --elysian-ely-slate: #5f6b7a;
+  --elysian-ely-slate: #5b6678;
   --elysian-ely-border: rgba(15, 23, 42, 0.08);
-  --elysian-ely-panel: rgba(255, 255, 255, 0.82);
-  --elysian-ely-accent: #1d4ed8;
-  --elysian-ely-accent-soft: rgba(29, 78, 216, 0.1);
+  --elysian-ely-panel: rgba(248, 250, 252, 0.9);
+  --elysian-ely-surface: rgba(255, 255, 255, 0.96);
+  --elysian-ely-accent: #2457d6;
+  --elysian-ely-accent-soft: rgba(36, 87, 214, 0.1);
   background:
-    radial-gradient(circle at top left, rgba(191, 219, 254, 0.65), transparent 34%),
-    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 28px;
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+    radial-gradient(circle at top left, rgba(191, 219, 254, 0.46), transparent 32%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
   color: var(--elysian-ely-ink);
   overflow: hidden;
 }
@@ -203,7 +204,7 @@ const resolvedCopy = computed(() =>
   gap: 1rem;
   padding: 1.4rem 1rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 247, 251, 0.96));
+    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(242, 246, 251, 0.98));
   border-right: 1px solid var(--elysian-ely-border);
 }
 
@@ -219,12 +220,12 @@ const resolvedCopy = computed(() =>
   place-items: center;
   width: 2.9rem;
   height: 2.9rem;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #0f172a, #1d4ed8);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #173ea6, #2457d6);
   color: white;
   font-size: 1.15rem;
   font-weight: 700;
-  box-shadow: 0 18px 30px rgba(29, 78, 216, 0.22);
+  box-shadow: 0 10px 20px rgba(36, 87, 214, 0.18);
 }
 
 .ely-brand-copy p {
@@ -285,25 +286,34 @@ const resolvedCopy = computed(() =>
 
 .ely-nav :deep(.t-menu__item),
 .ely-nav :deep(.t-submenu__title) {
-  border-radius: 14px;
-  min-height: 56px;
+  border-radius: 12px;
+  min-height: 58px;
   height: auto;
-  align-items: flex-start;
+  align-items: stretch;
   box-sizing: border-box;
-  padding-top: 0.55rem;
-  padding-bottom: 0.55rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.ely-nav :deep(.t-menu__item:hover),
+.ely-nav :deep(.t-submenu__title:hover),
+.ely-nav :deep(.t-is-opened > .t-submenu__title),
+.ely-nav :deep(.t-is-active) {
+  background: rgba(36, 87, 214, 0.07);
 }
 
 .ely-nav :deep(.t-menu__content) {
+  display: flex;
+  align-items: center;
   flex: 1;
   min-width: 0;
   white-space: normal;
-  line-height: 1.25;
+  line-height: 1.4;
 }
 
 .ely-nav :deep(.t-fake-arrow) {
   flex-shrink: 0;
-  margin-top: 0.35rem;
+  margin-top: 0.45rem;
 }
 
 .ely-shell-main {
@@ -320,10 +330,16 @@ const resolvedCopy = computed(() =>
   background: transparent;
 }
 
+.ely-shell-header > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
 .ely-shell-header h2 {
   margin: 0.5rem 0 0;
   font-size: clamp(1.8rem, 2vw, 2.45rem);
   line-height: 1.05;
+  word-break: keep-all;
   color: var(--elysian-ely-ink);
 }
 
@@ -339,6 +355,19 @@ const resolvedCopy = computed(() =>
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ely-header-actions :deep(.t-space) {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ely-header-actions :deep(.t-button) {
+  min-width: 84px;
+  white-space: nowrap;
 }
 
 .ely-user {
@@ -347,8 +376,8 @@ const resolvedCopy = computed(() =>
   gap: 0.8rem;
   padding: 0.55rem 0.85rem;
   border: 1px solid var(--elysian-ely-border);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .ely-user strong {
@@ -385,8 +414,8 @@ const resolvedCopy = computed(() =>
   min-width: 180px;
   padding: 0.95rem 1rem;
   border: 1px solid var(--elysian-ely-border);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.52);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
 }
 
 .ely-shell-tab strong,
@@ -405,8 +434,8 @@ const resolvedCopy = computed(() =>
 }
 
 .ely-shell-tab-active {
-  background: linear-gradient(135deg, rgba(29, 78, 216, 0.16), rgba(15, 23, 42, 0.08));
-  border-color: rgba(29, 78, 216, 0.22);
+  background: rgba(36, 87, 214, 0.1);
+  border-color: rgba(36, 87, 214, 0.2);
 }
 
 .ely-stat-grid {
@@ -418,9 +447,8 @@ const resolvedCopy = computed(() =>
 .ely-stat-card,
 .ely-fallback-card {
   border: 1px solid var(--elysian-ely-border);
-  border-radius: 22px;
-  background: var(--elysian-ely-panel);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  border-radius: 16px;
+  background: var(--elysian-ely-surface);
 }
 
 .ely-stat-value {

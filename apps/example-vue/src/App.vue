@@ -21,7 +21,9 @@ import {
   useElyCrudPage,
   vueEnterprisePresetManifest,
 } from "@elysian/ui-enterprise-vue"
+import { Button as TButton } from "tdesign-vue-next/es/button"
 import { ConfigProvider as TConfigProvider } from "tdesign-vue-next/es/config-provider"
+import { Input as TInput } from "tdesign-vue-next/es/input"
 import enUs from "tdesign-vue-next/es/locale/en_US"
 import zhCn from "tdesign-vue-next/es/locale/zh_CN"
 import { computed, defineAsyncComponent, onMounted, ref, watch } from "vue"
@@ -154,8 +156,22 @@ const localizeNavigationName = (code: string, fallbackName: string) => {
       return t("app.fallback.files")
     case "system-notifications":
       return t("app.fallback.notifications")
+    case "system-tenants":
+      return t("app.fallback.tenants")
+    case "customer-root":
+      return t("app.fallback.customerRoot")
     case "customer-list":
       return t("app.fallback.customers")
+    case "workflow-root":
+      return t("app.fallback.workflow")
+    case "workflow-definitions":
+      return t("app.fallback.workflowDefinitions")
+    case "workflow-instances":
+      return t("app.fallback.workflowInstances")
+    case "workflow-tasks-todo":
+      return t("app.fallback.workflowTodo")
+    case "workflow-tasks-done":
+      return t("app.fallback.workflowDone")
     default:
       return fallbackName
   }
@@ -1317,7 +1333,7 @@ onMounted(async () => {
   <TConfigProvider :global-config="tdesignGlobalConfig">
     <main class="app-shell min-h-screen px-5 py-6 text-stone-100 sm:px-8 lg:px-10">
       <div class="mx-auto flex max-w-7xl flex-col gap-6">
-        <section class="hero-panel overflow-hidden rounded-[2rem] px-6 py-8 lg:px-10">
+        <section class="hero-panel overflow-hidden px-6 py-8 lg:px-10">
           <div class="hero-grid grid gap-8 lg:grid-cols-[1.2fr_1fr]">
             <div>
               <div class="flex flex-wrap items-center justify-between gap-3">
@@ -1355,25 +1371,25 @@ onMounted(async () => {
             </div>
 
             <div class="hero-stats grid gap-4 sm:grid-cols-2">
-              <article class="stat-card rounded-[1.75rem] p-5">
+              <article class="stat-card p-5">
                 <p class="stat-label">{{ t("app.badge.runtime") }}</p>
                 <p class="stat-value">
                   {{ platform?.manifest.runtime ?? t("app.loading.short") }}
                 </p>
               </article>
-              <article class="stat-card rounded-[1.75rem] p-5">
+              <article class="stat-card p-5">
                 <p class="stat-label">{{ t("app.badge.enterprise") }}</p>
                 <p class="stat-value">
                   {{ localizePlatformStatus(vueEnterprisePresetManifest.status) }}
                 </p>
               </article>
-              <article class="stat-card rounded-[1.75rem] p-5">
+              <article class="stat-card p-5">
                 <p class="stat-label">{{ t("app.badge.auth") }}</p>
                 <p class="stat-value" :class="authStatusTone">
                   {{ authStatusLabel }}
                 </p>
               </article>
-              <article class="stat-card rounded-[1.75rem] p-5">
+              <article class="stat-card p-5">
                 <p class="stat-label">{{ t("app.badge.rows") }}</p>
                 <p class="stat-value">{{ filteredCustomerItems.length }}</p>
               </article>
@@ -1386,7 +1402,7 @@ onMounted(async () => {
         </p>
         <p
           v-else-if="errorMessage"
-          class="rounded-3xl border border-rose-400/20 bg-rose-500/10 p-5 text-rose-200"
+          class="rounded-2xl border border-rose-400/20 bg-rose-500/10 p-5 text-rose-200"
         >
           {{ errorMessage }}
         </p>
@@ -1394,7 +1410,7 @@ onMounted(async () => {
         <template v-else>
           <section class="grid gap-6 xl:grid-cols-[0.82fr_1.48fr]">
             <aside class="flex flex-col gap-6">
-              <section class="content-panel rounded-[2rem] p-6 lg:p-7">
+              <section class="content-panel p-6 lg:p-7">
                 <div class="flex items-end justify-between gap-4">
                   <div>
                     <p class="eyebrow text-emerald-300">{{ t("app.map.eyebrow") }}</p>
@@ -1407,7 +1423,7 @@ onMounted(async () => {
 
                 <div
                   v-if="!isAuthenticated"
-                  class="mt-6 rounded-[1.5rem] border border-white/8 bg-black/20 p-4 text-sm leading-7 text-stone-300"
+                  class="mt-6 rounded-2xl border border-white/8 bg-black/20 p-4 text-sm leading-7 text-stone-300"
                 >
                   {{ t("app.map.signInHint") }}
                 </div>
@@ -1416,7 +1432,7 @@ onMounted(async () => {
                   <article
                     v-for="item in navigationTree"
                     :key="item.id"
-                    class="nav-card rounded-[1.5rem] p-4"
+                    class="nav-card"
                   >
                     <div
                       class="nav-item"
@@ -1457,7 +1473,7 @@ onMounted(async () => {
                 </div>
               </section>
 
-              <section class="content-panel rounded-[2rem] p-6 lg:p-7">
+              <section class="content-panel p-6 lg:p-7">
                 <p class="eyebrow text-cyan-300">{{ t("app.schema.eyebrow") }}</p>
                 <h2 class="mt-3 text-2xl text-white">{{ t("app.schema.title") }}</h2>
                 <p class="mt-3 text-sm leading-7 text-stone-300">
@@ -1491,7 +1507,7 @@ onMounted(async () => {
                 </div>
               </section>
 
-              <section class="content-panel rounded-[2rem] p-6 lg:p-7">
+              <section class="content-panel p-6 lg:p-7">
                 <p class="eyebrow text-fuchsia-300">{{ t("app.permission.eyebrow") }}</p>
                 <h2 class="mt-3 text-2xl text-white">{{ t("app.permission.title") }}</h2>
 
@@ -1528,7 +1544,7 @@ onMounted(async () => {
               </section>
             </aside>
 
-            <section class="content-panel rounded-[2rem] p-3 lg:p-4">
+            <section class="content-panel p-3 lg:p-4">
               <div class="px-3 py-4 lg:px-4">
                 <p class="eyebrow text-amber-300">{{ t("app.section.workspace") }}</p>
                 <div class="mt-3 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -1568,31 +1584,34 @@ onMounted(async () => {
                 :user="enterpriseShellUser"
               >
                 <template #header-actions>
-                  <button
-                    type="button"
-                    class="action-button-sm"
+                  <TButton
+                    size="small"
+                    theme="primary"
+                    variant="outline"
                     :disabled="!canCreateCustomers"
                     @click="openCreatePanel"
                   >
                     {{ t("app.action.newCustomer") }}
-                  </button>
-                  <button
-                    type="button"
-                    class="action-button-sm"
+                  </TButton>
+                  <TButton
+                    size="small"
+                    theme="default"
+                    variant="outline"
                     :disabled="customerLoading || !canViewCustomers"
                     @click="reloadCustomers"
                   >
                     {{ t("app.action.refresh") }}
-                  </button>
-                  <button
+                  </TButton>
+                  <TButton
                     v-if="isAuthenticated"
-                    type="button"
-                    class="action-button-sm action-button-ghost"
+                    size="small"
+                    theme="default"
+                    variant="text"
                     :disabled="authLoading"
                     @click="submitLogout"
                   >
                     {{ t("app.action.signOut") }}
-                  </button>
+                  </TButton>
                 </template>
 
                 <template #workspace>
@@ -1820,10 +1839,11 @@ onMounted(async () => {
                         </article>
                       </div>
 
-                      <button
-                        type="button"
-                        class="enterprise-button mt-5"
-                        :disabled="authLoading"
+                      <TButton
+                        theme="primary"
+                        variant="outline"
+                        class="mt-5"
+                        :loading="authLoading"
                         @click="submitLogout"
                       >
                         {{
@@ -1831,36 +1851,36 @@ onMounted(async () => {
                             ? t("app.session.working")
                             : t("app.session.signOut")
                         }}
-                      </button>
+                      </TButton>
                     </template>
 
                     <form v-else class="mt-5 space-y-4" @submit.prevent="submitLogin">
                       <label class="enterprise-field">
                         <span>{{ t("app.session.username") }}</span>
-                        <input
+                        <TInput
                           v-model="loginForm.username"
-                          class="enterprise-input"
                           :disabled="authLoading"
                           placeholder="admin"
+                          clearable
                         />
                       </label>
 
                       <label class="enterprise-field">
                         <span>{{ t("app.session.password") }}</span>
-                        <input
+                        <TInput
                           v-model="loginForm.password"
-                          class="enterprise-input"
                           :disabled="authLoading"
                           type="password"
                           placeholder="admin123"
                         />
                       </label>
 
-                      <button
+                      <TButton
                         type="submit"
-                        class="enterprise-button"
+                        theme="primary"
+                        style="width: 100%"
+                        :loading="authLoading"
                         :disabled="
-                          authLoading ||
                           loginForm.username.trim().length === 0 ||
                           loginForm.password.trim().length === 0
                         "
@@ -1870,7 +1890,7 @@ onMounted(async () => {
                             ? t("app.session.signingIn")
                             : t("app.session.signIn")
                         }}
-                      </button>
+                      </TButton>
                     </form>
 
                     <p
@@ -1928,11 +1948,10 @@ onMounted(async () => {
 
 <style scoped>
 .enterprise-card {
-  border-radius: 22px;
+  border-radius: 16px;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(248, 250, 252, 0.9);
   padding: 1.2rem;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
   color: #0f172a;
 }
 
@@ -1967,15 +1986,14 @@ onMounted(async () => {
 }
 
 .enterprise-button {
-  border: 1px solid rgba(29, 78, 216, 0.14);
-  border-radius: 999px;
-  background: linear-gradient(135deg, #1d4ed8, #0f172a);
+  border: 1px solid rgba(36, 87, 214, 0.18);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2457d6, #173ea6);
   color: white;
   font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   padding: 0.65rem 1rem;
-  text-transform: uppercase;
 }
 
 .enterprise-button:disabled {
@@ -1984,7 +2002,7 @@ onMounted(async () => {
 }
 
 .enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   color: #0f172a;
 }
 
@@ -1997,20 +2015,6 @@ onMounted(async () => {
   flex-direction: column;
   gap: 0.7rem;
   color: #334155;
-}
-
-.enterprise-input {
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: white;
-  padding: 0.9rem 1rem;
-  color: #0f172a;
-  outline: none;
-}
-
-.enterprise-input:focus {
-  border-color: rgba(29, 78, 216, 0.42);
 }
 
 .token-pill-toggle {
@@ -2027,7 +2031,7 @@ onMounted(async () => {
 
 .enterprise-kpi-grid article,
 .enterprise-metadata div {
-  border-radius: 18px;
+  border-radius: 14px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(248, 250, 252, 0.92);
   padding: 0.85rem 0.95rem;
@@ -2057,7 +2061,7 @@ onMounted(async () => {
 }
 
 .enterprise-message {
-  border-radius: 22px;
+  border-radius: 14px;
   padding: 1rem 1.1rem;
   line-height: 1.75;
 }
@@ -2093,7 +2097,7 @@ onMounted(async () => {
 
 .enterprise-footer-note {
   margin-top: 0.25rem;
-  border-radius: 18px;
+  border-radius: 14px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(248, 250, 252, 0.88);
   padding: 0.9rem 1rem;
@@ -2121,7 +2125,7 @@ onMounted(async () => {
 
 .enterprise-danger-zone {
   margin-top: 1rem;
-  border-radius: 18px;
+  border-radius: 14px;
   border: 1px solid rgba(239, 68, 68, 0.16);
   background: rgba(254, 242, 242, 0.96);
   padding: 0.95rem 1rem;
@@ -2130,7 +2134,7 @@ onMounted(async () => {
 
 .enterprise-inline-warning {
   margin-top: 1rem;
-  border-radius: 18px;
+  border-radius: 14px;
   border: 1px solid rgba(245, 158, 11, 0.16);
   background: rgba(255, 251, 235, 0.96);
   padding: 0.85rem 0.95rem;

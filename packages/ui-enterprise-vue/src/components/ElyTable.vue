@@ -116,12 +116,12 @@ const resolvedColumns = computed(() => {
 
 <style scoped>
 .ely-table {
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .ely-table-inner {
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 .ely-table-inner :deep(tbody tr) {
