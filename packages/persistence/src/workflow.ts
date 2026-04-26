@@ -59,6 +59,9 @@ export interface UpdateWorkflowInstancePersistenceInput {
 
 export interface UpdateWorkflowTaskPersistenceInput {
   assignee?: string
+  claimSourceAssignee?: string | null
+  claimedByUserId?: string | null
+  claimedAt?: Date | null
   status?: "todo" | "completed" | "cancelled"
   result?: "approved" | "rejected" | null
   completedAt?: Date | null
@@ -316,6 +319,9 @@ export async function updateWorkflowTask(
     .update(workflowTasks)
     .set({
       assignee: input.assignee,
+      claimSourceAssignee: input.claimSourceAssignee,
+      claimedByUserId: input.claimedByUserId,
+      claimedAt: input.claimedAt,
       status: input.status,
       result: input.result,
       completedAt: input.completedAt,

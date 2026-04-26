@@ -30,6 +30,9 @@ interface WorkflowTaskRecord {
   instanceId: string
   nodeId: string
   assignee: string
+  claimSourceAssignee?: string
+  claimedByUserId?: string
+  claimedAt?: string
   status: "todo" | "completed" | "cancelled"
   result: "approved" | "rejected" | null
 }
@@ -42,6 +45,15 @@ interface WorkflowInstanceDetailRecord {
   currentNodeId: string | null
   currentTasks: WorkflowTaskRecord[]
   tasks: WorkflowTaskRecord[]
+}
+
+interface OperationLogRecord {
+  id: string
+  category: string
+  action: string
+  targetId: string
+  result: "success" | "failure"
+  details: Record<string, unknown> | null
 }
 
 type SmokeFailureCategory = "environment" | "dependency" | "test_case"
@@ -373,7 +385,7 @@ const run = async () => {
     await waitForHealth(90_000)
     lastStage = "module_readiness"
     await waitForRequiredModules(
-      ["auth", "customer", "workflow-definition"],
+      ["auth", "customer", "workflow-definition", "operation-log"],
       90_000,
     )
 
@@ -905,6 +917,19 @@ const run = async () => {
         `Claimed workflow task assignee mismatch (expected=${claimedAssignee}, received=${claimedTask?.assignee ?? "missing"})`,
       )
     }
+    if (claimedTask.claimSourceAssignee !== "role:admin") {
+      throw new Error(
+        `Claimed workflow task source assignee mismatch (expected=role:admin, received=${claimedTask.claimSourceAssignee ?? "missing"})`,
+      )
+    }
+    if (claimedTask.claimedByUserId !== loginPayload.user.id) {
+      throw new Error(
+        `Claimed workflow task claimer mismatch (expected=${loginPayload.user.id}, received=${claimedTask.claimedByUserId ?? "missing"})`,
+      )
+    }
+    if (!claimedTask.claimedAt) {
+      throw new Error("Claimed workflow task did not expose claimedAt")
+    }
 
     lastStage = "workflow_claim_todo_list"
     const claimedTodoResponse = await fetch(
@@ -955,7 +980,66 @@ const run = async () => {
         "Claimed workflow completion did not preserve the claimed assignee",
       )
     }
+    if (claimedDoneTask.claimSourceAssignee !== "role:admin") {
+      throw new Error(
+        "Claimed workflow completion did not preserve the original assignee snapshot",
+      )
+    }
     runningWorkflowInstanceIds.delete(claimedCompleted.id)
+
+    lastStage = "workflow_cancel_start"
+    const startCancellableResponse = await fetch(
+      `${baseUrl}/workflow/instances`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          definitionId: linearDefinition.id,
+          variables: {
+            amount: 200,
+          },
+        }),
+      },
+    )
+    await assertStatus(startCancellableResponse, 201)
+    const cancellableInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        startCancellableResponse,
+      )
+    runningWorkflowInstanceIds.add(cancellableInstance.id)
+
+    const cancellableTodoTask = cancellableInstance.currentTasks[0]
+    if (!cancellableTodoTask) {
+      throw new Error(
+        "Cancellable workflow start did not create a manager todo task",
+      )
+    }
+
+    lastStage = "workflow_cancel_execute"
+    const cancelWorkflowResponse = await fetch(
+      `${baseUrl}/workflow/instances/${cancellableInstance.id}/cancel`,
+      {
+        method: "POST",
+        headers: authHeader,
+      },
+    )
+    await assertStatus(cancelWorkflowResponse, 200)
+    const cancelledInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        cancelWorkflowResponse,
+      )
+    if (cancelledInstance.status !== "terminated") {
+      throw new Error(
+        `Expected cancelled workflow instance to be terminated, received ${cancelledInstance.status}`,
+      )
+    }
+    if (cancelledInstance.currentTasks.length !== 0) {
+      throw new Error("Cancelled workflow instance still has current tasks")
+    }
+    runningWorkflowInstanceIds.delete(cancelledInstance.id)
 
     lastStage = "workflow_instance_list"
     const workflowInstanceListResponse = await fetch(
@@ -983,6 +1067,135 @@ const run = async () => {
           `Workflow instance list does not include expected instance ${instanceId}`,
         )
       }
+    }
+
+    if (!instanceIds.has(cancelledInstance.id)) {
+      throw new Error(
+        `Workflow instance list does not include cancelled instance ${cancelledInstance.id}`,
+      )
+    }
+
+    lastStage = "workflow_audit_log_claim"
+    const claimAuditResponse = await fetch(
+      `${baseUrl}/system/operation-logs?category=workflow&action=workflow_task_claim`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(claimAuditResponse, 200)
+    const claimAuditPayload = await getResponseJson<{
+      items: OperationLogRecord[]
+    }>(claimAuditResponse)
+    const claimAudit = claimAuditPayload.items.find(
+      (item) => item.targetId === claimedTask.id,
+    )
+    if (!claimAudit) {
+      throw new Error("Workflow claim audit log is missing from operation logs")
+    }
+    if (claimAudit.result !== "success") {
+      throw new Error(
+        `Workflow claim audit result mismatch (expected=success, received=${claimAudit.result})`,
+      )
+    }
+    if (claimAudit.details?.assignee !== claimedAssignee) {
+      throw new Error(
+        `Workflow claim audit assignee mismatch (expected=${claimedAssignee}, received=${String(claimAudit.details?.assignee ?? "missing")})`,
+      )
+    }
+    if (claimAudit.details?.claimSourceAssignee !== "role:admin") {
+      throw new Error(
+        `Workflow claim audit source assignee mismatch (expected=role:admin, received=${String(claimAudit.details?.claimSourceAssignee ?? "missing")})`,
+      )
+    }
+    if (claimAudit.details?.claimedByUserId !== loginPayload.user.id) {
+      throw new Error(
+        `Workflow claim audit claimer mismatch (expected=${loginPayload.user.id}, received=${String(claimAudit.details?.claimedByUserId ?? "missing")})`,
+      )
+    }
+    if (!claimAudit.details?.claimedAt) {
+      throw new Error("Workflow claim audit did not expose claimedAt")
+    }
+
+    lastStage = "workflow_audit_log_complete"
+    const completeAuditResponse = await fetch(
+      `${baseUrl}/system/operation-logs?category=workflow&action=workflow_task_complete`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(completeAuditResponse, 200)
+    const completeAuditPayload = await getResponseJson<{
+      items: OperationLogRecord[]
+    }>(completeAuditResponse)
+    const completeAudit = completeAuditPayload.items.find(
+      (item) => item.targetId === claimedTask.id,
+    )
+    if (!completeAudit) {
+      throw new Error(
+        "Workflow completion audit log is missing from operation logs",
+      )
+    }
+    if (completeAudit.details?.assignee !== claimedAssignee) {
+      throw new Error(
+        `Workflow completion audit assignee mismatch (expected=${claimedAssignee}, received=${String(completeAudit.details?.assignee ?? "missing")})`,
+      )
+    }
+    if (completeAudit.details?.claimSourceAssignee !== "role:admin") {
+      throw new Error(
+        `Workflow completion audit source assignee mismatch (expected=role:admin, received=${String(completeAudit.details?.claimSourceAssignee ?? "missing")})`,
+      )
+    }
+    if (completeAudit.details?.claimedByUserId !== loginPayload.user.id) {
+      throw new Error(
+        `Workflow completion audit claimer mismatch (expected=${loginPayload.user.id}, received=${String(completeAudit.details?.claimedByUserId ?? "missing")})`,
+      )
+    }
+    if (completeAudit.details?.result !== "approved") {
+      throw new Error(
+        `Workflow completion audit result mismatch (expected=approved, received=${String(completeAudit.details?.result ?? "missing")})`,
+      )
+    }
+
+    lastStage = "workflow_audit_log_cancel"
+    const cancelAuditResponse = await fetch(
+      `${baseUrl}/system/operation-logs?category=workflow&action=workflow_instance_cancel`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(cancelAuditResponse, 200)
+    const cancelAuditPayload = await getResponseJson<{
+      items: OperationLogRecord[]
+    }>(cancelAuditResponse)
+    const cancelAudit = cancelAuditPayload.items.find(
+      (item) => item.targetId === cancelledInstance.id,
+    )
+    if (!cancelAudit) {
+      throw new Error(
+        "Workflow cancel audit log is missing from operation logs",
+      )
+    }
+    if (cancelAudit.details?.status !== "terminated") {
+      throw new Error(
+        `Workflow cancel audit status mismatch (expected=terminated, received=${String(cancelAudit.details?.status ?? "missing")})`,
+      )
+    }
+    const cancelledTasks = cancelAudit.details?.cancelledTasks
+    if (!Array.isArray(cancelledTasks) || cancelledTasks.length !== 1) {
+      throw new Error(
+        `Workflow cancel audit cancelledTasks mismatch (expected=1, received=${Array.isArray(cancelledTasks) ? cancelledTasks.length : "missing"})`,
+      )
+    }
+    const cancelledAuditTask = cancelledTasks[0] as Record<string, unknown>
+    if (cancelledAuditTask.id !== cancellableTodoTask.id) {
+      throw new Error(
+        `Workflow cancel audit task id mismatch (expected=${cancellableTodoTask.id}, received=${String(cancelledAuditTask.id ?? "missing")})`,
+      )
+    }
+    if (cancelledAuditTask.assignee !== "role:manager") {
+      throw new Error(
+        `Workflow cancel audit task assignee mismatch (expected=role:manager, received=${String(cancelledAuditTask.assignee ?? "missing")})`,
+      )
     }
 
     const reportPath = await writeSmokeReport({

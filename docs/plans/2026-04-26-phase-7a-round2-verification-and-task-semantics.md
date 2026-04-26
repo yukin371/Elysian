@@ -164,10 +164,12 @@
   - definition 动态创建
   - 线性 `approved` / `rejected`
   - 最小 `claim`（`role:admin -> user:<userId> -> complete`）
+  - 显式 instance cancel
   - 条件分支命中 finance 审批
   - `default` 分支直接结束
   - manager / finance todo 与 manager done 列表
   - instance list 包含 `completed / terminated` 结果
+  - workflow 审计日志中的 `claim / complete / cancel` 关键明细
 - 已补：
   - 高位随机端口，避免复用 `.env` 内的固定端口
   - Windows 下基于端口释放的 server 清理，降低 smoke 重跑时误连旧进程的风险
@@ -188,9 +190,9 @@
   - todo task 可被认领为当前用户，认领后 `assignee` 收敛为 `user:<userId>`
   - 若原 assignee 为 `role:<code>`，则要求当前用户命中对应 role code，super-admin 仍可兜底
   - 已认领 task 仅允许认领用户完成
-  - `done / history` 当前保留 claim 后的 `assignee`，不额外保留 claim 前候选快照
+  - `done / history` 当前保留 claim 后的 `assignee`，并在原任务记录内最小保留 `claimSourceAssignee / claimedByUserId / claimedAt`
 - 未扩面：
-  - 未新增 `candidate` / `claimedBy` 第二套字段
+  - 未新增独立 candidate owner、任务转移历史表或第二套 workflow history owner
   - 未引入 `transfer / delegate`
   - 未把 claim 语义扩到通知中心或前端工作台
 
@@ -242,7 +244,7 @@
 
 1. `packages/persistence` 的 workflow repository 独立测试已补到当前最小主线所需边界。
 2. workflow runtime smoke 已固定为可重复执行的真实执行路径回归入口。
-3. `claim` 已作为 Round-2 唯一新增任务动作收口，权限、seed、server 测试与 persistence 查询边界已同步。
+3. `claim` 已作为 Round-2 唯一新增任务动作收口，权限、seed、server 测试、persistence 查询边界与最小认领历史字段已同步。
 4. `transfer / delegate` 继续保留在评估占位，不进入本轮默认交付。
 
 ## 下一步建议

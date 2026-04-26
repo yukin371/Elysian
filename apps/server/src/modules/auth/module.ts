@@ -1,4 +1,5 @@
 import {
+  DEFAULT_TENANT_ID,
   type DatabaseClient,
   resetTenantContext,
   setTenantContext,
@@ -57,7 +58,9 @@ export const createAuthModule = (
           )
           const tenantId = body.tenantCode
             ? await resolveTenantIdByCodeOrThrow(body.tenantCode, options)
-            : null
+            : options.tenantContextDb
+              ? DEFAULT_TENANT_ID
+              : null
           const result = tenantId
             ? await withTenantContext(
                 options.tenantContextDb ?? throwMissingTenantContextDb(),

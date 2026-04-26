@@ -81,6 +81,9 @@ export interface UpdateWorkflowInstanceInput {
 
 export interface UpdateWorkflowTaskInput {
   assignee?: string
+  claimSourceAssignee?: string | null
+  claimedByUserId?: string | null
+  claimedAt?: Date | null
   status?: WorkflowTaskStatus
   result?: WorkflowTaskResult | null
   completedAt?: Date | null
@@ -468,6 +471,18 @@ export const createInMemoryWorkflowRepository = (
       const updated: WorkflowTaskState = {
         ...current,
         assignee: input.assignee ?? current.assignee,
+        claimSourceAssignee:
+          input.claimSourceAssignee !== undefined
+            ? (input.claimSourceAssignee ?? undefined)
+            : current.claimSourceAssignee,
+        claimedByUserId:
+          input.claimedByUserId !== undefined
+            ? (input.claimedByUserId ?? undefined)
+            : current.claimedByUserId,
+        claimedAt:
+          input.claimedAt !== undefined
+            ? (input.claimedAt?.toISOString() ?? undefined)
+            : current.claimedAt,
         status: input.status ?? current.status,
         result:
           input.result !== undefined ? (input.result ?? null) : current.result,
@@ -592,6 +607,11 @@ const mapWorkflowTaskRow = (row: WorkflowTaskRow): WorkflowTaskRecord => ({
   nodeId: row.nodeId,
   nodeName: row.nodeName,
   assignee: row.assignee,
+  ...(row.claimSourceAssignee
+    ? { claimSourceAssignee: row.claimSourceAssignee }
+    : {}),
+  ...(row.claimedByUserId ? { claimedByUserId: row.claimedByUserId } : {}),
+  ...(row.claimedAt ? { claimedAt: row.claimedAt.toISOString() } : {}),
   status: row.status,
   result: row.result,
   variables: row.variables,

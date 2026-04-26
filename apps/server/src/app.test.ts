@@ -1384,6 +1384,151 @@ describe("createServerApp", () => {
     )
   })
 
+  it("uses default tenant context for login when tenant context db is enabled", async () => {
+    const tenantContext = createTenantContextRecorder()
+    const fixture = await createAuthTestFixture({
+      tenantContextDb: tenantContext.db,
+    })
+    const app = createTestApp({
+      modules: [
+        createTenantContextModule(tenantContext.db, {
+          accessTokenSecret: testAccessTokenSecret,
+        }),
+        fixture.authModule,
+      ],
+    })
+
+    const loginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+
+    expect(loginResponse.status).toBe(200)
+    expect(tenantContext.statements).toContain(
+      `SET app.current_tenant = '${DEFAULT_TENANT_ID}'`,
+    )
+  })
+
+  it("keeps login scoped to the requested tenant when duplicate usernames exist across tenants", async () => {
+    const tenantAlphaId = "11111111-1111-4111-8111-111111111111"
+    const tenantAlphaCode = "tenant-alpha"
+    const tenantContext = createTenantContextRecorder()
+    const defaultPasswordHash = await createPasswordHash(testAdminPassword)
+    const tenantPasswordHash = await createPasswordHash("tenant-admin-123")
+    const repository = createInMemoryAuthRepository({
+      users: [
+        {
+          id: "user_default_admin",
+          username: "admin",
+          displayName: "Default Administrator",
+          passwordHash: defaultPasswordHash,
+          status: "active",
+          isSuperAdmin: true,
+          tenantId: DEFAULT_TENANT_ID,
+          lastLoginAt: null,
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        },
+        {
+          id: "user_tenant_admin",
+          username: "admin",
+          displayName: "Tenant Administrator",
+          passwordHash: tenantPasswordHash,
+          status: "active",
+          isSuperAdmin: false,
+          tenantId: tenantAlphaId,
+          lastLoginAt: null,
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        },
+      ],
+      roles: [
+        {
+          id: "role_default_admin",
+          code: "admin",
+          name: "Admin",
+          status: "active",
+          dataScope: 1,
+        },
+      ],
+      userRoles: [
+        {
+          userId: "user_default_admin",
+          roleId: "role_default_admin",
+        },
+        {
+          userId: "user_tenant_admin",
+          roleId: "role_default_admin",
+        },
+      ],
+    })
+    const app = createTestApp({
+      modules: [
+        createTenantContextModule(tenantContext.db, {
+          accessTokenSecret: testAccessTokenSecret,
+        }),
+        createAuthModule(repository, {
+          accessTokenSecret: testAccessTokenSecret,
+          refreshCookieName: "elysian_refresh_token",
+          tenantContextDb: tenantContext.db,
+          resolveTenantIdByCode: async (code) =>
+            code === tenantAlphaCode ? tenantAlphaId : null,
+        }),
+      ],
+    })
+
+    const defaultLoginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: testAdminPassword,
+        }),
+      }),
+    )
+    expect(defaultLoginResponse.status).toBe(200)
+    const defaultLoginBody = (await defaultLoginResponse.json()) as {
+      user: {
+        id: string
+        tenantId: string
+      }
+    }
+    expect(defaultLoginBody.user).toMatchObject({
+      id: "user_default_admin",
+      tenantId: DEFAULT_TENANT_ID,
+    })
+
+    const tenantLoginResponse = await app.handle(
+      new Request("http://localhost/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          username: "admin",
+          password: "tenant-admin-123",
+          tenantCode: tenantAlphaCode,
+        }),
+      }),
+    )
+    expect(tenantLoginResponse.status).toBe(200)
+    const tenantLoginBody = (await tenantLoginResponse.json()) as {
+      user: {
+        id: string
+        tenantId: string
+      }
+    }
+    expect(tenantLoginBody.user).toMatchObject({
+      id: "user_tenant_admin",
+      tenantId: tenantAlphaId,
+    })
+  })
+
   it("refreshes tokens and rotates the refresh session", async () => {
     const fixture = await createAuthTestFixture()
     const app = createTestApp({
@@ -4919,6 +5064,9 @@ describe("createServerApp", () => {
           nodeId: "admin-review",
           nodeName: "Admin Review",
           assignee: `user:${claimerFixture.userId}`,
+          claimSourceAssignee: "role:admin",
+          claimedByUserId: claimerFixture.userId,
+          claimedAt: expect.any(String),
           status: "todo",
           result: null,
           variables: {},
@@ -4935,6 +5083,9 @@ describe("createServerApp", () => {
           nodeId: "admin-review",
           nodeName: "Admin Review",
           assignee: `user:${claimerFixture.userId}`,
+          claimSourceAssignee: "role:admin",
+          claimedByUserId: claimerFixture.userId,
+          claimedAt: expect.any(String),
           status: "todo",
           result: null,
           variables: {},
@@ -4966,6 +5117,9 @@ describe("createServerApp", () => {
           nodeId: "admin-review",
           nodeName: "Admin Review",
           assignee: `user:${claimerFixture.userId}`,
+          claimSourceAssignee: "role:admin",
+          claimedByUserId: claimerFixture.userId,
+          claimedAt: expect.any(String),
           status: "todo",
           result: null,
           variables: {},
@@ -5028,6 +5182,9 @@ describe("createServerApp", () => {
           nodeId: "admin-review",
           nodeName: "Admin Review",
           assignee: `user:${claimerFixture.userId}`,
+          claimSourceAssignee: "role:admin",
+          claimedByUserId: claimerFixture.userId,
+          claimedAt: expect.any(String),
           status: "completed",
           result: "approved",
           variables: {},
@@ -5542,6 +5699,12 @@ describe("createServerApp", () => {
     )
     const secondStartedInstance = (await secondStartResponse.json()) as {
       id: string
+      currentTasks: Array<{ id: string }>
+    }
+    const secondTaskId = secondStartedInstance.currentTasks[0]?.id
+
+    if (!secondTaskId) {
+      throw new Error("Expected second workflow instance to create a todo task")
     }
 
     const cancelResponse = await cancelWorkflowInstance(
@@ -5572,6 +5735,15 @@ describe("createServerApp", () => {
       userAgent: "workflow-runtime-audit-agent",
       result: "success",
       details: {
+        cancelledTasks: [
+          {
+            id: secondTaskId,
+            assignee: "role:manager",
+            claimSourceAssignee: null,
+            claimedByUserId: null,
+            claimedAt: null,
+          },
+        ],
         status: "terminated",
         currentNodeId: null,
       },
@@ -5602,6 +5774,10 @@ describe("createServerApp", () => {
       userAgent: "workflow-runtime-audit-agent",
       result: "success",
       details: {
+        assignee: `user:${fixture.userId}`,
+        claimSourceAssignee: "role:manager",
+        claimedByUserId: fixture.userId,
+        claimedAt: expect.any(String),
         instanceId: startedInstance.id,
         result: "approved",
         status: "completed",
@@ -5618,6 +5794,10 @@ describe("createServerApp", () => {
       userAgent: "workflow-runtime-audit-agent",
       result: "success",
       details: {
+        assignee: `user:${fixture.userId}`,
+        claimSourceAssignee: "role:manager",
+        claimedByUserId: fixture.userId,
+        claimedAt: expect.any(String),
         instanceId: startedInstance.id,
         status: "running",
       },

@@ -140,7 +140,10 @@ export interface AuthDataScopeProfile {
 }
 
 export interface AuthRepository {
-  findUserByUsername: (username: string) => Promise<AuthUserRecord | null>
+  findUserByUsername: (
+    username: string,
+    tenantId?: string,
+  ) => Promise<AuthUserRecord | null>
   getUserById: (id: string) => Promise<AuthUserRecord | null>
   updateLastLoginAt: (userId: string, timestamp: string) => Promise<void>
   listRoleCodesForUser: (userId: string) => Promise<string[]>
@@ -210,8 +213,8 @@ export interface InMemoryAuthRepositorySeed {
 }
 
 export const createAuthRepository = (db: DatabaseClient): AuthRepository => ({
-  async findUserByUsername(username) {
-    const row = await getUserByUsername(db, username)
+  async findUserByUsername(username, tenantId) {
+    const row = await getUserByUsername(db, username, tenantId)
     return row ? mapUserRow(row) : null
   },
   async getUserById(id) {
@@ -305,9 +308,13 @@ export const createInMemoryAuthRepository = (
   const departments = [...(seed.departments ?? [])]
 
   return {
-    async findUserByUsername(username) {
+    async findUserByUsername(username, tenantId) {
       return (
-        [...users.values()].find((user) => user.username === username) ?? null
+        [...users.values()].find(
+          (user) =>
+            user.username === username &&
+            (tenantId === undefined || user.tenantId === tenantId),
+        ) ?? null
       )
     },
     async getUserById(id) {

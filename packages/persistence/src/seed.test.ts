@@ -5,6 +5,7 @@ import {
   createDefaultAuthSeedSpec,
   createTenantBootstrapSeedSpec,
   normalizeTenantInitOptions,
+  parseDefaultSeedCliArgs,
 } from "./seed"
 
 const defaultAdminPassword = ["admin", "123"].join("")
@@ -220,5 +221,19 @@ describe("normalizeTenantInitOptions", () => {
         adminPassword: " ",
       }),
     ).toThrow("adminPassword is required")
+  })
+})
+
+describe("parseDefaultSeedCliArgs", () => {
+  it("defaults to conservative seed behavior", () => {
+    expect(parseDefaultSeedCliArgs([])).toEqual({
+      reconcileAdminPassword: false,
+    })
+  })
+
+  it("enables admin password reconciliation when explicitly requested", () => {
+    expect(parseDefaultSeedCliArgs(["--reconcile-admin-password"])).toEqual({
+      reconcileAdminPassword: true,
+    })
   })
 })

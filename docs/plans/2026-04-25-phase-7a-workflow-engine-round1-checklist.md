@@ -78,22 +78,22 @@
 ### 阻断项
 
 - [ ] 若实例状态机仍依赖 notification 或 audit_log 才能表达，不允许继续推进
-- [ ] 若任务分派语义未明确，不进入 claim；complete 仅保留当前 assignee 直完结模型
+- [x] Round-1 阶段内不进入 claim；后续已在 Round-2 以最小语义单独补齐
 
 ## WP-3 Checklist：审批操作与历史
 
 ### 目标
 
-打通审批动作闭环，并保留最小历史查询；当前不进入 claim 语义。
+打通审批动作闭环，并保留最小历史查询；`claim` 在本清单对应的 Round-1 范围内暂不进入，已于后续 Round-2 单独补齐。
 
 ### 交付清单
 
-- [ ] claim 接口（当前简化范围暂不实现）
+- [x] claim 接口（已在 Round-2 作为唯一新增任务动作补齐）
 - [x] complete 接口（approved / rejected）
 - [x] cancel 接口
 - [x] done 列表 API
 - [x] 实例历史读取模型
-- [x] 最小 workflow 权限点与 seed
+- [x] 最小 workflow 权限点与 seed（后续已补 `workflow:task:claim`）
 
 ### 验证
 

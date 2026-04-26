@@ -332,6 +332,9 @@ export const createWorkflowModule = (
             targetId: params.id,
             details: {
               instanceId: detail.id,
+              ...buildWorkflowTaskAuditSummary(
+                detail.tasks.find((task) => task.id === params.id),
+              ),
               status: detail.status,
               currentNodeId: detail.currentNodeId,
             },
@@ -368,6 +371,9 @@ export const createWorkflowModule = (
             targetId: params.id,
             details: {
               instanceId: detail.id,
+              ...buildWorkflowTaskAuditSummary(
+                detail.tasks.find((task) => task.id === params.id),
+              ),
               result: body.result,
               status: detail.status,
               currentNodeId: detail.currentNodeId,
@@ -408,6 +414,12 @@ export const createWorkflowModule = (
             targetType: "workflow_instance",
             targetId: params.id,
             details: {
+              cancelledTasks: detail.tasks
+                .filter((task) => task.status === "cancelled")
+                .map((task) => ({
+                  id: task.id,
+                  ...buildWorkflowTaskAuditSummary(task),
+                })),
               status: detail.status,
               currentNodeId: detail.currentNodeId,
             },
@@ -445,6 +457,22 @@ const readOptionalHeader = (headers: Headers, key: string) => {
   const value = headers.get(key)?.trim()
   return value && value.length > 0 ? value : null
 }
+
+const buildWorkflowTaskAuditSummary = (
+  task:
+    | {
+        assignee: string
+        claimSourceAssignee?: string
+        claimedByUserId?: string
+        claimedAt?: string
+      }
+    | undefined,
+) => ({
+  assignee: task?.assignee ?? null,
+  claimSourceAssignee: task?.claimSourceAssignee ?? null,
+  claimedByUserId: task?.claimedByUserId ?? null,
+  claimedAt: task?.claimedAt ?? null,
+})
 
 const buildWorkflowAuditEvent = (
   headers: Headers,

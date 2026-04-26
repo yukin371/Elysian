@@ -163,16 +163,17 @@
 - `WP-1` 已落地：definition contract、节点类型白名单、定义 CRUD 与版本化已打通。
 - `WP-2` 已落地：instance/task schema、实例发起、实例列表/详情、todo 列表与 tenant 隔离已打通。
 - `WP-3` 已落地最小闭环：done 列表、`approved / rejected` 完成、实例取消、实例历史任务读取已打通。
+- `WP-3` 后续收口已补：`claim` 已在 `Round-2` 作为唯一新增任务动作落地，并补独立权限点、最小所有权历史与审计证据。
 - `WP-4` 已落地最小条件分支：当前支持基于实例变量的白名单比较表达式与唯一 `default` 分支；命中后可进入 approval 或 end。
 - workflow 权限已完成最小拆分：
   - `workflow:definition:list/create/update`
   - `workflow:instance:list/start/cancel`
-  - `workflow:task:list/complete`
-- 当前刻意暂缓：
-  - `claim` 语义
+  - `workflow:task:list/claim/complete`
+- 当前仍刻意暂缓：
+  - `transfer / delegate`
   - 更复杂条件语义与脚本节点
 - 当前权限策略：
-  - 已不再复用 definition 权限承载 runtime 操作，但仍保持在 definition / instance / task 三组最小粒度内，不继续下钻到 claim/transfer/delegate。
+  - 已不再复用 definition 权限承载 runtime 操作，并已在 task 组内下钻到 `claim / complete`；当前仍不继续扩到 `transfer / delegate`。
 
 ### WP-4 条件分支最小闭环
 

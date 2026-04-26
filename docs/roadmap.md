@@ -6,7 +6,7 @@
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A Round-1` 的最小 workflow 闭环已落地，`Round-2` 也已在 `2026-04-26` 完成收口，当前阶段结果固定为“workflow 验证闭环 + 最小 `claim` 语义”，不默认继续外扩到 `transfer / delegate`。`Phase 6B` 的多租户、数据权限、租户治理、`ADR-0009`、CI tenant e2e、`feature/dev/main` 的 `10/10` 滚动观察均已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 再次确认阶段出口。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A Round-1` 的最小 workflow 闭环已落地，`Round-2` 也已在 `2026-04-26` 完成收口，当前阶段结果固定为“workflow 验证闭环 + 最小 `claim` 语义与最小所有权历史保留”，不默认继续外扩到 `transfer / delegate`。`Phase 6B` 的多租户、数据权限、租户治理、`ADR-0009`、CI tenant e2e、`feature/dev/main` 的 `10/10` 滚动观察均已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 再次确认阶段出口。
 
 ### Current Mainline: Phase 7 / P7A ✅ Round-2 已收口
 
@@ -20,8 +20,11 @@
 - 已推进：workflow 权限已拆分为 definition / instance / task 三组最小权限点，并已补独立 `workflow:task:claim`、server 403 覆盖与默认 seed
 - 已完成：`2026-04-26` 本地自动化回归复验通过，`bun run check`、workflow 定向测试与 `bun run build:vue` 均已通过；详见 [2026-04-26-round-regression-closeout.md](./plans/2026-04-26-round-regression-closeout.md)
 - 已推进：`packages/persistence` 已新增 workflow repository 独立测试，当前覆盖 definition 版本唯一性、next version 计算、todo/done 查询边界、实例任务排序与取消语义；tenant RLS 仍继续依赖 server 集成测试与真实 PostgreSQL E2E 验证
-- 已推进：workflow 真实运行态 smoke 已并入既有 `e2e:smoke`，当前覆盖 definition 创建、线性 `approved/rejected`、最小 `claim`、条件分支命中与 `default` 分支、todo/done 与 instance list，并补高位随机端口与 Windows 端口释放清理，支持临时 PostgreSQL 库下重复执行
-- 已推进：workflow runtime 成功动作已补最小审计证据，当前对 `instance start / task claim / task complete / instance cancel` 写入 `category=workflow` 的 audit log，继续复用既有 operation log/audit log owner，而不新建第二套历史模型
+- 已推进：workflow 真实运行态 smoke 已并入既有 `e2e:smoke`，当前覆盖 definition 创建、线性 `approved/rejected`、最小 `claim`、显式 instance cancel、条件分支命中与 `default` 分支、todo/done、instance list 与 workflow 审计日志校验，并补高位随机端口与 Windows 端口释放清理，支持临时 PostgreSQL 库下重复执行
+- 已推进：workflow runtime 成功动作已补最小审计证据，当前对 `instance start / task claim / task complete / instance cancel` 写入 `category=workflow` 的 audit log；其中 `task claim / complete` 会携带最小 ownership context，`instance cancel` 会携带被取消待办快照，继续复用既有 operation log/audit log owner，而不新建第二套历史模型
+- 已推进：workflow task 在 `claim` 后会于原任务记录内保留最小所有权历史（`claimSourceAssignee / claimedByUserId / claimedAt`），用于 done/history 与审计辅助判断，但不扩成 `transfer / delegate` 或独立历史 owner
+- 已清理风险：启用 `tenant-context` 数据库上下文时，`/auth/login` 在未传 `tenantCode` 的情况下默认收敛到 `DEFAULT_TENANT_ID`，避免同名用户跨租户误登录
+- 已清理风险：`e2e:smoke:full` 已改为执行 `db:seed -- --reconcile-admin-password`，降低本地脏库因默认管理员密码漂移导致的假失败
 - 当前结论：`Round-2` exit gate 已满足，当前按“验证补齐 + 最小 `claim` 收口”结束本轮，不把 `transfer / delegate` 拉入实现
 - PRD 文档：[2026-04-24-system-design-v2-prd.md](./plans/2026-04-24-system-design-v2-prd.md)
 - 启动文档：[2026-04-25-phase-7a-workflow-engine-kickoff.md](./plans/2026-04-25-phase-7a-workflow-engine-kickoff.md)

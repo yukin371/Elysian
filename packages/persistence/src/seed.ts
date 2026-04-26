@@ -1,5 +1,6 @@
 import { and, eq, inArray } from "drizzle-orm"
 
+import { updateUserPasswordHash } from "./auth"
 import { type DatabaseClient, createDatabaseClient } from "./client"
 import {
   dictionaryItems,
@@ -24,6 +25,10 @@ export interface DefaultAuthSeedConfig {
   adminUsername: string
   adminPassword: string
   adminDisplayName: string
+}
+
+export interface DefaultSeedCliOptions {
+  reconcileAdminPassword: boolean
 }
 
 const defaultAdminPassword = ["admin", "123"].join("")
@@ -233,6 +238,10 @@ const defaultAuthSeedConfig: DefaultAuthSeedConfig = {
   adminUsername: "admin",
   adminPassword: defaultAdminPassword,
   adminDisplayName: "Administrator",
+}
+
+const defaultSeedCliOptions: DefaultSeedCliOptions = {
+  reconcileAdminPassword: false,
 }
 
 export const createDefaultAuthSeedConfig = (
@@ -1294,9 +1303,14 @@ export const normalizeTenantInitOptions = (
 export const seedDefaultAuthData = async (
   db: DatabaseClient,
   config: Partial<DefaultAuthSeedConfig> = {},
+  options: Partial<DefaultSeedCliOptions> = {},
 ) => {
   const spec = createDefaultAuthSeedSpec(config)
   const tid = DEFAULT_TENANT_ID
+  const resolvedOptions = {
+    ...defaultSeedCliOptions,
+    ...options,
+  }
 
   return withTenantSeedContext(db, tid, async () => {
     await db
@@ -1356,6 +1370,14 @@ export const seedDefaultAuthData = async (
       })
     }
 
+    let reconciledAdminPassword = false
+
+    if (existingAdmin[0] && resolvedOptions.reconcileAdminPassword) {
+      const adminPasswordHash = await Bun.password.hash(spec.adminUser.password)
+      await updateUserPasswordHash(db, existingAdmin[0].id, adminPasswordHash)
+      reconciledAdminPassword = true
+    }
+
     await db
       .insert(userRoles)
       .values(spec.userRoles)
@@ -1374,6 +1396,7 @@ export const seedDefaultAuthData = async (
     return {
       adminUsername: spec.adminUser.username,
       insertedAdmin: !existingAdmin[0],
+      reconciledAdminPassword,
     }
   })
 }
@@ -1421,19 +1444,26 @@ export const initializeTenant = async (
 
 export const runDefaultSeed = async (
   env: Record<string, string | undefined> = process.env,
+  options: Partial<DefaultSeedCliOptions> = {},
 ) => {
   const db = createDatabaseClient(env)
   try {
     const config = createDefaultAuthSeedConfig(env)
-    const result = await seedDefaultAuthData(db, config)
+    const result = await seedDefaultAuthData(db, config, options)
 
     console.log(
-      `[elysian] default auth seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin})`,
+      `[elysian] default auth seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin}, reconciledPassword=${result.reconciledAdminPassword})`,
     )
   } finally {
     await db.$client.end()
   }
 }
+
+export const parseDefaultSeedCliArgs = (
+  args: string[],
+): DefaultSeedCliOptions => ({
+  reconcileAdminPassword: args.includes("--reconcile-admin-password"),
+})
 
 const seedTenantBootstrapData = async (
   db: DatabaseClient,
@@ -1754,5 +1784,8 @@ const throwMissingSeedRelation = (type: string, value: string): never => {
 }
 
 if (import.meta.main) {
-  await runDefaultSeed()
+  await runDefaultSeed(
+    process.env,
+    parseDefaultSeedCliArgs(process.argv.slice(2)),
+  )
 }

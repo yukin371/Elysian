@@ -170,7 +170,10 @@ export const createAuthService = (
       password: string,
       context: AuthSessionContext = {},
     ) {
-      const user = await repository.findUserByUsername(username)
+      const user = await repository.findUserByUsername(
+        username,
+        context.tenantId ?? undefined,
+      )
 
       if (!user) {
         await recordAudit({

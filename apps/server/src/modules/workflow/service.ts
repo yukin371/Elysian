@@ -402,9 +402,13 @@ export const createWorkflowService = (repository: WorkflowRepository) => ({
     }
 
     requireClaimableWorkflowTask(task.assignee, actor, taskId)
+    const claimedAt = new Date()
 
     await repository.updateTask(tenantId, taskId, {
       assignee: buildWorkflowUserAssignee(actor.userId),
+      claimSourceAssignee: task.assignee,
+      claimedByUserId: actor.userId,
+      claimedAt,
     })
 
     const detail = await repository.getInstanceById(tenantId, task.instanceId)

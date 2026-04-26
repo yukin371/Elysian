@@ -119,6 +119,9 @@ export interface WorkflowTaskRecord {
   nodeId: string
   nodeName: string
   assignee: string
+  claimSourceAssignee?: string
+  claimedByUserId?: string
+  claimedAt?: string
   status: WorkflowTaskStatus
   result: WorkflowTaskResult | null
   variables: Record<string, unknown>

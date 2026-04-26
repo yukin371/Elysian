@@ -38,6 +38,7 @@
 - `bun run check`
 - `bun run test apps/server/src/app.test.ts packages/schema/src/index.test.ts packages/persistence/src/seed.test.ts`
 - `bun run build:vue`
+- `bun run e2e:smoke:full`
 
 ### 通过要点
 
@@ -46,18 +47,18 @@
 - Vue 企业预设相关测试通过，权限 gate 与 locale fallback 行为通过
 - `apps/example-vue` 生产构建通过，当前构建输出已收敛为 `vendor-vue` + 业务分块，不再出现独立 `vendor-tdesign` 大包
 - `husky` 已接管本地 hooks，且水印检测规则已修正为只检查新增行，避免规则文档误判
+- 真实 PostgreSQL smoke 已通过，确认 workflow `claim / cancel / audit log` 链路、`/auth/login` 默认 tenant 收敛与默认管理员密码 reconcile 后的本地脏库重跑路径可用
 
 ## 未完成的验证
 
 ### 环境阻塞
 
-- 未执行 `bun run e2e:smoke:full`
 - 未执行 `bun run e2e:tenant:full`
 
 原因：
 
-- 当前工作区缺少 `.env`
-- 因而无法确认本机 `DATABASE_URL` 与 `ACCESS_TOKEN_SECRET` 是否可用于真实环境回归
+- 已通过显式环境变量完成 `e2e:smoke:full`，无需依赖本地 `.env`
+- 当前仍未确认本机是否具备可继续执行 `e2e:tenant:full` 的 PostgreSQL 环境与对应验证窗口
 
 ### 手工验证空缺
 
@@ -69,21 +70,22 @@
 
 - 自动化回归：已收口
 - 文档一致性：已补齐
-- 真实环境回归：待补
+- 真实环境回归：`e2e:smoke:full` 已补，`e2e:tenant:full` 待补
 - 手工 UI 回归：待补
 
 当前可以把本轮视为：
 
 - `P7A Round-1` 后端最小闭环的自动化回归已通过
 - `TDesign` 迁移与 `husky` 替换的代码级回归已通过
-- 后续进入下一轮前，若要作为“完整阶段出口”使用，仍建议补一次真实环境与手工 UI 验证
+- workflow Round-2 收口后的真实 smoke 复验已通过
+- 后续进入下一轮前，若要作为“完整阶段出口”使用，仍建议补 tenant 真实环境与手工 UI 验证
 
 ## 建议下一步
 
-1. 在补齐 `.env` 后执行 `bun run e2e:smoke:full`
-2. 若本机具备 PostgreSQL，再执行 `bun run e2e:tenant:full`
+1. 若本机具备 PostgreSQL，再执行 `bun run e2e:tenant:full`
+2. 对 `e2e:smoke:full` 的通过结论继续保持“auth 默认 tenant + seed reconcile”前提，不回退到旧的非确定性 seed 路径
 3. 对 `apps/example-vue` 做一次浏览器级手工巡检，重点覆盖：
    - 角色管理 / 菜单管理 / 部门管理左侧列表
    - 标题两行场景，如 `bun-first` / `11 个节点`
    - `zh-CN / en-US` 切换与回退文案
-4. 若以上通过，再评估 `P7A Round-1` 是否进入下一轮
+4. 若以上通过，再评估 `P7A Round-1` / `Round-2` 收口结果是否进入下一轮

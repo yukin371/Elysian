@@ -156,11 +156,16 @@ export interface ListAuditLogsPersistenceFilter {
 export const getUserByUsername = async (
   db: DatabaseClient,
   username: string,
+  tenantId?: string,
 ): Promise<UserRow | null> => {
   const [row] = await db
     .select()
     .from(users)
-    .where(eq(users.username, username))
+    .where(
+      tenantId
+        ? and(eq(users.username, username), eq(users.tenantId, tenantId))
+        : eq(users.username, username),
+    )
     .limit(1)
 
   return row ?? null

@@ -27,7 +27,7 @@
     "stack:down": "docker compose down",
     "stack:reset": "docker compose down -v",
     "e2e:smoke": "bun scripts/e2e-smoke.ts",
-    "e2e:smoke:full": "bun run db:migrate && bun run db:seed && bun run e2e:smoke",
+    "e2e:smoke:full": "bun run db:migrate && bun run db:seed -- --reconcile-admin-password && bun run e2e:smoke",
     "e2e:tenant": "bun scripts/e2e-tenant-isolation.ts",
     "e2e:tenant:full": "bun run db:migrate && bun run db:seed && bun run e2e:tenant",
     "e2e:smoke:diagnose": "bun scripts/e2e-smoke-report-diagnose.ts",

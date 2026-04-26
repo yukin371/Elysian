@@ -362,6 +362,7 @@ describe("workflow persistence", () => {
 
   it("updates todo task assignee without moving it across status buckets", async () => {
     await withWorkflowTestDb(async ({ db }) => {
+      const claimedByUserId = "11111111-1111-4111-8111-111111111111"
       const definition = await insertWorkflowDefinition(db, {
         tenantId: tenantAlphaId,
         key: "expense-approval",
@@ -391,9 +392,17 @@ describe("workflow persistence", () => {
 
       const updatedTask = await updateWorkflowTask(db, task.id, {
         assignee: "user:reviewer-1",
+        claimSourceAssignee: "role:manager",
+        claimedByUserId,
+        claimedAt: new Date("2026-04-26T10:00:00.000Z"),
       })
 
       expect(updatedTask?.assignee).toBe("user:reviewer-1")
+      expect(updatedTask?.claimSourceAssignee).toBe("role:manager")
+      expect(updatedTask?.claimedByUserId).toBe(claimedByUserId)
+      expect(updatedTask?.claimedAt?.toISOString()).toBe(
+        "2026-04-26T10:00:00.000Z",
+      )
       expect(updatedTask?.status).toBe("todo")
       expect(
         await listWorkflowTodoTasks(db, {
@@ -527,6 +536,9 @@ create table workflow_tasks (
   node_id text not null,
   node_name text not null,
   assignee text not null,
+  claim_source_assignee text,
+  claimed_by_user_id uuid,
+  claimed_at timestamp with time zone,
   status workflow_task_status not null default 'todo',
   result workflow_task_result,
   variables jsonb not null default '{}'::jsonb,
