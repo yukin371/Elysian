@@ -62,7 +62,8 @@ const ensureRequiredEnv = () => {
 }
 
 const resolvedPort =
-  process.env.PORT ?? (31_000 + Math.floor(Math.random() * 1_000)).toString()
+  process.env.ELYSIAN_TENANT_PORT ??
+  (31_000 + Math.floor(Math.random() * 1_000)).toString()
 const baseUrl = `http://127.0.0.1:${resolvedPort}`
 
 const resolveTenantReportDir = () =>

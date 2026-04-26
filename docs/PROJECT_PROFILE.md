@@ -116,6 +116,7 @@
 - `bun run e2e:smoke:full` 当前会执行 `bun run db:seed -- --reconcile-admin-password`，用于在本地已存在默认管理员但密码已漂移的数据库上保持 smoke 重跑确定性。
 - 已新增 `bun run e2e:smoke:diagnose`，可基于 smoke 报告输出诊断结论与建议动作；CI `e2e-smoke` 已接入该诊断步骤并归档诊断结果。
 - 已新增 `bun run e2e:tenant` 与 `bun run e2e:tenant:full`，用于真实 PostgreSQL 下验证 tenant init 幂等、super-admin 租户管理授权、customer 跨租户隔离、RLS 与 `tenant_id` 外键约束。
+- `scripts/e2e-tenant-isolation.ts` 当前已改为优先读取 `ELYSIAN_TENANT_PORT`，默认走随机高位端口，不再受通用 `PORT` 环境变量污染影响。
 - 已新增 `bun run e2e:tenant:stability:snapshot`，用于把单次 tenant e2e 结果沉淀为稳定性快照（含 run 元数据）；CI `e2e-tenant` 已接入并随 artifact 归档。
 - 已新增 `bun run e2e:tenant:stability:evidence`，用于对多次下载的 tenant 稳定性快照做窗口汇总并输出“继续观察 / 可进入下一步”的证据报告。
 - 已新增 `bun run e2e:tenant:stability:collect` 与 `bun run e2e:tenant:upgrade:finalize:from-downloads`，用于把下载的 tenant snapshot artifact 归拢后串联 evidence / decision / gate，减少观察窗口收尾遗漏。

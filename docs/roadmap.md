@@ -149,6 +149,7 @@
 - 已清理风险：`db:seed` 已补 tenant context 设置与 tenant-aware conflict 目标，降低真实 PostgreSQL 下的 RLS/唯一约束错位风险
 - 已清理风险：customer 创建链路已补 `identity.user.tenantId` 透传，避免写入错误回退到 `DEFAULT_TENANT_ID`
 - 已清理风险：`db:seed`、`tenant:init` 与 tenant e2e harness 已补显式数据库连接回收，降低重复执行时的连接耗尽风险
+- 已清理风险：tenant e2e harness 已改为优先读取 `ELYSIAN_TENANT_PORT`，默认走随机高位端口，避免本机旧进程占用通用 `PORT` 时误连错误实例
 - 已完成验证：`bun run check` 与 `bun run e2e:tenant:full` 已通过，覆盖 tenant init 幂等、super-admin 租户管理授权、customer 跨租户隔离、RLS 与 `tenant_id` 外键约束
 - 已完成：`P6B3 / WP-4 ADR-0009`，已归档多租户升级与验证策略，固定默认租户/非默认租户初始化分离、真实 PostgreSQL 验证门槛与连接回收要求
 - 已完成：CI 已接入 `e2e-tenant` 作业，复用 `e2e:tenant:full` 与 PostgreSQL service 执行真实租户隔离验证并归档报告
