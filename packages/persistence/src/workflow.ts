@@ -58,6 +58,7 @@ export interface UpdateWorkflowInstancePersistenceInput {
 }
 
 export interface UpdateWorkflowTaskPersistenceInput {
+  assignee?: string
   status?: "todo" | "completed" | "cancelled"
   result?: "approved" | "rejected" | null
   completedAt?: Date | null
@@ -314,6 +315,7 @@ export async function updateWorkflowTask(
   const [row] = await db
     .update(workflowTasks)
     .set({
+      assignee: input.assignee,
       status: input.status,
       result: input.result,
       completedAt: input.completedAt,

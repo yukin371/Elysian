@@ -194,6 +194,7 @@ const defaultAuthSeedIds = {
     workflowInstanceCancel: "00000000-0000-0000-0000-000000000199",
     workflowTaskList: "00000000-0000-0000-0000-0000000001a0",
     workflowTaskComplete: "00000000-0000-0000-0000-0000000001a1",
+    workflowTaskClaim: "00000000-0000-0000-0000-0000000001a2",
     customerList: "00000000-0000-0000-0000-000000000201",
     customerCreate: "00000000-0000-0000-0000-000000000202",
     customerUpdate: "00000000-0000-0000-0000-000000000203",
@@ -619,6 +620,15 @@ export const createDefaultAuthSeedSpec = (
         action: "list",
         name: "List workflow tasks",
         description: "View workflow todo and done task lists",
+      },
+      {
+        id: defaultAuthSeedIds.permissions.workflowTaskClaim,
+        code: "workflow:task:claim",
+        module: "workflow",
+        resource: "task",
+        action: "claim",
+        name: "Claim workflow task",
+        description: "Claim workflow tasks for the current user",
       },
       {
         id: defaultAuthSeedIds.permissions.workflowTaskComplete,
@@ -1069,6 +1079,10 @@ export const createDefaultAuthSeedSpec = (
       {
         roleId: defaultAuthSeedIds.roles.admin,
         permissionId: defaultAuthSeedIds.permissions.workflowTaskList,
+      },
+      {
+        roleId: defaultAuthSeedIds.roles.admin,
+        permissionId: defaultAuthSeedIds.permissions.workflowTaskClaim,
       },
       {
         roleId: defaultAuthSeedIds.roles.admin,

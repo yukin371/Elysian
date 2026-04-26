@@ -48,6 +48,7 @@ import type {
   CreateCustomerInput,
   CustomerRepository,
 } from "./modules/customer"
+import type { WorkflowModuleOptions } from "./modules/workflow"
 
 const testAccessTokenSecret = ["test", "access", "secret"].join("-")
 const testAdminPassword = ["admin", "123"].join("")
@@ -74,6 +75,142 @@ const createTestApp = (
     logger: silentLogger,
     modules: options.modules,
   })
+
+const loginAsAdmin = async (app: ReturnType<typeof createTestApp>) => {
+  const response = await app.handle(
+    new Request("http://localhost/auth/login", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        username: "admin",
+        password: testAdminPassword,
+      }),
+    }),
+  )
+  const body = (await response.json()) as {
+    accessToken: string
+  }
+
+  return body.accessToken
+}
+
+const createAuthorizedHeaders = (
+  accessToken: string,
+  extraHeaders: Record<string, string> = {},
+) => ({
+  authorization: `Bearer ${accessToken}`,
+  ...extraHeaders,
+})
+
+const startWorkflowInstance = async (
+  app: ReturnType<typeof createTestApp>,
+  accessToken: string,
+  body: {
+    definitionId: string
+    variables?: Record<string, unknown>
+  },
+  extraHeaders: Record<string, string> = {},
+) =>
+  app.handle(
+    new Request("http://localhost/workflow/instances", {
+      method: "POST",
+      headers: {
+        ...createAuthorizedHeaders(accessToken, extraHeaders),
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }),
+  )
+
+const claimWorkflowTask = async (
+  app: ReturnType<typeof createTestApp>,
+  accessToken: string,
+  taskId: string,
+  extraHeaders: Record<string, string> = {},
+) =>
+  app.handle(
+    new Request(`http://localhost/workflow/tasks/${taskId}/claim`, {
+      method: "POST",
+      headers: createAuthorizedHeaders(accessToken, extraHeaders),
+    }),
+  )
+
+const completeWorkflowTask = async (
+  app: ReturnType<typeof createTestApp>,
+  accessToken: string,
+  taskId: string,
+  result: "approved" | "rejected",
+  extraHeaders: Record<string, string> = {},
+) =>
+  app.handle(
+    new Request(`http://localhost/workflow/tasks/${taskId}/complete`, {
+      method: "POST",
+      headers: {
+        ...createAuthorizedHeaders(accessToken, extraHeaders),
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        result,
+      }),
+    }),
+  )
+
+const cancelWorkflowInstance = async (
+  app: ReturnType<typeof createTestApp>,
+  accessToken: string,
+  instanceId: string,
+  extraHeaders: Record<string, string> = {},
+) =>
+  app.handle(
+    new Request(`http://localhost/workflow/instances/${instanceId}/cancel`, {
+      method: "POST",
+      headers: createAuthorizedHeaders(accessToken, extraHeaders),
+    }),
+  )
+
+const createWorkflowTestHarness = async (
+  options: {
+    fixture?: Awaited<ReturnType<typeof createAuthTestFixture>>
+    permissions?: string[]
+    isSuperAdmin?: boolean
+    definitions?: WorkflowDefinitionRecord[]
+    workflowRepository?: ReturnType<
+      typeof createInMemoryWorkflowDefinitionRepository
+    >
+    auditLogWriter?: WorkflowModuleOptions["auditLogWriter"]
+  } = {},
+) => {
+  const fixture =
+    options.fixture ??
+    (await createAuthTestFixture({
+      permissions: options.permissions ?? [...workflowAllPermissionCodes],
+      isSuperAdmin: options.isSuperAdmin ?? false,
+    }))
+  const workflowRepository =
+    options.workflowRepository ??
+    createInMemoryWorkflowDefinitionRepository(
+      options.definitions ?? createWorkflowDefinitionSeedRecords(),
+    )
+  const app = createTestApp({
+    modules: [
+      fixture.authModule,
+      createWorkflowModule(workflowRepository, {
+        authGuard: fixture.authGuard,
+        auditLogWriter: options.auditLogWriter,
+      }),
+    ],
+  })
+  const accessToken = await loginAsAdmin(app)
+
+  return {
+    fixture,
+    workflowRepository,
+    app,
+    accessToken,
+  }
+}
 
 const createAuthTestFixture = async (
   options: {
@@ -533,6 +670,35 @@ const createWorkflowDefinitionSeedRecords = (): WorkflowDefinitionRecord[] => [
   },
 ]
 
+const createClaimableWorkflowDefinitionSeedRecords =
+  (): WorkflowDefinitionRecord[] => [
+    {
+      id: "workflow_definition_claimable_v1",
+      key: "expense-approval-claimable",
+      name: "Expense Approval Claimable",
+      version: 1,
+      status: "active" as const,
+      definition: {
+        nodes: [
+          { id: "start", type: "start", name: "Start" },
+          {
+            id: "admin-review",
+            type: "approval",
+            name: "Admin Review",
+            assignee: "role:admin",
+          },
+          { id: "approved", type: "end", name: "Approved" },
+        ],
+        edges: [
+          { from: "start", to: "admin-review" },
+          { from: "admin-review", to: "approved" },
+        ],
+      },
+      createdAt: "2026-04-21T02:05:00.000Z",
+      updatedAt: "2026-04-21T02:05:00.000Z",
+    },
+  ]
+
 const createConditionalWorkflowDefinitionSeedRecords =
   (): WorkflowDefinitionRecord[] => [
     {
@@ -597,6 +763,7 @@ const workflowRuntimePermissionCodes = [
   "workflow:instance:start",
   "workflow:instance:cancel",
   "workflow:task:list",
+  "workflow:task:claim",
   "workflow:task:complete",
 ] as const
 
@@ -4319,52 +4486,14 @@ describe("createServerApp", () => {
   })
 
   it("starts workflow instances and lists todo tasks", async () => {
-    const fixture = await createAuthTestFixture({
-      permissions: [...workflowAllPermissionCodes],
-      isSuperAdmin: false,
-    })
-    const workflowRepository = createInMemoryWorkflowDefinitionRepository(
-      createWorkflowDefinitionSeedRecords(),
-    )
-    const app = createTestApp({
-      modules: [
-        fixture.authModule,
-        createWorkflowModule(workflowRepository, {
-          authGuard: fixture.authGuard,
-        }),
-      ],
-    })
-    const loginResponse = await app.handle(
-      new Request("http://localhost/auth/login", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "admin",
-          password: testAdminPassword,
-        }),
-      }),
-    )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const { app, accessToken, fixture } = await createWorkflowTestHarness()
 
-    const startResponse = await app.handle(
-      new Request("http://localhost/workflow/instances", {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          definitionId: "workflow_definition_expense_v1",
-          variables: {
-            amount: 1200,
-          },
-        }),
-      }),
-    )
+    const startResponse = await startWorkflowInstance(app, accessToken, {
+      definitionId: "workflow_definition_expense_v1",
+      variables: {
+        amount: 1200,
+      },
+    })
 
     expect(startResponse.status).toBe(201)
     const startedInstance = (await startResponse.json()) as {
@@ -4437,7 +4566,7 @@ describe("createServerApp", () => {
     const listInstancesResponse = await app.handle(
       new Request("http://localhost/workflow/instances", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -4469,7 +4598,7 @@ describe("createServerApp", () => {
     const getInstanceResponse = await app.handle(
       new Request(`http://localhost/workflow/instances/${startedInstance.id}`, {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -4535,7 +4664,7 @@ describe("createServerApp", () => {
         "http://localhost/workflow/tasks/todo?assignee=role:manager",
         {
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
           },
         },
       ),
@@ -4711,53 +4840,216 @@ describe("createServerApp", () => {
     })
   })
 
-  it("routes workflow instances through the conditional approval branch", async () => {
-    const fixture = await createAuthTestFixture({
+  it("claims workflow tasks for the current user and restricts completion to the claimer", async () => {
+    const claimerFixture = await createAuthTestFixture({
+      permissions: [...workflowAllPermissionCodes],
+      isSuperAdmin: false,
+    })
+    const peerFixture = await createAuthTestFixture({
       permissions: [...workflowAllPermissionCodes],
       isSuperAdmin: false,
     })
     const workflowRepository = createInMemoryWorkflowDefinitionRepository(
-      createConditionalWorkflowDefinitionSeedRecords(),
+      createClaimableWorkflowDefinitionSeedRecords(),
     )
-    const app = createTestApp({
+    const claimerApp = createTestApp({
       modules: [
-        fixture.authModule,
+        claimerFixture.authModule,
         createWorkflowModule(workflowRepository, {
-          authGuard: fixture.authGuard,
+          authGuard: claimerFixture.authGuard,
         }),
       ],
     })
-    const loginResponse = await app.handle(
-      new Request("http://localhost/auth/login", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "admin",
-          password: testAdminPassword,
+    const peerApp = createTestApp({
+      modules: [
+        peerFixture.authModule,
+        createWorkflowModule(workflowRepository, {
+          authGuard: peerFixture.authGuard,
         }),
-      }),
+      ],
+    })
+
+    const claimerAccessToken = await loginAsAdmin(claimerApp)
+    const peerAccessToken = await loginAsAdmin(peerApp)
+
+    const startResponse = await startWorkflowInstance(
+      claimerApp,
+      claimerAccessToken,
+      {
+        definitionId: "workflow_definition_claimable_v1",
+      },
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
+    const startedInstance = (await startResponse.json()) as {
+      id: string
+      currentTasks: Array<{ id: string }>
+    }
+    const taskId = startedInstance.currentTasks[0]?.id
+
+    if (!taskId) {
+      throw new Error("Expected workflow instance to create a claimable task")
     }
 
-    const startResponse = await app.handle(
-      new Request("http://localhost/workflow/instances", {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          definitionId: "workflow_definition_expense_condition_v1",
-          variables: {
-            amount: 6800,
-          },
-        }),
-      }),
+    const claimResponse = await claimWorkflowTask(
+      claimerApp,
+      claimerAccessToken,
+      taskId,
     )
+
+    expect(claimResponse.status).toBe(200)
+    expect(await claimResponse.json()).toEqual({
+      id: startedInstance.id,
+      definitionId: "workflow_definition_claimable_v1",
+      definitionKey: "expense-approval-claimable",
+      definitionName: "Expense Approval Claimable",
+      definitionVersion: 1,
+      status: "running",
+      currentNodeId: "admin-review",
+      variables: {},
+      startedByUserId: claimerFixture.userId,
+      startedAt: expect.any(String),
+      completedAt: null,
+      terminatedAt: null,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      currentTasks: [
+        {
+          id: taskId,
+          instanceId: startedInstance.id,
+          definitionId: "workflow_definition_claimable_v1",
+          nodeId: "admin-review",
+          nodeName: "Admin Review",
+          assignee: `user:${claimerFixture.userId}`,
+          status: "todo",
+          result: null,
+          variables: {},
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          completedAt: null,
+        },
+      ],
+      tasks: [
+        {
+          id: taskId,
+          instanceId: startedInstance.id,
+          definitionId: "workflow_definition_claimable_v1",
+          nodeId: "admin-review",
+          nodeName: "Admin Review",
+          assignee: `user:${claimerFixture.userId}`,
+          status: "todo",
+          result: null,
+          variables: {},
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          completedAt: null,
+        },
+      ],
+    })
+
+    const claimedTodoResponse = await claimerApp.handle(
+      new Request(
+        `http://localhost/workflow/tasks/todo?assignee=user:${claimerFixture.userId}`,
+        {
+          headers: {
+            authorization: `Bearer ${claimerAccessToken}`,
+          },
+        },
+      ),
+    )
+
+    expect(claimedTodoResponse.status).toBe(200)
+    expect(await claimedTodoResponse.json()).toEqual({
+      items: [
+        {
+          id: taskId,
+          instanceId: startedInstance.id,
+          definitionId: "workflow_definition_claimable_v1",
+          nodeId: "admin-review",
+          nodeName: "Admin Review",
+          assignee: `user:${claimerFixture.userId}`,
+          status: "todo",
+          result: null,
+          variables: {},
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          completedAt: null,
+        },
+      ],
+    })
+
+    const peerCompleteResponse = await completeWorkflowTask(
+      peerApp,
+      peerAccessToken,
+      taskId,
+      "approved",
+    )
+
+    expect(peerCompleteResponse.status).toBe(403)
+    expect(await peerCompleteResponse.json()).toEqual({
+      error: {
+        code: "WORKFLOW_TASK_ASSIGNEE_MISMATCH",
+        message: "Workflow task is assigned to another user",
+        status: 403,
+        details: {
+          id: taskId,
+          assignee: `user:${claimerFixture.userId}`,
+        },
+      },
+    })
+
+    const completeResponse = await completeWorkflowTask(
+      claimerApp,
+      claimerAccessToken,
+      taskId,
+      "approved",
+    )
+
+    expect(completeResponse.status).toBe(200)
+    expect(await completeResponse.json()).toEqual({
+      id: startedInstance.id,
+      definitionId: "workflow_definition_claimable_v1",
+      definitionKey: "expense-approval-claimable",
+      definitionName: "Expense Approval Claimable",
+      definitionVersion: 1,
+      status: "completed",
+      currentNodeId: "approved",
+      variables: {},
+      startedByUserId: claimerFixture.userId,
+      startedAt: expect.any(String),
+      completedAt: expect.any(String),
+      terminatedAt: null,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      currentTasks: [],
+      tasks: [
+        {
+          id: taskId,
+          instanceId: startedInstance.id,
+          definitionId: "workflow_definition_claimable_v1",
+          nodeId: "admin-review",
+          nodeName: "Admin Review",
+          assignee: `user:${claimerFixture.userId}`,
+          status: "completed",
+          result: "approved",
+          variables: {},
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          completedAt: expect.any(String),
+        },
+      ],
+    })
+  })
+
+  it("routes workflow instances through the conditional approval branch", async () => {
+    const { app, accessToken, fixture } = await createWorkflowTestHarness({
+      definitions: createConditionalWorkflowDefinitionSeedRecords(),
+    })
+
+    const startResponse = await startWorkflowInstance(app, accessToken, {
+      definitionId: "workflow_definition_expense_condition_v1",
+      variables: {
+        amount: 6800,
+      },
+    })
     const startedInstance = (await startResponse.json()) as {
       id: string
       currentTasks: Array<{ id: string }>
@@ -4770,17 +5062,11 @@ describe("createServerApp", () => {
       )
     }
 
-    const managerCompleteResponse = await app.handle(
-      new Request(`http://localhost/workflow/tasks/${managerTaskId}/complete`, {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          result: "approved",
-        }),
-      }),
+    const managerCompleteResponse = await completeWorkflowTask(
+      app,
+      accessToken,
+      managerTaskId,
+      "approved",
     )
 
     expect(managerCompleteResponse.status).toBe(200)
@@ -4860,7 +5146,7 @@ describe("createServerApp", () => {
         "http://localhost/workflow/tasks/todo?assignee=role:finance",
         {
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
           },
         },
       ),
@@ -4876,17 +5162,11 @@ describe("createServerApp", () => {
       )
     }
 
-    const financeCompleteResponse = await app.handle(
-      new Request(`http://localhost/workflow/tasks/${financeTaskId}/complete`, {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          result: "approved",
-        }),
-      }),
+    const financeCompleteResponse = await completeWorkflowTask(
+      app,
+      accessToken,
+      financeTaskId,
+      "approved",
     )
 
     expect(financeCompleteResponse.status).toBe(200)
@@ -5058,52 +5338,14 @@ describe("createServerApp", () => {
   })
 
   it("rejects workflow tasks and terminates instances", async () => {
-    const fixture = await createAuthTestFixture({
-      permissions: [...workflowAllPermissionCodes],
-      isSuperAdmin: false,
-    })
-    const workflowRepository = createInMemoryWorkflowDefinitionRepository(
-      createWorkflowDefinitionSeedRecords(),
-    )
-    const app = createTestApp({
-      modules: [
-        fixture.authModule,
-        createWorkflowModule(workflowRepository, {
-          authGuard: fixture.authGuard,
-        }),
-      ],
-    })
-    const loginResponse = await app.handle(
-      new Request("http://localhost/auth/login", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "admin",
-          password: testAdminPassword,
-        }),
-      }),
-    )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const { app, accessToken, fixture } = await createWorkflowTestHarness()
 
-    const startResponse = await app.handle(
-      new Request("http://localhost/workflow/instances", {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          definitionId: "workflow_definition_expense_v1",
-          variables: {
-            reason: "budget-exceeded",
-          },
-        }),
-      }),
-    )
+    const startResponse = await startWorkflowInstance(app, accessToken, {
+      definitionId: "workflow_definition_expense_v1",
+      variables: {
+        reason: "budget-exceeded",
+      },
+    })
     const startedInstance = (await startResponse.json()) as {
       id: string
       currentTasks: Array<{ id: string }>
@@ -5114,17 +5356,11 @@ describe("createServerApp", () => {
       throw new Error("Expected workflow instance to create a todo task")
     }
 
-    const rejectResponse = await app.handle(
-      new Request(`http://localhost/workflow/tasks/${taskId}/complete`, {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          result: "rejected",
-        }),
-      }),
+    const rejectResponse = await completeWorkflowTask(
+      app,
+      accessToken,
+      taskId,
+      "rejected",
     )
 
     expect(rejectResponse.status).toBe(200)
@@ -5168,61 +5404,17 @@ describe("createServerApp", () => {
   })
 
   it("cancels workflow instances and clears todo tasks", async () => {
-    const fixture = await createAuthTestFixture({
-      permissions: [...workflowAllPermissionCodes],
-      isSuperAdmin: false,
-    })
-    const workflowRepository = createInMemoryWorkflowDefinitionRepository(
-      createWorkflowDefinitionSeedRecords(),
-    )
-    const app = createTestApp({
-      modules: [
-        fixture.authModule,
-        createWorkflowModule(workflowRepository, {
-          authGuard: fixture.authGuard,
-        }),
-      ],
-    })
-    const loginResponse = await app.handle(
-      new Request("http://localhost/auth/login", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "admin",
-          password: testAdminPassword,
-        }),
-      }),
-    )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const { app, accessToken, fixture } = await createWorkflowTestHarness()
 
-    const startResponse = await app.handle(
-      new Request("http://localhost/workflow/instances", {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          definitionId: "workflow_definition_expense_v1",
-        }),
-      }),
-    )
+    const startResponse = await startWorkflowInstance(app, accessToken, {
+      definitionId: "workflow_definition_expense_v1",
+    })
     const startedInstance = (await startResponse.json()) as { id: string }
 
-    const cancelResponse = await app.handle(
-      new Request(
-        `http://localhost/workflow/instances/${startedInstance.id}/cancel`,
-        {
-          method: "POST",
-          headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
-          },
-        },
-      ),
+    const cancelResponse = await cancelWorkflowInstance(
+      app,
+      accessToken,
+      startedInstance.id,
     )
 
     expect(cancelResponse.status).toBe(200)
@@ -5263,7 +5455,7 @@ describe("createServerApp", () => {
     const todoResponse = await app.handle(
       new Request("http://localhost/workflow/tasks/todo", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -5271,6 +5463,248 @@ describe("createServerApp", () => {
     expect(todoResponse.status).toBe(200)
     expect(await todoResponse.json()).toEqual({
       items: [],
+    })
+  })
+
+  it("writes audit logs for workflow runtime actions", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: [...workflowAllPermissionCodes],
+      isSuperAdmin: true,
+    })
+    const { app, accessToken } = await createWorkflowTestHarness({
+      fixture,
+      isSuperAdmin: true,
+      auditLogWriter: (
+        input: Parameters<
+          NonNullable<WorkflowModuleOptions["auditLogWriter"]>
+        >[0],
+      ) =>
+        fixture.repository.createAuditLog({
+          category: "workflow",
+          ...input,
+        }),
+    })
+
+    const startResponse = await startWorkflowInstance(
+      app,
+      accessToken,
+      {
+        definitionId: "workflow_definition_expense_v1",
+      },
+      {
+        "user-agent": "workflow-runtime-audit-agent",
+        "x-forwarded-for": "127.0.2.1",
+        "x-request-id": "req-workflow-start-audit-1",
+      },
+    )
+    const startedInstance = (await startResponse.json()) as {
+      id: string
+      status: string
+      currentTasks: Array<{ id: string }>
+    }
+    const taskId = startedInstance.currentTasks[0]?.id
+
+    if (!taskId) {
+      throw new Error("Expected workflow instance to create a todo task")
+    }
+
+    const claimResponse = await claimWorkflowTask(app, accessToken, taskId, {
+      "user-agent": "workflow-runtime-audit-agent",
+      "x-forwarded-for": "127.0.2.2",
+      "x-request-id": "req-workflow-claim-audit-1",
+    })
+    expect(claimResponse.status).toBe(200)
+
+    const completeResponse = await completeWorkflowTask(
+      app,
+      accessToken,
+      taskId,
+      "approved",
+      {
+        "user-agent": "workflow-runtime-audit-agent",
+        "x-forwarded-for": "127.0.2.3",
+        "x-request-id": "req-workflow-complete-audit-1",
+      },
+    )
+    expect(completeResponse.status).toBe(200)
+
+    const secondStartResponse = await startWorkflowInstance(
+      app,
+      accessToken,
+      {
+        definitionId: "workflow_definition_expense_v1",
+      },
+      {
+        "user-agent": "workflow-runtime-audit-agent",
+        "x-forwarded-for": "127.0.2.4",
+        "x-request-id": "req-workflow-start-audit-2",
+      },
+    )
+    const secondStartedInstance = (await secondStartResponse.json()) as {
+      id: string
+    }
+
+    const cancelResponse = await cancelWorkflowInstance(
+      app,
+      accessToken,
+      secondStartedInstance.id,
+      {
+        "user-agent": "workflow-runtime-audit-agent",
+        "x-forwarded-for": "127.0.2.5",
+        "x-request-id": "req-workflow-cancel-audit-1",
+      },
+    )
+    expect(cancelResponse.status).toBe(200)
+
+    const workflowAuditLogs = (await fixture.repository.listAuditLogs()).filter(
+      (log) => log.category === "workflow",
+    )
+
+    expect(workflowAuditLogs).toHaveLength(5)
+    expect(workflowAuditLogs[0]).toMatchObject({
+      category: "workflow",
+      action: "workflow_instance_cancel",
+      targetType: "workflow_instance",
+      targetId: secondStartedInstance.id,
+      actorUserId: fixture.userId,
+      requestId: "req-workflow-cancel-audit-1",
+      ip: "127.0.2.5",
+      userAgent: "workflow-runtime-audit-agent",
+      result: "success",
+      details: {
+        status: "terminated",
+        currentNodeId: null,
+      },
+    })
+    expect(workflowAuditLogs[1]).toMatchObject({
+      category: "workflow",
+      action: "workflow_instance_start",
+      targetType: "workflow_instance",
+      targetId: secondStartedInstance.id,
+      actorUserId: fixture.userId,
+      requestId: "req-workflow-start-audit-2",
+      ip: "127.0.2.4",
+      userAgent: "workflow-runtime-audit-agent",
+      result: "success",
+      details: {
+        definitionId: "workflow_definition_expense_v1",
+        status: "running",
+      },
+    })
+    expect(workflowAuditLogs[2]).toMatchObject({
+      category: "workflow",
+      action: "workflow_task_complete",
+      targetType: "workflow_task",
+      targetId: taskId,
+      actorUserId: fixture.userId,
+      requestId: "req-workflow-complete-audit-1",
+      ip: "127.0.2.3",
+      userAgent: "workflow-runtime-audit-agent",
+      result: "success",
+      details: {
+        instanceId: startedInstance.id,
+        result: "approved",
+        status: "completed",
+      },
+    })
+    expect(workflowAuditLogs[3]).toMatchObject({
+      category: "workflow",
+      action: "workflow_task_claim",
+      targetType: "workflow_task",
+      targetId: taskId,
+      actorUserId: fixture.userId,
+      requestId: "req-workflow-claim-audit-1",
+      ip: "127.0.2.2",
+      userAgent: "workflow-runtime-audit-agent",
+      result: "success",
+      details: {
+        instanceId: startedInstance.id,
+        status: "running",
+      },
+    })
+    expect(workflowAuditLogs[4]).toMatchObject({
+      category: "workflow",
+      action: "workflow_instance_start",
+      targetType: "workflow_instance",
+      targetId: startedInstance.id,
+      actorUserId: fixture.userId,
+      requestId: "req-workflow-start-audit-1",
+      ip: "127.0.2.1",
+      userAgent: "workflow-runtime-audit-agent",
+      result: "success",
+      details: {
+        definitionId: "workflow_definition_expense_v1",
+        status: "running",
+      },
+    })
+  })
+
+  it("keeps workflow runtime actions successful when audit log writing fails", async () => {
+    const { app, accessToken, fixture } = await createWorkflowTestHarness({
+      auditLogWriter: async () => {
+        throw new Error("audit sink unavailable")
+      },
+    })
+
+    const startResponse = await startWorkflowInstance(
+      app,
+      accessToken,
+      {
+        definitionId: "workflow_definition_expense_v1",
+      },
+      {
+        "x-request-id": "req-workflow-audit-failure-start-1",
+      },
+    )
+
+    expect(startResponse.status).toBe(201)
+    expect(await startResponse.json()).toEqual({
+      id: expect.any(String),
+      definitionId: "workflow_definition_expense_v1",
+      definitionKey: "expense-approval",
+      definitionName: "Expense Approval",
+      definitionVersion: 1,
+      status: "running",
+      currentNodeId: "manager-review",
+      variables: {},
+      startedByUserId: fixture.userId,
+      startedAt: expect.any(String),
+      completedAt: null,
+      terminatedAt: null,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      currentTasks: [
+        {
+          id: expect.any(String),
+          instanceId: expect.any(String),
+          definitionId: "workflow_definition_expense_v1",
+          nodeId: "manager-review",
+          nodeName: "Manager Review",
+          assignee: "role:manager",
+          status: "todo",
+          result: null,
+          variables: {},
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          completedAt: null,
+        },
+      ],
+      tasks: [
+        {
+          id: expect.any(String),
+          instanceId: expect.any(String),
+          definitionId: "workflow_definition_expense_v1",
+          nodeId: "manager-review",
+          nodeName: "Manager Review",
+          assignee: "role:manager",
+          status: "todo",
+          result: null,
+          variables: {},
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          completedAt: null,
+        },
+      ],
     })
   })
 
@@ -5353,7 +5787,7 @@ describe("createServerApp", () => {
     })
   })
 
-  it("returns 403 for workflow task completion and instance cancel without workflow update permission", async () => {
+  it("returns 403 for workflow task claim, completion, and instance cancel without workflow update permission", async () => {
     const workflowRepository = createInMemoryWorkflowDefinitionRepository(
       createWorkflowDefinitionSeedRecords(),
     )
@@ -5439,6 +5873,27 @@ describe("createServerApp", () => {
     if (!taskId) {
       throw new Error("Expected workflow instance to create a todo task")
     }
+
+    const claimResponse = await restrictedApp.handle(
+      new Request(`http://localhost/workflow/tasks/${taskId}/claim`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${restrictedLoginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(claimResponse.status).toBe(403)
+    expect(await claimResponse.json()).toEqual({
+      error: {
+        code: "AUTH_PERMISSION_DENIED",
+        message: "Permission denied",
+        status: 403,
+        details: {
+          permissionCode: "workflow:task:claim",
+        },
+      },
+    })
 
     const completeResponse = await restrictedApp.handle(
       new Request(`http://localhost/workflow/tasks/${taskId}/complete`, {

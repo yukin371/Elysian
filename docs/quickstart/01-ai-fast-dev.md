@@ -15,11 +15,34 @@
 
 ## 标准流程
 
-1. 读取项目边界文档（PROJECT_PROFILE / roadmap / guardrails）。
-2. 生成或修改代码（优先复用，禁止重复 owner）。
-3. 运行验证命令（至少 `bun run check`）。
-4. 同步必要文档（roadmap / profile / plans）。
-5. 输出结果摘要（已完成、未验证、残留风险）。
+1. 读取项目边界文档（`PROJECT_PROFILE` / `roadmap` / `guardrails` / `DEVELOPMENT_PRINCIPLES`）。
+2. 先确认边界、owner、验证方式，再生成或修改代码。
+3. 优先复用现有实现，不为 `Clean Code` / `SOLID` 提前新增抽象层或 shared utils。
+4. 运行验证命令（至少 `bun run check`）。
+5. 同步必要文档（`roadmap` / `profile` / `plans` / `MODULE.md`）。
+6. 输出结果摘要（已完成、未验证、残留风险）。
+
+## AI 决策顺序
+
+AI 默认按以下顺序决策：
+
+1. 改动是否符合当前阶段边界
+2. 改动是否落在正确 canonical owner
+3. 是否已有现有实现可复用
+4. 是否有更简单、更少抽象的做法
+5. 是否有明确验证方式
+6. 最后才讨论代码是否足够“优雅”
+
+若局部代码“更 clean”和整体边界“更稳定”冲突，优先后者。
+
+## 审查时机
+
+AI 默认在以下时点进行审查：
+
+1. 开发前先审边界、owner、复用路径、验证方式
+2. 准备新增抽象前再审一次，避免过早通用化
+3. 输出结果前再审验证、文档同步和残留风险
+4. PR 阶段进入正式 review
 
 ## 最小命令集
 

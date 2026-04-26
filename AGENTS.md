@@ -7,13 +7,61 @@
 1. [docs/PROJECT_PROFILE.md](/E:/Github/Elysian/docs/PROJECT_PROFILE.md)
 2. [docs/roadmap.md](/E:/Github/Elysian/docs/roadmap.md)
 3. [docs/ARCHITECTURE_GUARDRAILS.md](/E:/Github/Elysian/docs/ARCHITECTURE_GUARDRAILS.md)
-4. 若任务涉及前端视觉与交互，先读 [packages/ui-enterprise-vue/DESIGN.md](/E:/Github/Elysian/packages/ui-enterprise-vue/DESIGN.md)
+4. [docs/DEVELOPMENT_PRINCIPLES.md](/E:/Github/Elysian/docs/DEVELOPMENT_PRINCIPLES.md)
+5. 若任务涉及前端视觉与交互，先读 [packages/ui-enterprise-vue/DESIGN.md](/E:/Github/Elysian/packages/ui-enterprise-vue/DESIGN.md)
    若任务涉及 `apps/example-vue` 的展示层，再读 [apps/example-vue/DESIGN.md](/E:/Github/Elysian/apps/example-vue/DESIGN.md)
-5. 目标目录下的 `MODULE.md`
-6. 若当前任务已有计划文档，再读对应 `docs/plans/*.md`
-7. 若当前任务触及长期边界决策，再读相关 `docs/decisions/ADR-*.md`
+6. 目标目录下的 `MODULE.md`
+7. 若当前任务已有计划文档，再读对应 `docs/plans/*.md`
+8. 若当前任务触及长期边界决策，再读相关 `docs/decisions/ADR-*.md`
 
 ## 强制规则
+
+### 开发原则优先级
+
+默认按以下顺序做技术决策，不得把 `Clean Code` 或 `SOLID` 放在这些规则之前：
+
+1. 先边界，后实现
+2. 先验证，后扩展
+3. 先复用，后新增
+4. 先契约，后技巧
+
+简化为一句话：
+
+`先边界，后抽象；先验证，后扩展；先复用，后新增；先契约，后技巧。`
+
+### AI 开发与审查约束
+
+AI 实施或 review 时，必须先判断：
+
+1. 改动是否符合当前阶段边界
+2. 改动是否落在正确 canonical owner
+3. 是否已有现有实现可复用
+4. 是否有更简单、更少抽象的做法
+5. 是否已有明确验证方式
+
+最后才判断代码是否足够“优雅”。
+
+AI 不得因为追求 `Clean Code` / `SOLID` 而做以下行为：
+
+- 主动扩大重构范围
+- 提前新增当前阶段不需要的接口、基类、适配器、shared utils
+- 为了消除局部重复而模糊 owner
+- 为了“函数更短”切碎连续业务语义
+- 为了“解耦”引入难以验证的间接层
+- 把规划态能力写成已实现事实
+
+若 `Clean Code` / `SOLID` 与边界稳定性冲突，优先边界稳定性。
+
+### 审查时机要求
+
+以下审查时机默认强制执行：
+
+1. 开发前先做一次边界自审
+2. 准备新增抽象、shared helper、adapter 或跨层重构前再审一次
+3. 提交结果前做一次验证与文档同步自审
+4. PR 阶段做正式 review
+
+不要把这类审查推迟到“代码写完以后再看”。
 
 ### 先复用后新增
 

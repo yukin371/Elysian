@@ -6,7 +6,7 @@
 
 - 绿地仓库
 - 目标形态是企业级快速开发平台
-- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾、`Phase 5 / P5A` 归档与 `Phase 6B` 企业增强收口；`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 完成阶段出口复验；当前主线进入 `Phase 7 / P7A Round-1` 实施
+- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾、`Phase 5 / P5A` 归档与 `Phase 6B` 企业增强收口；`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 完成阶段出口复验；`Phase 7 / P7A Round-1` 的最小 workflow 闭环与 `Round-2` 的验证补齐/最小 `claim` 收口均已落地，当前 workflow 阶段结果保持在“已验证的简化运行态”，不默认扩展为通用 BPM 能力
 
 ## 已确认事实
 
@@ -37,8 +37,9 @@
 - 服务端已落操作日志模块：`operation-log`，并已提供 `GET /system/operation-logs`、`GET /system/operation-logs/:id`、`GET /system/operation-logs/export`。
 - 服务端已落文件管理模块：`file`，并已提供 `GET /system/files`、`GET /system/files/:id`、`POST /system/files`、`GET /system/files/:id/download`、`DELETE /system/files/:id`。
 - 服务端已落通知管理模块：`notification`，并已提供 `GET /system/notifications`、`GET /system/notifications/:id`、`POST /system/notifications`、`POST /system/notifications/:id/read`。
-- 服务端已落 `workflow` 简化运行态，当前提供 `GET /workflow/definitions`、`GET /workflow/definitions/:id`、`POST /workflow/definitions`、`PUT /workflow/definitions/:id`、`POST /workflow/instances`、`GET /workflow/instances`、`GET /workflow/instances/:id`、`GET /workflow/tasks/todo`、`GET /workflow/tasks/done`、`POST /workflow/tasks/:id/complete`、`POST /workflow/instances/:id/cancel`，并已支持最小条件分支运行时。
-- workflow 权限已从 definition owner 内拆分为 `workflow:definition:*`、`workflow:instance:*` 与 `workflow:task:*` 三组最小权限点；当前仍未继续细拆到 claim/transfer 等更复杂任务语义。
+- 服务端已落 `workflow` 简化运行态，当前提供 `GET /workflow/definitions`、`GET /workflow/definitions/:id`、`POST /workflow/definitions`、`PUT /workflow/definitions/:id`、`POST /workflow/instances`、`GET /workflow/instances`、`GET /workflow/instances/:id`、`GET /workflow/tasks/todo`、`GET /workflow/tasks/done`、`POST /workflow/tasks/:id/claim`、`POST /workflow/tasks/:id/complete`、`POST /workflow/instances/:id/cancel`，并已支持最小条件分支运行时与认领后唯一执行人语义。
+- workflow 权限已从 definition owner 内拆分为 `workflow:definition:*`、`workflow:instance:*` 与 `workflow:task:*` 三组最小权限点，并已新增独立 `workflow:task:claim`；`transfer / delegate` 等更复杂任务语义仍未进入实现。
+- workflow 运行态成功动作已补最小审计证据，当前会对 `instance start / task claim / task complete / instance cancel` 写入 `category=workflow` 的 audit log，并复用既有 `requestId / ip / userAgent / actor / target / result / details` 字段。
 - `customer` 模块已接入 auth guard，401 / 403 语义已有测试覆盖。
 - auth 模块当前已对 `login / refresh / logout / permission denied` 写入最小审计记录，并保留 `request id / ip / user agent / actor / target / result` 字段。
 - 在存在 `DATABASE_URL` 时，server 会自动注册 `tenant-context`、`auth`、`tenant`、`customer`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 模块。
@@ -69,6 +70,7 @@
 - `packages/persistence` 默认 auth seed 已补 workflow definition / instance / task 的最小权限点，并继续将 workflow 菜单可见性挂在 definition list 权限上。
 - `packages/persistence` 的 `bun run db:migrate` 已可正常执行已提交的 SQL migrations。
 - `packages/persistence` 已支持 `bun run db:tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>` 初始化非默认租户。
+- `packages/persistence` 已补 workflow repository 独立测试，当前通过 `PGlite` 嵌入式 PostgreSQL 兼容底座覆盖 definition 版本唯一性、next version 计算、todo/done 查询边界、实例任务排序与取消语义；tenant RLS 仍继续由 server 测试与真实 PostgreSQL E2E 兜底。
 - `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试。
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
 - `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
@@ -109,6 +111,7 @@
 - CI workflow 已升级至 Node 24 兼容 action 版本（`actions/checkout@v5`、`actions/download-artifact@v7`、`actions/upload-artifact@v6`）。
 - 仓库 CI 已新增 `e2e-smoke` 作业（PostgreSQL service + migrate/seed + 登录/customer CRUD 冒烟）、`e2e-tenant` 作业（真实 PostgreSQL 下 tenant init 幂等、super-admin 授权、跨租户隔离、RLS/FK 验证 + artifact 归档）、`e2e-generator-safe-apply` 作业（生成安全覆盖三场景冒烟）、`e2e-generator-matrix` 作业（多 schema / 多策略回归矩阵）、`e2e-generator-cli` 作业（CLI 真实执行路径回归）、`p5a-handoff-corpus` 作业（P5A 语料分类回归 + artifact 归档）、`p5a-acceptance` 作业（P5A 阶段最小闭环验收 + artifact 归档）、`e2e-generator-report-index` 作业（汇总报告索引 artifact）与 `e2e-generator-report-gate` 作业（门禁判定 artifact）。
 - `scripts/e2e-smoke.ts` 已支持输出 `e2e-smoke-report.json`（状态、阶段、失败分类、失败信息），CI `e2e-smoke` 作业已归档 smoke report artifact。
+- `scripts/e2e-smoke.ts` 已纳入 workflow 真实运行态 smoke，当前覆盖 definition 创建、实例发起、manager/finance 待办、`approved/rejected`、最小 `claim`、条件分支命中与 `default` 分支、done/instance list，并补高位随机端口与 Windows 端口释放清理，支持临时 PostgreSQL 库下重复执行。
 - 已新增 `bun run e2e:smoke:diagnose`，可基于 smoke 报告输出诊断结论与建议动作；CI `e2e-smoke` 已接入该诊断步骤并归档诊断结果。
 - 已新增 `bun run e2e:tenant` 与 `bun run e2e:tenant:full`，用于真实 PostgreSQL 下验证 tenant init 幂等、super-admin 租户管理授权、customer 跨租户隔离、RLS 与 `tenant_id` 外键约束。
 - 已新增 `bun run e2e:tenant:stability:snapshot`，用于把单次 tenant e2e 结果沉淀为稳定性快照（含 run 元数据）；CI `e2e-tenant` 已接入并随 artifact 归档。

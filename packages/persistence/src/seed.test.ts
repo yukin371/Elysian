@@ -86,6 +86,7 @@ describe("createDefaultAuthSeedSpec", () => {
       "workflow:instance:start",
       "workflow:instance:cancel",
       "workflow:task:list",
+      "workflow:task:claim",
       "workflow:task:complete",
       "customer:customer:list",
       "customer:customer:create",

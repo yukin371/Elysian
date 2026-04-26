@@ -80,6 +80,7 @@ export interface UpdateWorkflowInstanceInput {
 }
 
 export interface UpdateWorkflowTaskInput {
+  assignee?: string
   status?: WorkflowTaskStatus
   result?: WorkflowTaskResult | null
   completedAt?: Date | null
@@ -466,6 +467,7 @@ export const createInMemoryWorkflowRepository = (
 
       const updated: WorkflowTaskState = {
         ...current,
+        assignee: input.assignee ?? current.assignee,
         status: input.status ?? current.status,
         result:
           input.result !== undefined ? (input.result ?? null) : current.result,

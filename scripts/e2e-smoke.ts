@@ -1,17 +1,47 @@
 import { spawn } from "node:child_process"
 import { once } from "node:events"
 import { mkdir, writeFile } from "node:fs/promises"
+import { createConnection } from "node:net"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
 interface LoginResponse {
   accessToken: string
+  user: {
+    id: string
+  }
 }
 
 interface CustomerRecord {
   id: string
   name: string
   status: "active" | "inactive"
+}
+
+interface WorkflowDefinitionRecord {
+  id: string
+  key: string
+  name: string
+  version: number
+}
+
+interface WorkflowTaskRecord {
+  id: string
+  instanceId: string
+  nodeId: string
+  assignee: string
+  status: "todo" | "completed" | "cancelled"
+  result: "approved" | "rejected" | null
+}
+
+interface WorkflowInstanceDetailRecord {
+  id: string
+  definitionId: string
+  definitionKey: string
+  status: "running" | "completed" | "terminated"
+  currentNodeId: string | null
+  currentTasks: WorkflowTaskRecord[]
+  tasks: WorkflowTaskRecord[]
 }
 
 type SmokeFailureCategory = "environment" | "dependency" | "test_case"
@@ -27,6 +57,9 @@ interface SmokeReport {
 }
 
 const requiredEnvKeys = ["DATABASE_URL", "ACCESS_TOKEN_SECRET"] as const
+const smokePort =
+  process.env.ELYSIAN_SMOKE_PORT ??
+  (31_000 + Math.floor(Math.random() * 1_000)).toString()
 
 const ensureRequiredEnv = () => {
   const missing = requiredEnvKeys.filter((key) => !process.env[key])
@@ -37,7 +70,7 @@ const ensureRequiredEnv = () => {
   }
 }
 
-const baseUrl = `http://127.0.0.1:${process.env.PORT ?? "3100"}`
+const baseUrl = `http://127.0.0.1:${smokePort}`
 
 const resolveSmokeReportDir = () =>
   process.env.ELYSIAN_SMOKE_REPORT_DIR ??
@@ -127,6 +160,90 @@ const waitForRequiredModules = async (
   )
 }
 
+const isPortListening = (port: string) =>
+  new Promise<boolean>((resolve) => {
+    const socket = createConnection({
+      host: "127.0.0.1",
+      port: Number(port),
+    })
+
+    const finish = (listening: boolean) => {
+      socket.removeAllListeners()
+      socket.destroy()
+      resolve(listening)
+    }
+
+    socket.once("connect", () => finish(true))
+    socket.once("error", () => finish(false))
+    socket.setTimeout(1_000, () => finish(false))
+  })
+
+const waitForPortRelease = async (port: string, timeoutMs: number) => {
+  const startedAt = Date.now()
+
+  while (Date.now() - startedAt < timeoutMs) {
+    if (!(await isPortListening(port))) {
+      return true
+    }
+
+    await Bun.sleep(250)
+  }
+
+  return !(await isPortListening(port))
+}
+
+const terminateServer = async (
+  server: ReturnType<typeof spawn>,
+  port: string,
+) => {
+  if (server.exitCode !== null) {
+    if (await waitForPortRelease(port, 1_000)) {
+      return
+    }
+  }
+
+  const exitPromise =
+    server.exitCode === null
+      ? once(server, "exit").then(() => true)
+      : Promise.resolve(true)
+
+  if (server.exitCode === null) {
+    server.kill("SIGTERM")
+  }
+
+  const exitedGracefully = await Promise.race([
+    exitPromise,
+    Bun.sleep(5_000).then(() => false),
+  ])
+
+  if (exitedGracefully) {
+    if (await waitForPortRelease(port, 1_000)) {
+      return
+    }
+  }
+
+  if (process.platform === "win32") {
+    const killer = spawn(
+      "powershell",
+      [
+        "-NoProfile",
+        "-Command",
+        `Get-NetTCPConnection -LocalPort ${port} -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { taskkill /pid $_ /t /f | Out-Null }`,
+      ],
+      {
+        stdio: "ignore",
+      },
+    )
+    await once(killer, "exit")
+  } else if (server.exitCode === null) {
+    server.kill("SIGKILL")
+  }
+
+  if (!(await waitForPortRelease(port, 5_000))) {
+    throw new Error(`Smoke server did not release port ${port}`)
+  }
+}
+
 const assertStatus = async (response: Response, expected: number) => {
   if (response.status !== expected) {
     const bodyText = await response.text()
@@ -135,6 +252,96 @@ const assertStatus = async (response: Response, expected: number) => {
     )
   }
 }
+
+const getResponseJson = async <T>(response: Response) =>
+  (await response.json()) as T
+
+const buildWorkflowDefinitionDrafts = (runId: string) => ({
+  linear: {
+    key: `smoke-linear-${runId}`,
+    name: `Smoke Linear ${runId}`,
+    definition: {
+      nodes: [
+        { id: "start", type: "start", name: "Start" },
+        {
+          id: "manager-review",
+          type: "approval",
+          name: "Manager Review",
+          assignee: "role:manager",
+        },
+        { id: "approved", type: "end", name: "Approved" },
+      ],
+      edges: [
+        { from: "start", to: "manager-review" },
+        { from: "manager-review", to: "approved" },
+      ],
+    },
+  },
+  conditional: {
+    key: `smoke-conditional-${runId}`,
+    name: `Smoke Conditional ${runId}`,
+    definition: {
+      nodes: [
+        { id: "start", type: "start", name: "Start" },
+        {
+          id: "manager-review",
+          type: "approval",
+          name: "Manager Review",
+          assignee: "role:manager",
+        },
+        {
+          id: "amount-check",
+          type: "condition",
+          name: "Amount Check",
+          conditions: [
+            {
+              expression: "${amount > 5000}",
+              target: "finance-review",
+            },
+            {
+              expression: "default",
+              target: "approved",
+            },
+          ],
+        },
+        {
+          id: "finance-review",
+          type: "approval",
+          name: "Finance Review",
+          assignee: "role:finance",
+        },
+        { id: "approved", type: "end", name: "Approved" },
+      ],
+      edges: [
+        { from: "start", to: "manager-review" },
+        { from: "manager-review", to: "amount-check" },
+        { from: "amount-check", to: "finance-review" },
+        { from: "amount-check", to: "approved" },
+        { from: "finance-review", to: "approved" },
+      ],
+    },
+  },
+  claimable: {
+    key: `smoke-claimable-${runId}`,
+    name: `Smoke Claimable ${runId}`,
+    definition: {
+      nodes: [
+        { id: "start", type: "start", name: "Start" },
+        {
+          id: "admin-review",
+          type: "approval",
+          name: "Admin Review",
+          assignee: "role:admin",
+        },
+        { id: "approved", type: "end", name: "Approved" },
+      ],
+      edges: [
+        { from: "start", to: "admin-review" },
+        { from: "admin-review", to: "approved" },
+      ],
+    },
+  },
+})
 
 const run = async () => {
   const startedAt = Date.now()
@@ -145,24 +352,30 @@ const run = async () => {
   const username = process.env.ELYSIAN_ADMIN_USERNAME ?? "admin"
   const password =
     process.env.ELYSIAN_ADMIN_PASSWORD ?? ["admin", "123"].join("")
+  const runId = `${Date.now()}`
+  const workflowDrafts = buildWorkflowDefinitionDrafts(runId)
 
-  const server = spawn("bun", ["run", "server"], {
-    cwd: process.cwd(),
+  const server = spawn("bun", ["src/index.ts"], {
+    cwd: join(process.cwd(), "apps", "server"),
     env: {
       ...process.env,
-      PORT: process.env.PORT ?? "3100",
+      PORT: smokePort,
     },
     stdio: "inherit",
   })
 
   let customerId: string | null = null
   let cleanupAuthHeader: Record<string, string> | null = null
+  const runningWorkflowInstanceIds = new Set<string>()
 
   try {
     lastStage = "server_bootstrap"
     await waitForHealth(90_000)
     lastStage = "module_readiness"
-    await waitForRequiredModules(["auth", "customer"], 90_000)
+    await waitForRequiredModules(
+      ["auth", "customer", "workflow-definition"],
+      90_000,
+    )
 
     lastStage = "auth_login"
     const loginResponse = await fetch(`${baseUrl}/auth/login`, {
@@ -180,6 +393,9 @@ const run = async () => {
 
     if (!loginPayload.accessToken) {
       throw new Error("Login succeeded but accessToken is missing")
+    }
+    if (!loginPayload.user?.id) {
+      throw new Error("Login succeeded but user.id is missing")
     }
 
     const authHeader = {
@@ -256,6 +472,519 @@ const run = async () => {
     )
     await assertStatus(afterDeleteResponse, 404)
 
+    lastStage = "workflow_definition_create_linear"
+    const createLinearDefinitionResponse = await fetch(
+      `${baseUrl}/workflow/definitions`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(workflowDrafts.linear),
+      },
+    )
+    await assertStatus(createLinearDefinitionResponse, 201)
+    const linearDefinition = await getResponseJson<WorkflowDefinitionRecord>(
+      createLinearDefinitionResponse,
+    )
+
+    lastStage = "workflow_definition_create_conditional"
+    const createConditionalDefinitionResponse = await fetch(
+      `${baseUrl}/workflow/definitions`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(workflowDrafts.conditional),
+      },
+    )
+    await assertStatus(createConditionalDefinitionResponse, 201)
+    const conditionalDefinition =
+      await getResponseJson<WorkflowDefinitionRecord>(
+        createConditionalDefinitionResponse,
+      )
+
+    lastStage = "workflow_definition_create_claimable"
+    const createClaimableDefinitionResponse = await fetch(
+      `${baseUrl}/workflow/definitions`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(workflowDrafts.claimable),
+      },
+    )
+    await assertStatus(createClaimableDefinitionResponse, 201)
+    const claimableDefinition = await getResponseJson<WorkflowDefinitionRecord>(
+      createClaimableDefinitionResponse,
+    )
+
+    lastStage = "workflow_linear_instance_start"
+    const startLinearApprovedResponse = await fetch(
+      `${baseUrl}/workflow/instances`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          definitionId: linearDefinition.id,
+          variables: {
+            amount: 1000,
+          },
+        }),
+      },
+    )
+    await assertStatus(startLinearApprovedResponse, 201)
+    const linearApprovedInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        startLinearApprovedResponse,
+      )
+    runningWorkflowInstanceIds.add(linearApprovedInstance.id)
+
+    const linearApprovedTodoTask = linearApprovedInstance.currentTasks[0]
+    if (!linearApprovedTodoTask) {
+      throw new Error(
+        "Linear workflow start did not create a manager todo task",
+      )
+    }
+
+    lastStage = "workflow_linear_todo_list"
+    const managerTodoResponse = await fetch(
+      `${baseUrl}/workflow/tasks/todo?assignee=role:manager`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(managerTodoResponse, 200)
+    const managerTodoPayload = await getResponseJson<{
+      items: WorkflowTaskRecord[]
+    }>(managerTodoResponse)
+    if (
+      !managerTodoPayload.items.some(
+        (task) => task.id === linearApprovedTodoTask.id,
+      )
+    ) {
+      throw new Error(
+        "Manager todo list does not include the linear workflow task",
+      )
+    }
+
+    lastStage = "workflow_linear_complete_approved"
+    const completeLinearApprovedResponse = await fetch(
+      `${baseUrl}/workflow/tasks/${linearApprovedTodoTask.id}/complete`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          result: "approved",
+        }),
+      },
+    )
+    await assertStatus(completeLinearApprovedResponse, 200)
+    const linearApprovedCompleted =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        completeLinearApprovedResponse,
+      )
+    if (linearApprovedCompleted.status !== "completed") {
+      throw new Error(
+        `Expected approved linear workflow instance to be completed, received ${linearApprovedCompleted.status}`,
+      )
+    }
+    if (linearApprovedCompleted.currentTasks.length !== 0) {
+      throw new Error(
+        "Approved linear workflow instance still has current tasks",
+      )
+    }
+    runningWorkflowInstanceIds.delete(linearApprovedCompleted.id)
+
+    lastStage = "workflow_linear_done_list"
+    const managerDoneResponse = await fetch(
+      `${baseUrl}/workflow/tasks/done?assignee=role:manager`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(managerDoneResponse, 200)
+    const managerDonePayload = await getResponseJson<{
+      items: WorkflowTaskRecord[]
+    }>(managerDoneResponse)
+    const approvedDoneTask = managerDonePayload.items.find(
+      (task) => task.id === linearApprovedTodoTask.id,
+    )
+    if (!approvedDoneTask || approvedDoneTask.result !== "approved") {
+      throw new Error(
+        "Manager done list does not include the approved linear workflow task",
+      )
+    }
+
+    lastStage = "workflow_linear_reject_start"
+    const startLinearRejectedResponse = await fetch(
+      `${baseUrl}/workflow/instances`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          definitionId: linearDefinition.id,
+          variables: {
+            amount: 500,
+          },
+        }),
+      },
+    )
+    await assertStatus(startLinearRejectedResponse, 201)
+    const linearRejectedInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        startLinearRejectedResponse,
+      )
+    runningWorkflowInstanceIds.add(linearRejectedInstance.id)
+
+    const linearRejectedTodoTask = linearRejectedInstance.currentTasks[0]
+    if (!linearRejectedTodoTask) {
+      throw new Error(
+        "Rejected linear workflow start did not create a todo task",
+      )
+    }
+
+    lastStage = "workflow_linear_complete_rejected"
+    const completeLinearRejectedResponse = await fetch(
+      `${baseUrl}/workflow/tasks/${linearRejectedTodoTask.id}/complete`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          result: "rejected",
+        }),
+      },
+    )
+    await assertStatus(completeLinearRejectedResponse, 200)
+    const linearRejectedCompleted =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        completeLinearRejectedResponse,
+      )
+    if (linearRejectedCompleted.status !== "terminated") {
+      throw new Error(
+        `Expected rejected linear workflow instance to be terminated, received ${linearRejectedCompleted.status}`,
+      )
+    }
+    runningWorkflowInstanceIds.delete(linearRejectedCompleted.id)
+
+    lastStage = "workflow_conditional_branch_start"
+    const startConditionalBranchResponse = await fetch(
+      `${baseUrl}/workflow/instances`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          definitionId: conditionalDefinition.id,
+          variables: {
+            amount: 6001,
+          },
+        }),
+      },
+    )
+    await assertStatus(startConditionalBranchResponse, 201)
+    const conditionalBranchInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        startConditionalBranchResponse,
+      )
+    runningWorkflowInstanceIds.add(conditionalBranchInstance.id)
+
+    const conditionalManagerTask = conditionalBranchInstance.currentTasks[0]
+    if (!conditionalManagerTask) {
+      throw new Error(
+        "Conditional workflow branch case did not create the manager task",
+      )
+    }
+
+    lastStage = "workflow_conditional_branch_manager_complete"
+    const conditionalManagerCompleteResponse = await fetch(
+      `${baseUrl}/workflow/tasks/${conditionalManagerTask.id}/complete`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          result: "approved",
+        }),
+      },
+    )
+    await assertStatus(conditionalManagerCompleteResponse, 200)
+    const conditionalAfterManager =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        conditionalManagerCompleteResponse,
+      )
+    if (conditionalAfterManager.currentTasks.length !== 1) {
+      throw new Error(
+        `Expected exactly one finance task after conditional manager approval, received ${conditionalAfterManager.currentTasks.length}`,
+      )
+    }
+    const financeTask = conditionalAfterManager.currentTasks[0]
+    if (!financeTask || financeTask.assignee !== "role:finance") {
+      throw new Error(
+        "Conditional branch did not route to the finance approver",
+      )
+    }
+
+    lastStage = "workflow_conditional_branch_finance_todo"
+    const financeTodoResponse = await fetch(
+      `${baseUrl}/workflow/tasks/todo?assignee=role:finance`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(financeTodoResponse, 200)
+    const financeTodoPayload = await getResponseJson<{
+      items: WorkflowTaskRecord[]
+    }>(financeTodoResponse)
+    if (!financeTodoPayload.items.some((task) => task.id === financeTask.id)) {
+      throw new Error(
+        "Finance todo list does not include the conditional branch task",
+      )
+    }
+
+    lastStage = "workflow_conditional_branch_finance_complete"
+    const conditionalFinanceCompleteResponse = await fetch(
+      `${baseUrl}/workflow/tasks/${financeTask.id}/complete`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          result: "approved",
+        }),
+      },
+    )
+    await assertStatus(conditionalFinanceCompleteResponse, 200)
+    const conditionalBranchCompleted =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        conditionalFinanceCompleteResponse,
+      )
+    if (conditionalBranchCompleted.status !== "completed") {
+      throw new Error(
+        `Expected conditional branch workflow instance to be completed, received ${conditionalBranchCompleted.status}`,
+      )
+    }
+    runningWorkflowInstanceIds.delete(conditionalBranchCompleted.id)
+
+    lastStage = "workflow_conditional_default_start"
+    const startConditionalDefaultResponse = await fetch(
+      `${baseUrl}/workflow/instances`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          definitionId: conditionalDefinition.id,
+          variables: {
+            amount: 4999,
+          },
+        }),
+      },
+    )
+    await assertStatus(startConditionalDefaultResponse, 201)
+    const conditionalDefaultInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        startConditionalDefaultResponse,
+      )
+    runningWorkflowInstanceIds.add(conditionalDefaultInstance.id)
+
+    const conditionalDefaultManagerTask =
+      conditionalDefaultInstance.currentTasks[0]
+    if (!conditionalDefaultManagerTask) {
+      throw new Error(
+        "Conditional default case did not create the manager approval task",
+      )
+    }
+
+    lastStage = "workflow_conditional_default_manager_complete"
+    const conditionalDefaultCompleteResponse = await fetch(
+      `${baseUrl}/workflow/tasks/${conditionalDefaultManagerTask.id}/complete`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          result: "approved",
+        }),
+      },
+    )
+    await assertStatus(conditionalDefaultCompleteResponse, 200)
+    const conditionalDefaultCompleted =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        conditionalDefaultCompleteResponse,
+      )
+    if (conditionalDefaultCompleted.status !== "completed") {
+      throw new Error(
+        `Expected conditional default workflow instance to be completed, received ${conditionalDefaultCompleted.status}`,
+      )
+    }
+    if (
+      conditionalDefaultCompleted.tasks.some(
+        (task) => task.assignee === "role:finance",
+      )
+    ) {
+      throw new Error(
+        "Conditional default workflow instance unexpectedly created a finance task",
+      )
+    }
+    runningWorkflowInstanceIds.delete(conditionalDefaultCompleted.id)
+
+    lastStage = "workflow_claim_start"
+    const startClaimableResponse = await fetch(
+      `${baseUrl}/workflow/instances`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          definitionId: claimableDefinition.id,
+          variables: {
+            amount: 300,
+          },
+        }),
+      },
+    )
+    await assertStatus(startClaimableResponse, 201)
+    const claimableInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        startClaimableResponse,
+      )
+    runningWorkflowInstanceIds.add(claimableInstance.id)
+
+    const claimableTodoTask = claimableInstance.currentTasks[0]
+    if (!claimableTodoTask || claimableTodoTask.assignee !== "role:admin") {
+      throw new Error(
+        "Claimable workflow start did not create the expected admin todo task",
+      )
+    }
+
+    lastStage = "workflow_claim_execute"
+    const claimTaskResponse = await fetch(
+      `${baseUrl}/workflow/tasks/${claimableTodoTask.id}/claim`,
+      {
+        method: "POST",
+        headers: authHeader,
+      },
+    )
+    await assertStatus(claimTaskResponse, 200)
+    const claimedInstance =
+      await getResponseJson<WorkflowInstanceDetailRecord>(claimTaskResponse)
+    const claimedTask = claimedInstance.currentTasks[0]
+    const claimedAssignee = `user:${loginPayload.user.id}`
+    if (!claimedTask || claimedTask.assignee !== claimedAssignee) {
+      throw new Error(
+        `Claimed workflow task assignee mismatch (expected=${claimedAssignee}, received=${claimedTask?.assignee ?? "missing"})`,
+      )
+    }
+
+    lastStage = "workflow_claim_todo_list"
+    const claimedTodoResponse = await fetch(
+      `${baseUrl}/workflow/tasks/todo?assignee=${encodeURIComponent(claimedAssignee)}`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(claimedTodoResponse, 200)
+    const claimedTodoPayload = await getResponseJson<{
+      items: WorkflowTaskRecord[]
+    }>(claimedTodoResponse)
+    if (!claimedTodoPayload.items.some((task) => task.id === claimedTask.id)) {
+      throw new Error(
+        "Claimed todo list does not include the claimable workflow task",
+      )
+    }
+
+    lastStage = "workflow_claim_complete"
+    const completeClaimedTaskResponse = await fetch(
+      `${baseUrl}/workflow/tasks/${claimedTask.id}/complete`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeader,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          result: "approved",
+        }),
+      },
+    )
+    await assertStatus(completeClaimedTaskResponse, 200)
+    const claimedCompleted =
+      await getResponseJson<WorkflowInstanceDetailRecord>(
+        completeClaimedTaskResponse,
+      )
+    if (claimedCompleted.status !== "completed") {
+      throw new Error(
+        `Expected claimed workflow instance to be completed, received ${claimedCompleted.status}`,
+      )
+    }
+    const claimedDoneTask = claimedCompleted.tasks.find(
+      (task) => task.id === claimedTask.id,
+    )
+    if (!claimedDoneTask || claimedDoneTask.assignee !== claimedAssignee) {
+      throw new Error(
+        "Claimed workflow completion did not preserve the claimed assignee",
+      )
+    }
+    runningWorkflowInstanceIds.delete(claimedCompleted.id)
+
+    lastStage = "workflow_instance_list"
+    const workflowInstanceListResponse = await fetch(
+      `${baseUrl}/workflow/instances`,
+      {
+        headers: authHeader,
+      },
+    )
+    await assertStatus(workflowInstanceListResponse, 200)
+    const workflowInstanceListPayload = await getResponseJson<{
+      items: WorkflowInstanceDetailRecord[]
+    }>(workflowInstanceListResponse)
+    const instanceIds = new Set(
+      workflowInstanceListPayload.items.map((instance) => instance.id),
+    )
+    for (const instanceId of [
+      linearApprovedCompleted.id,
+      linearRejectedCompleted.id,
+      conditionalBranchCompleted.id,
+      conditionalDefaultCompleted.id,
+      claimedCompleted.id,
+    ]) {
+      if (!instanceIds.has(instanceId)) {
+        throw new Error(
+          `Workflow instance list does not include expected instance ${instanceId}`,
+        )
+      }
+    }
+
     const reportPath = await writeSmokeReport({
       generatedAt: new Date().toISOString(),
       status: "passed",
@@ -294,18 +1023,20 @@ const run = async () => {
       }
     }
 
-    if (!server.killed) {
-      server.kill("SIGTERM")
+    if (cleanupAuthHeader) {
+      for (const instanceId of runningWorkflowInstanceIds) {
+        try {
+          await fetch(`${baseUrl}/workflow/instances/${instanceId}/cancel`, {
+            method: "POST",
+            headers: cleanupAuthHeader,
+          })
+        } catch {
+          // noop
+        }
+      }
     }
 
-    await Promise.race([
-      once(server, "exit"),
-      Bun.sleep(5_000).then(() => {
-        if (!server.killed) {
-          server.kill("SIGKILL")
-        }
-      }),
-    ])
+    await terminateServer(server, smokePort)
   }
 }
 

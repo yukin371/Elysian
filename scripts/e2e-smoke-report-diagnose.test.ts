@@ -66,6 +66,20 @@ describe("buildRecommendedActions", () => {
       actions.some((item) => item.includes("customer module route/repository")),
     ).toBeTrue()
   })
+
+  test("adds workflow specific action for workflow stages", () => {
+    const actions = buildRecommendedActions({
+      status: "failed",
+      failureCategory: "test_case",
+      lastStage: "workflow_conditional_branch_finance_complete",
+    })
+
+    expect(
+      actions.some((item) =>
+        item.includes("workflow definition/task transition"),
+      ),
+    ).toBeTrue()
+  })
 })
 
 describe("buildConclusion", () => {

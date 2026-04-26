@@ -36,6 +36,9 @@ export interface CompleteWorkflowTaskPayload {
   result: WorkflowTaskResult
 }
 
+const workflowRoleAssigneePrefix = "role:"
+const workflowUserAssigneePrefix = "user:"
+
 type InitialWorkflowTransition =
   | {
       status: "running"
@@ -62,6 +65,92 @@ type WorkflowTaskTransition =
 
 const isRecord = (input: unknown): input is Record<string, unknown> =>
   typeof input === "object" && input !== null && !Array.isArray(input)
+
+const buildWorkflowUserAssignee = (userId: string) =>
+  `${workflowUserAssigneePrefix}${userId}`
+
+const resolveWorkflowRoleAssignee = (assignee: string) => {
+  if (!assignee.startsWith(workflowRoleAssigneePrefix)) {
+    return null
+  }
+
+  const roleCode = assignee.slice(workflowRoleAssigneePrefix.length).trim()
+  return roleCode.length > 0 ? roleCode : null
+}
+
+const requireClaimableWorkflowTask = (
+  assignee: string,
+  actor: {
+    userId: string
+    roleCodes: string[]
+    isSuperAdmin: boolean
+  },
+  taskId: string,
+) => {
+  const claimedAssignee = buildWorkflowUserAssignee(actor.userId)
+  if (assignee === claimedAssignee) {
+    throw new AppError({
+      code: "WORKFLOW_TASK_ALREADY_CLAIMED",
+      message: "Workflow task is already claimed",
+      status: 409,
+      expose: true,
+      details: {
+        id: taskId,
+        assignee,
+      },
+    })
+  }
+
+  if (assignee.startsWith(workflowUserAssigneePrefix)) {
+    throw new AppError({
+      code: "WORKFLOW_TASK_ALREADY_CLAIMED",
+      message: "Workflow task is already claimed",
+      status: 409,
+      expose: true,
+      details: {
+        id: taskId,
+        assignee,
+      },
+    })
+  }
+
+  const roleCode = resolveWorkflowRoleAssignee(assignee)
+  if (roleCode && !actor.isSuperAdmin && !actor.roleCodes.includes(roleCode)) {
+    throw new AppError({
+      code: "WORKFLOW_TASK_CLAIM_FORBIDDEN",
+      message: "Workflow task cannot be claimed by the current user",
+      status: 403,
+      expose: true,
+      details: {
+        id: taskId,
+        assignee,
+        requiredRoleCode: roleCode,
+      },
+    })
+  }
+}
+
+const requireWorkflowTaskActor = (
+  assignee: string,
+  currentUserId: string,
+  taskId: string,
+) => {
+  if (
+    assignee.startsWith(workflowUserAssigneePrefix) &&
+    assignee !== buildWorkflowUserAssignee(currentUserId)
+  ) {
+    throw new AppError({
+      code: "WORKFLOW_TASK_ASSIGNEE_MISMATCH",
+      message: "Workflow task is assigned to another user",
+      status: 403,
+      expose: true,
+      details: {
+        id: taskId,
+        assignee,
+      },
+    })
+  }
+}
 
 interface WorkflowRuntimeContext {
   nodeMap: Map<string, WorkflowNode>
@@ -281,8 +370,54 @@ export const createWorkflowService = (repository: WorkflowRepository) => ({
     repository.listTodoTasks(tenantId, normalizeTaskFilter(filter)),
   listDoneTasks: (tenantId: string, filter: ListWorkflowTasksFilter = {}) =>
     repository.listDoneTasks(tenantId, normalizeTaskFilter(filter)),
+  async claimTask(
+    tenantId: string,
+    actor: {
+      userId: string
+      roleCodes: string[]
+      isSuperAdmin: boolean
+    },
+    taskId: string,
+  ) {
+    const task = await repository.getTaskById(tenantId, taskId)
+
+    if (!task) {
+      throw new AppError({
+        code: "WORKFLOW_TASK_NOT_FOUND",
+        message: "Workflow task not found",
+        status: 404,
+        expose: true,
+        details: { id: taskId },
+      })
+    }
+
+    if (task.status !== "todo") {
+      throw new AppError({
+        code: "WORKFLOW_TASK_NOT_TODO",
+        message: "Workflow task is not pending",
+        status: 409,
+        expose: true,
+        details: { id: taskId, status: task.status },
+      })
+    }
+
+    requireClaimableWorkflowTask(task.assignee, actor, taskId)
+
+    await repository.updateTask(tenantId, taskId, {
+      assignee: buildWorkflowUserAssignee(actor.userId),
+    })
+
+    const detail = await repository.getInstanceById(tenantId, task.instanceId)
+
+    if (!detail) {
+      throw new Error("Workflow task claim did not return instance detail")
+    }
+
+    return detail
+  },
   async completeTask(
     tenantId: string,
+    currentUserId: string,
     taskId: string,
     input: CompleteWorkflowTaskPayload,
   ) {
@@ -307,6 +442,8 @@ export const createWorkflowService = (repository: WorkflowRepository) => ({
         details: { id: taskId, status: task.status },
       })
     }
+
+    requireWorkflowTaskActor(task.assignee, currentUserId, taskId)
 
     const instance = await repository.getInstanceById(tenantId, task.instanceId)
 

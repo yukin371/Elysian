@@ -116,6 +116,12 @@ export const buildRecommendedActions = (
     )
   }
 
+  if (report.lastStage.startsWith("workflow_")) {
+    actions.add(
+      "Prioritize workflow definition/task transition checks and verify the workflow module runtime path against the latest smoke-created definitions.",
+    )
+  }
+
   return Array.from(actions)
 }
 

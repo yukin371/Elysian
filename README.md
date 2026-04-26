@@ -36,6 +36,7 @@
 - [项目画像](./docs/PROJECT_PROFILE.md)
 - [当前路线图](./docs/roadmap.md)
 - [架构边界](./docs/ARCHITECTURE_GUARDRAILS.md)
+- [开发原则](./docs/DEVELOPMENT_PRINCIPLES.md)
 - [产品定义](./docs/01-product-definition.md)
 - [架构草案](./docs/02-architecture.md)
 - [AI 与代码生成策略](./docs/03-ai-codegen-strategy.md)
@@ -176,6 +177,12 @@ bun run stack:up
 
 - 默认分支策略：
   `main` 保持可发布，`dev` 作为日常集成分支，功能开发从 `feature/*` 或 `fix/*` 分支切出
+- 开始实现前，先阅读：
+  `docs/PROJECT_PROFILE.md`、`docs/roadmap.md`、`docs/ARCHITECTURE_GUARDRAILS.md`、`docs/DEVELOPMENT_PRINCIPLES.md`
+- 默认技术决策顺序：
+  `先边界，后实现；先验证，后扩展；先复用，后新增；先契约，后技巧`
+- review 不只发生在 PR 阶段：
+  开发前先自审一次，准备新增抽象前再审一次，提交前再做一次验证与文档同步自审
 - GitHub 保护规则：
   `main` 需要 PR + `pr-format`/`validate` 通过 + conversation 已解决；`dev` 需要 `pr-format`/`validate` 通过，二者都禁止 force push 和删除
 - 首次 clone 后执行 `bun install` 会自动通过 `husky` 安装仓库 hooks；若本地 hooks 配置被覆盖，可手动修复：

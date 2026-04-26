@@ -127,6 +127,11 @@ if (process.env.DATABASE_URL) {
   modules.push(
     createWorkflowModule(workflowDefinitionRepository, {
       authGuard,
+      auditLogWriter: (event) =>
+        authRepository.createAuditLog({
+          category: "workflow",
+          ...event,
+        }),
     }),
   )
   modules.push(

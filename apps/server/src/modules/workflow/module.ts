@@ -7,8 +7,24 @@ import type { ServerModule } from "../module"
 import type { WorkflowRepository } from "./repository"
 import { createWorkflowService } from "./service"
 
+interface WorkflowAuditEvent {
+  tenantId: string
+  actorUserId: string
+  action: string
+  targetType: string
+  targetId: string
+  result: "success"
+  requestId: string | null
+  ip: string | null
+  userAgent: string | null
+  details: Record<string, unknown> | null
+}
+
+type WorkflowAuditLogWriter = (event: WorkflowAuditEvent) => Promise<unknown>
+
 export interface WorkflowModuleOptions {
   authGuard?: AuthGuard
+  auditLogWriter?: WorkflowAuditLogWriter
 }
 
 const workflowPermissions = {
@@ -20,6 +36,7 @@ const workflowPermissions = {
   startInstance: "workflow:instance:start",
   cancelInstance: "workflow:instance:cancel",
   listTask: "workflow:task:list",
+  claimTask: "workflow:task:claim",
   completeTask: "workflow:task:complete",
 } as const
 
@@ -35,6 +52,43 @@ export const createWorkflowModule = (
   name: workflowModuleSchema.name,
   register: (app, context) => {
     const service = createWorkflowService(repository)
+    // Workflow runtime keeps business success independent from audit sink availability.
+    const recordAuditBestEffort = async (
+      headers: Headers,
+      identity: AuthIdentity,
+      input: {
+        action: string
+        targetType: string
+        targetId: string
+        details?: Record<string, unknown> | null
+      },
+    ) => {
+      if (!options.auditLogWriter) {
+        return
+      }
+
+      try {
+        await options.auditLogWriter(
+          buildWorkflowAuditEvent(headers, identity, input),
+        )
+      } catch (error) {
+        context.logger.warn("Workflow audit log write failed", {
+          action: input.action,
+          targetType: input.targetType,
+          targetId: input.targetId,
+          actorUserId: identity.user.id,
+          tenantId: identity.user.tenantId,
+          error:
+            error instanceof Error
+              ? {
+                  name: error.name,
+                  message: error.message,
+                }
+              : { value: String(error) },
+        })
+      }
+    }
+
     const authorize = async (
       headers: Headers,
       permissionCode: string,
@@ -184,8 +238,24 @@ export const createWorkflowModule = (
             await authorize(request.headers, workflowPermissions.startInstance),
           )
           set.status = 201
+          const detail = await service.start(
+            identity.user.tenantId,
+            identity.user.id,
+            body,
+          )
 
-          return service.start(identity.user.tenantId, identity.user.id, body)
+          await recordAuditBestEffort(request.headers, identity, {
+            action: "workflow_instance_start",
+            targetType: "workflow_instance",
+            targetId: detail.id,
+            details: {
+              definitionId: detail.definitionId,
+              currentNodeId: detail.currentNodeId,
+              status: detail.status,
+            },
+          })
+
+          return detail
         },
         {
           body: t.Object({
@@ -241,13 +311,70 @@ export const createWorkflowModule = (
         },
       )
       .post(
+        "/workflow/tasks/:id/claim",
+        async ({ params, request }) => {
+          const identity = requireTenantScopedIdentity(
+            await authorize(request.headers, workflowPermissions.claimTask),
+          )
+          const detail = await service.claimTask(
+            identity.user.tenantId,
+            {
+              userId: identity.user.id,
+              roleCodes: identity.roles,
+              isSuperAdmin: identity.user.isSuperAdmin,
+            },
+            params.id,
+          )
+
+          await recordAuditBestEffort(request.headers, identity, {
+            action: "workflow_task_claim",
+            targetType: "workflow_task",
+            targetId: params.id,
+            details: {
+              instanceId: detail.id,
+              status: detail.status,
+              currentNodeId: detail.currentNodeId,
+            },
+          })
+
+          return detail
+        },
+        {
+          params: t.Object({
+            id: t.String(),
+          }),
+          detail: {
+            tags: ["workflow"],
+            summary: "Claim workflow task",
+          },
+        },
+      )
+      .post(
         "/workflow/tasks/:id/complete",
         async ({ params, body, request }) => {
           const identity = requireTenantScopedIdentity(
             await authorize(request.headers, workflowPermissions.completeTask),
           )
+          const detail = await service.completeTask(
+            identity.user.tenantId,
+            identity.user.id,
+            params.id,
+            body,
+          )
 
-          return service.completeTask(identity.user.tenantId, params.id, body)
+          await recordAuditBestEffort(request.headers, identity, {
+            action: "workflow_task_complete",
+            targetType: "workflow_task",
+            targetId: params.id,
+            details: {
+              instanceId: detail.id,
+              result: body.result,
+              status: detail.status,
+              currentNodeId: detail.currentNodeId,
+            },
+          })
+
+          return detail
         },
         {
           params: t.Object({
@@ -271,8 +398,22 @@ export const createWorkflowModule = (
               workflowPermissions.cancelInstance,
             ),
           )
+          const detail = await service.cancelInstance(
+            identity.user.tenantId,
+            params.id,
+          )
 
-          return service.cancelInstance(identity.user.tenantId, params.id)
+          await recordAuditBestEffort(request.headers, identity, {
+            action: "workflow_instance_cancel",
+            targetType: "workflow_instance",
+            targetId: params.id,
+            details: {
+              status: detail.status,
+              currentNodeId: detail.currentNodeId,
+            },
+          })
+
+          return detail
         },
         {
           params: t.Object({
@@ -299,3 +440,30 @@ const requireTenantScopedIdentity = (identity: AuthIdentity | undefined) => {
     expose: true,
   })
 }
+
+const readOptionalHeader = (headers: Headers, key: string) => {
+  const value = headers.get(key)?.trim()
+  return value && value.length > 0 ? value : null
+}
+
+const buildWorkflowAuditEvent = (
+  headers: Headers,
+  identity: AuthIdentity,
+  input: {
+    action: string
+    targetType: string
+    targetId: string
+    details?: Record<string, unknown> | null
+  },
+): WorkflowAuditEvent => ({
+  tenantId: identity.user.tenantId,
+  actorUserId: identity.user.id,
+  action: input.action,
+  targetType: input.targetType,
+  targetId: input.targetId,
+  result: "success",
+  requestId: readOptionalHeader(headers, "x-request-id"),
+  ip: readOptionalHeader(headers, "x-forwarded-for"),
+  userAgent: readOptionalHeader(headers, "user-agent"),
+  details: input.details ?? null,
+})
