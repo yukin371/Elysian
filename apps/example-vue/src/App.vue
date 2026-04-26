@@ -41,6 +41,7 @@ import { settingModuleSchema } from "../../../packages/schema/src/setting"
 import { userModuleSchema } from "../../../packages/schema/src/user"
 import { exampleLocaleMessages } from "./i18n"
 import {
+  createNotificationTableItems,
   filterNotifications,
   resolveNotificationSelection,
 } from "./lib/notification-workspace"
@@ -2719,6 +2720,7 @@ const enterpriseMenuTableItems = computed(() =>
 const enterpriseNotificationTableColumns = computed(() =>
   enterpriseNotificationPage.tableColumns.value.map((column) => ({
     ...column,
+    key: column.key === "status" ? "statusLabel" : column.key,
     label: localizeNotificationFieldLabel(column.key),
     width:
       column.key === "id"
@@ -2769,15 +2771,12 @@ const enterpriseNotificationQueryFields = computed<ElyQueryField[]>(() => [
 ])
 
 const enterpriseNotificationTableItems = computed(() =>
-  filteredNotificationItems.value.map((notification) => ({
-    ...notification,
-    level: localizeNotificationLevel(notification.level),
-    status: localizeNotificationStatus(notification.status),
-    readAt: notification.readAt
-      ? new Date(notification.readAt).toLocaleString(locale.value)
-      : t("app.notification.readAtEmpty"),
-    createdAt: new Date(notification.createdAt).toLocaleString(locale.value),
-  })),
+  createNotificationTableItems(filteredNotificationItems.value, {
+    localizeLevel: localizeNotificationLevel,
+    localizeStatus: localizeNotificationStatus,
+    formatDateTime: (value) => new Date(value).toLocaleString(locale.value),
+    readAtEmptyLabel: t("app.notification.readAtEmpty"),
+  }),
 )
 
 const enterpriseOperationLogTableColumns = computed(() =>

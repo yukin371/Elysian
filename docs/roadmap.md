@@ -19,6 +19,7 @@
 - 已推进：`WP-4` 最小条件分支已落地，当前支持基于实例变量的白名单比较表达式与 `default` 分支，不引入脚本执行器
 - 已推进：workflow 权限已拆分为 definition / instance / task 三组最小权限点，并已补独立 `workflow:task:claim`、server 403 覆盖与默认 seed
 - 已完成：`2026-04-26` 本地自动化回归复验通过，`bun run check`、workflow 定向测试与 `bun run build:vue` 均已通过；详见 [2026-04-26-round-regression-closeout.md](./plans/2026-04-26-round-regression-closeout.md)
+- 已清理风险：`packages/persistence` 的 `db:seed` 已补默认 workflow definitions 样本（`expense-approval v1/v2`、`expense-approval-condition v1`），workflow 示例页默认即可验证版本历史；`apps/example-vue` override seam 仅保留给测试注入
 - 已推进：`packages/persistence` 已新增 workflow repository 独立测试，当前覆盖 definition 版本唯一性、next version 计算、todo/done 查询边界、实例任务排序与取消语义；tenant RLS 仍继续依赖 server 集成测试与真实 PostgreSQL E2E 验证
 - 已推进：workflow 真实运行态 smoke 已并入既有 `e2e:smoke`，当前覆盖 definition 创建、线性 `approved/rejected`、最小 `claim`、显式 instance cancel、条件分支命中与 `default` 分支、todo/done、instance list 与 workflow 审计日志校验，并补高位随机端口与 Windows 端口释放清理，支持临时 PostgreSQL 库下重复执行
 - 已推进：workflow runtime 成功动作已补最小审计证据，当前对 `instance start / task claim / task complete / instance cancel` 写入 `category=workflow` 的 audit log；其中 `task claim / complete` 会携带最小 ownership context，`instance cancel` 会携带被取消待办快照，继续复用既有 operation log/audit log owner，而不新建第二套历史模型
@@ -45,6 +46,10 @@
 - 已完成：`3.10` Vue 管理后台布局，`ElyShell` 已具备侧边栏 + 顶栏 + 内容区 + 标签页布局
 - 已完成：`3.11` Vue 通用组件，`ui-enterprise-vue` 已落 `ElyCrudWorkspace`、标准列表页、标准表单页与只读详情视图
 - 已完成：`3.12` Vue 企业预设首版，`apps/example-vue` 已接入真实 enterprise shell 与 customer 工作区
+- 已推进：`apps/example-vue` 的 enterprise workspace 已扩到 `users / roles / departments / menus / dictionaries / settings / operation-logs / workflow definitions / notifications`，当前通知页已经收敛为“主区单列表 + 右侧详情/创建”结构，不再重复展示第二份列表
+- 已推进：通知工作区已通过真实浏览器回归验证登录、列表筛选、详情联动、创建通知与标记已读；当前已补状态列映射缺口，避免 `read/unread` 在企业表格中退化为“未知”
+- 已推进：customer 工作区已从前端本地筛选收敛到服务端列表协议，`GET /customers` 当前支持 query / page / pageSize / sortBy / sortOrder，并返回 page metadata 供示例页最小分页交互消费
+- 已确认边界：`apps/example-vue` 当前仍是“企业预设 + customer 单模块”的最小交互验证页，不视为完整多模块后台；详见 [2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md](./plans/2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md)
 
 ### 3. Phase 4 Pre-validation ✅ 归档
 
@@ -294,6 +299,6 @@
 
 ## 下一步
 
-1. 先把 `P7A Round-2` 作为当前 workflow 主线的阶段出口保留，不把已验证范围误写成通用 BPM 扩张起点。
-2. 若继续推进 workflow，优先只评估任务所有权历史与权限边界是否还需补强，不默认进入 `transfer / delegate`。
-3. 在未切换到新的主线前，不扩大到通知中心联动、调度器、脚本节点或前端设计器。
+1. 先把 `apps/example-vue` 的 enterprise workspace 能力继续按后台常用功能矩阵收口，优先补剩余高频模块与交互缺口，不急着抽象成新的 shared owner。
+2. 继续保留 `P7A Round-2` 作为 workflow 当前阶段出口，只在需要时补最小所有权/权限边界，不默认进入 `transfer / delegate`。
+3. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。

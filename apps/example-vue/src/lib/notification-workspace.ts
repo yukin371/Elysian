@@ -12,6 +12,13 @@ export interface NotificationWorkspaceQuery {
   status?: NotificationStatus | ""
 }
 
+export interface NotificationTableItem extends NotificationRecord {
+  level: string
+  statusLabel: string
+  readAt: string
+  createdAt: string
+}
+
 const normalizeQueryValue = (value: string | undefined) =>
   value?.trim().toLowerCase() ?? ""
 
@@ -75,3 +82,22 @@ export const resolveNotificationSelection = (
 
   return notifications[0]?.id ?? null
 }
+
+export const createNotificationTableItems = (
+  notifications: NotificationRecord[],
+  options: {
+    localizeLevel: (level: NotificationRecord["level"]) => string
+    localizeStatus: (status: NotificationRecord["status"]) => string
+    formatDateTime: (value: string) => string
+    readAtEmptyLabel: string
+  },
+): NotificationTableItem[] =>
+  notifications.map((notification) => ({
+    ...notification,
+    level: options.localizeLevel(notification.level),
+    statusLabel: options.localizeStatus(notification.status),
+    readAt: notification.readAt
+      ? options.formatDateTime(notification.readAt)
+      : options.readAtEmptyLabel,
+    createdAt: options.formatDateTime(notification.createdAt),
+  }))

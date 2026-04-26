@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test"
 import type { NotificationRecord } from "@elysian/schema"
 
 import {
+  createNotificationTableItems,
   filterNotifications,
   resolveNotificationSelection,
 } from "./notification-workspace"
@@ -95,5 +96,41 @@ describe("notification workspace helpers", () => {
 
   test("returns null when there are no visible notifications", () => {
     expect(resolveNotificationSelection([], null)).toBeNull()
+  })
+
+  test("maps notification status into a dedicated table label without losing the raw status", () => {
+    const tableItems = createNotificationTableItems(notifications, {
+      localizeLevel: (level) => `level:${level}`,
+      localizeStatus: (status) => `status:${status}`,
+      formatDateTime: (value) => `time:${value}`,
+      readAtEmptyLabel: "not-read-yet",
+    })
+
+    expect(tableItems).toEqual([
+      expect.objectContaining({
+        id: "notification_1",
+        level: "level:warning",
+        status: "unread",
+        statusLabel: "status:unread",
+        readAt: "not-read-yet",
+        createdAt: "time:2026-04-27T08:00:00.000Z",
+      }),
+      expect.objectContaining({
+        id: "notification_2",
+        level: "level:success",
+        status: "read",
+        statusLabel: "status:read",
+        readAt: "time:2026-04-27T08:30:00.000Z",
+        createdAt: "time:2026-04-27T08:00:00.000Z",
+      }),
+      expect.objectContaining({
+        id: "notification_3",
+        level: "level:error",
+        status: "unread",
+        statusLabel: "status:unread",
+        readAt: "not-read-yet",
+        createdAt: "time:2026-04-27T08:00:00.000Z",
+      }),
+    ])
   })
 })
