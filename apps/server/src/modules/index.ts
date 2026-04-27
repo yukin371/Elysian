@@ -25,6 +25,8 @@ export {
   createInMemoryFileStorage,
   createLocalFileStorage,
 } from "./file"
+export { createGeneratorSessionModule } from "./generator-session"
+export { createInMemoryGeneratorSessionRepository } from "./generator-session"
 export { createDictionaryModule } from "./dictionary"
 export {
   createDictionaryRepository,

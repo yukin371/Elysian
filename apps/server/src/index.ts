@@ -20,6 +20,8 @@ import {
   createDictionaryRepository,
   createFileModule,
   createFileRepository,
+  createGeneratorSessionModule,
+  createInMemoryGeneratorSessionRepository,
   createLocalFileStorage,
   createMenuModule,
   createMenuRepository,
@@ -54,6 +56,7 @@ if (process.env.DATABASE_URL) {
   const departmentRepository = createDepartmentRepository(db)
   const fileRepository = createFileRepository(db)
   const fileStorage = createLocalFileStorage()
+  const generatorSessionRepository = createInMemoryGeneratorSessionRepository()
   const menuRepository = createMenuRepository(db)
   const notificationRepository = createNotificationRepository(db)
   const operationLogRepository = createOperationLogRepository(db)
@@ -102,6 +105,16 @@ if (process.env.DATABASE_URL) {
   modules.push(
     createFileModule(fileRepository, fileStorage, {
       authGuard,
+    }),
+  )
+  modules.push(
+    createGeneratorSessionModule(generatorSessionRepository, {
+      authGuard,
+      auditLogWriter: (event) =>
+        authRepository.createAuditLog({
+          category: "generator",
+          ...event,
+        }),
     }),
   )
   modules.push(
