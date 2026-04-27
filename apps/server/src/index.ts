@@ -21,7 +21,7 @@ import {
   createFileModule,
   createFileRepository,
   createGeneratorSessionModule,
-  createInMemoryGeneratorSessionRepository,
+  createGeneratorSessionRepository,
   createLocalFileStorage,
   createMenuModule,
   createMenuRepository,
@@ -56,7 +56,7 @@ if (process.env.DATABASE_URL) {
   const departmentRepository = createDepartmentRepository(db)
   const fileRepository = createFileRepository(db)
   const fileStorage = createLocalFileStorage()
-  const generatorSessionRepository = createInMemoryGeneratorSessionRepository()
+  const generatorSessionRepository = createGeneratorSessionRepository(db)
   const menuRepository = createMenuRepository(db)
   const notificationRepository = createNotificationRepository(db)
   const operationLogRepository = createOperationLogRepository(db)

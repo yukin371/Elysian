@@ -218,10 +218,12 @@
 - 已补代码生成 / SQL 生成 / 安全能力的功能矩阵与缺口设计文档，明确当前状态应表述为“代码生成底座已可用、SQL 仍为 review-only preview、安全具备基础等价能力但未进入完整企业安全平台”；详见 [2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md](./plans/2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md)
 - `Track 1 / T1-2` 已落最小后端切片：`apps/server` 新增 `generator-session` 运行时模块，当前已支持生成 preview session 列表、详情、创建与 report 落盘，不提前进入 staging apply
 - `Track 1 / T1-3` 已落最小后端切片：当前可对 preview session 执行 staging apply，apply 前会重验目标文件是否漂移，成功后写入 manifest 并保留最小 apply evidence
+- `Track 1 / T1-4` 已落最小前端装配切片：`apps/example-vue` 的 generator workspace 当前已消费 `generator-session` 的 preview/apply DTO，主区展示文件计划与差异摘要，侧栏展示 session 元数据、SQL preview 与 apply evidence
+- `Track 1 / T1-5` 已落最小持久化切片：`packages/persistence` 新增 `generator_preview_sessions` 表与 CRUD helper，`apps/server` 在 `DATABASE_URL` 分支已切到持久化 repository，并通过 report path 回放 preview 详情与 apply 链路
 - `Track 2 / T2-1` 已落首个中性产物：`packages/generator` 当前可从 `ModuleSchema` 输出 `DatabaseChangePlan` create-table 计划，继续保持 SQL preview 在 generator、正式 migration proposal 在 persistence
 - `Track 2 / T2-2` 已落最小 proposal builder：`packages/persistence` 当前可基于 `DatabaseChangePlan` 形状输出 review-only SQL draft、Drizzle schema snippet 与风险标签，但仍不直接生成正式 migration 文件
 - 已完成一次功能矩阵复验：确认 generator session 列表 / 详情 / preview / staging apply 以及 auth refresh session 列表 / 单会话 revoke 均已落地，相关矩阵文档已按真实完成度回填
-- 已确认当前缺口边界：`apps/example-vue` 的 generator workspace 仍是浏览器本地 preview，尚未接入 server session / apply；generator session 记录当前也仍为内存态，未形成持久化回放中心
+- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，但更细粒度目标目录 diff、冲突解释与正式人工确认体验仍待补齐；SQL proposal 到正式 migration 的人工接入规范也仍待补齐
 - 完成 `Phase 1` 垂直切片闭环，打通 `schema -> server -> persistence -> generator -> frontend`
 - 用 Docker PostgreSQL + 浏览器 smoke 验证 customer create / update / delete 持久化链路
 - 固定仓库品牌与命名体系为 `Elysian` / `@elysian/*`
@@ -309,6 +311,6 @@
 ## 下一步
 
 1. 先把 `apps/example-vue` 的 enterprise workspace 能力继续按后台常用功能矩阵收口，优先补剩余高频模块与交互缺口，不急着抽象成新的 shared owner。
-2. 在生成主线中继续推进 `Studio 化 / migration 化 / 会话治理化` 三条缺口：当前优先补 `apps/example-vue` 对 generator session / apply 的前端接入、generation session 持久化、apply diff/evidence 强化、proposal 到正式 migration 的人工接入规范，以及 refresh session 设备化治理，再决定是否独立出 SQL 工作区。
+2. 在生成主线中继续推进 `Studio 化 / migration 化 / 会话治理化` 三条缺口：当前优先补 apply diff/evidence 强化、proposal 到正式 migration 的人工接入规范，以及 refresh session 设备化治理，再决定是否独立出 SQL 工作区。
 3. 继续保留 `P7A Round-2` 作为 workflow 当前阶段出口，只在需要时补最小所有权/权限边界，不默认进入 `transfer / delegate`。
 4. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。

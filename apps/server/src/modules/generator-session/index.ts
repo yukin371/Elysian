@@ -3,6 +3,7 @@ export {
   type GeneratorSessionModuleOptions,
 } from "./module"
 export {
+  createGeneratorSessionRepository,
   createInMemoryGeneratorSessionRepository,
   type CreateGeneratorPreviewSessionInput,
   type GeneratorPreviewSessionDetail,

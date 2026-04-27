@@ -112,7 +112,9 @@
 - `packages/persistence` 的 `db:seed` 已包含默认 workflow definitions 样本（`expense-approval v1/v2`、`expense-approval-condition v1`），默认开发环境无需前端 override 也可验证 workflow 版本历史；`apps/example-vue` 的 override seam 当前只用于稳定复现特定测试样本。
 - `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace；当前定位仍是“企业预设 + customer 单模块”的最小交互验证页，不视为完整多模块后台。
 - `apps/example-vue` 的 customer workspace 已从“前端拉全量后本地筛选”收敛到服务端列表协议，当前 `GET /customers` 已承接 query、分页与排序参数，并返回 page metadata 供工作区 footer 分页交互消费。
+- `apps/example-vue` 的 generator preview workspace 已接入 `generator-session` 后端运行态，当前由 preview session DTO 驱动文件计划、差异摘要、SQL preview 与 staging apply 证据；schema 选项仍保持在前端注册表内解析。
 - 服务端已落生成会话运行时模块：`generator-session`，并已提供 `GET /studio/generator/sessions`、`GET /studio/generator/sessions/:id`、`POST /studio/generator/sessions/preview`、`POST /studio/generator/sessions/:id/apply` 最小后端闭环。
+- `generator-session` 当前已落最小持久化回放中心：session 元数据进入 `packages/persistence` 的关系型表，preview report 仍按文件落盘并由 `apps/server` 运行时回放读取，避免把生成内核 owner 迁入数据库层。
 - 生成预览报告中心当前已具备后端最小运行态：可输出 preview report、review-only SQL preview 与 `DatabaseChangePlan`，并按会话落盘到 `generated/reports/generator-sessions/*.preview.json`。
 - generator 当前已支持基于 preview report 的安全 staging apply：apply 前会重验目标文件状态是否漂移，成功后写入 staging manifest，并把 apply 证据回传给 `generator-session`。
 - 仓库已具备最小质量链路：`Biome + GitHub Actions CI`。

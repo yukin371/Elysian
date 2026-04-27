@@ -71,11 +71,11 @@
 | 生成预览（文件级） | ✅ 已完成 | CLI `--preview` 可输出文件动作预览 | `packages/generator` | 仍以 CLI 为主 |
 | 结构化预览报告 | ✅ 已完成 | 可输出 JSON report，用于回归与审查 | `packages/generator` | 尚无报告中心 UI |
 | 浏览器本地预览入口 | ✅ 已完成 | 已有 `@elysian/generator/browser`，示例页可消费 | `packages/generator` + `apps/example-vue` | 仅限本地纯渲染，不做真实 apply |
-| Studio 生成预览工作区 | 🟡 部分完成 | `example-vue` 已能选 schema / target，查看文件与源码，但当前仍是浏览器本地 preview 工作区 | `apps/example-vue` | 尚未接入 server session / apply 契约，仍不是正式平台应用 |
+| Studio 生成预览工作区 | 🟡 部分完成 | `example-vue` 已接入 server preview/apply DTO，可查看文件计划、差异摘要、SQL preview 与 apply evidence | `apps/example-vue` | 仍缺正式人工确认流与更细粒度 diff 解释 |
 | React / Vue 双前端目标 | ✅ 已完成 | 模板层已支持 `vue/react` 页面输出 | `packages/generator` | 两端都还只是最小页面模板 |
-| 模块级生成历史 / 任务记录 | 🟡 部分完成 | `apps/server` 已提供 preview session 列表、详情、report 路径与 apply evidence，但当前 repository 仍为内存态 | `apps/server` | 重启后丢失历史；无持久化报告中心 |
-| Studio 内触发真实生成 apply | 🟡 部分完成 | 服务端已支持基于 preview session 执行 staging apply，并在 apply 前重验目标文件漂移 | `apps/server` | `example-vue` 尚未接入；缺正式前端确认流 |
-| Studio 内 diff / 冲突审查 | 🟡 部分完成 | preview / apply 响应已返回 diff summary、blocking conflict 与 apply evidence | `apps/server` | 前端未消费；缺更细粒度目标目录 diff 与冲突解释 |
+| 模块级生成历史 / 任务记录 | 🟡 部分完成 | `apps/server` 已提供 preview session 列表、详情、report 路径与 apply evidence，`packages/persistence` 已持久化 session 元数据 | `apps/server` + `packages/persistence` | report 仍依赖文件落盘回放；尚未形成更完整的报告治理中心 |
+| Studio 内触发真实生成 apply | 🟡 部分完成 | 服务端已支持基于 preview session 执行 staging apply，并在 apply 前重验目标文件漂移 | `apps/server` | `example-vue` 已接入最小 apply 入口，但仍缺正式前端确认流 |
+| Studio 内 diff / 冲突审查 | 🟡 部分完成 | preview / apply 响应已返回 diff summary、blocking conflict 与 apply evidence，`apps/example-vue` 已消费主区/侧栏装配 | `apps/server` + `apps/example-vue` | 缺更细粒度目标目录 diff 与冲突解释 |
 | 模板配置中心 / 生成参数模板 | ⚪ 未开始 | 没有平台内的 generator profile / preset 管理 | 无 | 仍以 CLI 参数为主 |
 | 数据表导入后反推模块 schema | ⚪ 未开始 | 没有“库表 -> ModuleSchema” 导入链 | 无 | 对齐后台平台常见 codegen 能力仍缺关键入口 |
 | 代码生成结果注册回平台导航 | 🟡 部分完成 | 生成物可落盘，但不会自动进入平台模块注册中心 | `packages/generator` / `apps/example-vue` | 缺页面注册 / 路由注册 owner |
@@ -173,7 +173,7 @@
 
 ##### T1-2 生成会话与报告中心
 
-状态：`已落最小后端切片，未完成持久化与前端接入`
+状态：`已落最小后端切片，已完成持久化与前端接入`
 
 当前已实现：
 
@@ -402,8 +402,8 @@
 
 ### 第一优先级
 
-1. `Track 1` 把已落地的 generator session / apply 能力接到 `apps/example-vue`
-2. `Track 1 / T1-2` 把 generation session 从内存态补到可持久化回放
+1. `Track 1 / T1-4` 强化目标目录 diff / 冲突解释 / 人工确认
+2. `Track 2 / T2-2` 把 proposal 接口、导出与人工接入规范补完整
 3. `Track 3 / T3-1` 补会话治理页、设备标识与更完整 revoke 交互
 
 理由：
@@ -412,9 +412,9 @@
 
 ### 第二优先级
 
-1. `Track 1 / T1-4` 强化目标目录 diff / 冲突解释 / 人工确认
-2. `Track 2 / T2-2` 把 proposal 接口、导出与人工接入规范补完整
-3. `Track 3 / T3-2` 登录安全策略
+1. 登录安全策略
+2. proposal 审核工作区或导出体验
+3. generation session 报告治理增强
 
 ### 第三优先级
 
