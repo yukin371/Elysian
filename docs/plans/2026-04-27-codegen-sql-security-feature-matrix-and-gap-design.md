@@ -71,11 +71,11 @@
 | 生成预览（文件级） | ✅ 已完成 | CLI `--preview` 可输出文件动作预览 | `packages/generator` | 仍以 CLI 为主 |
 | 结构化预览报告 | ✅ 已完成 | 可输出 JSON report，用于回归与审查 | `packages/generator` | 尚无报告中心 UI |
 | 浏览器本地预览入口 | ✅ 已完成 | 已有 `@elysian/generator/browser`，示例页可消费 | `packages/generator` + `apps/example-vue` | 仅限本地纯渲染，不做真实 apply |
-| Studio 生成预览工作区 | ✅ 已完成 | `example-vue` 已能选 schema / target，查看文件与源码 | `apps/example-vue` | 仍是示例装配，不是正式平台应用 |
+| Studio 生成预览工作区 | 🟡 部分完成 | `example-vue` 已能选 schema / target，查看文件与源码，但当前仍是浏览器本地 preview 工作区 | `apps/example-vue` | 尚未接入 server session / apply 契约，仍不是正式平台应用 |
 | React / Vue 双前端目标 | ✅ 已完成 | 模板层已支持 `vue/react` 页面输出 | `packages/generator` | 两端都还只是最小页面模板 |
-| 模块级生成历史 / 任务记录 | ⚪ 未开始 | 当前没有“本次生成任务”的持久化记录中心 | 无 | 无任务审计、无回放列表 |
-| Studio 内触发真实生成 apply | ⚪ 未开始 | 当前 Studio 只预览，不写入目录 | 无 | 缺服务端任务入口、授权、审计与 staging/apply 语义 |
-| Studio 内 diff / 冲突审查 | ⚪ 未开始 | 当前只看生成结果，不看目标目录 diff | 无 | 缺现有文件比对、冲突解释与人工确认 |
+| 模块级生成历史 / 任务记录 | 🟡 部分完成 | `apps/server` 已提供 preview session 列表、详情、report 路径与 apply evidence，但当前 repository 仍为内存态 | `apps/server` | 重启后丢失历史；无持久化报告中心 |
+| Studio 内触发真实生成 apply | 🟡 部分完成 | 服务端已支持基于 preview session 执行 staging apply，并在 apply 前重验目标文件漂移 | `apps/server` | `example-vue` 尚未接入；缺正式前端确认流 |
+| Studio 内 diff / 冲突审查 | 🟡 部分完成 | preview / apply 响应已返回 diff summary、blocking conflict 与 apply evidence | `apps/server` | 前端未消费；缺更细粒度目标目录 diff 与冲突解释 |
 | 模板配置中心 / 生成参数模板 | ⚪ 未开始 | 没有平台内的 generator profile / preset 管理 | 无 | 仍以 CLI 参数为主 |
 | 数据表导入后反推模块 schema | ⚪ 未开始 | 没有“库表 -> ModuleSchema” 导入链 | 无 | 对齐后台平台常见 codegen 能力仍缺关键入口 |
 | 代码生成结果注册回平台导航 | 🟡 部分完成 | 生成物可落盘，但不会自动进入平台模块注册中心 | `packages/generator` / `apps/example-vue` | 缺页面注册 / 路由注册 owner |
@@ -88,6 +88,8 @@
 | CLI 输出 SQL preview | ✅ 已完成 | `generate --preview` 会输出 SQL preview | `packages/generator` | 无独立 SQL 工作流 |
 | Studio 中查看 SQL preview | ✅ 已完成 | 生成预览工作区右侧已展示 SQL preview | `apps/example-vue` | 仍依附于 generator preview |
 | SQL owner 与 migration owner 分离 | ✅ 已完成 | 文档与实现都保持“preview 在 generator，正式 migration 在 persistence” | `packages/generator` / `packages/persistence` | 还缺中间过渡产物 |
+| 中性数据库变更计划 | ✅ 已完成 | `packages/generator` 已可从 `ModuleSchema` 输出 `DatabaseChangePlan` create-table 计划 | `packages/generator` | 当前仅覆盖 create-table |
+| review-only migration proposal | 🟡 部分完成 | `packages/persistence` 已可基于 `DatabaseChangePlan` 输出 SQL draft、Drizzle schema snippet 与风险标签 | `packages/persistence` | 仍需人工接入正式 migration 流程 |
 | 正式 migration 文件生成 | ⚪ 未开始 | 还没有从 `ModuleSchema` 直接生成正式 migration 文件 | 无 | 核心缺口 |
 | Drizzle schema artifact 生成 | ⚪ 未开始 | 没有正式 `packages/persistence` 侧 schema artifact 输出链 | 无 | 无法进入 `db:generate / db:migrate` 闭环 |
 | SQL 变更 diff / 兼容性分析 | ⚪ 未开始 | 当前只输出建表草案，不分析 alter / rename / drop 风险 | 无 | 高风险变更无法审查 |
@@ -108,7 +110,7 @@
 | 租户感知登录与 refresh | ✅ 已完成 | 已支持 tenant-aware 登录与 token 语义 | `apps/server` + `packages/persistence` | 无独立租户会话治理页 |
 | 数据权限基线 | ✅ 已完成 | `Phase 6B` 已落地最小数据权限框架 | `apps/server` + `packages/persistence` | 仍需更多真实业务压测 |
 | 密码重置等基础账号运维 | ✅ 已完成 | 系统用户模块已有 reset-password 能力 | `apps/server` | 缺更完整账号安全策略 |
-| 登录失败策略 / 锁定 / 设备管理 | ⚪ 未开始 | 没有账户锁定、设备列表、强制下线等能力 | 无 | 与企业安全平台常见能力仍有差距 |
+| 登录失败策略 / 锁定 / 设备管理 | 🟡 部分完成 | 当前已支持当前用户 refresh session 列表与单会话 revoke，但尚无失败锁定、设备标识归一和强制下线全套能力 | `apps/server` + `packages/persistence` | 设备视图、锁定窗口、批量/跨端治理仍缺 |
 | OAuth2 / OIDC / SSO | ⛔ 当前不做 | 当前阶段未进入 | 无 | 非当前主线 |
 | 注解式 / 表达式级方法安全 | ⛔ 当前不做 | 当前是 Elysia + 模块 guard，不走 Spring 注解模型 | 无 | 不追求框架形态等价 |
 | CSRF 体系 | ⛔ 当前不做 | 当前以 Bearer access token + SameSite refresh cookie 为主 | `apps/server` | 如未来进入浏览器表单态再评估 |
@@ -120,6 +122,7 @@
 当前结论不是“未完成”，而是：
 
 - `Generator CLI + preview/report + browser-safe preview` 已形成最小可用闭环。
+- `apps/server` 已补最小 generation session / staging apply 后端切片，但 `apps/example-vue` 仍未接入这条运行态链路。
 - 还没有进入“后台产品级代码生成中心”阶段。
 
 换句话说：
@@ -134,7 +137,8 @@
 更准确的说法是：
 
 - `SQL preview` 已完成
-- `正式 migration proposal / artifact / import 闭环` 未完成
+- `DatabaseChangePlan + review-only migration proposal` 已有最小实现
+- `正式 migration artifact / import 闭环` 未完成
 
 ### 3. 安全能力
 
@@ -143,6 +147,7 @@
 更准确的说法是：
 
 - `JWT + refresh session + RBAC + route guard + 审计 + tenant-aware auth` 这一层已经具备常见企业后台的基础等价能力
+- 当前还额外具备“当前用户 refresh session 列表 / 单会话 revoke”的最小会话治理切片
 - 但还没有进入“完整企业安全平台”或“Spring Security 全家桶级扩展能力”
 
 ## 未完成部分设计
@@ -168,6 +173,14 @@
 
 ##### T1-2 生成会话与报告中心
 
+状态：`已落最小后端切片，未完成持久化与前端接入`
+
+当前已实现：
+
+- `apps/server` 已支持 generation session 列表、详情、preview create
+- preview response 已返回 report 与 diff summary
+- apply 后可保留最小 evidence
+
 目标：
 
 - 为每次生成建立结构化 `generation session`
@@ -190,6 +203,14 @@
 
 ##### T1-3 staging apply
 
+状态：`已落最小后端切片，未完成 Studio 前端闭环`
+
+当前已实现：
+
+- 可基于 preview session 执行 staging apply
+- apply 前会重验目标文件是否漂移
+- apply 后会写入 manifest 与最小 evidence
+
 目标：
 
 - 允许平台内把生成结果先落到官方 staging 目录
@@ -201,6 +222,13 @@
 - `apps/server` 负责“谁可以发起、写到哪里、如何审计”
 
 ##### T1-4 diff / confirm / apply evidence
+
+状态：`已落最小 diff summary / evidence，未完成正式审查体验`
+
+当前已实现：
+
+- preview / apply 响应会返回 diff summary
+- apply evidence 已包含 session id、report path、manifest path、actor / request id / timestamp
 
 目标：
 
@@ -240,6 +268,8 @@
 
 ##### T2-1 中性数据库变更描述
 
+状态：`已完成首个 create-table 版本`
+
 目标：
 
 - 在 `generator` 与 `persistence` 之间引入可审查的中间产物
@@ -258,6 +288,8 @@
 - 避免让 `packages/generator` 直接生成带运行时语义的 migration 文件
 
 ##### T2-2 persistence 侧 migration proposal
+
+状态：`已落最小 review-only proposal builder`
 
 目标：
 
@@ -308,6 +340,13 @@
 #### 分阶段设计
 
 ##### T3-1 会话治理
+
+状态：`已落最小后端切片，未完成设备视图与更完整策略`
+
+当前已实现：
+
+- 当前用户 refresh session 列表
+- 当前用户单会话 revoke
 
 目标：
 
@@ -363,24 +402,24 @@
 
 ### 第一优先级
 
-1. `Track 1 / T1-2` 生成会话与报告中心
-2. `Track 2 / T2-1` 中性数据库变更描述
-3. `Track 3 / T3-1` 会话治理
+1. `Track 1` 把已落地的 generator session / apply 能力接到 `apps/example-vue`
+2. `Track 1 / T1-2` 把 generation session 从内存态补到可持久化回放
+3. `Track 3 / T3-1` 补会话治理页、设备标识与更完整 revoke 交互
 
 理由：
 
-- 这三项能直接提高“平台可用度”，且不会破坏当前 owner
+- 这三项直接决定“平台里是否真能用”，且优先补闭环而不是再扩新抽象
 
 ### 第二优先级
 
-1. `Track 1 / T1-3` staging apply
-2. `Track 2 / T2-2` migration proposal
+1. `Track 1 / T1-4` 强化目标目录 diff / 冲突解释 / 人工确认
+2. `Track 2 / T2-2` 把 proposal 接口、导出与人工接入规范补完整
 3. `Track 3 / T3-2` 登录安全策略
 
 ### 第三优先级
 
-1. `Track 1 / T1-4` diff / evidence
-2. `Track 2 / T2-3` 独立 SQL 工作区
+1. `Track 2 / T2-3` 独立 SQL 工作区
+2. `Track 2 / T2-4` 表结构导入
 3. `Track 3 / T3-4` 安全事件视图
 
 ## 验证要求
