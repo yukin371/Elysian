@@ -8,16 +8,30 @@ import {
 
 const previewFiles = [
   toGeneratorPreviewFileCard({
+    absolutePath: "E:/generated/modules/customer/customer.schema.ts",
     path: "modules/customer/customer.schema.ts",
     reason: "Persist the module schema alongside generated module artifacts.",
+    plannedAction: "create",
+    plannedReason: "File does not exist yet.",
+    exists: false,
+    hasChanges: true,
     mergeStrategy: "replace-whole-file",
     contents: "export const customerModuleSchema = {}",
+    currentContents: null,
+    isManaged: null,
   }),
   toGeneratorPreviewFileCard({
+    absolutePath: "E:/generated/modules/customer/customer.page.vue",
     path: "modules/customer/customer.page.vue",
     reason: "Provide a generated management page implementation.",
+    plannedAction: "create",
+    plannedReason: "File does not exist yet.",
+    exists: false,
+    hasChanges: true,
     mergeStrategy: "replace-whole-file",
     contents: "<template><div>customer page</div></template>",
+    currentContents: null,
+    isManaged: null,
   }),
 ]
 

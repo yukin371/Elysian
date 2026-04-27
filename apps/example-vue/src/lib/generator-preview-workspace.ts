@@ -1,6 +1,19 @@
-import type { RenderedModuleFile } from "./generator-preview-browser"
+import type { GeneratorPreviewReportFile } from "./platform-api"
 
-export interface GeneratorPreviewFileCard extends RenderedModuleFile {
+export interface GeneratorPreviewFileCard
+  extends Pick<
+    GeneratorPreviewReportFile,
+    | "absolutePath"
+    | "contents"
+    | "currentContents"
+    | "exists"
+    | "hasChanges"
+    | "mergeStrategy"
+    | "path"
+    | "plannedAction"
+    | "plannedReason"
+    | "reason"
+  > {
   charCount: number
   lineCount: number
 }
@@ -8,7 +21,7 @@ export interface GeneratorPreviewFileCard extends RenderedModuleFile {
 const normalizeQuery = (value: string) => value.trim().toLowerCase()
 
 export const toGeneratorPreviewFileCard = (
-  file: RenderedModuleFile,
+  file: GeneratorPreviewReportFile,
 ): GeneratorPreviewFileCard => ({
   ...file,
   charCount: file.contents.length,
@@ -27,8 +40,11 @@ export const filterGeneratorPreviewFiles = (
 
   return files.filter((file) => {
     const haystacks = [
+      file.absolutePath,
       file.path,
       file.reason,
+      file.plannedAction,
+      file.plannedReason,
       file.mergeStrategy,
       file.contents,
     ].map((value) => value.toLowerCase())

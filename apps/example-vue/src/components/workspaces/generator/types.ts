@@ -1,4 +1,10 @@
 import type { GeneratorPreviewFileCard } from "../../../lib/generator-preview-workspace"
+import type {
+  GeneratorPreviewApplyEvidence,
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewSqlPreview,
+  GeneratorPreviewSessionRecord,
+} from "../../../lib/platform-api"
 
 export type GeneratorPreviewTranslation = (
   key: string,
@@ -10,4 +16,10 @@ export interface GeneratorPreviewSchemaOption {
   value: string
 }
 
-export type { GeneratorPreviewFileCard }
+export type {
+  GeneratorPreviewApplyEvidence,
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewFileCard,
+  GeneratorPreviewSqlPreview,
+  GeneratorPreviewSessionRecord,
+}
