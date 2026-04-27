@@ -43,17 +43,29 @@ export const createCustomerModule = (
     return app
       .get(
         "/customers",
-        async ({ request }) => {
+        async ({ query, request }) => {
           const identity = await authorize(
             request.headers,
             customerPermissions.list,
           )
 
-          return {
-            items: await service.list(identity?.dataAccess),
-          }
+          return service.list(query, identity?.dataAccess)
         },
         {
+          query: t.Object({
+            q: t.Optional(t.String()),
+            status: t.Optional(
+              t.Union([t.Literal("active"), t.Literal("inactive")]),
+            ),
+            page: t.Optional(t.Numeric()),
+            pageSize: t.Optional(t.Numeric()),
+            sortBy: t.Optional(
+              t.Union([t.Literal("createdAt"), t.Literal("name")]),
+            ),
+            sortOrder: t.Optional(
+              t.Union([t.Literal("asc"), t.Literal("desc")]),
+            ),
+          }),
           detail: {
             tags: ["customer"],
             summary: "List customers",

@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test"
 import {
   createDefaultAuthSeedConfig,
   createDefaultAuthSeedSpec,
+  createDefaultWorkflowDefinitionSeedSpec,
   createTenantBootstrapSeedSpec,
   normalizeTenantInitOptions,
   parseDefaultSeedCliArgs,
@@ -160,6 +161,68 @@ describe("createDefaultAuthSeedSpec", () => {
     expect(spec.adminUser.username).toBe("ops-admin")
     expect(spec.adminUser.password).toBe(["ops", "secret"].join("-"))
     expect(spec.adminUser.displayName).toBe("Ops Admin")
+  })
+})
+
+describe("createDefaultWorkflowDefinitionSeedSpec", () => {
+  it("includes default workflow samples for version history and condition branching", () => {
+    const spec = createDefaultWorkflowDefinitionSeedSpec()
+
+    expect(
+      spec.map((definition) => ({
+        key: definition.key,
+        version: definition.version,
+      })),
+    ).toEqual([
+      { key: "expense-approval", version: 1 },
+      { key: "expense-approval", version: 2 },
+      { key: "expense-approval-condition", version: 1 },
+    ])
+    expect(
+      spec.find((definition) => definition.key === "expense-approval")
+        ?.definition,
+    ).toMatchObject({
+      nodes: [
+        { id: "start", type: "start" },
+        { id: "manager-review", type: "approval" },
+        { id: "approved", type: "end" },
+      ],
+    })
+    expect(
+      spec.find((definition) => definition.version === 2)?.definition,
+    ).toMatchObject({
+      nodes: [
+        { id: "start", type: "start" },
+        { id: "manager-review", type: "approval" },
+        { id: "finance-review", type: "approval" },
+        { id: "approved", type: "end" },
+      ],
+      edges: [
+        { from: "start", to: "manager-review" },
+        { from: "manager-review", to: "finance-review" },
+        { from: "finance-review", to: "approved" },
+      ],
+    })
+    expect(
+      spec.find((definition) => definition.key === "expense-approval-condition")
+        ?.definition,
+    ).toEqual(
+      expect.objectContaining({
+        nodes: expect.arrayContaining([
+          expect.objectContaining({ id: "amount-check", type: "condition" }),
+          expect.objectContaining({
+            id: "finance-review",
+            type: "approval",
+          }),
+        ]),
+        edges: expect.arrayContaining([
+          expect.objectContaining({
+            from: "amount-check",
+            to: "finance-review",
+          }),
+        ]),
+      }),
+    )
   })
 })
 

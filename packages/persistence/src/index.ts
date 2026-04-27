@@ -155,6 +155,7 @@ export {
 export {
   createDefaultAuthSeedConfig,
   createDefaultAuthSeedSpec,
+  createDefaultWorkflowDefinitionSeedSpec,
   createTenantBootstrapSeedSpec,
   initializeTenant,
   normalizeTenantInitOptions,

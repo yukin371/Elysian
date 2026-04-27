@@ -48,6 +48,11 @@ export interface ElyShellProps {
   copy?: ElyShellCopy
 }
 
+export interface ElyShellEmits {
+  (e: "menu-select", key: string): void
+  (e: "tab-select", key: string): void
+}
+
 export interface ResolvedElyShellCopy {
   navigationLabel: string
   environmentLabel: string

@@ -11,7 +11,11 @@ import { Menu as TMenu } from "tdesign-vue-next/es/menu"
 import { Space as TSpace } from "tdesign-vue-next/es/space"
 import { computed } from "vue"
 
-import { type ElyShellProps, resolveElyShellCopy } from "../contracts"
+import {
+  type ElyShellEmits,
+  type ElyShellProps,
+  resolveElyShellCopy,
+} from "../contracts"
 import ElyNavNodes from "./ElyNavNodes.vue"
 
 const props = withDefaults(defineProps<ElyShellProps>(), {
@@ -24,6 +28,7 @@ const props = withDefaults(defineProps<ElyShellProps>(), {
   user: null,
   copy: () => ({}),
 })
+const emit = defineEmits<ElyShellEmits>()
 
 const selectedMenuValue = computed(() => props.selectedMenuKey ?? undefined)
 
@@ -59,6 +64,14 @@ const resolvedCopy = computed(() =>
     copy: props.copy,
   }),
 )
+
+const handleMenuChange = (value: string | number) => {
+  emit("menu-select", String(value))
+}
+
+const handleTabSelect = (key: string) => {
+  emit("tab-select", key)
+}
 </script>
 
 <template>
@@ -84,6 +97,7 @@ const resolvedCopy = computed(() =>
           expand-type="normal"
           :value="selectedMenuValue"
           :expanded="expandedMenuValues"
+          @change="handleMenuChange"
         >
           <ElyNavNodes :items="navigation" />
         </TMenu>
@@ -123,15 +137,17 @@ const resolvedCopy = computed(() =>
         </THeader>
 
         <div v-if="tabs && tabs.length > 0" class="ely-shell-tabs">
-          <article
+          <button
             v-for="tab in tabs"
             :key="tab.key"
+            type="button"
             class="ely-shell-tab"
             :class="{ 'ely-shell-tab-active': tab.key === selectedTabKey }"
+            @click="handleTabSelect(tab.key)"
           >
             <strong>{{ tab.label }}</strong>
             <span v-if="tab.hint">{{ tab.hint }}</span>
-          </article>
+          </button>
         </div>
 
         <TContent class="ely-shell-content">
@@ -411,11 +427,14 @@ const resolvedCopy = computed(() =>
 }
 
 .ely-shell-tab {
+  appearance: none;
   min-width: 180px;
   padding: 0.95rem 1rem;
   border: 1px solid var(--elysian-ely-border);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.62);
+  cursor: pointer;
+  text-align: left;
 }
 
 .ely-shell-tab strong,

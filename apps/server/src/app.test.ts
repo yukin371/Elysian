@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test"
-import { DEFAULT_TENANT_ID, type DatabaseClient } from "@elysian/persistence"
+import {
+  DEFAULT_TENANT_ID,
+  type DatabaseClient,
+  createDefaultWorkflowDefinitionSeedSpec,
+} from "@elysian/persistence"
 import type { WorkflowDefinitionRecord } from "@elysian/schema"
 
 import { createServerApp } from "./app"
@@ -642,37 +646,61 @@ const createTenantSeedRecords = () => [
   },
 ]
 
+const createWorkflowDefinitionSeedRecordFromDefault = (input: {
+  key: string
+  version: number
+  id: string
+  createdAt: string
+}): WorkflowDefinitionRecord => {
+  const definition = defaultWorkflowDefinitionSeedByKeyAndVersion.get(
+    `${input.key}@${input.version}`,
+  )
+
+  if (!definition) {
+    throw new Error(
+      `Missing default workflow seed: ${input.key}@${input.version}`,
+    )
+  }
+
+  return {
+    id: input.id,
+    key: definition.key,
+    name: definition.name,
+    version: definition.version,
+    status: definition.status,
+    definition:
+      definition.definition as unknown as WorkflowDefinitionRecord["definition"],
+    createdAt: input.createdAt,
+    updatedAt: input.createdAt,
+  }
+}
+
+const createWorkflowDefinitionSeedRecord = (
+  input: Omit<WorkflowDefinitionRecord, "updatedAt">,
+): WorkflowDefinitionRecord => ({
+  ...input,
+  updatedAt: input.createdAt,
+})
+
+const defaultWorkflowDefinitionSeedByKeyAndVersion = new Map(
+  createDefaultWorkflowDefinitionSeedSpec().map((definition) => [
+    `${definition.key}@${definition.version}`,
+    definition,
+  ]),
+)
+
 const createWorkflowDefinitionSeedRecords = (): WorkflowDefinitionRecord[] => [
-  {
-    id: "workflow_definition_expense_v1",
+  createWorkflowDefinitionSeedRecordFromDefault({
     key: "expense-approval",
-    name: "Expense Approval",
     version: 1,
-    status: "active" as const,
-    definition: {
-      nodes: [
-        { id: "start", type: "start", name: "Start" },
-        {
-          id: "manager-review",
-          type: "approval",
-          name: "Manager Review",
-          assignee: "role:manager",
-        },
-        { id: "approved", type: "end", name: "Approved" },
-      ],
-      edges: [
-        { from: "start", to: "manager-review" },
-        { from: "manager-review", to: "approved" },
-      ],
-    },
+    id: "workflow_definition_expense_v1",
     createdAt: "2026-04-21T02:00:00.000Z",
-    updatedAt: "2026-04-21T02:00:00.000Z",
-  },
+  }),
 ]
 
 const createClaimableWorkflowDefinitionSeedRecords =
   (): WorkflowDefinitionRecord[] => [
-    {
+    createWorkflowDefinitionSeedRecord({
       id: "workflow_definition_claimable_v1",
       key: "expense-approval-claimable",
       name: "Expense Approval Claimable",
@@ -695,61 +723,17 @@ const createClaimableWorkflowDefinitionSeedRecords =
         ],
       },
       createdAt: "2026-04-21T02:05:00.000Z",
-      updatedAt: "2026-04-21T02:05:00.000Z",
-    },
+    }),
   ]
 
 const createConditionalWorkflowDefinitionSeedRecords =
   (): WorkflowDefinitionRecord[] => [
-    {
-      id: "workflow_definition_expense_condition_v1",
+    createWorkflowDefinitionSeedRecordFromDefault({
       key: "expense-approval-condition",
-      name: "Expense Approval Condition",
       version: 1,
-      status: "active" as const,
-      definition: {
-        nodes: [
-          { id: "start", type: "start", name: "Start" },
-          {
-            id: "manager-review",
-            type: "approval",
-            name: "Manager Review",
-            assignee: "role:manager",
-          },
-          {
-            id: "amount-check",
-            type: "condition",
-            name: "Amount Check",
-            conditions: [
-              {
-                expression: "${amount > 5000}",
-                target: "finance-review",
-              },
-              {
-                expression: "default",
-                target: "approved",
-              },
-            ],
-          },
-          {
-            id: "finance-review",
-            type: "approval",
-            name: "Finance Review",
-            assignee: "role:finance",
-          },
-          { id: "approved", type: "end", name: "Approved" },
-        ],
-        edges: [
-          { from: "start", to: "manager-review" },
-          { from: "manager-review", to: "amount-check" },
-          { from: "amount-check", to: "finance-review" },
-          { from: "amount-check", to: "approved" },
-          { from: "finance-review", to: "approved" },
-        ],
-      },
+      id: "workflow_definition_expense_condition_v1",
       createdAt: "2026-04-21T03:00:00.000Z",
-      updatedAt: "2026-04-21T03:00:00.000Z",
-    },
+    }),
   ]
 
 const workflowDefinitionPermissionCodes = [
@@ -1020,6 +1004,64 @@ describe("createServerApp", () => {
           updatedAt: "2026-04-21T00:00:00.000Z",
         },
       ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+  })
+
+  it("filters and paginates customers through the customer module", async () => {
+    const app = createTestApp({
+      modules: [
+        createCustomerModule(
+          createInMemoryCustomerRepository([
+            {
+              id: "cust_1",
+              name: "Acme Corp",
+              status: "active",
+              createdAt: "2026-04-21T00:00:00.000Z",
+              updatedAt: "2026-04-21T00:00:00.000Z",
+            },
+            {
+              id: "cust_2",
+              name: "Acme Finance",
+              status: "inactive",
+              createdAt: "2026-04-22T00:00:00.000Z",
+              updatedAt: "2026-04-22T00:00:00.000Z",
+            },
+            {
+              id: "cust_3",
+              name: "Northwind",
+              status: "active",
+              createdAt: "2026-04-23T00:00:00.000Z",
+              updatedAt: "2026-04-23T00:00:00.000Z",
+            },
+          ]),
+        ),
+      ],
+    })
+    const response = await app.handle(
+      new Request(
+        "http://localhost/customers?q=acme&status=active&page=2&pageSize=1&sortBy=name&sortOrder=asc",
+      ),
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      items: [
+        {
+          id: "cust_1",
+          name: "Acme Corp",
+          status: "active",
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 1,
+      totalPages: 1,
     })
   })
 
@@ -2136,6 +2178,10 @@ describe("createServerApp", () => {
           updatedAt: "2026-04-21T00:00:00.000Z",
         },
       ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
   })
 
@@ -2220,6 +2266,10 @@ describe("createServerApp", () => {
           updatedAt: "2026-04-21T00:00:00.000Z",
         },
       ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
   })
 
@@ -2233,7 +2283,13 @@ describe("createServerApp", () => {
     })
     let receivedCreateInput: CreateCustomerInput | null = null
     const customerRepository: CustomerRepository = {
-      list: async () => [],
+      list: async () => ({
+        items: [],
+        total: 0,
+        page: 1,
+        pageSize: 20,
+        totalPages: 1,
+      }),
       getById: async () => null,
       create: async (input) => {
         receivedCreateInput = input

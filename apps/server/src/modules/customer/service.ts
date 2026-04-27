@@ -3,12 +3,14 @@ import { AppError } from "../../errors"
 
 import type {
   CreateCustomerInput,
+  CustomerListQuery,
   CustomerRepository,
   UpdateCustomerInput,
 } from "./repository"
 
 export const createCustomerService = (repository: CustomerRepository) => ({
-  list: (dataAccess?: DataAccessContext) => repository.list(dataAccess),
+  list: (query?: CustomerListQuery, dataAccess?: DataAccessContext) =>
+    repository.list(query, dataAccess),
   async getById(id: string, dataAccess?: DataAccessContext) {
     const customer = await repository.getById(id, dataAccess)
 

@@ -12,6 +12,7 @@ import {
   roles,
   userRoles,
   users,
+  workflowDefinitions,
 } from "./schema"
 import {
   DEFAULT_TENANT_ID,
@@ -102,6 +103,16 @@ export interface DefaultAuthSeedSpec {
     roleId: string
     menuId: string
   }>
+}
+
+type DefaultWorkflowDefinitionSeed = Omit<
+  Pick<
+    typeof workflowDefinitions.$inferInsert,
+    "id" | "key" | "name" | "version" | "status" | "definition"
+  >,
+  "status"
+> & {
+  status: NonNullable<(typeof workflowDefinitions.$inferInsert)["status"]>
 }
 
 type DefaultRoleSeed = DefaultAuthSeedSpec["roles"][number]
@@ -232,6 +243,12 @@ const defaultAuthSeedIds = {
   users: {
     admin: "00000000-0000-0000-0000-000000000401",
   },
+} as const
+
+const defaultWorkflowSeedIds = {
+  expenseApprovalV1: "00000000-0000-0000-0000-000000000701",
+  expenseApprovalV2: "00000000-0000-0000-0000-000000000702",
+  expenseApprovalConditionV1: "00000000-0000-0000-0000-000000000703",
 } as const
 
 const defaultAuthSeedConfig: DefaultAuthSeedConfig = {
@@ -1179,6 +1196,110 @@ export const createDefaultAuthSeedSpec = (
   }
 }
 
+export const createDefaultWorkflowDefinitionSeedSpec =
+  (): DefaultWorkflowDefinitionSeed[] => [
+    {
+      id: defaultWorkflowSeedIds.expenseApprovalV1,
+      key: "expense-approval",
+      name: "Expense Approval",
+      version: 1,
+      status: "active",
+      definition: {
+        nodes: [
+          { id: "start", type: "start", name: "Start" },
+          {
+            id: "manager-review",
+            type: "approval",
+            name: "Manager Review",
+            assignee: "role:manager",
+          },
+          { id: "approved", type: "end", name: "Approved" },
+        ],
+        edges: [
+          { from: "start", to: "manager-review" },
+          { from: "manager-review", to: "approved" },
+        ],
+      },
+    },
+    {
+      id: defaultWorkflowSeedIds.expenseApprovalV2,
+      key: "expense-approval",
+      name: "Expense Approval",
+      version: 2,
+      status: "active",
+      definition: {
+        nodes: [
+          { id: "start", type: "start", name: "Start" },
+          {
+            id: "manager-review",
+            type: "approval",
+            name: "Manager Review",
+            assignee: "role:manager",
+          },
+          {
+            id: "finance-review",
+            type: "approval",
+            name: "Finance Review",
+            assignee: "role:finance",
+          },
+          { id: "approved", type: "end", name: "Approved" },
+        ],
+        edges: [
+          { from: "start", to: "manager-review" },
+          { from: "manager-review", to: "finance-review" },
+          { from: "finance-review", to: "approved" },
+        ],
+      },
+    },
+    {
+      id: defaultWorkflowSeedIds.expenseApprovalConditionV1,
+      key: "expense-approval-condition",
+      name: "Expense Approval Condition",
+      version: 1,
+      status: "active",
+      definition: {
+        nodes: [
+          { id: "start", type: "start", name: "Start" },
+          {
+            id: "manager-review",
+            type: "approval",
+            name: "Manager Review",
+            assignee: "role:manager",
+          },
+          {
+            id: "amount-check",
+            type: "condition",
+            name: "Amount Check",
+            conditions: [
+              {
+                expression: "${amount > 5000}",
+                target: "finance-review",
+              },
+              {
+                expression: "default",
+                target: "approved",
+              },
+            ],
+          },
+          {
+            id: "finance-review",
+            type: "approval",
+            name: "Finance Review",
+            assignee: "role:finance",
+          },
+          { id: "approved", type: "end", name: "Approved" },
+        ],
+        edges: [
+          { from: "start", to: "manager-review" },
+          { from: "manager-review", to: "amount-check" },
+          { from: "amount-check", to: "finance-review" },
+          { from: "amount-check", to: "approved" },
+          { from: "finance-review", to: "approved" },
+        ],
+      },
+    },
+  ]
+
 export const createTenantBootstrapSeedSpec = (
   config: Partial<DefaultAuthSeedConfig> = {},
 ): TenantBootstrapSeedSpec => {
@@ -1450,9 +1571,10 @@ export const runDefaultSeed = async (
   try {
     const config = createDefaultAuthSeedConfig(env)
     const result = await seedDefaultAuthData(db, config, options)
+    const workflowResult = await seedDefaultWorkflowDefinitionData(db)
 
     console.log(
-      `[elysian] default auth seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin}, reconciledPassword=${result.reconciledAdminPassword})`,
+      `[elysian] default seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin}, reconciledPassword=${result.reconciledAdminPassword}, workflowDefinitions=${workflowResult.definitionCount})`,
     )
   } finally {
     await db.$client.end()
@@ -1685,6 +1807,30 @@ const seedTenantBootstrapData = async (
       insertedAdmin: !existingAdmin[0],
     }
   })
+
+const seedDefaultWorkflowDefinitionData = async (
+  db: DatabaseClient,
+  tenantId = DEFAULT_TENANT_ID,
+) => {
+  const definitions = createDefaultWorkflowDefinitionSeedSpec()
+
+  return withTenantSeedContext(db, tenantId, async () => {
+    await db
+      .insert(workflowDefinitions)
+      .values(definitions.map((definition) => ({ ...definition, tenantId })))
+      .onConflictDoNothing({
+        target: [
+          workflowDefinitions.tenantId,
+          workflowDefinitions.key,
+          workflowDefinitions.version,
+        ],
+      })
+
+    return {
+      definitionCount: definitions.length,
+    }
+  })
+}
 
 const insertTenantBootstrapMenus = async (
   db: DatabaseClient,

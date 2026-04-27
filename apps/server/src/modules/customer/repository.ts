@@ -26,8 +26,30 @@ export interface UpdateCustomerInput {
   status?: CustomerStatus
 }
 
+export interface CustomerListQuery {
+  q?: string
+  status?: CustomerStatus
+  page?: number
+  pageSize?: number
+  sortBy?: "createdAt" | "name"
+  sortOrder?: "asc" | "desc"
+}
+
+export interface CustomerListResult {
+  items: CustomerRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+const DEFAULT_CUSTOMER_PAGE_SIZE = 20
+
 export interface CustomerRepository {
-  list: (dataAccess?: DataAccessContext) => Promise<CustomerRecord[]>
+  list: (
+    query?: CustomerListQuery,
+    dataAccess?: DataAccessContext,
+  ) => Promise<CustomerListResult>
   getById: (
     id: string,
     dataAccess?: DataAccessContext,
@@ -44,16 +66,21 @@ export interface CustomerRepository {
 export const createCustomerRepository = (
   db: DatabaseClient,
 ): CustomerRepository => ({
-  async list(dataAccess) {
-    const rows = await listCustomers(db, {
+  async list(query, dataAccess) {
+    const result = await listCustomers(db, {
       accessCondition: dataAccess
         ? buildDataAccessCondition(dataAccess, {
             deptColumn: customers.deptId,
             creatorColumn: customers.creatorId,
           })
         : undefined,
+      listQuery: query,
     })
-    return rows.map(mapCustomerRow)
+
+    return {
+      ...result,
+      items: result.items.map(mapCustomerRow),
+    }
   },
   async getById(id, dataAccess) {
     const row = await getCustomerById(db, id, {
@@ -106,8 +133,8 @@ export const createInMemoryCustomerRepository = (
   )
 
   return {
-    async list(dataAccess) {
-      return [...items.values()]
+    async list(query, dataAccess) {
+      const filtered = [...items.values()]
         .filter((item) =>
           dataAccess
             ? matchesDataAccess(dataAccess, {
@@ -116,8 +143,53 @@ export const createInMemoryCustomerRepository = (
               })
             : true,
         )
-        .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+        .filter((item) => {
+          const matchesQuery =
+            typeof query?.q === "string" && query.q.trim().length > 0
+              ? item.name
+                  .toLowerCase()
+                  .includes(query.q.trim().toLowerCase()) ||
+                item.id.toLowerCase().includes(query.q.trim().toLowerCase())
+              : true
+          const matchesStatus =
+            query?.status === "active" || query?.status === "inactive"
+              ? item.status === query.status
+              : true
+
+          return matchesQuery && matchesStatus
+        })
+        .sort((left, right) =>
+          query?.sortBy === "name"
+            ? query.sortOrder === "asc"
+              ? left.name.localeCompare(right.name)
+              : right.name.localeCompare(left.name)
+            : query?.sortOrder === "asc"
+              ? left.createdAt.localeCompare(right.createdAt)
+              : right.createdAt.localeCompare(left.createdAt),
+        )
+
+      const page =
+        typeof query?.page === "number" && Number.isFinite(query.page)
+          ? Math.max(1, Math.trunc(query.page))
+          : 1
+      const pageSize =
+        typeof query?.pageSize === "number" && Number.isFinite(query.pageSize)
+          ? Math.min(100, Math.max(1, Math.trunc(query.pageSize)))
+          : DEFAULT_CUSTOMER_PAGE_SIZE
+      const total = filtered.length
+      const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+      const resolvedPage = Math.min(page, totalPages)
+      const itemsInPage = filtered
+        .slice((resolvedPage - 1) * pageSize, resolvedPage * pageSize)
         .map(mapStoredCustomerToPublic)
+
+      return {
+        items: itemsInPage,
+        total,
+        page: resolvedPage,
+        pageSize,
+        totalPages,
+      }
     },
     async getById(id, dataAccess) {
       const item = items.get(id)
