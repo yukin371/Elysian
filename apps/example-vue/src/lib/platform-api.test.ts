@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, test } from "bun:test"
 
-import type { WorkflowDefinitionRecord } from "@elysian/schema"
+import type { TenantRecord, WorkflowDefinitionRecord } from "@elysian/schema"
 
 import {
+  clearAccessToken,
+  fetchTenants,
   fetchWorkflowDefinitionById,
   fetchWorkflowDefinitions,
+  setAccessToken,
+  updateTenantStatus,
 } from "./platform-api"
 
 const workflowOverrides: WorkflowDefinitionRecord[] = [
@@ -69,6 +73,7 @@ const workflowOverrides: WorkflowDefinitionRecord[] = [
 
 afterEach(() => {
   globalThis.__ELYSIAN_EXAMPLE_API_OVERRIDES__ = undefined
+  clearAccessToken()
 })
 
 describe("platform api workflow overrides", () => {
@@ -97,5 +102,98 @@ describe("platform api workflow overrides", () => {
     await expect(
       fetchWorkflowDefinitionById("workflow_definition_expense_v2"),
     ).resolves.toEqual(expectedDefinition)
+  })
+})
+
+describe("platform api tenant requests", () => {
+  test("fetches tenants with bearer token", async () => {
+    const tenantItems: TenantRecord[] = [
+      {
+        id: "tenant_default",
+        code: "default",
+        name: "Default Tenant",
+        status: "active",
+        createdAt: "2026-04-25T00:00:00.000Z",
+        updatedAt: "2026-04-25T00:00:00.000Z",
+      },
+    ]
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("tenant-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response(JSON.stringify({ items: tenantItems }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(fetchTenants()).resolves.toEqual({ items: tenantItems })
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/tenants",
+          authorization: "Bearer tenant-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  test("updates tenant status with canonical payload", async () => {
+    const updatedTenant: TenantRecord = {
+      id: "tenant_default",
+      code: "default",
+      name: "Default Tenant",
+      status: "suspended",
+      createdAt: "2026-04-25T00:00:00.000Z",
+      updatedAt: "2026-04-27T00:00:00.000Z",
+    }
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{
+      url: string
+      method: string
+      body: string | undefined
+      authorization: string | null
+    }> = []
+
+    setAccessToken("tenant-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        method: String(init?.method ?? "GET"),
+        body: typeof init?.body === "string" ? init.body : undefined,
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response(JSON.stringify(updatedTenant), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(
+        updateTenantStatus("tenant_default", "suspended"),
+      ).resolves.toEqual(updatedTenant)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/tenants/tenant_default/status",
+          method: "PUT",
+          body: JSON.stringify({ status: "suspended" }),
+          authorization: "Bearer tenant-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
   })
 })
