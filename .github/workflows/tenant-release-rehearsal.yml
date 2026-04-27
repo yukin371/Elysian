@@ -1,0 +1,207 @@
+name: Tenant Release Rehearsal
+
+on:
+  workflow_dispatch:
+    inputs:
+      evidence_branch:
+        description: "用于收集 tenant artifact 的分支"
+        required: false
+        default: "dev"
+        type: string
+      evidence_limit:
+        description: "收集的 tenant 运行样本数（默认 5）"
+        required: false
+        default: "5"
+        type: string
+      evidence_scan_limit:
+        description: "扫描的 tenant 运行上限（默认 15）"
+        required: false
+        default: "15"
+        type: string
+      source_branch:
+        description: "发布源分支"
+        required: false
+        default: "dev"
+        type: string
+      target_branch:
+        description: "发布目标分支"
+        required: false
+        default: "main"
+        type: string
+      release_environment:
+        description: "演练目标环境标识"
+        required: false
+        default: "staging-rehearsal"
+        type: string
+      release_commit:
+        description: "待发布 commit；默认当前 workflow SHA"
+        required: false
+        default: ""
+        type: string
+      release_pr:
+        description: "待发布 PR 编号或标识（可空）"
+        required: false
+        default: ""
+        type: string
+      release_migrations:
+        description: "本次 migration 列表，逗号分隔"
+        required: false
+        default: ""
+        type: string
+      release_tenant_init_codes:
+        description: "tenant:init 租户 code 列表，逗号分隔"
+        required: false
+        default: ""
+        type: string
+      release_default_seed_required:
+        description: "是否需要默认租户 seed（true/false）"
+        required: false
+        default: "false"
+        type: string
+      head_matches_window:
+        description: "待发布 head 是否与观察窗口 head 一致（true/false）"
+        required: false
+        default: "false"
+        type: string
+      docs_synced:
+        description: "文档是否已同步（true/false）"
+        required: false
+        default: "false"
+        type: string
+      rollback_prepared:
+        description: "回滚路径是否已准备（true/false）"
+        required: false
+        default: "false"
+        type: string
+      database_role_confirmed:
+        description: "数据库角色是否满足 NOSUPERUSER + NOBYPASSRLS（true/false）"
+        required: false
+        default: "false"
+        type: string
+      backup_ready:
+        description: "数据库备份或等价恢复手段是否就绪（true/false）"
+        required: false
+        default: "false"
+        type: string
+      check_passed:
+        description: "是否已确认 bun run check 通过（true/false）"
+        required: false
+        default: "false"
+        type: string
+      build_vue_passed:
+        description: "是否已确认 bun run build:vue 通过（true/false）"
+        required: false
+        default: "false"
+        type: string
+      tenant_full_passed:
+        description: "是否已确认 bun run e2e:tenant:full 通过（true/false）"
+        required: false
+        default: "false"
+        type: string
+      default_tenant_login_verified:
+        description: "默认租户登录验证是否完成（true/false）"
+        required: false
+        default: "false"
+        type: string
+      super_admin_tenant_access_verified:
+        description: "super-admin /system/tenants 验证是否完成（true/false）"
+        required: false
+        default: "false"
+        type: string
+      tenant_admin_denied_verified:
+        description: "tenant admin 禁止访问 /system/tenants 验证是否完成（true/false）"
+        required: false
+        default: "false"
+        type: string
+      non_default_tenant_login_verified:
+        description: "非默认租户 tenant admin 登录验证是否完成（true/false）"
+        required: false
+        default: "false"
+        type: string
+      cross_tenant_isolation_verified:
+        description: "跨租户隔离验证是否完成（true/false）"
+        required: false
+        default: "false"
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  rehearsal:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
+      ELYSIAN_TENANT_STABILITY_DOWNLOAD_REPOSITORY: ${{ github.repository }}
+      ELYSIAN_TENANT_STABILITY_DOWNLOAD_WORKFLOW: ci.yml
+      ELYSIAN_TENANT_STABILITY_DOWNLOAD_EVENTS: push,workflow_dispatch
+      ELYSIAN_TENANT_STABILITY_DOWNLOAD_OUTPUT_DIR: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/downloads
+      ELYSIAN_TENANT_STABILITY_EVIDENCE_INPUT_DIR: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/tenant
+      ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/evidence
+      ELYSIAN_TENANT_STABILITY_WINDOW_SIZE: 5
+      ELYSIAN_TENANT_RELEASE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/release/tenant-release-report.json
+      ELYSIAN_TENANT_RELEASE_GATE_REPORT_PATH: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/release/tenant-release-gate-report.json
+      ELYSIAN_TENANT_RELEASE_SOURCE_BRANCH: ${{ inputs.source_branch }}
+      ELYSIAN_TENANT_RELEASE_TARGET_BRANCH: ${{ inputs.target_branch }}
+      ELYSIAN_TENANT_RELEASE_ENVIRONMENT: ${{ inputs.release_environment }}
+      ELYSIAN_TENANT_RELEASE_COMMIT: ${{ inputs.release_commit != '' && inputs.release_commit || github.sha }}
+      ELYSIAN_TENANT_RELEASE_PR: ${{ inputs.release_pr }}
+      ELYSIAN_TENANT_RELEASE_MIGRATIONS: ${{ inputs.release_migrations }}
+      ELYSIAN_TENANT_RELEASE_TENANT_INIT_CODES: ${{ inputs.release_tenant_init_codes }}
+      ELYSIAN_TENANT_RELEASE_DEFAULT_SEED_REQUIRED: ${{ inputs.release_default_seed_required }}
+      ELYSIAN_TENANT_RELEASE_HEAD_MATCHES_WINDOW: ${{ inputs.head_matches_window }}
+      ELYSIAN_TENANT_RELEASE_DOCS_SYNCED: ${{ inputs.docs_synced }}
+      ELYSIAN_TENANT_RELEASE_ROLLBACK_PREPARED: ${{ inputs.rollback_prepared }}
+      ELYSIAN_TENANT_RELEASE_DATABASE_ROLE_CONFIRMED: ${{ inputs.database_role_confirmed }}
+      ELYSIAN_TENANT_RELEASE_BACKUP_READY: ${{ inputs.backup_ready }}
+      ELYSIAN_TENANT_RELEASE_CHECK_PASSED: ${{ inputs.check_passed }}
+      ELYSIAN_TENANT_RELEASE_BUILD_VUE_PASSED: ${{ inputs.build_vue_passed }}
+      ELYSIAN_TENANT_RELEASE_TENANT_FULL_PASSED: ${{ inputs.tenant_full_passed }}
+      ELYSIAN_TENANT_RELEASE_DEFAULT_TENANT_LOGIN_VERIFIED: ${{ inputs.default_tenant_login_verified }}
+      ELYSIAN_TENANT_RELEASE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED: ${{ inputs.super_admin_tenant_access_verified }}
+      ELYSIAN_TENANT_RELEASE_TENANT_ADMIN_DENIED_VERIFIED: ${{ inputs.tenant_admin_denied_verified }}
+      ELYSIAN_TENANT_RELEASE_NON_DEFAULT_TENANT_LOGIN_VERIFIED: ${{ inputs.non_default_tenant_login_verified }}
+      ELYSIAN_TENANT_RELEASE_CROSS_TENANT_ISOLATION_VERIFIED: ${{ inputs.cross_tenant_isolation_verified }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Capture git worktree baseline
+        shell: bash
+        run: |
+          {
+            echo "ELYSIAN_TENANT_RELEASE_GIT_STATUS_OUTPUT<<EOF"
+            git status --short
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build tenant evidence from GitHub artifacts
+        run: bun run e2e:tenant:upgrade:finalize:from-github -- --branch "${{ inputs.evidence_branch }}" --limit "${{ inputs.evidence_limit }}" --scan-limit "${{ inputs.evidence_scan_limit }}"
+
+      - name: Run tenant release rehearsal
+        id: tenant_release
+        continue-on-error: true
+        run: bun run tenant:release:finalize
+
+      - name: Upload tenant release rehearsal artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: tenant-release-rehearsal-report
+          path: ${{ github.workspace }}/.ci-reports/tenant-release-rehearsal/**
+          if-no-files-found: warn
+
+      - name: Fail when rehearsal gate is blocked
+        if: steps.tenant_release.outcome == 'failure'
+        run: exit 1

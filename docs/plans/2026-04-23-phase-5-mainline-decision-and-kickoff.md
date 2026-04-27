@@ -1,5 +1,7 @@
 # 2026-04-23 Phase 5 Mainline Decision and P5A Kickoff
 
+> 历史说明：本文记录 `2026-04-23` 时点的主线决策。自 `2026-04-24` 起，仓库已完成 `P5A` 并切换到 `Phase 6B / P6B3`；当前优先级以 [06-phased-implementation-plan.md](../06-phased-implementation-plan.md) 与 [roadmap.md](../roadmap.md) 为准。
+
 ## 决策结论
 
 - 下一主线选择：`Phase 5`
@@ -8,6 +10,7 @@
   - `P5B` AI 建议器
   - `P5C` 交互与审计工作流
   - `Phase 6B` 企业增强（多租户、数据权限、缓存、定时任务、导入导出、特性开关）
+- 以上结论为当时时点判断，现已归档为历史快照，不再代表当前执行主线
 
 ## 决策依据
 
@@ -143,3 +146,4 @@
 - `roadmap.md`：同步当前主线与下一步
 - `PROJECT_PROFILE.md`：同步当前阶段事实
 - 后续若 `AI -> Schema` 改变 owner 或长期边界，再补 ADR
+- 当前阶段推进请优先参考 `Phase 6B` 相关计划与 runbook，本文不再作为活跃任务文档

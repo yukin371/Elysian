@@ -83,7 +83,7 @@
 - 第二轮已推进：新增快照收集脚本（`e2e:smoke:stability:collect`），用于将下载 artifact 归拢为 evidence 输入
 - 第二轮已推进：新增从下载包直接收尾命令（`e2e:smoke:phase:finalize:from-downloads`），串联 collect/evidence/decision/gate
 - 第二轮已推进：基于最近 5 次 `dev` 相关成功运行（runIds: `24831519539`、`24831463736`、`24831405348`、`24831362661`、`24831277528`）生成稳定性证据，窗口已达标且阶段出口门禁通过
-- 第二轮已完成：主线决策已归档为 `Phase 5`，仅启动 `P5A: AI -> Schema`，暂不进入 `Phase 6B`
+- 第二轮已完成：曾输出“主线进入 `Phase 5 / P5A`”的阶段决策；该决策现已完成历史使命，当前主线已切换到 `Phase 6B`
 - 第二轮已推进：限流响应头观测增强（`x-ratelimit-limit`/`remaining`/`reset` + `retry-after`），为分布式限流评估提供运行期信号
 - 第二轮已推进：已建立双轨文档与 skill 模板骨架（`docs/quickstart`、`docs/reference`、`docs/ai-playbooks`、`skills/templates`）
 - 第二轮计划文档：[2026-04-22-phase-6a-round2-baseline-hardening.md](./plans/2026-04-22-phase-6a-round2-baseline-hardening.md)
@@ -92,7 +92,7 @@
 - 阶段执行基线：[2026-04-23-phase-execution-gates-and-wbs.md](./plans/2026-04-23-phase-execution-gates-and-wbs.md)
 - 稳定性观察窗口：[2026-04-23-phase-6a-round2-stability-window.md](./plans/2026-04-23-phase-6a-round2-stability-window.md)
 - 对标与功能清单：[2026-04-23-competitive-benchmark-and-dev-feature-checklist.md](./plans/2026-04-23-competitive-benchmark-and-dev-feature-checklist.md)
-- 主线决策与启动文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
+- 历史主线决策文档：[2026-04-23-phase-5-mainline-decision-and-kickoff.md](./plans/2026-04-23-phase-5-mainline-decision-and-kickoff.md)
 
 #### Phase 6A Round-2 Exit Checklist
 
@@ -105,16 +105,16 @@
 
 ### 5. Phase 5: AI 辅助开发 ✅ P5A 已归档
 
-- 已归档：`P5A: AI -> Schema` 最小闭环已完成，当前不再作为主线推进
-- 选择依据：
+- 已归档：`P5A: AI -> Schema` 最小闭环已完成；该阶段现作为已完成能力保留，不再定义当前主线优先级
+- 归档说明：
   - `Phase 4` 已完成，满足 `Phase 5` 入口条件
   - `03-ai-codegen-strategy.md` 已明确推荐顺序为“schema 驱动生成 -> AI 生成 schema -> 交互式 AI 助手”
-  - `Phase 6A Round-2` 已完成最小生产基线收尾，当前短板更偏体验层与交付层，而非继续追加 `Phase 6B` 重型企业能力
-- 当前约束：
+  - `P5A` 收尾后，仓库已按最新主计划切换到 `Phase 6B / P6B3`；`P5B/P5C` 保留为后续 backlog，而非当前执行主线
+- 归档边界：
   - 不启动 `P5B/P5C`
   - 不做交互式 AI 助手
   - 不允许 AI 绕过 schema / generator 直接改平台核心基础设施
-- 当前工作包：
+- 已完成工作包：
   - `WP-1` 需求输入模板与 `AI -> Schema` 验收语料
   - `WP-2` 结构化输出校验与 handoff 边界
   - `WP-3` 人工兜底、回放与失败审计最小骨架
@@ -172,9 +172,17 @@
 - 已完成：`2026-04-26` 自动化回归整理，已补 `P7A Round-1` 与 `TDesign` 迁移的统一回归收口文档，并明确当前仍待真实环境与手工 UI 验证
 - 已完成阶段出口复验：`2026-04-25` 本地 `bun run check` 与 `bun run e2e:tenant:full` 通过，可将 `Phase 6B` 作为已归档阶段处理
 - 归档后残留运营收尾：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
+- 已完成最小执行层自动化：新增 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize`，把既有 tenant migration/release runbook 收敛为 rehearsal report / gate / finalize 三段式入口；这些脚本仅服务发布演练，不代表生产平台命令、owner 边界或发布责任已变更
+- 已完成：发布检查清单已补 tenant 发布演练附加检查、输入映射与补充记录模板，`P6B3` 的 runbook 与 release checklist 已形成同一执行口径
+- 已完成：已产出一份可归档的 tenant release rehearsal 样例记录，证明在目标环境确认和发布后验证缺失时，rehearsal gate 会按预期阻断
+- 已完成：新增 `Tenant Release Rehearsal` GitHub 手动工作流，用表单化输入承接既有 `ELYSIAN_TENANT_RELEASE_*` 人工确认项；该工作流仅服务 rehearsal，不代表生产发布入口
+- 已完成：真实 GitHub manual rehearsal（run `24894806843`）已验证新 workflow 的输入、artifact 与 gate 行为；在 `gitWorktreeClean=true` 前提下，最终只保留目标环境确认与发布后验证相关的 `8` 个预期 blocker
+- 已完成：`P6B3 / WP-5` 迁移 / 发布演练与责任边界已完成最小收口，runbook、release checklist、rehearsal sample 与 GitHub manual rehearsal 已统一到同一执行口径
+- 已完成：GitHub `Tenant Release Rehearsal` 已固定为 tenant 发布演练的默认入口；runbook + shell env 路径保留为备用入口
 - 计划文档：[2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
 - 执行手册：[2026-04-24-phase-6b-tenant-upgrade-runbook.md](./plans/2026-04-24-phase-6b-tenant-upgrade-runbook.md)
 - 迁移/发布手册：[2026-04-24-phase-6b-tenant-migration-release-runbook.md](./plans/2026-04-24-phase-6b-tenant-migration-release-runbook.md)
+- 收证记录：[2026-04-24-phase-6b-tenant-release-blocker-tracker.md](./plans/2026-04-24-phase-6b-tenant-release-blocker-tracker.md)
 - 观察策略：[2026-04-24-phase-6b-tenant-scale-observation-strategy.md](./plans/2026-04-24-phase-6b-tenant-scale-observation-strategy.md)
 - 滚动观察记录：[2026-04-24-phase-6b-tenant-rolling-window.md](./plans/2026-04-24-phase-6b-tenant-rolling-window.md)
 
@@ -290,7 +298,7 @@
 - 已新增仓库根 `docker-compose.yml` 与 `stack:*` 脚本，形成 `server + PostgreSQL` 一键启动基线（含 migrate + seed）
 - 已新增 `e2e:smoke` 与 `e2e:smoke:full` 脚本，并在 CI 接入 `e2e-smoke` job（统一走 full 入口，执行 migrate + seed + 登录/customer CRUD 冒烟）
 - 已补 `WP-3` 最小基线：`/metrics` 运行时指标快照、可配置 CORS 白名单、内存限流策略（生产环境默认启用）
-- 已完成 `Phase 6A Round-2` 退出判定，并将下一主线切换为 `Phase 5 / P5A`
+- 已完成 `Phase 6A Round-2` 退出判定；先前已切到 `Phase 5 / P5A`，当前已进一步推进到 `Phase 6B / P6B3`
 
 ## 待验证项
 

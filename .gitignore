@@ -23,6 +23,7 @@ generated/
 .turbo/
 .cache/
 coverage/
+.ci-reports/
 artifacts/
 docs/superpowers/
 *.log

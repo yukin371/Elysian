@@ -12,6 +12,7 @@ afterEach(async () => {
     await rm(dir, { recursive: true, force: true })
   }
   process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_PATH = ""
+  process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR = ""
   process.env.ELYSIAN_TENANT_UPGRADE_DECISION_REPORT_PATH = ""
 })
 
@@ -85,5 +86,43 @@ describe("e2e-tenant-upgrade-decision", () => {
     expect(markdown).toContain("执行建议：继续稳定性观察")
     expect(markdown).toContain("样本不足：仅 3 次，未达到窗口要求 5 次。")
     expect(markdown).toContain("存在系统性阻断：连续失败次数达到 2。")
+  })
+
+  test("falls back to evidence output dir when explicit evidence path is absent", async () => {
+    const dir = await createTempDir(
+      "elysian-tenant-upgrade-decision-output-dir-",
+    )
+    const outputPath = join(dir, "tenant-upgrade-decision.md")
+
+    process.env.ELYSIAN_TENANT_STABILITY_EVIDENCE_OUTPUT_DIR = dir
+    process.env.ELYSIAN_TENANT_UPGRADE_DECISION_REPORT_PATH = outputPath
+
+    await writeFile(
+      join(dir, "e2e-tenant-stability-evidence.json"),
+      JSON.stringify({
+        generatedAt: "2026-04-24T00:00:00.000Z",
+        inputDir: "/tmp/input",
+        outputDir: dir,
+        windowSize: 5,
+        totalSnapshots: 5,
+        selectedWindowRuns: 5,
+        hasMinimumRuns: true,
+        failedRunCount: 0,
+        maxConsecutiveFailedRuns: 0,
+        dependencyFailureCount: 0,
+        environmentFailureCount: 0,
+        systemicBlockerDetected: false,
+        qualifiedForNextStep: true,
+        recommendation: "candidate_for_next_step",
+        topRunIds: ["9205", "9204", "9203", "9202", "9201"],
+      }),
+      "utf8",
+    )
+
+    const result = await run()
+    expect(result.evidencePath).toBe(
+      join(dir, "e2e-tenant-stability-evidence.json"),
+    )
+    expect(result.outputPath).toBe(outputPath)
   })
 })

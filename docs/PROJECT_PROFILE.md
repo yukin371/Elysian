@@ -10,7 +10,7 @@
 
 ## 已确认事实
 
-- 仓库已从纯文档阶段进入最小工程骨架阶段。
+- 仓库已从纯文档阶段进入可执行工程骨架持续扩展阶段，当前已具备稳定的 CI、E2E 与多租户治理增量能力。
 - 根目录已存在 [README.md](/E:/Github/Elysian/README.md)。
 - 已存在的设计文档包括产品定义、架构草案、AI 与代码生成策略、MVP 路线图、调研与技术决策。
 - 仓库目标是以 `Elysia` 为后端内核，以前端可插拔为原则，支持企业级快速开发与 AI 辅助。
@@ -121,6 +121,8 @@
 - 仓库当前已使用 `Husky` 托管 `pre-commit / commit-msg / pre-push` 本地 hooks；`bun install` 会自动执行 `prepare` 完成安装，并保留 `bun run hooks:install` 作为手动修复入口。
 - CI workflow 已升级至 Node 24 兼容 action 版本（`actions/checkout@v5`、`actions/download-artifact@v7`、`actions/upload-artifact@v6`）。
 - 仓库 CI 已新增 `e2e-smoke` 作业（PostgreSQL service + migrate/seed + 登录/customer CRUD 冒烟）、`e2e-tenant` 作业（真实 PostgreSQL 下 tenant init 幂等、super-admin 授权、跨租户隔离、RLS/FK 验证 + artifact 归档）、`e2e-generator-safe-apply` 作业（生成安全覆盖三场景冒烟）、`e2e-generator-matrix` 作业（多 schema / 多策略回归矩阵）、`e2e-generator-cli` 作业（CLI 真实执行路径回归）、`p5a-handoff-corpus` 作业（P5A 语料分类回归 + artifact 归档）、`p5a-acceptance` 作业（P5A 阶段最小闭环验收 + artifact 归档）、`e2e-generator-report-index` 作业（汇总报告索引 artifact）与 `e2e-generator-report-gate` 作业（门禁判定 artifact）。
+- GitHub Actions 当前还提供 `Tenant Release Rehearsal` 手动工作流：先从 GitHub 下载 tenant artifact 生成 evidence / decision，再把人工确认项映射给 `tenant:release:finalize`；该入口仅服务 release rehearsal，不代表生产发布平台命令，当前已固定为 tenant 发布演练默认入口。
+- `Tenant Release Rehearsal` 已完成一次真实 GitHub `workflow_dispatch` 验证（run `24894806843`）：workflow 可稳定下载 tenant artifact、生成 evidence / decision、执行 release gate 并上传 rehearsal artifact；在固定 checkout 后 git 基线后，gate 仅保留目标环境与发布后验证相关的 `8` 个预期 blocker。
 - `scripts/e2e-smoke.ts` 已支持输出 `e2e-smoke-report.json`（状态、阶段、失败分类、失败信息），CI `e2e-smoke` 作业已归档 smoke report artifact。
 - `scripts/e2e-smoke.ts` 已纳入 workflow 真实运行态 smoke，当前覆盖 definition 创建、实例发起、manager/finance 待办、`approved/rejected`、最小 `claim`、显式 instance cancel、条件分支命中与 `default` 分支、done/instance list，以及 workflow 审计日志端到端校验，并补高位随机端口与 Windows 端口释放清理，支持临时 PostgreSQL 库下重复执行。
 - `bun run e2e:smoke:full` 当前会执行 `bun run db:seed -- --reconcile-admin-password`，用于在本地已存在默认管理员但密码已漂移的数据库上保持 smoke 重跑确定性。
@@ -189,7 +191,7 @@
 
 - 前端适配层尚未定稿，容易过早耦合到某一个框架。
 - 认证策略已初步固定，但复杂组织权限、数据范围和跨部门隔离仍未进入实现，后续阶段容易出现边界膨胀。
-- 多租户基础能力已接入 `feature/dev/main` 的 CI tenant e2e 作业，并已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察；当前无系统性失败信号，但生产发布平台、数据库快照编排与发布后演练仍未固化到仓库自动化。
+- 多租户基础能力已接入 `feature/dev/main` 的 CI tenant e2e 作业，并已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察；当前无系统性失败信号，且仓库已补 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 作为 release rehearsal 执行层自动化，但生产发布平台、数据库快照编排与发布后演练仍未固化到平台级自动化。
 - 文件模块当前只验证了本地磁盘存储适配器，尚未进入对象存储、多副本或生产级生命周期治理。
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
 - workflow 模块当前只验证了线性审批、最小动作闭环与白名单条件分支；独立权限点与更复杂任务语义仍未进入实现。
@@ -218,6 +220,9 @@
 - `bun run e2e:tenant:upgrade:finalize`
 - `bun run e2e:tenant:upgrade:finalize:from-downloads`
 - `bun run e2e:tenant:upgrade:finalize:from-github`（需本机已安装并登录 `gh` CLI）
+- `bun run tenant:release:report`（既有 tenant migration/release runbook 的 rehearsal report 自动化；不等于生产平台发布命令）
+- `bun run tenant:release:gate`（既有 tenant migration/release runbook 的 rehearsal gate 自动化；不等于生产平台发布命令）
+- `bun run tenant:release:finalize`（既有 tenant migration/release runbook 的 rehearsal finalize 自动化；不等于生产平台发布命令）
 - `bun run e2e:generator:safe-apply`
 - `bun run e2e:generator:matrix`
 - `bun run e2e:generator:cli`
@@ -265,6 +270,9 @@
 - Tenant 升级收尾：`bun run e2e:tenant:upgrade:finalize`
 - Tenant 从下载包收尾：`bun run e2e:tenant:upgrade:finalize:from-downloads`
 - Tenant 从 GitHub 一键收尾：`bun run e2e:tenant:upgrade:finalize:from-github`
+- Tenant 发布演练报告：`bun run tenant:release:report`
+- Tenant 发布演练门禁：`bun run tenant:release:gate`
+- Tenant 发布演练收尾：`bun run tenant:release:finalize`
 - E2E 冒烟报告诊断：`bun run e2e:smoke:diagnose`
 - E2E 冒烟报告索引：`bun run e2e:smoke:reports:index`
 - E2E 冒烟报告门禁：`bun run e2e:smoke:reports:gate`
