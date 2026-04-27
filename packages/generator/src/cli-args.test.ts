@@ -22,6 +22,7 @@ describe("parseCliArgs", () => {
       targetPreset: "staging",
       frontendTarget: "vue",
       conflictStrategy: "overwrite-generated-only",
+      preview: false,
     })
   })
 
@@ -41,6 +42,7 @@ describe("parseCliArgs", () => {
       targetPreset: "custom",
       frontendTarget: "react",
       conflictStrategy: "skip",
+      preview: false,
     })
   })
 
@@ -59,6 +61,29 @@ describe("parseCliArgs", () => {
       targetPreset: "staging",
       frontendTarget: "vue",
       conflictStrategy: "skip",
+      preview: false,
+    })
+  })
+
+  it("parses preview mode with a report path", () => {
+    const result = parseCliArgs([
+      "--schema",
+      "customer",
+      "--target",
+      "staging",
+      "--preview",
+      "--report",
+      "./generated/reports/customer.preview.json",
+    ])
+
+    expect(result).toEqual({
+      schemaName: "customer",
+      outputDir: resolveTargetPresetOutputDir("staging"),
+      targetPreset: "staging",
+      frontendTarget: "vue",
+      conflictStrategy: "skip",
+      preview: true,
+      reportPath: "./generated/reports/customer.preview.json",
     })
   })
 
@@ -103,6 +128,19 @@ describe("parseCliArgs", () => {
       "./schema.json",
       "--target",
       "staging",
+    ])
+
+    expect(result).toBeNull()
+  })
+
+  it("returns null when report is provided without preview", () => {
+    const result = parseCliArgs([
+      "--schema",
+      "customer",
+      "--target",
+      "staging",
+      "--report",
+      "./generated/reports/customer.preview.json",
     ])
 
     expect(result).toBeNull()

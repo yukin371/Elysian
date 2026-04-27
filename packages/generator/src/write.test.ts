@@ -12,7 +12,12 @@ import { dirname, join } from "node:path"
 
 import { customerModuleSchema } from "@elysian/schema"
 
-import { writeModuleFiles } from "./write"
+import { buildGenerationPreviewReport } from "./preview"
+import {
+  PreviewReportApplyError,
+  applyGenerationPreviewReport,
+  writeModuleFiles,
+} from "./write"
 
 const findTempFiles = async (
   directory: string,
@@ -267,5 +272,49 @@ describe("writeModuleFiles", () => {
 
     expect(schemaEntry?.written).toBe(false)
     expect(schemaFile).toBe("")
+  })
+})
+
+describe("applyGenerationPreviewReport", () => {
+  it("writes files from a current preview report and records a manifest", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "elysian-generator-"))
+    const report = await buildGenerationPreviewReport(customerModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+      conflictStrategy: "fail",
+      targetPreset: "staging",
+    })
+
+    const result = await applyGenerationPreviewReport(report)
+    const manifestFile = await readFile(
+      join(directory, ".elysian-generator/customer.vue.json"),
+      "utf8",
+    )
+
+    expect(result.files).toHaveLength(5)
+    expect(result.files.every((item) => item.written)).toBe(true)
+    expect(result.manifestPath).toContain(".elysian-generator")
+    expect(manifestFile).toContain('"targetPreset": "staging"')
+  })
+
+  it("refuses to apply a stale preview report when target files drift", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "elysian-generator-"))
+    const report = await buildGenerationPreviewReport(customerModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+      conflictStrategy: "fail",
+      targetPreset: "staging",
+    })
+    const driftedPath = join(directory, "modules/customer/customer.schema.ts")
+
+    await mkdir(dirname(driftedPath), { recursive: true })
+    await writeFile(driftedPath, "export const drifted = true\n", "utf8")
+
+    await expect(() => applyGenerationPreviewReport(report)).toThrow(
+      PreviewReportApplyError,
+    )
+    await expect(() => applyGenerationPreviewReport(report)).toThrow(
+      "Preview report is stale for file",
+    )
   })
 })

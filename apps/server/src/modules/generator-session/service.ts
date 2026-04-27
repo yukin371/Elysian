@@ -1,10 +1,13 @@
 import { join } from "node:path"
 
 import {
+  type AppliedGenerationPreviewReport,
   DEFAULT_GENERATION_TARGET,
   type FrontendTarget,
   type GenerationTargetPreset,
+  type PreviewReportApplyError,
   type WriteConflictStrategy,
+  applyGenerationPreviewReport,
   buildGenerationPreviewReport,
   getRegisteredSchema,
   resolveTargetPresetOutputDir,
@@ -26,10 +29,55 @@ interface CreateGeneratorPreviewSessionInput {
   targetPreset?: GenerationTargetPreset
 }
 
+interface ApplyGeneratorPreviewSessionInput {
+  id: string
+}
+
 export interface GeneratorSessionServiceOptions {
   now?: () => Date
   reportRootDir?: string
   resolveOutputDir?: (targetPreset: GenerationTargetPreset) => string
+}
+
+const isPreviewApplyError = (
+  error: unknown,
+): error is PreviewReportApplyError =>
+  typeof error === "object" &&
+  error !== null &&
+  "name" in error &&
+  error.name === "PreviewReportApplyError" &&
+  "code" in error &&
+  typeof error.code === "string"
+
+const toApplyConflictError = (
+  session: GeneratorPreviewSessionDetail,
+  error: PreviewReportApplyError,
+): AppError => {
+  if (error.code === "PREVIEW_REPORT_STALE") {
+    return new AppError({
+      code: "GENERATOR_SESSION_STALE",
+      message: "Generator preview session is stale",
+      status: 409,
+      expose: true,
+      details: {
+        id: session.id,
+        outputDir: session.outputDir,
+        reason: error.message,
+      },
+    })
+  }
+
+  return new AppError({
+    code: "GENERATOR_SESSION_APPLY_CONFLICT",
+    message: "Generator preview session cannot be applied",
+    status: 409,
+    expose: true,
+    details: {
+      id: session.id,
+      outputDir: session.outputDir,
+      reason: error.message,
+    },
+  })
 }
 
 export const createGeneratorSessionService = (
@@ -41,6 +89,96 @@ export const createGeneratorSessionService = (
     options.resolveOutputDir ?? resolveTargetPresetOutputDir
 
   return {
+    async applyPreviewSession(
+      input: ApplyGeneratorPreviewSessionInput,
+    ): Promise<
+      GeneratorPreviewSessionDetail & {
+        applyResult: AppliedGenerationPreviewReport
+      }
+    > {
+      const session = await repository.getPreviewSessionById(input.id)
+      if (!session) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_NOT_FOUND",
+          message: "Generator session not found",
+          status: 404,
+          expose: true,
+          details: {
+            id: input.id,
+          },
+        })
+      }
+
+      if (session.status !== "ready") {
+        throw new AppError({
+          code: "GENERATOR_SESSION_NOT_READY",
+          message: "Generator session is not ready for apply",
+          status: 409,
+          expose: true,
+          details: {
+            id: session.id,
+            status: session.status,
+          },
+        })
+      }
+
+      if (session.hasBlockingConflicts) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_BLOCKING_CONFLICTS",
+          message: "Generator session still has blocking conflicts",
+          status: 409,
+          expose: true,
+          details: {
+            id: session.id,
+            conflictStrategy: session.conflictStrategy,
+          },
+        })
+      }
+
+      let applyResult: AppliedGenerationPreviewReport
+
+      try {
+        applyResult = await applyGenerationPreviewReport(session.report)
+      } catch (error) {
+        if (isPreviewApplyError(error)) {
+          throw toApplyConflictError(session, error)
+        }
+
+        throw error
+      }
+
+      const appliedAt = now().toISOString()
+      const appliedFileCount = applyResult.files.filter(
+        (file) => file.written,
+      ).length
+      const skippedFileCount = applyResult.files.length - appliedFileCount
+      const updatedSession = await repository.markPreviewSessionApplied(
+        session.id,
+        {
+          appliedAt,
+          appliedFileCount,
+          applyManifestPath: applyResult.manifestPath,
+          skippedFileCount,
+        },
+      )
+
+      if (!updatedSession) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_NOT_FOUND",
+          message: "Generator session not found",
+          status: 404,
+          expose: true,
+          details: {
+            id: session.id,
+          },
+        })
+      }
+
+      return {
+        ...updatedSession,
+        applyResult,
+      }
+    },
     async createPreviewSession(
       input: CreateGeneratorPreviewSessionInput,
     ): Promise<GeneratorPreviewSessionDetail> {

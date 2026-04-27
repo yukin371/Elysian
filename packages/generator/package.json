@@ -12,6 +12,7 @@
     "@elysian/schema": "workspace:*"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./browser": "./src/browser.ts"
   }
 }

@@ -1,12 +1,20 @@
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-export type GenerationTargetPreset = "staging"
-export type MergeStrategy = "replace-whole-file"
+import {
+  DEFAULT_OUTPUT_DIR,
+  type GenerationTargetPreset,
+  listTargetPresets,
+} from "./shared-conventions"
 
-export const DEFAULT_GENERATION_TARGET: GenerationTargetPreset = "staging"
-export const DEFAULT_OUTPUT_DIR = "generated"
-export const DEFAULT_MERGE_STRATEGY: MergeStrategy = "replace-whole-file"
+export {
+  DEFAULT_GENERATION_TARGET,
+  DEFAULT_MERGE_STRATEGY,
+  DEFAULT_OUTPUT_DIR,
+  listTargetPresets,
+  type GenerationTargetPreset,
+  type MergeStrategy,
+} from "./shared-conventions"
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url))
 
@@ -22,5 +30,3 @@ export const resolveTargetPresetOutputDir = (
 
   return resolve(resolveRepositoryRoot(), DEFAULT_OUTPUT_DIR)
 }
-
-export const listTargetPresets = (): GenerationTargetPreset[] => ["staging"]

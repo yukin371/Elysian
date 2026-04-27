@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
-import { mkdtemp, readFile } from "node:fs/promises"
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 
 import {
   createAuthGuard,
@@ -11,7 +11,7 @@ import {
   createInMemoryGeneratorSessionRepository,
   createPasswordHash,
 } from ".."
-import { createServerApp, type CreateServerAppOptions } from "../../app"
+import { type CreateServerAppOptions, createServerApp } from "../../app"
 import { createServerConfig } from "../../config"
 import type { ServerLogger } from "../../logging"
 
@@ -153,7 +153,7 @@ const createAuthFixture = async () => {
 }
 
 describe("generator session module", () => {
-  it("creates, lists, and gets generator preview sessions", async () => {
+  it("creates, applies, lists, and gets generator preview sessions", async () => {
     const fixture = await createAuthFixture()
     const repository = createInMemoryGeneratorSessionRepository()
     const outputDir = await mkdtemp(
@@ -200,6 +200,9 @@ describe("generator session module", () => {
 
     const createBody = (await createResponse.json()) as {
       session: {
+        appliedAt: string | null
+        appliedFileCount: number | null
+        applyManifestPath: string | null
         id: string
         actorUserId: string
         actorUsername: string
@@ -209,6 +212,11 @@ describe("generator session module", () => {
         sourceType: string
       }
       report: {
+        databaseChangePlan: {
+          operations: Array<{
+            tableName: string
+          }>
+        }
         schemaName: string
         sqlPreview: {
           tableName: string
@@ -221,10 +229,58 @@ describe("generator session module", () => {
     expect(createBody.session.actorUsername).toBe("admin")
     expect(createBody.session.previewFileCount).toBe(5)
     expect(createBody.report.schemaName).toBe("customer")
+    expect(createBody.report.databaseChangePlan.operations[0]?.tableName).toBe(
+      "customer",
+    )
     expect(createBody.report.sqlPreview.tableName).toBe("customer")
 
     const reportContents = await readFile(createBody.session.reportPath, "utf8")
     expect(reportContents).toContain('"schemaName": "customer"')
+    expect(reportContents).toContain('"databaseChangePlan"')
+
+    const applyResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "user-agent": "generator-session-test-agent",
+            "x-request-id": "req-generator-session-apply-1",
+          }),
+        },
+      ),
+    )
+    expect(applyResponse.status).toBe(200)
+
+    const applyBody = (await applyResponse.json()) as {
+      session: {
+        appliedAt: string
+        appliedFileCount: number
+        applyManifestPath: string
+        id: string
+        skippedFileCount: number
+        status: string
+      }
+      apply: {
+        files: Array<{ written: boolean }>
+        manifestPath: string
+      }
+    }
+    expect(applyBody.session.id).toBe(createBody.session.id)
+    expect(applyBody.session.status).toBe("applied")
+    expect(applyBody.session.appliedAt).toBeTruthy()
+    expect(applyBody.session.appliedFileCount).toBe(5)
+    expect(applyBody.session.skippedFileCount).toBe(0)
+    expect(applyBody.session.applyManifestPath).toBe(
+      applyBody.apply.manifestPath,
+    )
+    expect(applyBody.apply.files.every((file) => file.written)).toBe(true)
+
+    const manifestContents = await readFile(
+      applyBody.apply.manifestPath,
+      "utf8",
+    )
+    expect(manifestContents).toContain('"schemaName": "customer"')
 
     const listResponse = await app.handle(
       new Request("http://localhost/studio/generator/sessions", {
@@ -278,6 +334,86 @@ describe("generator session module", () => {
       userAgent: "generator-session-test-agent",
       result: "success",
     })
+
+    const applyAuditLog = (await fixture.repository.listAuditLogs()).find(
+      (entry) => entry.action === "staging_apply",
+    )
+    expect(applyAuditLog).toMatchObject({
+      category: "generator",
+      action: "staging_apply",
+      actorUserId: createBody.session.actorUserId,
+      targetType: "generator-session",
+      targetId: createBody.session.id,
+      requestId: "req-generator-session-apply-1",
+      userAgent: "generator-session-test-agent",
+      result: "success",
+    })
+  })
+
+  it("refuses to apply stale generator preview sessions", async () => {
+    const fixture = await createAuthFixture()
+    const repository = createInMemoryGeneratorSessionRepository()
+    const outputDir = await mkdtemp(
+      join(tmpdir(), "elysian-generator-session-output-"),
+    )
+    const reportRootDir = await mkdtemp(
+      join(tmpdir(), "elysian-generator-session-report-"),
+    )
+    const app = createTestApp([
+      fixture.authModule,
+      createGeneratorSessionModule(repository, {
+        authGuard: fixture.authGuard,
+        reportRootDir,
+        resolveOutputDir: () => outputDir,
+      }),
+    ])
+    const accessToken = await loginAsAdmin(app)
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "customer",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          targetPreset: "staging",
+        }),
+      }),
+    )
+    expect(createResponse.status).toBe(201)
+
+    const createBody = (await createResponse.json()) as {
+      session: {
+        id: string
+      }
+    }
+    const driftedPath = join(outputDir, "modules/customer/customer.schema.ts")
+
+    await mkdir(dirname(driftedPath), { recursive: true })
+    await writeFile(driftedPath, "export const drifted = true\n", "utf8")
+
+    const applyResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken),
+        },
+      ),
+    )
+
+    expect(applyResponse.status).toBe(409)
+    const errorBody = (await applyResponse.json()) as {
+      error: {
+        code: string
+      }
+    }
+    expect(errorBody.error.code).toBe("GENERATOR_SESSION_STALE")
   })
 
   it("requires authentication for generator preview sessions when auth guard is configured", async () => {

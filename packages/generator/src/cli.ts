@@ -6,6 +6,10 @@ import { type ModuleSchema, validateModuleSchema } from "@elysian/schema"
 
 import { parseCliArgs } from "./cli-args"
 import { DEFAULT_GENERATION_TARGET, listTargetPresets } from "./conventions"
+import {
+  buildGenerationPreviewReport,
+  writeGenerationPreviewReport,
+} from "./preview"
 import { getRegisteredSchema, listRegisteredSchemaNames } from "./schemas"
 import { writeModuleFiles } from "./write"
 
@@ -74,18 +78,53 @@ const main = async () => {
     return
   }
 
-  const result = await writeModuleFiles(schema, {
-    outputDir: resolveCliPath(options.outputDir),
-    frontendTarget: options.frontendTarget,
-    schemaArtifactSource,
-    conflictStrategy: options.conflictStrategy,
-    targetPreset:
-      options.targetPreset === "custom" ? undefined : options.targetPreset,
-  })
+  try {
+    if (options.preview) {
+      const previewReport = await buildGenerationPreviewReport(schema, {
+        outputDir: resolveCliPath(options.outputDir),
+        frontendTarget: options.frontendTarget,
+        schemaArtifactSource,
+        conflictStrategy: options.conflictStrategy,
+        targetPreset:
+          options.targetPreset === "custom" ? undefined : options.targetPreset,
+      })
 
-  for (const file of result) {
-    const status = file.written ? "written" : "skipped"
-    console.log(`[generator] ${status} ${file.absolutePath}`)
+      for (const file of previewReport.files) {
+        const diffSuffix = file.hasChanges ? "" : " (no diff)"
+        console.log(
+          `[generator] preview ${file.plannedAction} ${file.absolutePath}${diffSuffix}`,
+        )
+      }
+
+      if (options.reportPath) {
+        const reportPath = resolveCliPath(options.reportPath)
+        await writeGenerationPreviewReport(reportPath, previewReport)
+        console.log(`[generator] report ${reportPath}`)
+      }
+
+      console.log("[generator] sql-preview")
+      console.log(previewReport.sqlPreview.contents)
+      return
+    }
+
+    const result = await writeModuleFiles(schema, {
+      outputDir: resolveCliPath(options.outputDir),
+      frontendTarget: options.frontendTarget,
+      schemaArtifactSource,
+      conflictStrategy: options.conflictStrategy,
+      targetPreset:
+        options.targetPreset === "custom" ? undefined : options.targetPreset,
+    })
+
+    for (const file of result) {
+      const status = file.written ? "written" : "skipped"
+      console.log(`[generator] ${status} ${file.absolutePath}`)
+    }
+  } catch (error) {
+    console.error(
+      `[generator] ${error instanceof Error ? error.message : String(error)}`,
+    )
+    process.exitCode = 1
   }
 }
 
@@ -96,7 +135,9 @@ const printUsage = () => {
       "  bun --filter @elysian/generator generate --schema customer --target staging --frontend vue [--conflict skip|overwrite|overwrite-generated-only|fail]",
       "  bun --filter @elysian/generator generate --schema-file ./docs/ai-playbooks/examples/supplier.module-schema.json --target staging --frontend vue [--conflict skip|overwrite|overwrite-generated-only|fail]",
       "  bun --filter @elysian/generator generate --schema customer --out ./custom/generated --frontend vue [--conflict skip|overwrite|overwrite-generated-only|fail]",
+      "  bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --preview [--report ./generated/reports/customer.preview.json]",
       "  Exactly one of --schema or --schema-file must be provided.",
+      "  --report requires --preview.",
       "  --overwrite is kept as a shortcut for --conflict overwrite",
       "",
       `Target presets: ${listTargetPresets().join(", ")}`,

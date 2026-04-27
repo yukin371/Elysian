@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-04-26`
+更新时间：`2026-04-27`
 
 ## 项目类型
 
@@ -74,6 +74,9 @@
 - `packages/persistence` 已补 workflow repository 独立测试，当前通过 `PGlite` 嵌入式 PostgreSQL 兼容底座覆盖 definition 版本唯一性、next version 计算、todo/done 查询边界、实例任务排序与取消语义；tenant RLS 仍继续由 server 测试与真实 PostgreSQL E2E 兜底。
 - `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试。
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
+- `packages/generator` 已新增 preview/report 能力，可在不写入目标目录的前提下输出文件动作预览、内容快照报告与 review-only SQL preview。
+- `packages/generator` 已新增 `DatabaseChangePlan` 中性数据库变更描述，可从 `ModuleSchema` 产出 reviewable create-table 计划，继续保持正式 migration owner 在 `packages/persistence`。
+- `packages/persistence` 已新增 migration proposal 草案生成能力，可消费 `DatabaseChangePlan` 形状并输出 review-only SQL draft、Drizzle schema snippet 与风险说明；正式 `db:generate / db:migrate` 仍保持人工确认后进入。
 - `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
 - `packages/schema` 已把 `enum` 字段必须提供 `options` 或 `dictionaryTypeCode` 收紧为 runtime 硬约束，避免裸 enum 误过 `P5A` handoff。
 - `packages/generator` 已支持 `--schema-file` 直接消费外部 JSON `ModuleSchema`；当 schema 来源为外部文件时，会在生成目录内联 `.schema.ts`，不假设该模块已注册到 `@elysian/schema`。
@@ -109,6 +112,9 @@
 - `packages/persistence` 的 `db:seed` 已包含默认 workflow definitions 样本（`expense-approval v1/v2`、`expense-approval-condition v1`），默认开发环境无需前端 override 也可验证 workflow 版本历史；`apps/example-vue` 的 override seam 当前只用于稳定复现特定测试样本。
 - `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace；当前定位仍是“企业预设 + customer 单模块”的最小交互验证页，不视为完整多模块后台。
 - `apps/example-vue` 的 customer workspace 已从“前端拉全量后本地筛选”收敛到服务端列表协议，当前 `GET /customers` 已承接 query、分页与排序参数，并返回 page metadata 供工作区 footer 分页交互消费。
+- 服务端已落生成会话运行时模块：`generator-session`，并已提供 `GET /studio/generator/sessions`、`GET /studio/generator/sessions/:id`、`POST /studio/generator/sessions/preview`、`POST /studio/generator/sessions/:id/apply` 最小后端闭环。
+- 生成预览报告中心当前已具备后端最小运行态：可输出 preview report、review-only SQL preview 与 `DatabaseChangePlan`，并按会话落盘到 `generated/reports/generator-sessions/*.preview.json`。
+- generator 当前已支持基于 preview report 的安全 staging apply：apply 前会重验目标文件状态是否漂移，成功后写入 staging manifest，并把 apply 证据回传给 `generator-session`。
 - 仓库已具备最小质量链路：`Biome + GitHub Actions CI`。
 - 仓库当前已使用 `Husky` 托管 `pre-commit / commit-msg / pre-push` 本地 hooks；`bun install` 会自动执行 `prepare` 完成安装，并保留 `bun run hooks:install` 作为手动修复入口。
 - CI workflow 已升级至 Node 24 兼容 action 版本（`actions/checkout@v5`、`actions/download-artifact@v7`、`actions/upload-artifact@v6`）。
@@ -282,6 +288,8 @@
 - PowerShell 复制环境文件：`Copy-Item .env.example .env`
 - 生成模块模板：`bun --filter @elysian/generator generate --schema customer --out ./generated --frontend vue`
 - 指定冲突策略：`bun --filter @elysian/generator generate --schema customer --out ./generated --frontend vue --conflict fail`
+- 预览生成结果：`bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --preview`
+- 输出预览报告：`bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --preview --report ./generated/reports/customer.preview.json`
 - 使用官方 staging 目录：`bun --filter @elysian/generator generate --schema customer --target staging --frontend vue`
 - 从外部 schema 文件生成：`bun --filter @elysian/generator generate --schema-file ./docs/ai-playbooks/examples/supplier.module-schema.json --target staging --frontend vue`
 - P5A handoff 报告：`bun run p5a:handoff:report --input-file ./docs/ai-playbooks/examples/p5a-complete-task-input.txt --schema-file ./docs/ai-playbooks/examples/p5a-failed.module-schema.json`

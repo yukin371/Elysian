@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises"
+import { mkdir, mkdtemp, readdir, rm, stat, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
@@ -252,6 +252,81 @@ const run = async (): Promise<CliCheckResult[]> => {
           ),
           "Expected external schema handoff to avoid package import references",
         )
+      },
+    )
+
+    await recordCheck(
+      "preview mode writes a report without mutating generated module files",
+      async () => {
+        const previewOutputDir = join(workspace, "preview-output")
+        const previewReportAbsolutePath = join(
+          workspace,
+          "preview-report",
+          "customer.preview.json",
+        )
+        const previewRun = await runGeneratorCli(
+          [
+            "--schema",
+            "customer",
+            "--out",
+            previewOutputDir,
+            "--frontend",
+            "vue",
+            "--preview",
+            "--report",
+            previewReportAbsolutePath,
+          ],
+          process.cwd(),
+        )
+        assert(
+          previewRun.code === 0,
+          `Expected preview run success, got ${previewRun.code}`,
+        )
+        assert(
+          previewRun.stdout.includes("[generator] preview create"),
+          "Expected preview mode to print planned preview actions",
+        )
+        assert(
+          previewRun.stdout.includes("[generator] sql-preview"),
+          "Expected preview mode to print the SQL preview header",
+        )
+
+        const previewReport = JSON.parse(
+          await Bun.file(previewReportAbsolutePath).text(),
+        ) as {
+          files: Array<{ plannedAction: string }>
+          sqlPreview: { contents: string }
+        }
+
+        assert(
+          previewReport.files.every((item) => item.plannedAction === "create"),
+          "Expected preview report to classify missing files as create actions",
+        )
+        assert(
+          previewReport.sqlPreview.contents.includes("CREATE TABLE customer ("),
+          "Expected preview report to include SQL preview contents",
+        )
+
+        try {
+          await stat(
+            join(previewOutputDir, "modules/customer/customer.schema.ts"),
+          )
+          throw new Error(
+            "Preview mode should not create generated module files on disk",
+          )
+        } catch (error) {
+          const errorCode =
+            typeof error === "object" &&
+            error !== null &&
+            "code" in error &&
+            typeof error.code === "string"
+              ? error.code
+              : null
+
+          if (errorCode !== "ENOENT") {
+            throw error
+          }
+        }
       },
     )
   } finally {

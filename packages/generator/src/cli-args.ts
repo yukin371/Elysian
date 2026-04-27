@@ -11,6 +11,8 @@ export interface CliOptions {
   targetPreset: GenerationTargetPreset | "custom"
   frontendTarget: "vue" | "react"
   conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail"
+  preview: boolean
+  reportPath?: string
 }
 
 export const parseCliArgs = (args: string[]): CliOptions | null => {
@@ -25,6 +27,8 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
     | "overwrite"
     | "overwrite-generated-only"
     | "fail" = "skip"
+  let preview = false
+  let reportPath = ""
 
   for (let index = 0; index < args.length; index += 1) {
     const current = args[index]
@@ -78,6 +82,17 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
       continue
     }
 
+    if (current === "--preview") {
+      preview = true
+      continue
+    }
+
+    if (current === "--report") {
+      reportPath = args[index + 1] ?? ""
+      index += 1
+      continue
+    }
+
     if (current === "--conflict") {
       const value = args[index + 1]
 
@@ -103,6 +118,10 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
     return null
   }
 
+  if (reportPath && !preview) {
+    return null
+  }
+
   return {
     ...(hasSchemaName ? { schemaName } : {}),
     ...(hasSchemaFilePath ? { schemaFilePath } : {}),
@@ -110,5 +129,7 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
     targetPreset,
     frontendTarget,
     conflictStrategy,
+    preview,
+    ...(reportPath ? { reportPath } : {}),
   }
 }

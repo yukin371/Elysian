@@ -1,13 +1,16 @@
 import type { GenerationPreviewReport } from "@elysian/generator"
 
 export type GeneratorPreviewSessionSourceType = "registered-schema"
-export type GeneratorPreviewSessionStatus = "ready"
+export type GeneratorPreviewSessionStatus = "ready" | "applied"
 
 export interface GeneratorPreviewSessionRecord {
   id: string
   actorDisplayName: string | null
   actorUserId: string | null
   actorUsername: string | null
+  appliedAt: string | null
+  appliedFileCount: number | null
+  applyManifestPath: string | null
   conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail"
   createdAt: string
   frontendTarget: "vue" | "react"
@@ -16,6 +19,7 @@ export interface GeneratorPreviewSessionRecord {
   previewFileCount: number
   reportPath: string
   schemaName: string
+  skippedFileCount: number | null
   sourceType: GeneratorPreviewSessionSourceType
   sourceValue: string
   status: GeneratorPreviewSessionStatus
@@ -32,6 +36,9 @@ export interface CreateGeneratorPreviewSessionInput {
   actorDisplayName?: string | null
   actorUserId?: string | null
   actorUsername?: string | null
+  appliedAt?: string | null
+  appliedFileCount?: number | null
+  applyManifestPath?: string | null
   conflictStrategy: GeneratorPreviewSessionRecord["conflictStrategy"]
   createdAt: string
   frontendTarget: GeneratorPreviewSessionRecord["frontendTarget"]
@@ -42,11 +49,19 @@ export interface CreateGeneratorPreviewSessionInput {
   report: GenerationPreviewReport
   reportPath: string
   schemaName: string
+  skippedFileCount?: number | null
   sourceType: GeneratorPreviewSessionSourceType
   sourceValue: string
   status?: GeneratorPreviewSessionStatus
   targetPreset: GeneratorPreviewSessionRecord["targetPreset"]
   tenantId?: string | null
+}
+
+export interface MarkPreviewSessionAppliedInput {
+  appliedAt: string
+  appliedFileCount: number
+  applyManifestPath: string | null
+  skippedFileCount: number
 }
 
 export interface GeneratorSessionRepository {
@@ -57,6 +72,10 @@ export interface GeneratorSessionRepository {
     id: string,
   ) => Promise<GeneratorPreviewSessionDetail | null>
   listPreviewSessions: () => Promise<GeneratorPreviewSessionRecord[]>
+  markPreviewSessionApplied: (
+    id: string,
+    input: MarkPreviewSessionAppliedInput,
+  ) => Promise<GeneratorPreviewSessionDetail | null>
 }
 
 export const createInMemoryGeneratorSessionRepository =
@@ -70,6 +89,9 @@ export const createInMemoryGeneratorSessionRepository =
           actorDisplayName: input.actorDisplayName ?? null,
           actorUserId: input.actorUserId ?? null,
           actorUsername: input.actorUsername ?? null,
+          appliedAt: input.appliedAt ?? null,
+          appliedFileCount: input.appliedFileCount ?? null,
+          applyManifestPath: input.applyManifestPath ?? null,
           conflictStrategy: input.conflictStrategy,
           createdAt: input.createdAt,
           frontendTarget: input.frontendTarget,
@@ -79,6 +101,7 @@ export const createInMemoryGeneratorSessionRepository =
           report: input.report,
           reportPath: input.reportPath,
           schemaName: input.schemaName,
+          skippedFileCount: input.skippedFileCount ?? null,
           sourceType: input.sourceType,
           sourceValue: input.sourceValue,
           status: input.status ?? "ready",
@@ -97,6 +120,24 @@ export const createInMemoryGeneratorSessionRepository =
           .map((session) => toPreviewSessionRecord(session))
           .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
       },
+      async markPreviewSessionApplied(id, input) {
+        const current = sessions.get(id)
+        if (!current) {
+          return null
+        }
+
+        const updated: GeneratorPreviewSessionDetail = {
+          ...current,
+          appliedAt: input.appliedAt,
+          appliedFileCount: input.appliedFileCount,
+          applyManifestPath: input.applyManifestPath,
+          skippedFileCount: input.skippedFileCount,
+          status: "applied",
+        }
+
+        sessions.set(id, updated)
+        return updated
+      },
     }
   }
 
@@ -107,6 +148,9 @@ const toPreviewSessionRecord = (
   actorDisplayName: session.actorDisplayName,
   actorUserId: session.actorUserId,
   actorUsername: session.actorUsername,
+  appliedAt: session.appliedAt,
+  appliedFileCount: session.appliedFileCount,
+  applyManifestPath: session.applyManifestPath,
   conflictStrategy: session.conflictStrategy,
   createdAt: session.createdAt,
   frontendTarget: session.frontendTarget,
@@ -115,6 +159,7 @@ const toPreviewSessionRecord = (
   previewFileCount: session.previewFileCount,
   reportPath: session.reportPath,
   schemaName: session.schemaName,
+  skippedFileCount: session.skippedFileCount,
   sourceType: session.sourceType,
   sourceValue: session.sourceValue,
   status: session.status,

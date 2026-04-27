@@ -1,6 +1,15 @@
 export { createDatabaseConfig, type DatabaseConfig } from "./config"
 export { createDatabaseClient, type DatabaseClient } from "./client"
 export {
+  buildMigrationProposalFromChangePlan,
+  type DatabaseChangePlanLike,
+  type DatabaseColumnPlanLike,
+  type DatabaseTableChangePlanLike,
+  type MigrationProposal,
+  type MigrationProposalRisk,
+  type MigrationProposalRiskCode,
+} from "./migration-proposal"
+export {
   buildDataAccessCondition,
   matchesDataAccess,
   resolveDataAccessContext,

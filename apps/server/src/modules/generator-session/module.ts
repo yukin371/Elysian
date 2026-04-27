@@ -50,12 +50,10 @@ export const createGeneratorSessionModule = (
     const recordAuditBestEffort = async (
       headers: Headers,
       identity: AuthIdentity,
-      session: { id: string; reportPath: string; schemaName: string },
-      input: {
-        conflictStrategy: string
-        frontendTarget: string
-        previewFileCount: number
-        targetPreset: string
+      event: {
+        action: string
+        details: Record<string, unknown> | null
+        sessionId: string
       },
     ) => {
       if (!options.auditLogWriter) {
@@ -64,29 +62,22 @@ export const createGeneratorSessionModule = (
 
       try {
         await options.auditLogWriter({
-          action: "preview_create",
+          action: event.action,
           actorUserId: identity.user.id,
-          details: {
-            schemaName: session.schemaName,
-            frontendTarget: input.frontendTarget,
-            conflictStrategy: input.conflictStrategy,
-            targetPreset: input.targetPreset,
-            previewFileCount: input.previewFileCount,
-            reportPath: session.reportPath,
-          },
+          details: event.details,
           ip: buildRequestContext(headers).ip,
           requestId: buildRequestContext(headers).requestId,
           result: "success",
-          targetId: session.id,
+          targetId: event.sessionId,
           targetType: "generator-session",
           tenantId: identity.user.tenantId,
           userAgent: buildRequestContext(headers).userAgent,
         })
       } catch (error) {
         context.logger.warn("Generator session audit log write failed", {
-          action: "preview_create",
+          action: event.action,
           targetType: "generator-session",
-          targetId: session.id,
+          targetId: event.sessionId,
           actorUserId: identity.user.id,
           tenantId: identity.user.tenantId,
           error:
@@ -172,36 +163,24 @@ export const createGeneratorSessionModule = (
           })
 
           if (identity) {
-            await recordAuditBestEffort(request.headers, identity, session, {
-              conflictStrategy: session.conflictStrategy,
-              frontendTarget: session.frontendTarget,
-              previewFileCount: session.previewFileCount,
-              targetPreset: session.targetPreset,
+            await recordAuditBestEffort(request.headers, identity, {
+              action: "preview_create",
+              details: {
+                schemaName: session.schemaName,
+                frontendTarget: session.frontendTarget,
+                conflictStrategy: session.conflictStrategy,
+                targetPreset: session.targetPreset,
+                previewFileCount: session.previewFileCount,
+                reportPath: session.reportPath,
+              },
+              sessionId: session.id,
             })
           }
 
           set.status = 201
 
           return {
-            session: {
-              id: session.id,
-              actorDisplayName: session.actorDisplayName,
-              actorUserId: session.actorUserId,
-              actorUsername: session.actorUsername,
-              conflictStrategy: session.conflictStrategy,
-              createdAt: session.createdAt,
-              frontendTarget: session.frontendTarget,
-              hasBlockingConflicts: session.hasBlockingConflicts,
-              outputDir: session.outputDir,
-              previewFileCount: session.previewFileCount,
-              reportPath: session.reportPath,
-              schemaName: session.schemaName,
-              sourceType: session.sourceType,
-              sourceValue: session.sourceValue,
-              status: session.status,
-              targetPreset: session.targetPreset,
-              tenantId: session.tenantId,
-            },
+            session: toSessionResponse(session),
             report: session.report,
           }
         },
@@ -218,7 +197,80 @@ export const createGeneratorSessionModule = (
           },
         },
       )
+      .post(
+        "/studio/generator/sessions/:id/apply",
+        async ({ params, request }) => {
+          const identity = (await authorize(request.headers)) ?? null
+          const session = await service.applyPreviewSession({
+            id: params.id,
+          })
+
+          if (identity) {
+            await recordAuditBestEffort(request.headers, identity, {
+              action: "staging_apply",
+              details: {
+                schemaName: session.schemaName,
+                frontendTarget: session.frontendTarget,
+                conflictStrategy: session.conflictStrategy,
+                targetPreset: session.targetPreset,
+                outputDir: session.outputDir,
+                applyManifestPath: session.applyManifestPath,
+                appliedFileCount: session.appliedFileCount,
+                skippedFileCount: session.skippedFileCount,
+              },
+              sessionId: session.id,
+            })
+          }
+
+          return {
+            session: toSessionResponse(session),
+            apply: {
+              files: session.applyResult.files,
+              manifestPath: session.applyResult.manifestPath,
+            },
+          }
+        },
+        {
+          params: t.Object({
+            id: t.String({ minLength: 1 }),
+          }),
+          detail: {
+            tags: ["generator"],
+            summary: "Apply a generator preview session to staging",
+          },
+        },
+      )
   },
+})
+
+const toSessionResponse = (
+  session: Awaited<
+    ReturnType<
+      ReturnType<typeof createGeneratorSessionService>["createPreviewSession"]
+    >
+  >,
+) => ({
+  id: session.id,
+  actorDisplayName: session.actorDisplayName,
+  actorUserId: session.actorUserId,
+  actorUsername: session.actorUsername,
+  appliedAt: session.appliedAt,
+  appliedFileCount: session.appliedFileCount,
+  applyManifestPath: session.applyManifestPath,
+  conflictStrategy: session.conflictStrategy,
+  createdAt: session.createdAt,
+  frontendTarget: session.frontendTarget,
+  hasBlockingConflicts: session.hasBlockingConflicts,
+  outputDir: session.outputDir,
+  previewFileCount: session.previewFileCount,
+  reportPath: session.reportPath,
+  schemaName: session.schemaName,
+  skippedFileCount: session.skippedFileCount,
+  sourceType: session.sourceType,
+  sourceValue: session.sourceValue,
+  status: session.status,
+  targetPreset: session.targetPreset,
+  tenantId: session.tenantId,
 })
 
 const buildRequestContext = (headers: Headers) => ({

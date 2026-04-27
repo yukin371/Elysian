@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-04-26`
+更新时间：`2026-04-27`
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -46,10 +46,10 @@
 - 已完成：`3.10` Vue 管理后台布局，`ElyShell` 已具备侧边栏 + 顶栏 + 内容区 + 标签页布局
 - 已完成：`3.11` Vue 通用组件，`ui-enterprise-vue` 已落 `ElyCrudWorkspace`、标准列表页、标准表单页与只读详情视图
 - 已完成：`3.12` Vue 企业预设首版，`apps/example-vue` 已接入真实 enterprise shell 与 customer 工作区
-- 已推进：`apps/example-vue` 的 enterprise workspace 已扩到 `users / roles / departments / menus / dictionaries / settings / operation-logs / workflow definitions / notifications`，当前通知页已经收敛为“主区单列表 + 右侧详情/创建”结构，不再重复展示第二份列表
+- 已推进：`apps/example-vue` 的 enterprise workspace 已扩到 `users / roles / departments / menus / dictionaries / settings / operation-logs / workflow definitions / notifications / tenants`，当前通知页已收敛为“主区单列表 + 右侧详情/创建”结构；tenant 工作区已接入列表 / 详情 / 创建 / 编辑 / 状态切换的最小闭环，并完成首轮示例应用内 helper 拆分，避免继续把 tenant 纯逻辑堆进 `App.vue`
 - 已推进：通知工作区已通过真实浏览器回归验证登录、列表筛选、详情联动、创建通知与标记已读；当前已补状态列映射缺口，避免 `read/unread` 在企业表格中退化为“未知”
 - 已推进：customer 工作区已从前端本地筛选收敛到服务端列表协议，`GET /customers` 当前支持 query / page / pageSize / sortBy / sortOrder，并返回 page metadata 供示例页最小分页交互消费
-- 已确认边界：`apps/example-vue` 当前仍是“企业预设 + customer 单模块”的最小交互验证页，不视为完整多模块后台；详见 [2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md](./plans/2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md)
+- 已确认边界：`apps/example-vue` 当前是“企业预设 + 多工作区联调验证页”，重点验证 customers / notifications / tenants / workflow 等真实闭环，不视为完整多模块后台；后续结构整理仍限制在示例应用内部，不新增 shared owner；详见 [2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md](./plans/2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md)
 
 ### 3. Phase 4 Pre-validation ✅ 归档
 
@@ -197,6 +197,7 @@
 - 已接入：CI `e2e-generator-matrix` 与 `e2e-generator-cli` 作业
 - 已清理：并发覆盖下 Windows `rename` 瞬时冲突风险（原子写入增加重试），并补并发回归断言
 - 已新增：`bun run e2e:generator:cli`，覆盖 generator CLI 真实执行路径的冲突策略语义
+- 已推进：`packages/generator` 已补 preview/report 闭环，当前 `generate --preview` 可输出文件动作预览、结构化报告与 review-only SQL preview，为后续 Studio 生成预览提供底层产物
 - 已新增：matrix/cli JSON 报告输出，并在 CI 归档 artifact 用于失败定位与趋势追踪
 - 已新增：`bun run e2e:generator:reports:index` 与 CI `e2e-generator-report-index`，汇总 matrix/cli 报告为单一索引 artifact
 - 已新增：`bun run e2e:generator:reports:gate` 与 CI `e2e-generator-report-gate`，按阈值策略执行发布门禁判定
@@ -213,6 +214,12 @@
 
 ## 最近进展
 
+- generator 已从“只写入”扩到“可预览后再决定是否落盘”，当前可在 CLI 预览文件动作、输出 JSON 报告并生成 review-only SQL preview
+- 已补代码生成 / SQL 生成 / 安全能力的功能矩阵与缺口设计文档，明确当前状态应表述为“代码生成底座已可用、SQL 仍为 review-only preview、安全具备基础等价能力但未进入完整企业安全平台”；详见 [2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md](./plans/2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md)
+- `Track 1 / T1-2` 已落最小后端切片：`apps/server` 新增 `generator-session` 运行时模块，当前已支持生成 preview session 列表、详情、创建与 report 落盘，不提前进入 staging apply
+- `Track 1 / T1-3` 已落最小后端切片：当前可对 preview session 执行 staging apply，apply 前会重验目标文件是否漂移，成功后写入 manifest 并保留最小 apply evidence
+- `Track 2 / T2-1` 已落首个中性产物：`packages/generator` 当前可从 `ModuleSchema` 输出 `DatabaseChangePlan` create-table 计划，继续保持 SQL preview 在 generator、正式 migration proposal 在 persistence
+- `Track 2 / T2-2` 已落最小 proposal builder：`packages/persistence` 当前可基于 `DatabaseChangePlan` 形状输出 review-only SQL draft、Drizzle schema snippet 与风险标签，但仍不直接生成正式 migration 文件
 - 完成 `Phase 1` 垂直切片闭环，打通 `schema -> server -> persistence -> generator -> frontend`
 - 用 Docker PostgreSQL + 浏览器 smoke 验证 customer create / update / delete 持久化链路
 - 固定仓库品牌与命名体系为 `Elysian` / `@elysian/*`
@@ -300,5 +307,6 @@
 ## 下一步
 
 1. 先把 `apps/example-vue` 的 enterprise workspace 能力继续按后台常用功能矩阵收口，优先补剩余高频模块与交互缺口，不急着抽象成新的 shared owner。
-2. 继续保留 `P7A Round-2` 作为 workflow 当前阶段出口，只在需要时补最小所有权/权限边界，不默认进入 `transfer / delegate`。
-3. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。
+2. 在生成主线中继续推进 `Studio 化 / migration 化 / 会话治理化` 三条缺口：`T1-2`、`T1-3`、`T2-1` 与 `T2-2` 已落最小切片，下一步进入 apply diff/evidence 强化、proposal 到正式 migration 的人工接入规范，以及 refresh session 治理，再决定是否独立出 SQL 工作区。
+3. 继续保留 `P7A Round-2` 作为 workflow 当前阶段出口，只在需要时补最小所有权/权限边界，不默认进入 `transfer / delegate`。
+4. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。
