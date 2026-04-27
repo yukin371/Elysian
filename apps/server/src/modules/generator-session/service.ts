@@ -30,7 +30,9 @@ interface CreateGeneratorPreviewSessionInput {
 }
 
 interface ApplyGeneratorPreviewSessionInput {
+  actor: AuthIdentity | null
   id: string
+  requestId: string | null
 }
 
 export interface GeneratorSessionServiceOptions {
@@ -157,7 +159,11 @@ export const createGeneratorSessionService = (
         {
           appliedAt,
           appliedFileCount,
+          appliedByDisplayName: input.actor?.user.displayName ?? null,
+          appliedByUserId: input.actor?.user.id ?? null,
+          appliedByUsername: input.actor?.user.username ?? null,
           applyManifestPath: applyResult.manifestPath,
+          applyRequestId: input.requestId,
           skippedFileCount,
         },
       )

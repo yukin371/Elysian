@@ -199,9 +199,21 @@ describe("generator session module", () => {
     expect(createResponse.status).toBe(201)
 
     const createBody = (await createResponse.json()) as {
+      diff: {
+        actionCounts: {
+          block: number
+          create: number
+          overwrite: number
+          skip: number
+        }
+        changedFileCount: number
+        totalFileCount: number
+        unchangedFileCount: number
+      }
       session: {
         appliedAt: string | null
         appliedFileCount: number | null
+        applyEvidence: null
         applyManifestPath: string | null
         id: string
         actorUserId: string
@@ -228,6 +240,18 @@ describe("generator session module", () => {
     expect(createBody.session.sourceType).toBe("registered-schema")
     expect(createBody.session.actorUsername).toBe("admin")
     expect(createBody.session.previewFileCount).toBe(5)
+    expect(createBody.session.applyEvidence).toBeNull()
+    expect(createBody.diff).toEqual({
+      totalFileCount: 5,
+      changedFileCount: 5,
+      unchangedFileCount: 0,
+      actionCounts: {
+        create: 5,
+        overwrite: 0,
+        skip: 0,
+        block: 0,
+      },
+    })
     expect(createBody.report.schemaName).toBe("customer")
     expect(createBody.report.databaseChangePlan.operations[0]?.tableName).toBe(
       "customer",
@@ -253,15 +277,44 @@ describe("generator session module", () => {
     expect(applyResponse.status).toBe(200)
 
     const applyBody = (await applyResponse.json()) as {
+      diff: {
+        actionCounts: {
+          block: number
+          create: number
+          overwrite: number
+          skip: number
+        }
+        changedFileCount: number
+        totalFileCount: number
+        unchangedFileCount: number
+      }
       session: {
         appliedAt: string
         appliedFileCount: number
+        appliedByUserId: string
+        applyEvidence: {
+          actorUserId: string
+          appliedAt: string
+          manifestPath: string
+          reportPath: string
+          requestId: string
+          sessionId: string
+        }
         applyManifestPath: string
+        applyRequestId: string
         id: string
         skippedFileCount: number
         status: string
       }
       apply: {
+        evidence: {
+          actorUserId: string
+          appliedAt: string
+          manifestPath: string
+          reportPath: string
+          requestId: string
+          sessionId: string
+        }
         files: Array<{ written: boolean }>
         manifestPath: string
       }
@@ -270,10 +323,22 @@ describe("generator session module", () => {
     expect(applyBody.session.status).toBe("applied")
     expect(applyBody.session.appliedAt).toBeTruthy()
     expect(applyBody.session.appliedFileCount).toBe(5)
+    expect(applyBody.session.appliedByUserId).toBe(createBody.session.actorUserId)
     expect(applyBody.session.skippedFileCount).toBe(0)
+    expect(applyBody.session.applyRequestId).toBe("req-generator-session-apply-1")
     expect(applyBody.session.applyManifestPath).toBe(
       applyBody.apply.manifestPath,
     )
+    expect(applyBody.diff).toEqual(createBody.diff)
+    expect(applyBody.apply.evidence).toMatchObject({
+      sessionId: createBody.session.id,
+      reportPath: createBody.session.reportPath,
+      manifestPath: applyBody.apply.manifestPath,
+      actorUserId: createBody.session.actorUserId,
+      requestId: "req-generator-session-apply-1",
+    })
+    expect(applyBody.apply.evidence.appliedAt).toBe(applyBody.session.appliedAt)
+    expect(applyBody.session.applyEvidence).toEqual(applyBody.apply.evidence)
     expect(applyBody.apply.files.every((file) => file.written)).toBe(true)
 
     const manifestContents = await readFile(
@@ -290,13 +355,22 @@ describe("generator session module", () => {
     expect(listResponse.status).toBe(200)
 
     const listBody = (await listResponse.json()) as {
-      items: Array<{ id: string; schemaName: string }>
+      items: Array<{
+        applyEvidence: {
+          requestId: string
+        }
+        id: string
+        schemaName: string
+      }>
     }
     expect(listBody.items).toHaveLength(1)
     expect(listBody.items[0]).toMatchObject({
       id: createBody.session.id,
       schemaName: "customer",
     })
+    expect(listBody.items[0]?.applyEvidence.requestId).toBe(
+      "req-generator-session-apply-1",
+    )
 
     const detailResponse = await app.handle(
       new Request(
@@ -309,6 +383,16 @@ describe("generator session module", () => {
     expect(detailResponse.status).toBe(200)
 
     const detailBody = (await detailResponse.json()) as {
+      applyEvidence: {
+        actorUserId: string
+        requestId: string
+      }
+      diffSummary: {
+        actionCounts: {
+          create: number
+        }
+        totalFileCount: number
+      }
       id: string
       report: {
         schemaName: string
@@ -319,6 +403,12 @@ describe("generator session module", () => {
       report: {
         schemaName: "customer",
       },
+    })
+    expect(detailBody.diffSummary.totalFileCount).toBe(5)
+    expect(detailBody.diffSummary.actionCounts.create).toBe(5)
+    expect(detailBody.applyEvidence).toMatchObject({
+      actorUserId: createBody.session.actorUserId,
+      requestId: "req-generator-session-apply-1",
     })
 
     const auditLog = (await fixture.repository.listAuditLogs()).find(

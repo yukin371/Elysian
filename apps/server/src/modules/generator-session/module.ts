@@ -3,7 +3,11 @@ import { t } from "elysia"
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
-import type { GeneratorSessionRepository } from "./repository"
+import type {
+  GeneratorPreviewSessionDetail,
+  GeneratorPreviewSessionRecord,
+  GeneratorSessionRepository,
+} from "./repository"
 import {
   type GeneratorSessionServiceOptions,
   createGeneratorSessionService,
@@ -110,7 +114,7 @@ export const createGeneratorSessionModule = (
           await authorize(request.headers)
 
           return {
-            items: await service.listPreviewSessions(),
+            items: (await service.listPreviewSessions()).map(toSessionResponse),
           }
         },
         {
@@ -138,7 +142,7 @@ export const createGeneratorSessionModule = (
             })
           }
 
-          return session
+          return toSessionDetailResponse(session)
         },
         {
           params: t.Object({
@@ -181,6 +185,7 @@ export const createGeneratorSessionModule = (
 
           return {
             session: toSessionResponse(session),
+            diff: buildDiffSummary(session.report),
             report: session.report,
           }
         },
@@ -201,8 +206,11 @@ export const createGeneratorSessionModule = (
         "/studio/generator/sessions/:id/apply",
         async ({ params, request }) => {
           const identity = (await authorize(request.headers)) ?? null
+          const requestContext = buildRequestContext(request.headers)
           const session = await service.applyPreviewSession({
+            actor: identity,
             id: params.id,
+            requestId: requestContext.requestId,
           })
 
           if (identity) {
@@ -214,6 +222,7 @@ export const createGeneratorSessionModule = (
                 conflictStrategy: session.conflictStrategy,
                 targetPreset: session.targetPreset,
                 outputDir: session.outputDir,
+                reportPath: session.reportPath,
                 applyManifestPath: session.applyManifestPath,
                 appliedFileCount: session.appliedFileCount,
                 skippedFileCount: session.skippedFileCount,
@@ -224,8 +233,10 @@ export const createGeneratorSessionModule = (
 
           return {
             session: toSessionResponse(session),
+            diff: buildDiffSummary(session.report),
             apply: {
               files: session.applyResult.files,
+              evidence: buildApplyEvidence(session),
               manifestPath: session.applyResult.manifestPath,
             },
           }
@@ -244,11 +255,7 @@ export const createGeneratorSessionModule = (
 })
 
 const toSessionResponse = (
-  session: Awaited<
-    ReturnType<
-      ReturnType<typeof createGeneratorSessionService>["createPreviewSession"]
-    >
-  >,
+  session: GeneratorPreviewSessionRecord,
 ) => ({
   id: session.id,
   actorDisplayName: session.actorDisplayName,
@@ -256,7 +263,12 @@ const toSessionResponse = (
   actorUsername: session.actorUsername,
   appliedAt: session.appliedAt,
   appliedFileCount: session.appliedFileCount,
+  appliedByDisplayName: session.appliedByDisplayName,
+  appliedByUserId: session.appliedByUserId,
+  appliedByUsername: session.appliedByUsername,
   applyManifestPath: session.applyManifestPath,
+  applyRequestId: session.applyRequestId,
+  applyEvidence: buildApplyEvidence(session),
   conflictStrategy: session.conflictStrategy,
   createdAt: session.createdAt,
   frontendTarget: session.frontendTarget,
@@ -272,6 +284,64 @@ const toSessionResponse = (
   targetPreset: session.targetPreset,
   tenantId: session.tenantId,
 })
+
+const toSessionDetailResponse = (session: GeneratorPreviewSessionDetail) => ({
+  ...toSessionResponse(session),
+  diffSummary: buildDiffSummary(session.report),
+  report: session.report,
+})
+
+const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
+  if (
+    session.appliedAt === null &&
+    session.applyManifestPath === null &&
+    session.applyRequestId === null &&
+    session.appliedByUserId === null
+  ) {
+    return null
+  }
+
+  return {
+    sessionId: session.id,
+    reportPath: session.reportPath,
+    manifestPath: session.applyManifestPath,
+    appliedAt: session.appliedAt,
+    actorDisplayName: session.appliedByDisplayName,
+    actorUserId: session.appliedByUserId,
+    actorUsername: session.appliedByUsername,
+    requestId: session.applyRequestId,
+  }
+}
+
+const buildDiffSummary = (
+  report: GeneratorPreviewSessionDetail["report"],
+) => {
+  const createCount = report.files.filter(
+    (file) => file.plannedAction === "create",
+  ).length
+  const overwriteCount = report.files.filter(
+    (file) => file.plannedAction === "overwrite",
+  ).length
+  const skipCount = report.files.filter(
+    (file) => file.plannedAction === "skip",
+  ).length
+  const blockCount = report.files.filter(
+    (file) => file.plannedAction === "block",
+  ).length
+  const changedFileCount = report.files.filter((file) => file.hasChanges).length
+
+  return {
+    totalFileCount: report.files.length,
+    changedFileCount,
+    unchangedFileCount: report.files.length - changedFileCount,
+    actionCounts: {
+      create: createCount,
+      overwrite: overwriteCount,
+      skip: skipCount,
+      block: blockCount,
+    },
+  }
+}
 
 const buildRequestContext = (headers: Headers) => ({
   requestId: headers.get("x-request-id"),

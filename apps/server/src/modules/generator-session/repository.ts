@@ -10,7 +10,11 @@ export interface GeneratorPreviewSessionRecord {
   actorUsername: string | null
   appliedAt: string | null
   appliedFileCount: number | null
+  appliedByDisplayName: string | null
+  appliedByUserId: string | null
+  appliedByUsername: string | null
   applyManifestPath: string | null
+  applyRequestId: string | null
   conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail"
   createdAt: string
   frontendTarget: "vue" | "react"
@@ -38,7 +42,11 @@ export interface CreateGeneratorPreviewSessionInput {
   actorUsername?: string | null
   appliedAt?: string | null
   appliedFileCount?: number | null
+  appliedByDisplayName?: string | null
+  appliedByUserId?: string | null
+  appliedByUsername?: string | null
   applyManifestPath?: string | null
+  applyRequestId?: string | null
   conflictStrategy: GeneratorPreviewSessionRecord["conflictStrategy"]
   createdAt: string
   frontendTarget: GeneratorPreviewSessionRecord["frontendTarget"]
@@ -60,7 +68,11 @@ export interface CreateGeneratorPreviewSessionInput {
 export interface MarkPreviewSessionAppliedInput {
   appliedAt: string
   appliedFileCount: number
+  appliedByDisplayName: string | null
+  appliedByUserId: string | null
+  appliedByUsername: string | null
   applyManifestPath: string | null
+  applyRequestId: string | null
   skippedFileCount: number
 }
 
@@ -91,7 +103,11 @@ export const createInMemoryGeneratorSessionRepository =
           actorUsername: input.actorUsername ?? null,
           appliedAt: input.appliedAt ?? null,
           appliedFileCount: input.appliedFileCount ?? null,
+          appliedByDisplayName: input.appliedByDisplayName ?? null,
+          appliedByUserId: input.appliedByUserId ?? null,
+          appliedByUsername: input.appliedByUsername ?? null,
           applyManifestPath: input.applyManifestPath ?? null,
+          applyRequestId: input.applyRequestId ?? null,
           conflictStrategy: input.conflictStrategy,
           createdAt: input.createdAt,
           frontendTarget: input.frontendTarget,
@@ -130,7 +146,11 @@ export const createInMemoryGeneratorSessionRepository =
           ...current,
           appliedAt: input.appliedAt,
           appliedFileCount: input.appliedFileCount,
+          appliedByDisplayName: input.appliedByDisplayName,
+          appliedByUserId: input.appliedByUserId,
+          appliedByUsername: input.appliedByUsername,
           applyManifestPath: input.applyManifestPath,
+          applyRequestId: input.applyRequestId,
           skippedFileCount: input.skippedFileCount,
           status: "applied",
         }
@@ -150,7 +170,11 @@ const toPreviewSessionRecord = (
   actorUsername: session.actorUsername,
   appliedAt: session.appliedAt,
   appliedFileCount: session.appliedFileCount,
+  appliedByDisplayName: session.appliedByDisplayName,
+  appliedByUserId: session.appliedByUserId,
+  appliedByUsername: session.appliedByUsername,
   applyManifestPath: session.applyManifestPath,
+  applyRequestId: session.applyRequestId,
   conflictStrategy: session.conflictStrategy,
   createdAt: session.createdAt,
   frontendTarget: session.frontendTarget,

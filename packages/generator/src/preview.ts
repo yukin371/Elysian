@@ -3,7 +3,7 @@ import { dirname } from "node:path"
 
 import type { ModuleSchema } from "@elysian/schema"
 
-import type { GenerationTargetPreset } from "./conventions"
+import type { GenerationTargetPreset, MergeStrategy } from "./conventions"
 import {
   type FrontendTarget,
   type RenderModuleTemplatesOptions,
@@ -27,7 +27,7 @@ export interface PreviewedModuleFile {
   exists: boolean
   hasChanges: boolean
   isManaged: boolean | null
-  mergeStrategy: string
+  mergeStrategy: MergeStrategy
   path: string
   plannedAction: PreviewPlannedAction
   plannedReason: string
