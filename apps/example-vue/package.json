@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@elysian/frontend-vue": "workspace:*",
+    "@elysian/generator": "workspace:*",
     "@elysian/schema": "workspace:*",
     "@elysian/ui-core": "workspace:*",
     "@elysian/ui-enterprise-vue": "workspace:*",

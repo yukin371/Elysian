@@ -12,10 +12,6 @@ import {
 import type { WorkflowDefinitionRecord, WorkflowNode } from "@elysian/schema"
 import type { UiNavigationNode } from "@elysian/ui-core"
 import {
-  type ElyFormField,
-  type ElyFormValues,
-  type ElyQueryField,
-  type ElyQueryValues,
   ElyShell,
   type ElyShellStat,
   type ElyShellTab,
@@ -38,80 +34,46 @@ import { notificationModuleSchema } from "../../../packages/schema/src/notificat
 import { operationLogModuleSchema } from "../../../packages/schema/src/operation-log"
 import { roleModuleSchema } from "../../../packages/schema/src/role"
 import { settingModuleSchema } from "../../../packages/schema/src/setting"
+import { tenantModuleSchema } from "../../../packages/schema/src/tenant"
 import { userModuleSchema } from "../../../packages/schema/src/user"
+import FileWorkspaceMain from "./components/workspaces/file/FileWorkspaceMain.vue"
+import FileWorkspacePanel from "./components/workspaces/file/FileWorkspacePanel.vue"
+import GeneratorPreviewWorkspaceMain from "./components/workspaces/generator/GeneratorPreviewWorkspaceMain.vue"
+import GeneratorPreviewWorkspacePanel from "./components/workspaces/generator/GeneratorPreviewWorkspacePanel.vue"
+import WorkflowWorkspaceMain from "./components/workspaces/workflow/WorkflowWorkspaceMain.vue"
+import WorkflowWorkspacePanel from "./components/workspaces/workflow/WorkflowWorkspacePanel.vue"
 import { exampleLocaleMessages } from "./i18n"
-import {
-  createNotificationTableItems,
-  filterNotifications,
-  resolveNotificationSelection,
-} from "./lib/notification-workspace"
+import { resolveWorkspaceMenuKey } from "./lib/navigation-workspace"
+import { resolveOperationLogSelection } from "./lib/operation-log-workspace"
 import {
   type AuthIdentityResponse,
-  type CustomerRecord,
-  type DepartmentDetailRecord,
-  type DepartmentRecord,
-  type DictionaryTypeDetailRecord,
-  type DictionaryTypeRecord,
-  type MenuDetailRecord,
-  type MenuRecord,
-  type NotificationRecord,
-  type OperationLogListQuery,
-  type OperationLogRecord,
   type PlatformResponse,
-  type RoleDetailRecord,
-  type RoleRecord,
-  type SettingRecord,
-  type UserRecord,
   clearAccessToken,
-  createCustomer,
-  createDepartment,
-  createDictionaryType,
-  createMenu,
-  createNotification,
-  createRole,
-  createSetting,
-  createUser,
-  deleteCustomer,
-  fetchCustomers,
-  fetchDepartmentById,
-  fetchDepartments,
-  fetchDictionaryItems,
-  fetchDictionaryTypeById,
-  fetchDictionaryTypes,
-  fetchMenuById,
-  fetchMenus,
-  fetchNotificationById,
-  fetchNotifications,
-  fetchOperationLogById,
-  fetchOperationLogs,
   fetchPlatform,
-  fetchRoleById,
-  fetchRoles,
-  fetchSettingById,
-  fetchSettings,
   fetchSystemModules,
-  fetchUsers,
-  fetchWorkflowDefinitionById,
-  fetchWorkflowDefinitions,
   login,
   logout,
-  markNotificationAsRead,
   refreshAuth,
-  resetUserPassword,
-  updateCustomer,
-  updateDepartment,
-  updateDictionaryType,
-  updateMenu,
-  updateRole,
-  updateSetting,
-  updateUser,
 } from "./lib/platform-api"
+import { resolveSettingSelection } from "./lib/setting-workspace"
 import {
-  type WorkflowStatusFilter,
-  filterWorkflowDefinitions,
-  listWorkflowDefinitionVersions,
-  resolveWorkflowDefinitionSelection,
-} from "./lib/workflow-workspace"
+  appendStudioNavigation,
+  buildStudioNavigation,
+} from "./lib/studio-navigation"
+import { resolveWorkflowDefinitionSelection } from "./lib/workflow-workspace"
+import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
+import { useDepartmentWorkspace } from "./workspaces/use-department-workspace"
+import { useDictionaryWorkspace } from "./workspaces/use-dictionary-workspace"
+import { useFileWorkspace } from "./workspaces/use-file-workspace"
+import { useGeneratorPreviewWorkspace } from "./workspaces/use-generator-preview-workspace"
+import { useMenuWorkspace } from "./workspaces/use-menu-workspace"
+import { useNotificationWorkspace } from "./workspaces/use-notification-workspace"
+import { useOperationLogWorkspace } from "./workspaces/use-operation-log-workspace"
+import { useRoleWorkspace } from "./workspaces/use-role-workspace"
+import { useSettingWorkspace } from "./workspaces/use-setting-workspace"
+import { useTenantWorkspace } from "./workspaces/use-tenant-workspace"
+import { useUserWorkspace } from "./workspaces/use-user-workspace"
+import { useWorkflowWorkspace } from "./workspaces/use-workflow-workspace"
 
 const ElyCrudWorkspace = defineAsyncComponent(
   () =>
@@ -137,6 +99,7 @@ const operationLogPageDefinition = buildVueCustomCrudPage(
 )
 const rolePageDefinition = buildVueCustomCrudPage(roleModuleSchema)
 const settingPageDefinition = buildVueCustomCrudPage(settingModuleSchema)
+const tenantPageDefinition = buildVueCustomCrudPage(tenantModuleSchema)
 const userPageDefinition = buildVueCustomCrudPage(userModuleSchema)
 
 const localeRuntime = provideVueLocaleRuntime(
@@ -196,194 +159,6 @@ const findFirstMenuItem = (
   }
 
   return null
-}
-
-const createDefaultCustomerDraft = () => ({
-  name: "",
-  status: "active" as CustomerRecord["status"],
-})
-
-const createDefaultUserDraft = () => ({
-  username: "",
-  displayName: "",
-  email: "",
-  phone: "",
-  status: "active" as UserRecord["status"],
-  isSuperAdmin: false,
-})
-
-const createDefaultDictionaryTypeDraft = () => ({
-  code: "",
-  name: "",
-  description: "",
-  status: "active" as DictionaryTypeRecord["status"],
-})
-
-const createDefaultNotificationDraft = () => ({
-  recipientUserId: "",
-  title: "",
-  content: "",
-  level: "info" as NotificationRecord["level"],
-})
-
-const createDefaultDepartmentDraft = () => ({
-  parentId: "",
-  code: "",
-  name: "",
-  sort: 10,
-  status: "active" as DepartmentRecord["status"],
-})
-
-const createDefaultMenuDraft = () => ({
-  parentId: "",
-  type: "menu" as MenuRecord["type"],
-  code: "",
-  name: "",
-  path: "",
-  component: "",
-  icon: "",
-  sort: 10,
-  isVisible: true,
-  status: "active" as MenuRecord["status"],
-  permissionCode: "",
-})
-
-const createDefaultSettingDraft = () => ({
-  key: "",
-  value: "",
-  description: "",
-  status: "active" as SettingRecord["status"],
-})
-
-const createDefaultRoleDraft = () => ({
-  code: "",
-  name: "",
-  description: "",
-  status: "active" as RoleRecord["status"],
-  isSystem: false,
-  dataScope: 1 as RoleRecord["dataScope"],
-})
-
-type CustomerListSortValue =
-  | "createdAt:desc"
-  | "createdAt:asc"
-  | "name:asc"
-  | "name:desc"
-
-const normalizeCustomerName = (value: unknown) => String(value ?? "").trim()
-const normalizeCustomerStatus = (value: unknown): CustomerRecord["status"] =>
-  value === "inactive" ? "inactive" : "active"
-const normalizeUserText = (value: unknown) => String(value ?? "").trim()
-const normalizeOptionalUserText = (value: unknown) => {
-  const normalized = normalizeUserText(value)
-  return normalized.length > 0 ? normalized : undefined
-}
-const normalizeUserStatus = (value: unknown): UserRecord["status"] =>
-  value === "disabled" ? "disabled" : "active"
-const normalizeUserBoolean = (value: unknown) => value === true
-const normalizeDictionaryText = (value: unknown) => String(value ?? "").trim()
-const normalizeOptionalDictionaryText = (value: unknown) => {
-  const normalized = normalizeDictionaryText(value)
-  return normalized.length > 0 ? normalized : undefined
-}
-const normalizeDictionaryStatus = (
-  value: unknown,
-): DictionaryTypeRecord["status"] =>
-  value === "disabled" ? "disabled" : "active"
-const normalizeNotificationText = (value: unknown) => String(value ?? "").trim()
-const normalizeNotificationLevel = (
-  value: unknown,
-): NotificationRecord["level"] => {
-  if (value === "success" || value === "warning" || value === "error") {
-    return value
-  }
-
-  return "info"
-}
-const normalizeDepartmentText = (value: unknown) => String(value ?? "").trim()
-const normalizeOptionalDepartmentId = (value: unknown) => {
-  const normalized = normalizeDepartmentText(value)
-  return normalized.length > 0 ? normalized : undefined
-}
-const normalizeDepartmentSort = (value: unknown) => {
-  const parsed =
-    typeof value === "number" ? value : Number.parseInt(String(value ?? ""), 10)
-
-  return Number.isFinite(parsed) ? parsed : 10
-}
-const normalizeDepartmentStatus = (
-  value: unknown,
-): DepartmentRecord["status"] => (value === "disabled" ? "disabled" : "active")
-const normalizeMenuText = (value: unknown) => String(value ?? "").trim()
-const normalizeOptionalMenuText = (value: unknown) => {
-  const normalized = normalizeMenuText(value)
-  return normalized.length > 0 ? normalized : undefined
-}
-const normalizeOptionalMenuId = (value: unknown) => {
-  const normalized = normalizeMenuText(value)
-  return normalized.length > 0 ? normalized : undefined
-}
-const normalizeMenuSort = (value: unknown) => {
-  const parsed =
-    typeof value === "number" ? value : Number.parseInt(String(value ?? ""), 10)
-
-  return Number.isFinite(parsed) ? parsed : 10
-}
-const normalizeMenuStatus = (value: unknown): MenuRecord["status"] =>
-  value === "disabled" ? "disabled" : "active"
-const normalizeMenuBoolean = (value: unknown) => value === true
-const normalizeMenuType = (value: unknown): MenuRecord["type"] => {
-  if (value === "directory" || value === "button") {
-    return value
-  }
-
-  return "menu"
-}
-const normalizeSettingText = (value: unknown) => String(value ?? "").trim()
-const normalizeOptionalSettingText = (value: unknown) => {
-  const normalized = normalizeSettingText(value)
-  return normalized.length > 0 ? normalized : undefined
-}
-const normalizeSettingStatus = (value: unknown): SettingRecord["status"] =>
-  value === "disabled" ? "disabled" : "active"
-const normalizeRoleText = (value: unknown) => String(value ?? "").trim()
-const normalizeOptionalRoleText = (value: unknown) => {
-  const normalized = normalizeRoleText(value)
-  return normalized.length > 0 ? normalized : undefined
-}
-const normalizeRoleStatus = (value: unknown): RoleRecord["status"] =>
-  value === "disabled" ? "disabled" : "active"
-const normalizeRoleBoolean = (value: unknown) => value === true
-const normalizeRoleDataScope = (value: unknown): RoleRecord["dataScope"] => {
-  const parsed =
-    typeof value === "number" ? value : Number.parseInt(String(value ?? ""), 10)
-
-  return parsed === 2 || parsed === 3 || parsed === 4 || parsed === 5
-    ? parsed
-    : 1
-}
-const buildCustomerListQuery = (values: ElyQueryValues, page: number) => {
-  const query =
-    typeof values.name === "string" && values.name.trim().length > 0
-      ? values.name.trim()
-      : undefined
-  const status =
-    values.status === "active" || values.status === "inactive"
-      ? values.status
-      : undefined
-
-  return {
-    q: query,
-    status,
-    page,
-    pageSize: customerListPageSize.value,
-    sortBy: customerListSortValue.value.startsWith("name")
-      ? ("name" as const)
-      : ("createdAt" as const),
-    sortOrder: customerListSortValue.value.endsWith(":asc")
-      ? ("asc" as const)
-      : ("desc" as const),
-  }
 }
 
 const localizeWorkflowStatus = (status: WorkflowDefinitionRecord["status"]) => {
@@ -527,6 +302,18 @@ const localizeSettingStatus = (status: string) => {
 
   if (status === "disabled") {
     return t("app.setting.status.disabled")
+  }
+
+  return status
+}
+
+const localizeTenantStatus = (status: string) => {
+  if (status === "active") {
+    return t("app.tenant.status.active")
+  }
+
+  if (status === "suspended") {
+    return t("app.tenant.status.suspended")
   }
 
   return status
@@ -740,6 +527,25 @@ const localizeSettingFieldLabel = (fieldKey: string) => {
   }
 }
 
+const localizeTenantFieldLabel = (fieldKey: string) => {
+  switch (fieldKey) {
+    case "id":
+      return t("app.tenant.field.id")
+    case "code":
+      return t("app.tenant.field.code")
+    case "name":
+      return t("app.tenant.field.name")
+    case "status":
+      return t("app.tenant.field.status")
+    case "createdAt":
+      return t("app.tenant.field.createdAt")
+    case "updatedAt":
+      return t("app.tenant.field.updatedAt")
+    default:
+      return fieldKey
+  }
+}
+
 const localizeOperationLogFieldLabel = (fieldKey: string) => {
   switch (fieldKey) {
     case "id":
@@ -845,6 +651,10 @@ const localizeNavigationName = (code: string, fallbackName: string) => {
       return t("app.fallback.workflowTodo")
     case "workflow-tasks-done":
       return t("app.fallback.workflowDone")
+    case "studio-root":
+      return t("app.fallback.studio")
+    case "studio-generator-preview":
+      return t("app.fallback.generatorPreview")
     default:
       return fallbackName
   }
@@ -1048,6 +858,22 @@ const buildFallbackNavigation = (): UiNavigationNode[] => [
         depth: 1,
         children: [],
       },
+      {
+        id: "enterprise-tenants",
+        parentId: "enterprise-system",
+        type: "menu",
+        code: "system-tenants",
+        name: t("app.fallback.tenants"),
+        path: "/system/tenants",
+        component: "system/tenants/index",
+        icon: "city-10",
+        sort: 100,
+        isVisible: true,
+        status: "active",
+        permissionCode: "system:tenant:list",
+        depth: 1,
+        children: [],
+      },
     ],
   },
   {
@@ -1072,11 +898,14 @@ type ExampleWorkspaceKind =
   | "customer"
   | "dictionary"
   | "department"
+  | "file"
+  | "generator-preview"
   | "menu"
   | "notification"
   | "operation-log"
   | "role"
   | "setting"
+  | "tenant"
   | "user"
   | "workflow-definitions"
   | "placeholder"
@@ -1099,77 +928,28 @@ const resolveModuleCodeFromPath = (path: string | null | undefined) => {
   if (path.startsWith("/system/notifications")) return "notification"
   if (path.startsWith("/system/tenants")) return "tenant"
   if (path.startsWith("/workflow/")) return "workflow"
+  if (path.startsWith("/studio/generator-preview")) return "generator-preview"
 
   return null
 }
 
 const platform = ref<PlatformResponse | null>(null)
 const authIdentity = ref<AuthIdentityResponse | null>(null)
-const customerItems = ref<CustomerRecord[]>([])
-const departmentItems = ref<DepartmentRecord[]>([])
-const menuItems = ref<MenuRecord[]>([])
-const notificationItems = ref<NotificationRecord[]>([])
-const operationLogItems = ref<OperationLogRecord[]>([])
-const roleItems = ref<RoleRecord[]>([])
-const settingItems = ref<SettingRecord[]>([])
-const userItems = ref<UserRecord[]>([])
-const dictionaryTypeDetail = ref<DictionaryTypeDetailRecord | null>(null)
-const departmentDetail = ref<DepartmentDetailRecord | null>(null)
-const menuDetail = ref<MenuDetailRecord | null>(null)
-const notificationDetail = ref<NotificationRecord | null>(null)
-const operationLogDetail = ref<OperationLogRecord | null>(null)
-const roleDetail = ref<RoleDetailRecord | null>(null)
-const settingDetail = ref<SettingRecord | null>(null)
-const workflowDefinitions = ref<WorkflowDefinitionRecord[]>([])
 const registeredModuleCodes = ref<string[]>([])
 const loading = ref(true)
 const authLoading = ref(false)
-const customerLoading = ref(false)
-const dictionaryLoading = ref(false)
-const departmentLoading = ref(false)
-const menuLoading = ref(false)
-const notificationLoading = ref(false)
-const operationLogLoading = ref(false)
-const roleLoading = ref(false)
-const settingLoading = ref(false)
-const userLoading = ref(false)
-const workflowLoading = ref(false)
-const dictionaryDetailLoading = ref(false)
-const departmentDetailLoading = ref(false)
-const menuDetailLoading = ref(false)
-const notificationDetailLoading = ref(false)
-const operationLogDetailLoading = ref(false)
-const roleDetailLoading = ref(false)
-const settingDetailLoading = ref(false)
-const workflowDetailLoading = ref(false)
 const errorMessage = ref("")
 const authErrorMessage = ref("")
-const customerErrorMessage = ref("")
-const dictionaryErrorMessage = ref("")
-const departmentErrorMessage = ref("")
-const menuErrorMessage = ref("")
-const notificationErrorMessage = ref("")
-const operationLogErrorMessage = ref("")
-const roleErrorMessage = ref("")
-const settingErrorMessage = ref("")
-const userErrorMessage = ref("")
-const workflowErrorMessage = ref("")
-const dictionaryDetailErrorMessage = ref("")
-const departmentDetailErrorMessage = ref("")
-const menuDetailErrorMessage = ref("")
-const notificationDetailErrorMessage = ref("")
-const operationLogDetailErrorMessage = ref("")
-const roleDetailErrorMessage = ref("")
-const settingDetailErrorMessage = ref("")
-const workflowDetailErrorMessage = ref("")
 const authModuleReady = ref(false)
 const customerModuleReady = ref(false)
 const departmentModuleReady = ref(false)
+const fileModuleReady = ref(false)
 const menuModuleReady = ref(false)
 const notificationModuleReady = ref(false)
 const operationLogModuleReady = ref(false)
 const roleModuleReady = ref(false)
 const settingModuleReady = ref(false)
+const tenantModuleReady = ref(false)
 const userModuleReady = ref(false)
 const dictionaryModuleReady = ref(false)
 const workflowModuleReady = ref(false)
@@ -1181,70 +961,8 @@ const loginForm = ref({
   password: demoAdminPassword,
 })
 
-const customerForm = ref(createDefaultCustomerDraft())
-const editForm = ref(createDefaultCustomerDraft())
-const editingId = ref<string | null>(null)
-const deleteConfirmId = ref<string | null>(null)
-const selectedCustomerId = ref<string | null>(null)
-const selectedDictionaryTypeId = ref<string | null>(null)
-const selectedDepartmentId = ref<string | null>(null)
-const selectedMenuId = ref<string | null>(null)
-const selectedNotificationId = ref<string | null>(null)
-const selectedOperationLogId = ref<string | null>(null)
-const selectedRoleId = ref<string | null>(null)
-const selectedSettingId = ref<string | null>(null)
-const selectedUserId = ref<string | null>(null)
-const selectedWorkflowDefinitionId = ref<string | null>(null)
-const workflowDefinitionDetail = ref<WorkflowDefinitionRecord | null>(null)
-const workflowQuery = ref("")
-const workflowStatusFilter = ref<"all" | WorkflowDefinitionRecord["status"]>(
-  "all",
-)
 const currentMenuKey = ref<string | null>(null)
 const currentShellTabKey = ref<ExampleShellTabKey>("workspace")
-const enterpriseFormMode = ref<"create" | "detail" | "edit">("create")
-const dictionaryPanelMode = ref<"detail" | "create" | "edit">("detail")
-const departmentPanelMode = ref<"detail" | "create" | "edit">("detail")
-const menuPanelMode = ref<"detail" | "create" | "edit">("detail")
-const notificationPanelMode = ref<"detail" | "create">("detail")
-const rolePanelMode = ref<"detail" | "create" | "edit">("detail")
-const settingPanelMode = ref<"detail" | "create" | "edit">("detail")
-const userPanelMode = ref<"detail" | "create" | "edit" | "reset">("detail")
-const enterpriseQueryValues = ref<ElyQueryValues>({})
-const dictionaryQueryValues = ref<ElyQueryValues>({})
-const departmentQueryValues = ref<ElyQueryValues>({})
-const menuQueryValues = ref<ElyQueryValues>({})
-const notificationQueryValues = ref<ElyQueryValues>({})
-const operationLogQueryValues = ref<ElyQueryValues>({})
-const roleQueryValues = ref<ElyQueryValues>({})
-const settingQueryValues = ref<ElyQueryValues>({})
-const userQueryValues = ref<ElyQueryValues>({})
-const customerListPage = ref(1)
-const customerListPageSize = ref(20)
-const customerListSortValue = ref<CustomerListSortValue>("createdAt:desc")
-const customerPageInputValue = ref("1")
-const customerListTotal = ref(0)
-const customerListTotalPages = ref(1)
-const dictionaryTypes = ref<
-  Awaited<ReturnType<typeof fetchDictionaryTypes>>["items"]
->([])
-const dictionaryItems = ref<
-  Awaited<ReturnType<typeof fetchDictionaryItems>>["items"]
->([])
-const dictionaryCreateForm = ref(createDefaultDictionaryTypeDraft())
-const dictionaryEditForm = ref(createDefaultDictionaryTypeDraft())
-const notificationCreateForm = ref(createDefaultNotificationDraft())
-const departmentCreateForm = ref(createDefaultDepartmentDraft())
-const departmentEditForm = ref(createDefaultDepartmentDraft())
-const menuCreateForm = ref(createDefaultMenuDraft())
-const menuEditForm = ref(createDefaultMenuDraft())
-const roleCreateForm = ref(createDefaultRoleDraft())
-const roleEditForm = ref(createDefaultRoleDraft())
-const settingCreateForm = ref(createDefaultSettingDraft())
-const settingEditForm = ref(createDefaultSettingDraft())
-const userCreateForm = ref(createDefaultUserDraft())
-const userEditForm = ref(createDefaultUserDraft())
-const userPasswordInput = ref("")
 
 const isAuthenticated = computed(() => authIdentity.value !== null)
 const permissionCodes = computed(
@@ -1262,15 +980,19 @@ const navigationTree = computed(() =>
 )
 
 const fallbackNavigation = computed(() => buildFallbackNavigation())
+const studioNavigation = computed(() => buildStudioNavigation(t))
 
 const navigationItemCount = computed(
   () => flattenNavigation(enterpriseNavigation.value).length,
 )
 
 const enterpriseNavigation = computed(() =>
-  navigationTree.value.length > 0
-    ? navigationTree.value
-    : fallbackNavigation.value,
+  appendStudioNavigation(
+    navigationTree.value.length > 0
+      ? navigationTree.value
+      : fallbackNavigation.value,
+    studioNavigation.value,
+  ),
 )
 
 const defaultNavigationItem = computed(
@@ -1298,16 +1020,6 @@ watch(
       : null
 
     currentMenuKey.value = currentItem?.id ?? fallbackItem?.id ?? null
-  },
-  {
-    immediate: true,
-  },
-)
-
-watch(
-  customerListPage,
-  (page) => {
-    customerPageInputValue.value = String(page)
   },
   {
     immediate: true,
@@ -1346,6 +1058,10 @@ const isSettingWorkspace = computed(
   () => selectedNavigationItem.value?.path === "/system/settings",
 )
 
+const isTenantWorkspace = computed(
+  () => selectedNavigationItem.value?.path === "/system/tenants",
+)
+
 const isUserWorkspace = computed(
   () => selectedNavigationItem.value?.path === "/system/users",
 )
@@ -1354,28 +1070,42 @@ const isWorkflowDefinitionsWorkspace = computed(
   () => selectedNavigationItem.value?.path === "/workflow/definitions",
 )
 
+const isFileWorkspace = computed(
+  () => selectedNavigationItem.value?.path === "/system/files",
+)
+
+const isGeneratorPreviewWorkspace = computed(
+  () => selectedNavigationItem.value?.path === "/studio/generator-preview",
+)
+
 const currentWorkspaceKind = computed<ExampleWorkspaceKind>(() =>
   isCustomerWorkspace.value
     ? "customer"
     : isDictionaryWorkspace.value
       ? "dictionary"
-      : isDepartmentWorkspace.value
-        ? "department"
-        : isMenuWorkspace.value
-          ? "menu"
-          : isNotificationWorkspace.value
-            ? "notification"
-            : isOperationLogWorkspace.value
-              ? "operation-log"
-              : isRoleWorkspace.value
-                ? "role"
-                : isSettingWorkspace.value
-                  ? "setting"
-                  : isUserWorkspace.value
-                    ? "user"
-                    : isWorkflowDefinitionsWorkspace.value
-                      ? "workflow-definitions"
-                      : "placeholder",
+      : isFileWorkspace.value
+        ? "file"
+        : isGeneratorPreviewWorkspace.value
+          ? "generator-preview"
+          : isDepartmentWorkspace.value
+            ? "department"
+            : isMenuWorkspace.value
+              ? "menu"
+              : isNotificationWorkspace.value
+                ? "notification"
+                : isOperationLogWorkspace.value
+                  ? "operation-log"
+                  : isRoleWorkspace.value
+                    ? "role"
+                    : isSettingWorkspace.value
+                      ? "setting"
+                      : isTenantWorkspace.value
+                        ? "tenant"
+                        : isUserWorkspace.value
+                          ? "user"
+                          : isWorkflowDefinitionsWorkspace.value
+                            ? "workflow-definitions"
+                            : "placeholder",
 )
 
 const customerNavigationItem = computed(
@@ -1399,8 +1129,9 @@ const currentModuleCodeLabel = computed(
 
 const currentModuleReady = computed(
   () =>
-    currentModuleCode.value !== null &&
-    registeredModuleCodes.value.includes(currentModuleCode.value),
+    currentModuleCode.value === "generator-preview" ||
+    (currentModuleCode.value !== null &&
+      registeredModuleCodes.value.includes(currentModuleCode.value)),
 )
 
 const currentModuleStatusLabel = computed(() =>
@@ -1414,27 +1145,33 @@ const currentWorkspaceSectionTitle = computed(() =>
     ? t("app.section.workspaceTitle")
     : isDictionaryWorkspace.value
       ? t("app.dictionary.sectionTitle")
-      : isDepartmentWorkspace.value
-        ? t("app.department.sectionTitle")
-        : isMenuWorkspace.value
-          ? t("app.menu.sectionTitle")
-          : isNotificationWorkspace.value
-            ? t("app.notification.sectionTitle")
-            : isOperationLogWorkspace.value
-              ? t("app.operationLog.sectionTitle")
-              : isRoleWorkspace.value
-                ? t("app.role.sectionTitle")
-                : isSettingWorkspace.value
-                  ? t("app.setting.sectionTitle")
-                  : isUserWorkspace.value
-                    ? t("app.user.sectionTitle")
-                    : isWorkflowDefinitionsWorkspace.value
-                      ? t("app.workflow.sectionTitle")
-                      : t("app.section.placeholderTitle", {
-                          name:
-                            selectedNavigationItem.value?.name ??
-                            t("app.section.workspaceTitle"),
-                        }),
+      : isFileWorkspace.value
+        ? t("app.file.sectionTitle")
+        : isGeneratorPreviewWorkspace.value
+          ? t("app.generatorPreview.sectionTitle")
+          : isDepartmentWorkspace.value
+            ? t("app.department.sectionTitle")
+            : isMenuWorkspace.value
+              ? t("app.menu.sectionTitle")
+              : isNotificationWorkspace.value
+                ? t("app.notification.sectionTitle")
+                : isOperationLogWorkspace.value
+                  ? t("app.operationLog.sectionTitle")
+                  : isRoleWorkspace.value
+                    ? t("app.role.sectionTitle")
+                    : isSettingWorkspace.value
+                      ? t("app.setting.sectionTitle")
+                      : isTenantWorkspace.value
+                        ? t("app.tenant.sectionTitle")
+                        : isUserWorkspace.value
+                          ? t("app.user.sectionTitle")
+                          : isWorkflowDefinitionsWorkspace.value
+                            ? t("app.workflow.sectionTitle")
+                            : t("app.section.placeholderTitle", {
+                                name:
+                                  selectedNavigationItem.value?.name ??
+                                  t("app.section.workspaceTitle"),
+                              }),
 )
 
 const currentWorkspaceSectionCopy = computed(() =>
@@ -1442,33 +1179,39 @@ const currentWorkspaceSectionCopy = computed(() =>
     ? t("app.section.workspaceCopy")
     : isDictionaryWorkspace.value
       ? t("app.dictionary.sectionCopy")
-      : isDepartmentWorkspace.value
-        ? t("app.department.sectionCopy")
-        : isMenuWorkspace.value
-          ? t("app.menu.sectionCopy")
-          : isNotificationWorkspace.value
-            ? t("app.notification.sectionCopy")
-            : isOperationLogWorkspace.value
-              ? t("app.operationLog.sectionCopy")
-              : isRoleWorkspace.value
-                ? t("app.role.sectionCopy")
-                : isSettingWorkspace.value
-                  ? t("app.setting.sectionCopy")
-                  : isUserWorkspace.value
-                    ? t("app.user.sectionCopy")
-                    : isWorkflowDefinitionsWorkspace.value
-                      ? t("app.workflow.sectionCopy")
-                      : currentModuleReady.value
-                        ? t("app.section.placeholderCopyReady", {
-                            name:
-                              selectedNavigationItem.value?.name ??
-                              t("app.section.workspaceTitle"),
-                          })
-                        : t("app.section.placeholderCopyOffline", {
-                            name:
-                              selectedNavigationItem.value?.name ??
-                              t("app.section.workspaceTitle"),
-                          }),
+      : isFileWorkspace.value
+        ? t("app.file.sectionCopy")
+        : isGeneratorPreviewWorkspace.value
+          ? t("app.generatorPreview.sectionCopy")
+          : isDepartmentWorkspace.value
+            ? t("app.department.sectionCopy")
+            : isMenuWorkspace.value
+              ? t("app.menu.sectionCopy")
+              : isNotificationWorkspace.value
+                ? t("app.notification.sectionCopy")
+                : isOperationLogWorkspace.value
+                  ? t("app.operationLog.sectionCopy")
+                  : isRoleWorkspace.value
+                    ? t("app.role.sectionCopy")
+                    : isSettingWorkspace.value
+                      ? t("app.setting.sectionCopy")
+                      : isTenantWorkspace.value
+                        ? t("app.tenant.sectionCopy")
+                        : isUserWorkspace.value
+                          ? t("app.user.sectionCopy")
+                          : isWorkflowDefinitionsWorkspace.value
+                            ? t("app.workflow.sectionCopy")
+                            : currentModuleReady.value
+                              ? t("app.section.placeholderCopyReady", {
+                                  name:
+                                    selectedNavigationItem.value?.name ??
+                                    t("app.section.workspaceTitle"),
+                                })
+                              : t("app.section.placeholderCopyOffline", {
+                                  name:
+                                    selectedNavigationItem.value?.name ??
+                                    t("app.section.workspaceTitle"),
+                                }),
 )
 
 const currentWorkspaceTitle = computed(() =>
@@ -1476,22 +1219,28 @@ const currentWorkspaceTitle = computed(() =>
     ? t("app.shell.workspaceTitle")
     : isDictionaryWorkspace.value
       ? t("app.dictionary.shellTitle")
-      : isDepartmentWorkspace.value
-        ? t("app.department.shellTitle")
-        : isMenuWorkspace.value
-          ? t("app.menu.shellTitle")
-          : isNotificationWorkspace.value
-            ? t("app.notification.shellTitle")
-            : isOperationLogWorkspace.value
-              ? t("app.operationLog.shellTitle")
-              : isRoleWorkspace.value
-                ? t("app.role.shellTitle")
-                : isSettingWorkspace.value
-                  ? t("app.setting.shellTitle")
-                  : isUserWorkspace.value
-                    ? t("app.user.shellTitle")
-                    : (selectedNavigationItem.value?.name ??
-                      t("app.shell.workspaceTitle")),
+      : isFileWorkspace.value
+        ? t("app.file.shellTitle")
+        : isGeneratorPreviewWorkspace.value
+          ? t("app.generatorPreview.shellTitle")
+          : isDepartmentWorkspace.value
+            ? t("app.department.shellTitle")
+            : isMenuWorkspace.value
+              ? t("app.menu.shellTitle")
+              : isNotificationWorkspace.value
+                ? t("app.notification.shellTitle")
+                : isOperationLogWorkspace.value
+                  ? t("app.operationLog.shellTitle")
+                  : isRoleWorkspace.value
+                    ? t("app.role.shellTitle")
+                    : isSettingWorkspace.value
+                      ? t("app.setting.shellTitle")
+                      : isTenantWorkspace.value
+                        ? t("app.tenant.shellTitle")
+                        : isUserWorkspace.value
+                          ? t("app.user.shellTitle")
+                          : (selectedNavigationItem.value?.name ??
+                            t("app.shell.workspaceTitle")),
 )
 
 const placeholderWorkspaceCopy = computed(() =>
@@ -1509,29 +1258,37 @@ const currentWorkspaceDescription = computed(() =>
     ? t("app.shell.workspaceDescription")
     : isDictionaryWorkspace.value
       ? t("app.dictionary.shellDescription")
-      : isDepartmentWorkspace.value
-        ? t("app.department.shellDescription")
-        : isMenuWorkspace.value
-          ? t("app.menu.shellDescription")
-          : isNotificationWorkspace.value
-            ? t("app.notification.shellDescription")
-            : isOperationLogWorkspace.value
-              ? t("app.operationLog.shellDescription")
-              : isRoleWorkspace.value
-                ? t("app.role.shellDescription")
-                : isSettingWorkspace.value
-                  ? t("app.setting.shellDescription")
-                  : isUserWorkspace.value
-                    ? t("app.user.shellDescription")
-                    : isWorkflowDefinitionsWorkspace.value
-                      ? t("app.workflow.shellDescription")
-                      : currentModuleReady.value
-                        ? t("app.shell.placeholderDescriptionReady", {
-                            name: selectedNavigationItem.value?.name ?? "",
-                          })
-                        : t("app.shell.placeholderDescriptionOffline", {
-                            name: selectedNavigationItem.value?.name ?? "",
-                          }),
+      : isFileWorkspace.value
+        ? t("app.file.shellDescription")
+        : isGeneratorPreviewWorkspace.value
+          ? t("app.generatorPreview.shellDescription")
+          : isDepartmentWorkspace.value
+            ? t("app.department.shellDescription")
+            : isMenuWorkspace.value
+              ? t("app.menu.shellDescription")
+              : isNotificationWorkspace.value
+                ? t("app.notification.shellDescription")
+                : isOperationLogWorkspace.value
+                  ? t("app.operationLog.shellDescription")
+                  : isRoleWorkspace.value
+                    ? t("app.role.shellDescription")
+                    : isSettingWorkspace.value
+                      ? t("app.setting.shellDescription")
+                      : isTenantWorkspace.value
+                        ? t("app.tenant.shellDescription")
+                        : isUserWorkspace.value
+                          ? t("app.user.shellDescription")
+                          : isWorkflowDefinitionsWorkspace.value
+                            ? t("app.workflow.shellDescription")
+                            : currentModuleReady.value
+                              ? t("app.shell.placeholderDescriptionReady", {
+                                  name:
+                                    selectedNavigationItem.value?.name ?? "",
+                                })
+                              : t("app.shell.placeholderDescriptionOffline", {
+                                  name:
+                                    selectedNavigationItem.value?.name ?? "",
+                                }),
 )
 
 const enterpriseSelectedMenuKey = computed(
@@ -1565,6 +1322,17 @@ const departmentPermissions = usePermissions(
     list: "system:department:list",
     create: "system:department:create",
     update: "system:department:update",
+  },
+  authModuleReady,
+)
+
+const filePermissions = usePermissions(
+  permissionCodes,
+  {
+    list: "system:file:list",
+    create: "system:file:upload",
+    update: "system:file:download",
+    delete: "system:file:delete",
   },
   authModuleReady,
 )
@@ -1617,6 +1385,16 @@ const settingPermissions = usePermissions(
   authModuleReady,
 )
 
+const tenantPermissions = usePermissions(
+  permissionCodes,
+  {
+    list: "system:tenant:list",
+    create: "system:tenant:create",
+    update: "system:tenant:update",
+  },
+  authModuleReady,
+)
+
 const userPermissions = usePermissions(
   permissionCodes,
   {
@@ -1654,6 +1432,27 @@ const canCreateDepartments = computed(
 
 const canUpdateDepartments = computed(
   () => canEnterDepartmentWorkspace.value && departmentPermissions.update.value,
+)
+
+const canEnterFileWorkspace = computed(
+  () =>
+    fileModuleReady.value && (!authModuleReady.value || isAuthenticated.value),
+)
+
+const canViewFiles = computed(
+  () => canEnterFileWorkspace.value && filePermissions.list.value,
+)
+
+const canUploadFiles = computed(
+  () => canEnterFileWorkspace.value && filePermissions.create.value,
+)
+
+const canDownloadFiles = computed(
+  () => canEnterFileWorkspace.value && filePermissions.update.value,
+)
+
+const canDeleteFiles = computed(
+  () => canEnterFileWorkspace.value && filePermissions.delete.value,
 )
 
 const canEnterMenuWorkspace = computed(
@@ -1740,6 +1539,30 @@ const canUpdateSettings = computed(
   () => canEnterSettingWorkspace.value && settingPermissions.update.value,
 )
 
+const canEnterTenantWorkspace = computed(
+  () =>
+    tenantModuleReady.value &&
+    (!authModuleReady.value || isAuthenticated.value),
+)
+
+const canManageTenantsAsSuperAdmin = computed(
+  () =>
+    canEnterTenantWorkspace.value &&
+    authIdentity.value?.user.isSuperAdmin === true,
+)
+
+const canViewTenants = computed(
+  () => canManageTenantsAsSuperAdmin.value && tenantPermissions.list.value,
+)
+
+const canCreateTenants = computed(
+  () => canManageTenantsAsSuperAdmin.value && tenantPermissions.create.value,
+)
+
+const canUpdateTenants = computed(
+  () => canManageTenantsAsSuperAdmin.value && tenantPermissions.update.value,
+)
+
 const canEnterUserWorkspace = computed(
   () =>
     userModuleReady.value && (!authModuleReady.value || isAuthenticated.value),
@@ -1804,6 +1627,20 @@ const canViewWorkflowDefinitions = computed(
       permissionCodes.value.includes("workflow:definition:list")),
 )
 
+const {
+  filterSummary: generatorPreviewFilterSummary,
+  filteredPreviewFiles: generatorPreviewFiles,
+  previewQuery: generatorPreviewQuery,
+  resetFilters: resetGeneratorPreviewFilters,
+  schemaOptions: generatorPreviewSchemaOptions,
+  selectedFilePath: selectedGeneratorPreviewFilePath,
+  selectedFrontendTarget: selectedGeneratorPreviewFrontendTarget,
+  selectedPreviewFile: selectedGeneratorPreviewFile,
+  selectedSchema: selectedGeneratorPreviewSchema,
+  selectedSchemaName: selectedGeneratorPreviewSchemaName,
+  sqlPreview: generatorPreviewSqlPreview,
+} = useGeneratorPreviewWorkspace(t)
+
 const dictionaryOptionCatalog = computed(() =>
   buildCrudDictionaryOptionCatalog(
     dictionaryTypes.value,
@@ -1822,6 +1659,121 @@ const enterpriseCustomerPage = useElyCrudPage(
   resolvedCustomerPageDefinition,
   permissionCodes,
 )
+
+const {
+  canGoToNextCustomerPage,
+  canGoToPreviousCustomerPage,
+  canJumpToCustomerPage,
+  cancelDelete,
+  clearWorkspace: clearCustomerWorkspace,
+  confirmDelete,
+  customerCountLabel,
+  customerErrorMessage,
+  customerFormMode: enterpriseFormMode,
+  customerItems,
+  customerListPage,
+  customerListPageSize,
+  customerListSortValue,
+  customerListTotal,
+  customerListTotalPages,
+  customerLoading,
+  customerPageInputValue,
+  customerPageSizeOptions,
+  customerPaginationSummary,
+  customerQuerySummary,
+  customerQueryValues: enterpriseQueryValues,
+  customerSortOptions,
+  deleteConfirmId,
+  formFields: enterpriseFormFields,
+  formValues: enterpriseFormValues,
+  goToFirstCustomerPage,
+  goToLastCustomerPage,
+  goToNextCustomerPage,
+  goToPreviousCustomerPage,
+  handleAction: handleEnterpriseAction,
+  handleFormCancel: handleEnterpriseFormCancel,
+  handleFormSubmit: handleEnterpriseFormSubmit,
+  handlePageSizeChange: handleCustomerPageSizeChange,
+  handleReset: handleEnterpriseReset,
+  handleRowClick: handleEnterpriseRowClick,
+  handleSearch: handleEnterpriseSearch,
+  handleSortChange: handleCustomerSortChange,
+  openCreatePanel,
+  panelDescription: enterprisePanelDescription,
+  panelTitle: enterprisePanelTitle,
+  queryFields: enterpriseQueryFields,
+  reloadCustomers,
+  requestDelete,
+  selectedCustomer,
+  selectedCustomerId,
+  startEdit,
+  submitCustomerPageJump,
+  tableActions: enterpriseTableActions,
+  tableColumns: enterpriseTableColumns,
+  tableItems: enterpriseTableItems,
+  updateCustomerPageInput,
+} = useCustomerWorkspace({
+  currentShellTabKey,
+  page: enterpriseCustomerPage,
+  locale,
+  t,
+  localizeFieldLabel,
+  localizeStatus: (status) => localizeCustomerStatus(status),
+  localizeActionLabel,
+  canView: canViewCustomers,
+  canCreate: canCreateCustomers,
+  canUpdate: canUpdateCustomers,
+  canDelete: canDeleteCustomers,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
+const {
+  cancelPanel: cancelFilePanel,
+  clearWorkspace: clearFileWorkspace,
+  confirmDelete: confirmFileDelete,
+  countLabel: fileCountLabel,
+  downloadSelectedFile,
+  fileActionLoading,
+  fileDetailErrorMessage,
+  fileDetailLoading,
+  fileErrorMessage,
+  fileItems,
+  fileLoading,
+  filePanelMode,
+  fileQuery,
+  filterSummary: fileFilterSummary,
+  filteredFileItems,
+  openDeletePanel: openFileDeletePanel,
+  openUploadPanel: openFileUploadPanel,
+  pendingUploadFile,
+  reloadFiles,
+  resetQuery: resetFileQuery,
+  selectFile,
+  selectedFile,
+  selectedFileId,
+  setPendingUploadFile,
+  submitUpload: submitFileUpload,
+  tableItems: fileTableItems,
+  updateQuery: updateFileQuery,
+} = useFileWorkspace({
+  currentShellTabKey,
+  isWorkspaceActive: isFileWorkspace,
+  locale,
+  t,
+  canView: canViewFiles,
+  canUpload: canUploadFiles,
+  canDownload: canDownloadFiles,
+  canDelete: canDeleteFiles,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
 
 const enterpriseDictionaryPage = useElyCrudPage(
   dictionaryPageDefinition,
@@ -1846,2235 +1798,477 @@ const enterpriseSettingPage = useElyCrudPage(
   settingPageDefinition,
   permissionCodes,
 )
-
-const selectedCustomer = computed(
-  () =>
-    customerItems.value.find(
-      (customer) => customer.id === selectedCustomerId.value,
-    ) ?? null,
+const enterpriseTenantPage = useElyCrudPage(
+  tenantPageDefinition,
+  permissionCodes,
 )
 
-const selectedWorkflowListItem = computed(
-  () =>
-    workflowDefinitions.value.find(
-      (definition) => definition.id === selectedWorkflowDefinitionId.value,
-    ) ?? null,
-)
-
-const filteredDictionaryTypes = computed(() => {
-  const code =
-    typeof dictionaryQueryValues.value.code === "string"
-      ? dictionaryQueryValues.value.code.trim().toLowerCase()
-      : ""
-  const name =
-    typeof dictionaryQueryValues.value.name === "string"
-      ? dictionaryQueryValues.value.name.trim().toLowerCase()
-      : ""
-  const description =
-    typeof dictionaryQueryValues.value.description === "string"
-      ? dictionaryQueryValues.value.description.trim().toLowerCase()
-      : ""
-  const status =
-    dictionaryQueryValues.value.status === "active" ||
-    dictionaryQueryValues.value.status === "disabled"
-      ? dictionaryQueryValues.value.status
-      : ""
-
-  return dictionaryTypes.value.filter((type) => {
-    if (code.length > 0 && !type.code.toLowerCase().includes(code)) {
-      return false
+const {
+  cancelPanel: cancelNotificationPanel,
+  clearWorkspace: clearNotificationWorkspace,
+  countLabel: notificationCountLabel,
+  filteredNotificationItems,
+  formFields: enterpriseNotificationFormFields,
+  formValues: enterpriseNotificationFormValues,
+  handleReset: handleNotificationReset,
+  handleRowClick: handleNotificationRowClick,
+  handleSearch: handleNotificationSearch,
+  markSelectedAsRead: markSelectedNotificationAsRead,
+  notificationDetail,
+  notificationDetailErrorMessage,
+  notificationDetailLoading,
+  notificationErrorMessage,
+  notificationItems,
+  notificationLoading,
+  notificationPanelMode,
+  notificationQueryValues,
+  openCreatePanel: openNotificationCreatePanel,
+  panelDescription: notificationPanelDescription,
+  panelTitle: notificationPanelTitle,
+  queryFields: enterpriseNotificationQueryFields,
+  reloadNotifications,
+  selectedNotification,
+  selectedNotificationId,
+  selectNotification,
+  submitForm: submitNotificationForm,
+  tableColumns: enterpriseNotificationTableColumns,
+  tableItems: enterpriseNotificationTableItems,
+} = useNotificationWorkspace({
+  currentShellTabKey,
+  page: enterpriseNotificationPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeNotificationFieldLabel,
+  localizeLevel: localizeNotificationLevel,
+  localizeStatus: localizeNotificationStatus,
+  canView: canViewNotifications,
+  canCreate: canCreateNotifications,
+  canUpdate: canUpdateNotifications,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
     }
-
-    if (name.length > 0 && !type.name.toLowerCase().includes(name)) {
-      return false
-    }
-
-    if (
-      description.length > 0 &&
-      !(type.description ?? "").toLowerCase().includes(description)
-    ) {
-      return false
-    }
-
-    if (status && type.status !== status) {
-      return false
-    }
-
-    return true
-  })
-})
-
-const filteredDepartmentItems = computed(() => {
-  const code =
-    typeof departmentQueryValues.value.code === "string"
-      ? departmentQueryValues.value.code.trim().toLowerCase()
-      : ""
-  const name =
-    typeof departmentQueryValues.value.name === "string"
-      ? departmentQueryValues.value.name.trim().toLowerCase()
-      : ""
-  const status =
-    departmentQueryValues.value.status === "active" ||
-    departmentQueryValues.value.status === "disabled"
-      ? departmentQueryValues.value.status
-      : ""
-
-  return departmentItems.value.filter((department) => {
-    if (code.length > 0 && !department.code.toLowerCase().includes(code)) {
-      return false
-    }
-
-    if (name.length > 0 && !department.name.toLowerCase().includes(name)) {
-      return false
-    }
-
-    if (status && department.status !== status) {
-      return false
-    }
-
-    return true
-  })
-})
-
-const filteredMenuItems = computed(() => {
-  const type =
-    menuQueryValues.value.type === "directory" ||
-    menuQueryValues.value.type === "menu" ||
-    menuQueryValues.value.type === "button"
-      ? menuQueryValues.value.type
-      : ""
-  const code =
-    typeof menuQueryValues.value.code === "string"
-      ? menuQueryValues.value.code.trim().toLowerCase()
-      : ""
-  const name =
-    typeof menuQueryValues.value.name === "string"
-      ? menuQueryValues.value.name.trim().toLowerCase()
-      : ""
-  const path =
-    typeof menuQueryValues.value.path === "string"
-      ? menuQueryValues.value.path.trim().toLowerCase()
-      : ""
-  const component =
-    typeof menuQueryValues.value.component === "string"
-      ? menuQueryValues.value.component.trim().toLowerCase()
-      : ""
-  const icon =
-    typeof menuQueryValues.value.icon === "string"
-      ? menuQueryValues.value.icon.trim().toLowerCase()
-      : ""
-  const permissionCode =
-    typeof menuQueryValues.value.permissionCode === "string"
-      ? menuQueryValues.value.permissionCode.trim().toLowerCase()
-      : ""
-  const status =
-    menuQueryValues.value.status === "active" ||
-    menuQueryValues.value.status === "disabled"
-      ? menuQueryValues.value.status
-      : ""
-
-  return menuItems.value.filter((menu) => {
-    if (type && menu.type !== type) {
-      return false
-    }
-
-    if (code.length > 0 && !menu.code.toLowerCase().includes(code)) {
-      return false
-    }
-
-    if (name.length > 0 && !menu.name.toLowerCase().includes(name)) {
-      return false
-    }
-
-    if (path.length > 0 && !(menu.path ?? "").toLowerCase().includes(path)) {
-      return false
-    }
-
-    if (
-      component.length > 0 &&
-      !(menu.component ?? "").toLowerCase().includes(component)
-    ) {
-      return false
-    }
-
-    if (icon.length > 0 && !(menu.icon ?? "").toLowerCase().includes(icon)) {
-      return false
-    }
-
-    if (
-      permissionCode.length > 0 &&
-      !(menu.permissionCode ?? "").toLowerCase().includes(permissionCode)
-    ) {
-      return false
-    }
-
-    if (status && menu.status !== status) {
-      return false
-    }
-
-    return true
-  })
-})
-
-const notificationListQuery = computed(() => {
-  const query: {
-    recipientUserId?: string
-    status?: NotificationRecord["status"]
-  } = {}
-
-  if (
-    typeof notificationQueryValues.value.recipientUserId === "string" &&
-    notificationQueryValues.value.recipientUserId.trim()
-  ) {
-    query.recipientUserId = notificationQueryValues.value.recipientUserId.trim()
-  }
-
-  if (
-    notificationQueryValues.value.status === "unread" ||
-    notificationQueryValues.value.status === "read"
-  ) {
-    query.status = notificationQueryValues.value.status
-  }
-
-  return query
-})
-
-const filteredNotificationItems = computed(() =>
-  filterNotifications(notificationItems.value, {
-    recipientUserId:
-      typeof notificationQueryValues.value.recipientUserId === "string"
-        ? notificationQueryValues.value.recipientUserId
-        : undefined,
-    title:
-      typeof notificationQueryValues.value.title === "string"
-        ? notificationQueryValues.value.title
-        : undefined,
-    content:
-      typeof notificationQueryValues.value.content === "string"
-        ? notificationQueryValues.value.content
-        : undefined,
-    level:
-      notificationQueryValues.value.level === "info" ||
-      notificationQueryValues.value.level === "success" ||
-      notificationQueryValues.value.level === "warning" ||
-      notificationQueryValues.value.level === "error"
-        ? notificationQueryValues.value.level
-        : "",
-    status:
-      notificationQueryValues.value.status === "unread" ||
-      notificationQueryValues.value.status === "read"
-        ? notificationQueryValues.value.status
-        : "",
-  }),
-)
-
-const operationLogListQuery = computed<OperationLogListQuery>(() => {
-  const query: OperationLogListQuery = {}
-
-  if (
-    typeof operationLogQueryValues.value.category === "string" &&
-    operationLogQueryValues.value.category.trim()
-  ) {
-    query.category = operationLogQueryValues.value.category.trim()
-  }
-
-  if (
-    typeof operationLogQueryValues.value.action === "string" &&
-    operationLogQueryValues.value.action.trim()
-  ) {
-    query.action = operationLogQueryValues.value.action.trim()
-  }
-
-  if (
-    typeof operationLogQueryValues.value.actorUserId === "string" &&
-    operationLogQueryValues.value.actorUserId.trim()
-  ) {
-    query.actorUserId = operationLogQueryValues.value.actorUserId.trim()
-  }
-
-  if (
-    operationLogQueryValues.value.result === "success" ||
-    operationLogQueryValues.value.result === "failure"
-  ) {
-    query.result = operationLogQueryValues.value.result
-  }
-
-  return query
-})
-
-const filteredOperationLogItems = computed(() => {
-  const category =
-    typeof operationLogQueryValues.value.category === "string"
-      ? operationLogQueryValues.value.category.trim().toLowerCase()
-      : ""
-  const action =
-    typeof operationLogQueryValues.value.action === "string"
-      ? operationLogQueryValues.value.action.trim().toLowerCase()
-      : ""
-  const actorUserId =
-    typeof operationLogQueryValues.value.actorUserId === "string"
-      ? operationLogQueryValues.value.actorUserId.trim().toLowerCase()
-      : ""
-  const result =
-    operationLogQueryValues.value.result === "success" ||
-    operationLogQueryValues.value.result === "failure"
-      ? operationLogQueryValues.value.result
-      : ""
-
-  return operationLogItems.value.filter((item) => {
-    if (
-      category.length > 0 &&
-      !item.category.toLowerCase().includes(category)
-    ) {
-      return false
-    }
-    if (action.length > 0 && !item.action.toLowerCase().includes(action)) {
-      return false
-    }
-    if (
-      actorUserId.length > 0 &&
-      !(item.actorUserId ?? "").toLowerCase().includes(actorUserId)
-    ) {
-      return false
-    }
-    if (result && item.result !== result) {
-      return false
-    }
-
-    return true
-  })
-})
-
-const filteredUserItems = computed(() => {
-  const query =
-    typeof userQueryValues.value.username === "string"
-      ? userQueryValues.value.username.trim().toLowerCase()
-      : ""
-  const displayName =
-    typeof userQueryValues.value.displayName === "string"
-      ? userQueryValues.value.displayName.trim().toLowerCase()
-      : ""
-  const email =
-    typeof userQueryValues.value.email === "string"
-      ? userQueryValues.value.email.trim().toLowerCase()
-      : ""
-  const phone =
-    typeof userQueryValues.value.phone === "string"
-      ? userQueryValues.value.phone.trim().toLowerCase()
-      : ""
-  const status =
-    userQueryValues.value.status === "active" ||
-    userQueryValues.value.status === "disabled"
-      ? userQueryValues.value.status
-      : ""
-
-  return userItems.value.filter((user) => {
-    if (query.length > 0 && !user.username.toLowerCase().includes(query)) {
-      return false
-    }
-
-    if (
-      displayName.length > 0 &&
-      !user.displayName.toLowerCase().includes(displayName)
-    ) {
-      return false
-    }
-
-    if (email.length > 0 && !(user.email ?? "").toLowerCase().includes(email)) {
-      return false
-    }
-
-    if (phone.length > 0 && !(user.phone ?? "").toLowerCase().includes(phone)) {
-      return false
-    }
-
-    if (status && user.status !== status) {
-      return false
-    }
-
-    return true
-  })
-})
-
-const filteredRoleItems = computed(() => {
-  const code =
-    typeof roleQueryValues.value.code === "string"
-      ? roleQueryValues.value.code.trim().toLowerCase()
-      : ""
-  const name =
-    typeof roleQueryValues.value.name === "string"
-      ? roleQueryValues.value.name.trim().toLowerCase()
-      : ""
-  const description =
-    typeof roleQueryValues.value.description === "string"
-      ? roleQueryValues.value.description.trim().toLowerCase()
-      : ""
-  const status =
-    roleQueryValues.value.status === "active" ||
-    roleQueryValues.value.status === "disabled"
-      ? roleQueryValues.value.status
-      : ""
-
-  return roleItems.value.filter((role) => {
-    if (code.length > 0 && !role.code.toLowerCase().includes(code)) {
-      return false
-    }
-
-    if (name.length > 0 && !role.name.toLowerCase().includes(name)) {
-      return false
-    }
-
-    if (
-      description.length > 0 &&
-      !(role.description ?? "").toLowerCase().includes(description)
-    ) {
-      return false
-    }
-
-    if (status && role.status !== status) {
-      return false
-    }
-
-    return true
-  })
-})
-
-const filteredSettingItems = computed(() => {
-  const key =
-    typeof settingQueryValues.value.key === "string"
-      ? settingQueryValues.value.key.trim().toLowerCase()
-      : ""
-  const value =
-    typeof settingQueryValues.value.value === "string"
-      ? settingQueryValues.value.value.trim().toLowerCase()
-      : ""
-  const description =
-    typeof settingQueryValues.value.description === "string"
-      ? settingQueryValues.value.description.trim().toLowerCase()
-      : ""
-  const status =
-    settingQueryValues.value.status === "active" ||
-    settingQueryValues.value.status === "disabled"
-      ? settingQueryValues.value.status
-      : ""
-
-  return settingItems.value.filter((setting) => {
-    if (key.length > 0 && !setting.key.toLowerCase().includes(key)) {
-      return false
-    }
-
-    if (value.length > 0 && !setting.value.toLowerCase().includes(value)) {
-      return false
-    }
-
-    if (
-      description.length > 0 &&
-      !(setting.description ?? "").toLowerCase().includes(description)
-    ) {
-      return false
-    }
-
-    if (status && setting.status !== status) {
-      return false
-    }
-
-    return true
-  })
-})
-
-const selectedDepartmentListItem = computed(
-  () =>
-    departmentItems.value.find(
-      (department) => department.id === selectedDepartmentId.value,
-    ) ?? null,
-)
-
-const selectedDictionaryTypeListItem = computed(
-  () =>
-    dictionaryTypes.value.find(
-      (type) => type.id === selectedDictionaryTypeId.value,
-    ) ?? null,
-)
-
-const selectedDictionaryType = computed<
-  DictionaryTypeRecord | DictionaryTypeDetailRecord | null
->(() => {
-  if (
-    dictionaryTypeDetail.value &&
-    dictionaryTypeDetail.value.id === selectedDictionaryTypeId.value
-  ) {
-    return dictionaryTypeDetail.value
-  }
-
-  return selectedDictionaryTypeListItem.value
-})
-
-const selectedDictionaryTypeDetail = computed(() =>
-  dictionaryTypeDetail.value &&
-  dictionaryTypeDetail.value.id === selectedDictionaryTypeId.value
-    ? dictionaryTypeDetail.value
-    : null,
-)
-
-const selectedDictionaryTypeItems = computed(() => {
-  if (selectedDictionaryTypeDetail.value) {
-    return selectedDictionaryTypeDetail.value.items
-  }
-
-  if (!selectedDictionaryTypeId.value) {
-    return []
-  }
-
-  return dictionaryItems.value.filter(
-    (item) => item.typeId === selectedDictionaryTypeId.value,
-  )
-})
-
-const selectedDepartment = computed<
-  DepartmentRecord | DepartmentDetailRecord | null
->(() => {
-  if (
-    departmentDetail.value &&
-    departmentDetail.value.id === selectedDepartmentId.value
-  ) {
-    return departmentDetail.value
-  }
-
-  return selectedDepartmentListItem.value
-})
-
-const selectedDepartmentDetail = computed(() =>
-  departmentDetail.value &&
-  departmentDetail.value.id === selectedDepartmentId.value
-    ? departmentDetail.value
-    : null,
-)
-
-const selectedMenuListItem = computed(
-  () =>
-    menuItems.value.find((menu) => menu.id === selectedMenuId.value) ?? null,
-)
-
-const selectedMenu = computed<MenuRecord | MenuDetailRecord | null>(() => {
-  if (menuDetail.value && menuDetail.value.id === selectedMenuId.value) {
-    return menuDetail.value
-  }
-
-  return selectedMenuListItem.value
-})
-
-const selectedMenuDetail = computed(() =>
-  menuDetail.value && menuDetail.value.id === selectedMenuId.value
-    ? menuDetail.value
-    : null,
-)
-
-const selectedNotificationListItem = computed(
-  () =>
-    notificationItems.value.find(
-      (notification) => notification.id === selectedNotificationId.value,
-    ) ?? null,
-)
-
-const selectedNotification = computed(
-  () =>
-    (notificationDetail.value &&
-    notificationDetail.value.id === selectedNotificationId.value
-      ? notificationDetail.value
-      : selectedNotificationListItem.value) ?? null,
-)
-
-const selectedOperationLogListItem = computed(
-  () =>
-    operationLogItems.value.find(
-      (item) => item.id === selectedOperationLogId.value,
-    ) ?? null,
-)
-
-const selectedOperationLog = computed(
-  () =>
-    (operationLogDetail.value &&
-    operationLogDetail.value.id === selectedOperationLogId.value
-      ? operationLogDetail.value
-      : selectedOperationLogListItem.value) ?? null,
-)
-
-const selectedRoleListItem = computed(
-  () =>
-    roleItems.value.find((role) => role.id === selectedRoleId.value) ?? null,
-)
-
-const selectedRole = computed<RoleRecord | RoleDetailRecord | null>(() => {
-  if (roleDetail.value && roleDetail.value.id === selectedRoleId.value) {
-    return roleDetail.value
-  }
-
-  return selectedRoleListItem.value
-})
-
-const selectedRoleDetail = computed(() =>
-  roleDetail.value && roleDetail.value.id === selectedRoleId.value
-    ? roleDetail.value
-    : null,
-)
-
-const selectedSettingListItem = computed(
-  () =>
-    settingItems.value.find(
-      (setting) => setting.id === selectedSettingId.value,
-    ) ?? null,
-)
-
-const selectedSetting = computed(
-  () =>
-    (settingDetail.value && settingDetail.value.id === selectedSettingId.value
-      ? settingDetail.value
-      : selectedSettingListItem.value) ?? null,
-)
-
-const selectedUser = computed(
-  () =>
-    userItems.value.find((user) => user.id === selectedUserId.value) ?? null,
-)
-
-const selectedWorkflowDefinition = computed(
-  () => workflowDefinitionDetail.value ?? selectedWorkflowListItem.value,
-)
-
-const localizeSelectOptions = (
-  options?: Array<{ label: string; value: string }>,
-) =>
-  options?.map((option) => ({
-    ...option,
-    label:
-      option.value === "active" || option.value === "inactive"
-        ? localizeCustomerStatus(option.value)
-        : option.value === "disabled"
-          ? localizeUserStatus(option.value)
-          : option.label,
-  }))
-
-const enterpriseTableColumns = computed(() =>
-  enterpriseCustomerPage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "status"
-          ? "120"
-          : column.key.endsWith("At")
-            ? "200"
-            : undefined,
-  })),
-)
-
-const enterpriseQueryFields = computed(() =>
-  enterpriseCustomerPage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeFieldLabel(field.key),
-    options: localizeSelectOptions(field.options),
-    placeholder:
-      field.key === "name"
-        ? t("app.customer.query.namePlaceholder")
-        : field.key === "status"
-          ? t("copy.query.statusPlaceholder")
-          : field.placeholder,
-  })),
-)
-
-const enterpriseTableActions = computed(() =>
-  enterpriseCustomerPage.tableActions.value
-    .filter((action) => action.key !== "create")
-    .map((action) => ({
-      ...action,
-      label: localizeActionLabel(action.key, action.label),
-    })),
-)
-
-const enterpriseTableItems = computed(() =>
-  customerItems.value.map((customer) => ({
-    ...customer,
-    createdAt: new Date(customer.createdAt).toLocaleString(locale.value),
-    updatedAt: new Date(customer.updatedAt).toLocaleString(locale.value),
-  })),
-)
-
-const departmentParentLookup = computed(
-  () =>
-    new Map(
-      departmentItems.value.map((department) => [department.id, department]),
-    ),
-)
-
-const menuParentLookup = computed(
-  () => new Map(menuItems.value.map((menu) => [menu.id, menu])),
-)
-
-const departmentBlockedParentIds = computed(() => {
-  if (!selectedDepartmentId.value) {
-    return new Set<string>()
-  }
-
-  const blocked = new Set<string>([selectedDepartmentId.value])
-  const queue = [selectedDepartmentId.value]
-
-  while (queue.length > 0) {
-    const currentId = queue.shift()
-
-    if (!currentId) {
-      continue
-    }
-
-    for (const department of departmentItems.value) {
-      if (department.parentId === currentId && !blocked.has(department.id)) {
-        blocked.add(department.id)
-        queue.push(department.id)
-      }
-    }
-  }
-
-  return blocked
-})
-
-const menuBlockedParentIds = computed(() => {
-  if (!selectedMenuId.value) {
-    return new Set<string>()
-  }
-
-  const blocked = new Set<string>([selectedMenuId.value])
-  const queue = [selectedMenuId.value]
-
-  while (queue.length > 0) {
-    const currentId = queue.shift()
-
-    if (!currentId) {
-      continue
-    }
-
-    for (const menu of menuItems.value) {
-      if (menu.parentId === currentId && !blocked.has(menu.id)) {
-        blocked.add(menu.id)
-        queue.push(menu.id)
-      }
-    }
-  }
-
-  return blocked
-})
-
-const departmentParentOptions = computed(() => [
-  {
-    label: t("app.department.parentRoot"),
-    value: "",
   },
-  ...departmentItems.value
-    .filter(
-      (department) => !departmentBlockedParentIds.value.has(department.id),
-    )
-    .map((department) => ({
-      label: department.name,
-      value: department.id,
-    })),
-])
-
-const menuParentOptions = computed(() => [
-  {
-    label: t("app.menu.parentRoot"),
-    value: "",
-  },
-  ...menuItems.value
-    .filter((menu) => !menuBlockedParentIds.value.has(menu.id))
-    .map((menu) => ({
-      label: `${menu.name} (${menu.code})`,
-      value: menu.id,
-    })),
-])
-
-const enterpriseDepartmentTableColumns = computed(() =>
-  enterpriseDepartmentPage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeDepartmentFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "parentId"
-          ? "220"
-          : column.key === "status"
-            ? "120"
-            : column.key === "sort"
-              ? "120"
-              : column.key.endsWith("At")
-                ? "200"
-                : undefined,
-  })),
-)
-
-const enterpriseDepartmentQueryFields = computed(() =>
-  enterpriseDepartmentPage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeDepartmentFieldLabel(field.key),
-    options:
-      field.key === "status" && field.options
-        ? field.options.map((option) => ({
-            ...option,
-            label: localizeDepartmentStatus(option.value),
-          }))
-        : field.options,
-    placeholder:
-      field.key === "code"
-        ? t("app.department.query.codePlaceholder")
-        : field.key === "name"
-          ? t("app.department.query.namePlaceholder")
-          : field.key === "status"
-            ? t("copy.query.statusPlaceholder")
-            : field.placeholder,
-  })),
-)
-
-const enterpriseDepartmentTableItems = computed(() =>
-  filteredDepartmentItems.value.map((department) => ({
-    ...department,
-    parentId: department.parentId
-      ? (departmentParentLookup.value.get(department.parentId)?.name ??
-        department.parentId)
-      : t("app.department.parentRoot"),
-    status: localizeDepartmentStatus(department.status),
-    createdAt: new Date(department.createdAt).toLocaleString(locale.value),
-    updatedAt: new Date(department.updatedAt).toLocaleString(locale.value),
-  })),
-)
-
-const enterpriseMenuTableColumns = computed(() =>
-  enterpriseMenuPage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeMenuFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "parentId"
-          ? "220"
-          : column.key === "type"
-            ? "140"
-            : column.key === "sort"
-              ? "120"
-              : column.key === "isVisible"
-                ? "140"
-                : column.key === "status"
-                  ? "120"
-                  : column.key.endsWith("At")
-                    ? "200"
-                    : undefined,
-  })),
-)
-
-const enterpriseMenuQueryFields = computed(() =>
-  enterpriseMenuPage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeMenuFieldLabel(field.key),
-    options:
-      field.key === "type" && field.options
-        ? field.options.map((option) => ({
-            ...option,
-            label: localizeMenuType(option.value),
-          }))
-        : field.key === "status" && field.options
-          ? field.options.map((option) => ({
-              ...option,
-              label: localizeMenuStatus(option.value),
-            }))
-          : field.options,
-    placeholder:
-      field.key === "code"
-        ? t("app.menu.query.codePlaceholder")
-        : field.key === "name"
-          ? t("app.menu.query.namePlaceholder")
-          : field.key === "path"
-            ? t("app.menu.query.pathPlaceholder")
-            : field.key === "component"
-              ? t("app.menu.query.componentPlaceholder")
-              : field.key === "icon"
-                ? t("app.menu.query.iconPlaceholder")
-                : field.key === "permissionCode"
-                  ? t("app.menu.query.permissionCodePlaceholder")
-                  : field.key === "status"
-                    ? t("copy.query.statusPlaceholder")
-                    : field.placeholder,
-  })),
-)
-
-const enterpriseMenuTableItems = computed(() =>
-  filteredMenuItems.value.map((menu) => ({
-    ...menu,
-    parentId: menu.parentId
-      ? (menuParentLookup.value.get(menu.parentId)?.name ?? menu.parentId)
-      : t("app.menu.parentRoot"),
-    type: localizeMenuType(menu.type),
-    isVisible: localizeMenuBoolean(menu.isVisible),
-    status: localizeMenuStatus(menu.status),
-    createdAt: new Date(menu.createdAt).toLocaleString(locale.value),
-    updatedAt: new Date(menu.updatedAt).toLocaleString(locale.value),
-  })),
-)
-
-const enterpriseNotificationTableColumns = computed(() =>
-  enterpriseNotificationPage.tableColumns.value.map((column) => ({
-    ...column,
-    key: column.key === "status" ? "statusLabel" : column.key,
-    label: localizeNotificationFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "recipientUserId" || column.key === "createdByUserId"
-          ? "180"
-          : column.key === "level" || column.key === "status"
-            ? "120"
-            : column.key.endsWith("At")
-              ? "200"
-              : undefined,
-  })),
-)
-
-const enterpriseNotificationQueryFields = computed<ElyQueryField[]>(() => [
-  {
-    key: "recipientUserId",
-    label: t("app.notification.field.recipientUserId"),
-    kind: "text",
-    placeholder: t("app.notification.query.recipientUserIdPlaceholder"),
-  },
-  ...enterpriseNotificationPage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeNotificationFieldLabel(field.key),
-    options:
-      field.key === "level" && field.options
-        ? field.options.map((option) => ({
-            ...option,
-            label: localizeNotificationLevel(option.value),
-          }))
-        : field.key === "status" && field.options
-          ? field.options.map((option) => ({
-              ...option,
-              label: localizeNotificationStatus(option.value),
-            }))
-          : field.options,
-    placeholder:
-      field.key === "title"
-        ? t("app.notification.query.titlePlaceholder")
-        : field.key === "content"
-          ? t("app.notification.query.contentPlaceholder")
-          : field.key === "level"
-            ? t("app.notification.query.levelPlaceholder")
-            : field.key === "status"
-              ? t("app.notification.query.statusPlaceholder")
-              : field.placeholder,
-  })),
-])
-
-const enterpriseNotificationTableItems = computed(() =>
-  createNotificationTableItems(filteredNotificationItems.value, {
-    localizeLevel: localizeNotificationLevel,
-    localizeStatus: localizeNotificationStatus,
-    formatDateTime: (value) => new Date(value).toLocaleString(locale.value),
-    readAtEmptyLabel: t("app.notification.readAtEmpty"),
-  }),
-)
-
-const enterpriseOperationLogTableColumns = computed(() =>
-  enterpriseOperationLogPage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeOperationLogFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "result"
-          ? "120"
-          : column.key === "createdAt"
-            ? "200"
-            : undefined,
-  })),
-)
-
-const enterpriseOperationLogQueryFields = computed(() => {
-  const supportedQueryKeys = new Set([
-    "category",
-    "action",
-    "actorUserId",
-    "result",
-  ])
-
-  return enterpriseOperationLogPage.queryFields.value
-    .filter((field) => supportedQueryKeys.has(field.key))
-    .map((field) => ({
-      ...field,
-      label: localizeOperationLogFieldLabel(field.key),
-      options:
-        field.key === "result" && field.options
-          ? field.options.map((option) => ({
-              ...option,
-              label: localizeOperationLogResult(option.value),
-            }))
-          : field.options,
-      placeholder:
-        field.key === "category"
-          ? t("app.operationLog.query.categoryPlaceholder")
-          : field.key === "action"
-            ? t("app.operationLog.query.actionPlaceholder")
-            : field.key === "actorUserId"
-              ? t("app.operationLog.query.actorUserIdPlaceholder")
-              : field.key === "result"
-                ? t("app.operationLog.query.resultPlaceholder")
-                : field.placeholder,
-    }))
 })
 
-const enterpriseOperationLogTableItems = computed(() =>
-  filteredOperationLogItems.value.map((item) => ({
-    ...item,
-    result: localizeOperationLogResult(item.result),
-    createdAt: new Date(item.createdAt).toLocaleString(locale.value),
-  })),
-)
-
-const enterpriseUserTableColumns = computed(() =>
-  enterpriseUserPage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeUserFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "status"
-          ? "120"
-          : column.key === "isSuperAdmin"
-            ? "140"
-            : column.key.endsWith("At")
-              ? "200"
-              : undefined,
-  })),
-)
-
-const enterpriseUserQueryFields = computed(() =>
-  enterpriseUserPage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeUserFieldLabel(field.key),
-    options: localizeSelectOptions(field.options),
-    placeholder:
-      field.key === "username"
-        ? t("app.user.query.usernamePlaceholder")
-        : field.key === "displayName"
-          ? t("app.user.query.displayNamePlaceholder")
-          : field.key === "email"
-            ? t("app.user.query.emailPlaceholder")
-            : field.key === "phone"
-              ? t("app.user.query.phonePlaceholder")
-              : field.key === "status"
-                ? t("copy.query.statusPlaceholder")
-                : field.placeholder,
-  })),
-)
-
-const enterpriseUserTableItems = computed(() =>
-  filteredUserItems.value.map((user) => ({
-    ...user,
-    status: localizeUserStatus(user.status),
-    isSuperAdmin: user.isSuperAdmin
-      ? t("app.user.boolean.true")
-      : t("app.user.boolean.false"),
-    lastLoginAt: user.lastLoginAt
-      ? new Date(user.lastLoginAt).toLocaleString(locale.value)
-      : t("app.user.lastLoginEmpty"),
-    createdAt: new Date(user.createdAt).toLocaleString(locale.value),
-    updatedAt: new Date(user.updatedAt).toLocaleString(locale.value),
-  })),
-)
-
-const enterpriseRoleTableColumns = computed(() =>
-  enterpriseRolePage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeRoleFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "status"
-          ? "120"
-          : column.key === "isSystem"
-            ? "140"
-            : column.key === "dataScope"
-              ? "160"
-              : column.key.endsWith("At")
-                ? "200"
-                : undefined,
-  })),
-)
-
-const enterpriseRoleQueryFields = computed(() =>
-  enterpriseRolePage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeRoleFieldLabel(field.key),
-    options:
-      field.key === "status" && field.options
-        ? field.options.map((option) => ({
-            ...option,
-            label: localizeRoleStatus(option.value),
-          }))
-        : field.options,
-    placeholder:
-      field.key === "code"
-        ? t("app.role.query.codePlaceholder")
-        : field.key === "name"
-          ? t("app.role.query.namePlaceholder")
-          : field.key === "description"
-            ? t("app.role.query.descriptionPlaceholder")
-            : field.key === "status"
-              ? t("copy.query.statusPlaceholder")
-              : field.placeholder,
-  })),
-)
-
-const enterpriseRoleTableItems = computed(() =>
-  filteredRoleItems.value.map((role) => ({
-    ...role,
-    status: localizeRoleStatus(role.status),
-    isSystem: role.isSystem
-      ? t("app.role.boolean.true")
-      : t("app.role.boolean.false"),
-    dataScope: localizeRoleDataScope(role.dataScope),
-    createdAt: new Date(role.createdAt).toLocaleString(locale.value),
-    updatedAt: new Date(role.updatedAt).toLocaleString(locale.value),
-  })),
-)
-
-const enterpriseDictionaryTableColumns = computed(() =>
-  enterpriseDictionaryPage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeDictionaryFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "status"
-          ? "120"
-          : column.key.endsWith("At")
-            ? "200"
-            : undefined,
-  })),
-)
-
-const enterpriseDictionaryQueryFields = computed(() =>
-  enterpriseDictionaryPage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeDictionaryFieldLabel(field.key),
-    options:
-      field.key === "status" && field.options
-        ? field.options.map((option) => ({
-            ...option,
-            label: localizeDictionaryStatus(option.value),
-          }))
-        : field.options,
-    placeholder:
-      field.key === "code"
-        ? t("app.dictionary.query.codePlaceholder")
-        : field.key === "name"
-          ? t("app.dictionary.query.namePlaceholder")
-          : field.key === "description"
-            ? t("app.dictionary.query.descriptionPlaceholder")
-            : field.key === "status"
-              ? t("copy.query.statusPlaceholder")
-              : field.placeholder,
-  })),
-)
-
-const enterpriseDictionaryTableItems = computed(() =>
-  filteredDictionaryTypes.value.map((type) => ({
-    ...type,
-    status: localizeDictionaryStatus(type.status),
-    createdAt: new Date(type.createdAt).toLocaleString(locale.value),
-    updatedAt: new Date(type.updatedAt).toLocaleString(locale.value),
-  })),
-)
-
-const enterpriseSettingTableColumns = computed(() =>
-  enterpriseSettingPage.tableColumns.value.map((column) => ({
-    ...column,
-    label: localizeSettingFieldLabel(column.key),
-    width:
-      column.key === "id"
-        ? "240"
-        : column.key === "status"
-          ? "120"
-          : column.key.endsWith("At")
-            ? "200"
-            : undefined,
-  })),
-)
-
-const enterpriseSettingQueryFields = computed(() =>
-  enterpriseSettingPage.queryFields.value.map((field) => ({
-    ...field,
-    label: localizeSettingFieldLabel(field.key),
-    options:
-      field.key === "status" && field.options
-        ? field.options.map((option) => ({
-            ...option,
-            label: localizeSettingStatus(option.value),
-          }))
-        : field.options,
-    placeholder:
-      field.key === "key"
-        ? t("app.setting.query.keyPlaceholder")
-        : field.key === "value"
-          ? t("app.setting.query.valuePlaceholder")
-          : field.key === "description"
-            ? t("app.setting.query.descriptionPlaceholder")
-            : field.key === "status"
-              ? t("copy.query.statusPlaceholder")
-              : field.placeholder,
-  })),
-)
-
-const enterpriseSettingTableItems = computed(() =>
-  filteredSettingItems.value.map((setting) => ({
-    ...setting,
-    status: localizeSettingStatus(setting.status),
-    createdAt: new Date(setting.createdAt).toLocaleString(locale.value),
-    updatedAt: new Date(setting.updatedAt).toLocaleString(locale.value),
-  })),
-)
-
-const userCountLabel = computed(() =>
-  t("app.user.countLabel", {
-    visible: filteredUserItems.value.length,
-    total: userItems.value.length,
-  }),
-)
-
-const dictionaryCountLabel = computed(() =>
-  t("app.dictionary.countLabel", {
-    visible: filteredDictionaryTypes.value.length,
-    total: dictionaryTypes.value.length,
-  }),
-)
-
-const departmentCountLabel = computed(() =>
-  t("app.department.countLabel", {
-    visible: filteredDepartmentItems.value.length,
-    total: departmentItems.value.length,
-  }),
-)
-
-const menuCountLabel = computed(() =>
-  t("app.menu.countLabel", {
-    visible: filteredMenuItems.value.length,
-    total: menuItems.value.length,
-  }),
-)
-
-const notificationCountLabel = computed(() =>
-  t("app.notification.countLabel", {
-    visible: filteredNotificationItems.value.length,
-    total: notificationItems.value.length,
-  }),
-)
-
-const operationLogCountLabel = computed(() =>
-  t("app.operationLog.countLabel", {
-    visible: filteredOperationLogItems.value.length,
-    total: operationLogItems.value.length,
-  }),
-)
-
-const roleDataScopeOptions = computed(() => [
-  {
-    label: t("app.role.dataScope.1"),
-    value: "1",
-  },
-  {
-    label: t("app.role.dataScope.2"),
-    value: "2",
-  },
-  {
-    label: t("app.role.dataScope.3"),
-    value: "3",
-  },
-  {
-    label: t("app.role.dataScope.4"),
-    value: "4",
-  },
-  {
-    label: t("app.role.dataScope.5"),
-    value: "5",
-  },
-])
-
-const roleCountLabel = computed(() =>
-  t("app.role.countLabel", {
-    visible: filteredRoleItems.value.length,
-    total: roleItems.value.length,
-  }),
-)
-
-const settingCountLabel = computed(() =>
-  t("app.setting.countLabel", {
-    visible: filteredSettingItems.value.length,
-    total: settingItems.value.length,
-  }),
-)
-
-const enterpriseNotificationFormFields = computed<ElyFormField[]>(() => {
-  const allowedFieldKeys =
-    notificationPanelMode.value === "create"
-      ? new Set(["recipientUserId", "title", "content", "level"])
-      : new Set([
-          "recipientUserId",
-          "title",
-          "content",
-          "level",
-          "status",
-          "createdByUserId",
-          "readAt",
-          "createdAt",
-        ])
-
-  return enterpriseNotificationPage.formFields.value
-    .filter((field) => allowedFieldKeys.has(field.key))
-    .map((field) => ({
-      ...field,
-      label: localizeNotificationFieldLabel(field.key),
-      input: field.key === "content" ? ("textarea" as const) : field.input,
-      disabled: notificationPanelMode.value === "detail" || field.disabled,
-      options:
-        field.key === "level" && field.options
-          ? field.options.map((option) => ({
-              ...option,
-              label: localizeNotificationLevel(option.value),
-            }))
-          : field.key === "status" && field.options
-            ? field.options.map((option) => ({
-                ...option,
-                label: localizeNotificationStatus(option.value),
-              }))
-            : field.options,
-      placeholder:
-        field.key === "recipientUserId"
-          ? t("app.notification.query.recipientUserIdPlaceholder")
-          : field.key === "title"
-            ? t("app.notification.query.titlePlaceholder")
-            : field.key === "content"
-              ? t("app.notification.query.contentPlaceholder")
-              : field.key === "level"
-                ? t("app.notification.query.levelPlaceholder")
-                : field.placeholder,
-    }))
-})
-
-const enterpriseNotificationFormValues = computed<ElyFormValues>(() => {
-  if (notificationPanelMode.value === "detail" && selectedNotification.value) {
-    return {
-      recipientUserId: selectedNotification.value.recipientUserId,
-      title: selectedNotification.value.title,
-      content: selectedNotification.value.content,
-      level: selectedNotification.value.level,
-      status: selectedNotification.value.status,
-      createdByUserId: selectedNotification.value.createdByUserId ?? "",
-      readAt: selectedNotification.value.readAt ?? "",
-      createdAt: selectedNotification.value.createdAt,
+const {
+  clearWorkspace: clearOperationLogWorkspace,
+  countLabel: operationLogCountLabel,
+  detailFields: enterpriseOperationLogDetailFields,
+  detailValues: enterpriseOperationLogDetailValues,
+  detailsText: operationLogDetailsText,
+  filteredOperationLogItems,
+  handleReset: handleOperationLogReset,
+  handleRowClick: handleOperationLogRowClick,
+  handleSearch: handleOperationLogSearch,
+  operationLogDetail,
+  operationLogDetailErrorMessage,
+  operationLogDetailLoading,
+  operationLogErrorMessage,
+  operationLogLoading,
+  operationLogQueryValues,
+  panelDescription: operationLogPanelDescription,
+  panelTitle: operationLogPanelTitle,
+  queryFields: enterpriseOperationLogQueryFields,
+  reloadOperationLogs,
+  resetQuery: resetOperationLogQuery,
+  selectedOperationLog,
+  selectedOperationLogId,
+  selectOperationLog,
+  tableColumns: enterpriseOperationLogTableColumns,
+  tableItems: enterpriseOperationLogTableItems,
+} = useOperationLogWorkspace({
+  currentShellTabKey,
+  page: enterpriseOperationLogPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeOperationLogFieldLabel,
+  localizeResult: localizeOperationLogResult,
+  canView: canViewOperationLogs,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
     }
-  }
-
-  return {
-    ...notificationCreateForm.value,
-  }
-})
-
-const enterpriseDictionaryFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseDictionaryPage.formFields.value.map((field) => ({
-    ...field,
-    label: localizeDictionaryFieldLabel(field.key),
-    input: field.key === "description" ? ("textarea" as const) : field.input,
-    options:
-      field.key === "status"
-        ? [
-            {
-              label: t("app.dictionary.status.active"),
-              value: "active",
-            },
-            {
-              label: t("app.dictionary.status.disabled"),
-              value: "disabled",
-            },
-          ]
-        : field.options,
-    placeholder:
-      field.key === "code"
-        ? t("app.dictionary.query.codePlaceholder")
-        : field.key === "name"
-          ? t("app.dictionary.query.namePlaceholder")
-          : field.key === "description"
-            ? t("app.dictionary.query.descriptionPlaceholder")
-            : field.key === "status"
-              ? t("copy.query.statusPlaceholder")
-              : field.placeholder,
-  }))
-
-  if (dictionaryPanelMode.value !== "detail") {
-    return baseFields
-  }
-
-  return [
-    ...baseFields,
-    {
-      key: "createdAt",
-      label: t("app.dictionary.field.createdAt"),
-      input: "datetime",
-      disabled: true,
-    },
-    {
-      key: "updatedAt",
-      label: t("app.dictionary.field.updatedAt"),
-      input: "datetime",
-      disabled: true,
-    },
-  ]
-})
-
-const enterpriseDictionaryFormValues = computed<ElyFormValues>(() => {
-  if (dictionaryPanelMode.value === "edit") {
-    return {
-      ...dictionaryEditForm.value,
-      description: dictionaryEditForm.value.description ?? "",
-    }
-  }
-
-  if (dictionaryPanelMode.value === "detail" && selectedDictionaryType.value) {
-    return {
-      code: selectedDictionaryType.value.code,
-      name: selectedDictionaryType.value.name,
-      description: selectedDictionaryType.value.description ?? "",
-      status: selectedDictionaryType.value.status,
-      createdAt: selectedDictionaryType.value.createdAt,
-      updatedAt: selectedDictionaryType.value.updatedAt,
-    }
-  }
-
-  return {
-    ...dictionaryCreateForm.value,
-    description: dictionaryCreateForm.value.description ?? "",
-  }
-})
-
-const enterpriseFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseCustomerPage.formFields.value.map((field) => ({
-    ...field,
-    label: localizeFieldLabel(field.key),
-    options: localizeSelectOptions(field.options),
-    placeholder:
-      field.key === "status"
-        ? t("copy.query.statusPlaceholder")
-        : field.placeholder,
-  }))
-
-  if (enterpriseFormMode.value !== "detail") {
-    return baseFields
-  }
-
-  return [
-    ...baseFields,
-    {
-      key: "createdAt",
-      label: t("app.customer.field.createdAt"),
-      input: "datetime",
-      disabled: true,
-    },
-    {
-      key: "updatedAt",
-      label: t("app.customer.field.updatedAt"),
-      input: "datetime",
-      disabled: true,
-    },
-  ]
-})
-
-const enterpriseFormValues = computed<ElyFormValues>(() => {
-  if (enterpriseFormMode.value === "edit") {
-    return { ...editForm.value }
-  }
-
-  if (enterpriseFormMode.value === "detail" && selectedCustomer.value) {
-    return {
-      name: selectedCustomer.value.name,
-      status: selectedCustomer.value.status,
-      createdAt: selectedCustomer.value.createdAt,
-      updatedAt: selectedCustomer.value.updatedAt,
-    }
-  }
-
-  return { ...customerForm.value }
-})
-
-const enterpriseDepartmentFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseDepartmentPage.formFields.value.map((field) => ({
-    ...field,
-    label: localizeDepartmentFieldLabel(field.key),
-    input: field.key === "parentId" ? ("select" as const) : field.input,
-    options:
-      field.key === "parentId"
-        ? departmentParentOptions.value
-        : field.key === "status"
-          ? [
-              {
-                label: t("app.department.status.active"),
-                value: "active",
-              },
-              {
-                label: t("app.department.status.disabled"),
-                value: "disabled",
-              },
-            ]
-          : field.options,
-    placeholder:
-      field.key === "parentId"
-        ? t("app.department.parentPlaceholder")
-        : field.key === "code"
-          ? t("app.department.query.codePlaceholder")
-          : field.key === "name"
-            ? t("app.department.query.namePlaceholder")
-            : field.key === "status"
-              ? t("copy.query.statusPlaceholder")
-              : field.placeholder,
-  }))
-
-  if (departmentPanelMode.value !== "detail") {
-    return baseFields
-  }
-
-  return [
-    ...baseFields,
-    {
-      key: "createdAt",
-      label: t("app.department.field.createdAt"),
-      input: "datetime",
-      disabled: true,
-    },
-    {
-      key: "updatedAt",
-      label: t("app.department.field.updatedAt"),
-      input: "datetime",
-      disabled: true,
-    },
-  ]
-})
-
-const enterpriseDepartmentFormValues = computed<ElyFormValues>(() => {
-  if (departmentPanelMode.value === "edit") {
-    return {
-      ...departmentEditForm.value,
-      parentId: departmentEditForm.value.parentId ?? "",
-    }
-  }
-
-  if (departmentPanelMode.value === "detail" && selectedDepartment.value) {
-    return {
-      parentId: selectedDepartment.value.parentId ?? "",
-      code: selectedDepartment.value.code,
-      name: selectedDepartment.value.name,
-      sort: selectedDepartment.value.sort,
-      status: selectedDepartment.value.status,
-      createdAt: selectedDepartment.value.createdAt,
-      updatedAt: selectedDepartment.value.updatedAt,
-    }
-  }
-
-  return {
-    ...departmentCreateForm.value,
-    parentId: departmentCreateForm.value.parentId ?? "",
-  }
-})
-
-const enterpriseMenuFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseMenuPage.formFields.value.map((field) => ({
-    ...field,
-    label: localizeMenuFieldLabel(field.key),
-    input:
-      field.key === "parentId"
-        ? ("select" as const)
-        : field.key === "type"
-          ? ("select" as const)
-          : field.key === "status"
-            ? ("select" as const)
-            : field.key === "isVisible"
-              ? ("switch" as const)
-              : field.input,
-    options:
-      field.key === "parentId"
-        ? menuParentOptions.value
-        : field.key === "type"
-          ? [
-              {
-                label: t("app.menu.type.directory"),
-                value: "directory",
-              },
-              {
-                label: t("app.menu.type.menu"),
-                value: "menu",
-              },
-              {
-                label: t("app.menu.type.button"),
-                value: "button",
-              },
-            ]
-          : field.key === "status"
-            ? [
-                {
-                  label: t("app.menu.status.active"),
-                  value: "active",
-                },
-                {
-                  label: t("app.menu.status.disabled"),
-                  value: "disabled",
-                },
-              ]
-            : field.options,
-    placeholder:
-      field.key === "parentId"
-        ? t("app.menu.parentPlaceholder")
-        : field.key === "code"
-          ? t("app.menu.query.codePlaceholder")
-          : field.key === "name"
-            ? t("app.menu.query.namePlaceholder")
-            : field.key === "path"
-              ? t("app.menu.query.pathPlaceholder")
-              : field.key === "component"
-                ? t("app.menu.query.componentPlaceholder")
-                : field.key === "icon"
-                  ? t("app.menu.query.iconPlaceholder")
-                  : field.key === "permissionCode"
-                    ? t("app.menu.query.permissionCodePlaceholder")
-                    : field.key === "status"
-                      ? t("copy.query.statusPlaceholder")
-                      : field.placeholder,
-  }))
-
-  if (menuPanelMode.value !== "detail") {
-    return baseFields
-  }
-
-  return [
-    ...baseFields,
-    {
-      key: "createdAt",
-      label: t("app.menu.field.createdAt"),
-      input: "datetime",
-      disabled: true,
-    },
-    {
-      key: "updatedAt",
-      label: t("app.menu.field.updatedAt"),
-      input: "datetime",
-      disabled: true,
-    },
-  ]
-})
-
-const enterpriseMenuFormValues = computed<ElyFormValues>(() => {
-  if (menuPanelMode.value === "edit") {
-    return {
-      ...menuEditForm.value,
-      parentId: menuEditForm.value.parentId ?? "",
-      path: menuEditForm.value.path ?? "",
-      component: menuEditForm.value.component ?? "",
-      icon: menuEditForm.value.icon ?? "",
-      permissionCode: menuEditForm.value.permissionCode ?? "",
-    }
-  }
-
-  if (menuPanelMode.value === "detail" && selectedMenu.value) {
-    return {
-      parentId: selectedMenu.value.parentId ?? "",
-      type: selectedMenu.value.type,
-      code: selectedMenu.value.code,
-      name: selectedMenu.value.name,
-      path: selectedMenu.value.path ?? "",
-      component: selectedMenu.value.component ?? "",
-      icon: selectedMenu.value.icon ?? "",
-      sort: selectedMenu.value.sort,
-      isVisible: selectedMenu.value.isVisible,
-      status: selectedMenu.value.status,
-      permissionCode: selectedMenu.value.permissionCode ?? "",
-      createdAt: selectedMenu.value.createdAt,
-      updatedAt: selectedMenu.value.updatedAt,
-    }
-  }
-
-  return {
-    ...menuCreateForm.value,
-    parentId: menuCreateForm.value.parentId ?? "",
-    path: menuCreateForm.value.path ?? "",
-    component: menuCreateForm.value.component ?? "",
-    icon: menuCreateForm.value.icon ?? "",
-    permissionCode: menuCreateForm.value.permissionCode ?? "",
-  }
-})
-
-const enterpriseUserFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseUserPage.formFields.value
-    .filter((field) =>
-      userPanelMode.value === "detail" ? true : field.key !== "lastLoginAt",
-    )
-    .map((field) => ({
-      ...field,
-      label: localizeUserFieldLabel(field.key),
-      options: localizeSelectOptions(field.options),
-      placeholder:
-        field.key === "username"
-          ? t("app.user.query.usernamePlaceholder")
-          : field.key === "displayName"
-            ? t("app.user.query.displayNamePlaceholder")
-            : field.key === "email"
-              ? t("app.user.query.emailPlaceholder")
-              : field.key === "phone"
-                ? t("app.user.query.phonePlaceholder")
-                : field.key === "status"
-                  ? t("copy.query.statusPlaceholder")
-                  : field.placeholder,
-    }))
-
-  if (userPanelMode.value !== "detail") {
-    return baseFields
-  }
-
-  return [
-    ...baseFields,
-    {
-      key: "createdAt",
-      label: t("app.user.field.createdAt"),
-      input: "datetime",
-      disabled: true,
-    },
-    {
-      key: "updatedAt",
-      label: t("app.user.field.updatedAt"),
-      input: "datetime",
-      disabled: true,
-    },
-  ]
-})
-
-const enterpriseUserFormValues = computed<ElyFormValues>(() => {
-  if (userPanelMode.value === "edit") {
-    return { ...userEditForm.value }
-  }
-
-  if (userPanelMode.value === "detail" && selectedUser.value) {
-    return {
-      username: selectedUser.value.username,
-      displayName: selectedUser.value.displayName,
-      email: selectedUser.value.email ?? "",
-      phone: selectedUser.value.phone ?? "",
-      status: selectedUser.value.status,
-      isSuperAdmin: selectedUser.value.isSuperAdmin,
-      lastLoginAt: selectedUser.value.lastLoginAt ?? "",
-      createdAt: selectedUser.value.createdAt,
-      updatedAt: selectedUser.value.updatedAt,
-    }
-  }
-
-  return { ...userCreateForm.value }
-})
-
-const enterpriseRoleFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseRolePage.formFields.value.map((field) => ({
-    ...field,
-    label: localizeRoleFieldLabel(field.key),
-    input:
-      field.key === "description"
-        ? ("textarea" as const)
-        : field.key === "dataScope"
-          ? ("select" as const)
-          : field.input,
-    options:
-      field.key === "status"
-        ? [
-            {
-              label: t("app.role.status.active"),
-              value: "active",
-            },
-            {
-              label: t("app.role.status.disabled"),
-              value: "disabled",
-            },
-          ]
-        : field.key === "dataScope"
-          ? roleDataScopeOptions.value
-          : field.options,
-    placeholder:
-      field.key === "code"
-        ? t("app.role.query.codePlaceholder")
-        : field.key === "name"
-          ? t("app.role.query.namePlaceholder")
-          : field.key === "description"
-            ? t("app.role.query.descriptionPlaceholder")
-            : field.key === "status"
-              ? t("copy.query.statusPlaceholder")
-              : field.placeholder,
-  }))
-
-  if (rolePanelMode.value !== "detail") {
-    return baseFields
-  }
-
-  return [
-    ...baseFields,
-    {
-      key: "createdAt",
-      label: t("app.role.field.createdAt"),
-      input: "datetime",
-      disabled: true,
-    },
-    {
-      key: "updatedAt",
-      label: t("app.role.field.updatedAt"),
-      input: "datetime",
-      disabled: true,
-    },
-  ]
-})
-
-const enterpriseRoleFormValues = computed<ElyFormValues>(() => {
-  if (rolePanelMode.value === "edit") {
-    return {
-      ...roleEditForm.value,
-      description: roleEditForm.value.description ?? "",
-      dataScope: String(roleEditForm.value.dataScope),
-    }
-  }
-
-  if (rolePanelMode.value === "detail" && selectedRole.value) {
-    return {
-      code: selectedRole.value.code,
-      name: selectedRole.value.name,
-      description: selectedRole.value.description ?? "",
-      status: selectedRole.value.status,
-      isSystem: selectedRole.value.isSystem,
-      dataScope: String(selectedRole.value.dataScope),
-      createdAt: selectedRole.value.createdAt,
-      updatedAt: selectedRole.value.updatedAt,
-    }
-  }
-
-  return {
-    ...roleCreateForm.value,
-    description: roleCreateForm.value.description ?? "",
-    dataScope: String(roleCreateForm.value.dataScope),
-  }
-})
-
-const enterpriseSettingFormFields = computed<ElyFormField[]>(() => {
-  const baseFields = enterpriseSettingPage.formFields.value.map((field) => ({
-    ...field,
-    label: localizeSettingFieldLabel(field.key),
-    input: field.key === "description" ? ("textarea" as const) : field.input,
-    options:
-      field.key === "status"
-        ? [
-            {
-              label: t("app.setting.status.active"),
-              value: "active",
-            },
-            {
-              label: t("app.setting.status.disabled"),
-              value: "disabled",
-            },
-          ]
-        : field.options,
-    placeholder:
-      field.key === "key"
-        ? t("app.setting.query.keyPlaceholder")
-        : field.key === "value"
-          ? t("app.setting.query.valuePlaceholder")
-          : field.key === "description"
-            ? t("app.setting.query.descriptionPlaceholder")
-            : field.key === "status"
-              ? t("copy.query.statusPlaceholder")
-              : field.placeholder,
-  }))
-
-  if (settingPanelMode.value !== "detail") {
-    return baseFields
-  }
-
-  return [
-    ...baseFields,
-    {
-      key: "createdAt",
-      label: t("app.setting.field.createdAt"),
-      input: "datetime",
-      disabled: true,
-    },
-    {
-      key: "updatedAt",
-      label: t("app.setting.field.updatedAt"),
-      input: "datetime",
-      disabled: true,
-    },
-  ]
-})
-
-const enterpriseSettingFormValues = computed<ElyFormValues>(() => {
-  if (settingPanelMode.value === "edit") {
-    return {
-      ...settingEditForm.value,
-      description: settingEditForm.value.description ?? "",
-    }
-  }
-
-  if (settingPanelMode.value === "detail" && selectedSetting.value) {
-    return {
-      key: selectedSetting.value.key,
-      value: selectedSetting.value.value,
-      description: selectedSetting.value.description ?? "",
-      status: selectedSetting.value.status,
-      createdAt: selectedSetting.value.createdAt,
-      updatedAt: selectedSetting.value.updatedAt,
-    }
-  }
-
-  return {
-    ...settingCreateForm.value,
-    description: settingCreateForm.value.description ?? "",
-  }
-})
-
-const enterpriseOperationLogDetailFields = computed<ElyFormField[]>(() => [
-  {
-    key: "category",
-    label: t("app.operationLog.field.category"),
-    input: "text",
-    disabled: true,
   },
-  {
-    key: "action",
-    label: t("app.operationLog.field.action"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  cancelPanel: cancelDictionaryPanel,
+  clearWorkspace: clearDictionaryOptions,
+  countLabel: dictionaryCountLabel,
+  dictionaryDetailErrorMessage,
+  dictionaryDetailLoading,
+  dictionaryErrorMessage,
+  dictionaryItems,
+  dictionaryLoading,
+  dictionaryPanelMode,
+  dictionaryQueryValues,
+  dictionaryTypes,
+  filteredDictionaryTypes,
+  formFields: enterpriseDictionaryFormFields,
+  formValues: enterpriseDictionaryFormValues,
+  handleReset: handleDictionaryReset,
+  handleRowClick: handleDictionaryRowClick,
+  handleSearch: handleDictionarySearch,
+  openCreatePanel: openDictionaryCreatePanel,
+  panelDescription: dictionaryPanelDescription,
+  panelTitle: dictionaryPanelTitle,
+  queryFields: enterpriseDictionaryQueryFields,
+  reloadDictionaries,
+  resetQuery: resetDictionaryQuery,
+  selectDictionaryType,
+  selectedDictionaryType,
+  selectedDictionaryTypeDetail,
+  selectedDictionaryTypeId,
+  selectedDictionaryTypeItems,
+  startEdit: startDictionaryEdit,
+  submitForm: submitDictionaryForm,
+  tableColumns: enterpriseDictionaryTableColumns,
+  tableItems: enterpriseDictionaryTableItems,
+} = useDictionaryWorkspace({
+  currentShellTabKey,
+  page: enterpriseDictionaryPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeDictionaryFieldLabel,
+  localizeStatus: localizeDictionaryStatus,
+  canView: canViewDictionaries,
+  canCreate: canCreateDictionaryTypes,
+  canUpdate: canUpdateDictionaryTypes,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "actorUserId",
-    label: t("app.operationLog.field.actorUserId"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  cancelPanel: cancelDepartmentPanel,
+  clearWorkspace: clearDepartmentWorkspace,
+  countLabel: departmentCountLabel,
+  departmentDetail,
+  departmentDetailErrorMessage,
+  departmentDetailLoading,
+  departmentErrorMessage,
+  departmentLoading,
+  departmentPanelMode,
+  departmentQueryValues,
+  filteredDepartmentItems,
+  formFields: enterpriseDepartmentFormFields,
+  formValues: enterpriseDepartmentFormValues,
+  handleReset: handleDepartmentReset,
+  handleRowClick: handleDepartmentRowClick,
+  handleSearch: handleDepartmentSearch,
+  openCreatePanel: openDepartmentCreatePanel,
+  panelDescription: departmentPanelDescription,
+  panelTitle: departmentPanelTitle,
+  parentLookup: departmentParentLookup,
+  queryFields: enterpriseDepartmentQueryFields,
+  reloadDepartments,
+  resetQuery: resetDepartmentQuery,
+  selectDepartment,
+  selectedDepartment,
+  selectedDepartmentDetail,
+  selectedDepartmentId,
+  startEdit: startDepartmentEdit,
+  submitForm: submitDepartmentForm,
+  tableColumns: enterpriseDepartmentTableColumns,
+  tableItems: enterpriseDepartmentTableItems,
+} = useDepartmentWorkspace({
+  currentShellTabKey,
+  page: enterpriseDepartmentPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeDepartmentFieldLabel,
+  localizeStatus: localizeDepartmentStatus,
+  canView: canViewDepartments,
+  canCreate: canCreateDepartments,
+  canUpdate: canUpdateDepartments,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "targetType",
-    label: t("app.operationLog.field.targetType"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  cancelPanel: cancelMenuPanel,
+  clearWorkspace: clearMenuWorkspace,
+  countLabel: menuCountLabel,
+  filteredMenuItems,
+  formFields: enterpriseMenuFormFields,
+  formValues: enterpriseMenuFormValues,
+  handleReset: handleMenuReset,
+  handleRowClick: handleMenuRowClick,
+  handleSearch: handleMenuSearch,
+  menuDetail,
+  menuDetailErrorMessage,
+  menuDetailLoading,
+  menuErrorMessage,
+  menuLoading,
+  menuPanelMode,
+  menuQueryValues,
+  openCreatePanel: openMenuCreatePanel,
+  panelDescription: menuPanelDescription,
+  panelTitle: menuPanelTitle,
+  parentLookup: menuParentLookup,
+  queryFields: enterpriseMenuQueryFields,
+  reloadMenus,
+  resetQuery: resetMenuQuery,
+  selectMenu,
+  selectedMenu,
+  selectedMenuDetail,
+  selectedMenuId,
+  startEdit: startMenuEdit,
+  submitForm: submitMenuForm,
+  tableColumns: enterpriseMenuTableColumns,
+  tableItems: enterpriseMenuTableItems,
+} = useMenuWorkspace({
+  currentShellTabKey,
+  page: enterpriseMenuPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeMenuFieldLabel,
+  localizeType: localizeMenuType,
+  localizeBoolean: localizeMenuBoolean,
+  localizeStatus: localizeMenuStatus,
+  canView: canViewMenus,
+  canCreate: canCreateMenus,
+  canUpdate: canUpdateMenus,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "targetId",
-    label: t("app.operationLog.field.targetId"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  cancelPanel: cancelRolePanel,
+  clearWorkspace: clearRoleWorkspace,
+  countLabel: roleCountLabel,
+  filteredRoleItems,
+  formFields: enterpriseRoleFormFields,
+  formValues: enterpriseRoleFormValues,
+  handleReset: handleRoleReset,
+  handleRowClick: handleRoleRowClick,
+  handleSearch: handleRoleSearch,
+  openCreatePanel: openRoleCreatePanel,
+  panelDescription: rolePanelDescription,
+  panelTitle: rolePanelTitle,
+  queryFields: enterpriseRoleQueryFields,
+  reloadRoles,
+  resetQuery: resetRoleQuery,
+  roleDetail,
+  roleDetailErrorMessage,
+  roleDetailLoading,
+  roleErrorMessage,
+  roleLoading,
+  rolePanelMode,
+  roleQueryValues,
+  selectRole,
+  selectedRole,
+  selectedRoleDetail,
+  selectedRoleId,
+  startEdit: startRoleEdit,
+  submitForm: submitRoleForm,
+  tableColumns: enterpriseRoleTableColumns,
+  tableItems: enterpriseRoleTableItems,
+} = useRoleWorkspace({
+  currentShellTabKey,
+  page: enterpriseRolePage,
+  locale,
+  t,
+  localizeFieldLabel: localizeRoleFieldLabel,
+  localizeStatus: localizeRoleStatus,
+  localizeBoolean: (value) =>
+    value ? t("app.role.boolean.true") : t("app.role.boolean.false"),
+  localizeDataScope: localizeRoleDataScope,
+  canView: canViewRoles,
+  canCreate: canCreateRoles,
+  canUpdate: canUpdateRoles,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "result",
-    label: t("app.operationLog.field.result"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  cancelPanel: cancelTenantPanel,
+  clearWorkspace: clearTenantWorkspace,
+  countLabel: tenantCountLabel,
+  filteredTenantItems,
+  formFields: enterpriseTenantFormFields,
+  formValues: enterpriseTenantFormValues,
+  handleReset: handleTenantReset,
+  handleRowClick: handleTenantRowClick,
+  handleSearch: handleTenantSearch,
+  openCreatePanel: openTenantCreatePanel,
+  panelDescription: tenantPanelDescription,
+  panelTitle: tenantPanelTitle,
+  queryFields: enterpriseTenantQueryFields,
+  reloadTenants,
+  resetQuery: resetTenantQuery,
+  selectTenant,
+  selectedTenant,
+  selectedTenantId,
+  startEdit: startTenantEdit,
+  submitForm: submitTenantForm,
+  tableColumns: enterpriseTenantTableColumns,
+  tableItems: enterpriseTenantTableItems,
+  tenantDetail,
+  tenantDetailErrorMessage,
+  tenantDetailLoading,
+  tenantErrorMessage,
+  tenantLoading,
+  tenantPanelMode,
+  tenantQueryValues,
+  toggleSelectedStatus: toggleSelectedTenantStatus,
+} = useTenantWorkspace({
+  currentShellTabKey,
+  page: enterpriseTenantPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeTenantFieldLabel,
+  localizeStatus: localizeTenantStatus,
+  canView: canViewTenants,
+  canCreate: canCreateTenants,
+  canUpdate: canUpdateTenants,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "requestId",
-    label: t("app.operationLog.field.requestId"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  cancelPanel: cancelUserPanel,
+  clearWorkspace: clearUserWorkspace,
+  countLabel: userCountLabel,
+  filteredUserItems,
+  formFields: enterpriseUserFormFields,
+  formValues: enterpriseUserFormValues,
+  handleReset: handleUserReset,
+  handleRowClick: handleUserRowClick,
+  handleSearch: handleUserSearch,
+  openCreatePanel: openUserCreatePanel,
+  panelDescription: userPanelDescription,
+  panelTitle: userPanelTitle,
+  queryFields: enterpriseUserQueryFields,
+  reloadUsers,
+  selectedUser,
+  selectedUserId,
+  startEdit: startUserEdit,
+  startPasswordReset: startUserPasswordReset,
+  submitForm: submitUserForm,
+  submitPasswordReset: submitUserPasswordReset,
+  tableColumns: enterpriseUserTableColumns,
+  tableItems: enterpriseUserTableItems,
+  userErrorMessage,
+  userLoading,
+  userPanelMode,
+  userPasswordInput,
+  userQueryValues,
+} = useUserWorkspace({
+  currentShellTabKey,
+  page: enterpriseUserPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeUserFieldLabel,
+  localizeStatus: localizeUserStatus,
+  localizeBoolean: (value) =>
+    value ? t("app.user.boolean.true") : t("app.user.boolean.false"),
+  canView: canViewUsers,
+  canCreate: canCreateUsers,
+  canUpdate: canUpdateUsers,
+  canResetPassword: canResetUserPasswords,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "ip",
-    label: t("app.operationLog.field.ip"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  clearWorkflowDefinitions,
+  handleWorkflowDefinitionSelect,
+  reloadWorkflowDefinitions,
+  resetWorkflowFilters,
+  selectWorkflowDefinition,
+  selectedWorkflowDefinition,
+  selectedWorkflowDefinitionId,
+  setWorkflowStatusFilter,
+  workflowDefinitionCards,
+  workflowDefinitionDetailCards,
+  workflowDefinitions,
+  workflowDetailErrorMessage,
+  workflowDetailLoading,
+  workflowErrorMessage,
+  workflowFilterSummary,
+  workflowLoading,
+  workflowQuery,
+  workflowStatusFilter,
+  workflowVersionHistoryCards,
+} = useWorkflowWorkspace({
+  currentShellTabKey,
+  locale,
+  t,
+  localizeStatus: localizeWorkflowStatus,
+  localizeNodeType: localizeWorkflowNodeType,
+  describeNode: describeWorkflowNode,
+  canView: canViewWorkflowDefinitions,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "userAgent",
-    label: t("app.operationLog.field.userAgent"),
-    input: "text",
-    disabled: true,
+})
+
+const {
+  cancelPanel: cancelSettingPanel,
+  clearWorkspace: clearSettingWorkspace,
+  countLabel: settingCountLabel,
+  filteredSettingItems,
+  formFields: enterpriseSettingFormFields,
+  formValues: enterpriseSettingFormValues,
+  handleReset: handleSettingReset,
+  handleRowClick: handleSettingRowClick,
+  handleSearch: handleSettingSearch,
+  openCreatePanel: openSettingCreatePanel,
+  panelDescription: settingPanelDescription,
+  panelTitle: settingPanelTitle,
+  queryFields: enterpriseSettingQueryFields,
+  reloadSettings,
+  resetQuery: resetSettingQuery,
+  selectedSetting,
+  selectedSettingId,
+  selectSetting,
+  settingDetail,
+  settingDetailErrorMessage,
+  settingDetailLoading,
+  settingErrorMessage,
+  settingLoading,
+  settingPanelMode,
+  settingQueryValues,
+  startEdit: startSettingEdit,
+  submitForm: submitSettingForm,
+  tableColumns: enterpriseSettingTableColumns,
+  tableItems: enterpriseSettingTableItems,
+} = useSettingWorkspace({
+  currentShellTabKey,
+  page: enterpriseSettingPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeSettingFieldLabel,
+  localizeStatus: localizeSettingStatus,
+  canView: canViewSettings,
+  canCreate: canCreateSettings,
+  canUpdate: canUpdateSettings,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
   },
-  {
-    key: "createdAt",
-    label: t("app.operationLog.field.createdAt"),
-    input: "datetime",
-    disabled: true,
-  },
-])
-
-const enterpriseOperationLogDetailValues = computed<ElyFormValues>(() => {
-  if (!selectedOperationLog.value) {
-    return {}
-  }
-
-  return {
-    category: selectedOperationLog.value.category,
-    action: selectedOperationLog.value.action,
-    actorUserId: selectedOperationLog.value.actorUserId ?? "",
-    targetType: selectedOperationLog.value.targetType ?? "",
-    targetId: selectedOperationLog.value.targetId ?? "",
-    result: localizeOperationLogResult(selectedOperationLog.value.result),
-    requestId: selectedOperationLog.value.requestId ?? "",
-    ip: selectedOperationLog.value.ip ?? "",
-    userAgent: selectedOperationLog.value.userAgent ?? "",
-    createdAt: selectedOperationLog.value.createdAt,
-  }
-})
-
-const operationLogDetailsText = computed(() => {
-  if (!selectedOperationLog.value?.details) {
-    return t("app.operationLog.meta.empty")
-  }
-
-  return JSON.stringify(selectedOperationLog.value.details, null, 2)
-})
-
-const enterprisePanelTitle = computed(() => {
-  if (deleteConfirmId.value && selectedCustomer.value) {
-    return t("app.panelTitle.delete", { name: selectedCustomer.value.name })
-  }
-
-  if (enterpriseFormMode.value === "edit") {
-    return t("app.panelTitle.edit")
-  }
-
-  if (enterpriseFormMode.value === "detail" && selectedCustomer.value) {
-    return selectedCustomer.value.name
-  }
-
-  return t("app.panelTitle.create")
-})
-
-const dictionaryPanelTitle = computed(() => {
-  if (dictionaryPanelMode.value === "edit") {
-    return t("app.dictionary.panelTitle.edit")
-  }
-
-  if (dictionaryPanelMode.value === "create") {
-    return t("app.dictionary.panelTitle.create")
-  }
-
-  return (
-    selectedDictionaryType.value?.name ??
-    t("app.dictionary.panelTitle.detailFallback")
-  )
-})
-
-const dictionaryPanelDescription = computed(() => {
-  if (dictionaryPanelMode.value === "edit") {
-    return t("app.dictionary.panelDesc.edit")
-  }
-
-  if (dictionaryPanelMode.value === "create") {
-    return t("app.dictionary.panelDesc.create")
-  }
-
-  return selectedDictionaryType.value
-    ? t("app.dictionary.panelDesc.detail")
-    : t("app.dictionary.detailEmptyDescription")
-})
-
-const departmentPanelTitle = computed(() => {
-  if (departmentPanelMode.value === "edit") {
-    return t("app.department.panelTitle.edit")
-  }
-
-  if (departmentPanelMode.value === "create") {
-    return t("app.department.panelTitle.create")
-  }
-
-  return (
-    selectedDepartment.value?.name ??
-    t("app.department.panelTitle.detailFallback")
-  )
-})
-
-const departmentPanelDescription = computed(() => {
-  if (departmentPanelMode.value === "edit") {
-    return t("app.department.panelDesc.edit")
-  }
-
-  if (departmentPanelMode.value === "create") {
-    return t("app.department.panelDesc.create")
-  }
-
-  return selectedDepartment.value
-    ? t("app.department.panelDesc.detail")
-    : t("app.department.detailEmptyDescription")
-})
-
-const menuPanelTitle = computed(() => {
-  if (menuPanelMode.value === "edit") {
-    return t("app.menu.panelTitle.edit")
-  }
-
-  if (menuPanelMode.value === "create") {
-    return t("app.menu.panelTitle.create")
-  }
-
-  return selectedMenu.value?.name ?? t("app.menu.panelTitle.detailFallback")
-})
-
-const menuPanelDescription = computed(() => {
-  if (menuPanelMode.value === "edit") {
-    return t("app.menu.panelDesc.edit")
-  }
-
-  if (menuPanelMode.value === "create") {
-    return t("app.menu.panelDesc.create")
-  }
-
-  return selectedMenu.value
-    ? t("app.menu.panelDesc.detail")
-    : t("app.menu.detailEmptyDescription")
-})
-
-const notificationPanelTitle = computed(() => {
-  if (notificationPanelMode.value === "create") {
-    return t("app.notification.panelTitle.create")
-  }
-
-  return (
-    selectedNotification.value?.title ??
-    t("app.notification.panelTitle.detailFallback")
-  )
-})
-
-const notificationPanelDescription = computed(() =>
-  notificationPanelMode.value === "create"
-    ? t("app.notification.panelDesc.create")
-    : selectedNotification.value
-      ? t("app.notification.panelDesc.detail")
-      : t("app.notification.detailEmptyDescription"),
-)
-
-const operationLogPanelTitle = computed(() => {
-  if (!selectedOperationLog.value) {
-    return t("app.operationLog.panelTitle.detailFallback")
-  }
-
-  return `${selectedOperationLog.value.category} / ${selectedOperationLog.value.action}`
-})
-
-const operationLogPanelDescription = computed(() =>
-  selectedOperationLog.value
-    ? t("app.operationLog.panelDesc.detail")
-    : t("app.operationLog.detailEmptyDescription"),
-)
-
-const rolePanelTitle = computed(() => {
-  if (rolePanelMode.value === "edit") {
-    return t("app.role.panelTitle.edit")
-  }
-
-  if (rolePanelMode.value === "create") {
-    return t("app.role.panelTitle.create")
-  }
-
-  return selectedRole.value?.name ?? t("app.role.panelTitle.detailFallback")
-})
-
-const rolePanelDescription = computed(() => {
-  if (rolePanelMode.value === "edit") {
-    return t("app.role.panelDesc.edit")
-  }
-
-  if (rolePanelMode.value === "create") {
-    return t("app.role.panelDesc.create")
-  }
-
-  return selectedRole.value
-    ? t("app.role.panelDesc.detail")
-    : t("app.role.detailEmptyDescription")
-})
-
-const settingPanelTitle = computed(() => {
-  if (settingPanelMode.value === "edit") {
-    return t("app.setting.panelTitle.edit")
-  }
-
-  if (settingPanelMode.value === "create") {
-    return t("app.setting.panelTitle.create")
-  }
-
-  return (
-    selectedSetting.value?.key ?? t("app.setting.panelTitle.detailFallback")
-  )
-})
-
-const settingPanelDescription = computed(() => {
-  if (settingPanelMode.value === "edit") {
-    return t("app.setting.panelDesc.edit")
-  }
-
-  if (settingPanelMode.value === "create") {
-    return t("app.setting.panelDesc.create")
-  }
-
-  return selectedSetting.value
-    ? t("app.setting.panelDesc.detail")
-    : t("app.setting.detailEmptyDescription")
-})
-
-const enterprisePanelDescription = computed(() => {
-  if (deleteConfirmId.value && selectedCustomer.value) {
-    return t("app.panelDesc.delete")
-  }
-
-  if (enterpriseFormMode.value === "edit") {
-    return t("app.panelDesc.edit")
-  }
-
-  if (enterpriseFormMode.value === "detail" && selectedCustomer.value) {
-    return t("app.panelDesc.detail")
-  }
-
-  return t("app.panelDesc.create")
-})
-
-const userPanelTitle = computed(() => {
-  if (userPanelMode.value === "edit") {
-    return t("app.user.panelTitle.edit")
-  }
-
-  if (userPanelMode.value === "create") {
-    return t("app.user.panelTitle.create")
-  }
-
-  if (userPanelMode.value === "reset") {
-    return selectedUser.value
-      ? t("app.user.panelTitle.reset", {
-          name: selectedUser.value.displayName || selectedUser.value.username,
-        })
-      : t("app.user.panelTitle.resetFallback")
-  }
-
-  return (
-    selectedUser.value?.displayName ??
-    selectedUser.value?.username ??
-    t("app.user.panelTitle.detailFallback")
-  )
-})
-
-const userPanelDescription = computed(() => {
-  if (userPanelMode.value === "edit") {
-    return t("app.user.panelDesc.edit")
-  }
-
-  if (userPanelMode.value === "create") {
-    return t("app.user.panelDesc.create")
-  }
-
-  if (userPanelMode.value === "reset") {
-    return t("app.user.panelDesc.reset")
-  }
-
-  return selectedUser.value
-    ? t("app.user.panelDesc.detail")
-    : t("app.user.detailEmptyDescription")
 })
 
 const authStatusState = computed(() => {
@@ -4144,6 +2338,10 @@ const currentWorkspaceItemCount = computed(() => {
     return filteredSettingItems.value.length
   }
 
+  if (isTenantWorkspace.value) {
+    return filteredTenantItems.value.length
+  }
+
   if (isUserWorkspace.value) {
     return filteredUserItems.value.length
   }
@@ -4152,12 +2350,28 @@ const currentWorkspaceItemCount = computed(() => {
     return workflowDefinitionCards.value.length
   }
 
+  if (isFileWorkspace.value) {
+    return filteredFileItems.value.length
+  }
+
+  if (isGeneratorPreviewWorkspace.value) {
+    return generatorPreviewFiles.value.length
+  }
+
   return 0
 })
 
 const currentWorkspaceItemHint = computed(() => {
+  if (isGeneratorPreviewWorkspace.value) {
+    return t("app.generatorPreview.statsHint")
+  }
+
   if (isWorkflowDefinitionsWorkspace.value) {
     return t("app.workflow.statsHint")
+  }
+
+  if (isFileWorkspace.value) {
+    return t("app.file.statsHint")
   }
 
   if (isUserWorkspace.value) {
@@ -4190,6 +2404,10 @@ const currentWorkspaceItemHint = computed(() => {
 
   if (isSettingWorkspace.value) {
     return t("app.setting.statsHint")
+  }
+
+  if (isTenantWorkspace.value) {
+    return t("app.tenant.statsHint")
   }
 
   if (currentWorkspaceKind.value === "placeholder") {
@@ -4240,48 +2458,78 @@ const enterpriseShellTabs = computed<ElyShellTab[]>(() => [
         ? t("app.dictionary.tabsHint", {
             count: filteredDictionaryTypes.value.length,
           })
-        : isDepartmentWorkspace.value
-          ? t("app.department.tabsHint", {
-              count: filteredDepartmentItems.value.length,
+        : isFileWorkspace.value
+          ? t("app.file.tabsHint", {
+              count: filteredFileItems.value.length,
             })
-          : isMenuWorkspace.value
-            ? t("app.menu.tabsHint", {
-                count: filteredMenuItems.value.length,
+          : isDepartmentWorkspace.value
+            ? t("app.department.tabsHint", {
+                count: filteredDepartmentItems.value.length,
               })
-            : isNotificationWorkspace.value
-              ? t("app.notification.tabsHint", {
-                  count: filteredNotificationItems.value.length,
+            : isMenuWorkspace.value
+              ? t("app.menu.tabsHint", {
+                  count: filteredMenuItems.value.length,
                 })
-              : isOperationLogWorkspace.value
-                ? t("app.operationLog.tabsHint", {
-                    count: filteredOperationLogItems.value.length,
+              : isNotificationWorkspace.value
+                ? t("app.notification.tabsHint", {
+                    count: filteredNotificationItems.value.length,
                   })
-                : isRoleWorkspace.value
-                  ? t("app.role.tabsHint", {
-                      count: filteredRoleItems.value.length,
+                : isOperationLogWorkspace.value
+                  ? t("app.operationLog.tabsHint", {
+                      count: filteredOperationLogItems.value.length,
                     })
-                  : isSettingWorkspace.value
-                    ? t("app.setting.tabsHint", {
-                        count: filteredSettingItems.value.length,
+                  : isRoleWorkspace.value
+                    ? t("app.role.tabsHint", {
+                        count: filteredRoleItems.value.length,
                       })
-                    : isUserWorkspace.value
-                      ? t("app.user.tabsHint", {
-                          count: filteredUserItems.value.length,
+                    : isSettingWorkspace.value
+                      ? t("app.setting.tabsHint", {
+                          count: filteredSettingItems.value.length,
                         })
-                      : isWorkflowDefinitionsWorkspace.value
-                        ? t("app.workflow.tabsHint", {
-                            count: workflowDefinitionCards.value.length,
+                      : isTenantWorkspace.value
+                        ? t("app.tenant.tabsHint", {
+                            count: filteredTenantItems.value.length,
                           })
-                        : currentNavigationPath.value,
+                        : isUserWorkspace.value
+                          ? t("app.user.tabsHint", {
+                              count: filteredUserItems.value.length,
+                            })
+                          : isGeneratorPreviewWorkspace.value
+                            ? t("app.generatorPreview.tabsHint", {
+                                count: generatorPreviewFiles.value.length,
+                              })
+                            : isWorkflowDefinitionsWorkspace.value
+                              ? t("app.workflow.tabsHint", {
+                                  count: workflowDefinitionCards.value.length,
+                                })
+                              : currentNavigationPath.value,
   },
   {
     key: "runtime",
     label: t("app.tabs.runtime"),
-    hint: currentModuleStatusLabel.value,
+    hint:
+      authStatusState.value === "offline"
+        ? t("app.tabs.runtimePreview")
+        : t("app.tabs.runtimeSessionAware"),
   },
 ])
 
 const enterpriseSelectedTabKey = computed(() => currentShellTabKey.value)
+const isRuntimeShellTab = computed(
+  () => enterpriseSelectedTabKey.value === "runtime",
+)
+
+const shellWorkspaceTitle = computed(() =>
+  isRuntimeShellTab.value
+    ? t("app.runtime.title")
+    : currentWorkspaceTitle.value,
+)
+
+const shellWorkspaceDescription = computed(() =>
+  isRuntimeShellTab.value
+    ? t("app.runtime.copy")
+    : currentWorkspaceDescription.value,
+)
 
 const enterpriseShellUser = computed<ElyShellUserSummary | null>(() =>
   authIdentity.value
@@ -4332,69 +2580,6 @@ const enterpriseShellCopy = computed(() => ({
   presetEyebrow: t("copy.shell.presetEyebrow"),
   fallbackWorkspace: t("copy.crud.emptyDescription"),
 }))
-
-const customerCountLabel = computed(() =>
-  t("app.workspace.countLabel", {
-    visible: customerItems.value.length,
-    total: customerListTotal.value,
-    page: customerListPage.value,
-    totalPages: customerListTotalPages.value,
-  }),
-)
-
-const canGoToPreviousCustomerPage = computed(() => customerListPage.value > 1)
-const canGoToNextCustomerPage = computed(
-  () => customerListPage.value < customerListTotalPages.value,
-)
-const canJumpToCustomerPage = computed(() => {
-  const nextPage = Number.parseInt(customerPageInputValue.value, 10)
-
-  return (
-    Number.isFinite(nextPage) &&
-    nextPage >= 1 &&
-    nextPage <= customerListTotalPages.value &&
-    nextPage !== customerListPage.value
-  )
-})
-const customerPaginationSummary = computed(() =>
-  t("app.workspace.paginationSummary", {
-    page: customerListPage.value,
-    totalPages: customerListTotalPages.value,
-    total: customerListTotal.value,
-  }),
-)
-const customerPageSizeOptions = computed(() => [
-  {
-    label: t("app.workspace.paginationPageSize20"),
-    value: 20,
-  },
-  {
-    label: t("app.workspace.paginationPageSize50"),
-    value: 50,
-  },
-  {
-    label: t("app.workspace.paginationPageSize100"),
-    value: 100,
-  },
-])
-const customerSortOptions = computed(() => [
-  {
-    label: t("app.workspace.paginationSortCreatedDesc"),
-    value: "createdAt:desc",
-  },
-  {
-    label: t("app.workspace.paginationSortCreatedAsc"),
-    value: "createdAt:asc",
-  },
-  {
-    label: t("app.workspace.paginationSortNameAsc"),
-    value: "name:asc",
-  },
-  {
-    label: t("app.workspace.paginationSortNameDesc"),
-    value: "name:desc",
-  },
-])
 
 const currentQuerySummary = computed(() => {
   if (isDictionaryWorkspace.value) {
@@ -4796,99 +2981,42 @@ const currentQuerySummary = computed(() => {
     return fragments.length > 0 ? fragments.join(" / ") : t("app.filter.none")
   }
 
-  const fragments: string[] = []
+  if (isTenantWorkspace.value) {
+    const fragments: string[] = []
 
-  if (
-    typeof enterpriseQueryValues.value.name === "string" &&
-    enterpriseQueryValues.value.name.trim()
-  ) {
-    fragments.push(
-      `${t("app.filter.name")}: ${enterpriseQueryValues.value.name.trim()}`,
-    )
+    if (
+      typeof tenantQueryValues.value.code === "string" &&
+      tenantQueryValues.value.code.trim()
+    ) {
+      fragments.push(
+        `${t("app.tenant.field.code")}: ${tenantQueryValues.value.code.trim()}`,
+      )
+    }
+
+    if (
+      typeof tenantQueryValues.value.name === "string" &&
+      tenantQueryValues.value.name.trim()
+    ) {
+      fragments.push(
+        `${t("app.tenant.field.name")}: ${tenantQueryValues.value.name.trim()}`,
+      )
+    }
+
+    if (
+      typeof tenantQueryValues.value.status === "string" &&
+      tenantQueryValues.value.status
+    ) {
+      fragments.push(
+        `${t("app.tenant.field.status")}: ${localizeTenantStatus(
+          tenantQueryValues.value.status,
+        )}`,
+      )
+    }
+
+    return fragments.length > 0 ? fragments.join(" / ") : t("app.filter.none")
   }
 
-  if (
-    typeof enterpriseQueryValues.value.status === "string" &&
-    enterpriseQueryValues.value.status
-  ) {
-    fragments.push(
-      `${t("app.filter.status")}: ${localizeCustomerStatus(
-        enterpriseQueryValues.value.status,
-      )}`,
-    )
-  }
-
-  fragments.push(
-    `${t("app.filter.pageSize")}: ${customerListPageSize.value}`,
-    `${t("app.filter.sort")}: ${customerSortOptions.value.find((option) => option.value === customerListSortValue.value)?.label ?? customerListSortValue.value}`,
-  )
-
-  return fragments.length > 0 ? fragments.join(" / ") : t("app.filter.none")
-})
-
-const filteredWorkflowDefinitions = computed(() => {
-  return filterWorkflowDefinitions(
-    workflowDefinitions.value,
-    workflowQuery.value,
-    workflowStatusFilter.value,
-  )
-})
-
-const workflowDefinitionCards = computed(() =>
-  filteredWorkflowDefinitions.value.map((definition) => ({
-    ...definition,
-    updatedAtLabel: new Date(definition.updatedAt).toLocaleString(locale.value),
-    statusLabel: localizeWorkflowStatus(definition.status),
-    nodeCount: definition.definition.nodes.length,
-    edgeCount: definition.definition.edges.length,
-  })),
-)
-
-const workflowDefinitionDetailCards = computed(
-  () =>
-    selectedWorkflowDefinition.value?.definition.nodes.map((node) => ({
-      id: node.id,
-      name: node.name,
-      typeLabel: localizeWorkflowNodeType(node.type),
-      description: describeWorkflowNode(node),
-    })) ?? [],
-)
-
-const workflowVersionHistoryCards = computed(() => {
-  return listWorkflowDefinitionVersions(
-    workflowDefinitions.value,
-    selectedWorkflowDefinition.value?.key,
-  ).map((definition) => ({
-    ...definition,
-    updatedAtLabel: new Date(definition.updatedAt).toLocaleString(locale.value),
-    statusLabel: localizeWorkflowStatus(definition.status),
-    nodeCount: definition.definition.nodes.length,
-    edgeCount: definition.definition.edges.length,
-  }))
-})
-
-const workflowFilterSummary = computed(() => {
-  const fragments: string[] = []
-
-  if (workflowQuery.value.trim().length > 0) {
-    fragments.push(
-      t("app.workflow.filter.querySummary", {
-        value: workflowQuery.value.trim(),
-      }),
-    )
-  }
-
-  if (workflowStatusFilter.value !== "all") {
-    fragments.push(
-      t("app.workflow.filter.statusSummary", {
-        value: localizeWorkflowStatus(workflowStatusFilter.value),
-      }),
-    )
-  }
-
-  return fragments.length > 0
-    ? fragments.join(" / ")
-    : t("app.workflow.filter.none")
+  return customerQuerySummary.value
 })
 
 const openCustomerWorkspace = () => {
@@ -4897,6 +3025,10 @@ const openCustomerWorkspace = () => {
   }
 
   currentMenuKey.value = customerNavigationItem.value.id
+  currentShellTabKey.value = "workspace"
+}
+
+const openCurrentWorkspaceTab = () => {
   currentShellTabKey.value = "workspace"
 }
 
@@ -4949,7 +3081,6 @@ watch(
 
     if (items.length === 0) {
       selectedDictionaryTypeId.value = null
-      dictionaryTypeDetail.value = null
 
       if (canCreateDictionaryTypes.value) {
         dictionaryPanelMode.value = "create"
@@ -5109,11 +3240,19 @@ watch(
       return
     }
 
+    const nextOperationLogId = resolveOperationLogSelection(
+      items,
+      selectedOperationLogId.value,
+    )
+    const nextOperationLog = items.find(
+      (item) => item.id === nextOperationLogId,
+    )
+
     if (
-      !selectedOperationLogId.value ||
-      !items.some((item) => item.id === selectedOperationLogId.value)
+      nextOperationLog &&
+      nextOperationLogId !== selectedOperationLogId.value
     ) {
-      await selectOperationLog(items[0])
+      await selectOperationLog(nextOperationLog)
     }
   },
   {
@@ -5177,11 +3316,48 @@ watch(
       return
     }
 
+    const nextSettingId = resolveSettingSelection(
+      items,
+      selectedSettingId.value,
+    )
+    const nextSetting = items.find((item) => item.id === nextSettingId)
+
+    if (nextSetting && nextSettingId !== selectedSettingId.value) {
+      await selectSetting(nextSetting)
+    }
+  },
+  {
+    immediate: true,
+  },
+)
+
+watch(
+  filteredTenantItems,
+  async (items) => {
     if (
-      !selectedSettingId.value ||
-      !items.some((item) => item.id === selectedSettingId.value)
+      !isTenantWorkspace.value ||
+      tenantLoading.value ||
+      tenantPanelMode.value !== "detail"
     ) {
-      await selectSetting(items[0])
+      return
+    }
+
+    if (items.length === 0) {
+      selectedTenantId.value = null
+      tenantDetail.value = null
+
+      if (canCreateTenants.value) {
+        tenantPanelMode.value = "create"
+      }
+
+      return
+    }
+
+    if (
+      !selectedTenantId.value ||
+      !items.some((item) => item.id === selectedTenantId.value)
+    ) {
+      await selectTenant(items[0])
     }
   },
   {
@@ -5263,383 +3439,6 @@ const isRecoverableAuthError = (error: unknown) =>
     error.message.includes("[AUTH_ACCESS_TOKEN_REQUIRED]") ||
     error.message.includes("[AUTH_ACCESS_TOKEN_INVALID]"))
 
-const resetCustomerActions = () => {
-  editingId.value = null
-  deleteConfirmId.value = null
-}
-
-const clearDictionaryOptions = () => {
-  dictionaryTypes.value = []
-  dictionaryItems.value = []
-  dictionaryTypeDetail.value = null
-  selectedDictionaryTypeId.value = null
-  dictionaryErrorMessage.value = ""
-  dictionaryDetailErrorMessage.value = ""
-  dictionaryPanelMode.value = "detail"
-  resetDictionaryPanelInputs()
-}
-
-const clearNotificationWorkspace = () => {
-  notificationItems.value = []
-  notificationDetail.value = null
-  selectedNotificationId.value = null
-  notificationErrorMessage.value = ""
-  notificationDetailErrorMessage.value = ""
-  notificationPanelMode.value = "detail"
-  resetNotificationPanelInputs()
-}
-
-const clearWorkflowDefinitions = () => {
-  workflowDefinitions.value = []
-  selectedWorkflowDefinitionId.value = null
-  workflowDefinitionDetail.value = null
-  workflowDetailErrorMessage.value = ""
-}
-
-const resetUserPanelInputs = () => {
-  userCreateForm.value = createDefaultUserDraft()
-  userEditForm.value = createDefaultUserDraft()
-  userPasswordInput.value = ""
-}
-
-const resetDictionaryPanelInputs = () => {
-  dictionaryCreateForm.value = createDefaultDictionaryTypeDraft()
-  dictionaryEditForm.value = createDefaultDictionaryTypeDraft()
-}
-
-const resetNotificationPanelInputs = () => {
-  notificationCreateForm.value = createDefaultNotificationDraft()
-}
-
-const resetDepartmentPanelInputs = () => {
-  departmentCreateForm.value = createDefaultDepartmentDraft()
-  departmentEditForm.value = createDefaultDepartmentDraft()
-}
-
-const resetMenuPanelInputs = () => {
-  menuCreateForm.value = createDefaultMenuDraft()
-  menuEditForm.value = createDefaultMenuDraft()
-}
-
-const resetRolePanelInputs = () => {
-  roleCreateForm.value = createDefaultRoleDraft()
-  roleEditForm.value = createDefaultRoleDraft()
-}
-
-const resetSettingPanelInputs = () => {
-  settingCreateForm.value = createDefaultSettingDraft()
-  settingEditForm.value = createDefaultSettingDraft()
-}
-
-const clearDepartmentWorkspace = () => {
-  departmentItems.value = []
-  departmentDetail.value = null
-  selectedDepartmentId.value = null
-  departmentErrorMessage.value = ""
-  departmentDetailErrorMessage.value = ""
-  departmentPanelMode.value = "detail"
-  resetDepartmentPanelInputs()
-}
-
-const clearMenuWorkspace = () => {
-  menuItems.value = []
-  menuDetail.value = null
-  selectedMenuId.value = null
-  menuErrorMessage.value = ""
-  menuDetailErrorMessage.value = ""
-  menuPanelMode.value = "detail"
-  resetMenuPanelInputs()
-}
-
-const clearOperationLogWorkspace = () => {
-  operationLogItems.value = []
-  operationLogDetail.value = null
-  selectedOperationLogId.value = null
-  operationLogErrorMessage.value = ""
-  operationLogDetailErrorMessage.value = ""
-}
-
-const clearRoleWorkspace = () => {
-  roleItems.value = []
-  roleDetail.value = null
-  selectedRoleId.value = null
-  roleErrorMessage.value = ""
-  roleDetailErrorMessage.value = ""
-  rolePanelMode.value = "detail"
-  resetRolePanelInputs()
-}
-
-const clearSettingWorkspace = () => {
-  settingItems.value = []
-  settingDetail.value = null
-  selectedSettingId.value = null
-  settingErrorMessage.value = ""
-  settingDetailErrorMessage.value = ""
-  settingPanelMode.value = "detail"
-  resetSettingPanelInputs()
-}
-
-const clearUserWorkspace = () => {
-  userItems.value = []
-  selectedUserId.value = null
-  userErrorMessage.value = ""
-  userPanelMode.value = "detail"
-  resetUserPanelInputs()
-}
-
-const selectWorkflowDefinition = async (
-  definition: WorkflowDefinitionRecord,
-) => {
-  currentShellTabKey.value = "workspace"
-  selectedWorkflowDefinitionId.value = definition.id
-  workflowDefinitionDetail.value = definition
-  workflowDetailLoading.value = true
-  workflowDetailErrorMessage.value = ""
-
-  try {
-    workflowDefinitionDetail.value = await fetchWorkflowDefinitionById(
-      definition.id,
-    )
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    workflowDetailErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.loadWorkflowDefinitions")
-  } finally {
-    workflowDetailLoading.value = false
-  }
-}
-
-const reloadWorkflowDefinitions = async () => {
-  if (!canViewWorkflowDefinitions.value) {
-    clearWorkflowDefinitions()
-    return
-  }
-
-  workflowLoading.value = true
-  workflowErrorMessage.value = ""
-  workflowDetailErrorMessage.value = ""
-
-  try {
-    const payload = await fetchWorkflowDefinitions()
-    workflowDefinitions.value = payload.items
-
-    if (payload.items.length === 0) {
-      selectedWorkflowDefinitionId.value = null
-      workflowDefinitionDetail.value = null
-      return
-    }
-
-    const nextDefinition =
-      payload.items.find(
-        (definition) => definition.id === selectedWorkflowDefinitionId.value,
-      ) ?? payload.items[0]
-
-    if (nextDefinition) {
-      await selectWorkflowDefinition(nextDefinition)
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    clearWorkflowDefinitions()
-    workflowErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.loadWorkflowDefinitions")
-  } finally {
-    workflowLoading.value = false
-  }
-}
-
-const selectNotification = async (notification: NotificationRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedNotificationId.value = notification.id
-  notificationDetail.value = notification
-  notificationDetailLoading.value = true
-  notificationDetailErrorMessage.value = ""
-
-  try {
-    notificationDetail.value = await fetchNotificationById(notification.id)
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    notificationDetailErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.loadNotificationDetail")
-  } finally {
-    notificationDetailLoading.value = false
-  }
-}
-
-const reloadNotifications = async () => {
-  if (!canViewNotifications.value) {
-    clearNotificationWorkspace()
-    return
-  }
-
-  notificationLoading.value = true
-  notificationErrorMessage.value = ""
-  notificationDetailErrorMessage.value = ""
-
-  try {
-    const payload = await fetchNotifications(notificationListQuery.value)
-    notificationItems.value = payload.items
-
-    if (payload.items.length === 0) {
-      selectedNotificationId.value = null
-      notificationDetail.value = null
-
-      if (canCreateNotifications.value) {
-        notificationPanelMode.value = "create"
-      }
-
-      return
-    }
-
-    if (
-      selectedNotificationId.value &&
-      !payload.items.some((item) => item.id === selectedNotificationId.value)
-    ) {
-      selectedNotificationId.value = payload.items[0]?.id ?? null
-    }
-
-    if (notificationPanelMode.value !== "create") {
-      const nextNotification =
-        payload.items.find(
-          (item) => item.id === selectedNotificationId.value,
-        ) ?? payload.items[0]
-
-      if (nextNotification) {
-        await selectNotification(nextNotification)
-      }
-    }
-  } catch (error) {
-    clearNotificationWorkspace()
-
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    notificationErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadNotifications")
-  } finally {
-    notificationLoading.value = false
-  }
-}
-
-const openCreatePanel = () => {
-  if (!canCreateCustomers.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  resetCustomerActions()
-  customerForm.value = createDefaultCustomerDraft()
-  selectedCustomerId.value = null
-  enterpriseFormMode.value = "create"
-}
-
-const focusCustomer = (customer: CustomerRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedCustomerId.value = customer.id
-  resetCustomerActions()
-  enterpriseFormMode.value = "detail"
-}
-
-const reloadDictionaries = async () => {
-  if (!canViewDictionaries.value) {
-    clearDictionaryOptions()
-    return
-  }
-
-  dictionaryLoading.value = true
-  dictionaryErrorMessage.value = ""
-
-  try {
-    const [typePayload, itemPayload] = await Promise.all([
-      fetchDictionaryTypes(),
-      fetchDictionaryItems(),
-    ])
-
-    dictionaryTypes.value = typePayload.items
-    dictionaryItems.value = itemPayload.items
-
-    if (typePayload.items.length === 0) {
-      dictionaryItems.value = []
-      selectedDictionaryTypeId.value = null
-      dictionaryTypeDetail.value = null
-
-      if (canCreateDictionaryTypes.value) {
-        dictionaryPanelMode.value = "create"
-      }
-
-      return
-    }
-
-    if (
-      selectedDictionaryTypeId.value &&
-      !typePayload.items.some(
-        (type) => type.id === selectedDictionaryTypeId.value,
-      )
-    ) {
-      selectedDictionaryTypeId.value = typePayload.items[0]?.id ?? null
-    }
-
-    if (dictionaryPanelMode.value !== "create") {
-      const nextType =
-        typePayload.items.find(
-          (type) => type.id === selectedDictionaryTypeId.value,
-        ) ?? typePayload.items[0]
-
-      if (nextType) {
-        await selectDictionaryType(nextType)
-      }
-    }
-  } catch (error) {
-    clearDictionaryOptions()
-
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-    dictionaryErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadDictionaries")
-  } finally {
-    dictionaryLoading.value = false
-  }
-}
-
-const selectDictionaryType = async (type: DictionaryTypeRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedDictionaryTypeId.value = type.id
-  dictionaryTypeDetail.value = null
-  dictionaryDetailLoading.value = true
-  dictionaryDetailErrorMessage.value = ""
-
-  try {
-    dictionaryTypeDetail.value = await fetchDictionaryTypeById(type.id)
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    dictionaryDetailErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.loadDictionaryDetail")
-  } finally {
-    dictionaryDetailLoading.value = false
-  }
-}
-
 const restoreSession = async () => {
   if (!authModuleReady.value) {
     authIdentity.value = null
@@ -5665,468 +3464,6 @@ const restoreSession = async () => {
   }
 }
 
-const reloadCustomers = async () => {
-  if (!canViewCustomers.value) {
-    customerItems.value = []
-    customerListPage.value = 1
-    customerListTotal.value = 0
-    customerListTotalPages.value = 1
-    selectedCustomerId.value = null
-    resetCustomerActions()
-
-    if (canCreateCustomers.value) {
-      enterpriseFormMode.value = "create"
-    }
-
-    return
-  }
-
-  customerLoading.value = true
-  customerErrorMessage.value = ""
-
-  try {
-    const payload = await fetchCustomers(
-      buildCustomerListQuery(
-        enterpriseQueryValues.value,
-        customerListPage.value,
-      ),
-    )
-    customerItems.value = payload.items
-    customerListPage.value = payload.page
-    customerListTotal.value = payload.total
-    customerListTotalPages.value = payload.totalPages
-
-    if (
-      selectedCustomerId.value &&
-      !payload.items.some((item) => item.id === selectedCustomerId.value)
-    ) {
-      selectedCustomerId.value = payload.items[0]?.id ?? null
-    }
-
-    if (payload.items.length === 0 && enterpriseFormMode.value !== "create") {
-      resetCustomerActions()
-      selectedCustomerId.value = null
-    }
-
-    if (enterpriseFormMode.value === "create" && !canCreateCustomers.value) {
-      enterpriseFormMode.value = "detail"
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    customerErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadCustomers")
-  } finally {
-    customerLoading.value = false
-  }
-}
-
-const selectDepartment = async (department: DepartmentRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedDepartmentId.value = department.id
-  departmentPanelMode.value = "detail"
-  departmentDetail.value = null
-  departmentDetailLoading.value = true
-  departmentDetailErrorMessage.value = ""
-
-  try {
-    departmentDetail.value = await fetchDepartmentById(department.id)
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    departmentDetailErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.loadDepartmentDetail")
-  } finally {
-    departmentDetailLoading.value = false
-  }
-}
-
-const selectMenu = async (menu: MenuRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedMenuId.value = menu.id
-  menuPanelMode.value = "detail"
-  menuDetail.value = null
-  menuDetailLoading.value = true
-  menuDetailErrorMessage.value = ""
-
-  try {
-    menuDetail.value = await fetchMenuById(menu.id)
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    menuDetailErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadMenuDetail")
-  } finally {
-    menuDetailLoading.value = false
-  }
-}
-
-const selectOperationLog = async (item: OperationLogRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedOperationLogId.value = item.id
-  operationLogDetail.value = null
-  operationLogDetailLoading.value = true
-  operationLogDetailErrorMessage.value = ""
-
-  try {
-    operationLogDetail.value = await fetchOperationLogById(item.id)
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    operationLogDetailErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.loadOperationLogDetail")
-  } finally {
-    operationLogDetailLoading.value = false
-  }
-}
-
-const reloadDepartments = async () => {
-  if (!canViewDepartments.value) {
-    clearDepartmentWorkspace()
-    return
-  }
-
-  departmentLoading.value = true
-  departmentErrorMessage.value = ""
-
-  try {
-    const payload = await fetchDepartments()
-    departmentItems.value = payload.items
-
-    if (payload.items.length === 0) {
-      selectedDepartmentId.value = null
-      departmentDetail.value = null
-
-      if (canCreateDepartments.value) {
-        departmentPanelMode.value = "create"
-      }
-
-      return
-    }
-
-    if (departmentPanelMode.value !== "detail") {
-      if (
-        selectedDepartmentId.value &&
-        !payload.items.some((item) => item.id === selectedDepartmentId.value)
-      ) {
-        selectedDepartmentId.value = payload.items[0]?.id ?? null
-      }
-
-      return
-    }
-
-    const nextDepartment =
-      payload.items.find((item) => item.id === selectedDepartmentId.value) ??
-      payload.items[0]
-
-    if (nextDepartment) {
-      await selectDepartment(nextDepartment)
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    clearDepartmentWorkspace()
-    departmentErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadDepartments")
-  } finally {
-    departmentLoading.value = false
-  }
-}
-
-const reloadMenus = async () => {
-  if (!canViewMenus.value) {
-    clearMenuWorkspace()
-    return
-  }
-
-  menuLoading.value = true
-  menuErrorMessage.value = ""
-
-  try {
-    const payload = await fetchMenus()
-    menuItems.value = payload.items
-
-    if (payload.items.length === 0) {
-      selectedMenuId.value = null
-      menuDetail.value = null
-
-      if (canCreateMenus.value) {
-        menuPanelMode.value = "create"
-      }
-
-      return
-    }
-
-    if (menuPanelMode.value !== "detail") {
-      if (
-        selectedMenuId.value &&
-        !payload.items.some((item) => item.id === selectedMenuId.value)
-      ) {
-        selectedMenuId.value = payload.items[0]?.id ?? null
-      }
-
-      return
-    }
-
-    const nextMenu =
-      payload.items.find((item) => item.id === selectedMenuId.value) ??
-      payload.items[0]
-
-    if (nextMenu) {
-      await selectMenu(nextMenu)
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    clearMenuWorkspace()
-    menuErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadMenus")
-  } finally {
-    menuLoading.value = false
-  }
-}
-
-const reloadOperationLogs = async () => {
-  if (!canViewOperationLogs.value) {
-    clearOperationLogWorkspace()
-    return
-  }
-
-  operationLogLoading.value = true
-  operationLogErrorMessage.value = ""
-
-  try {
-    const payload = await fetchOperationLogs(operationLogListQuery.value)
-    operationLogItems.value = payload.items
-
-    if (payload.items.length === 0) {
-      selectedOperationLogId.value = null
-      operationLogDetail.value = null
-      return
-    }
-
-    const nextItem =
-      payload.items.find((item) => item.id === selectedOperationLogId.value) ??
-      payload.items[0]
-
-    if (nextItem) {
-      await selectOperationLog(nextItem)
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    clearOperationLogWorkspace()
-    operationLogErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadOperationLogs")
-  } finally {
-    operationLogLoading.value = false
-  }
-}
-
-const selectSetting = async (setting: SettingRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedSettingId.value = setting.id
-  settingPanelMode.value = "detail"
-  settingDetail.value = null
-  settingDetailLoading.value = true
-  settingDetailErrorMessage.value = ""
-
-  try {
-    settingDetail.value = await fetchSettingById(setting.id)
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    settingDetailErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadSettingDetail")
-  } finally {
-    settingDetailLoading.value = false
-  }
-}
-
-const reloadSettings = async () => {
-  if (!canViewSettings.value) {
-    clearSettingWorkspace()
-    return
-  }
-
-  settingLoading.value = true
-  settingErrorMessage.value = ""
-
-  try {
-    const payload = await fetchSettings()
-    settingItems.value = payload.items
-
-    if (payload.items.length === 0) {
-      selectedSettingId.value = null
-      settingDetail.value = null
-
-      if (canCreateSettings.value) {
-        settingPanelMode.value = "create"
-      }
-
-      return
-    }
-
-    if (settingPanelMode.value !== "detail") {
-      if (
-        selectedSettingId.value &&
-        !payload.items.some((item) => item.id === selectedSettingId.value)
-      ) {
-        selectedSettingId.value = payload.items[0]?.id ?? null
-      }
-
-      return
-    }
-
-    const nextSetting =
-      payload.items.find((item) => item.id === selectedSettingId.value) ??
-      payload.items[0]
-
-    if (nextSetting) {
-      await selectSetting(nextSetting)
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    clearSettingWorkspace()
-    settingErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadSettings")
-  } finally {
-    settingLoading.value = false
-  }
-}
-
-const reloadUsers = async () => {
-  if (!canViewUsers.value) {
-    clearUserWorkspace()
-    return
-  }
-
-  userLoading.value = true
-  userErrorMessage.value = ""
-
-  try {
-    const payload = await fetchUsers()
-    userItems.value = payload.items
-
-    if (
-      selectedUserId.value &&
-      !payload.items.some((item) => item.id === selectedUserId.value)
-    ) {
-      selectedUserId.value = payload.items[0]?.id ?? null
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    clearUserWorkspace()
-    userErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadUsers")
-  } finally {
-    userLoading.value = false
-  }
-}
-
-const selectRole = async (role: RoleRecord) => {
-  currentShellTabKey.value = "workspace"
-  selectedRoleId.value = role.id
-  rolePanelMode.value = "detail"
-  roleDetail.value = null
-  roleDetailLoading.value = true
-  roleDetailErrorMessage.value = ""
-
-  try {
-    roleDetail.value = await fetchRoleById(role.id)
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    roleDetailErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadRoleDetail")
-  } finally {
-    roleDetailLoading.value = false
-  }
-}
-
-const reloadRoles = async () => {
-  if (!canViewRoles.value) {
-    clearRoleWorkspace()
-    return
-  }
-
-  roleLoading.value = true
-  roleErrorMessage.value = ""
-
-  try {
-    const payload = await fetchRoles()
-    roleItems.value = payload.items
-
-    if (payload.items.length === 0) {
-      selectedRoleId.value = null
-      roleDetail.value = null
-
-      if (canCreateRoles.value) {
-        rolePanelMode.value = "create"
-      }
-
-      return
-    }
-
-    if (rolePanelMode.value !== "detail") {
-      if (
-        selectedRoleId.value &&
-        !payload.items.some((item) => item.id === selectedRoleId.value)
-      ) {
-        selectedRoleId.value = payload.items[0]?.id ?? null
-      }
-
-      return
-    }
-
-    const nextRole =
-      payload.items.find((item) => item.id === selectedRoleId.value) ??
-      payload.items[0]
-
-    if (nextRole) {
-      await selectRole(nextRole)
-    }
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    clearRoleWorkspace()
-    roleErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.loadRoles")
-  } finally {
-    roleLoading.value = false
-  }
-}
-
 const submitLogin = async () => {
   if (!authModuleReady.value || authLoading.value) {
     return
@@ -6137,6 +3474,7 @@ const submitLogin = async () => {
 
   try {
     authIdentity.value = await login(loginForm.value)
+    await reloadFiles()
     await reloadNotifications()
     await reloadDictionaries()
     await reloadCustomers()
@@ -6145,6 +3483,7 @@ const submitLogin = async () => {
     await reloadOperationLogs()
     await reloadRoles()
     await reloadSettings()
+    await reloadTenants()
     await reloadUsers()
     await reloadWorkflowDefinitions()
   } catch (error) {
@@ -6172,1261 +3511,42 @@ const submitLogout = async () => {
   } finally {
     authIdentity.value = null
     clearAccessToken()
+    clearCustomerWorkspace()
     clearDictionaryOptions()
+    clearFileWorkspace()
     clearNotificationWorkspace()
-    customerItems.value = []
     clearDepartmentWorkspace()
     clearMenuWorkspace()
     clearOperationLogWorkspace()
     clearRoleWorkspace()
     clearSettingWorkspace()
+    clearTenantWorkspace()
     clearUserWorkspace()
     clearWorkflowDefinitions()
-    selectedCustomerId.value = null
     enterpriseFormMode.value = "create"
-    departmentQueryValues.value = {}
-    menuQueryValues.value = {}
-    operationLogQueryValues.value = {}
-    roleQueryValues.value = {}
-    settingQueryValues.value = {}
-    userQueryValues.value = {}
+    resetDepartmentQuery()
+    resetMenuQuery()
+    resetOperationLogQuery()
+    resetRoleQuery()
+    resetSettingQuery()
+    resetTenantQuery()
+    handleUserReset()
     notificationQueryValues.value = {}
-    resetCustomerActions()
     authLoading.value = false
   }
 }
 
-const submitCustomerForm = async (values: ElyFormValues) => {
-  if (!canCreateCustomers.value || customerLoading.value) {
-    return
-  }
-
-  const payload = {
-    name: normalizeCustomerName(values.name),
-    status: normalizeCustomerStatus(values.status),
-  }
-
-  if (payload.name.length === 0) {
-    customerErrorMessage.value = t("app.error.customerNameRequired")
-    return
-  }
-
-  customerLoading.value = true
-  customerErrorMessage.value = ""
-
-  try {
-    const created = await createCustomer(payload)
-    customerForm.value = createDefaultCustomerDraft()
-    customerListPage.value = 1
-    selectedCustomerId.value = created.id
-    enterpriseFormMode.value = "detail"
-    await reloadCustomers()
-  } catch (error) {
-    customerErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.createCustomer")
-  } finally {
-    customerLoading.value = false
-  }
-}
-
-const startEdit = (customer: CustomerRecord) => {
-  if (!canUpdateCustomers.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedCustomerId.value = customer.id
-  deleteConfirmId.value = null
-  editingId.value = customer.id
-  editForm.value = {
-    name: customer.name,
-    status: customer.status,
-  }
-  enterpriseFormMode.value = "edit"
-}
-
-const cancelEdit = () => {
-  editingId.value = null
-  if (selectedCustomer.value) {
-    enterpriseFormMode.value = "detail"
-  }
-}
-
-const submitEditForm = async (values: ElyFormValues) => {
-  if (!editingId.value || customerLoading.value || !canUpdateCustomers.value) {
-    return
-  }
-
-  const payload = {
-    name: normalizeCustomerName(values.name),
-    status: normalizeCustomerStatus(values.status),
-  }
-
-  if (payload.name.length === 0) {
-    customerErrorMessage.value = t("app.error.customerNameRequired")
-    return
-  }
-
-  customerLoading.value = true
-  customerErrorMessage.value = ""
-
-  try {
-    const updated = await updateCustomer(editingId.value, payload)
-    editingId.value = null
-    selectedCustomerId.value = updated.id
-    enterpriseFormMode.value = "detail"
-    await reloadCustomers()
-  } catch (error) {
-    customerErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.updateCustomer")
-  } finally {
-    customerLoading.value = false
-  }
-}
-
-const requestDelete = (customer: CustomerRecord) => {
-  if (!canDeleteCustomers.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedCustomerId.value = customer.id
-  editingId.value = null
-  deleteConfirmId.value = customer.id
-  enterpriseFormMode.value = "detail"
-}
-
-const cancelDelete = () => {
-  deleteConfirmId.value = null
-}
-
-const confirmDelete = async () => {
-  if (
-    !deleteConfirmId.value ||
-    customerLoading.value ||
-    !canDeleteCustomers.value
-  ) {
-    return
-  }
-
-  customerLoading.value = true
-  customerErrorMessage.value = ""
-
-  try {
-    await deleteCustomer(deleteConfirmId.value)
-    if (selectedCustomerId.value === deleteConfirmId.value) {
-      selectedCustomerId.value = null
-    }
-    deleteConfirmId.value = null
-    await reloadCustomers()
-  } catch (error) {
-    customerErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.deleteCustomer")
-  } finally {
-    customerLoading.value = false
-  }
-}
-
-const handleEnterpriseSearch = async (values: ElyQueryValues) => {
-  enterpriseQueryValues.value = values
-  customerListPage.value = 1
-  await reloadCustomers()
-}
-
-const handleEnterpriseReset = async () => {
-  enterpriseQueryValues.value = {}
-  customerListPage.value = 1
-  await reloadCustomers()
-}
-
-const handleNotificationSearch = async (values: ElyQueryValues) => {
-  notificationQueryValues.value = values
-  await reloadNotifications()
-}
-
-const handleNotificationReset = async () => {
-  notificationQueryValues.value = {}
-  await reloadNotifications()
-}
-
-const handleDictionarySearch = (values: ElyQueryValues) => {
-  dictionaryQueryValues.value = values
-}
-
-const handleDictionaryReset = () => {
-  dictionaryQueryValues.value = {}
-}
-
-const handleDepartmentSearch = (values: ElyQueryValues) => {
-  departmentQueryValues.value = values
-}
-
-const handleDepartmentReset = () => {
-  departmentQueryValues.value = {}
-}
-
-const handleMenuSearch = (values: ElyQueryValues) => {
-  menuQueryValues.value = values
-}
-
-const handleMenuReset = () => {
-  menuQueryValues.value = {}
-}
-
-const handleOperationLogSearch = async (values: ElyQueryValues) => {
-  operationLogQueryValues.value = values
-  await reloadOperationLogs()
-}
-
-const handleOperationLogReset = async () => {
-  operationLogQueryValues.value = {}
-  await reloadOperationLogs()
-}
-
-const openNotificationCreatePanel = () => {
-  if (!canCreateNotifications.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedNotificationId.value = null
-  notificationDetail.value = null
-  notificationErrorMessage.value = ""
-  notificationDetailErrorMessage.value = ""
-  resetNotificationPanelInputs()
-  notificationPanelMode.value = "create"
-}
-
-const openDictionaryCreatePanel = () => {
-  if (!canCreateDictionaryTypes.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedDictionaryTypeId.value = null
-  dictionaryTypeDetail.value = null
-  dictionaryErrorMessage.value = ""
-  dictionaryDetailErrorMessage.value = ""
-  resetDictionaryPanelInputs()
-  dictionaryPanelMode.value = "create"
-}
-
-const openDepartmentCreatePanel = () => {
-  if (!canCreateDepartments.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedDepartmentId.value = null
-  departmentDetail.value = null
-  departmentErrorMessage.value = ""
-  departmentDetailErrorMessage.value = ""
-  resetDepartmentPanelInputs()
-  departmentPanelMode.value = "create"
-}
-
-const openMenuCreatePanel = () => {
-  if (!canCreateMenus.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedMenuId.value = null
-  menuDetail.value = null
-  menuErrorMessage.value = ""
-  menuDetailErrorMessage.value = ""
-  resetMenuPanelInputs()
-  menuPanelMode.value = "create"
-}
-
-const startDepartmentEdit = (
-  department: DepartmentRecord | DepartmentDetailRecord,
-) => {
-  if (!canUpdateDepartments.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedDepartmentId.value = department.id
-  departmentErrorMessage.value = ""
-  departmentDetailErrorMessage.value = ""
-  departmentEditForm.value = {
-    parentId: department.parentId ?? "",
-    code: department.code,
-    name: department.name,
-    sort: department.sort,
-    status: department.status,
-  }
-  departmentPanelMode.value = "edit"
-}
-
-const startDictionaryEdit = (
-  dictionaryType: DictionaryTypeRecord | DictionaryTypeDetailRecord,
-) => {
-  if (!canUpdateDictionaryTypes.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedDictionaryTypeId.value = dictionaryType.id
-  dictionaryErrorMessage.value = ""
-  dictionaryDetailErrorMessage.value = ""
-  dictionaryEditForm.value = {
-    code: dictionaryType.code,
-    name: dictionaryType.name,
-    description: dictionaryType.description ?? "",
-    status: dictionaryType.status,
-  }
-  dictionaryPanelMode.value = "edit"
-}
-
-const startMenuEdit = (menu: MenuRecord | MenuDetailRecord) => {
-  if (!canUpdateMenus.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedMenuId.value = menu.id
-  menuErrorMessage.value = ""
-  menuDetailErrorMessage.value = ""
-  menuEditForm.value = {
-    parentId: menu.parentId ?? "",
-    type: menu.type,
-    code: menu.code,
-    name: menu.name,
-    path: menu.path ?? "",
-    component: menu.component ?? "",
-    icon: menu.icon ?? "",
-    sort: menu.sort,
-    isVisible: menu.isVisible,
-    status: menu.status,
-    permissionCode: menu.permissionCode ?? "",
-  }
-  menuPanelMode.value = "edit"
-}
-
-const cancelDepartmentPanel = () => {
-  departmentErrorMessage.value = ""
-
-  if (selectedDepartment.value) {
-    departmentPanelMode.value = "detail"
-    return
-  }
-
-  if (canCreateDepartments.value) {
-    departmentPanelMode.value = "create"
-    return
-  }
-
-  departmentPanelMode.value = "detail"
-}
-
-const cancelNotificationPanel = () => {
-  notificationErrorMessage.value = ""
-
-  if (selectedNotification.value) {
-    notificationPanelMode.value = "detail"
-    return
-  }
-
-  if (canCreateNotifications.value) {
-    notificationPanelMode.value = "create"
-    return
-  }
-
-  notificationPanelMode.value = "detail"
-}
-
-const cancelDictionaryPanel = () => {
-  dictionaryErrorMessage.value = ""
-
-  if (selectedDictionaryType.value) {
-    dictionaryPanelMode.value = "detail"
-    return
-  }
-
-  if (canCreateDictionaryTypes.value) {
-    dictionaryPanelMode.value = "create"
-    return
-  }
-
-  dictionaryPanelMode.value = "detail"
-}
-
-const cancelMenuPanel = () => {
-  menuErrorMessage.value = ""
-
-  if (selectedMenu.value) {
-    menuPanelMode.value = "detail"
-    return
-  }
-
-  if (canCreateMenus.value) {
-    menuPanelMode.value = "create"
-    return
-  }
-
-  menuPanelMode.value = "detail"
-}
-
-const submitNotificationForm = async (values: ElyFormValues) => {
-  if (notificationLoading.value || notificationDetailLoading.value) {
-    return
-  }
-
-  const payload = {
-    recipientUserId: normalizeNotificationText(values.recipientUserId),
-    title: normalizeNotificationText(values.title),
-    content: normalizeNotificationText(values.content),
-    level: normalizeNotificationLevel(values.level),
-  }
-
-  if (payload.recipientUserId.length === 0) {
-    notificationErrorMessage.value = t(
-      "app.error.notificationRecipientRequired",
-    )
-    return
-  }
-
-  if (payload.title.length === 0) {
-    notificationErrorMessage.value = t("app.error.notificationTitleRequired")
-    return
-  }
-
-  if (payload.content.length === 0) {
-    notificationErrorMessage.value = t("app.error.notificationContentRequired")
-    return
-  }
-
-  notificationLoading.value = true
-  notificationErrorMessage.value = ""
-
-  try {
-    const created = await createNotification(payload)
-    selectedNotificationId.value = created.id
-    notificationDetail.value = created
-    notificationPanelMode.value = "detail"
-    resetNotificationPanelInputs()
-    await reloadNotifications()
-  } catch (error) {
-    notificationErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.createNotification")
-  } finally {
-    notificationLoading.value = false
-  }
-}
-
-const submitDictionaryForm = async (values: ElyFormValues) => {
-  if (dictionaryLoading.value || dictionaryDetailLoading.value) {
-    return
-  }
-
-  const payload = {
-    code: normalizeDictionaryText(values.code),
-    name: normalizeDictionaryText(values.name),
-    description: normalizeOptionalDictionaryText(values.description),
-    status: normalizeDictionaryStatus(values.status),
-  }
-
-  if (payload.code.length === 0) {
-    dictionaryErrorMessage.value = t("app.error.dictionaryCodeRequired")
-    return
-  }
-
-  if (payload.name.length === 0) {
-    dictionaryErrorMessage.value = t("app.error.dictionaryNameRequired")
-    return
-  }
-
-  dictionaryLoading.value = true
-  dictionaryErrorMessage.value = ""
-
-  try {
-    if (
-      dictionaryPanelMode.value === "edit" &&
-      selectedDictionaryTypeId.value
-    ) {
-      const updated = await updateDictionaryType(
-        selectedDictionaryTypeId.value,
-        payload,
-      )
-      selectedDictionaryTypeId.value = updated.id
-      dictionaryTypeDetail.value = updated
-      dictionaryPanelMode.value = "detail"
-      await reloadDictionaries()
-      return
-    }
-
-    if (!canCreateDictionaryTypes.value) {
-      return
-    }
-
-    const created = await createDictionaryType(payload)
-    selectedDictionaryTypeId.value = created.id
-    dictionaryTypeDetail.value = created
-    dictionaryPanelMode.value = "detail"
-    resetDictionaryPanelInputs()
-    await reloadDictionaries()
-  } catch (error) {
-    dictionaryErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : dictionaryPanelMode.value === "edit"
-          ? t("app.error.updateDictionary")
-          : t("app.error.createDictionary")
-  } finally {
-    dictionaryLoading.value = false
-  }
-}
-
-const submitDepartmentForm = async (values: ElyFormValues) => {
-  if (departmentLoading.value || departmentDetailLoading.value) {
-    return
-  }
-
-  const payload = {
-    parentId: normalizeOptionalDepartmentId(values.parentId) ?? null,
-    code: normalizeDepartmentText(values.code),
-    name: normalizeDepartmentText(values.name),
-    sort: normalizeDepartmentSort(values.sort),
-    status: normalizeDepartmentStatus(values.status),
-  }
-
-  if (payload.code.length === 0) {
-    departmentErrorMessage.value = t("app.error.departmentCodeRequired")
-    return
-  }
-
-  if (payload.name.length === 0) {
-    departmentErrorMessage.value = t("app.error.departmentNameRequired")
-    return
-  }
-
-  departmentLoading.value = true
-  departmentErrorMessage.value = ""
-
-  try {
-    if (departmentPanelMode.value === "edit" && selectedDepartmentId.value) {
-      const updated = await updateDepartment(
-        selectedDepartmentId.value,
-        payload,
-      )
-      selectedDepartmentId.value = updated.id
-      departmentDetail.value = updated
-      departmentPanelMode.value = "detail"
-      await reloadDepartments()
-      return
-    }
-
-    if (!canCreateDepartments.value) {
-      return
-    }
-
-    const created = await createDepartment(payload)
-    selectedDepartmentId.value = created.id
-    departmentDetail.value = created
-    departmentPanelMode.value = "detail"
-    resetDepartmentPanelInputs()
-    await reloadDepartments()
-  } catch (error) {
-    departmentErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : departmentPanelMode.value === "edit"
-          ? t("app.error.updateDepartment")
-          : t("app.error.createDepartment")
-  } finally {
-    departmentLoading.value = false
-  }
-}
-
-const submitMenuForm = async (values: ElyFormValues) => {
-  if (menuLoading.value || menuDetailLoading.value) {
-    return
-  }
-
-  const payload = {
-    parentId: normalizeOptionalMenuId(values.parentId) ?? null,
-    type: normalizeMenuType(values.type),
-    code: normalizeMenuText(values.code),
-    name: normalizeMenuText(values.name),
-    path: normalizeOptionalMenuText(values.path),
-    component: normalizeOptionalMenuText(values.component),
-    icon: normalizeOptionalMenuText(values.icon),
-    sort: normalizeMenuSort(values.sort),
-    isVisible: normalizeMenuBoolean(values.isVisible),
-    status: normalizeMenuStatus(values.status),
-    permissionCode: normalizeOptionalMenuText(values.permissionCode),
-  }
-
-  if (payload.code.length === 0) {
-    menuErrorMessage.value = t("app.error.menuCodeRequired")
-    return
-  }
-
-  if (payload.name.length === 0) {
-    menuErrorMessage.value = t("app.error.menuNameRequired")
-    return
-  }
-
-  menuLoading.value = true
-  menuErrorMessage.value = ""
-
-  try {
-    if (menuPanelMode.value === "edit" && selectedMenuId.value) {
-      const updated = await updateMenu(selectedMenuId.value, payload)
-      selectedMenuId.value = updated.id
-      menuDetail.value = updated
-      menuPanelMode.value = "detail"
-      await reloadMenus()
-      return
-    }
-
-    if (!canCreateMenus.value) {
-      return
-    }
-
-    const created = await createMenu(payload)
-    selectedMenuId.value = created.id
-    menuDetail.value = created
-    menuPanelMode.value = "detail"
-    resetMenuPanelInputs()
-    await reloadMenus()
-  } catch (error) {
-    menuErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : menuPanelMode.value === "edit"
-          ? t("app.error.updateMenu")
-          : t("app.error.createMenu")
-  } finally {
-    menuLoading.value = false
-  }
-}
-
-const markSelectedNotificationAsRead = async () => {
-  if (
-    notificationLoading.value ||
-    notificationDetailLoading.value ||
-    !selectedNotification.value ||
-    selectedNotification.value.status === "read" ||
-    !canUpdateNotifications.value
-  ) {
-    return
-  }
-
-  notificationLoading.value = true
-  notificationErrorMessage.value = ""
-
-  try {
-    const updated = await markNotificationAsRead(selectedNotification.value.id)
-    notificationItems.value = notificationItems.value.map((notification) =>
-      notification.id === updated.id ? updated : notification,
-    )
-    notificationDetail.value = updated
-    await reloadNotifications()
-  } catch (error) {
-    notificationErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.markNotificationRead")
-  } finally {
-    notificationLoading.value = false
-  }
-}
-
-const handleNotificationRowClick = async (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const notification = filteredNotificationItems.value.find(
-    (item) => item.id === rowId,
-  )
-
-  if (!notification) {
-    return
-  }
-
-  await selectNotification(notification)
-}
-
-const handleDictionaryRowClick = async (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const dictionaryType = filteredDictionaryTypes.value.find(
-    (item) => item.id === rowId,
-  )
-
-  if (!dictionaryType) {
-    return
-  }
-
-  await selectDictionaryType(dictionaryType)
-}
-
-const handleDepartmentRowClick = async (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const department = filteredDepartmentItems.value.find(
-    (item) => item.id === rowId,
-  )
-
-  if (!department) {
-    return
-  }
-
-  await selectDepartment(department)
-}
-
-const handleMenuRowClick = async (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const menu = filteredMenuItems.value.find((item) => item.id === rowId)
-
-  if (!menu) {
-    return
-  }
-
-  await selectMenu(menu)
-}
-
-const handleOperationLogRowClick = async (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const operationLog = filteredOperationLogItems.value.find(
-    (item) => item.id === rowId,
-  )
-
-  if (!operationLog) {
-    return
-  }
-
-  await selectOperationLog(operationLog)
-}
-
-const handleUserSearch = (values: ElyQueryValues) => {
-  userQueryValues.value = values
-}
-
-const handleUserReset = () => {
-  userQueryValues.value = {}
-}
-
-const openRoleCreatePanel = () => {
-  if (!canCreateRoles.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedRoleId.value = null
-  roleDetail.value = null
-  roleErrorMessage.value = ""
-  roleDetailErrorMessage.value = ""
-  resetRolePanelInputs()
-  rolePanelMode.value = "create"
-}
-
-const startRoleEdit = (role: RoleRecord | RoleDetailRecord) => {
-  if (!canUpdateRoles.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedRoleId.value = role.id
-  roleErrorMessage.value = ""
-  roleDetailErrorMessage.value = ""
-  roleEditForm.value = {
-    code: role.code,
-    name: role.name,
-    description: role.description ?? "",
-    status: role.status,
-    isSystem: role.isSystem,
-    dataScope: role.dataScope,
-  }
-  rolePanelMode.value = "edit"
-}
-
-const cancelRolePanel = () => {
-  roleErrorMessage.value = ""
-
-  if (selectedRole.value) {
-    rolePanelMode.value = "detail"
-    return
-  }
-
-  if (canCreateRoles.value) {
-    rolePanelMode.value = "create"
-    return
-  }
-
-  rolePanelMode.value = "detail"
-}
-
-const submitRoleForm = async (values: ElyFormValues) => {
-  if (roleLoading.value || roleDetailLoading.value) {
-    return
-  }
-
-  const payload = {
-    code: normalizeRoleText(values.code),
-    name: normalizeRoleText(values.name),
-    description: normalizeOptionalRoleText(values.description),
-    status: normalizeRoleStatus(values.status),
-    isSystem: normalizeRoleBoolean(values.isSystem),
-    dataScope: normalizeRoleDataScope(values.dataScope),
-  }
-
-  if (payload.code.length === 0) {
-    roleErrorMessage.value = t("app.error.roleCodeRequired")
-    return
-  }
-
-  if (payload.name.length === 0) {
-    roleErrorMessage.value = t("app.error.roleNameRequired")
-    return
-  }
-
-  roleLoading.value = true
-  roleErrorMessage.value = ""
-
-  try {
-    if (rolePanelMode.value === "edit" && selectedRoleId.value) {
-      const updated = await updateRole(selectedRoleId.value, payload)
-      selectedRoleId.value = updated.id
-      roleDetail.value = updated
-      rolePanelMode.value = "detail"
-      await reloadRoles()
-      return
-    }
-
-    if (!canCreateRoles.value) {
-      return
-    }
-
-    const created = await createRole(payload)
-    selectedRoleId.value = created.id
-    roleDetail.value = created
-    rolePanelMode.value = "detail"
-    resetRolePanelInputs()
-    await reloadRoles()
-  } catch (error) {
-    roleErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : rolePanelMode.value === "edit"
-          ? t("app.error.updateRole")
-          : t("app.error.createRole")
-  } finally {
-    roleLoading.value = false
-  }
-}
-
-const handleRoleSearch = (values: ElyQueryValues) => {
-  roleQueryValues.value = values
-}
-
-const handleRoleReset = () => {
-  roleQueryValues.value = {}
-}
-
-const handleSettingSearch = (values: ElyQueryValues) => {
-  settingQueryValues.value = values
-}
-
-const handleSettingReset = () => {
-  settingQueryValues.value = {}
-}
-
-const handleRoleRowClick = async (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const role = filteredRoleItems.value.find((item) => item.id === rowId)
-
-  if (!role) {
-    return
-  }
-
-  await selectRole(role)
-}
-
-const openSettingCreatePanel = () => {
-  if (!canCreateSettings.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedSettingId.value = null
-  settingDetail.value = null
-  settingErrorMessage.value = ""
-  settingDetailErrorMessage.value = ""
-  resetSettingPanelInputs()
-  settingPanelMode.value = "create"
-}
-
-const startSettingEdit = (setting: SettingRecord) => {
-  if (!canUpdateSettings.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedSettingId.value = setting.id
-  settingErrorMessage.value = ""
-  settingDetailErrorMessage.value = ""
-  settingEditForm.value = {
-    key: setting.key,
-    value: setting.value,
-    description: setting.description ?? "",
-    status: setting.status,
-  }
-  settingPanelMode.value = "edit"
-}
-
-const cancelSettingPanel = () => {
-  settingErrorMessage.value = ""
-
-  if (selectedSetting.value) {
-    settingPanelMode.value = "detail"
-    return
-  }
-
-  if (canCreateSettings.value) {
-    settingPanelMode.value = "create"
-    return
-  }
-
-  settingPanelMode.value = "detail"
-}
-
-const submitSettingForm = async (values: ElyFormValues) => {
-  if (settingLoading.value || settingDetailLoading.value) {
-    return
-  }
-
-  const payload = {
-    key: normalizeSettingText(values.key),
-    value: normalizeSettingText(values.value),
-    description: normalizeOptionalSettingText(values.description),
-    status: normalizeSettingStatus(values.status),
-  }
-
-  if (payload.key.length === 0) {
-    settingErrorMessage.value = t("app.error.settingKeyRequired")
-    return
-  }
-
-  if (payload.value.length === 0) {
-    settingErrorMessage.value = t("app.error.settingValueRequired")
-    return
-  }
-
-  settingLoading.value = true
-  settingErrorMessage.value = ""
-
-  try {
-    if (settingPanelMode.value === "edit" && selectedSettingId.value) {
-      const updated = await updateSetting(selectedSettingId.value, payload)
-      selectedSettingId.value = updated.id
-      settingDetail.value = updated
-      settingPanelMode.value = "detail"
-      await reloadSettings()
-      return
-    }
-
-    if (!canCreateSettings.value) {
-      return
-    }
-
-    const created = await createSetting(payload)
-    selectedSettingId.value = created.id
-    settingDetail.value = created
-    settingPanelMode.value = "detail"
-    resetSettingPanelInputs()
-    await reloadSettings()
-  } catch (error) {
-    settingErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : settingPanelMode.value === "edit"
-          ? t("app.error.updateSetting")
-          : t("app.error.createSetting")
-  } finally {
-    settingLoading.value = false
-  }
-}
-
-const handleSettingRowClick = async (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const setting = filteredSettingItems.value.find((item) => item.id === rowId)
-
-  if (!setting) {
-    return
-  }
-
-  await selectSetting(setting)
-}
-
-const openUserCreatePanel = () => {
-  if (!canCreateUsers.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedUserId.value = null
-  userErrorMessage.value = ""
-  resetUserPanelInputs()
-  userPanelMode.value = "create"
-}
-
-const startUserEdit = (user: UserRecord) => {
-  if (!canUpdateUsers.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedUserId.value = user.id
-  userErrorMessage.value = ""
-  userEditForm.value = {
-    username: user.username,
-    displayName: user.displayName,
-    email: user.email ?? "",
-    phone: user.phone ?? "",
-    status: user.status,
-    isSuperAdmin: user.isSuperAdmin,
-  }
-  userPasswordInput.value = ""
-  userPanelMode.value = "edit"
-}
-
-const startUserPasswordReset = (user: UserRecord) => {
-  if (!canResetUserPasswords.value) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedUserId.value = user.id
-  userErrorMessage.value = ""
-  userPasswordInput.value = ""
-  userPanelMode.value = "reset"
-}
-
-const cancelUserPanel = () => {
-  userErrorMessage.value = ""
-  userPasswordInput.value = ""
-
-  if (selectedUser.value) {
-    userPanelMode.value = "detail"
-    return
-  }
-
-  if (canCreateUsers.value) {
-    userPanelMode.value = "create"
-    return
-  }
-
-  userPanelMode.value = "detail"
-}
-
-const submitUserForm = async (values: ElyFormValues) => {
-  if (userLoading.value) {
-    return
-  }
-
-  const payload = {
-    username: normalizeUserText(values.username),
-    displayName: normalizeUserText(values.displayName),
-    email: normalizeOptionalUserText(values.email),
-    phone: normalizeOptionalUserText(values.phone),
-    status: normalizeUserStatus(values.status),
-    isSuperAdmin: normalizeUserBoolean(values.isSuperAdmin),
-  }
-
-  if (payload.username.length === 0) {
-    userErrorMessage.value = t("app.error.userUsernameRequired")
-    return
-  }
-
-  if (payload.displayName.length === 0) {
-    userErrorMessage.value = t("app.error.userDisplayNameRequired")
-    return
-  }
-
-  userLoading.value = true
-  userErrorMessage.value = ""
-
-  try {
-    if (userPanelMode.value === "edit" && selectedUser.value) {
-      const updated = await updateUser(selectedUser.value.id, payload)
-      selectedUserId.value = updated.id
-      userPanelMode.value = "detail"
-      await reloadUsers()
-      return
-    }
-
-    if (!canCreateUsers.value) {
-      return
-    }
-
-    const password = normalizeUserText(userPasswordInput.value)
-
-    if (password.length === 0) {
-      userErrorMessage.value = t("app.error.userPasswordRequired")
-      return
-    }
-
-    const created = await createUser({
-      ...payload,
-      password,
-    })
-    selectedUserId.value = created.id
-    userPanelMode.value = "detail"
-    resetUserPanelInputs()
-    await reloadUsers()
-  } catch (error) {
-    userErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : userPanelMode.value === "edit"
-          ? t("app.error.updateUser")
-          : t("app.error.createUser")
-  } finally {
-    userLoading.value = false
-  }
-}
-
-const submitUserPasswordReset = async () => {
-  if (
-    !selectedUser.value ||
-    userLoading.value ||
-    !canResetUserPasswords.value
-  ) {
-    return
-  }
-
-  const password = normalizeUserText(userPasswordInput.value)
-
-  if (password.length === 0) {
-    userErrorMessage.value = t("app.error.userPasswordRequired")
-    return
-  }
-
-  userLoading.value = true
-  userErrorMessage.value = ""
-
-  try {
-    await resetUserPassword(selectedUser.value.id, password)
-    userPasswordInput.value = ""
-    userPanelMode.value = "detail"
-    await reloadUsers()
-  } catch (error) {
-    userErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.resetUserPassword")
-  } finally {
-    userLoading.value = false
-  }
-}
-
-const handleCustomerPageSizeChange = async (value: number | string) => {
-  const nextPageSize =
-    typeof value === "number" ? value : Number.parseInt(value, 10)
-
-  if (
-    !Number.isFinite(nextPageSize) ||
-    nextPageSize === customerListPageSize.value
-  ) {
-    return
-  }
-
-  customerListPageSize.value = nextPageSize
-  customerListPage.value = 1
-  await reloadCustomers()
-}
-
-const handleCustomerSortChange = async (value: string) => {
-  if (
-    value !== "createdAt:desc" &&
-    value !== "createdAt:asc" &&
-    value !== "name:asc" &&
-    value !== "name:desc"
-  ) {
-    return
-  }
-
-  if (value === customerListSortValue.value) {
-    return
-  }
-
-  customerListSortValue.value = value
-  customerListPage.value = 1
-  await reloadCustomers()
-}
-
-const handleEnterpriseAction = (key: string, row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const customer = customerItems.value.find((item) => item.id === rowId)
-
-  if (!customer) {
-    return
-  }
-
-  if (key === "update") {
-    startEdit(customer)
-    return
-  }
-
-  if (key === "delete") {
-    requestDelete(customer)
-  }
-}
-
-const handleEnterpriseRowClick = (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const customer = customerItems.value.find((item) => item.id === rowId)
-
-  if (customer) {
-    focusCustomer(customer)
-  }
-}
-
-const handleUserRowClick = (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const user = filteredUserItems.value.find((item) => item.id === rowId)
-
-  if (!user) {
-    return
-  }
-
-  currentShellTabKey.value = "workspace"
-  selectedUserId.value = user.id
-  userErrorMessage.value = ""
-  userPanelMode.value = "detail"
-}
-
-const handleWorkflowDefinitionSelect = async (definitionId: string) => {
-  const definition = workflowDefinitions.value.find(
-    (item) => item.id === definitionId,
-  )
-
-  if (!definition || workflowDetailLoading.value) {
-    return
-  }
-
-  await selectWorkflowDefinition(definition)
-}
-
-const setWorkflowStatusFilter = (filter: WorkflowStatusFilter) => {
-  workflowStatusFilter.value = filter
-}
-
-const resetWorkflowFilters = () => {
-  workflowQuery.value = ""
-  workflowStatusFilter.value = "all"
-}
-
 const handleShellMenuSelect = (menuKey: string) => {
-  const currentItem = findNavigationItemById(
+  const nextMenuKey = resolveWorkspaceMenuKey(
     enterpriseNavigation.value,
     menuKey,
   )
 
-  if (!currentItem) {
+  if (!nextMenuKey) {
     return
   }
 
-  currentMenuKey.value =
-    findFirstMenuItem(currentItem.children)?.id ?? currentItem.id
+  currentMenuKey.value = nextMenuKey
   currentShellTabKey.value = "workspace"
 }
 
@@ -7436,70 +3556,6 @@ const handleShellTabSelect = (tabKey: string) => {
   }
 
   currentShellTabKey.value = tabKey
-}
-
-const goToPreviousCustomerPage = async () => {
-  if (!canGoToPreviousCustomerPage.value || customerLoading.value) {
-    return
-  }
-
-  customerListPage.value -= 1
-  await reloadCustomers()
-}
-
-const goToNextCustomerPage = async () => {
-  if (!canGoToNextCustomerPage.value || customerLoading.value) {
-    return
-  }
-
-  customerListPage.value += 1
-  await reloadCustomers()
-}
-
-const goToFirstCustomerPage = async () => {
-  if (!canGoToPreviousCustomerPage.value || customerLoading.value) {
-    return
-  }
-
-  customerListPage.value = 1
-  await reloadCustomers()
-}
-
-const goToLastCustomerPage = async () => {
-  if (!canGoToNextCustomerPage.value || customerLoading.value) {
-    return
-  }
-
-  customerListPage.value = customerListTotalPages.value
-  await reloadCustomers()
-}
-
-const submitCustomerPageJump = async () => {
-  if (!canJumpToCustomerPage.value || customerLoading.value) {
-    customerPageInputValue.value = String(customerListPage.value)
-    return
-  }
-
-  customerListPage.value = Number.parseInt(customerPageInputValue.value, 10)
-  await reloadCustomers()
-}
-
-const handleEnterpriseFormSubmit = async (values: ElyFormValues) => {
-  if (enterpriseFormMode.value === "edit") {
-    await submitEditForm(values)
-    return
-  }
-
-  await submitCustomerForm(values)
-}
-
-const handleEnterpriseFormCancel = () => {
-  if (enterpriseFormMode.value === "edit") {
-    cancelEdit()
-    return
-  }
-
-  customerForm.value = createDefaultCustomerDraft()
 }
 
 onMounted(async () => {
@@ -7515,6 +3571,7 @@ onMounted(async () => {
     authModuleReady.value = modulePayload.modules.includes("auth")
     customerModuleReady.value = modulePayload.modules.includes("customer")
     departmentModuleReady.value = modulePayload.modules.includes("department")
+    fileModuleReady.value = modulePayload.modules.includes("file")
     menuModuleReady.value = modulePayload.modules.includes("menu")
     notificationModuleReady.value =
       modulePayload.modules.includes("notification")
@@ -7522,11 +3579,13 @@ onMounted(async () => {
       modulePayload.modules.includes("operation-log")
     roleModuleReady.value = modulePayload.modules.includes("role")
     settingModuleReady.value = modulePayload.modules.includes("setting")
+    tenantModuleReady.value = modulePayload.modules.includes("tenant")
     userModuleReady.value = modulePayload.modules.includes("user")
     dictionaryModuleReady.value = modulePayload.modules.includes("dictionary")
     workflowModuleReady.value = modulePayload.modules.includes("workflow")
 
     await restoreSession()
+    await reloadFiles()
     await reloadNotifications()
     await reloadDictionaries()
 
@@ -7544,6 +3603,7 @@ onMounted(async () => {
     await reloadOperationLogs()
     await reloadRoles()
     await reloadSettings()
+    await reloadTenants()
     await reloadUsers()
     await reloadWorkflowDefinitions()
   } catch (error) {
@@ -7656,8 +3716,8 @@ onMounted(async () => {
                 :key="locale"
                 :title="t('app.shell.title')"
                 :subtitle="t('app.shell.subtitle')"
-                :workspace-title="currentWorkspaceTitle"
-                :workspace-description="currentWorkspaceDescription"
+                :workspace-title="shellWorkspaceTitle"
+                :workspace-description="shellWorkspaceDescription"
                 :preset-label="t('app.shell.presetLabel')"
                 :environment="envName"
                 :status="
@@ -7676,186 +3736,228 @@ onMounted(async () => {
                 @tab-select="handleShellTabSelect"
               >
                 <template #header-actions>
+                  <template v-if="!isRuntimeShellTab">
+                    <TButton
+                      v-if="isRoleWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateRoles"
+                      @click="openRoleCreatePanel"
+                    >
+                      {{ t("app.action.newRole") }}
+                    </TButton>
+                    <TButton
+                      v-if="isRoleWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="roleLoading || !canViewRoles"
+                      @click="reloadRoles"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isCustomerWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateCustomers"
+                      @click="openCreatePanel"
+                    >
+                      {{ t("app.action.newCustomer") }}
+                    </TButton>
+                    <TButton
+                      v-if="isCustomerWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="customerLoading || !canViewCustomers"
+                      @click="reloadCustomers"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isDictionaryWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateDictionaryTypes"
+                      @click="openDictionaryCreatePanel"
+                    >
+                      {{ t("app.action.newDictionaryType") }}
+                    </TButton>
+                    <TButton
+                      v-if="isDictionaryWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="dictionaryLoading || !canViewDictionaries"
+                      @click="reloadDictionaries"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isDepartmentWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateDepartments"
+                      @click="openDepartmentCreatePanel"
+                    >
+                      {{ t("app.action.newDepartment") }}
+                    </TButton>
+                    <TButton
+                      v-if="isDepartmentWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="departmentLoading || !canViewDepartments"
+                      @click="reloadDepartments"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isMenuWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateMenus"
+                      @click="openMenuCreatePanel"
+                    >
+                      {{ t("app.action.newMenu") }}
+                    </TButton>
+                    <TButton
+                      v-if="isMenuWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="menuLoading || !canViewMenus"
+                      @click="reloadMenus"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isNotificationWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateNotifications"
+                      @click="openNotificationCreatePanel"
+                    >
+                      {{ t("app.action.newNotification") }}
+                    </TButton>
+                    <TButton
+                      v-if="isNotificationWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="notificationLoading || !canViewNotifications"
+                      @click="reloadNotifications"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isOperationLogWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="operationLogLoading || !canViewOperationLogs"
+                      @click="reloadOperationLogs"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isUserWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateUsers"
+                      @click="openUserCreatePanel"
+                    >
+                      {{ t("app.action.newUser") }}
+                    </TButton>
+                    <TButton
+                      v-if="isSettingWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateSettings"
+                      @click="openSettingCreatePanel"
+                    >
+                      {{ t("app.action.newSetting") }}
+                    </TButton>
+                    <TButton
+                      v-if="isSettingWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="settingLoading || !canViewSettings"
+                      @click="reloadSettings"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isTenantWorkspace"
+                      size="small"
+                      theme="primary"
+                      variant="outline"
+                      :disabled="!canCreateTenants"
+                      @click="openTenantCreatePanel"
+                    >
+                      {{ t("app.action.newTenant") }}
+                    </TButton>
+                    <TButton
+                      v-if="isTenantWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="tenantLoading || !canViewTenants"
+                      @click="reloadTenants"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isUserWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :disabled="userLoading || !canViewUsers"
+                      @click="reloadUsers"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isFileWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :loading="fileLoading"
+                      :disabled="fileLoading || (!canViewFiles && !canUploadFiles)"
+                      @click="reloadFiles"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                    <TButton
+                      v-if="isWorkflowDefinitionsWorkspace"
+                      size="small"
+                      theme="default"
+                      variant="outline"
+                      :loading="workflowLoading"
+                      :disabled="workflowLoading || !canViewWorkflowDefinitions"
+                      @click="reloadWorkflowDefinitions"
+                    >
+                      {{ t("app.action.refresh") }}
+                    </TButton>
+                  </template>
                   <TButton
-                    v-if="isRoleWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateRoles"
-                    @click="openRoleCreatePanel"
-                  >
-                    {{ t("app.action.newRole") }}
-                  </TButton>
-                  <TButton
-                    v-if="isRoleWorkspace"
+                    v-if="isRuntimeShellTab"
                     size="small"
                     theme="default"
                     variant="outline"
-                    :disabled="roleLoading || !canViewRoles"
-                    @click="reloadRoles"
+                    @click="openCurrentWorkspaceTab"
                   >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isCustomerWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateCustomers"
-                    @click="openCreatePanel"
-                  >
-                    {{ t("app.action.newCustomer") }}
-                  </TButton>
-                  <TButton
-                    v-if="isCustomerWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="customerLoading || !canViewCustomers"
-                    @click="reloadCustomers"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isDictionaryWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateDictionaryTypes"
-                    @click="openDictionaryCreatePanel"
-                  >
-                    {{ t("app.action.newDictionaryType") }}
-                  </TButton>
-                  <TButton
-                    v-if="isDictionaryWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="dictionaryLoading || !canViewDictionaries"
-                    @click="reloadDictionaries"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isDepartmentWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateDepartments"
-                    @click="openDepartmentCreatePanel"
-                  >
-                    {{ t("app.action.newDepartment") }}
-                  </TButton>
-                  <TButton
-                    v-if="isDepartmentWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="departmentLoading || !canViewDepartments"
-                    @click="reloadDepartments"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isMenuWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateMenus"
-                    @click="openMenuCreatePanel"
-                  >
-                    {{ t("app.action.newMenu") }}
-                  </TButton>
-                  <TButton
-                    v-if="isMenuWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="menuLoading || !canViewMenus"
-                    @click="reloadMenus"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isNotificationWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateNotifications"
-                    @click="openNotificationCreatePanel"
-                  >
-                    {{ t("app.action.newNotification") }}
-                  </TButton>
-                  <TButton
-                    v-if="isNotificationWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="notificationLoading || !canViewNotifications"
-                    @click="reloadNotifications"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isOperationLogWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="operationLogLoading || !canViewOperationLogs"
-                    @click="reloadOperationLogs"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isUserWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateUsers"
-                    @click="openUserCreatePanel"
-                  >
-                    {{ t("app.action.newUser") }}
-                  </TButton>
-                  <TButton
-                    v-if="isSettingWorkspace"
-                    size="small"
-                    theme="primary"
-                    variant="outline"
-                    :disabled="!canCreateSettings"
-                    @click="openSettingCreatePanel"
-                  >
-                    {{ t("app.action.newSetting") }}
-                  </TButton>
-                  <TButton
-                    v-if="isSettingWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="settingLoading || !canViewSettings"
-                    @click="reloadSettings"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isUserWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :disabled="userLoading || !canViewUsers"
-                    @click="reloadUsers"
-                  >
-                    {{ t("app.action.refresh") }}
-                  </TButton>
-                  <TButton
-                    v-if="isWorkflowDefinitionsWorkspace"
-                    size="small"
-                    theme="default"
-                    variant="outline"
-                    :loading="workflowLoading"
-                    :disabled="workflowLoading || !canViewWorkflowDefinitions"
-                    @click="reloadWorkflowDefinitions"
-                  >
-                    {{ t("app.action.refresh") }}
+                    {{ t("app.runtime.backToWorkspace") }}
                   </TButton>
                   <TButton
                     v-if="isAuthenticated"
@@ -7909,174 +4011,74 @@ onMounted(async () => {
                     </div>
                   </section>
 
-                  <section
+                  <WorkflowWorkspaceMain
                     v-else-if="currentWorkspaceKind === 'workflow-definitions'"
-                    class="enterprise-card enterprise-main-card"
-                  >
-                    <p class="enterprise-eyebrow">{{ t("app.workflow.listEyebrow") }}</p>
-                    <h3 class="enterprise-heading">{{ t("app.workflow.listTitle") }}</h3>
-                    <p class="enterprise-copy">
-                      {{ t("app.workflow.listDescription") }}
-                    </p>
+                    :t="t"
+                    :module-ready="workflowModuleReady"
+                    :auth-module-ready="authModuleReady"
+                    :is-authenticated="isAuthenticated"
+                    :can-enter-workspace="canEnterWorkflowWorkspace"
+                    :can-view-definitions="canViewWorkflowDefinitions"
+                    :error-message="workflowErrorMessage"
+                    :loading="workflowLoading"
+                    :query="workflowQuery"
+                    :status-filter="workflowStatusFilter"
+                    :filter-summary="workflowFilterSummary"
+                    :definition-cards="workflowDefinitionCards"
+                    :definition-count="workflowDefinitions.length"
+                    :selected-definition-id="selectedWorkflowDefinitionId"
+                    @update:query="workflowQuery = $event"
+                    @select-definition="handleWorkflowDefinitionSelect"
+                    @select-status-filter="setWorkflowStatusFilter"
+                    @reset-filters="resetWorkflowFilters"
+                  />
 
-                    <div
-                      v-if="!workflowModuleReady"
-                      class="enterprise-message enterprise-message-warning mt-5"
-                    >
-                      {{ t("app.message.workflowModuleOffline") }}
-                    </div>
+                  <FileWorkspaceMain
+                    v-else-if="currentWorkspaceKind === 'file'"
+                    :t="t"
+                    :module-ready="fileModuleReady"
+                    :auth-module-ready="authModuleReady"
+                    :is-authenticated="isAuthenticated"
+                    :can-enter-workspace="canEnterFileWorkspace"
+                    :can-view-files="canViewFiles"
+                    :can-upload-files="canUploadFiles"
+                    :error-message="fileErrorMessage"
+                    :loading="fileLoading"
+                    :query="fileQuery"
+                    :filter-summary="fileFilterSummary"
+                    :count-label="fileCountLabel"
+                    :table-items="fileTableItems"
+                    :selected-file-id="selectedFileId"
+                    @update:query="updateFileQuery"
+                    @reset-filters="resetFileQuery"
+                    @select-file="
+                      (fileId) => {
+                        const nextFile = fileItems.find((item) => item.id === fileId)
 
-                    <div
-                      v-else-if="authModuleReady && !isAuthenticated"
-                      class="enterprise-message enterprise-message-info mt-5"
-                    >
-                      {{ t("app.message.workflowSignInToLoad") }}
-                    </div>
+                        if (nextFile) {
+                          void selectFile(nextFile)
+                        }
+                      }
+                    "
+                    @open-upload="openFileUploadPanel"
+                  />
 
-                    <div
-                      v-else-if="canEnterWorkflowWorkspace && !canViewWorkflowDefinitions"
-                      class="enterprise-message enterprise-message-warning mt-5"
-                    >
-                      {{ t("app.message.workflowNoListPermission") }}
-                    </div>
-
-                    <div
-                      v-else-if="workflowErrorMessage"
-                      class="enterprise-message enterprise-message-danger mt-5"
-                    >
-                      {{ workflowErrorMessage }}
-                    </div>
-
-                    <div
-                      v-else-if="workflowLoading"
-                      class="enterprise-message enterprise-message-info mt-5"
-                    >
-                      {{ t("app.workflow.loading") }}
-                    </div>
-
-                    <div v-else class="mt-5 space-y-5">
-                      <div class="workflow-filter-bar">
-                        <label class="enterprise-field workflow-filter-search">
-                          <span>{{ t("app.workflow.filter.searchLabel") }}</span>
-                          <TInput
-                            v-model="workflowQuery"
-                            :placeholder="t('app.workflow.filter.searchPlaceholder')"
-                            clearable
-                          />
-                        </label>
-
-                        <div class="workflow-filter-panel">
-                          <p class="enterprise-subheading">
-                            {{ t("app.workflow.filter.statusTitle") }}
-                          </p>
-                          <div class="workflow-filter-pills">
-                            <button
-                              type="button"
-                              class="workflow-filter-pill"
-                              :class="
-                                workflowStatusFilter === 'all'
-                                  ? 'workflow-filter-pill-active'
-                                  : ''
-                              "
-                              @click="setWorkflowStatusFilter('all')"
-                            >
-                              {{ t("app.workflow.filter.all") }}
-                            </button>
-                            <button
-                              type="button"
-                              class="workflow-filter-pill"
-                              :class="
-                                workflowStatusFilter === 'active'
-                                  ? 'workflow-filter-pill-active'
-                                  : ''
-                              "
-                              @click="setWorkflowStatusFilter('active')"
-                            >
-                              {{ t("app.workflow.filter.active") }}
-                            </button>
-                            <button
-                              type="button"
-                              class="workflow-filter-pill"
-                              :class="
-                                workflowStatusFilter === 'disabled'
-                                  ? 'workflow-filter-pill-active'
-                                  : ''
-                              "
-                              @click="setWorkflowStatusFilter('disabled')"
-                            >
-                              {{ t("app.workflow.filter.disabled") }}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="workflow-filter-summary">
-                        <span class="enterprise-toolbar-pill">
-                          {{ workflowFilterSummary }}
-                        </span>
-                        <button
-                          v-if="
-                            workflowQuery.trim().length > 0 ||
-                            workflowStatusFilter !== 'all'
-                          "
-                          type="button"
-                          class="enterprise-button enterprise-button-ghost"
-                          @click="resetWorkflowFilters"
-                        >
-                          {{ t("app.workflow.filter.reset") }}
-                        </button>
-                      </div>
-
-                      <div
-                        v-if="workflowDefinitionCards.length === 0"
-                        class="enterprise-message enterprise-message-info"
-                      >
-                        {{
-                          workflowDefinitions.length === 0
-                            ? t("app.workflow.empty")
-                            : t("app.workflow.emptyFiltered")
-                        }}
-                      </div>
-
-                      <div v-else class="workflow-definition-list">
-                        <button
-                          v-for="definition in workflowDefinitionCards"
-                          :key="definition.id"
-                          type="button"
-                          class="workflow-definition-card"
-                          :class="
-                            selectedWorkflowDefinitionId === definition.id
-                              ? 'workflow-definition-card-active'
-                              : ''
-                          "
-                          @click="handleWorkflowDefinitionSelect(definition.id)"
-                        >
-                          <div class="workflow-definition-card-header">
-                            <div>
-                              <strong>{{ definition.name }}</strong>
-                              <p>{{ definition.key }}</p>
-                            </div>
-                            <span class="workflow-status-pill">
-                              {{ definition.statusLabel }}
-                            </span>
-                          </div>
-
-                          <div class="workflow-definition-card-meta">
-                            <span>v{{ definition.version }}</span>
-                            <span>
-                              {{ definition.nodeCount }}
-                              {{ t("app.workflow.meta.nodes") }}
-                            </span>
-                            <span>
-                              {{ definition.edgeCount }}
-                              {{ t("app.workflow.meta.edges") }}
-                            </span>
-                            <span>{{ definition.updatedAtLabel }}</span>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                  </section>
+                  <GeneratorPreviewWorkspaceMain
+                    v-else-if="currentWorkspaceKind === 'generator-preview'"
+                    :t="t"
+                    :schema-options="generatorPreviewSchemaOptions"
+                    :selected-schema-name="selectedGeneratorPreviewSchemaName"
+                    :selected-frontend-target="selectedGeneratorPreviewFrontendTarget"
+                    :query="generatorPreviewQuery"
+                    :filter-summary="generatorPreviewFilterSummary"
+                    :files="generatorPreviewFiles"
+                    :selected-file-path="selectedGeneratorPreviewFilePath"
+                    @update:selected-schema-name="selectedGeneratorPreviewSchemaName = $event"
+                    @update:selected-frontend-target="selectedGeneratorPreviewFrontendTarget = $event"
+                    @update:query="generatorPreviewQuery = $event"
+                    @select-file="selectedGeneratorPreviewFilePath = $event"
+                    @reset-filters="resetGeneratorPreviewFilters"
+                  />
 
                   <section
                     v-else-if="currentWorkspaceKind === 'dictionary'"
@@ -8496,6 +4498,76 @@ onMounted(async () => {
                   </section>
 
                   <section
+                    v-else-if="currentWorkspaceKind === 'tenant'"
+                    class="enterprise-card enterprise-main-card"
+                  >
+                    <div
+                      v-if="!tenantModuleReady"
+                      class="enterprise-message enterprise-message-warning"
+                    >
+                      {{ t("app.message.tenantModuleOffline") }}
+                    </div>
+
+                    <div
+                      v-else-if="authModuleReady && !isAuthenticated"
+                      class="enterprise-message enterprise-message-info"
+                    >
+                      {{ t("app.message.tenantSignInToLoad") }}
+                    </div>
+
+                    <div
+                      v-else-if="
+                        authModuleReady &&
+                        isAuthenticated &&
+                        !authIdentity?.user.isSuperAdmin
+                      "
+                      class="enterprise-message enterprise-message-warning"
+                    >
+                      {{ t("app.message.tenantSuperAdminRequired") }}
+                    </div>
+
+                    <div
+                      v-else-if="canEnterTenantWorkspace && !canViewTenants"
+                      class="enterprise-message enterprise-message-warning"
+                    >
+                      {{ t("app.message.tenantNoListPermission") }}
+                    </div>
+
+                    <div
+                      v-else-if="tenantErrorMessage"
+                      class="enterprise-message enterprise-message-danger"
+                    >
+                      {{ tenantErrorMessage }}
+                    </div>
+
+                    <ElyCrudWorkspace
+                      v-else
+                      :eyebrow="t('app.tenant.workspaceEyebrow')"
+                      :title="t('app.tenant.workspaceTitle')"
+                      :description="t('app.tenant.workspaceDescription')"
+                      :query-fields="enterpriseTenantQueryFields"
+                      :query-loading="tenantLoading"
+                      :table-columns="enterpriseTenantTableColumns"
+                      :items="enterpriseTenantTableItems"
+                      :table-loading="tenantLoading"
+                      :table-actions="[]"
+                      :item-count-label="tenantCountLabel"
+                      :empty-title="t('app.tenant.emptyTitle')"
+                      :empty-description="t('app.tenant.emptyDescription')"
+                      :copy="enterpriseCrudCopy"
+                      @search="handleTenantSearch"
+                      @reset="handleTenantReset"
+                      @row-click="handleTenantRowClick"
+                    >
+                      <template #toolbar>
+                        <span class="enterprise-toolbar-pill">
+                          {{ currentQuerySummary }}
+                        </span>
+                      </template>
+                    </ElyCrudWorkspace>
+                  </section>
+
+                  <section
                     v-else-if="currentWorkspaceKind === 'user'"
                     class="enterprise-card enterprise-main-card"
                   >
@@ -8740,9 +4812,7 @@ onMounted(async () => {
                                     :model-value="customerPageInputValue"
                                     size="small"
                                     :placeholder="t('app.workspace.paginationJumpPlaceholder')"
-                                    @update:model-value="
-                                      customerPageInputValue = String($event ?? '')
-                                    "
+                                    @update:model-value="updateCustomerPageInput"
                                     @enter="submitCustomerPageJump"
                                   />
                                   <TButton
@@ -8766,7 +4836,46 @@ onMounted(async () => {
                 </template>
 
                 <template #secondary>
-                  <section v-if="currentWorkspaceKind === 'placeholder'" class="enterprise-card">
+                  <section v-if="isRuntimeShellTab" class="enterprise-card">
+                    <p class="enterprise-eyebrow">{{ t("app.runtime.sideEyebrow") }}</p>
+                    <h3 class="enterprise-heading">{{ t("app.runtime.sideTitle") }}</h3>
+                    <p class="enterprise-copy">{{ t("app.runtime.sideDescription") }}</p>
+
+                    <div class="enterprise-metadata mt-5">
+                      <div>
+                        <span>{{ t("app.runtime.currentPage") }}</span>
+                        <strong>{{ selectedNavigationItem?.name }}</strong>
+                      </div>
+                      <div>
+                        <span>{{ t("app.runtime.currentPath") }}</span>
+                        <strong>{{ currentNavigationPath }}</strong>
+                      </div>
+                      <div>
+                        <span>{{ t("app.runtime.sideAuthLabel") }}</span>
+                        <strong>{{ authStatusLabel }}</strong>
+                      </div>
+                      <div>
+                        <span>{{ t("app.runtime.sideModuleCodeLabel") }}</span>
+                        <strong>{{ currentModuleCodeLabel }}</strong>
+                      </div>
+                    </div>
+
+                    <div class="mt-5">
+                      <p class="enterprise-subheading">
+                        {{ t("app.runtime.sideDecisionTitle") }}
+                      </p>
+                      <ul class="enterprise-list">
+                        <li>{{ t("app.runtime.sideDecisionTab") }}</li>
+                        <li>{{ t("app.runtime.sideDecisionOwner") }}</li>
+                        <li>{{ t("app.runtime.sideDecisionFallback") }}</li>
+                      </ul>
+                    </div>
+                  </section>
+
+                  <section
+                    v-else-if="currentWorkspaceKind === 'placeholder'"
+                    class="enterprise-card"
+                  >
                     <p class="enterprise-eyebrow">{{ t("app.placeholder.sideEyebrow") }}</p>
                     <h3 class="enterprise-heading">{{ t("app.placeholder.sideTitle") }}</h3>
                     <p class="enterprise-copy">{{ t("app.placeholder.sideDescription") }}</p>
@@ -9735,6 +5844,135 @@ onMounted(async () => {
                   </section>
 
                   <section
+                    v-else-if="currentWorkspaceKind === 'tenant'"
+                    class="enterprise-card"
+                  >
+                    <p class="enterprise-eyebrow">{{ t("app.tenant.detailEyebrow") }}</p>
+                    <h3 class="enterprise-heading">{{ tenantPanelTitle }}</h3>
+                    <p class="enterprise-copy">{{ tenantPanelDescription }}</p>
+
+                    <div
+                      v-if="!tenantModuleReady"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ t("app.message.tenantModuleOffline") }}
+                    </div>
+
+                    <div
+                      v-else-if="authModuleReady && !isAuthenticated"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ t("app.message.tenantSignInToLoad") }}
+                    </div>
+
+                    <div
+                      v-else-if="
+                        authModuleReady &&
+                        isAuthenticated &&
+                        !authIdentity?.user.isSuperAdmin
+                      "
+                      class="enterprise-inline-warning"
+                    >
+                      {{ t("app.message.tenantSuperAdminRequired") }}
+                    </div>
+
+                    <div
+                      v-else-if="canEnterTenantWorkspace && !canViewTenants"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ t("app.message.tenantNoListPermission") }}
+                    </div>
+
+                    <div
+                      v-else-if="tenantErrorMessage"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ tenantErrorMessage }}
+                    </div>
+
+                    <div
+                      v-else-if="tenantDetailLoading && selectedTenant"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ t("app.tenant.detailLoading") }}
+                    </div>
+
+                    <div
+                      v-else-if="tenantDetailErrorMessage"
+                      class="enterprise-inline-warning"
+                    >
+                      {{ tenantDetailErrorMessage }}
+                    </div>
+
+                    <template v-else-if="tenantPanelMode === 'detail' && selectedTenant">
+                      <div class="enterprise-button-row">
+                        <button
+                          v-if="canUpdateTenants"
+                          type="button"
+                          class="enterprise-button"
+                          :disabled="tenantLoading || tenantDetailLoading"
+                          @click="startTenantEdit(selectedTenant)"
+                        >
+                          {{ t("app.tenant.action.edit") }}
+                        </button>
+                        <button
+                          v-if="canUpdateTenants"
+                          type="button"
+                          class="enterprise-button enterprise-button-ghost"
+                          :disabled="tenantLoading || tenantDetailLoading"
+                          @click="toggleSelectedTenantStatus"
+                        >
+                          {{
+                            selectedTenant.status === "active"
+                              ? t("app.tenant.action.suspend")
+                              : t("app.tenant.action.activate")
+                          }}
+                        </button>
+                        <button
+                          v-if="canCreateTenants"
+                          type="button"
+                          class="enterprise-button enterprise-button-ghost"
+                          @click="openTenantCreatePanel"
+                        >
+                          {{ t("app.tenant.action.create") }}
+                        </button>
+                      </div>
+
+                      <ElyForm
+                        class="mt-5"
+                        :fields="enterpriseTenantFormFields"
+                        :values="enterpriseTenantFormValues"
+                        readonly
+                        :loading="tenantLoading || tenantDetailLoading"
+                        :copy="enterpriseFormCopy"
+                      />
+                    </template>
+
+                    <template
+                      v-else-if="
+                        tenantPanelMode === 'create' || tenantPanelMode === 'edit'
+                      "
+                    >
+                      <ElyForm
+                        class="mt-5"
+                        :fields="enterpriseTenantFormFields"
+                        :values="enterpriseTenantFormValues"
+                        :loading="tenantLoading || tenantDetailLoading"
+                        :copy="enterpriseFormCopy"
+                        @submit="submitTenantForm"
+                        @cancel="cancelTenantPanel"
+                      />
+                    </template>
+
+                    <div
+                      v-else
+                      class="enterprise-inline-warning mt-5"
+                    >
+                      {{ t("app.tenant.detailEmptyDescription") }}
+                    </div>
+                  </section>
+
+                  <section
                     v-else-if="currentWorkspaceKind === 'user'"
                     class="enterprise-card"
                   >
@@ -9881,120 +6119,60 @@ onMounted(async () => {
                     </div>
                   </section>
 
-                  <section
+                  <WorkflowWorkspacePanel
                     v-else-if="currentWorkspaceKind === 'workflow-definitions'"
-                    class="enterprise-card"
-                  >
-                    <p class="enterprise-eyebrow">{{ t("app.workflow.detailEyebrow") }}</p>
-                    <h3 class="enterprise-heading">
-                      {{
-                        selectedWorkflowDefinition?.name ??
-                        t("app.workflow.detailEmptyTitle")
-                      }}
-                    </h3>
-                    <p class="enterprise-copy">
-                      {{
-                        selectedWorkflowDefinition
-                          ? t("app.workflow.detailDescription")
-                          : t("app.workflow.detailEmpty")
-                      }}
-                    </p>
+                    :t="t"
+                    :locale="locale"
+                    :detail-loading="workflowDetailLoading"
+                    :detail-error-message="workflowDetailErrorMessage"
+                    :selected-definition="selectedWorkflowDefinition"
+                    :selected-definition-id="selectedWorkflowDefinitionId"
+                    :version-history-cards="workflowVersionHistoryCards"
+                    :detail-cards="workflowDefinitionDetailCards"
+                    :localize-status="localizeWorkflowStatus"
+                    @select-definition="handleWorkflowDefinitionSelect"
+                  />
 
-                    <div
-                      v-if="workflowDetailLoading && selectedWorkflowDefinition"
-                      class="enterprise-inline-warning"
-                    >
-                      {{ t("app.workflow.detailLoading") }}
-                    </div>
+                  <FileWorkspacePanel
+                    v-else-if="currentWorkspaceKind === 'file'"
+                    :t="t"
+                    :locale="locale"
+                    :module-ready="fileModuleReady"
+                    :auth-module-ready="authModuleReady"
+                    :is-authenticated="isAuthenticated"
+                    :can-view-files="canViewFiles"
+                    :can-upload-files="canUploadFiles"
+                    :can-download-files="canDownloadFiles"
+                    :can-delete-files="canDeleteFiles"
+                    :loading="fileLoading"
+                    :detail-loading="fileDetailLoading"
+                    :action-loading="fileActionLoading"
+                    :error-message="fileErrorMessage"
+                    :detail-error-message="fileDetailErrorMessage"
+                    :panel-mode="filePanelMode"
+                    :selected-file="selectedFile"
+                    :pending-upload-file="pendingUploadFile"
+                    @set-upload-file="setPendingUploadFile"
+                    @submit-upload="submitFileUpload"
+                    @download-selected="downloadSelectedFile"
+                    @open-delete="openFileDeletePanel"
+                    @confirm-delete="confirmFileDelete"
+                    @cancel-panel="cancelFilePanel"
+                  />
 
-                    <div
-                      v-if="workflowDetailErrorMessage"
-                      class="enterprise-inline-warning"
-                    >
-                      {{ workflowDetailErrorMessage }}
-                    </div>
-
-                    <div
-                      v-if="selectedWorkflowDefinition"
-                      class="enterprise-metadata mt-5"
-                    >
-                      <div>
-                        <span>{{ t("app.workflow.meta.status") }}</span>
-                        <strong>{{
-                          localizeWorkflowStatus(selectedWorkflowDefinition.status)
-                        }}</strong>
-                      </div>
-                      <div>
-                        <span>{{ t("app.workflow.meta.key") }}</span>
-                        <strong>{{ selectedWorkflowDefinition.key }}</strong>
-                      </div>
-                      <div>
-                        <span>{{ t("app.workflow.meta.version") }}</span>
-                        <strong>v{{ selectedWorkflowDefinition.version }}</strong>
-                      </div>
-                      <div>
-                        <span>{{ t("app.workflow.meta.structure") }}</span>
-                        <strong>
-                          {{ selectedWorkflowDefinition.definition.nodes.length }}
-                          {{ t("app.workflow.meta.nodes") }}
-                          / {{ selectedWorkflowDefinition.definition.edges.length }}
-                          {{ t("app.workflow.meta.edges") }}
-                        </strong>
-                      </div>
-                      <div>
-                        <span>{{ t("app.workflow.meta.updatedAt") }}</span>
-                        <strong>{{
-                          new Date(selectedWorkflowDefinition.updatedAt).toLocaleString(locale)
-                        }}</strong>
-                      </div>
-                    </div>
-
-                    <div v-if="selectedWorkflowDefinition" class="mt-5">
-                      <p class="enterprise-subheading">
-                        {{ t("app.workflow.versionHistoryTitle") }}
-                      </p>
-                      <div
-                        v-if="workflowVersionHistoryCards.length > 0"
-                        class="workflow-version-history"
-                      >
-                        <button
-                          v-for="definition in workflowVersionHistoryCards"
-                          :key="definition.id"
-                          type="button"
-                          class="workflow-version-card"
-                          :class="
-                            selectedWorkflowDefinitionId === definition.id
-                              ? 'workflow-version-card-active'
-                              : ''
-                          "
-                          @click="handleWorkflowDefinitionSelect(definition.id)"
-                        >
-                          <strong>v{{ definition.version }}</strong>
-                          <span>{{ definition.statusLabel }}</span>
-                          <small>{{ definition.updatedAtLabel }}</small>
-                        </button>
-                      </div>
-
-                      <p class="enterprise-subheading mt-5">
-                        {{ t("app.workflow.nodeFlowTitle") }}
-                      </p>
-                      <ul class="workflow-node-list">
-                        <li
-                          v-for="node in workflowDefinitionDetailCards"
-                          :key="node.id"
-                          class="workflow-node-item"
-                        >
-                          <div class="workflow-node-item-header">
-                            <strong>{{ node.name }}</strong>
-                            <span>{{ node.typeLabel }}</span>
-                          </div>
-                          <p v-if="node.description" class="workflow-node-copy">
-                            {{ node.description }}
-                          </p>
-                        </li>
-                      </ul>
-                    </div>
-                  </section>
+                  <GeneratorPreviewWorkspacePanel
+                    v-else-if="currentWorkspaceKind === 'generator-preview'"
+                    :t="t"
+                    :selected-schema-name="
+                      selectedGeneratorPreviewSchema?.name ??
+                      selectedGeneratorPreviewSchemaName
+                    "
+                    :selected-frontend-target="
+                      selectedGeneratorPreviewFrontendTarget
+                    "
+                    :selected-file="selectedGeneratorPreviewFile"
+                    :sql-preview="generatorPreviewSqlPreview"
+                  />
 
                   <section v-else class="enterprise-card">
                     <p class="enterprise-eyebrow">{{ t("app.panel.formDetail") }}</p>
@@ -10478,141 +6656,6 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.75rem;
-}
-
-.workflow-filter-bar {
-  display: grid;
-  gap: 1rem;
-}
-
-.workflow-filter-search {
-  margin: 0;
-}
-
-.workflow-filter-panel,
-.workflow-filter-summary,
-.workflow-version-history {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.workflow-filter-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.workflow-filter-pill,
-.workflow-version-card {
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 0.45rem 0.8rem;
-}
-
-.workflow-filter-pill-active,
-.workflow-version-card-active {
-  border-color: rgba(36, 87, 214, 0.3);
-  background: rgba(36, 87, 214, 0.1);
-  color: #173ea6;
-}
-
-.workflow-definition-list,
-.workflow-node-list {
-  display: grid;
-  gap: 0.85rem;
-  margin-top: 1.25rem;
-}
-
-.workflow-definition-card,
-.workflow-node-item {
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.96);
-  padding: 1rem;
-  text-align: left;
-  color: #0f172a;
-  transition:
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
-}
-
-.workflow-definition-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(36, 87, 214, 0.24);
-  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
-}
-
-.workflow-definition-card-active {
-  border-color: rgba(36, 87, 214, 0.45);
-  box-shadow: 0 18px 32px rgba(36, 87, 214, 0.12);
-}
-
-.workflow-definition-card-header,
-.workflow-node-item-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.8rem;
-}
-
-.workflow-definition-card-header strong,
-.workflow-node-item-header strong {
-  display: block;
-  font-size: 1rem;
-}
-
-.workflow-definition-card-header p {
-  margin: 0.35rem 0 0;
-  color: #64748b;
-}
-
-.workflow-definition-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem 0.85rem;
-  margin-top: 0.9rem;
-  font-size: 0.8rem;
-  color: #475569;
-}
-
-.workflow-status-pill,
-.workflow-node-item-header span {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  background: rgba(36, 87, 214, 0.1);
-  color: #173ea6;
-  padding: 0.28rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.workflow-node-copy {
-  margin: 0.7rem 0 0;
-  color: #475569;
-  line-height: 1.65;
-}
-
-.workflow-version-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
-  border-radius: 14px;
-  padding: 0.7rem 0.85rem;
-}
-
-.workflow-version-card small {
-  color: #64748b;
 }
 
 .enterprise-danger-zone {

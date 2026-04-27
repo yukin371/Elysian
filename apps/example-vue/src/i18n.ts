@@ -57,6 +57,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.setting.sectionTitle": "系统配置工作区",
       "app.setting.sectionCopy":
         "系统配置页先收敛到真实列表、详情与基础编辑，不提前扩成多环境对比或版本管理器。",
+      "app.tenant.sectionTitle": "租户管理工作区",
+      "app.tenant.sectionCopy":
+        "租户页先收敛到真实列表、详情、基础编辑与状态切换，不提前扩成租户初始化编排台或跨租户治理中心。",
       "app.dictionary.sectionTitle": "字典管理工作区",
       "app.dictionary.sectionCopy":
         "字典页先收敛到真实类型列表、详情与基础编辑，字典项先围绕当前类型展示，不提前扩成第二个并列主工作区。",
@@ -88,6 +91,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.setting.shellTitle": "系统配置工作区",
       "app.setting.shellDescription":
         "列表与详情直接消费系统配置接口，当前只做最小闭环，不在本轮扩写环境覆盖或版本能力。",
+      "app.tenant.shellTitle": "租户工作区",
+      "app.tenant.shellDescription":
+        "列表与详情直接消费系统租户接口，当前只做最小闭环，并保持 super-admin 门禁显式可见。",
       "app.dictionary.shellTitle": "字典管理工作区",
       "app.dictionary.shellDescription":
         "列表与详情直接消费系统字典接口，当前主区聚焦字典类型，右侧围绕当前类型展示字典项。",
@@ -112,6 +118,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.action.newMenu": "新建菜单",
       "app.action.newRole": "新建角色",
       "app.action.newSetting": "新建配置",
+      "app.action.newTenant": "新建租户",
       "app.action.newUser": "新建用户",
       "app.action.refresh": "刷新",
       "app.action.signOut": "退出登录",
@@ -142,6 +149,13 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "请先登录，再加载受保护的系统配置数据。",
       "app.message.settingNoListPermission":
         "当前身份可以进入工作区，但没有 `system:setting:list` 权限。",
+      "app.message.tenantModuleOffline":
+        "`tenant` 模块尚未注册。请确认服务端已启用系统租户模块后再重试。",
+      "app.message.tenantSignInToLoad": "请先登录，再加载受保护的租户数据。",
+      "app.message.tenantNoListPermission":
+        "当前身份可以进入工作区，但没有 `system:tenant:list` 权限。",
+      "app.message.tenantSuperAdminRequired":
+        "租户管理仅对 super-admin 开放，普通管理员不会在示例页伪装成可操作态。",
       "app.message.dictionaryModuleOffline":
         "`dictionary` 模块尚未注册。请确认服务端已启用系统字典模块后再重试。",
       "app.message.dictionarySignInToLoad":
@@ -382,6 +396,42 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "编辑模式继续复用 schema 派生字段，不额外引入第二套表单 owner。",
       "app.setting.panelDesc.detail":
         "右侧详情与动作保持围绕当前配置，不在主区重复堆叠编辑入口。",
+      "app.tenant.workspaceEyebrow": "真实模块工作区",
+      "app.tenant.workspaceTitle": "系统租户清单",
+      "app.tenant.workspaceDescription":
+        "主区只承接查询与租户列表，右侧聚焦当前租户详情、基础编辑与状态切换，避免把治理动作摊成第二个主区。",
+      "app.tenant.emptyTitle": "当前筛选条件下没有租户",
+      "app.tenant.emptyDescription": "清空条件或调整关键字后重试。",
+      "app.tenant.detailEyebrow": "租户详情",
+      "app.tenant.detailEmptyTitle": "尚未选择租户",
+      "app.tenant.detailEmptyDescription": "请选择一条租户记录查看详情。",
+      "app.tenant.detailLoading": "正在刷新当前租户详情...",
+      "app.tenant.field.id": "ID",
+      "app.tenant.field.code": "租户编码",
+      "app.tenant.field.name": "租户名称",
+      "app.tenant.field.status": "状态",
+      "app.tenant.field.createdAt": "创建时间",
+      "app.tenant.field.updatedAt": "更新时间",
+      "app.tenant.status.active": "启用",
+      "app.tenant.status.suspended": "停用",
+      "app.tenant.query.codePlaceholder": "按租户编码搜索",
+      "app.tenant.query.namePlaceholder": "按租户名称搜索",
+      "app.tenant.action.create": "新建租户",
+      "app.tenant.action.edit": "编辑租户",
+      "app.tenant.action.activate": "启用租户",
+      "app.tenant.action.suspend": "停用租户",
+      "app.tenant.countLabel": "当前显示 {visible} 条，共 {total} 条",
+      "app.tenant.statsHint": "当前可见租户条目数",
+      "app.tenant.tabsHint": "{count} 个租户",
+      "app.tenant.panelTitle.create": "新建租户",
+      "app.tenant.panelTitle.edit": "编辑租户",
+      "app.tenant.panelTitle.detailFallback": "租户详情",
+      "app.tenant.panelDesc.create":
+        "创建流程直接调用系统租户模块接口，示例页只装配表单状态与交互。",
+      "app.tenant.panelDesc.edit":
+        "编辑模式继续复用 schema 派生字段，不额外扩出新的治理抽象层。",
+      "app.tenant.panelDesc.detail":
+        "右侧详情与动作保持围绕当前租户，并显式保留状态切换入口。",
       "app.dictionary.workspaceEyebrow": "真实模块工作区",
       "app.dictionary.workspaceTitle": "系统字典类型",
       "app.dictionary.workspaceDescription":
@@ -558,6 +608,43 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.workflow.node.conditions": "{count} 个条件分支",
       "app.workflow.statsHint": "当前流程定义条目数",
       "app.workflow.tabsHint": "{count} 条流程定义",
+      "app.generatorPreview.sectionTitle": "生成预览工作区",
+      "app.generatorPreview.sectionCopy":
+        "这里消费 generator 的纯渲染入口，预览文件列表、源码片段与 SQL 草案，不直接落盘到目标目录。",
+      "app.generatorPreview.shellTitle": "生成预览工作区",
+      "app.generatorPreview.shellDescription":
+        "示例页在浏览器侧消费 browser-safe generator 入口，先验证 Studio 预览面板的最小交互闭环。",
+      "app.generatorPreview.workspaceEyebrow": "本地生成预览",
+      "app.generatorPreview.workspaceTitle": "Generator 产物清单",
+      "app.generatorPreview.workspaceDescription":
+        "左侧选择 schema 与前端目标，主区展示将要生成的文件列表；右侧聚焦当前文件源码和 SQL preview。",
+      "app.generatorPreview.message.localOnly":
+        "当前工作区只做本地预览，不会写入生成目录，也不会替代 CLI 的真实 apply/preview 报告。",
+      "app.generatorPreview.filter.schemaLabel": "模块 Schema",
+      "app.generatorPreview.filter.frontendLabel": "前端目标",
+      "app.generatorPreview.filter.searchLabel": "搜索产物",
+      "app.generatorPreview.filter.searchPlaceholder":
+        "按文件路径、理由或内容搜索",
+      "app.generatorPreview.filter.reset": "清空筛选",
+      "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
+      "app.generatorPreview.filter.frontendSummary": "前端: {value}",
+      "app.generatorPreview.filter.querySummary": "关键词: {value}",
+      "app.generatorPreview.detailEyebrow": "预览详情",
+      "app.generatorPreview.detailDescription":
+        "右侧保持聚焦，只展示当前文件源码和对应 SQL preview，避免在两侧重复铺开文件列表。",
+      "app.generatorPreview.detailEmptyTitle": "尚未选择生成文件",
+      "app.generatorPreview.detailEmptyDescription":
+        "从左侧产物列表中选择一项，查看源码与 SQL preview。",
+      "app.generatorPreview.emptyFiltered":
+        "当前筛选条件下没有匹配的生成文件。",
+      "app.generatorPreview.sourceTitle": "生成源码",
+      "app.generatorPreview.sqlTitle": "SQL Preview",
+      "app.generatorPreview.meta.schemaName": "Schema",
+      "app.generatorPreview.meta.frontendTarget": "前端目标",
+      "app.generatorPreview.meta.mergeStrategy": "合并策略",
+      "app.generatorPreview.meta.lines": "行数",
+      "app.generatorPreview.statsHint": "当前预览文件数",
+      "app.generatorPreview.tabsHint": "预览 {count} 个产物",
       "app.placeholder.eyebrow": "页面占位",
       "app.placeholder.sideEyebrow": "接入状态",
       "app.placeholder.sideTitle": "页面边界",
@@ -610,6 +697,20 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "优先补齐 `customer / workflow / system-*` 的最小工作区 contract。",
       "app.runtime.step.owner":
         "共享预设层只负责壳层事件与视觉基线，页面切换仍由示例应用装配。",
+      "app.runtime.backToWorkspace": "返回工作区",
+      "app.runtime.sideEyebrow": "运行态边界",
+      "app.runtime.sideTitle": "当前 tab 语义",
+      "app.runtime.sideDescription":
+        "切到运行态后，右侧副栏不再显示业务详情或编辑面板，只保留页面诊断与边界说明。",
+      "app.runtime.sideAuthLabel": "会话状态",
+      "app.runtime.sideModuleCodeLabel": "模块代码",
+      "app.runtime.sideDecisionTitle": "当前约束",
+      "app.runtime.sideDecisionTab":
+        "`runtime` tab 只承接诊断信息，不承接 create / edit / detail 动作。",
+      "app.runtime.sideDecisionOwner":
+        "业务工作区 owner 仍在 `apps/example-vue`，共享壳层不反向拥有页面状态。",
+      "app.runtime.sideDecisionFallback":
+        "未闭环模块继续显式降级为占位页，而不是在运行态里伪装成功能可用。",
       "app.panel.formDetail": "标准表单 / 详情",
       "app.panel.customerModulePreview":
         "客户模块离线，标准表单面板当前保持在预览模式。",
@@ -706,6 +807,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.loadRoleDetail": "加载角色详情失败",
       "app.error.loadSettings": "加载系统配置列表失败",
       "app.error.loadSettingDetail": "加载系统配置详情失败",
+      "app.error.loadTenants": "加载租户列表失败",
+      "app.error.loadTenantDetail": "加载租户详情失败",
       "app.error.loadDictionaries": "加载字典类型列表失败",
       "app.error.loadDictionaryDetail": "加载字典详情失败",
       "app.error.loadOperationLogs": "加载操作日志列表失败",
@@ -718,6 +821,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.createMenu": "创建菜单失败",
       "app.error.createRole": "创建角色失败",
       "app.error.createSetting": "创建系统配置失败",
+      "app.error.createTenant": "创建租户失败",
       "app.error.createDictionary": "创建字典类型失败",
       "app.error.createUser": "创建用户失败",
       "app.error.updateCustomer": "更新客户失败",
@@ -725,6 +829,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.updateMenu": "更新菜单失败",
       "app.error.updateRole": "更新角色失败",
       "app.error.updateSetting": "更新系统配置失败",
+      "app.error.updateTenant": "更新租户失败",
+      "app.error.updateTenantStatus": "切换租户状态失败",
       "app.error.updateDictionary": "更新字典类型失败",
       "app.error.updateUser": "更新用户失败",
       "app.error.deleteCustomer": "删除客户失败",
@@ -740,6 +846,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.roleNameRequired": "角色名称不能为空",
       "app.error.settingKeyRequired": "配置键不能为空",
       "app.error.settingValueRequired": "配置值不能为空",
+      "app.error.tenantCodeRequired": "租户编码不能为空",
+      "app.error.tenantNameRequired": "租户名称不能为空",
       "app.error.dictionaryCodeRequired": "字典编码不能为空",
       "app.error.dictionaryNameRequired": "字典名称不能为空",
       "app.error.userUsernameRequired": "用户名不能为空",
@@ -812,6 +920,75 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.notificationRecipientRequired": "接收用户不能为空",
       "app.error.notificationTitleRequired": "通知标题不能为空",
       "app.error.notificationContentRequired": "通知内容不能为空",
+      "app.file.sectionTitle": "文件管理工作区",
+      "app.file.sectionCopy":
+        "文件页先收敛到真实列表、详情、上传、下载与删除闭环，不提前扩成对象存储控制台、批量编排或跨桶治理中心。",
+      "app.file.shellTitle": "文件工作区",
+      "app.file.shellDescription":
+        "工作区直接消费系统文件接口，当前保持最小文件管理闭环，不扩写成第二套存储平台。",
+      "app.file.workspaceEyebrow": "系统文件",
+      "app.file.workspaceTitle": "文件列表",
+      "app.file.workspaceDescription":
+        "主区聚焦筛选与列表，右侧承接详情、上传、下载与删除确认，避免重复渲染第二份文件表。",
+      "app.file.loading": "正在加载文件列表...",
+      "app.file.emptyTitle": "当前没有文件",
+      "app.file.emptyDescription":
+        "调整筛选条件，或从右侧上传一个文件完成最小闭环验证。",
+      "app.file.countLabel": "当前显示 {visible} 个文件，共 {total} 个文件",
+      "app.file.tabsHint": "当前可见 {count} 个文件",
+      "app.file.statsHint":
+        "文件工作区保持列表、详情、上传、下载与删除闭环。",
+      "app.file.detailEyebrow": "文件详情",
+      "app.file.detailEmptyTitle": "文件详情",
+      "app.file.detailEmptyDescription":
+        "从左侧列表选择一个文件，或直接在右侧上传一个新文件。",
+      "app.file.detailLoading": "正在加载文件详情...",
+      "app.file.panelTitle.upload": "上传文件",
+      "app.file.panelTitle.delete": "删除文件",
+      "app.file.panelTitle.detailFallback": "文件详情",
+      "app.file.panelDesc.upload":
+        "上传流程当前只覆盖单文件最小闭环，不扩写批量上传、断点续传或跨存储策略。",
+      "app.file.panelDesc.delete":
+        "删除确认保持显式，不在本轮引入回收站、批量清理或生命周期策略。",
+      "app.file.panelDesc.detail":
+        "详情面板用于承接下载与删除动作，不再重复渲染第二份主列表。",
+      "app.file.field.originalName": "文件名",
+      "app.file.field.mimeType": "MIME 类型",
+      "app.file.field.size": "文件大小",
+      "app.file.field.uploaderUserId": "上传用户",
+      "app.file.field.createdAt": "上传时间",
+      "app.file.query.originalNamePlaceholder": "按文件名查询",
+      "app.file.query.mimeTypePlaceholder": "按 MIME 类型查询",
+      "app.file.query.uploaderUserIdPlaceholder": "按上传用户查询",
+      "app.file.filter.reset": "重置筛选",
+      "app.file.meta.id": "文件 ID",
+      "app.file.meta.mimeType": "MIME 类型",
+      "app.file.meta.size": "文件大小",
+      "app.file.meta.uploaderUserId": "上传用户",
+      "app.file.meta.createdAt": "上传时间",
+      "app.file.action.upload": "上传文件",
+      "app.file.action.submitUpload": "确认上传",
+      "app.file.action.download": "下载文件",
+      "app.file.action.delete": "删除文件",
+      "app.file.action.confirmDelete": "确认删除",
+      "app.file.action.cancelDelete": "取消删除",
+      "app.file.uploadFieldLabel": "选择文件",
+      "app.file.uploadPrompt": "选择一个文件，右侧即可提交上传。",
+      "app.file.mimeTypeEmpty": "未识别",
+      "app.file.uploaderEmpty": "系统",
+      "app.file.deleteConfirm": "确认删除文件 {name}？该动作会直接删除当前记录。",
+      "app.message.fileModuleOffline":
+        "`file` 模块尚未注册。请确认服务端已启用系统文件模块后再重试。",
+      "app.message.fileSignInToLoad":
+        "请先登录，再加载受保护的文件数据。",
+      "app.message.fileNoListPermission":
+        "当前身份没有 `system:file:list` 权限；若仍具备上传权限，可以直接使用右侧上传面板。",
+      "app.error.loadFiles": "文件列表加载失败",
+      "app.error.loadFileDetail": "文件详情加载失败",
+      "app.error.uploadFile": "文件上传失败",
+      "app.error.downloadFile": "文件下载失败",
+      "app.error.deleteFile": "文件删除失败",
+      "app.error.fileRequired": "请先选择一个要上传的文件",
       "app.fallback.system": "系统管理",
       "app.fallback.users": "用户管理",
       "app.fallback.roles": "角色管理",
@@ -830,6 +1007,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.fallback.workflowInstances": "流程实例",
       "app.fallback.workflowTodo": "待办任务",
       "app.fallback.workflowDone": "已办任务",
+      "app.fallback.studio": "开发工具",
+      "app.fallback.generatorPreview": "生成预览",
       "copy.shell.navigation": "导航",
       "copy.shell.environment": "环境",
       "copy.shell.presetEyebrow": "企业预设",
@@ -906,6 +1085,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.setting.sectionTitle": "Settings workspace",
       "app.setting.sectionCopy":
         "The system-settings page stays focused on a real list, detail, and basic edit loop instead of expanding into environment diffing or version management.",
+      "app.tenant.sectionTitle": "Tenants workspace",
+      "app.tenant.sectionCopy":
+        "The tenant page stays focused on a real list, detail, basic edit, and status toggle loop instead of expanding into tenant-bootstrap orchestration or a cross-tenant governance center.",
       "app.dictionary.sectionTitle": "Dictionaries workspace",
       "app.dictionary.sectionCopy":
         "The dictionary page stays focused on real type list, detail, and basic edit flows, while items remain attached to the selected type instead of becoming a second primary workspace.",
@@ -937,6 +1119,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.setting.shellTitle": "Settings workspace",
       "app.setting.shellDescription":
         "The workspace consumes the real system-setting API and stays scoped to the minimum loop instead of expanding into environment overrides or versioning.",
+      "app.tenant.shellTitle": "Tenants workspace",
+      "app.tenant.shellDescription":
+        "The workspace consumes the real system-tenant API and keeps the super-admin gate explicit instead of faking broader access.",
       "app.dictionary.shellTitle": "Dictionaries workspace",
       "app.dictionary.shellDescription":
         "The workspace consumes the real system-dictionary API, keeps the main area focused on dictionary types, and shows items alongside the selected type.",
@@ -961,6 +1146,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.action.newMenu": "New menu",
       "app.action.newRole": "New role",
       "app.action.newSetting": "New setting",
+      "app.action.newTenant": "New tenant",
       "app.action.newUser": "New user",
       "app.action.refresh": "Refresh",
       "app.action.signOut": "Sign out",
@@ -994,6 +1180,14 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "Sign in first to load protected setting data.",
       "app.message.settingNoListPermission":
         "This identity can enter the workspace but does not have `system:setting:list`.",
+      "app.message.tenantModuleOffline":
+        "`tenant` is not registered on this server yet. Enable the system-tenant module and try again.",
+      "app.message.tenantSignInToLoad":
+        "Sign in first to load protected tenant data.",
+      "app.message.tenantNoListPermission":
+        "This identity can enter the workspace but does not have `system:tenant:list`.",
+      "app.message.tenantSuperAdminRequired":
+        "Tenant management stays restricted to super-admin users. The example app does not fake an interactive state for regular admins.",
       "app.message.dictionaryModuleOffline":
         "`dictionary` is not registered on this server yet. Enable the system-dictionary module and try again.",
       "app.message.dictionarySignInToLoad":
@@ -1244,6 +1438,44 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "Edit mode reuses the same schema-derived fields instead of adding a second form owner.",
       "app.setting.panelDesc.detail":
         "The side panel stays centered on the current setting and keeps edit actions out of the main list area.",
+      "app.tenant.workspaceEyebrow": "Real module workspace",
+      "app.tenant.workspaceTitle": "System tenants",
+      "app.tenant.workspaceDescription":
+        "The main area owns tenant query and list views, while the side panel stays focused on detail, basic edit, and status changes.",
+      "app.tenant.emptyTitle": "No tenants match the current filters",
+      "app.tenant.emptyDescription":
+        "Clear the filters or adjust the search terms.",
+      "app.tenant.detailEyebrow": "Tenant detail",
+      "app.tenant.detailEmptyTitle": "No tenant selected",
+      "app.tenant.detailEmptyDescription":
+        "Select a tenant row to inspect the detail panel.",
+      "app.tenant.detailLoading": "Refreshing tenant detail...",
+      "app.tenant.field.id": "ID",
+      "app.tenant.field.code": "Tenant Code",
+      "app.tenant.field.name": "Tenant Name",
+      "app.tenant.field.status": "Status",
+      "app.tenant.field.createdAt": "Created At",
+      "app.tenant.field.updatedAt": "Updated At",
+      "app.tenant.status.active": "Active",
+      "app.tenant.status.suspended": "Suspended",
+      "app.tenant.query.codePlaceholder": "Search by tenant code",
+      "app.tenant.query.namePlaceholder": "Search by tenant name",
+      "app.tenant.action.create": "New tenant",
+      "app.tenant.action.edit": "Edit tenant",
+      "app.tenant.action.activate": "Activate tenant",
+      "app.tenant.action.suspend": "Suspend tenant",
+      "app.tenant.countLabel": "Showing {visible} of {total} tenants",
+      "app.tenant.statsHint": "Current visible tenant rows",
+      "app.tenant.tabsHint": "{count} tenants",
+      "app.tenant.panelTitle.create": "Create tenant",
+      "app.tenant.panelTitle.edit": "Edit tenant",
+      "app.tenant.panelTitle.detailFallback": "Tenant detail",
+      "app.tenant.panelDesc.create":
+        "Create mode calls the canonical system-tenant API directly while the example app only owns view state.",
+      "app.tenant.panelDesc.edit":
+        "Edit mode reuses the same schema-derived fields instead of adding another governance abstraction layer.",
+      "app.tenant.panelDesc.detail":
+        "The side panel stays centered on the current tenant and keeps the status toggle explicit.",
       "app.dictionary.workspaceEyebrow": "Real module workspace",
       "app.dictionary.workspaceTitle": "System dictionary types",
       "app.dictionary.workspaceDescription":
@@ -1431,6 +1663,43 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.workflow.node.conditions": "{count} condition branches",
       "app.workflow.statsHint": "Current workflow definition rows",
       "app.workflow.tabsHint": "{count} workflow definitions",
+      "app.generatorPreview.sectionTitle": "Generator preview workspace",
+      "app.generatorPreview.sectionCopy":
+        "This surface consumes the pure generator renderer to preview file artifacts, source output, and a SQL draft without writing into the target directory.",
+      "app.generatorPreview.shellTitle": "Generator preview workspace",
+      "app.generatorPreview.shellDescription":
+        "The example app consumes a browser-safe generator entry to validate the Studio preview panel before introducing a backend apply flow.",
+      "app.generatorPreview.workspaceEyebrow": "Local generation preview",
+      "app.generatorPreview.workspaceTitle": "Generator artifact list",
+      "app.generatorPreview.workspaceDescription":
+        "Pick a schema and frontend target on the left, review the file list in the main area, and inspect source plus SQL preview on the right.",
+      "app.generatorPreview.message.localOnly":
+        "This workspace is preview-only. It does not write to the generation directory and does not replace the CLI apply or preview reports.",
+      "app.generatorPreview.filter.schemaLabel": "Module schema",
+      "app.generatorPreview.filter.frontendLabel": "Frontend target",
+      "app.generatorPreview.filter.searchLabel": "Search artifacts",
+      "app.generatorPreview.filter.searchPlaceholder":
+        "Search by file path, reason, or contents",
+      "app.generatorPreview.filter.reset": "Clear filters",
+      "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
+      "app.generatorPreview.filter.frontendSummary": "Frontend: {value}",
+      "app.generatorPreview.filter.querySummary": "Query: {value}",
+      "app.generatorPreview.detailEyebrow": "Preview detail",
+      "app.generatorPreview.detailDescription":
+        "The side panel stays focused on the selected generated file and the matching SQL preview instead of duplicating the file list.",
+      "app.generatorPreview.detailEmptyTitle": "No generated file selected",
+      "app.generatorPreview.detailEmptyDescription":
+        "Pick an artifact from the list to inspect source and SQL preview.",
+      "app.generatorPreview.emptyFiltered":
+        "No generated files match the current filter.",
+      "app.generatorPreview.sourceTitle": "Generated source",
+      "app.generatorPreview.sqlTitle": "SQL preview",
+      "app.generatorPreview.meta.schemaName": "Schema",
+      "app.generatorPreview.meta.frontendTarget": "Frontend target",
+      "app.generatorPreview.meta.mergeStrategy": "Merge strategy",
+      "app.generatorPreview.meta.lines": "lines",
+      "app.generatorPreview.statsHint": "Preview files currently in scope",
+      "app.generatorPreview.tabsHint": "{count} preview artifacts",
       "app.placeholder.eyebrow": "Placeholder",
       "app.placeholder.sideEyebrow": "Integration status",
       "app.placeholder.sideTitle": "Page boundary",
@@ -1484,6 +1753,20 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "Prioritize the minimum `customer / workflow / system-*` workspace contracts.",
       "app.runtime.step.owner":
         "The shared preset owns shell events and visual baselines; page switching still belongs to the example app.",
+      "app.runtime.backToWorkspace": "Back to workspace",
+      "app.runtime.sideEyebrow": "Runtime boundary",
+      "app.runtime.sideTitle": "Current tab semantics",
+      "app.runtime.sideDescription":
+        "When runtime mode is active, the right rail stops showing business detail or edit panels and only keeps diagnostics and boundary notes.",
+      "app.runtime.sideAuthLabel": "Session state",
+      "app.runtime.sideModuleCodeLabel": "Module code",
+      "app.runtime.sideDecisionTitle": "Current constraints",
+      "app.runtime.sideDecisionTab":
+        "The `runtime` tab only carries diagnostics and does not pretend to support create, edit, or detail actions.",
+      "app.runtime.sideDecisionOwner":
+        "Business workspace ownership stays in `apps/example-vue`; the shared shell does not take page state back.",
+      "app.runtime.sideDecisionFallback":
+        "Modules without a closed loop stay as explicit placeholders instead of pretending to be available inside runtime mode.",
       "app.panel.formDetail": "Standard Form / Detail",
       "app.panel.customerModulePreview":
         "Customer module is offline, so the standard form panel stays in preview mode.",
@@ -1584,6 +1867,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.loadRoleDetail": "Failed to load role detail",
       "app.error.loadSettings": "Failed to load settings",
       "app.error.loadSettingDetail": "Failed to load setting detail",
+      "app.error.loadTenants": "Failed to load tenants",
+      "app.error.loadTenantDetail": "Failed to load tenant detail",
       "app.error.loadDictionaries": "Failed to load dictionary types",
       "app.error.loadDictionaryDetail": "Failed to load dictionary detail",
       "app.error.loadOperationLogs": "Failed to load operation logs",
@@ -1596,6 +1881,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.createMenu": "Failed to create menu",
       "app.error.createRole": "Failed to create role",
       "app.error.createSetting": "Failed to create setting",
+      "app.error.createTenant": "Failed to create tenant",
       "app.error.createDictionary": "Failed to create dictionary type",
       "app.error.createUser": "Failed to create user",
       "app.error.updateCustomer": "Failed to update customer",
@@ -1603,6 +1889,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.updateMenu": "Failed to update menu",
       "app.error.updateRole": "Failed to update role",
       "app.error.updateSetting": "Failed to update setting",
+      "app.error.updateTenant": "Failed to update tenant",
+      "app.error.updateTenantStatus": "Failed to update tenant status",
       "app.error.updateDictionary": "Failed to update dictionary type",
       "app.error.updateUser": "Failed to update user",
       "app.error.deleteCustomer": "Failed to delete customer",
@@ -1619,6 +1907,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.roleNameRequired": "Role name is required",
       "app.error.settingKeyRequired": "Setting key is required",
       "app.error.settingValueRequired": "Setting value is required",
+      "app.error.tenantCodeRequired": "Tenant code is required",
+      "app.error.tenantNameRequired": "Tenant name is required",
       "app.error.dictionaryCodeRequired": "Dictionary code is required",
       "app.error.dictionaryNameRequired": "Dictionary name is required",
       "app.error.userUsernameRequired": "Username is required",
@@ -1694,6 +1984,76 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.notificationTitleRequired": "Notification title is required",
       "app.error.notificationContentRequired":
         "Notification content is required",
+      "app.file.sectionTitle": "Files workspace",
+      "app.file.sectionCopy":
+        "The files page stays focused on a real list, detail, upload, download, and delete loop instead of expanding into an object-storage console or retention center.",
+      "app.file.shellTitle": "Files workspace",
+      "app.file.shellDescription":
+        "The workspace consumes the real system-file API and keeps scope on the minimum file-management loop.",
+      "app.file.workspaceEyebrow": "System files",
+      "app.file.workspaceTitle": "File list",
+      "app.file.workspaceDescription":
+        "The main area stays focused on filters and list state while the side panel owns detail, upload, download, and delete confirmation.",
+      "app.file.loading": "Loading files...",
+      "app.file.emptyTitle": "No files in scope",
+      "app.file.emptyDescription":
+        "Adjust the filters or upload a file from the side panel to verify the minimum loop.",
+      "app.file.countLabel": "{visible} visible files out of {total}",
+      "app.file.tabsHint": "{count} files in view",
+      "app.file.statsHint":
+        "The files workspace keeps list, detail, upload, download, and delete in one loop.",
+      "app.file.detailEyebrow": "File detail",
+      "app.file.detailEmptyTitle": "File detail",
+      "app.file.detailEmptyDescription":
+        "Choose a file from the list or upload a new one from the side panel.",
+      "app.file.detailLoading": "Loading file detail...",
+      "app.file.panelTitle.upload": "Upload file",
+      "app.file.panelTitle.delete": "Delete file",
+      "app.file.panelTitle.detailFallback": "File detail",
+      "app.file.panelDesc.upload":
+        "This round keeps upload limited to the minimum single-file flow instead of adding bulk transfer or storage-policy tooling.",
+      "app.file.panelDesc.delete":
+        "Delete stays explicit for this round without adding trash bins, retention windows, or lifecycle policies.",
+      "app.file.panelDesc.detail":
+        "The detail panel owns download and delete actions without duplicating a second list surface.",
+      "app.file.field.originalName": "File name",
+      "app.file.field.mimeType": "MIME type",
+      "app.file.field.size": "Size",
+      "app.file.field.uploaderUserId": "Uploader",
+      "app.file.field.createdAt": "Uploaded at",
+      "app.file.query.originalNamePlaceholder": "Filter by file name",
+      "app.file.query.mimeTypePlaceholder": "Filter by MIME type",
+      "app.file.query.uploaderUserIdPlaceholder": "Filter by uploader",
+      "app.file.filter.reset": "Reset filters",
+      "app.file.meta.id": "File ID",
+      "app.file.meta.mimeType": "MIME type",
+      "app.file.meta.size": "Size",
+      "app.file.meta.uploaderUserId": "Uploader",
+      "app.file.meta.createdAt": "Uploaded at",
+      "app.file.action.upload": "Upload file",
+      "app.file.action.submitUpload": "Submit upload",
+      "app.file.action.download": "Download file",
+      "app.file.action.delete": "Delete file",
+      "app.file.action.confirmDelete": "Confirm delete",
+      "app.file.action.cancelDelete": "Cancel",
+      "app.file.uploadFieldLabel": "Choose file",
+      "app.file.uploadPrompt": "Choose one file, then submit it from the side panel.",
+      "app.file.mimeTypeEmpty": "Unknown",
+      "app.file.uploaderEmpty": "System",
+      "app.file.deleteConfirm":
+        "Delete file {name}? This removes the current record immediately.",
+      "app.message.fileModuleOffline":
+        "`file` is not registered on this server yet. Enable the system-file module and try again.",
+      "app.message.fileSignInToLoad":
+        "Sign in first to load protected file data.",
+      "app.message.fileNoListPermission":
+        "This identity does not have `system:file:list`; if upload permission is still available, use the side-panel upload flow.",
+      "app.error.loadFiles": "Failed to load files",
+      "app.error.loadFileDetail": "Failed to load file detail",
+      "app.error.uploadFile": "Failed to upload file",
+      "app.error.downloadFile": "Failed to download file",
+      "app.error.deleteFile": "Failed to delete file",
+      "app.error.fileRequired": "Choose a file before uploading",
       "app.fallback.system": "System",
       "app.fallback.users": "Users",
       "app.fallback.roles": "Roles",
@@ -1712,6 +2072,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.fallback.workflowInstances": "Instances",
       "app.fallback.workflowTodo": "Todo",
       "app.fallback.workflowDone": "Done",
+      "app.fallback.studio": "Studio tools",
+      "app.fallback.generatorPreview": "Generator preview",
       "copy.shell.navigation": "Navigation",
       "copy.shell.environment": "Environment",
       "copy.shell.presetEyebrow": "Enterprise Preset",

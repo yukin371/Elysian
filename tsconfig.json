@@ -23,6 +23,7 @@
       "@elysian/ui-enterprise-vue": ["packages/ui-enterprise-vue/src/index.ts"],
       "@elysian/persistence": ["packages/persistence/src/index.ts"],
       "@elysian/generator": ["packages/generator/src/index.ts"],
+      "@elysian/generator/browser": ["packages/generator/src/browser.ts"],
       "@elysian/frontend-vue": ["packages/frontend-vue/src/index.ts"],
       "@elysian/frontend-react": ["packages/frontend-react/src/index.ts"]
     }
