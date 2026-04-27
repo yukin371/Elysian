@@ -298,6 +298,19 @@ export interface CreateNotificationRequest {
   level?: NotificationRecord["level"]
 }
 
+export interface FileRecord {
+  id: string
+  originalName: string
+  mimeType?: string
+  size: number
+  uploaderUserId?: string
+  createdAt: string
+}
+
+export interface FilesResponse {
+  items: FileRecord[]
+}
+
 export interface DictionaryTypeRecord {
   id: string
   code: string
@@ -354,9 +367,12 @@ interface ExampleApiOverrides {
   workflowDefinitions?: WorkflowDefinitionRecord[]
 }
 
+type MultipartRequestBody = FormData
+
 interface RequestJsonOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE"
   body?: unknown
+  bodyType?: "json" | "form-data"
   auth?: boolean
   credentials?: "omit" | "same-origin" | "include"
 }
@@ -386,7 +402,7 @@ const requestJson = async <T>(
 ): Promise<T> => {
   const headers = new Headers()
 
-  if (options.body !== undefined) {
+  if (options.body !== undefined && options.bodyType !== "form-data") {
     headers.set("content-type", "application/json")
   }
 
@@ -397,7 +413,12 @@ const requestJson = async <T>(
   const response = await fetch(`${SERVER_URL}${path}`, {
     method: options.method ?? "GET",
     headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body:
+      options.bodyType === "form-data"
+        ? (options.body as MultipartRequestBody)
+        : options.body !== undefined
+          ? JSON.stringify(options.body)
+          : undefined,
     credentials: options.credentials,
   })
 
@@ -423,6 +444,43 @@ const requestJson = async <T>(
   }
 
   return response.json() as Promise<T>
+}
+
+const requestBlob = async (
+  path: string,
+  options: Omit<RequestJsonOptions, "body" | "bodyType"> = {},
+  allowAuthRetry = true,
+): Promise<Blob> => {
+  const headers = new Headers()
+
+  if (options.auth && accessToken) {
+    headers.set("authorization", `Bearer ${accessToken}`)
+  }
+
+  const response = await fetch(`${SERVER_URL}${path}`, {
+    method: options.method ?? "GET",
+    headers,
+    credentials: options.credentials,
+  })
+
+  if (
+    response.status === 401 &&
+    options.auth &&
+    allowAuthRetry &&
+    !path.startsWith("/auth/")
+  ) {
+    const restored = await tryRefreshAccessToken()
+
+    if (restored) {
+      return requestBlob(path, options, false)
+    }
+  }
+
+  if (!response.ok) {
+    throw await toRequestError(response)
+  }
+
+  return response.blob()
 }
 
 const tryRefreshAccessToken = async () => {
@@ -794,6 +852,39 @@ export const markNotificationAsRead = async (
       auth: true,
     },
   )
+
+export const fetchFiles = async (): Promise<FilesResponse> =>
+  requestJson<FilesResponse>("/system/files", {
+    auth: true,
+  })
+
+export const fetchFileById = async (id: string): Promise<FileRecord> =>
+  requestJson<FileRecord>(`/system/files/${encodeURIComponent(id)}`, {
+    auth: true,
+  })
+
+export const uploadFile = async (file: File): Promise<FileRecord> => {
+  const formData = new FormData()
+  formData.set("file", file, file.name)
+
+  return requestJson<FileRecord>("/system/files", {
+    method: "POST",
+    body: formData,
+    bodyType: "form-data",
+    auth: true,
+  })
+}
+
+export const downloadFileBlob = async (id: string): Promise<Blob> =>
+  requestBlob(`/system/files/${encodeURIComponent(id)}/download`, {
+    auth: true,
+  })
+
+export const deleteFile = async (id: string): Promise<void> =>
+  requestJson<void>(`/system/files/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    auth: true,
+  })
 
 export const fetchDictionaryTypes =
   async (): Promise<DictionaryTypesResponse> =>
