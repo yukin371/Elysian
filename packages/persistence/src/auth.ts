@@ -1013,6 +1013,29 @@ export const getRefreshSessionByTokenHash = async (
   return row ?? null
 }
 
+export const getRefreshSessionById = async (
+  db: DatabaseClient,
+  sessionId: string,
+): Promise<RefreshSessionRow | null> => {
+  const [row] = await db
+    .select()
+    .from(refreshSessions)
+    .where(eq(refreshSessions.id, sessionId))
+    .limit(1)
+
+  return row ?? null
+}
+
+export const listRefreshSessionsByUserId = async (
+  db: DatabaseClient,
+  userId: string,
+): Promise<RefreshSessionRow[]> =>
+  db
+    .select()
+    .from(refreshSessions)
+    .where(eq(refreshSessions.userId, userId))
+    .orderBy(desc(refreshSessions.createdAt))
+
 export const revokeRefreshSession = async (
   db: DatabaseClient,
   sessionId: string,

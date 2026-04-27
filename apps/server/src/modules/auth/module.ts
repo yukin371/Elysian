@@ -113,6 +113,19 @@ export const createAuthModule = (
           },
         },
       )
+      .get(
+        "/auth/sessions",
+        async ({ request }) =>
+          service.listSessions(
+            extractBearerToken(request.headers.get("authorization")),
+          ),
+        {
+          detail: {
+            tags: ["auth"],
+            summary: "List current user refresh sessions",
+          },
+        },
+      )
       .post(
         "/auth/refresh",
         async ({ request, set }) => {
@@ -145,6 +158,33 @@ export const createAuthModule = (
           detail: {
             tags: ["auth"],
             summary: "Refresh access token and rotate refresh session",
+          },
+        },
+      )
+      .delete(
+        "/auth/sessions/:id",
+        async ({ params, request, set }) => {
+          const result = await service.revokeSession(
+            extractBearerToken(request.headers.get("authorization")),
+            params.id,
+            buildAuthRequestContext(request, refreshCookieName),
+          )
+
+          set.status = 204
+          if (result.currentSessionRevoked) {
+            set.headers["set-cookie"] = clearRefreshCookie(
+              refreshCookieName,
+              options.secureCookies ?? false,
+            )
+          }
+        },
+        {
+          params: t.Object({
+            id: t.String({ minLength: 1 }),
+          }),
+          detail: {
+            tags: ["auth"],
+            summary: "Revoke current user refresh session",
           },
         },
       )

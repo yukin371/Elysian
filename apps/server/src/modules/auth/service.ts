@@ -6,6 +6,7 @@ import type {
   AuthRepository,
   AuthUserRecord,
   CreateAuthAuditLogInput,
+  RefreshSessionRecord,
 } from "./repository"
 import {
   createRefreshToken,
@@ -69,6 +70,23 @@ export interface AuthResponse {
   roles: string[]
   permissionCodes: string[]
   menus: AuthMenuRecord[]
+}
+
+export interface AuthSessionSummary {
+  id: string
+  userAgent: string | null
+  ip: string | null
+  expiresAt: string
+  lastUsedAt: string | null
+  revokedAt: string | null
+  replacedBySessionId: string | null
+  createdAt: string
+  updatedAt: string
+  isCurrent: boolean
+}
+
+export interface AuthSessionsResponse {
+  items: AuthSessionSummary[]
 }
 
 const DEFAULT_ACCESS_TOKEN_TTL_SECONDS = 15 * 60
@@ -139,6 +157,35 @@ export const createAuthService = (
       category: "auth",
       ...input,
     })
+
+  const resolveAuthorizedSessionActor = async (accessToken: string) => {
+    const payload = await verifyOrThrow(accessToken, options.accessTokenSecret)
+    const user = requireActiveUser(await repository.getUserById(payload.sub), {
+      userId: payload.sub,
+      sessionId: payload.sid,
+    })
+
+    return {
+      payload,
+      user,
+    }
+  }
+
+  const mapSessionSummary = (
+    session: RefreshSessionRecord,
+    currentSessionId: string,
+  ): AuthSessionSummary => ({
+    id: session.id,
+    userAgent: session.userAgent,
+    ip: session.ip,
+    expiresAt: session.expiresAt,
+    lastUsedAt: session.lastUsedAt,
+    revokedAt: session.revokedAt,
+    replacedBySessionId: session.replacedBySessionId,
+    createdAt: session.createdAt,
+    updatedAt: session.updatedAt,
+    isCurrent: session.id === currentSessionId,
+  })
 
   const requireActiveUser = (user: AuthUserRecord | null, details?: object) => {
     if (!user) {
@@ -280,6 +327,14 @@ export const createAuthService = (
     },
     async me(accessToken: string) {
       return this.authorize(accessToken)
+    },
+    async listSessions(accessToken: string): Promise<AuthSessionsResponse> {
+      const { payload, user } = await resolveAuthorizedSessionActor(accessToken)
+      const sessions = await repository.listRefreshSessionsForUser(user.id)
+
+      return {
+        items: sessions.map((session) => mapSessionSummary(session, payload.sid)),
+      }
     },
     async authorize(
       accessToken: string,
@@ -426,6 +481,67 @@ export const createAuthService = (
       })
 
       return buildAuthResponse(user, nextSession.id, newRefreshToken)
+    },
+    async revokeSession(
+      accessToken: string,
+      sessionId: string,
+      context: AuthSessionContext = {},
+    ): Promise<{ currentSessionRevoked: boolean }> {
+      const { payload, user } = await resolveAuthorizedSessionActor(accessToken)
+      const session = await repository.getRefreshSessionById(sessionId)
+
+      if (!session || session.userId !== user.id) {
+        await recordAudit({
+          tenantId: user.tenantId,
+          action: "session_revoke",
+          actorUserId: user.id,
+          targetType: "session",
+          targetId: sessionId,
+          result: "failure",
+          requestId: context.requestId ?? null,
+          ip: context.ip ?? null,
+          userAgent: context.userAgent ?? null,
+          details: {
+            reason: "session_not_found",
+          },
+        })
+        throw new AppError({
+          code: "AUTH_SESSION_NOT_FOUND",
+          message: "Session not found",
+          status: 404,
+          expose: true,
+          details: {
+            sessionId,
+          },
+        })
+      }
+
+      const currentSessionRevoked = session.id === payload.sid
+      const alreadyRevoked = session.revokedAt !== null
+
+      if (!alreadyRevoked) {
+        await repository.revokeRefreshSession(session.id)
+      }
+
+      await recordAudit({
+        tenantId: user.tenantId,
+        action: "session_revoke",
+        actorUserId: user.id,
+        targetType: "session",
+        targetId: session.id,
+        result: "success",
+        requestId: context.requestId ?? null,
+        ip: context.ip ?? null,
+        userAgent: context.userAgent ?? null,
+        details: {
+          currentSessionRevoked,
+          alreadyRevoked,
+        },
+      })
+
+      return {
+        currentSessionRevoked,
+      }
     },
     async logout(
       refreshToken: string | null,

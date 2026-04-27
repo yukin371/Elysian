@@ -8,6 +8,7 @@ import {
   type MenuRow,
   type RefreshSessionRow,
   type UserRow,
+  getRefreshSessionById,
   getRefreshSessionByTokenHash,
   getUserById,
   getUserByUsername,
@@ -18,6 +19,7 @@ import {
   listDepartmentIdsForUser,
   listMenusForUser,
   listPermissionCodesForUser,
+  listRefreshSessionsByUserId,
   listRoleCodesForUser,
   resolveDataAccessContext,
   revokeRefreshSession,
@@ -153,9 +155,11 @@ export interface AuthRepository {
   createRefreshSession: (
     input: CreateRefreshSessionInput,
   ) => Promise<RefreshSessionRecord>
+  getRefreshSessionById: (sessionId: string) => Promise<RefreshSessionRecord | null>
   getRefreshSessionByTokenHash: (
     tokenHash: string,
   ) => Promise<RefreshSessionRecord | null>
+  listRefreshSessionsForUser: (userId: string) => Promise<RefreshSessionRecord[]>
   revokeRefreshSession: (
     sessionId: string,
     replacedBySessionId?: string | null,
@@ -252,9 +256,17 @@ export const createAuthRepository = (db: DatabaseClient): AuthRepository => ({
     })
     return mapRefreshSessionRow(row)
   },
+  async getRefreshSessionById(sessionId) {
+    const row = await getRefreshSessionById(db, sessionId)
+    return row ? mapRefreshSessionRow(row) : null
+  },
   async getRefreshSessionByTokenHash(tokenHash) {
     const row = await getRefreshSessionByTokenHash(db, tokenHash)
     return row ? mapRefreshSessionRow(row) : null
+  },
+  async listRefreshSessionsForUser(userId) {
+    const rows = await listRefreshSessionsByUserId(db, userId)
+    return rows.map(mapRefreshSessionRow)
   },
   async revokeRefreshSession(sessionId, replacedBySessionId = null) {
     await revokeRefreshSession(db, sessionId, new Date(), replacedBySessionId)
@@ -434,12 +446,24 @@ export const createInMemoryAuthRepository = (
       refreshSessions.set(session.id, session)
       return session
     },
+    async getRefreshSessionById(sessionId) {
+      return refreshSessions.get(sessionId) ?? null
+    },
     async getRefreshSessionByTokenHash(tokenHash) {
       return (
         [...refreshSessions.values()].find(
           (session) => session.tokenHash === tokenHash,
         ) ?? null
       )
+    },
+    async listRefreshSessionsForUser(userId) {
+      return [...refreshSessions.values()]
+        .filter((session) => session.userId === userId)
+        .sort(
+          (left, right) =>
+            new Date(right.createdAt).getTime() -
+            new Date(left.createdAt).getTime(),
+        )
     },
     async revokeRefreshSession(sessionId, replacedBySessionId = null) {
       const existing = refreshSessions.get(sessionId)
