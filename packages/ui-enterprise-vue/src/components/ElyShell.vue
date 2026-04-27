@@ -114,9 +114,7 @@ const handleTabSelect = (key: string) => {
       <TLayout class="ely-shell-main">
         <THeader height="auto" class="ely-shell-header">
           <div>
-            <p class="ely-overline">{{ resolvedCopy.presetEyebrow }}</p>
             <h2>{{ workspaceTitle }}</h2>
-            <p>{{ workspaceDescription }}</p>
           </div>
 
           <div class="ely-header-actions">
@@ -203,8 +201,8 @@ const handleTabSelect = (key: string) => {
     radial-gradient(circle at top left, rgba(191, 219, 254, 0.46), transparent 32%),
     linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   border: 1px solid rgba(226, 232, 240, 0.88);
-  border-radius: 20px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.07);
   color: var(--elysian-ely-ink);
   overflow: hidden;
 }
@@ -236,12 +234,12 @@ const handleTabSelect = (key: string) => {
   place-items: center;
   width: 2.9rem;
   height: 2.9rem;
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #173ea6, #2457d6);
   color: white;
   font-size: 1.15rem;
   font-weight: 700;
-  box-shadow: 0 10px 20px rgba(36, 87, 214, 0.18);
+  box-shadow: 0 8px 18px rgba(36, 87, 214, 0.16);
 }
 
 .ely-brand-copy p {
@@ -264,7 +262,6 @@ const handleTabSelect = (key: string) => {
 }
 
 .ely-sidebar-label span,
-.ely-overline,
 .ely-stat-label,
 .ely-sidebar-foot p {
   margin: 0;
@@ -342,7 +339,7 @@ const handleTabSelect = (key: string) => {
   justify-content: space-between;
   gap: 1.5rem;
   min-height: auto;
-  padding: 2rem 2rem 1.4rem;
+  padding: 1.5rem 2rem 1rem;
   background: transparent;
 }
 
@@ -352,19 +349,11 @@ const handleTabSelect = (key: string) => {
 }
 
 .ely-shell-header h2 {
-  margin: 0.5rem 0 0;
-  font-size: clamp(1.8rem, 2vw, 2.45rem);
-  line-height: 1.05;
+  margin: 0;
+  font-size: clamp(1.55rem, 1.5rem + 0.85vw, 2rem);
+  line-height: 1.08;
   word-break: keep-all;
   color: var(--elysian-ely-ink);
-}
-
-.ely-shell-header p {
-  max-width: 52rem;
-  margin: 0.7rem 0 0;
-  font-size: 0.96rem;
-  line-height: 1.7;
-  color: var(--elysian-ely-slate);
 }
 
 .ely-header-actions {
@@ -392,8 +381,8 @@ const handleTabSelect = (key: string) => {
   gap: 0.8rem;
   padding: 0.55rem 0.85rem;
   border: 1px solid var(--elysian-ely-border);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.78);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .ely-user strong {
@@ -422,7 +411,7 @@ const handleTabSelect = (key: string) => {
 .ely-shell-tabs {
   display: flex;
   gap: 0.85rem;
-  padding: 0 2rem 0.6rem;
+  padding: 0 2rem 0.3rem;
   overflow-x: auto;
 }
 
@@ -431,8 +420,8 @@ const handleTabSelect = (key: string) => {
   min-width: 180px;
   padding: 0.95rem 1rem;
   border: 1px solid var(--elysian-ely-border);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.62);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
   cursor: pointer;
   text-align: left;
 }
@@ -453,25 +442,26 @@ const handleTabSelect = (key: string) => {
 }
 
 .ely-shell-tab-active {
-  background: rgba(36, 87, 214, 0.1);
+  background: rgba(36, 87, 214, 0.08);
   border-color: rgba(36, 87, 214, 0.2);
 }
 
 .ely-stat-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
 .ely-stat-card,
 .ely-fallback-card {
-  border: 1px solid var(--elysian-ely-border);
-  border-radius: 16px;
-  background: var(--elysian-ely-surface);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.62);
+  box-shadow: none;
 }
 
 .ely-stat-value {
-  margin: 0.85rem 0 0;
+  margin: 0.65rem 0 0;
   font-size: clamp(1.5rem, 1.2rem + 0.7vw, 1.8rem);
   line-height: 1.15;
   overflow-wrap: anywhere;
