@@ -12,7 +12,8 @@ export interface NotificationWorkspaceQuery {
   status?: NotificationStatus | ""
 }
 
-export interface NotificationTableItem extends NotificationRecord {
+export interface NotificationTableItem
+  extends Omit<NotificationRecord, "level" | "readAt" | "createdAt"> {
   level: string
   statusLabel: string
   readAt: string
@@ -21,6 +22,29 @@ export interface NotificationTableItem extends NotificationRecord {
 
 const normalizeQueryValue = (value: string | undefined) =>
   value?.trim().toLowerCase() ?? ""
+
+export const createDefaultNotificationDraft = () => ({
+  recipientUserId: "",
+  title: "",
+  content: "",
+  level: "info" as NotificationRecord["level"],
+})
+
+export const normalizeNotificationText = (value: unknown) =>
+  String(value ?? "").trim()
+
+export const normalizeNotificationLevel = (
+  value: unknown,
+): NotificationRecord["level"] => {
+  switch (value) {
+    case "warning":
+    case "error":
+    case "success":
+      return value
+    default:
+      return "info"
+  }
+}
 
 export const filterNotifications = (
   notifications: NotificationRecord[],

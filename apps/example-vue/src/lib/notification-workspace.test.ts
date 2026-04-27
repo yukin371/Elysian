@@ -3,8 +3,11 @@ import { describe, expect, test } from "bun:test"
 import type { NotificationRecord } from "@elysian/schema"
 
 import {
+  createDefaultNotificationDraft,
   createNotificationTableItems,
   filterNotifications,
+  normalizeNotificationLevel,
+  normalizeNotificationText,
   resolveNotificationSelection,
 } from "./notification-workspace"
 
@@ -76,6 +79,21 @@ describe("notification workspace helpers", () => {
         status: "unread",
       }).map((notification) => notification.id),
     ).toEqual(["notification_1"])
+  })
+
+  test("builds the default notification draft and normalizes form input", () => {
+    expect(createDefaultNotificationDraft()).toEqual({
+      recipientUserId: "",
+      title: "",
+      content: "",
+      level: "info",
+    })
+
+    expect(normalizeNotificationText("  nightly report  ")).toBe(
+      "nightly report",
+    )
+    expect(normalizeNotificationLevel("warning")).toBe("warning")
+    expect(normalizeNotificationLevel("unknown")).toBe("info")
   })
 
   test("keeps the selected notification when it remains visible", () => {
