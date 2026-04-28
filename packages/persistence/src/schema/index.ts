@@ -5,20 +5,14 @@ export {
   type TenantRow,
 } from "./tenant"
 export {
-  permissions,
-  rolePermissions,
   roles,
   roleStatus,
   userRoles,
   users,
   userStatus,
-  type NewPermissionRow,
-  type NewRolePermissionRow,
   type NewRoleRow,
   type NewUserRoleRow,
   type NewUserRow,
-  type PermissionRow,
-  type RolePermissionRow,
   type RoleRow,
   type UserRoleRow,
   type UserRow,
@@ -45,6 +39,14 @@ export {
   type NewRoleMenuRow,
   type RoleMenuRow,
 } from "./menu"
+export {
+  permissions,
+  rolePermissions,
+  type NewPermissionRow,
+  type NewRolePermissionRow,
+  type PermissionRow,
+  type RolePermissionRow,
+} from "./permission"
 export {
   refreshSessions,
   type NewRefreshSessionRow,

@@ -11,7 +11,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core"
 
-import { permissions, roles } from "./auth"
+import { roles } from "./auth"
+import { permissions } from "./permission"
 import { tenants } from "./tenant"
 
 export const menuStatus = pgEnum("menu_status", ["active", "disabled"])
