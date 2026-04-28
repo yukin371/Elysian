@@ -30,6 +30,16 @@ export {
   uploadFile,
 } from "./platform-api/files"
 export {
+  fetchOperationLogById,
+  fetchOperationLogs,
+} from "./platform-api/operation-logs"
+export {
+  createNotification,
+  fetchNotificationById,
+  fetchNotifications,
+  markNotificationAsRead,
+} from "./platform-api/notifications"
+export {
   createTenant,
   fetchTenantById,
   fetchTenants,
@@ -769,96 +779,6 @@ export const updateSetting = async (
     body: input,
     auth: true,
   })
-
-export const fetchOperationLogs = async (
-  query: OperationLogListQuery = {},
-): Promise<OperationLogsResponse> => {
-  const search = new URLSearchParams()
-
-  if (query.category?.trim()) {
-    search.set("category", query.category.trim())
-  }
-
-  if (query.action?.trim()) {
-    search.set("action", query.action.trim())
-  }
-
-  if (query.actorUserId?.trim()) {
-    search.set("actorUserId", query.actorUserId.trim())
-  }
-
-  if (query.result) {
-    search.set("result", query.result)
-  }
-
-  return requestJson<OperationLogsResponse>(
-    `/system/operation-logs${search.size > 0 ? `?${search.toString()}` : ""}`,
-    {
-      auth: true,
-    },
-  )
-}
-
-export const fetchOperationLogById = async (
-  id: string,
-): Promise<OperationLogRecord> =>
-  requestJson<OperationLogRecord>(
-    `/system/operation-logs/${encodeURIComponent(id)}`,
-    {
-      auth: true,
-    },
-  )
-
-export const fetchNotifications = async (
-  query: NotificationListQuery = {},
-): Promise<NotificationsResponse> => {
-  const search = new URLSearchParams()
-
-  if (query.recipientUserId?.trim()) {
-    search.set("recipientUserId", query.recipientUserId.trim())
-  }
-
-  if (query.status) {
-    search.set("status", query.status)
-  }
-
-  return requestJson<NotificationsResponse>(
-    `/system/notifications${search.size > 0 ? `?${search.toString()}` : ""}`,
-    {
-      auth: true,
-    },
-  )
-}
-
-export const fetchNotificationById = async (
-  id: string,
-): Promise<NotificationRecord> =>
-  requestJson<NotificationRecord>(
-    `/system/notifications/${encodeURIComponent(id)}`,
-    {
-      auth: true,
-    },
-  )
-
-export const createNotification = async (
-  input: CreateNotificationRequest,
-): Promise<NotificationRecord> =>
-  requestJson<NotificationRecord>("/system/notifications", {
-    method: "POST",
-    body: input,
-    auth: true,
-  })
-
-export const markNotificationAsRead = async (
-  id: string,
-): Promise<NotificationRecord> =>
-  requestJson<NotificationRecord>(
-    `/system/notifications/${encodeURIComponent(id)}/read`,
-    {
-      method: "POST",
-      auth: true,
-    },
-  )
 
 export const fetchDictionaryTypes =
   async (): Promise<DictionaryTypesResponse> =>
