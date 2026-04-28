@@ -59,6 +59,12 @@ export {
   updatePost,
 } from "./platform-api/posts"
 export {
+  createRole,
+  fetchRoleById,
+  fetchRoles,
+  updateRole,
+} from "./platform-api/roles"
+export {
   createSetting,
   fetchSettingById,
   fetchSettings,
@@ -71,6 +77,12 @@ export {
   updateTenant,
   updateTenantStatus,
 } from "./platform-api/tenants"
+export {
+  createUser,
+  fetchUsers,
+  resetUserPassword,
+  updateUser,
+} from "./platform-api/users"
 export {
   applyGeneratorPreviewSession,
   createGeneratorPreviewSession,
@@ -619,69 +631,6 @@ export const fetchPlatform = () => requestJson<PlatformResponse>("/platform")
 
 export const fetchSystemModules = () =>
   requestJson<SystemModulesResponse>("/system/modules")
-
-export const fetchUsers = async (): Promise<UsersResponse> =>
-  requestJson<UsersResponse>("/system/users", {
-    auth: true,
-  })
-
-export const createUser = async (
-  input: CreateUserRequest,
-): Promise<UserRecord> =>
-  requestJson<UserRecord>("/system/users", {
-    method: "POST",
-    body: input,
-    auth: true,
-  })
-
-export const updateUser = async (
-  id: string,
-  input: UpdateUserRequest,
-): Promise<UserRecord> =>
-  requestJson<UserRecord>(`/system/users/${encodeURIComponent(id)}`, {
-    method: "PUT",
-    body: input,
-    auth: true,
-  })
-
-export const resetUserPassword = async (
-  id: string,
-  password: string,
-): Promise<void> =>
-  requestJson<void>(`/system/users/${encodeURIComponent(id)}/reset-password`, {
-    method: "POST",
-    body: { password },
-    auth: true,
-  })
-
-export const fetchRoles = async (): Promise<RolesResponse> =>
-  requestJson<RolesResponse>("/system/roles", {
-    auth: true,
-  })
-
-export const fetchRoleById = async (id: string): Promise<RoleDetailRecord> =>
-  requestJson<RoleDetailRecord>(`/system/roles/${encodeURIComponent(id)}`, {
-    auth: true,
-  })
-
-export const createRole = async (
-  input: CreateRoleRequest,
-): Promise<RoleDetailRecord> =>
-  requestJson<RoleDetailRecord>("/system/roles", {
-    method: "POST",
-    body: input,
-    auth: true,
-  })
-
-export const updateRole = async (
-  id: string,
-  input: UpdateRoleRequest,
-): Promise<RoleDetailRecord> =>
-  requestJson<RoleDetailRecord>(`/system/roles/${encodeURIComponent(id)}`, {
-    method: "PUT",
-    body: input,
-    auth: true,
-  })
 
 export const fetchMenus = async (): Promise<MenusResponse> =>
   requestJson<MenusResponse>("/system/menus", {
