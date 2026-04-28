@@ -43,6 +43,7 @@
   - `use-example-shell-workspace-main-bindings.ts`
   - `use-example-shell-workspace-secondary-bindings.ts`
   - `use-example-shell-bindings.ts`（已收口为薄聚合器）
+  - `create-example-shell-bindings-options.ts`
   - `ShellWorkspaceHeaderActions.vue`
   - `ShellWorkspaceMainSwitch.vue`
   - `ShellWorkspaceSecondarySwitch.vue`
