@@ -123,30 +123,20 @@ export {
 } from "./department"
 export {
   type CreateRolePersistenceInput,
-  type CreateUserPersistenceInput,
   getRoleByCode,
   getRoleById,
-  getUserById,
-  getUserByUsername,
   insertRole,
-  insertUser,
   listExistingRoleIds,
   listExistingPermissionCodes,
-  listExistingUserIds,
   listPermissionCodesForRole,
   listPermissionCodesForUser,
   listRoleCodesForUser,
   listRoles,
   listUserIdsForRole,
   listDataScopesForUser,
-  listUsers,
   replaceRolePermissionCodes,
   replaceRoleUserIds,
   updateRole,
-  updateUser,
-  updateUserLastLoginAt,
-  updateUserPasswordHash,
-  type UpdateUserPersistenceInput,
   type UpdateRolePersistenceInput,
 } from "./auth"
 export {
@@ -188,6 +178,18 @@ export {
   revokeRefreshSession,
   touchRefreshSession,
 } from "./session"
+export {
+  type CreateUserPersistenceInput,
+  getUserById,
+  getUserByUsername,
+  insertUser,
+  listExistingUserIds,
+  listUsers,
+  type UpdateUserPersistenceInput,
+  updateUser,
+  updateUserLastLoginAt,
+  updateUserPasswordHash,
+} from "./user"
 export {
   createDefaultAuthSeedConfig,
   createDefaultAuthSeedSpec,
