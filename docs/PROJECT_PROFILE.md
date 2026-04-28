@@ -26,7 +26,7 @@
 - 服务端当前已暴露 `/metrics` 运行时指标快照接口（最小观测基线）。
 - 服务端当前已暴露 `/metrics/prometheus` 指标端点（Prometheus exposition 格式，含 `process_uptime_seconds`、`process_start_time_seconds`、`process_cpu_*_seconds_total`、`process_memory_*`）。
 - 服务端已落首个真实业务模块：`customer`，并已具备完整 CRUD。
-- 服务端已落认证模块：`auth`，并已提供 `POST /auth/login`、`POST /auth/refresh`、`POST /auth/logout`、`GET /auth/me`。
+- 服务端已落认证模块：`auth`，并已提供 `POST /auth/login`、`POST /auth/refresh`、`POST /auth/logout`、`GET /auth/me`、`GET /auth/sessions`、`DELETE /auth/sessions/:id`。
 - 服务端已落菜单管理模块：`menu`，并已提供 `GET /system/menus`、`GET /system/menus/:id`、`POST /system/menus`、`PUT /system/menus/:id`。
 - 服务端已落角色管理模块：`role`，并已提供 `GET /system/roles`、`GET /system/roles/:id`、`POST /system/roles`、`PUT /system/roles/:id`。
 - 服务端已落用户管理模块：`user`，并已提供 `GET /system/users`、`GET /system/users/:id`、`POST /system/users`、`PUT /system/users/:id`、`POST /system/users/:id/reset-password`。
@@ -54,7 +54,7 @@
 - `packages/persistence` 已提供 `customer` 查询、插入、更新、删除 helper。
 - `packages/persistence` 已补 `users / roles / permissions / user_roles / role_permissions / menus / role_menus / refresh_sessions` 的关系型 schema 与 helper。
 - `packages/persistence` 已补 `audit_logs` 审计表与最小写入 / 查询 helper。
-- `packages/persistence` 已补 users 列表、创建、更新、重置密码等用户管理 helper，并保持在既有 auth/persistence owner 内。
+- `packages/persistence` 已补 users 列表、创建、更新、重置密码与 `user_posts` 关联 helper，并保持在既有 auth/persistence owner 内。
 - `packages/persistence` 已补 roles 列表、创建、更新、角色权限替换、角色用户关联替换等角色管理 helper，并保持在既有 auth/persistence owner 内。
 - `packages/persistence` 已补 menus 列表、创建、更新、菜单角色关联替换等菜单管理 helper，并保持在既有 auth/persistence owner 内。
 - `packages/persistence` 已补 `departments / user_departments` 关系型 schema、migration 与部门 CRUD / 用户关联 helper，并保持在既有 auth/persistence owner 内。

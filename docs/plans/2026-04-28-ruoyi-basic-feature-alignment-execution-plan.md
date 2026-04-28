@@ -102,7 +102,7 @@
 - `bun run build:vue`
 - 相关 workspace helper / 组件测试继续通过
 
-### WP-2 岗位管理（post）模块
+### WP-2 岗位管理（post）模块 ✅ 已完成最小闭环
 
 目标：
 
@@ -136,7 +136,7 @@
 - persistence 定向测试
 - `bun run build:vue`
 
-### WP-3 在线会话治理
+### WP-3 在线会话治理 ✅ 已完成最小闭环
 
 目标：
 
@@ -159,6 +159,12 @@
 
 - 现有 refresh / revoke / logout 回归不退化
 - 新增最小 server 测试与前端装配验证
+
+本轮收口结果：
+
+- 已补 `user_posts` 持久化与 `postIds` 前后端链路
+- 已补在线会话工作区、当前/历史状态区分与 `revoked / rotated` 二次吊销治理
+- 后端 `DELETE /auth/sessions/:id` 已显式拒绝再次吊销 rotated 会话
 
 ### WP-4 登录安全策略
 
