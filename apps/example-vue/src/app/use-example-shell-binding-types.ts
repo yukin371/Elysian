@@ -1,5 +1,6 @@
 import type { ComputedRef, Ref } from "vue"
 
+import type { FileWorkspaceQuery } from "../lib/file-workspace"
 import type { AuthIdentityResponse, PlatformResponse } from "../lib/platform-api"
 import type { AppTranslate } from "./app-shell-helpers"
 
@@ -103,7 +104,7 @@ export interface UseExampleShellBindingsOptions {
   fileModuleReady: ValueSource<boolean>
   canEnterFileWorkspace: ValueSource<boolean>
   fileErrorMessage: ValueSource<string>
-  fileQuery: Ref<string>
+  fileQuery: Ref<FileWorkspaceQuery>
   fileFilterSummary: ValueSource<string>
   fileCountLabel: ValueSource<string>
   fileTableItems: ValueSource<unknown[]>

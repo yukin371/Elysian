@@ -404,6 +404,22 @@ const {
   updateCustomerPageInput,
 } = customerWorkspace
 
+const fileWorkspace = useFileWorkspace({
+  currentShellTabKey,
+  isWorkspaceActive: isFileWorkspace,
+  locale,
+  t,
+  canView: canViewFiles,
+  canUpload: canUploadFiles,
+  canDownload: canDownloadFiles,
+  canDelete: canDeleteFiles,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   cancelPanel: cancelFilePanel,
   clearWorkspace: clearFileWorkspace,
@@ -432,21 +448,7 @@ const {
   submitUpload: submitFileUpload,
   tableItems: fileTableItems,
   updateQuery: updateFileQuery,
-} = useFileWorkspace({
-  currentShellTabKey,
-  isWorkspaceActive: isFileWorkspace,
-  locale,
-  t,
-  canView: canViewFiles,
-  canUpload: canUploadFiles,
-  canDownload: canDownloadFiles,
-  canDelete: canDeleteFiles,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = fileWorkspace
 
 const sessionWorkspace = useAuthSessionWorkspace({
   currentShellTabKey,
@@ -1460,38 +1462,14 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     canUpdateTenants,
   },
   fileWorkspace: {
+    workspace: fileWorkspace,
     isFileWorkspace,
-    fileLoading,
     canViewFiles,
     canUploadFiles,
     canDownloadFiles,
     canDeleteFiles,
     fileModuleReady,
     canEnterFileWorkspace,
-    fileErrorMessage,
-    fileQuery,
-    fileFilterSummary,
-    fileCountLabel,
-    fileTableItems,
-    selectedFileId,
-    fileDetailLoading,
-    fileActionLoading,
-    fileDetailErrorMessage,
-    filePanelMode,
-    selectedFile,
-    pendingUploadFile,
-    fileItems,
-    updateFileQuery,
-    resetFileQuery,
-    selectFile,
-    openFileUploadPanel,
-    reloadFiles,
-    setPendingUploadFile,
-    submitFileUpload,
-    downloadSelectedFile,
-    openFileDeletePanel,
-    confirmFileDelete,
-    cancelFilePanel,
   },
   workflowWorkspace: {
     isWorkflowDefinitionsWorkspace,

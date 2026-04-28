@@ -10,6 +10,7 @@ import type { useMenuWorkspace } from "../workspaces/use-menu-workspace"
 import type { useSettingWorkspace } from "../workspaces/use-setting-workspace"
 import type { useTenantWorkspace } from "../workspaces/use-tenant-workspace"
 import type { useUserWorkspace } from "../workspaces/use-user-workspace"
+import type { useFileWorkspace } from "../workspaces/use-file-workspace"
 import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
 
 type BindingSegment<
@@ -158,40 +159,16 @@ interface CreateExampleShellBindingsOptionsInput {
     canEnterTenantWorkspace: OptionValue<"canEnterTenantWorkspace">
     canUpdateTenants: OptionValue<"canUpdateTenants">
   }
-  fileWorkspace: BindingSegment<
-    | "isFileWorkspace"
-    | "fileLoading"
-    | "canViewFiles"
-    | "canUploadFiles"
-    | "canDownloadFiles"
-    | "canDeleteFiles"
-    | "fileModuleReady"
-    | "canEnterFileWorkspace"
-    | "fileErrorMessage"
-    | "fileQuery"
-    | "fileFilterSummary"
-    | "fileCountLabel"
-    | "fileTableItems"
-    | "selectedFileId"
-    | "fileDetailLoading"
-    | "fileActionLoading"
-    | "fileDetailErrorMessage"
-    | "filePanelMode"
-    | "selectedFile"
-    | "pendingUploadFile"
-    | "fileItems"
-    | "updateFileQuery"
-    | "resetFileQuery"
-    | "selectFile"
-    | "openFileUploadPanel"
-    | "reloadFiles"
-    | "setPendingUploadFile"
-    | "submitFileUpload"
-    | "downloadSelectedFile"
-    | "openFileDeletePanel"
-    | "confirmFileDelete"
-    | "cancelFilePanel"
-  >
+  fileWorkspace: {
+    workspace: ReturnType<typeof useFileWorkspace>
+    isFileWorkspace: OptionValue<"isFileWorkspace">
+    canViewFiles: OptionValue<"canViewFiles">
+    canUploadFiles: OptionValue<"canUploadFiles">
+    canDownloadFiles: OptionValue<"canDownloadFiles">
+    canDeleteFiles: OptionValue<"canDeleteFiles">
+    fileModuleReady: OptionValue<"fileModuleReady">
+    canEnterFileWorkspace: OptionValue<"canEnterFileWorkspace">
+  }
   workflowWorkspace: BindingSegment<
     | "isWorkflowDefinitionsWorkspace"
     | "workflowLoading"
@@ -1053,6 +1030,74 @@ export const createExampleShellBindingsOptions = (
     cancelTenantPanel: input.tenantWorkspace.workspace.cancelPanel,
   }
 
+  const fileWorkspaceOptions: BindingSegment<
+    | "isFileWorkspace"
+    | "fileLoading"
+    | "canViewFiles"
+    | "canUploadFiles"
+    | "canDownloadFiles"
+    | "canDeleteFiles"
+    | "fileModuleReady"
+    | "canEnterFileWorkspace"
+    | "fileErrorMessage"
+    | "fileQuery"
+    | "fileFilterSummary"
+    | "fileCountLabel"
+    | "fileTableItems"
+    | "selectedFileId"
+    | "fileDetailLoading"
+    | "fileActionLoading"
+    | "fileDetailErrorMessage"
+    | "filePanelMode"
+    | "selectedFile"
+    | "pendingUploadFile"
+    | "fileItems"
+    | "updateFileQuery"
+    | "resetFileQuery"
+    | "selectFile"
+    | "openFileUploadPanel"
+    | "reloadFiles"
+    | "setPendingUploadFile"
+    | "submitFileUpload"
+    | "downloadSelectedFile"
+    | "openFileDeletePanel"
+    | "confirmFileDelete"
+    | "cancelFilePanel"
+  > = {
+    isFileWorkspace: input.fileWorkspace.isFileWorkspace,
+    fileLoading: input.fileWorkspace.workspace.fileLoading,
+    canViewFiles: input.fileWorkspace.canViewFiles,
+    canUploadFiles: input.fileWorkspace.canUploadFiles,
+    canDownloadFiles: input.fileWorkspace.canDownloadFiles,
+    canDeleteFiles: input.fileWorkspace.canDeleteFiles,
+    fileModuleReady: input.fileWorkspace.fileModuleReady,
+    canEnterFileWorkspace: input.fileWorkspace.canEnterFileWorkspace,
+    fileErrorMessage: input.fileWorkspace.workspace.fileErrorMessage,
+    fileQuery: input.fileWorkspace.workspace.fileQuery,
+    fileFilterSummary: input.fileWorkspace.workspace.filterSummary,
+    fileCountLabel: input.fileWorkspace.workspace.countLabel,
+    fileTableItems: input.fileWorkspace.workspace.tableItems,
+    selectedFileId: input.fileWorkspace.workspace.selectedFileId,
+    fileDetailLoading: input.fileWorkspace.workspace.fileDetailLoading,
+    fileActionLoading: input.fileWorkspace.workspace.fileActionLoading,
+    fileDetailErrorMessage: input.fileWorkspace.workspace.fileDetailErrorMessage,
+    filePanelMode: input.fileWorkspace.workspace.filePanelMode,
+    selectedFile: input.fileWorkspace.workspace.selectedFile,
+    pendingUploadFile: input.fileWorkspace.workspace.pendingUploadFile,
+    fileItems: input.fileWorkspace.workspace.fileItems,
+    updateFileQuery: input.fileWorkspace.workspace.updateQuery,
+    resetFileQuery: input.fileWorkspace.workspace.resetQuery,
+    selectFile: input.fileWorkspace.workspace.selectFile,
+    openFileUploadPanel: input.fileWorkspace.workspace.openUploadPanel,
+    reloadFiles: input.fileWorkspace.workspace.reloadFiles,
+    setPendingUploadFile: input.fileWorkspace.workspace.setPendingUploadFile,
+    submitFileUpload: input.fileWorkspace.workspace.submitUpload,
+    downloadSelectedFile: input.fileWorkspace.workspace.downloadSelectedFile,
+    openFileDeletePanel: input.fileWorkspace.workspace.openDeletePanel,
+    confirmFileDelete: input.fileWorkspace.workspace.confirmDelete,
+    cancelFilePanel: input.fileWorkspace.workspace.cancelPanel,
+  }
+
   return {
     ...input.shell,
     ...roleWorkspaceOptions,
@@ -1067,7 +1112,7 @@ export const createExampleShellBindingsOptions = (
     ...userWorkspaceOptions,
     ...settingWorkspaceOptions,
     ...tenantWorkspaceOptions,
-    ...input.fileWorkspace,
+    ...fileWorkspaceOptions,
     ...input.workflowWorkspace,
     ...input.generatorPreviewWorkspace,
   }
