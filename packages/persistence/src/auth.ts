@@ -4,13 +4,11 @@ import type { DatabaseClient } from "./client"
 import {
   type DepartmentRow,
   type MenuRow,
-  type RefreshSessionRow,
   type RoleRow,
   type UserRow,
   departments,
   menus,
   permissions,
-  refreshSessions,
   roleDepts,
   roleMenus,
   rolePermissions,
@@ -30,6 +28,15 @@ export {
 } from "./post"
 import { DEFAULT_TENANT_ID } from "./tenant"
 export {
+  type CreateRefreshSessionPersistenceInput,
+  getRefreshSessionById,
+  getRefreshSessionByTokenHash,
+  insertRefreshSession,
+  listRefreshSessionsByUserId,
+  revokeRefreshSession,
+  touchRefreshSession,
+} from "./session"
+export {
   type AuditLogResult,
   type CreateAuditLogPersistenceInput,
   getAuditLogById,
@@ -43,16 +50,6 @@ export type RoleDataScopeValue = 1 | 2 | 3 | 4 | 5
 export interface DataScopeAssignment {
   scope: RoleDataScopeValue
   customDeptIds?: string[]
-}
-
-export interface CreateRefreshSessionPersistenceInput {
-  id?: string
-  userId: string
-  tokenHash: string
-  userAgent?: string | null
-  ip?: string | null
-  expiresAt: Date
-  tenantId?: string
 }
 
 export interface CreateUserPersistenceInput {
@@ -965,94 +962,4 @@ export const replaceRoleUserIds = async (
       roleId,
     })),
   )
-}
-
-export const insertRefreshSession = async (
-  db: DatabaseClient,
-  input: CreateRefreshSessionPersistenceInput,
-): Promise<RefreshSessionRow> => {
-  const [row] = await db
-    .insert(refreshSessions)
-    .values({
-      ...(input.id ? { id: input.id } : {}),
-      userId: input.userId,
-      tokenHash: input.tokenHash,
-      userAgent: input.userAgent ?? null,
-      ip: input.ip ?? null,
-      expiresAt: input.expiresAt,
-      tenantId: input.tenantId ?? DEFAULT_TENANT_ID,
-    })
-    .returning()
-
-  if (!row) {
-    throw new Error("Refresh session insert did not return a row")
-  }
-
-  return row
-}
-
-export const getRefreshSessionByTokenHash = async (
-  db: DatabaseClient,
-  tokenHash: string,
-): Promise<RefreshSessionRow | null> => {
-  const [row] = await db
-    .select()
-    .from(refreshSessions)
-    .where(eq(refreshSessions.tokenHash, tokenHash))
-    .limit(1)
-
-  return row ?? null
-}
-
-export const getRefreshSessionById = async (
-  db: DatabaseClient,
-  sessionId: string,
-): Promise<RefreshSessionRow | null> => {
-  const [row] = await db
-    .select()
-    .from(refreshSessions)
-    .where(eq(refreshSessions.id, sessionId))
-    .limit(1)
-
-  return row ?? null
-}
-
-export const listRefreshSessionsByUserId = async (
-  db: DatabaseClient,
-  userId: string,
-): Promise<RefreshSessionRow[]> =>
-  db
-    .select()
-    .from(refreshSessions)
-    .where(eq(refreshSessions.userId, userId))
-    .orderBy(desc(refreshSessions.createdAt))
-
-export const revokeRefreshSession = async (
-  db: DatabaseClient,
-  sessionId: string,
-  revokedAt: Date,
-  replacedBySessionId?: string | null,
-): Promise<void> => {
-  await db
-    .update(refreshSessions)
-    .set({
-      revokedAt,
-      replacedBySessionId: replacedBySessionId ?? null,
-      updatedAt: revokedAt,
-    })
-    .where(eq(refreshSessions.id, sessionId))
-}
-
-export const touchRefreshSession = async (
-  db: DatabaseClient,
-  sessionId: string,
-  timestamp: Date,
-): Promise<void> => {
-  await db
-    .update(refreshSessions)
-    .set({
-      lastUsedAt: timestamp,
-      updatedAt: timestamp,
-    })
-    .where(eq(refreshSessions.id, sessionId))
 }

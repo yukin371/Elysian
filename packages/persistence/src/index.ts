@@ -113,8 +113,6 @@ export {
   type CreateUserPersistenceInput,
   getDepartmentByCode,
   getDepartmentById,
-  getRefreshSessionById,
-  getRefreshSessionByTokenHash,
   getMenuByCode,
   getMenuById,
   getRoleByCode,
@@ -124,10 +122,8 @@ export {
   insertDepartment,
   insertMenu,
   insertRole,
-  insertRefreshSession,
   insertUser,
   listDepartments,
-  listRefreshSessionsByUserId,
   listDepartmentIdsForRole,
   listDepartmentIdsForUser,
   listExistingRoleIds,
@@ -150,8 +146,6 @@ export {
   replaceMenuRoleIds,
   replaceRolePermissionCodes,
   replaceRoleUserIds,
-  revokeRefreshSession,
-  touchRefreshSession,
   updateDepartment,
   updateMenu,
   updateRole,
@@ -162,7 +156,6 @@ export {
   type UpdateMenuPersistenceInput,
   type UpdateUserPersistenceInput,
   type UpdateRolePersistenceInput,
-  type CreateRefreshSessionPersistenceInput,
 } from "./auth"
 export {
   type AuditLogResult,
@@ -182,6 +175,15 @@ export {
   type UpdatePostPersistenceInput,
   updatePost,
 } from "./post"
+export {
+  type CreateRefreshSessionPersistenceInput,
+  getRefreshSessionById,
+  getRefreshSessionByTokenHash,
+  insertRefreshSession,
+  listRefreshSessionsByUserId,
+  revokeRefreshSession,
+  touchRefreshSession,
+} from "./session"
 export {
   createDefaultAuthSeedConfig,
   createDefaultAuthSeedSpec,
