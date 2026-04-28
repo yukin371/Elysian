@@ -511,6 +511,24 @@ const enterpriseTenantPage = useElyCrudPage(
   permissionCodes,
 )
 
+const notificationWorkspace = useNotificationWorkspace({
+  currentShellTabKey,
+  page: enterpriseNotificationPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeNotificationFieldLabel,
+  localizeLevel: localizeNotificationLevel,
+  localizeStatus: localizeNotificationStatus,
+  canView: canViewNotifications,
+  canCreate: canCreateNotifications,
+  canUpdate: canUpdateNotifications,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   cancelPanel: cancelNotificationPanel,
   clearWorkspace: clearNotificationWorkspace,
@@ -541,17 +559,16 @@ const {
   submitForm: submitNotificationForm,
   tableColumns: enterpriseNotificationTableColumns,
   tableItems: enterpriseNotificationTableItems,
-} = useNotificationWorkspace({
+} = notificationWorkspace
+
+const operationLogWorkspace = useOperationLogWorkspace({
   currentShellTabKey,
-  page: enterpriseNotificationPage,
+  page: enterpriseOperationLogPage,
   locale,
   t,
-  localizeFieldLabel: localizeNotificationFieldLabel,
-  localizeLevel: localizeNotificationLevel,
-  localizeStatus: localizeNotificationStatus,
-  canView: canViewNotifications,
-  canCreate: canCreateNotifications,
-  canUpdate: canUpdateNotifications,
+  localizeFieldLabel: localizeOperationLogFieldLabel,
+  localizeResult: localizeOperationLogResult,
+  canView: canViewOperationLogs,
   onRecoverableAuthError: (error) => {
     if (isRecoverableAuthError(error)) {
       authIdentity.value = null
@@ -585,20 +602,7 @@ const {
   selectOperationLog,
   tableColumns: enterpriseOperationLogTableColumns,
   tableItems: enterpriseOperationLogTableItems,
-} = useOperationLogWorkspace({
-  currentShellTabKey,
-  page: enterpriseOperationLogPage,
-  locale,
-  t,
-  localizeFieldLabel: localizeOperationLogFieldLabel,
-  localizeResult: localizeOperationLogResult,
-  canView: canViewOperationLogs,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = operationLogWorkspace
 
 const dictionaryWorkspace = useDictionaryWorkspace({
   currentShellTabKey,
@@ -1465,60 +1469,22 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     cancelMenuPanel,
   },
   notificationWorkspace: {
+    workspace: notificationWorkspace,
     isNotificationWorkspace,
-    notificationLoading,
     canCreateNotifications,
     canViewNotifications,
     notificationModuleReady,
     canEnterNotificationWorkspace,
-    notificationErrorMessage,
-    enterpriseNotificationQueryFields,
-    enterpriseNotificationTableColumns,
-    enterpriseNotificationTableItems,
-    notificationCountLabel,
     canUpdateNotifications,
-    notificationDetailLoading,
-    notificationDetailErrorMessage,
-    notificationPanelMode,
-    notificationPanelTitle,
-    notificationPanelDescription,
-    selectedNotification,
-    enterpriseNotificationFormFields,
-    enterpriseNotificationFormValues,
     localizeNotificationStatus,
     localizeNotificationLevel,
-    handleNotificationSearch,
-    handleNotificationReset,
-    handleNotificationRowClick,
-    openNotificationCreatePanel,
-    reloadNotifications,
-    markSelectedNotificationAsRead,
-    submitNotificationForm,
-    cancelNotificationPanel,
   },
   operationLogWorkspace: {
+    workspace: operationLogWorkspace,
     isOperationLogWorkspace,
-    operationLogLoading,
     canViewOperationLogs,
     operationLogModuleReady,
     canEnterOperationLogWorkspace,
-    operationLogErrorMessage,
-    enterpriseOperationLogQueryFields,
-    enterpriseOperationLogTableColumns,
-    enterpriseOperationLogTableItems,
-    operationLogCountLabel,
-    operationLogDetailLoading,
-    operationLogDetailErrorMessage,
-    operationLogPanelTitle,
-    operationLogPanelDescription,
-    selectedOperationLog,
-    enterpriseOperationLogDetailFields,
-    enterpriseOperationLogDetailValues,
-    operationLogDetailsText,
-    handleOperationLogSearch,
-    handleOperationLogReset,
-    handleOperationLogRowClick,
-    reloadOperationLogs,
   },
   userWorkspace: {
     isUserWorkspace,

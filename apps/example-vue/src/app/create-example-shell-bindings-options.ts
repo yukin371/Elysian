@@ -1,6 +1,8 @@
 import type { useAuthSessionWorkspace } from "../workspaces/use-auth-session-workspace"
 import type { useCustomerWorkspace } from "../workspaces/use-customer-workspace"
 import type { useDictionaryWorkspace } from "../workspaces/use-dictionary-workspace"
+import type { useNotificationWorkspace } from "../workspaces/use-notification-workspace"
+import type { useOperationLogWorkspace } from "../workspaces/use-operation-log-workspace"
 import type { useRoleWorkspace } from "../workspaces/use-role-workspace"
 import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
 
@@ -171,62 +173,24 @@ interface CreateExampleShellBindingsOptionsInput {
     | "submitMenuForm"
     | "cancelMenuPanel"
   >
-  notificationWorkspace: BindingSegment<
-    | "isNotificationWorkspace"
-    | "notificationLoading"
-    | "canCreateNotifications"
-    | "canViewNotifications"
-    | "notificationModuleReady"
-    | "canEnterNotificationWorkspace"
-    | "notificationErrorMessage"
-    | "enterpriseNotificationQueryFields"
-    | "enterpriseNotificationTableColumns"
-    | "enterpriseNotificationTableItems"
-    | "notificationCountLabel"
-    | "canUpdateNotifications"
-    | "notificationDetailLoading"
-    | "notificationDetailErrorMessage"
-    | "notificationPanelMode"
-    | "notificationPanelTitle"
-    | "notificationPanelDescription"
-    | "selectedNotification"
-    | "enterpriseNotificationFormFields"
-    | "enterpriseNotificationFormValues"
-    | "localizeNotificationStatus"
-    | "localizeNotificationLevel"
-    | "handleNotificationSearch"
-    | "handleNotificationReset"
-    | "handleNotificationRowClick"
-    | "openNotificationCreatePanel"
-    | "reloadNotifications"
-    | "markSelectedNotificationAsRead"
-    | "submitNotificationForm"
-    | "cancelNotificationPanel"
-  >
-  operationLogWorkspace: BindingSegment<
-    | "isOperationLogWorkspace"
-    | "operationLogLoading"
-    | "canViewOperationLogs"
-    | "operationLogModuleReady"
-    | "canEnterOperationLogWorkspace"
-    | "operationLogErrorMessage"
-    | "enterpriseOperationLogQueryFields"
-    | "enterpriseOperationLogTableColumns"
-    | "enterpriseOperationLogTableItems"
-    | "operationLogCountLabel"
-    | "operationLogDetailLoading"
-    | "operationLogDetailErrorMessage"
-    | "operationLogPanelTitle"
-    | "operationLogPanelDescription"
-    | "selectedOperationLog"
-    | "enterpriseOperationLogDetailFields"
-    | "enterpriseOperationLogDetailValues"
-    | "operationLogDetailsText"
-    | "handleOperationLogSearch"
-    | "handleOperationLogReset"
-    | "handleOperationLogRowClick"
-    | "reloadOperationLogs"
-  >
+  notificationWorkspace: {
+    workspace: ReturnType<typeof useNotificationWorkspace>
+    isNotificationWorkspace: OptionValue<"isNotificationWorkspace">
+    canCreateNotifications: OptionValue<"canCreateNotifications">
+    canViewNotifications: OptionValue<"canViewNotifications">
+    notificationModuleReady: OptionValue<"notificationModuleReady">
+    canEnterNotificationWorkspace: OptionValue<"canEnterNotificationWorkspace">
+    canUpdateNotifications: OptionValue<"canUpdateNotifications">
+    localizeNotificationStatus: OptionValue<"localizeNotificationStatus">
+    localizeNotificationLevel: OptionValue<"localizeNotificationLevel">
+  }
+  operationLogWorkspace: {
+    workspace: ReturnType<typeof useOperationLogWorkspace>
+    isOperationLogWorkspace: OptionValue<"isOperationLogWorkspace">
+    canViewOperationLogs: OptionValue<"canViewOperationLogs">
+    operationLogModuleReady: OptionValue<"operationLogModuleReady">
+    canEnterOperationLogWorkspace: OptionValue<"canEnterOperationLogWorkspace">
+  }
   userWorkspace: BindingSegment<
     | "isUserWorkspace"
     | "userLoading"
@@ -688,6 +652,144 @@ export const createExampleShellBindingsOptions = (
     revokeSelectedSession: input.sessionWorkspace.workspace.revokeSelectedSession,
   }
 
+  const notificationWorkspaceOptions: BindingSegment<
+    | "isNotificationWorkspace"
+    | "notificationLoading"
+    | "canCreateNotifications"
+    | "canViewNotifications"
+    | "notificationModuleReady"
+    | "canEnterNotificationWorkspace"
+    | "notificationErrorMessage"
+    | "enterpriseNotificationQueryFields"
+    | "enterpriseNotificationTableColumns"
+    | "enterpriseNotificationTableItems"
+    | "notificationCountLabel"
+    | "canUpdateNotifications"
+    | "notificationDetailLoading"
+    | "notificationDetailErrorMessage"
+    | "notificationPanelMode"
+    | "notificationPanelTitle"
+    | "notificationPanelDescription"
+    | "selectedNotification"
+    | "enterpriseNotificationFormFields"
+    | "enterpriseNotificationFormValues"
+    | "localizeNotificationStatus"
+    | "localizeNotificationLevel"
+    | "handleNotificationSearch"
+    | "handleNotificationReset"
+    | "handleNotificationRowClick"
+    | "openNotificationCreatePanel"
+    | "reloadNotifications"
+    | "markSelectedNotificationAsRead"
+    | "submitNotificationForm"
+    | "cancelNotificationPanel"
+  > = {
+    isNotificationWorkspace: input.notificationWorkspace.isNotificationWorkspace,
+    notificationLoading: input.notificationWorkspace.workspace.notificationLoading,
+    canCreateNotifications: input.notificationWorkspace.canCreateNotifications,
+    canViewNotifications: input.notificationWorkspace.canViewNotifications,
+    notificationModuleReady: input.notificationWorkspace.notificationModuleReady,
+    canEnterNotificationWorkspace:
+      input.notificationWorkspace.canEnterNotificationWorkspace,
+    notificationErrorMessage:
+      input.notificationWorkspace.workspace.notificationErrorMessage,
+    enterpriseNotificationQueryFields:
+      input.notificationWorkspace.workspace.queryFields,
+    enterpriseNotificationTableColumns:
+      input.notificationWorkspace.workspace.tableColumns,
+    enterpriseNotificationTableItems:
+      input.notificationWorkspace.workspace.tableItems,
+    notificationCountLabel: input.notificationWorkspace.workspace.countLabel,
+    canUpdateNotifications: input.notificationWorkspace.canUpdateNotifications,
+    notificationDetailLoading:
+      input.notificationWorkspace.workspace.notificationDetailLoading,
+    notificationDetailErrorMessage:
+      input.notificationWorkspace.workspace.notificationDetailErrorMessage,
+    notificationPanelMode: input.notificationWorkspace.workspace.notificationPanelMode,
+    notificationPanelTitle: input.notificationWorkspace.workspace.panelTitle,
+    notificationPanelDescription:
+      input.notificationWorkspace.workspace.panelDescription,
+    selectedNotification: input.notificationWorkspace.workspace.selectedNotification,
+    enterpriseNotificationFormFields:
+      input.notificationWorkspace.workspace.formFields,
+    enterpriseNotificationFormValues:
+      input.notificationWorkspace.workspace.formValues,
+    localizeNotificationStatus:
+      input.notificationWorkspace.localizeNotificationStatus,
+    localizeNotificationLevel: input.notificationWorkspace.localizeNotificationLevel,
+    handleNotificationSearch: input.notificationWorkspace.workspace.handleSearch,
+    handleNotificationReset: input.notificationWorkspace.workspace.handleReset,
+    handleNotificationRowClick:
+      input.notificationWorkspace.workspace.handleRowClick,
+    openNotificationCreatePanel:
+      input.notificationWorkspace.workspace.openCreatePanel,
+    reloadNotifications: input.notificationWorkspace.workspace.reloadNotifications,
+    markSelectedNotificationAsRead:
+      input.notificationWorkspace.workspace.markSelectedAsRead,
+    submitNotificationForm: input.notificationWorkspace.workspace.submitForm,
+    cancelNotificationPanel: input.notificationWorkspace.workspace.cancelPanel,
+  }
+
+  const operationLogWorkspaceOptions: BindingSegment<
+    | "isOperationLogWorkspace"
+    | "operationLogLoading"
+    | "canViewOperationLogs"
+    | "operationLogModuleReady"
+    | "canEnterOperationLogWorkspace"
+    | "operationLogErrorMessage"
+    | "enterpriseOperationLogQueryFields"
+    | "enterpriseOperationLogTableColumns"
+    | "enterpriseOperationLogTableItems"
+    | "operationLogCountLabel"
+    | "operationLogDetailLoading"
+    | "operationLogDetailErrorMessage"
+    | "operationLogPanelTitle"
+    | "operationLogPanelDescription"
+    | "selectedOperationLog"
+    | "enterpriseOperationLogDetailFields"
+    | "enterpriseOperationLogDetailValues"
+    | "operationLogDetailsText"
+    | "handleOperationLogSearch"
+    | "handleOperationLogReset"
+    | "handleOperationLogRowClick"
+    | "reloadOperationLogs"
+  > = {
+    isOperationLogWorkspace: input.operationLogWorkspace.isOperationLogWorkspace,
+    operationLogLoading: input.operationLogWorkspace.workspace.operationLogLoading,
+    canViewOperationLogs: input.operationLogWorkspace.canViewOperationLogs,
+    operationLogModuleReady: input.operationLogWorkspace.operationLogModuleReady,
+    canEnterOperationLogWorkspace:
+      input.operationLogWorkspace.canEnterOperationLogWorkspace,
+    operationLogErrorMessage:
+      input.operationLogWorkspace.workspace.operationLogErrorMessage,
+    enterpriseOperationLogQueryFields:
+      input.operationLogWorkspace.workspace.queryFields,
+    enterpriseOperationLogTableColumns:
+      input.operationLogWorkspace.workspace.tableColumns,
+    enterpriseOperationLogTableItems:
+      input.operationLogWorkspace.workspace.tableItems,
+    operationLogCountLabel: input.operationLogWorkspace.workspace.countLabel,
+    operationLogDetailLoading:
+      input.operationLogWorkspace.workspace.operationLogDetailLoading,
+    operationLogDetailErrorMessage:
+      input.operationLogWorkspace.workspace.operationLogDetailErrorMessage,
+    operationLogPanelTitle: input.operationLogWorkspace.workspace.panelTitle,
+    operationLogPanelDescription:
+      input.operationLogWorkspace.workspace.panelDescription,
+    selectedOperationLog: input.operationLogWorkspace.workspace.selectedOperationLog,
+    enterpriseOperationLogDetailFields:
+      input.operationLogWorkspace.workspace.detailFields,
+    enterpriseOperationLogDetailValues:
+      input.operationLogWorkspace.workspace.detailValues,
+    operationLogDetailsText: input.operationLogWorkspace.workspace.detailsText,
+    handleOperationLogSearch:
+      input.operationLogWorkspace.workspace.handleSearch,
+    handleOperationLogReset: input.operationLogWorkspace.workspace.handleReset,
+    handleOperationLogRowClick:
+      input.operationLogWorkspace.workspace.handleRowClick,
+    reloadOperationLogs: input.operationLogWorkspace.workspace.reloadOperationLogs,
+  }
+
   return {
     ...input.shell,
     ...roleWorkspaceOptions,
@@ -697,8 +799,8 @@ export const createExampleShellBindingsOptions = (
     ...sessionWorkspaceOptions,
     ...input.postWorkspace,
     ...input.menuWorkspace,
-    ...input.notificationWorkspace,
-    ...input.operationLogWorkspace,
+    ...notificationWorkspaceOptions,
+    ...operationLogWorkspaceOptions,
     ...input.userWorkspace,
     ...input.settingWorkspace,
     ...input.tenantWorkspace,
