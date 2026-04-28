@@ -234,29 +234,6 @@ export const roleDepts = pgTable("role_depts", {
     .defaultNow(),
 })
 
-export const refreshSessions = pgTable("refresh_sessions", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  tenantId: uuid("tenant_id")
-    .notNull()
-    .references(() => tenants.id, { onDelete: "restrict" }),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  tokenHash: text("token_hash").notNull().unique(),
-  userAgent: text("user_agent"),
-  ip: text("ip"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
-  revokedAt: timestamp("revoked_at", { withTimezone: true }),
-  replacedBySessionId: uuid("replaced_by_session_id"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-})
-
 export type UserRow = InferSelectModel<typeof users>
 export type NewUserRow = InferInsertModel<typeof users>
 export type RoleRow = InferSelectModel<typeof roles>
@@ -277,9 +254,6 @@ export type UserDepartmentRow = InferSelectModel<typeof userDepartments>
 export type NewUserDepartmentRow = InferInsertModel<typeof userDepartments>
 export type RoleDeptRow = InferSelectModel<typeof roleDepts>
 export type NewRoleDeptRow = InferInsertModel<typeof roleDepts>
-export type RefreshSessionRow = InferSelectModel<typeof refreshSessions>
-export type NewRefreshSessionRow = InferInsertModel<typeof refreshSessions>
-
 export {
   auditLogs,
   auditResult,
