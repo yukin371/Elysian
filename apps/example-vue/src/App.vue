@@ -861,6 +861,23 @@ const {
   tableItems: enterpriseRoleTableItems,
 } = roleWorkspace
 
+const tenantWorkspace = useTenantWorkspace({
+  currentShellTabKey,
+  page: enterpriseTenantPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeTenantFieldLabel,
+  localizeStatus: localizeTenantStatus,
+  canView: canViewTenants,
+  canCreate: canCreateTenants,
+  canUpdate: canUpdateTenants,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   cancelPanel: cancelTenantPanel,
   clearWorkspace: clearTenantWorkspace,
@@ -892,16 +909,20 @@ const {
   tenantPanelMode,
   tenantQueryValues,
   toggleSelectedStatus: toggleSelectedTenantStatus,
-} = useTenantWorkspace({
+} = tenantWorkspace
+
+const userWorkspace = useUserWorkspace({
   currentShellTabKey,
-  page: enterpriseTenantPage,
+  page: enterpriseUserPage,
   locale,
   t,
-  localizeFieldLabel: localizeTenantFieldLabel,
-  localizeStatus: localizeTenantStatus,
-  canView: canViewTenants,
-  canCreate: canCreateTenants,
-  canUpdate: canUpdateTenants,
+  localizeFieldLabel: localizeUserFieldLabel,
+  localizeStatus: localizeUserStatus,
+  localizeBoolean: localizeUserBoolean,
+  canView: canViewUsers,
+  canCreate: canCreateUsers,
+  canUpdate: canUpdateUsers,
+  canResetPassword: canResetUserPasswords,
   onRecoverableAuthError: (error) => {
     if (isRecoverableAuthError(error)) {
       authIdentity.value = null
@@ -937,24 +958,7 @@ const {
   userPanelMode,
   userPasswordInput,
   userQueryValues,
-} = useUserWorkspace({
-  currentShellTabKey,
-  page: enterpriseUserPage,
-  locale,
-  t,
-  localizeFieldLabel: localizeUserFieldLabel,
-  localizeStatus: localizeUserStatus,
-  localizeBoolean: localizeUserBoolean,
-  canView: canViewUsers,
-  canCreate: canCreateUsers,
-  canUpdate: canUpdateUsers,
-  canResetPassword: canResetUserPasswords,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = userWorkspace
 
 const {
   clearWorkflowDefinitions,
@@ -984,6 +988,23 @@ const {
   localizeNodeType: localizeWorkflowNodeType,
   describeNode: describeWorkflowNode,
   canView: canViewWorkflowDefinitions,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
+const settingWorkspace = useSettingWorkspace({
+  currentShellTabKey,
+  page: enterpriseSettingPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeSettingFieldLabel,
+  localizeStatus: localizeSettingStatus,
+  canView: canViewSettings,
+  canCreate: canCreateSettings,
+  canUpdate: canUpdateSettings,
   onRecoverableAuthError: (error) => {
     if (isRecoverableAuthError(error)) {
       authIdentity.value = null
@@ -1021,22 +1042,7 @@ const {
   submitForm: submitSettingForm,
   tableColumns: enterpriseSettingTableColumns,
   tableItems: enterpriseSettingTableItems,
-} = useSettingWorkspace({
-  currentShellTabKey,
-  page: enterpriseSettingPage,
-  locale,
-  t,
-  localizeFieldLabel: localizeSettingFieldLabel,
-  localizeStatus: localizeSettingStatus,
-  canView: canViewSettings,
-  canCreate: canCreateSettings,
-  canUpdate: canUpdateSettings,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = settingWorkspace
 
 const {
   authStatusLabel,
@@ -1426,97 +1432,32 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     canEnterOperationLogWorkspace,
   },
   userWorkspace: {
+    workspace: userWorkspace,
     isUserWorkspace,
-    userLoading,
     canCreateUsers,
     canViewUsers,
     userModuleReady,
     canEnterUserWorkspace,
-    userErrorMessage,
-    enterpriseUserQueryFields,
-    enterpriseUserTableColumns,
-    enterpriseUserTableItems,
-    userCountLabel,
     canUpdateUsers,
     canResetUserPasswords,
-    userPanelMode,
-    userPanelTitle,
-    userPanelDescription,
-    selectedUser,
-    enterpriseUserFormFields,
-    enterpriseUserFormValues,
-    userPasswordInput,
-    handleUserSearch,
-    handleUserReset,
-    handleUserRowClick,
-    openUserCreatePanel,
-    reloadUsers,
-    startUserEdit,
-    startUserPasswordReset,
-    submitUserForm,
-    cancelUserPanel,
-    submitUserPasswordReset,
   },
   settingWorkspace: {
+    workspace: settingWorkspace,
     isSettingWorkspace,
-    settingLoading,
     canCreateSettings,
     canViewSettings,
     settingModuleReady,
     canEnterSettingWorkspace,
-    settingErrorMessage,
-    enterpriseSettingQueryFields,
-    enterpriseSettingTableColumns,
-    enterpriseSettingTableItems,
-    settingCountLabel,
     canUpdateSettings,
-    settingDetailLoading,
-    settingDetailErrorMessage,
-    settingPanelMode,
-    settingPanelTitle,
-    settingPanelDescription,
-    selectedSetting,
-    enterpriseSettingFormFields,
-    enterpriseSettingFormValues,
-    handleSettingSearch,
-    handleSettingReset,
-    handleSettingRowClick,
-    openSettingCreatePanel,
-    reloadSettings,
-    startSettingEdit,
-    submitSettingForm,
-    cancelSettingPanel,
   },
   tenantWorkspace: {
+    workspace: tenantWorkspace,
     isTenantWorkspace,
-    tenantLoading,
     canCreateTenants,
     canViewTenants,
     tenantModuleReady,
     canEnterTenantWorkspace,
-    tenantErrorMessage,
-    enterpriseTenantQueryFields,
-    enterpriseTenantTableColumns,
-    enterpriseTenantTableItems,
-    tenantCountLabel,
     canUpdateTenants,
-    tenantDetailLoading,
-    tenantDetailErrorMessage,
-    tenantPanelMode,
-    tenantPanelTitle,
-    tenantPanelDescription,
-    selectedTenant,
-    enterpriseTenantFormFields,
-    enterpriseTenantFormValues,
-    handleTenantSearch,
-    handleTenantReset,
-    handleTenantRowClick,
-    openTenantCreatePanel,
-    reloadTenants,
-    startTenantEdit,
-    toggleSelectedTenantStatus,
-    submitTenantForm,
-    cancelTenantPanel,
   },
   fileWorkspace: {
     isFileWorkspace,

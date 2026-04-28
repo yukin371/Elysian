@@ -7,6 +7,9 @@ import type { useOperationLogWorkspace } from "../workspaces/use-operation-log-w
 import type { usePostWorkspace } from "../workspaces/use-post-workspace"
 import type { useRoleWorkspace } from "../workspaces/use-role-workspace"
 import type { useMenuWorkspace } from "../workspaces/use-menu-workspace"
+import type { useSettingWorkspace } from "../workspaces/use-setting-workspace"
+import type { useTenantWorkspace } from "../workspaces/use-tenant-workspace"
+import type { useUserWorkspace } from "../workspaces/use-user-workspace"
 import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
 
 type BindingSegment<
@@ -127,99 +130,34 @@ interface CreateExampleShellBindingsOptionsInput {
     operationLogModuleReady: OptionValue<"operationLogModuleReady">
     canEnterOperationLogWorkspace: OptionValue<"canEnterOperationLogWorkspace">
   }
-  userWorkspace: BindingSegment<
-    | "isUserWorkspace"
-    | "userLoading"
-    | "canCreateUsers"
-    | "canViewUsers"
-    | "userModuleReady"
-    | "canEnterUserWorkspace"
-    | "userErrorMessage"
-    | "enterpriseUserQueryFields"
-    | "enterpriseUserTableColumns"
-    | "enterpriseUserTableItems"
-    | "userCountLabel"
-    | "canUpdateUsers"
-    | "canResetUserPasswords"
-    | "userPanelMode"
-    | "userPanelTitle"
-    | "userPanelDescription"
-    | "selectedUser"
-    | "enterpriseUserFormFields"
-    | "enterpriseUserFormValues"
-    | "userPasswordInput"
-    | "handleUserSearch"
-    | "handleUserReset"
-    | "handleUserRowClick"
-    | "openUserCreatePanel"
-    | "reloadUsers"
-    | "startUserEdit"
-    | "startUserPasswordReset"
-    | "submitUserForm"
-    | "cancelUserPanel"
-    | "submitUserPasswordReset"
-  >
-  settingWorkspace: BindingSegment<
-    | "isSettingWorkspace"
-    | "settingLoading"
-    | "canCreateSettings"
-    | "canViewSettings"
-    | "settingModuleReady"
-    | "canEnterSettingWorkspace"
-    | "settingErrorMessage"
-    | "enterpriseSettingQueryFields"
-    | "enterpriseSettingTableColumns"
-    | "enterpriseSettingTableItems"
-    | "settingCountLabel"
-    | "canUpdateSettings"
-    | "settingDetailLoading"
-    | "settingDetailErrorMessage"
-    | "settingPanelMode"
-    | "settingPanelTitle"
-    | "settingPanelDescription"
-    | "selectedSetting"
-    | "enterpriseSettingFormFields"
-    | "enterpriseSettingFormValues"
-    | "handleSettingSearch"
-    | "handleSettingReset"
-    | "handleSettingRowClick"
-    | "openSettingCreatePanel"
-    | "reloadSettings"
-    | "startSettingEdit"
-    | "submitSettingForm"
-    | "cancelSettingPanel"
-  >
-  tenantWorkspace: BindingSegment<
-    | "isTenantWorkspace"
-    | "tenantLoading"
-    | "canCreateTenants"
-    | "canViewTenants"
-    | "tenantModuleReady"
-    | "canEnterTenantWorkspace"
-    | "tenantErrorMessage"
-    | "enterpriseTenantQueryFields"
-    | "enterpriseTenantTableColumns"
-    | "enterpriseTenantTableItems"
-    | "tenantCountLabel"
-    | "canUpdateTenants"
-    | "tenantDetailLoading"
-    | "tenantDetailErrorMessage"
-    | "tenantPanelMode"
-    | "tenantPanelTitle"
-    | "tenantPanelDescription"
-    | "selectedTenant"
-    | "enterpriseTenantFormFields"
-    | "enterpriseTenantFormValues"
-    | "handleTenantSearch"
-    | "handleTenantReset"
-    | "handleTenantRowClick"
-    | "openTenantCreatePanel"
-    | "reloadTenants"
-    | "startTenantEdit"
-    | "toggleSelectedTenantStatus"
-    | "submitTenantForm"
-    | "cancelTenantPanel"
-  >
+  userWorkspace: {
+    workspace: ReturnType<typeof useUserWorkspace>
+    isUserWorkspace: OptionValue<"isUserWorkspace">
+    canCreateUsers: OptionValue<"canCreateUsers">
+    canViewUsers: OptionValue<"canViewUsers">
+    userModuleReady: OptionValue<"userModuleReady">
+    canEnterUserWorkspace: OptionValue<"canEnterUserWorkspace">
+    canUpdateUsers: OptionValue<"canUpdateUsers">
+    canResetUserPasswords: OptionValue<"canResetUserPasswords">
+  }
+  settingWorkspace: {
+    workspace: ReturnType<typeof useSettingWorkspace>
+    isSettingWorkspace: OptionValue<"isSettingWorkspace">
+    canCreateSettings: OptionValue<"canCreateSettings">
+    canViewSettings: OptionValue<"canViewSettings">
+    settingModuleReady: OptionValue<"settingModuleReady">
+    canEnterSettingWorkspace: OptionValue<"canEnterSettingWorkspace">
+    canUpdateSettings: OptionValue<"canUpdateSettings">
+  }
+  tenantWorkspace: {
+    workspace: ReturnType<typeof useTenantWorkspace>
+    isTenantWorkspace: OptionValue<"isTenantWorkspace">
+    canCreateTenants: OptionValue<"canCreateTenants">
+    canViewTenants: OptionValue<"canViewTenants">
+    tenantModuleReady: OptionValue<"tenantModuleReady">
+    canEnterTenantWorkspace: OptionValue<"canEnterTenantWorkspace">
+    canUpdateTenants: OptionValue<"canUpdateTenants">
+  }
   fileWorkspace: BindingSegment<
     | "isFileWorkspace"
     | "fileLoading"
@@ -926,6 +864,195 @@ export const createExampleShellBindingsOptions = (
     reloadOperationLogs: input.operationLogWorkspace.workspace.reloadOperationLogs,
   }
 
+  const userWorkspaceOptions: BindingSegment<
+    | "isUserWorkspace"
+    | "userLoading"
+    | "canCreateUsers"
+    | "canViewUsers"
+    | "userModuleReady"
+    | "canEnterUserWorkspace"
+    | "userErrorMessage"
+    | "enterpriseUserQueryFields"
+    | "enterpriseUserTableColumns"
+    | "enterpriseUserTableItems"
+    | "userCountLabel"
+    | "canUpdateUsers"
+    | "canResetUserPasswords"
+    | "userPanelMode"
+    | "userPanelTitle"
+    | "userPanelDescription"
+    | "selectedUser"
+    | "enterpriseUserFormFields"
+    | "enterpriseUserFormValues"
+    | "userPasswordInput"
+    | "handleUserSearch"
+    | "handleUserReset"
+    | "handleUserRowClick"
+    | "openUserCreatePanel"
+    | "reloadUsers"
+    | "startUserEdit"
+    | "startUserPasswordReset"
+    | "submitUserForm"
+    | "cancelUserPanel"
+    | "submitUserPasswordReset"
+  > = {
+    isUserWorkspace: input.userWorkspace.isUserWorkspace,
+    userLoading: input.userWorkspace.workspace.userLoading,
+    canCreateUsers: input.userWorkspace.canCreateUsers,
+    canViewUsers: input.userWorkspace.canViewUsers,
+    userModuleReady: input.userWorkspace.userModuleReady,
+    canEnterUserWorkspace: input.userWorkspace.canEnterUserWorkspace,
+    userErrorMessage: input.userWorkspace.workspace.userErrorMessage,
+    enterpriseUserQueryFields: input.userWorkspace.workspace.queryFields,
+    enterpriseUserTableColumns: input.userWorkspace.workspace.tableColumns,
+    enterpriseUserTableItems: input.userWorkspace.workspace.tableItems,
+    userCountLabel: input.userWorkspace.workspace.countLabel,
+    canUpdateUsers: input.userWorkspace.canUpdateUsers,
+    canResetUserPasswords: input.userWorkspace.canResetUserPasswords,
+    userPanelMode: input.userWorkspace.workspace.userPanelMode,
+    userPanelTitle: input.userWorkspace.workspace.panelTitle,
+    userPanelDescription: input.userWorkspace.workspace.panelDescription,
+    selectedUser: input.userWorkspace.workspace.selectedUser,
+    enterpriseUserFormFields: input.userWorkspace.workspace.formFields,
+    enterpriseUserFormValues: input.userWorkspace.workspace.formValues,
+    userPasswordInput: input.userWorkspace.workspace.userPasswordInput,
+    handleUserSearch: input.userWorkspace.workspace.handleSearch,
+    handleUserReset: input.userWorkspace.workspace.handleReset,
+    handleUserRowClick: input.userWorkspace.workspace.handleRowClick,
+    openUserCreatePanel: input.userWorkspace.workspace.openCreatePanel,
+    reloadUsers: input.userWorkspace.workspace.reloadUsers,
+    startUserEdit: input.userWorkspace.workspace.startEdit,
+    startUserPasswordReset: input.userWorkspace.workspace.startPasswordReset,
+    submitUserForm: input.userWorkspace.workspace.submitForm,
+    cancelUserPanel: input.userWorkspace.workspace.cancelPanel,
+    submitUserPasswordReset: input.userWorkspace.workspace.submitPasswordReset,
+  }
+
+  const settingWorkspaceOptions: BindingSegment<
+    | "isSettingWorkspace"
+    | "settingLoading"
+    | "canCreateSettings"
+    | "canViewSettings"
+    | "settingModuleReady"
+    | "canEnterSettingWorkspace"
+    | "settingErrorMessage"
+    | "enterpriseSettingQueryFields"
+    | "enterpriseSettingTableColumns"
+    | "enterpriseSettingTableItems"
+    | "settingCountLabel"
+    | "canUpdateSettings"
+    | "settingDetailLoading"
+    | "settingDetailErrorMessage"
+    | "settingPanelMode"
+    | "settingPanelTitle"
+    | "settingPanelDescription"
+    | "selectedSetting"
+    | "enterpriseSettingFormFields"
+    | "enterpriseSettingFormValues"
+    | "handleSettingSearch"
+    | "handleSettingReset"
+    | "handleSettingRowClick"
+    | "openSettingCreatePanel"
+    | "reloadSettings"
+    | "startSettingEdit"
+    | "submitSettingForm"
+    | "cancelSettingPanel"
+  > = {
+    isSettingWorkspace: input.settingWorkspace.isSettingWorkspace,
+    settingLoading: input.settingWorkspace.workspace.settingLoading,
+    canCreateSettings: input.settingWorkspace.canCreateSettings,
+    canViewSettings: input.settingWorkspace.canViewSettings,
+    settingModuleReady: input.settingWorkspace.settingModuleReady,
+    canEnterSettingWorkspace: input.settingWorkspace.canEnterSettingWorkspace,
+    settingErrorMessage: input.settingWorkspace.workspace.settingErrorMessage,
+    enterpriseSettingQueryFields: input.settingWorkspace.workspace.queryFields,
+    enterpriseSettingTableColumns: input.settingWorkspace.workspace.tableColumns,
+    enterpriseSettingTableItems: input.settingWorkspace.workspace.tableItems,
+    settingCountLabel: input.settingWorkspace.workspace.countLabel,
+    canUpdateSettings: input.settingWorkspace.canUpdateSettings,
+    settingDetailLoading: input.settingWorkspace.workspace.settingDetailLoading,
+    settingDetailErrorMessage:
+      input.settingWorkspace.workspace.settingDetailErrorMessage,
+    settingPanelMode: input.settingWorkspace.workspace.settingPanelMode,
+    settingPanelTitle: input.settingWorkspace.workspace.panelTitle,
+    settingPanelDescription: input.settingWorkspace.workspace.panelDescription,
+    selectedSetting: input.settingWorkspace.workspace.selectedSetting,
+    enterpriseSettingFormFields: input.settingWorkspace.workspace.formFields,
+    enterpriseSettingFormValues: input.settingWorkspace.workspace.formValues,
+    handleSettingSearch: input.settingWorkspace.workspace.handleSearch,
+    handleSettingReset: input.settingWorkspace.workspace.handleReset,
+    handleSettingRowClick: input.settingWorkspace.workspace.handleRowClick,
+    openSettingCreatePanel: input.settingWorkspace.workspace.openCreatePanel,
+    reloadSettings: input.settingWorkspace.workspace.reloadSettings,
+    startSettingEdit: input.settingWorkspace.workspace.startEdit,
+    submitSettingForm: input.settingWorkspace.workspace.submitForm,
+    cancelSettingPanel: input.settingWorkspace.workspace.cancelPanel,
+  }
+
+  const tenantWorkspaceOptions: BindingSegment<
+    | "isTenantWorkspace"
+    | "tenantLoading"
+    | "canCreateTenants"
+    | "canViewTenants"
+    | "tenantModuleReady"
+    | "canEnterTenantWorkspace"
+    | "tenantErrorMessage"
+    | "enterpriseTenantQueryFields"
+    | "enterpriseTenantTableColumns"
+    | "enterpriseTenantTableItems"
+    | "tenantCountLabel"
+    | "canUpdateTenants"
+    | "tenantDetailLoading"
+    | "tenantDetailErrorMessage"
+    | "tenantPanelMode"
+    | "tenantPanelTitle"
+    | "tenantPanelDescription"
+    | "selectedTenant"
+    | "enterpriseTenantFormFields"
+    | "enterpriseTenantFormValues"
+    | "handleTenantSearch"
+    | "handleTenantReset"
+    | "handleTenantRowClick"
+    | "openTenantCreatePanel"
+    | "reloadTenants"
+    | "startTenantEdit"
+    | "toggleSelectedTenantStatus"
+    | "submitTenantForm"
+    | "cancelTenantPanel"
+  > = {
+    isTenantWorkspace: input.tenantWorkspace.isTenantWorkspace,
+    tenantLoading: input.tenantWorkspace.workspace.tenantLoading,
+    canCreateTenants: input.tenantWorkspace.canCreateTenants,
+    canViewTenants: input.tenantWorkspace.canViewTenants,
+    tenantModuleReady: input.tenantWorkspace.tenantModuleReady,
+    canEnterTenantWorkspace: input.tenantWorkspace.canEnterTenantWorkspace,
+    tenantErrorMessage: input.tenantWorkspace.workspace.tenantErrorMessage,
+    enterpriseTenantQueryFields: input.tenantWorkspace.workspace.queryFields,
+    enterpriseTenantTableColumns: input.tenantWorkspace.workspace.tableColumns,
+    enterpriseTenantTableItems: input.tenantWorkspace.workspace.tableItems,
+    tenantCountLabel: input.tenantWorkspace.workspace.countLabel,
+    canUpdateTenants: input.tenantWorkspace.canUpdateTenants,
+    tenantDetailLoading: input.tenantWorkspace.workspace.tenantDetailLoading,
+    tenantDetailErrorMessage:
+      input.tenantWorkspace.workspace.tenantDetailErrorMessage,
+    tenantPanelMode: input.tenantWorkspace.workspace.tenantPanelMode,
+    tenantPanelTitle: input.tenantWorkspace.workspace.panelTitle,
+    tenantPanelDescription: input.tenantWorkspace.workspace.panelDescription,
+    selectedTenant: input.tenantWorkspace.workspace.selectedTenant,
+    enterpriseTenantFormFields: input.tenantWorkspace.workspace.formFields,
+    enterpriseTenantFormValues: input.tenantWorkspace.workspace.formValues,
+    handleTenantSearch: input.tenantWorkspace.workspace.handleSearch,
+    handleTenantReset: input.tenantWorkspace.workspace.handleReset,
+    handleTenantRowClick: input.tenantWorkspace.workspace.handleRowClick,
+    openTenantCreatePanel: input.tenantWorkspace.workspace.openCreatePanel,
+    reloadTenants: input.tenantWorkspace.workspace.reloadTenants,
+    startTenantEdit: input.tenantWorkspace.workspace.startEdit,
+    toggleSelectedTenantStatus:
+      input.tenantWorkspace.workspace.toggleSelectedStatus,
+    submitTenantForm: input.tenantWorkspace.workspace.submitForm,
+    cancelTenantPanel: input.tenantWorkspace.workspace.cancelPanel,
+  }
+
   return {
     ...input.shell,
     ...roleWorkspaceOptions,
@@ -937,9 +1064,9 @@ export const createExampleShellBindingsOptions = (
     ...menuWorkspaceOptions,
     ...notificationWorkspaceOptions,
     ...operationLogWorkspaceOptions,
-    ...input.userWorkspace,
-    ...input.settingWorkspace,
-    ...input.tenantWorkspace,
+    ...userWorkspaceOptions,
+    ...settingWorkspaceOptions,
+    ...tenantWorkspaceOptions,
     ...input.fileWorkspace,
     ...input.workflowWorkspace,
     ...input.generatorPreviewWorkspace,
