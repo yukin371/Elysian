@@ -3,7 +3,6 @@ import {
   boolean,
   foreignKey,
   integer,
-  jsonb,
   pgEnum,
   pgTable,
   smallint,
@@ -22,7 +21,6 @@ export const departmentStatus = pgEnum("department_status", [
   "active",
   "disabled",
 ])
-export const auditResult = pgEnum("audit_result", ["success", "failure"])
 
 export const users = pgTable(
   "users",
@@ -259,28 +257,6 @@ export const refreshSessions = pgTable("refresh_sessions", {
     .defaultNow(),
 })
 
-export const auditLogs = pgTable("audit_logs", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  tenantId: uuid("tenant_id")
-    .notNull()
-    .references(() => tenants.id, { onDelete: "restrict" }),
-  category: text("category").notNull(),
-  action: text("action").notNull(),
-  actorUserId: uuid("actor_user_id").references(() => users.id, {
-    onDelete: "set null",
-  }),
-  targetType: text("target_type"),
-  targetId: text("target_id"),
-  result: auditResult("result").notNull(),
-  requestId: text("request_id"),
-  ip: text("ip"),
-  userAgent: text("user_agent"),
-  details: jsonb("details").$type<Record<string, unknown> | null>(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-})
-
 export type UserRow = InferSelectModel<typeof users>
 export type NewUserRow = InferInsertModel<typeof users>
 export type RoleRow = InferSelectModel<typeof roles>
@@ -303,9 +279,13 @@ export type RoleDeptRow = InferSelectModel<typeof roleDepts>
 export type NewRoleDeptRow = InferInsertModel<typeof roleDepts>
 export type RefreshSessionRow = InferSelectModel<typeof refreshSessions>
 export type NewRefreshSessionRow = InferInsertModel<typeof refreshSessions>
-export type AuditLogRow = InferSelectModel<typeof auditLogs>
-export type NewAuditLogRow = InferInsertModel<typeof auditLogs>
 
+export {
+  auditLogs,
+  auditResult,
+  type AuditLogRow,
+  type NewAuditLogRow,
+} from "./audit-log"
 export {
   type NewPostRow,
   type PostRow,

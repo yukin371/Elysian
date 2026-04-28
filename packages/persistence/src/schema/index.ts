@@ -5,8 +5,6 @@ export {
   type TenantRow,
 } from "./tenant"
 export {
-  auditLogs,
-  auditResult,
   departments,
   departmentStatus,
   menuStatus,
@@ -23,10 +21,8 @@ export {
   userRoles,
   users,
   userStatus,
-  type AuditLogRow,
   type DepartmentRow,
   type MenuRow,
-  type NewAuditLogRow,
   type NewDepartmentRow,
   type NewMenuRow,
   type NewPermissionRow,
@@ -48,6 +44,12 @@ export {
   type UserRoleRow,
   type UserRow,
 } from "./auth"
+export {
+  auditLogs,
+  auditResult,
+  type AuditLogRow,
+  type NewAuditLogRow,
+} from "./audit-log"
 export {
   type NewPostRow,
   type PostRow,
