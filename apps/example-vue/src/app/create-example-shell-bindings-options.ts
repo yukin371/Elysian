@@ -1,5 +1,6 @@
 import type { useAuthSessionWorkspace } from "../workspaces/use-auth-session-workspace"
 import type { useCustomerWorkspace } from "../workspaces/use-customer-workspace"
+import type { useDepartmentWorkspace } from "../workspaces/use-department-workspace"
 import type { useDictionaryWorkspace } from "../workspaces/use-dictionary-workspace"
 import type { useNotificationWorkspace } from "../workspaces/use-notification-workspace"
 import type { useOperationLogWorkspace } from "../workspaces/use-operation-log-workspace"
@@ -76,38 +77,15 @@ interface CreateExampleShellBindingsOptionsInput {
     localizeDictionaryStatus: OptionValue<"localizeDictionaryStatus">
     canUpdateDictionaryTypes: OptionValue<"canUpdateDictionaryTypes">
   }
-  departmentWorkspace: BindingSegment<
-    | "isDepartmentWorkspace"
-    | "departmentLoading"
-    | "canCreateDepartments"
-    | "canViewDepartments"
-    | "departmentModuleReady"
-    | "canEnterDepartmentWorkspace"
-    | "departmentErrorMessage"
-    | "enterpriseDepartmentQueryFields"
-    | "enterpriseDepartmentTableColumns"
-    | "enterpriseDepartmentTableItems"
-    | "departmentCountLabel"
-    | "canUpdateDepartments"
-    | "departmentDetailLoading"
-    | "departmentDetailErrorMessage"
-    | "departmentPanelMode"
-    | "departmentPanelTitle"
-    | "departmentPanelDescription"
-    | "selectedDepartment"
-    | "selectedDepartmentDetail"
-    | "enterpriseDepartmentFormFields"
-    | "enterpriseDepartmentFormValues"
-    | "departmentParentLookup"
-    | "handleDepartmentSearch"
-    | "handleDepartmentReset"
-    | "handleDepartmentRowClick"
-    | "openDepartmentCreatePanel"
-    | "reloadDepartments"
-    | "startDepartmentEdit"
-    | "submitDepartmentForm"
-    | "cancelDepartmentPanel"
-  >
+  departmentWorkspace: {
+    workspace: ReturnType<typeof useDepartmentWorkspace>
+    isDepartmentWorkspace: OptionValue<"isDepartmentWorkspace">
+    canCreateDepartments: OptionValue<"canCreateDepartments">
+    canViewDepartments: OptionValue<"canViewDepartments">
+    departmentModuleReady: OptionValue<"departmentModuleReady">
+    canEnterDepartmentWorkspace: OptionValue<"canEnterDepartmentWorkspace">
+    canUpdateDepartments: OptionValue<"canUpdateDepartments">
+  }
   sessionWorkspace: {
     workspace: ReturnType<typeof useAuthSessionWorkspace>
     isSessionWorkspace: OptionValue<"isSessionWorkspace">
@@ -578,6 +556,82 @@ export const createExampleShellBindingsOptions = (
     cancelDictionaryPanel: input.dictionaryWorkspace.workspace.cancelPanel,
   }
 
+  const departmentWorkspaceOptions: BindingSegment<
+    | "isDepartmentWorkspace"
+    | "departmentLoading"
+    | "canCreateDepartments"
+    | "canViewDepartments"
+    | "departmentModuleReady"
+    | "canEnterDepartmentWorkspace"
+    | "departmentErrorMessage"
+    | "enterpriseDepartmentQueryFields"
+    | "enterpriseDepartmentTableColumns"
+    | "enterpriseDepartmentTableItems"
+    | "departmentCountLabel"
+    | "canUpdateDepartments"
+    | "departmentDetailLoading"
+    | "departmentDetailErrorMessage"
+    | "departmentPanelMode"
+    | "departmentPanelTitle"
+    | "departmentPanelDescription"
+    | "selectedDepartment"
+    | "selectedDepartmentDetail"
+    | "enterpriseDepartmentFormFields"
+    | "enterpriseDepartmentFormValues"
+    | "departmentParentLookup"
+    | "handleDepartmentSearch"
+    | "handleDepartmentReset"
+    | "handleDepartmentRowClick"
+    | "openDepartmentCreatePanel"
+    | "reloadDepartments"
+    | "startDepartmentEdit"
+    | "submitDepartmentForm"
+    | "cancelDepartmentPanel"
+  > = {
+    isDepartmentWorkspace: input.departmentWorkspace.isDepartmentWorkspace,
+    departmentLoading: input.departmentWorkspace.workspace.departmentLoading,
+    canCreateDepartments: input.departmentWorkspace.canCreateDepartments,
+    canViewDepartments: input.departmentWorkspace.canViewDepartments,
+    departmentModuleReady: input.departmentWorkspace.departmentModuleReady,
+    canEnterDepartmentWorkspace:
+      input.departmentWorkspace.canEnterDepartmentWorkspace,
+    departmentErrorMessage: input.departmentWorkspace.workspace.departmentErrorMessage,
+    enterpriseDepartmentQueryFields:
+      input.departmentWorkspace.workspace.queryFields,
+    enterpriseDepartmentTableColumns:
+      input.departmentWorkspace.workspace.tableColumns,
+    enterpriseDepartmentTableItems:
+      input.departmentWorkspace.workspace.tableItems,
+    departmentCountLabel: input.departmentWorkspace.workspace.countLabel,
+    canUpdateDepartments: input.departmentWorkspace.canUpdateDepartments,
+    departmentDetailLoading:
+      input.departmentWorkspace.workspace.departmentDetailLoading,
+    departmentDetailErrorMessage:
+      input.departmentWorkspace.workspace.departmentDetailErrorMessage,
+    departmentPanelMode: input.departmentWorkspace.workspace.departmentPanelMode,
+    departmentPanelTitle: input.departmentWorkspace.workspace.panelTitle,
+    departmentPanelDescription:
+      input.departmentWorkspace.workspace.panelDescription,
+    selectedDepartment: input.departmentWorkspace.workspace.selectedDepartment,
+    selectedDepartmentDetail:
+      input.departmentWorkspace.workspace.selectedDepartmentDetail,
+    enterpriseDepartmentFormFields:
+      input.departmentWorkspace.workspace.formFields,
+    enterpriseDepartmentFormValues:
+      input.departmentWorkspace.workspace.formValues,
+    departmentParentLookup: input.departmentWorkspace.workspace.parentLookup,
+    handleDepartmentSearch: input.departmentWorkspace.workspace.handleSearch,
+    handleDepartmentReset: input.departmentWorkspace.workspace.handleReset,
+    handleDepartmentRowClick:
+      input.departmentWorkspace.workspace.handleRowClick,
+    openDepartmentCreatePanel:
+      input.departmentWorkspace.workspace.openCreatePanel,
+    reloadDepartments: input.departmentWorkspace.workspace.reloadDepartments,
+    startDepartmentEdit: input.departmentWorkspace.workspace.startEdit,
+    submitDepartmentForm: input.departmentWorkspace.workspace.submitForm,
+    cancelDepartmentPanel: input.departmentWorkspace.workspace.cancelPanel,
+  }
+
   const sessionWorkspaceOptions: BindingSegment<
     | "isSessionWorkspace"
     | "sessionLoading"
@@ -877,7 +931,7 @@ export const createExampleShellBindingsOptions = (
     ...roleWorkspaceOptions,
     ...customerWorkspaceOptions,
     ...dictionaryWorkspaceOptions,
-    ...input.departmentWorkspace,
+    ...departmentWorkspaceOptions,
     ...sessionWorkspaceOptions,
     ...postWorkspaceOptions,
     ...menuWorkspaceOptions,

@@ -656,6 +656,23 @@ const {
   tableItems: enterpriseDictionaryTableItems,
 } = dictionaryWorkspace
 
+const departmentWorkspace = useDepartmentWorkspace({
+  currentShellTabKey,
+  page: enterpriseDepartmentPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeDepartmentFieldLabel,
+  localizeStatus: localizeDepartmentStatus,
+  canView: canViewDepartments,
+  canCreate: canCreateDepartments,
+  canUpdate: canUpdateDepartments,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   cancelPanel: cancelDepartmentPanel,
   clearWorkspace: clearDepartmentWorkspace,
@@ -688,22 +705,7 @@ const {
   submitForm: submitDepartmentForm,
   tableColumns: enterpriseDepartmentTableColumns,
   tableItems: enterpriseDepartmentTableItems,
-} = useDepartmentWorkspace({
-  currentShellTabKey,
-  page: enterpriseDepartmentPage,
-  locale,
-  t,
-  localizeFieldLabel: localizeDepartmentFieldLabel,
-  localizeStatus: localizeDepartmentStatus,
-  canView: canViewDepartments,
-  canCreate: canCreateDepartments,
-  canUpdate: canUpdateDepartments,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = departmentWorkspace
 
 const postWorkspace = usePostWorkspace({
   currentShellTabKey,
@@ -1374,36 +1376,13 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     canUpdateDictionaryTypes,
   },
   departmentWorkspace: {
+    workspace: departmentWorkspace,
     isDepartmentWorkspace,
-    departmentLoading,
     canCreateDepartments,
     canViewDepartments,
     departmentModuleReady,
     canEnterDepartmentWorkspace,
-    departmentErrorMessage,
-    enterpriseDepartmentQueryFields,
-    enterpriseDepartmentTableColumns,
-    enterpriseDepartmentTableItems,
-    departmentCountLabel,
     canUpdateDepartments,
-    departmentDetailLoading,
-    departmentDetailErrorMessage,
-    departmentPanelMode,
-    departmentPanelTitle,
-    departmentPanelDescription,
-    selectedDepartment,
-    selectedDepartmentDetail,
-    enterpriseDepartmentFormFields,
-    enterpriseDepartmentFormValues,
-    departmentParentLookup,
-    handleDepartmentSearch,
-    handleDepartmentReset,
-    handleDepartmentRowClick,
-    openDepartmentCreatePanel,
-    reloadDepartments,
-    startDepartmentEdit,
-    submitDepartmentForm,
-    cancelDepartmentPanel,
   },
   sessionWorkspace: {
     workspace: sessionWorkspace,
