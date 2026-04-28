@@ -52,6 +52,9 @@ export interface UseExampleShellBindingsOptions {
   departmentLoading: ValueSource<boolean>
   canCreateDepartments: ValueSource<boolean>
   canViewDepartments: ValueSource<boolean>
+  isSessionWorkspace: ComputedRef<boolean>
+  sessionLoading: ValueSource<boolean>
+  canEnterSessionWorkspace: ValueSource<boolean>
   isPostWorkspace: ComputedRef<boolean>
   postLoading: ValueSource<boolean>
   canCreatePosts: ValueSource<boolean>
@@ -132,6 +135,11 @@ export interface UseExampleShellBindingsOptions {
   enterpriseDepartmentTableColumns: ValueSource<unknown[]>
   enterpriseDepartmentTableItems: ValueSource<unknown[]>
   departmentCountLabel: ValueSource<string>
+  sessionErrorMessage: ValueSource<string>
+  enterpriseSessionQueryFields: ValueSource<unknown[]>
+  enterpriseSessionTableColumns: ValueSource<unknown[]>
+  enterpriseSessionTableItems: ValueSource<unknown[]>
+  sessionCountLabel: ValueSource<string>
   postModuleReady: ValueSource<boolean>
   canEnterPostWorkspace: ValueSource<boolean>
   postErrorMessage: ValueSource<string>
@@ -231,6 +239,8 @@ export interface UseExampleShellBindingsOptions {
   enterpriseDepartmentFormFields: ValueSource<unknown[]>
   enterpriseDepartmentFormValues: ValueSource<Record<string, unknown>>
   departmentParentLookup: ValueSource<Record<string, string>>
+  sessionActionLoading: ValueSource<boolean>
+  selectedSession: ValueSource<Record<string, unknown> | null>
   canUpdatePosts: ValueSource<boolean>
   postDetailLoading: ValueSource<boolean>
   postDetailErrorMessage: ValueSource<string>
@@ -346,6 +356,9 @@ export interface UseExampleShellBindingsOptions {
   handleDepartmentSearch: (payload: unknown) => void
   handleDepartmentReset: () => void
   handleDepartmentRowClick: (payload: unknown) => void
+  handleSessionSearch: (payload: unknown) => void
+  handleSessionReset: () => void
+  handleSessionRowClick: (payload: unknown) => void
   handlePostSearch: (payload: unknown) => void
   handlePostReset: () => void
   handlePostRowClick: (payload: unknown) => void
@@ -414,6 +427,7 @@ export interface UseExampleShellBindingsOptions {
   startDepartmentEdit: () => void
   submitDepartmentForm: (payload: unknown) => void
   cancelDepartmentPanel: () => void
+  revokeSelectedSession: () => void
   startPostEdit: () => void
   submitPostForm: (payload: unknown) => void
   cancelPostPanel: () => void
