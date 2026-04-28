@@ -30,6 +30,12 @@ export {
   updateDictionaryType,
 } from "./platform-api/dictionaries"
 export {
+  createDepartment,
+  fetchDepartmentById,
+  fetchDepartments,
+  updateDepartment,
+} from "./platform-api/departments"
+export {
   deleteFile,
   downloadFileBlob,
   fetchFileById,
@@ -46,6 +52,12 @@ export {
   fetchNotifications,
   markNotificationAsRead,
 } from "./platform-api/notifications"
+export {
+  createPost,
+  fetchPostById,
+  fetchPosts,
+  updatePost,
+} from "./platform-api/posts"
 export {
   createTenant,
   fetchTenantById,
@@ -664,70 +676,6 @@ export const updateRole = async (
     body: input,
     auth: true,
   })
-
-export const fetchDepartments = async (): Promise<DepartmentsResponse> =>
-  requestJson<DepartmentsResponse>("/system/departments", {
-    auth: true,
-  })
-
-export const fetchPosts = async (): Promise<PostsResponse> =>
-  requestJson<PostsResponse>("/system/posts", {
-    auth: true,
-  })
-
-export const fetchPostById = async (id: string): Promise<PostRecord> =>
-  requestJson<PostRecord>(`/system/posts/${encodeURIComponent(id)}`, {
-    auth: true,
-  })
-
-export const createPost = async (input: CreatePostRequest): Promise<PostRecord> =>
-  requestJson<PostRecord>("/system/posts", {
-    method: "POST",
-    body: input,
-    auth: true,
-  })
-
-export const updatePost = async (
-  id: string,
-  input: UpdatePostRequest,
-): Promise<PostRecord> =>
-  requestJson<PostRecord>(`/system/posts/${encodeURIComponent(id)}`, {
-    method: "PUT",
-    body: input,
-    auth: true,
-  })
-
-export const fetchDepartmentById = async (
-  id: string,
-): Promise<DepartmentDetailRecord> =>
-  requestJson<DepartmentDetailRecord>(
-    `/system/departments/${encodeURIComponent(id)}`,
-    {
-      auth: true,
-    },
-  )
-
-export const createDepartment = async (
-  input: CreateDepartmentRequest,
-): Promise<DepartmentDetailRecord> =>
-  requestJson<DepartmentDetailRecord>("/system/departments", {
-    method: "POST",
-    body: input,
-    auth: true,
-  })
-
-export const updateDepartment = async (
-  id: string,
-  input: UpdateDepartmentRequest,
-): Promise<DepartmentDetailRecord> =>
-  requestJson<DepartmentDetailRecord>(
-    `/system/departments/${encodeURIComponent(id)}`,
-    {
-      method: "PUT",
-      body: input,
-      auth: true,
-    },
-  )
 
 export const fetchMenus = async (): Promise<MenusResponse> =>
   requestJson<MenusResponse>("/system/menus", {
