@@ -1,4 +1,4 @@
-import { type ModuleSchema, customerModuleSchema } from "@elysian/schema"
+import { type ModuleSchema } from "@elysian/schema"
 import {
   type UiCrudPageDefinition,
   type UiFormField,
@@ -131,9 +131,6 @@ export const buildVueCustomCrudPage = (
     },
   ],
 })
-
-export const customerWorkspacePageDefinition =
-  buildVueCustomCrudPage(customerModuleSchema)
 
 export interface CrudDictionaryTypeRecord {
   id: string

@@ -4,9 +4,21 @@ import {
   buildCrudDictionaryOptionCatalog,
   buildVueCustomCrudPage,
   createVueLocaleRuntime,
-  customerWorkspacePageDefinition,
   provideVueLocaleRuntime,
 } from "@elysian/frontend-vue"
+import {
+  customerModuleSchema,
+  departmentModuleSchema,
+  dictionaryModuleSchema,
+  menuModuleSchema,
+  notificationModuleSchema,
+  operationLogModuleSchema,
+  postModuleSchema,
+  roleModuleSchema,
+  settingModuleSchema,
+  tenantModuleSchema,
+  userModuleSchema,
+} from "@elysian/schema"
 import {
   ElyCrudWorkspace,
   ElyShell,
@@ -18,17 +30,6 @@ import enUs from "tdesign-vue-next/es/locale/en_US"
 import zhCn from "tdesign-vue-next/es/locale/zh_CN"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { computed, ref } from "vue"
-
-import { departmentModuleSchema } from "../../../packages/schema/src/department"
-import { dictionaryModuleSchema } from "../../../packages/schema/src/dictionary"
-import { menuModuleSchema } from "../../../packages/schema/src/menu"
-import { notificationModuleSchema } from "../../../packages/schema/src/notification"
-import { operationLogModuleSchema } from "../../../packages/schema/src/operation-log"
-import { postModuleSchema } from "../../../packages/schema/src/post"
-import { roleModuleSchema } from "../../../packages/schema/src/role"
-import { settingModuleSchema } from "../../../packages/schema/src/setting"
-import { tenantModuleSchema } from "../../../packages/schema/src/tenant"
-import { userModuleSchema } from "../../../packages/schema/src/user"
 import ShellWorkspaceHeaderActions from "./components/workspaces/shell/ShellWorkspaceHeaderActions.vue"
 import ShellHeroBanner from "./components/workspaces/shell/ShellHeroBanner.vue"
 import ShellWorkspaceMainSwitch from "./components/workspaces/shell/ShellWorkspaceMainSwitch.vue"
@@ -63,7 +64,7 @@ import { useTenantWorkspace } from "./workspaces/use-tenant-workspace"
 import { useUserWorkspace } from "./workspaces/use-user-workspace"
 import { useWorkflowWorkspace } from "./workspaces/use-workflow-workspace"
 
-const customerPageDefinition = customerWorkspacePageDefinition
+const customerPageDefinition = buildVueCustomCrudPage(customerModuleSchema)
 const dictionaryPageDefinition = buildVueCustomCrudPage(dictionaryModuleSchema)
 const departmentPageDefinition = buildVueCustomCrudPage(departmentModuleSchema)
 const menuPageDefinition = buildVueCustomCrudPage(menuModuleSchema)
