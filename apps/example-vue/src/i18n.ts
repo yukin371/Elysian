@@ -44,7 +44,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "当前工作区沿用同一套 schema 驱动契约，只替换企业预设渲染层，验证未来多语言和设计系统切换的边界。",
       "app.workflow.sectionTitle": "流程定义工作区",
       "app.workflow.sectionCopy":
-        "这里开始承接真实 workflow 模块，而不是继续停留在示例占位态。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
+        "这里开始承接真实 workflow 模块。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
       "app.department.sectionTitle": "部门管理工作区",
       "app.department.sectionCopy":
         "系统部门页先收敛到真实列表、详情与基础编辑，不提前扩成组织树设计器或关系编辑器。",
@@ -112,9 +112,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.workflow.shellDescription":
         "列表与详情直接消费 workflow definitions 接口，验证多模块工作区的最小真实闭环。",
       "app.shell.placeholderDescriptionReady":
-        "{name} 已经可以通过左侧导航进入，但当前仍是示例级页面占位。",
+        "{name} 已经可以通过左侧导航进入，页面接入正在持续完善。",
       "app.shell.placeholderDescriptionOffline":
-        "{name} 当前对应模块未在运行时中注册，示例页保持占位。",
+        "{name} 当前对应模块未在运行时中注册，页面保持只读说明状态。",
       "app.shell.presetLabel": "TDesign Vue 预设",
       "app.shell.status.sessionAware": "会话感知",
       "app.shell.status.preview": "预览模式",
@@ -200,7 +200,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "当前页 {visible} 条，共 {total} 条，第 {page}/{totalPages} 页",
       "app.workspace.footerStatus": "预设状态",
       "app.workspace.footerCopy":
-        "列表、表单和详情模式已经统一收敛到同一个预设 owner，不再只是预览骨架。",
+        "列表、表单和详情模式已经统一收敛到同一个预设 owner，并进入真实工作区闭环。",
       "app.workspace.paginationLabel": "分页状态",
       "app.workspace.paginationSummary":
         "第 {page}/{totalPages} 页，共 {total} 条记录",
@@ -728,7 +728,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.generatorPreview.meta.requestId": "请求 ID",
       "app.generatorPreview.statsHint": "当前预览文件数",
       "app.generatorPreview.tabsHint": "预览 {count} 个产物",
-      "app.placeholder.eyebrow": "页面占位",
+      "app.placeholder.eyebrow": "页面说明",
       "app.placeholder.sideEyebrow": "接入状态",
       "app.placeholder.sideTitle": "页面边界",
       "app.placeholder.sideDescription":
@@ -742,13 +742,13 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.placeholder.sideDecisionOwner":
         "业务页面装配继续留在 example-vue，不把模块逻辑沉到共享预设层。",
       "app.placeholder.sideDecisionContract":
-        "只有在模块页面 contract 明确后，才把占位页升级成真实工作区。",
+        "只有在模块页面 contract 明确后，才把说明页升级成真实工作区。",
       "app.placeholder.sideDecisionEscalation":
         "如果需要跨页面注册、会话管理或路由编排，应先确认 canonical owner。",
       "app.placeholder.descriptionReady":
-        "{name} 的导航入口已经可切换，但真实工作区仍待接入。",
+        "{name} 的导航入口已经可切换，真实工作区正在接入。",
       "app.placeholder.descriptionOffline":
-        "{name} 的运行时模块尚未注册，示例页继续显示明确占位态。",
+        "{name} 的运行时模块尚未注册，当前页面继续展示接入说明。",
       "app.placeholder.route": "页面路径",
       "app.placeholder.moduleCode": "模块编码",
       "app.placeholder.moduleStatus": "模块状态",
@@ -764,7 +764,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.placeholder.pathMissing": "当前页面没有公开路径",
       "app.placeholder.fallbackModule": "未识别模块",
       "app.placeholder.backToCustomer": "回到客户工作区",
-      "app.placeholder.statsHint": "当前占位页不承载真实业务记录",
+      "app.placeholder.statsHint": "当前说明页不承载真实业务记录",
       "app.runtime.eyebrow": "运行时视图",
       "app.runtime.title": "当前页运行态",
       "app.runtime.copy":
@@ -793,7 +793,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.runtime.sideDecisionOwner":
         "业务工作区 owner 仍在 `apps/example-vue`，共享壳层不反向拥有页面状态。",
       "app.runtime.sideDecisionFallback":
-        "未闭环模块继续显式降级为占位页，而不是在运行态里伪装成功能可用。",
+        "未闭环模块继续显式保留为说明页，而不是在运行态里伪装成功能可用。",
       "app.panel.formDetail": "标准表单 / 详情",
       "app.panel.customerModulePreview":
         "客户模块离线，标准表单面板当前保持在预览模式。",
@@ -1229,9 +1229,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.workflow.shellDescription":
         "The workspace reads real workflow definition APIs to prove a minimum multi-module page loop.",
       "app.shell.placeholderDescriptionReady":
-        "{name} is reachable from the left navigation, but still stays in a placeholder state inside the example app.",
+        "{name} is reachable from the left navigation, and its page integration is still being completed.",
       "app.shell.placeholderDescriptionOffline":
-        "{name} is still a placeholder because the backing runtime module is not registered.",
+        "{name} currently stays in an informational state because the backing runtime module is not registered.",
       "app.shell.presetLabel": "TDesign Vue Preset",
       "app.shell.status.sessionAware": "session-aware",
       "app.shell.status.preview": "preview mode",
@@ -1324,7 +1324,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "{visible} rows on this page, {total} total, page {page} of {totalPages}",
       "app.workspace.footerStatus": "Preset status",
       "app.workspace.footerCopy":
-        "List, form, and detail modes now run through the same preset owner instead of a preview skeleton.",
+        "List, form, and detail modes now run through the same preset owner as a real workspace loop.",
       "app.workspace.paginationLabel": "Pagination",
       "app.workspace.paginationSummary":
         "Page {page} of {totalPages}, {total} total rows",
@@ -1874,7 +1874,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.generatorPreview.meta.requestId": "Request ID",
       "app.generatorPreview.statsHint": "Preview files currently in scope",
       "app.generatorPreview.tabsHint": "{count} preview artifacts",
-      "app.placeholder.eyebrow": "Placeholder",
+      "app.placeholder.eyebrow": "Page status",
       "app.placeholder.sideEyebrow": "Integration status",
       "app.placeholder.sideTitle": "Page boundary",
       "app.placeholder.sideDescription":
@@ -1888,13 +1888,13 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.placeholder.sideDecisionOwner":
         "Business page assembly stays in example-vue instead of dropping module logic into the shared preset layer.",
       "app.placeholder.sideDecisionContract":
-        "Only promote a placeholder into a real workspace after the module page contract is explicit.",
+        "Only promote an informational page into a real workspace after the module page contract is explicit.",
       "app.placeholder.sideDecisionEscalation":
         "If routing, page registry, or session orchestration is needed, confirm the canonical owner first.",
       "app.placeholder.descriptionReady":
-        "{name} can now be reached through navigation, but the real workspace is still pending.",
+        "{name} can now be reached through navigation, and the real workspace is still being integrated.",
       "app.placeholder.descriptionOffline":
-        "{name} stays in an explicit placeholder state because the runtime module is not registered yet.",
+        "{name} stays in an explicit informational state because the runtime module is not registered yet.",
       "app.placeholder.route": "Route",
       "app.placeholder.moduleCode": "Module code",
       "app.placeholder.moduleStatus": "Module status",
@@ -1911,7 +1911,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.placeholder.fallbackModule": "unknown module",
       "app.placeholder.backToCustomer": "Back to customer workspace",
       "app.placeholder.statsHint":
-        "This placeholder page carries no real business rows",
+        "This informational page carries no real business rows",
       "app.runtime.eyebrow": "Runtime view",
       "app.runtime.title": "Current page runtime",
       "app.runtime.copy":
@@ -1940,7 +1940,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.runtime.sideDecisionOwner":
         "Business workspace ownership stays in `apps/example-vue`; the shared shell does not take page state back.",
       "app.runtime.sideDecisionFallback":
-        "Modules without a closed loop stay as explicit placeholders instead of pretending to be available inside runtime mode.",
+        "Modules without a closed loop stay as explicit informational pages instead of pretending to be available inside runtime mode.",
       "app.panel.formDetail": "Standard Form / Detail",
       "app.panel.customerModulePreview":
         "Customer module is offline, so the standard form panel stays in preview mode.",

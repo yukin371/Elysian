@@ -309,7 +309,7 @@ const handleFileInput = (event: Event) => {
 
 .enterprise-inline-warning {
   margin-top: 1rem;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(245, 158, 11, 0.16);
   background: rgba(255, 251, 235, 0.96);
   padding: 0.85rem 0.95rem;
@@ -373,7 +373,7 @@ const handleFileInput = (event: Event) => {
 }
 
 .enterprise-metadata div {
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(248, 250, 252, 0.92);
   padding: 0.85rem 0.95rem;
@@ -389,7 +389,7 @@ const handleFileInput = (event: Event) => {
 .upload-dropzone {
   display: grid;
   gap: 0.85rem;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px dashed rgba(36, 87, 214, 0.28);
   background: rgba(239, 246, 255, 0.82);
   padding: 1rem;

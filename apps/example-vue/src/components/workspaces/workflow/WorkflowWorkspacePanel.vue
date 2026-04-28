@@ -166,7 +166,7 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 
 .enterprise-inline-warning {
   margin-top: 1rem;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(245, 158, 11, 0.16);
   background: rgba(255, 251, 235, 0.96);
   padding: 0.85rem 0.95rem;
@@ -180,7 +180,7 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 }
 
 .enterprise-metadata div {
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(248, 250, 252, 0.92);
   padding: 0.85rem 0.95rem;
@@ -212,7 +212,7 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
   align-items: flex-start;
   gap: 0.25rem;
   border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 14px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.96);
   color: #0f172a;
   font-size: 0.78rem;
@@ -240,7 +240,7 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 
 .workflow-node-item {
   width: 100%;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255, 255, 255, 0.96);
   padding: 1rem;

@@ -225,7 +225,7 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
 }
 
 .enterprise-message {
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 1rem 1.1rem;
   line-height: 1.75;
 }
@@ -331,7 +331,7 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
 
 .workflow-definition-card {
   width: 100%;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255, 255, 255, 0.96);
   padding: 1rem;
@@ -346,12 +346,12 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
 .workflow-definition-card:hover {
   transform: translateY(-1px);
   border-color: rgba(36, 87, 214, 0.24);
-  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
 }
 
 .workflow-definition-card-active {
   border-color: rgba(36, 87, 214, 0.45);
-  box-shadow: 0 18px 32px rgba(36, 87, 214, 0.12);
+  box-shadow: 0 12px 22px rgba(36, 87, 214, 0.1);
 }
 
 .workflow-definition-card-header {

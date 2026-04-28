@@ -104,7 +104,7 @@ const emit = defineEmits<{
 
 <style scoped>
 .enterprise-message {
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 1rem 1.1rem;
   line-height: 1.75;
 }
