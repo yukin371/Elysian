@@ -122,11 +122,7 @@ export {
   updateDepartment,
 } from "./department"
 export {
-  listExistingPermissionCodes,
-  listPermissionCodesForRole,
-  listPermissionCodesForUser,
   listDataScopesForUser,
-  replaceRolePermissionCodes,
 } from "./auth"
 export {
   type AuditLogResult,
@@ -158,6 +154,12 @@ export {
   type UpdatePostPersistenceInput,
   updatePost,
 } from "./post"
+export {
+  listExistingPermissionCodes,
+  listPermissionCodesForRole,
+  listPermissionCodesForUser,
+  replaceRolePermissionCodes,
+} from "./permission"
 export {
   type CreateRolePersistenceInput,
   getRoleByCode,
