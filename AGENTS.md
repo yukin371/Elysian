@@ -9,7 +9,8 @@
 3. [docs/ARCHITECTURE_GUARDRAILS.md](/E:/Github/Elysian/docs/ARCHITECTURE_GUARDRAILS.md)
 4. [docs/DEVELOPMENT_PRINCIPLES.md](/E:/Github/Elysian/docs/DEVELOPMENT_PRINCIPLES.md)
 5. 若任务涉及前端视觉与交互，先读 [packages/ui-enterprise-vue/DESIGN.md](/E:/Github/Elysian/packages/ui-enterprise-vue/DESIGN.md)
-   若任务涉及 `apps/example-vue` 的展示层，再读 [apps/example-vue/DESIGN.md](/E:/Github/Elysian/apps/example-vue/DESIGN.md)
+   若目标前端模块或应用存在自己的 `DESIGN.md`，继续读取该文件
+   例如：`apps/example-vue` 读 [apps/example-vue/DESIGN.md](/E:/Github/Elysian/apps/example-vue/DESIGN.md)，`apps/example-uniapp` 读 [apps/example-uniapp/DESIGN.md](/E:/Github/Elysian/apps/example-uniapp/DESIGN.md)
 6. 目标目录下的 `MODULE.md`
 7. 若当前任务已有计划文档，再读对应 `docs/plans/*.md`
 8. 若当前任务触及长期边界决策，再读相关 `docs/decisions/ADR-*.md`
@@ -148,8 +149,21 @@ AI 不得因为追求 `Clean Code` / `SOLID` 而做以下行为：
 - 当前版本目标、active tracks、下一步变化时，同步 `docs/roadmap.md`
 - owner、依赖方向、跨切关注点变化时，同步 `docs/ARCHITECTURE_GUARDRAILS.md`
 - 模块职责、依赖规则、不变量变化时，同步对应 `MODULE.md`
+- 前端视觉规则、页面文案规则、组件视觉基线变化时，同步对应作用域内的 `DESIGN.md`
 - 长期有效决策进入 `docs/decisions/ADR-*.md`
 - 临时实施设计进入 `docs/plans/*.md`
+
+### 前端设计约束
+
+- `DESIGN.md` 只承接前端视觉、交互和文案约束，不替代 `MODULE.md` 的模块职责边界。
+- 前端页面若存在适用的 `DESIGN.md`，实现时必须遵守最近作用域的 `DESIGN.md` 与其上层共享 `DESIGN.md`。
+- 一般情况不要求每个前端模块单独新增 `DESIGN.md`；若现有上层 `DESIGN.md` 已足够约束，默认直接沿用。
+- 同一应用内必须保持单一风格体系；主题色、圆角、阴影、容器语义和文案语气都视为应用级规则，不允许按页面自由漂移。
+- C 端应用和 B 端应用可以存在风格差异，但差异必须落在各自适用的 `DESIGN.md`，不能靠页面临时发挥。
+- 是否需要新增局部 `DESIGN.md`，只在以下情况再判断：
+  1. 该模块已有稳定且持续存在的独立展示规则
+  2. 这些规则写在 `MODULE.md` 会混淆模块职责与视觉约束
+  3. 不补局部 `DESIGN.md` 会导致上层设计规则不足以约束实现
 
 ## 必须停下并询问的情况
 
