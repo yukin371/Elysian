@@ -962,6 +962,21 @@ const {
   userQueryValues,
 } = userWorkspace
 
+const workflowWorkspace = useWorkflowWorkspace({
+  currentShellTabKey,
+  locale,
+  t,
+  localizeStatus: localizeWorkflowStatus,
+  localizeNodeType: localizeWorkflowNodeType,
+  describeNode: describeWorkflowNode,
+  canView: canViewWorkflowDefinitions,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   clearWorkflowDefinitions,
   handleWorkflowDefinitionSelect,
@@ -982,20 +997,7 @@ const {
   workflowQuery,
   workflowStatusFilter,
   workflowVersionHistoryCards,
-} = useWorkflowWorkspace({
-  currentShellTabKey,
-  locale,
-  t,
-  localizeStatus: localizeWorkflowStatus,
-  localizeNodeType: localizeWorkflowNodeType,
-  describeNode: describeWorkflowNode,
-  canView: canViewWorkflowDefinitions,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = workflowWorkspace
 
 const settingWorkspace = useSettingWorkspace({
   currentShellTabKey,
@@ -1472,28 +1474,12 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     canEnterFileWorkspace,
   },
   workflowWorkspace: {
+    workspace: workflowWorkspace,
     isWorkflowDefinitionsWorkspace,
-    workflowLoading,
     canViewWorkflowDefinitions,
     workflowModuleReady,
     canEnterWorkflowWorkspace,
-    workflowErrorMessage,
-    workflowQuery,
-    workflowStatusFilter,
-    workflowFilterSummary,
-    workflowDefinitionCards,
-    workflowDefinitions,
-    selectedWorkflowDefinitionId,
-    workflowDetailLoading,
-    workflowDetailErrorMessage,
-    selectedWorkflowDefinition,
-    workflowVersionHistoryCards,
-    workflowDefinitionDetailCards,
     localizeWorkflowStatus,
-    handleWorkflowDefinitionSelect,
-    setWorkflowStatusFilter,
-    resetWorkflowFilters,
-    reloadWorkflowDefinitions,
   },
   generatorPreviewWorkspace: {
     generatorPreviewLoading,

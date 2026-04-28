@@ -11,6 +11,7 @@ import type { useSettingWorkspace } from "../workspaces/use-setting-workspace"
 import type { useTenantWorkspace } from "../workspaces/use-tenant-workspace"
 import type { useUserWorkspace } from "../workspaces/use-user-workspace"
 import type { useFileWorkspace } from "../workspaces/use-file-workspace"
+import type { useWorkflowWorkspace } from "../workspaces/use-workflow-workspace"
 import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
 
 type BindingSegment<
@@ -169,30 +170,14 @@ interface CreateExampleShellBindingsOptionsInput {
     fileModuleReady: OptionValue<"fileModuleReady">
     canEnterFileWorkspace: OptionValue<"canEnterFileWorkspace">
   }
-  workflowWorkspace: BindingSegment<
-    | "isWorkflowDefinitionsWorkspace"
-    | "workflowLoading"
-    | "canViewWorkflowDefinitions"
-    | "workflowModuleReady"
-    | "canEnterWorkflowWorkspace"
-    | "workflowErrorMessage"
-    | "workflowQuery"
-    | "workflowStatusFilter"
-    | "workflowFilterSummary"
-    | "workflowDefinitionCards"
-    | "workflowDefinitions"
-    | "selectedWorkflowDefinitionId"
-    | "workflowDetailLoading"
-    | "workflowDetailErrorMessage"
-    | "selectedWorkflowDefinition"
-    | "workflowVersionHistoryCards"
-    | "workflowDefinitionDetailCards"
-    | "localizeWorkflowStatus"
-    | "handleWorkflowDefinitionSelect"
-    | "setWorkflowStatusFilter"
-    | "resetWorkflowFilters"
-    | "reloadWorkflowDefinitions"
-  >
+  workflowWorkspace: {
+    workspace: ReturnType<typeof useWorkflowWorkspace>
+    isWorkflowDefinitionsWorkspace: OptionValue<"isWorkflowDefinitionsWorkspace">
+    canViewWorkflowDefinitions: OptionValue<"canViewWorkflowDefinitions">
+    workflowModuleReady: OptionValue<"workflowModuleReady">
+    canEnterWorkflowWorkspace: OptionValue<"canEnterWorkflowWorkspace">
+    localizeWorkflowStatus: OptionValue<"localizeWorkflowStatus">
+  }
   generatorPreviewWorkspace: BindingSegment<
     | "generatorPreviewLoading"
     | "generatorPreviewApplyLoading"
@@ -1098,6 +1083,65 @@ export const createExampleShellBindingsOptions = (
     cancelFilePanel: input.fileWorkspace.workspace.cancelPanel,
   }
 
+  const workflowWorkspaceOptions: BindingSegment<
+    | "isWorkflowDefinitionsWorkspace"
+    | "workflowLoading"
+    | "canViewWorkflowDefinitions"
+    | "workflowModuleReady"
+    | "canEnterWorkflowWorkspace"
+    | "workflowErrorMessage"
+    | "workflowQuery"
+    | "workflowStatusFilter"
+    | "workflowFilterSummary"
+    | "workflowDefinitionCards"
+    | "workflowDefinitions"
+    | "selectedWorkflowDefinitionId"
+    | "workflowDetailLoading"
+    | "workflowDetailErrorMessage"
+    | "selectedWorkflowDefinition"
+    | "workflowVersionHistoryCards"
+    | "workflowDefinitionDetailCards"
+    | "localizeWorkflowStatus"
+    | "handleWorkflowDefinitionSelect"
+    | "setWorkflowStatusFilter"
+    | "resetWorkflowFilters"
+    | "reloadWorkflowDefinitions"
+  > = {
+    isWorkflowDefinitionsWorkspace:
+      input.workflowWorkspace.isWorkflowDefinitionsWorkspace,
+    workflowLoading: input.workflowWorkspace.workspace.workflowLoading,
+    canViewWorkflowDefinitions: input.workflowWorkspace.canViewWorkflowDefinitions,
+    workflowModuleReady: input.workflowWorkspace.workflowModuleReady,
+    canEnterWorkflowWorkspace: input.workflowWorkspace.canEnterWorkflowWorkspace,
+    workflowErrorMessage: input.workflowWorkspace.workspace.workflowErrorMessage,
+    workflowQuery: input.workflowWorkspace.workspace.workflowQuery,
+    workflowStatusFilter: input.workflowWorkspace.workspace.workflowStatusFilter,
+    workflowFilterSummary: input.workflowWorkspace.workspace.workflowFilterSummary,
+    workflowDefinitionCards:
+      input.workflowWorkspace.workspace.workflowDefinitionCards,
+    workflowDefinitions: input.workflowWorkspace.workspace.workflowDefinitions,
+    selectedWorkflowDefinitionId:
+      input.workflowWorkspace.workspace.selectedWorkflowDefinitionId,
+    workflowDetailLoading:
+      input.workflowWorkspace.workspace.workflowDetailLoading,
+    workflowDetailErrorMessage:
+      input.workflowWorkspace.workspace.workflowDetailErrorMessage,
+    selectedWorkflowDefinition:
+      input.workflowWorkspace.workspace.selectedWorkflowDefinition,
+    workflowVersionHistoryCards:
+      input.workflowWorkspace.workspace.workflowVersionHistoryCards,
+    workflowDefinitionDetailCards:
+      input.workflowWorkspace.workspace.workflowDefinitionDetailCards,
+    localizeWorkflowStatus: input.workflowWorkspace.localizeWorkflowStatus,
+    handleWorkflowDefinitionSelect:
+      input.workflowWorkspace.workspace.handleWorkflowDefinitionSelect,
+    setWorkflowStatusFilter:
+      input.workflowWorkspace.workspace.setWorkflowStatusFilter,
+    resetWorkflowFilters: input.workflowWorkspace.workspace.resetWorkflowFilters,
+    reloadWorkflowDefinitions:
+      input.workflowWorkspace.workspace.reloadWorkflowDefinitions,
+  }
+
   return {
     ...input.shell,
     ...roleWorkspaceOptions,
@@ -1113,7 +1157,7 @@ export const createExampleShellBindingsOptions = (
     ...settingWorkspaceOptions,
     ...tenantWorkspaceOptions,
     ...fileWorkspaceOptions,
-    ...input.workflowWorkspace,
+    ...workflowWorkspaceOptions,
     ...input.generatorPreviewWorkspace,
   }
 }
