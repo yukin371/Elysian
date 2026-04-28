@@ -193,6 +193,9 @@ export const useExampleWorkspaceGates = (
       options.postModuleReady.value &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
+  const canEnterSessionWorkspace = computed(
+    () => options.authModuleReady.value && options.isAuthenticated.value,
+  )
   const canViewPosts = computed(
     () => canEnterPostWorkspace.value && postPermissions.list.value,
   )
@@ -378,6 +381,7 @@ export const useExampleWorkspaceGates = (
     canEnterNotificationWorkspace,
     canEnterOperationLogWorkspace,
     canEnterPostWorkspace,
+    canEnterSessionWorkspace,
     canEnterRoleWorkspace,
     canEnterSettingWorkspace,
     canEnterTenantWorkspace,

@@ -25,6 +25,50 @@ interface UseExampleNavigationOptions {
   buildFallbackNavigation: () => UiNavigationNode[]
 }
 
+const appendSessionNavigation = (items: UiNavigationNode[], t: AppTranslate) => {
+  const hasSessionEntry = flattenNavigation(items).some(
+    (item) => item.path === "/system/sessions",
+  )
+
+  if (hasSessionEntry) {
+    return items
+  }
+
+  const sessionItem: UiNavigationNode = {
+    id: "enterprise-sessions",
+    parentId: "enterprise-system",
+    type: "menu",
+    code: "system-sessions",
+    name: t("app.fallback.onlineSessions"),
+    path: "/system/sessions",
+    component: "system/sessions/index",
+    icon: "time",
+    sort: 47,
+    isVisible: true,
+    status: "active",
+    permissionCode: null,
+    depth: 1,
+    children: [],
+  }
+
+  const systemIndex = items.findIndex((item) => item.code === "system-root")
+
+  if (systemIndex < 0) {
+    return [...items, sessionItem]
+  }
+
+  return items.map((item, index) =>
+    index === systemIndex
+      ? {
+          ...item,
+          children: [...item.children, sessionItem].sort(
+            (left, right) => left.sort - right.sort,
+          ),
+        }
+      : item,
+  )
+}
+
 export const useExampleNavigation = ({
   authIdentity,
   registeredModuleCodes,
@@ -51,9 +95,12 @@ export const useExampleNavigation = ({
 
   const enterpriseNavigation = computed(() =>
     appendStudioNavigation(
-      navigationTree.value.length > 0
-        ? navigationTree.value
-        : fallbackNavigation.value,
+      appendSessionNavigation(
+        navigationTree.value.length > 0
+          ? navigationTree.value
+          : fallbackNavigation.value,
+        t,
+      ),
       studioNavigation.value,
     ),
   )
@@ -108,6 +155,9 @@ export const useExampleNavigation = ({
   const isPostWorkspace = computed(
     () => selectedNavigationItem.value?.path === "/system/posts",
   )
+  const isSessionWorkspace = computed(
+    () => selectedNavigationItem.value?.path === "/system/sessions",
+  )
   const isMenuWorkspace = computed(
     () => selectedNavigationItem.value?.path === "/system/menus",
   )
@@ -152,6 +202,8 @@ export const useExampleNavigation = ({
               ? "department"
               : isPostWorkspace.value
                 ? "post"
+                : isSessionWorkspace.value
+                  ? "session"
                 : isMenuWorkspace.value
                   ? "menu"
                   : isNotificationWorkspace.value
@@ -231,6 +283,8 @@ export const useExampleNavigation = ({
                             ? t("app.user.sectionTitle")
                             : isPostWorkspace.value
                               ? t("app.post.sectionTitle")
+                              : isSessionWorkspace.value
+                                ? t("app.onlineSession.sectionTitle")
                               : isWorkflowDefinitionsWorkspace.value
                                 ? t("app.workflow.sectionTitle")
                                 : t("app.section.placeholderTitle", {
@@ -267,6 +321,8 @@ export const useExampleNavigation = ({
                             ? t("app.user.sectionCopy")
                             : isPostWorkspace.value
                               ? t("app.post.sectionCopy")
+                              : isSessionWorkspace.value
+                                ? t("app.onlineSession.sectionCopy")
                               : isWorkflowDefinitionsWorkspace.value
                                 ? t("app.workflow.sectionCopy")
                                 : currentModuleReady.value
@@ -309,6 +365,8 @@ export const useExampleNavigation = ({
                             ? t("app.user.shellTitle")
                             : isPostWorkspace.value
                               ? t("app.post.shellTitle")
+                              : isSessionWorkspace.value
+                                ? t("app.onlineSession.shellTitle")
                               : (selectedNavigationItem.value?.name ??
                                 t("app.shell.workspaceTitle")),
   )
@@ -350,6 +408,8 @@ export const useExampleNavigation = ({
                             ? t("app.user.shellDescription")
                             : isPostWorkspace.value
                               ? t("app.post.shellDescription")
+                              : isSessionWorkspace.value
+                                ? t("app.onlineSession.shellDescription")
                               : isWorkflowDefinitionsWorkspace.value
                                 ? t("app.workflow.shellDescription")
                                 : currentModuleReady.value
@@ -416,6 +476,7 @@ export const useExampleNavigation = ({
     isOperationLogWorkspace,
     isPostWorkspace,
     isRoleWorkspace,
+    isSessionWorkspace,
     isRuntimeShellTab,
     isSettingWorkspace,
     isTenantWorkspace,

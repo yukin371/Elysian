@@ -39,6 +39,23 @@ export interface LoginResponse extends AuthIdentityResponse {
   accessToken: string
 }
 
+export interface AuthSessionSummary {
+  id: string
+  userAgent: string | null
+  ip: string | null
+  expiresAt: string
+  lastUsedAt: string | null
+  revokedAt: string | null
+  replacedBySessionId: string | null
+  createdAt: string
+  updatedAt: string
+  isCurrent: boolean
+}
+
+export interface AuthSessionsResponse {
+  items: AuthSessionSummary[]
+}
+
 export interface CustomerRecord {
   id: string
   name: string
@@ -755,6 +772,19 @@ export const logout = async (): Promise<void> => {
     credentials: "include",
   })
   clearAccessToken()
+}
+
+export const fetchAuthSessions = () =>
+  requestJson<AuthSessionsResponse>("/auth/sessions", {
+    auth: true,
+  })
+
+export const revokeAuthSession = async (sessionId: string): Promise<void> => {
+  await requestJson<void>(`/auth/sessions/${encodeURIComponent(sessionId)}`, {
+    method: "DELETE",
+    auth: true,
+    credentials: "include",
+  })
 }
 
 export const fetchCustomers = async (

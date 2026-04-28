@@ -50,6 +50,7 @@ interface UseExampleSessionOrchestrationOptions {
   reloadDictionaries: () => Promise<void>
   reloadCustomers: () => Promise<void>
   reloadDepartments: () => Promise<void>
+  reloadSessions: () => Promise<void>
   reloadPosts: () => Promise<void>
   reloadMenus: () => Promise<void>
   reloadOperationLogs: () => Promise<void>
@@ -63,6 +64,7 @@ interface UseExampleSessionOrchestrationOptions {
   clearFileWorkspace: () => void
   clearNotificationWorkspace: () => void
   clearDepartmentWorkspace: () => void
+  clearSessionWorkspace: () => void
   clearPostWorkspace: () => void
   clearMenuWorkspace: () => void
   clearOperationLogWorkspace: () => void
@@ -98,6 +100,7 @@ export const useExampleSessionOrchestration = (
     await options.reloadDictionaries()
     await options.reloadCustomers()
     await options.reloadDepartments()
+    await options.reloadSessions()
     await options.reloadPosts()
     await options.reloadMenus()
     await options.reloadOperationLogs()
@@ -176,6 +179,7 @@ export const useExampleSessionOrchestration = (
       options.clearFileWorkspace()
       options.clearNotificationWorkspace()
       options.clearDepartmentWorkspace()
+      options.clearSessionWorkspace()
       options.clearPostWorkspace()
       options.clearMenuWorkspace()
       options.clearOperationLogWorkspace()
@@ -245,6 +249,7 @@ export const useExampleSessionOrchestration = (
 
       await options.reloadCustomers()
       await options.reloadDepartments()
+      await options.reloadSessions()
       await options.reloadPosts()
       await options.reloadMenus()
       await options.reloadOperationLogs()

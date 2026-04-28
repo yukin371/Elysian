@@ -17,6 +17,7 @@ export type ExampleWorkspaceKind =
   | "operation-log"
   | "post"
   | "role"
+  | "session"
   | "setting"
   | "tenant"
   | "user"
@@ -76,6 +77,7 @@ export const resolveModuleCodeFromPath = (path: string | null | undefined) => {
   if (path.startsWith("/system/menus")) return "menu"
   if (path.startsWith("/system/departments")) return "department"
   if (path.startsWith("/system/posts")) return "post"
+  if (path.startsWith("/system/sessions")) return "auth"
   if (path.startsWith("/system/dictionaries")) return "dictionary"
   if (path.startsWith("/system/settings")) return "setting"
   if (path.startsWith("/system/operation-logs")) return "operation-log"
@@ -598,6 +600,8 @@ export const createAppShellLocalization = (t: AppTranslate) => {
         return t("app.fallback.departments")
       case "system-posts":
         return t("app.fallback.posts")
+      case "system-sessions":
+        return t("app.fallback.onlineSessions")
       case "system-dictionaries":
         return t("app.fallback.dictionaries")
       case "system-settings":
@@ -751,6 +755,22 @@ export const createAppShellLocalization = (t: AppTranslate) => {
           isVisible: true,
           status: "active",
           permissionCode: "system:post:list",
+          depth: 1,
+          children: [],
+        },
+        {
+          id: "enterprise-sessions",
+          parentId: "enterprise-system",
+          type: "menu",
+          code: "system-sessions",
+          name: t("app.fallback.onlineSessions"),
+          path: "/system/sessions",
+          component: "system/sessions/index",
+          icon: "time",
+          sort: 47,
+          isVisible: true,
+          status: "active",
+          permissionCode: null,
           depth: 1,
           children: [],
         },

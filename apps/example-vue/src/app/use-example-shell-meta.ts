@@ -26,6 +26,7 @@ interface UseExampleShellMetaOptions {
   isCustomerWorkspace: ComputedRef<boolean>
   isDictionaryWorkspace: ComputedRef<boolean>
   isDepartmentWorkspace: ComputedRef<boolean>
+  isSessionWorkspace: ComputedRef<boolean>
   isMenuWorkspace: ComputedRef<boolean>
   isNotificationWorkspace: ComputedRef<boolean>
   isOperationLogWorkspace: ComputedRef<boolean>
@@ -45,6 +46,7 @@ interface UseExampleShellMetaOptions {
   customerItems: ItemCollection
   dictionaryItems: ItemCollection
   departmentItems: ItemCollection
+  sessionItems: ItemCollection
   menuItems: ItemCollection
   notificationItems: ItemCollection
   operationLogItems: ItemCollection
@@ -67,6 +69,7 @@ export const useExampleShellMeta = ({
   isCustomerWorkspace,
   isDictionaryWorkspace,
   isDepartmentWorkspace,
+  isSessionWorkspace,
   isMenuWorkspace,
   isNotificationWorkspace,
   isOperationLogWorkspace,
@@ -86,6 +89,7 @@ export const useExampleShellMeta = ({
   customerItems,
   dictionaryItems,
   departmentItems,
+  sessionItems,
   menuItems,
   notificationItems,
   operationLogItems,
@@ -142,6 +146,10 @@ export const useExampleShellMeta = ({
 
     if (isDepartmentWorkspace.value) {
       return departmentItems.value.length
+    }
+
+    if (isSessionWorkspace.value) {
+      return sessionItems.value.length
     }
 
     if (isMenuWorkspace.value) {
@@ -210,6 +218,10 @@ export const useExampleShellMeta = ({
 
     if (isDepartmentWorkspace.value) {
       return t("app.department.statsHint")
+    }
+
+    if (isSessionWorkspace.value) {
+      return t("app.onlineSession.statsHint")
     }
 
     if (isMenuWorkspace.value) {
@@ -292,6 +304,10 @@ export const useExampleShellMeta = ({
               ? t("app.department.tabsHint", {
                   count: departmentItems.value.length,
                 })
+              : isSessionWorkspace.value
+                ? t("app.onlineSession.tabsHint", {
+                    count: sessionItems.value.length,
+                  })
               : isMenuWorkspace.value
                 ? t("app.menu.tabsHint", {
                     count: menuItems.value.length,

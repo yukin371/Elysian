@@ -8,6 +8,7 @@ interface UseExampleQuerySummaryOptions {
   customerQuerySummary: ComputedRef<string>
   isDictionaryWorkspace: ComputedRef<boolean>
   isDepartmentWorkspace: ComputedRef<boolean>
+  isSessionWorkspace: ComputedRef<boolean>
   isPostWorkspace: ComputedRef<boolean>
   isRoleWorkspace: ComputedRef<boolean>
   isMenuWorkspace: ComputedRef<boolean>
@@ -18,6 +19,7 @@ interface UseExampleQuerySummaryOptions {
   isTenantWorkspace: ComputedRef<boolean>
   dictionaryQueryValues: Ref<ElyQueryValues>
   departmentQueryValues: Ref<ElyQueryValues>
+  sessionQuerySummary: ComputedRef<string>
   postQueryValues: Ref<ElyQueryValues>
   roleQueryValues: Ref<ElyQueryValues>
   menuQueryValues: Ref<ElyQueryValues>
@@ -125,6 +127,10 @@ export const useExampleQuerySummary = (
       return fragments.length > 0
         ? fragments.join(" / ")
         : options.t("app.filter.none")
+    }
+
+    if (options.isSessionWorkspace.value) {
+      return options.sessionQuerySummary.value
     }
 
     if (options.isPostWorkspace.value) {
