@@ -1,7 +1,8 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-import { departments, users } from "./auth"
+import { users } from "./auth"
+import { departments } from "./department"
 import { tenants } from "./tenant"
 
 export const files = pgTable("files", {

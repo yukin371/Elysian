@@ -1,7 +1,8 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-import { departments, users } from "./auth"
+import { users } from "./auth"
+import { departments } from "./department"
 import { tenants } from "./tenant"
 
 export const customerStatus = pgEnum("customer_status", ["active", "inactive"])
