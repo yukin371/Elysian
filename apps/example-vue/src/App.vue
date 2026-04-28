@@ -705,6 +705,23 @@ const {
   },
 })
 
+const postWorkspace = usePostWorkspace({
+  currentShellTabKey,
+  page: enterprisePostPage,
+  locale,
+  t,
+  localizeFieldLabel: localizePostFieldLabel,
+  localizeStatus: localizePostStatus,
+  canView: canViewPosts,
+  canCreate: canCreatePosts,
+  canUpdate: canUpdatePosts,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   cancelPanel: cancelPostPanel,
   clearWorkspace: clearPostWorkspace,
@@ -735,16 +752,20 @@ const {
   submitForm: submitPostForm,
   tableColumns: enterprisePostTableColumns,
   tableItems: enterprisePostTableItems,
-} = usePostWorkspace({
+} = postWorkspace
+
+const menuWorkspace = useMenuWorkspace({
   currentShellTabKey,
-  page: enterprisePostPage,
+  page: enterpriseMenuPage,
   locale,
   t,
-  localizeFieldLabel: localizePostFieldLabel,
-  localizeStatus: localizePostStatus,
-  canView: canViewPosts,
-  canCreate: canCreatePosts,
-  canUpdate: canUpdatePosts,
+  localizeFieldLabel: localizeMenuFieldLabel,
+  localizeType: localizeMenuType,
+  localizeBoolean: localizeMenuBoolean,
+  localizeStatus: localizeMenuStatus,
+  canView: canViewMenus,
+  canCreate: canCreateMenus,
+  canUpdate: canUpdateMenus,
   onRecoverableAuthError: (error) => {
     if (isRecoverableAuthError(error)) {
       authIdentity.value = null
@@ -784,24 +805,7 @@ const {
   submitForm: submitMenuForm,
   tableColumns: enterpriseMenuTableColumns,
   tableItems: enterpriseMenuTableItems,
-} = useMenuWorkspace({
-  currentShellTabKey,
-  page: enterpriseMenuPage,
-  locale,
-  t,
-  localizeFieldLabel: localizeMenuFieldLabel,
-  localizeType: localizeMenuType,
-  localizeBoolean: localizeMenuBoolean,
-  localizeStatus: localizeMenuStatus,
-  canView: canViewMenus,
-  canCreate: canCreateMenus,
-  canUpdate: canUpdateMenus,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = menuWorkspace
 
 const roleWorkspace = useRoleWorkspace({
   currentShellTabKey,
@@ -1407,66 +1411,22 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     canEnterSessionWorkspace,
   },
   postWorkspace: {
+    workspace: postWorkspace,
     isPostWorkspace,
-    postLoading,
     canCreatePosts,
     canViewPosts,
     postModuleReady,
     canEnterPostWorkspace,
-    postErrorMessage,
-    enterprisePostQueryFields,
-    enterprisePostTableColumns,
-    enterprisePostTableItems,
-    postCountLabel,
     canUpdatePosts,
-    postDetailLoading,
-    postDetailErrorMessage,
-    postPanelMode,
-    postPanelTitle,
-    postPanelDescription,
-    selectedPost,
-    enterprisePostFormFields,
-    enterprisePostFormValues,
-    handlePostSearch,
-    handlePostReset,
-    handlePostRowClick,
-    openPostCreatePanel,
-    reloadPosts,
-    startPostEdit,
-    submitPostForm,
-    cancelPostPanel,
   },
   menuWorkspace: {
+    workspace: menuWorkspace,
     isMenuWorkspace,
-    menuLoading,
     canCreateMenus,
     canViewMenus,
     menuModuleReady,
     canEnterMenuWorkspace,
-    menuErrorMessage,
-    enterpriseMenuQueryFields,
-    enterpriseMenuTableColumns,
-    enterpriseMenuTableItems,
-    menuCountLabel,
     canUpdateMenus,
-    menuDetailLoading,
-    menuDetailErrorMessage,
-    menuPanelMode,
-    menuPanelTitle,
-    menuPanelDescription,
-    selectedMenu,
-    selectedMenuDetail,
-    enterpriseMenuFormFields,
-    enterpriseMenuFormValues,
-    menuParentLookup,
-    handleMenuSearch,
-    handleMenuReset,
-    handleMenuRowClick,
-    openMenuCreatePanel,
-    reloadMenus,
-    startMenuEdit,
-    submitMenuForm,
-    cancelMenuPanel,
   },
   notificationWorkspace: {
     workspace: notificationWorkspace,

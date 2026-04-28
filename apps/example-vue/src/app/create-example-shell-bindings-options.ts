@@ -3,7 +3,9 @@ import type { useCustomerWorkspace } from "../workspaces/use-customer-workspace"
 import type { useDictionaryWorkspace } from "../workspaces/use-dictionary-workspace"
 import type { useNotificationWorkspace } from "../workspaces/use-notification-workspace"
 import type { useOperationLogWorkspace } from "../workspaces/use-operation-log-workspace"
+import type { usePostWorkspace } from "../workspaces/use-post-workspace"
 import type { useRoleWorkspace } from "../workspaces/use-role-workspace"
+import type { useMenuWorkspace } from "../workspaces/use-menu-workspace"
 import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
 
 type BindingSegment<
@@ -111,68 +113,24 @@ interface CreateExampleShellBindingsOptionsInput {
     isSessionWorkspace: OptionValue<"isSessionWorkspace">
     canEnterSessionWorkspace: OptionValue<"canEnterSessionWorkspace">
   }
-  postWorkspace: BindingSegment<
-    | "isPostWorkspace"
-    | "postLoading"
-    | "canCreatePosts"
-    | "canViewPosts"
-    | "postModuleReady"
-    | "canEnterPostWorkspace"
-    | "postErrorMessage"
-    | "enterprisePostQueryFields"
-    | "enterprisePostTableColumns"
-    | "enterprisePostTableItems"
-    | "postCountLabel"
-    | "canUpdatePosts"
-    | "postDetailLoading"
-    | "postDetailErrorMessage"
-    | "postPanelMode"
-    | "postPanelTitle"
-    | "postPanelDescription"
-    | "selectedPost"
-    | "enterprisePostFormFields"
-    | "enterprisePostFormValues"
-    | "handlePostSearch"
-    | "handlePostReset"
-    | "handlePostRowClick"
-    | "openPostCreatePanel"
-    | "reloadPosts"
-    | "startPostEdit"
-    | "submitPostForm"
-    | "cancelPostPanel"
-  >
-  menuWorkspace: BindingSegment<
-    | "isMenuWorkspace"
-    | "menuLoading"
-    | "canCreateMenus"
-    | "canViewMenus"
-    | "menuModuleReady"
-    | "canEnterMenuWorkspace"
-    | "menuErrorMessage"
-    | "enterpriseMenuQueryFields"
-    | "enterpriseMenuTableColumns"
-    | "enterpriseMenuTableItems"
-    | "menuCountLabel"
-    | "canUpdateMenus"
-    | "menuDetailLoading"
-    | "menuDetailErrorMessage"
-    | "menuPanelMode"
-    | "menuPanelTitle"
-    | "menuPanelDescription"
-    | "selectedMenu"
-    | "selectedMenuDetail"
-    | "enterpriseMenuFormFields"
-    | "enterpriseMenuFormValues"
-    | "menuParentLookup"
-    | "handleMenuSearch"
-    | "handleMenuReset"
-    | "handleMenuRowClick"
-    | "openMenuCreatePanel"
-    | "reloadMenus"
-    | "startMenuEdit"
-    | "submitMenuForm"
-    | "cancelMenuPanel"
-  >
+  postWorkspace: {
+    workspace: ReturnType<typeof usePostWorkspace>
+    isPostWorkspace: OptionValue<"isPostWorkspace">
+    canCreatePosts: OptionValue<"canCreatePosts">
+    canViewPosts: OptionValue<"canViewPosts">
+    postModuleReady: OptionValue<"postModuleReady">
+    canEnterPostWorkspace: OptionValue<"canEnterPostWorkspace">
+    canUpdatePosts: OptionValue<"canUpdatePosts">
+  }
+  menuWorkspace: {
+    workspace: ReturnType<typeof useMenuWorkspace>
+    isMenuWorkspace: OptionValue<"isMenuWorkspace">
+    canCreateMenus: OptionValue<"canCreateMenus">
+    canViewMenus: OptionValue<"canViewMenus">
+    menuModuleReady: OptionValue<"menuModuleReady">
+    canEnterMenuWorkspace: OptionValue<"canEnterMenuWorkspace">
+    canUpdateMenus: OptionValue<"canUpdateMenus">
+  }
   notificationWorkspace: {
     workspace: ReturnType<typeof useNotificationWorkspace>
     isNotificationWorkspace: OptionValue<"isNotificationWorkspace">
@@ -652,6 +610,130 @@ export const createExampleShellBindingsOptions = (
     revokeSelectedSession: input.sessionWorkspace.workspace.revokeSelectedSession,
   }
 
+  const postWorkspaceOptions: BindingSegment<
+    | "isPostWorkspace"
+    | "postLoading"
+    | "canCreatePosts"
+    | "canViewPosts"
+    | "postModuleReady"
+    | "canEnterPostWorkspace"
+    | "postErrorMessage"
+    | "enterprisePostQueryFields"
+    | "enterprisePostTableColumns"
+    | "enterprisePostTableItems"
+    | "postCountLabel"
+    | "canUpdatePosts"
+    | "postDetailLoading"
+    | "postDetailErrorMessage"
+    | "postPanelMode"
+    | "postPanelTitle"
+    | "postPanelDescription"
+    | "selectedPost"
+    | "enterprisePostFormFields"
+    | "enterprisePostFormValues"
+    | "handlePostSearch"
+    | "handlePostReset"
+    | "handlePostRowClick"
+    | "openPostCreatePanel"
+    | "reloadPosts"
+    | "startPostEdit"
+    | "submitPostForm"
+    | "cancelPostPanel"
+  > = {
+    isPostWorkspace: input.postWorkspace.isPostWorkspace,
+    postLoading: input.postWorkspace.workspace.postLoading,
+    canCreatePosts: input.postWorkspace.canCreatePosts,
+    canViewPosts: input.postWorkspace.canViewPosts,
+    postModuleReady: input.postWorkspace.postModuleReady,
+    canEnterPostWorkspace: input.postWorkspace.canEnterPostWorkspace,
+    postErrorMessage: input.postWorkspace.workspace.postErrorMessage,
+    enterprisePostQueryFields: input.postWorkspace.workspace.queryFields,
+    enterprisePostTableColumns: input.postWorkspace.workspace.tableColumns,
+    enterprisePostTableItems: input.postWorkspace.workspace.tableItems,
+    postCountLabel: input.postWorkspace.workspace.countLabel,
+    canUpdatePosts: input.postWorkspace.canUpdatePosts,
+    postDetailLoading: input.postWorkspace.workspace.postDetailLoading,
+    postDetailErrorMessage: input.postWorkspace.workspace.postDetailErrorMessage,
+    postPanelMode: input.postWorkspace.workspace.postPanelMode,
+    postPanelTitle: input.postWorkspace.workspace.panelTitle,
+    postPanelDescription: input.postWorkspace.workspace.panelDescription,
+    selectedPost: input.postWorkspace.workspace.selectedPost,
+    enterprisePostFormFields: input.postWorkspace.workspace.formFields,
+    enterprisePostFormValues: input.postWorkspace.workspace.formValues,
+    handlePostSearch: input.postWorkspace.workspace.handleSearch,
+    handlePostReset: input.postWorkspace.workspace.handleReset,
+    handlePostRowClick: input.postWorkspace.workspace.handleRowClick,
+    openPostCreatePanel: input.postWorkspace.workspace.openCreatePanel,
+    reloadPosts: input.postWorkspace.workspace.reloadPosts,
+    startPostEdit: input.postWorkspace.workspace.startEdit,
+    submitPostForm: input.postWorkspace.workspace.submitForm,
+    cancelPostPanel: input.postWorkspace.workspace.cancelPanel,
+  }
+
+  const menuWorkspaceOptions: BindingSegment<
+    | "isMenuWorkspace"
+    | "menuLoading"
+    | "canCreateMenus"
+    | "canViewMenus"
+    | "menuModuleReady"
+    | "canEnterMenuWorkspace"
+    | "menuErrorMessage"
+    | "enterpriseMenuQueryFields"
+    | "enterpriseMenuTableColumns"
+    | "enterpriseMenuTableItems"
+    | "menuCountLabel"
+    | "canUpdateMenus"
+    | "menuDetailLoading"
+    | "menuDetailErrorMessage"
+    | "menuPanelMode"
+    | "menuPanelTitle"
+    | "menuPanelDescription"
+    | "selectedMenu"
+    | "selectedMenuDetail"
+    | "enterpriseMenuFormFields"
+    | "enterpriseMenuFormValues"
+    | "menuParentLookup"
+    | "handleMenuSearch"
+    | "handleMenuReset"
+    | "handleMenuRowClick"
+    | "openMenuCreatePanel"
+    | "reloadMenus"
+    | "startMenuEdit"
+    | "submitMenuForm"
+    | "cancelMenuPanel"
+  > = {
+    isMenuWorkspace: input.menuWorkspace.isMenuWorkspace,
+    menuLoading: input.menuWorkspace.workspace.menuLoading,
+    canCreateMenus: input.menuWorkspace.canCreateMenus,
+    canViewMenus: input.menuWorkspace.canViewMenus,
+    menuModuleReady: input.menuWorkspace.menuModuleReady,
+    canEnterMenuWorkspace: input.menuWorkspace.canEnterMenuWorkspace,
+    menuErrorMessage: input.menuWorkspace.workspace.menuErrorMessage,
+    enterpriseMenuQueryFields: input.menuWorkspace.workspace.queryFields,
+    enterpriseMenuTableColumns: input.menuWorkspace.workspace.tableColumns,
+    enterpriseMenuTableItems: input.menuWorkspace.workspace.tableItems,
+    menuCountLabel: input.menuWorkspace.workspace.countLabel,
+    canUpdateMenus: input.menuWorkspace.canUpdateMenus,
+    menuDetailLoading: input.menuWorkspace.workspace.menuDetailLoading,
+    menuDetailErrorMessage: input.menuWorkspace.workspace.menuDetailErrorMessage,
+    menuPanelMode: input.menuWorkspace.workspace.menuPanelMode,
+    menuPanelTitle: input.menuWorkspace.workspace.panelTitle,
+    menuPanelDescription: input.menuWorkspace.workspace.panelDescription,
+    selectedMenu: input.menuWorkspace.workspace.selectedMenu,
+    selectedMenuDetail: input.menuWorkspace.workspace.selectedMenuDetail,
+    enterpriseMenuFormFields: input.menuWorkspace.workspace.formFields,
+    enterpriseMenuFormValues: input.menuWorkspace.workspace.formValues,
+    menuParentLookup: input.menuWorkspace.workspace.parentLookup,
+    handleMenuSearch: input.menuWorkspace.workspace.handleSearch,
+    handleMenuReset: input.menuWorkspace.workspace.handleReset,
+    handleMenuRowClick: input.menuWorkspace.workspace.handleRowClick,
+    openMenuCreatePanel: input.menuWorkspace.workspace.openCreatePanel,
+    reloadMenus: input.menuWorkspace.workspace.reloadMenus,
+    startMenuEdit: input.menuWorkspace.workspace.startEdit,
+    submitMenuForm: input.menuWorkspace.workspace.submitForm,
+    cancelMenuPanel: input.menuWorkspace.workspace.cancelPanel,
+  }
+
   const notificationWorkspaceOptions: BindingSegment<
     | "isNotificationWorkspace"
     | "notificationLoading"
@@ -797,8 +879,8 @@ export const createExampleShellBindingsOptions = (
     ...dictionaryWorkspaceOptions,
     ...input.departmentWorkspace,
     ...sessionWorkspaceOptions,
-    ...input.postWorkspace,
-    ...input.menuWorkspace,
+    ...postWorkspaceOptions,
+    ...menuWorkspaceOptions,
     ...notificationWorkspaceOptions,
     ...operationLogWorkspaceOptions,
     ...input.userWorkspace,
