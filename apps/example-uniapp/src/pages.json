@@ -1,0 +1,34 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/notifications/index",
+      "style": {
+        "navigationBarTitleText": "通知"
+      }
+    },
+    {
+      "path": "pages/notification-detail/index",
+      "style": {
+        "navigationBarTitleText": "通知详情"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "Elysian",
+    "navigationBarBackgroundColor": "#f4f7fb",
+    "backgroundColor": "#f4f7fb"
+  }
+}

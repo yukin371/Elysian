@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-04-27`
+更新时间：`2026-04-28`
 
 ## 项目类型
 
@@ -14,7 +14,7 @@
 - 根目录已存在 [README.md](/E:/Github/Elysian/README.md)。
 - 已存在的设计文档包括产品定义、架构草案、AI 与代码生成策略、MVP 路线图、调研与技术决策。
 - 仓库目标是以 `Elysia` 为后端内核，以前端可插拔为原则，支持企业级快速开发与 AI 辅助。
-- 前端当前不绑定单一实现，设计方向支持 `Vue` 与 `React`。
+- 前端当前不绑定单一实现；当前 C 端界面方向已明确为 `Vue` 第一优先级、`uniapp` 第二优先级设计储备，`React` 暂不进入当前 C 端主线。
 - 仓库已建立 `Bun workspaces` 工作区。
 - 仓库根目录已提供 `docker-compose.yml`，可一键拉起 `server + PostgreSQL` 本地容器栈（含 migrate + seed）。
 - 根依赖声明文件已存在：[package.json](/E:/Github/Elysian/package.json)。
@@ -44,10 +44,10 @@
 - auth 模块当前已对 `login / refresh / logout / permission denied` 写入最小审计记录，并保留 `request id / ip / user agent / actor / target / result` 字段。
 - 在启用 `tenant-context` 数据库上下文时，`/auth/login` 若未显式传入 `tenantCode`，当前会默认收敛到 `DEFAULT_TENANT_ID` 范围，避免同名用户跨租户误命中。
 - 在存在 `DATABASE_URL` 时，server 会自动注册 `tenant-context`、`auth`、`tenant`、`customer`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 模块。
-- 服务端已启用 CORS，可直接支撑本地 `dev:server` + `dev:vue` 双端口开发。
+- 服务端已启用 CORS，可直接支撑本地 `dev:server` + `dev:vue` 双端口开发；当前也已补 `dev:uniapp` / `build:uniapp` 骨架脚本，供 `uniapp` H5 空壳验证使用。
 - 服务端已支持基于环境变量的最小 CORS 白名单和内存限流策略（生产环境默认启用限流）。
 - 限流开启时服务端会返回 `x-ratelimit-limit`、`x-ratelimit-remaining`、`x-ratelimit-reset` 响应头，并在超限时保留 `retry-after`。
-- 已存在首个真实前端示例应用：`apps/example-vue`。
+- 已存在前端示例应用：`apps/example-vue`（主线企业后台验证）与 `apps/example-uniapp`（首轮 C 端骨架验证）。
 - 已存在共享包：`packages/core`、`packages/schema`、`packages/persistence`、`packages/generator`、`packages/frontend-vue`、`packages/frontend-react`、`packages/ui-core`、`packages/ui-enterprise-vue`。
 - persistence 路线已确定为 `PostgreSQL + Drizzle ORM + Bun SQL + drizzle-kit`。
 - `packages/persistence` 已定义首个真实表：`customers`。
@@ -159,7 +159,7 @@
 
 - 运行入口：`TBD`
   确认路径：前端示例与生成器 CLI 建立后补充更多入口。
-- 构建命令：已存在 `bun run build:vue` 用于构建 Vue 示例；服务端独立 build 产物命令仍为 `TBD`
+- 构建命令：已存在 `bun run build:vue` 与 `bun run build:uniapp`；服务端独立 build 产物命令仍为 `TBD`
   确认路径：确定 server 首版打包与发布方式后补充。
 - 部署方式：已具备本地容器化启动基线（`docker compose`）；生产发布方式仍为 `TBD`
   确认路径：确定正式生产镜像与发布流程后补充。
@@ -191,7 +191,7 @@
 
 - 前端适配层尚未定稿，容易过早耦合到某一个框架。
 - 认证策略已初步固定，但复杂组织权限、数据范围和跨部门隔离仍未进入实现，后续阶段容易出现边界膨胀。
-- 多租户基础能力已接入 `feature/dev/main` 的 CI tenant e2e 作业，并已完成 `feature/dev/main` 三条分支的 `10/10` 滚动观察；当前无系统性失败信号，且仓库已补 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 作为 release rehearsal 执行层自动化，但生产发布平台、数据库快照编排与发布后演练仍未固化到平台级自动化。
+- 多租户基础能力已接入主线相关的 CI tenant e2e 作业，并已完成历史功能分支样本、`dev`、`main` 三段 `10/10` 滚动观察；当前无系统性失败信号，且仓库已补 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize` 作为 release rehearsal 执行层自动化，但生产发布平台、数据库快照编排与发布后演练仍未固化到平台级自动化。
 - 文件模块当前只验证了本地磁盘存储适配器，尚未进入对象存储、多副本或生产级生命周期治理。
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
 - workflow 模块当前只验证了线性审批、最小动作闭环与白名单条件分支；独立权限点与更复杂任务语义仍未进入实现。
@@ -250,7 +250,9 @@
 - 启动服务端：`bun run server`
 - 服务端热更新：`bun run dev:server`
 - 启动 Vue 示例：`bun run dev:vue`
+- 启动 uniapp H5 骨架：`bun run dev:uniapp`
 - 构建 Vue 示例：`bun run build:vue`
+- 构建 uniapp H5 骨架：`bun run build:uniapp`
 - lint：`bun run lint`
 - 格式化：`bun run format`
 - 全量检查：`bun run check`

@@ -23,6 +23,10 @@
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
 - C 端第二界面设计：[2026-04-28-c-end-uniapp-second-surface-design.md](./plans/2026-04-28-c-end-uniapp-second-surface-design.md)
 - uniapp 范围规划：[2026-04-28-uniapp-scope-plan.md](./plans/2026-04-28-uniapp-scope-plan.md)
+- uniapp 范围细化清单：[2026-04-28-uniapp-scope-checklist.md](./plans/2026-04-28-uniapp-scope-checklist.md)
+- uniapp P0 决策稿：[2026-04-28-uniapp-p0-decisions.md](./plans/2026-04-28-uniapp-p0-decisions.md)
+- uniapp P0 验证 runbook：[2026-04-28-uniapp-p0-validation-runbook.md](./plans/2026-04-28-uniapp-p0-validation-runbook.md)
+- uniapp P1 scaffold draft：[2026-04-28-uniapp-p1-scaffold-draft.md](./plans/2026-04-28-uniapp-p1-scaffold-draft.md)
 - workflow 收口文档：[2026-04-26-phase-7a-round2-verification-and-task-semantics.md](./plans/2026-04-26-phase-7a-round2-verification-and-task-semantics.md)
 
 ## Active Tracks
