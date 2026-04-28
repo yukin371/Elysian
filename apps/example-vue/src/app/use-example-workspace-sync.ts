@@ -2,6 +2,7 @@ import { watch, type ComputedRef, type Ref } from "vue"
 
 import { resolveNotificationSelection } from "../lib/notification-workspace"
 import { resolveOperationLogSelection } from "../lib/operation-log-workspace"
+import { resolvePostSelection } from "../lib/post-workspace"
 import { resolveSettingSelection } from "../lib/setting-workspace"
 import { resolveWorkflowDefinitionSelection } from "../lib/workflow-workspace"
 
@@ -40,6 +41,15 @@ interface UseExampleWorkspaceSyncOptions {
   departmentDetail: Ref<ItemWithId | null>
   canCreateDepartments: ComputedRef<boolean>
   selectDepartment: (item: ItemWithId) => Promise<void>
+
+  filteredPostItems: ComputedRef<ItemWithId[]>
+  isPostWorkspace: ComputedRef<boolean>
+  postLoading: Ref<boolean>
+  postPanelMode: Ref<string>
+  selectedPostId: Ref<string | null>
+  postDetail: Ref<ItemWithId | null>
+  canCreatePosts: ComputedRef<boolean>
+  selectPost: (item: ItemWithId) => Promise<void>
 
   filteredMenuItems: ComputedRef<ItemWithId[]>
   isMenuWorkspace: ComputedRef<boolean>
@@ -265,6 +275,41 @@ export const useExampleWorkspaceSync = (
         }
 
         await options.selectDepartment(firstItem)
+      }
+    },
+    {
+      immediate: true,
+    },
+  )
+
+  watch(
+    options.filteredPostItems,
+    async (items) => {
+      if (
+        !options.isPostWorkspace.value ||
+        options.postLoading.value ||
+        options.postPanelMode.value !== "detail"
+      ) {
+        return
+      }
+
+      const nextPostId = resolvePostSelection(items, options.selectedPostId.value)
+
+      if (!nextPostId) {
+        options.selectedPostId.value = null
+        options.postDetail.value = null
+
+        if (options.canCreatePosts.value) {
+          options.postPanelMode.value = "create"
+        }
+
+        return
+      }
+
+      const nextPost = items.find((item) => item.id === nextPostId)
+
+      if (nextPost && nextPostId !== options.selectedPostId.value) {
+        await options.selectPost(nextPost)
       }
     },
     {

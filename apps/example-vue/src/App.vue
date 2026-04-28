@@ -24,6 +24,7 @@ import { dictionaryModuleSchema } from "../../../packages/schema/src/dictionary"
 import { menuModuleSchema } from "../../../packages/schema/src/menu"
 import { notificationModuleSchema } from "../../../packages/schema/src/notification"
 import { operationLogModuleSchema } from "../../../packages/schema/src/operation-log"
+import { postModuleSchema } from "../../../packages/schema/src/post"
 import { roleModuleSchema } from "../../../packages/schema/src/role"
 import { settingModuleSchema } from "../../../packages/schema/src/setting"
 import { tenantModuleSchema } from "../../../packages/schema/src/tenant"
@@ -55,6 +56,7 @@ import { useGeneratorPreviewWorkspace } from "./workspaces/use-generator-preview
 import { useMenuWorkspace } from "./workspaces/use-menu-workspace"
 import { useNotificationWorkspace } from "./workspaces/use-notification-workspace"
 import { useOperationLogWorkspace } from "./workspaces/use-operation-log-workspace"
+import { usePostWorkspace } from "./workspaces/use-post-workspace"
 import { useRoleWorkspace } from "./workspaces/use-role-workspace"
 import { useSettingWorkspace } from "./workspaces/use-setting-workspace"
 import { useTenantWorkspace } from "./workspaces/use-tenant-workspace"
@@ -71,6 +73,7 @@ const notificationPageDefinition = buildVueCustomCrudPage(
 const operationLogPageDefinition = buildVueCustomCrudPage(
   operationLogModuleSchema,
 )
+const postPageDefinition = buildVueCustomCrudPage(postModuleSchema)
 const rolePageDefinition = buildVueCustomCrudPage(roleModuleSchema)
 const settingPageDefinition = buildVueCustomCrudPage(settingModuleSchema)
 const tenantPageDefinition = buildVueCustomCrudPage(tenantModuleSchema)
@@ -102,6 +105,8 @@ const {
   localizeCustomerStatus,
   localizeDepartmentFieldLabel,
   localizeDepartmentStatus,
+  localizePostFieldLabel,
+  localizePostStatus,
   localizeDictionaryFieldLabel,
   localizeDictionaryStatus,
   localizeFieldLabel,
@@ -141,6 +146,7 @@ const authErrorMessage = ref("")
 const authModuleReady = ref(false)
 const customerModuleReady = ref(false)
 const departmentModuleReady = ref(false)
+const postModuleReady = ref(false)
 const fileModuleReady = ref(false)
 const menuModuleReady = ref(false)
 const notificationModuleReady = ref(false)
@@ -181,6 +187,7 @@ const {
   enterpriseSelectedTabKey,
   isCustomerWorkspace,
   isDepartmentWorkspace,
+  isPostWorkspace,
   isDictionaryWorkspace,
   isFileWorkspace,
   isGeneratorPreviewWorkspace,
@@ -209,6 +216,7 @@ const {
 const {
   canCreateCustomers,
   canCreateDepartments,
+  canCreatePosts,
   canCreateDictionaryTypes,
   canCreateMenus,
   canCreateNotifications,
@@ -221,6 +229,7 @@ const {
   canDownloadFiles,
   canEnterCustomerWorkspace,
   canEnterDepartmentWorkspace,
+  canEnterPostWorkspace,
   canEnterDictionaryWorkspace,
   canEnterFileWorkspace,
   canEnterMenuWorkspace,
@@ -234,6 +243,7 @@ const {
   canResetUserPasswords,
   canUpdateCustomers,
   canUpdateDepartments,
+  canUpdatePosts,
   canUpdateDictionaryTypes,
   canUpdateMenus,
   canUpdateNotifications,
@@ -244,6 +254,7 @@ const {
   canUploadFiles,
   canViewCustomers,
   canViewDepartments,
+  canViewPosts,
   canViewDictionaries,
   canViewFiles,
   canViewMenus,
@@ -261,6 +272,7 @@ const {
   authIdentity,
   customerModuleReady,
   departmentModuleReady,
+  postModuleReady,
   dictionaryModuleReady,
   fileModuleReady,
   menuModuleReady,
@@ -437,6 +449,7 @@ const enterpriseDepartmentPage = useElyCrudPage(
   departmentPageDefinition,
   permissionCodes,
 )
+const enterprisePostPage = useElyCrudPage(postPageDefinition, permissionCodes)
 const enterpriseMenuPage = useElyCrudPage(menuPageDefinition, permissionCodes)
 const enterpriseNotificationPage = useElyCrudPage(
   notificationPageDefinition,
@@ -638,6 +651,53 @@ const {
   canView: canViewDepartments,
   canCreate: canCreateDepartments,
   canUpdate: canUpdateDepartments,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
+const {
+  cancelPanel: cancelPostPanel,
+  clearWorkspace: clearPostWorkspace,
+  countLabel: postCountLabel,
+  formFields: enterprisePostFormFields,
+  formValues: enterprisePostFormValues,
+  handleReset: handlePostReset,
+  handleRowClick: handlePostRowClick,
+  handleSearch: handlePostSearch,
+  openCreatePanel: openPostCreatePanel,
+  panelDescription: postPanelDescription,
+  panelTitle: postPanelTitle,
+  postDetail,
+  postDetailErrorMessage,
+  postDetailLoading,
+  postErrorMessage,
+  postLoading,
+  postPanelMode,
+  postQueryValues,
+  filteredPostItems,
+  queryFields: enterprisePostQueryFields,
+  reloadPosts,
+  resetQuery: resetPostQuery,
+  selectPost,
+  selectedPost,
+  selectedPostId,
+  startEdit: startPostEdit,
+  submitForm: submitPostForm,
+  tableColumns: enterprisePostTableColumns,
+  tableItems: enterprisePostTableItems,
+} = usePostWorkspace({
+  currentShellTabKey,
+  page: enterprisePostPage,
+  locale,
+  t,
+  localizeFieldLabel: localizePostFieldLabel,
+  localizeStatus: localizePostStatus,
+  canView: canViewPosts,
+  canCreate: canCreatePosts,
+  canUpdate: canUpdatePosts,
   onRecoverableAuthError: (error) => {
     if (isRecoverableAuthError(error)) {
       authIdentity.value = null
@@ -981,6 +1041,7 @@ const { currentQuerySummary } = useExampleQuerySummary({
   customerQuerySummary,
   isDictionaryWorkspace,
   isDepartmentWorkspace,
+  isPostWorkspace,
   isRoleWorkspace,
   isMenuWorkspace,
   isNotificationWorkspace,
@@ -990,6 +1051,7 @@ const { currentQuerySummary } = useExampleQuerySummary({
   isTenantWorkspace,
   dictionaryQueryValues,
   departmentQueryValues,
+  postQueryValues,
   roleQueryValues,
   menuQueryValues,
   notificationQueryValues,
@@ -999,6 +1061,7 @@ const { currentQuerySummary } = useExampleQuerySummary({
   tenantQueryValues,
   localizeDictionaryStatus,
   localizeDepartmentStatus,
+  localizePostStatus,
   localizeRoleStatus,
   localizeMenuType,
   localizeMenuStatus,
@@ -1038,6 +1101,14 @@ useExampleWorkspaceSync({
   departmentDetail,
   canCreateDepartments,
   selectDepartment,
+  filteredPostItems,
+  isPostWorkspace,
+  postLoading,
+  postPanelMode,
+  selectedPostId,
+  postDetail,
+  canCreatePosts,
+  selectPost,
   filteredMenuItems,
   isMenuWorkspace,
   menuLoading,
@@ -1107,6 +1178,7 @@ const {
   authModuleReady,
   customerModuleReady,
   departmentModuleReady,
+  postModuleReady,
   fileModuleReady,
   menuModuleReady,
   notificationModuleReady,
@@ -1124,6 +1196,7 @@ const {
   reloadDictionaries,
   reloadCustomers,
   reloadDepartments,
+  reloadPosts,
   reloadMenus,
   reloadOperationLogs,
   reloadRoles,
@@ -1136,6 +1209,7 @@ const {
   clearFileWorkspace,
   clearNotificationWorkspace,
   clearDepartmentWorkspace,
+  clearPostWorkspace,
   clearMenuWorkspace,
   clearOperationLogWorkspace,
   clearRoleWorkspace,
@@ -1144,6 +1218,7 @@ const {
   clearUserWorkspace,
   clearWorkflowDefinitions,
   resetDepartmentQuery,
+  resetPostQuery,
   resetMenuQuery,
   resetOperationLogQuery,
   resetRoleQuery,
@@ -1218,13 +1293,17 @@ const {
   canDeleteCustomers,
   isDictionaryWorkspace,
   dictionaryLoading,
-  canCreateDictionaryTypes,
-  canViewDictionaries,
-  isDepartmentWorkspace,
-  departmentLoading,
-  canCreateDepartments,
-  canViewDepartments,
-  isMenuWorkspace,
+    canCreateDictionaryTypes,
+    canViewDictionaries,
+    isDepartmentWorkspace,
+    departmentLoading,
+    canCreateDepartments,
+    canViewDepartments,
+    isPostWorkspace,
+    postLoading,
+    canCreatePosts,
+    canViewPosts,
+    isMenuWorkspace,
   menuLoading,
   canCreateMenus,
   canViewMenus,

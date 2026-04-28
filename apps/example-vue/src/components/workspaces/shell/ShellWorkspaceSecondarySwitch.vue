@@ -8,6 +8,7 @@ import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspa
 import MenuWorkspacePanel from "../menu/MenuWorkspacePanel.vue"
 import NotificationWorkspacePanel from "../notification/NotificationWorkspacePanel.vue"
 import OperationLogWorkspacePanel from "../operation-log/OperationLogWorkspacePanel.vue"
+import PostWorkspacePanel from "../post/PostWorkspacePanel.vue"
 import RoleWorkspacePanel from "../role/RoleWorkspacePanel.vue"
 import SettingWorkspacePanel from "../setting/SettingWorkspacePanel.vue"
 import TenantWorkspacePanel from "../tenant/TenantWorkspacePanel.vue"
@@ -62,6 +63,21 @@ interface ShellWorkspaceSecondarySwitchProps {
   enterpriseDepartmentFormFields: ReadonlyArray<unknown>
   enterpriseDepartmentFormValues: Record<string, unknown>
   departmentParentLookup: Record<string, string>
+  postModuleReady: boolean
+  canEnterPostWorkspace: boolean
+  canViewPosts: boolean
+  canCreatePosts: boolean
+  canUpdatePosts: boolean
+  postLoading: boolean
+  postDetailLoading: boolean
+  postErrorMessage: string
+  postDetailErrorMessage: string
+  postPanelMode: string
+  postPanelTitle: string
+  postPanelDescription: string
+  selectedPost: Record<string, unknown> | null
+  enterprisePostFormFields: ReadonlyArray<unknown>
+  enterprisePostFormValues: Record<string, unknown>
   menuModuleReady: boolean
   canEnterMenuWorkspace: boolean
   canViewMenus: boolean
@@ -235,6 +251,10 @@ defineEmits<{
   (event: "open-department-create"): void
   (event: "submit-department-form", payload: unknown): void
   (event: "cancel-department-panel"): void
+  (event: "start-post-edit"): void
+  (event: "open-post-create"): void
+  (event: "submit-post-form", payload: unknown): void
+  (event: "cancel-post-panel"): void
   (event: "start-menu-edit"): void
   (event: "open-menu-create"): void
   (event: "submit-menu-form", payload: unknown): void
@@ -350,6 +370,33 @@ defineEmits<{
     @open-create="$emit('open-department-create')"
     @submit-form="$emit('submit-department-form', $event)"
     @cancel-panel="$emit('cancel-department-panel')"
+  />
+
+  <PostWorkspacePanel
+    v-else-if="currentWorkspaceKind === 'post'"
+    :t="t"
+    :module-ready="postModuleReady"
+    :auth-module-ready="authModuleReady"
+    :is-authenticated="isAuthenticated"
+    :can-enter-workspace="canEnterPostWorkspace"
+    :can-view-posts="canViewPosts"
+    :can-create-posts="canCreatePosts"
+    :can-update-posts="canUpdatePosts"
+    :loading="postLoading"
+    :detail-loading="postDetailLoading"
+    :error-message="postErrorMessage"
+    :detail-error-message="postDetailErrorMessage"
+    :panel-mode="postPanelMode"
+    :panel-title="postPanelTitle"
+    :panel-description="postPanelDescription"
+    :selected-post="selectedPost"
+    :form-fields="enterprisePostFormFields"
+    :form-values="enterprisePostFormValues"
+    :form-copy="enterpriseFormCopy"
+    @start-edit="$emit('start-post-edit')"
+    @open-create="$emit('open-post-create')"
+    @submit-form="$emit('submit-post-form', $event)"
+    @cancel-panel="$emit('cancel-post-panel')"
   />
 
   <MenuWorkspacePanel
@@ -640,7 +687,7 @@ defineEmits<{
     :permission-count="permissionCount"
     :auth-loading="authLoading"
     :login-username="loginUsername"
-    :login-password="loginPassword"
+    v-bind="{ loginPassword }"
     :auth-error-message="authErrorMessage"
     @submit-logout="$emit('submit-logout')"
     @update:login-username="$emit('update:login-username', $event)"

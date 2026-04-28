@@ -1,20 +1,17 @@
-import { onMounted, type Ref } from "vue"
+import { type Ref, onMounted } from "vue"
 
 import {
+  type AuthIdentityResponse,
+  type PlatformResponse,
   clearAccessToken,
   fetchPlatform,
   fetchSystemModules,
   login,
   logout,
   refreshAuth,
-  type AuthIdentityResponse,
-  type PlatformResponse,
 } from "../lib/platform-api"
 
-type AppTranslate = (
-  key: string,
-  params?: Record<string, unknown>,
-) => string
+type AppTranslate = (key: string, params?: Record<string, unknown>) => string
 
 interface LoginFormState {
   username: string
@@ -35,6 +32,7 @@ interface UseExampleSessionOrchestrationOptions {
   authModuleReady: Ref<boolean>
   customerModuleReady: Ref<boolean>
   departmentModuleReady: Ref<boolean>
+  postModuleReady: Ref<boolean>
   fileModuleReady: Ref<boolean>
   menuModuleReady: Ref<boolean>
   notificationModuleReady: Ref<boolean>
@@ -52,6 +50,7 @@ interface UseExampleSessionOrchestrationOptions {
   reloadDictionaries: () => Promise<void>
   reloadCustomers: () => Promise<void>
   reloadDepartments: () => Promise<void>
+  reloadPosts: () => Promise<void>
   reloadMenus: () => Promise<void>
   reloadOperationLogs: () => Promise<void>
   reloadRoles: () => Promise<void>
@@ -64,6 +63,7 @@ interface UseExampleSessionOrchestrationOptions {
   clearFileWorkspace: () => void
   clearNotificationWorkspace: () => void
   clearDepartmentWorkspace: () => void
+  clearPostWorkspace: () => void
   clearMenuWorkspace: () => void
   clearOperationLogWorkspace: () => void
   clearRoleWorkspace: () => void
@@ -72,6 +72,7 @@ interface UseExampleSessionOrchestrationOptions {
   clearUserWorkspace: () => void
   clearWorkflowDefinitions: () => void
   resetDepartmentQuery: () => void
+  resetPostQuery: () => void
   resetMenuQuery: () => void
   resetOperationLogQuery: () => void
   resetRoleQuery: () => void
@@ -97,6 +98,7 @@ export const useExampleSessionOrchestration = (
     await options.reloadDictionaries()
     await options.reloadCustomers()
     await options.reloadDepartments()
+    await options.reloadPosts()
     await options.reloadMenus()
     await options.reloadOperationLogs()
     await options.reloadRoles()
@@ -174,6 +176,7 @@ export const useExampleSessionOrchestration = (
       options.clearFileWorkspace()
       options.clearNotificationWorkspace()
       options.clearDepartmentWorkspace()
+      options.clearPostWorkspace()
       options.clearMenuWorkspace()
       options.clearOperationLogWorkspace()
       options.clearRoleWorkspace()
@@ -183,6 +186,7 @@ export const useExampleSessionOrchestration = (
       options.clearWorkflowDefinitions()
       options.enterpriseFormMode.value = "create"
       options.resetDepartmentQuery()
+      options.resetPostQuery()
       options.resetMenuQuery()
       options.resetOperationLogQuery()
       options.resetRoleQuery()
@@ -209,6 +213,7 @@ export const useExampleSessionOrchestration = (
         modulePayload.modules.includes("customer")
       options.departmentModuleReady.value =
         modulePayload.modules.includes("department")
+      options.postModuleReady.value = modulePayload.modules.includes("post")
       options.fileModuleReady.value = modulePayload.modules.includes("file")
       options.menuModuleReady.value = modulePayload.modules.includes("menu")
       options.notificationModuleReady.value =
@@ -240,6 +245,7 @@ export const useExampleSessionOrchestration = (
 
       await options.reloadCustomers()
       await options.reloadDepartments()
+      await options.reloadPosts()
       await options.reloadMenus()
       await options.reloadOperationLogs()
       await options.reloadRoles()

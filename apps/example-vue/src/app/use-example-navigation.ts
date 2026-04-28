@@ -1,6 +1,6 @@
 import { buildVueNavigation } from "@elysian/frontend-vue"
 import type { UiNavigationNode } from "@elysian/ui-core"
-import { computed, ref, watch, type Ref } from "vue"
+import { type Ref, computed, ref, watch } from "vue"
 
 import type { AuthIdentityResponse } from "../lib/platform-api"
 import {
@@ -105,6 +105,9 @@ export const useExampleNavigation = ({
   const isDepartmentWorkspace = computed(
     () => selectedNavigationItem.value?.path === "/system/departments",
   )
+  const isPostWorkspace = computed(
+    () => selectedNavigationItem.value?.path === "/system/posts",
+  )
   const isMenuWorkspace = computed(
     () => selectedNavigationItem.value?.path === "/system/menus",
   )
@@ -147,23 +150,25 @@ export const useExampleNavigation = ({
             ? "generator-preview"
             : isDepartmentWorkspace.value
               ? "department"
-              : isMenuWorkspace.value
-                ? "menu"
-                : isNotificationWorkspace.value
-                  ? "notification"
-                  : isOperationLogWorkspace.value
-                    ? "operation-log"
-                    : isRoleWorkspace.value
-                      ? "role"
-                      : isSettingWorkspace.value
-                        ? "setting"
-                        : isTenantWorkspace.value
-                          ? "tenant"
-                          : isUserWorkspace.value
-                            ? "user"
-                            : isWorkflowDefinitionsWorkspace.value
-                              ? "workflow-definitions"
-                              : "placeholder",
+              : isPostWorkspace.value
+                ? "post"
+                : isMenuWorkspace.value
+                  ? "menu"
+                  : isNotificationWorkspace.value
+                    ? "notification"
+                    : isOperationLogWorkspace.value
+                      ? "operation-log"
+                      : isRoleWorkspace.value
+                        ? "role"
+                        : isSettingWorkspace.value
+                          ? "setting"
+                          : isTenantWorkspace.value
+                            ? "tenant"
+                            : isUserWorkspace.value
+                              ? "user"
+                              : isWorkflowDefinitionsWorkspace.value
+                                ? "workflow-definitions"
+                                : "placeholder",
   )
 
   const customerNavigationItem = computed(
@@ -174,7 +179,8 @@ export const useExampleNavigation = ({
   )
 
   const currentNavigationPath = computed(
-    () => selectedNavigationItem.value?.path ?? t("app.placeholder.pathMissing"),
+    () =>
+      selectedNavigationItem.value?.path ?? t("app.placeholder.pathMissing"),
   )
 
   const currentModuleCode = computed(() =>
@@ -223,13 +229,15 @@ export const useExampleNavigation = ({
                           ? t("app.tenant.sectionTitle")
                           : isUserWorkspace.value
                             ? t("app.user.sectionTitle")
-                            : isWorkflowDefinitionsWorkspace.value
-                              ? t("app.workflow.sectionTitle")
-                              : t("app.section.placeholderTitle", {
-                                  name:
-                                    selectedNavigationItem.value?.name ??
-                                    t("app.section.workspaceTitle"),
-                                }),
+                            : isPostWorkspace.value
+                              ? t("app.post.sectionTitle")
+                              : isWorkflowDefinitionsWorkspace.value
+                                ? t("app.workflow.sectionTitle")
+                                : t("app.section.placeholderTitle", {
+                                    name:
+                                      selectedNavigationItem.value?.name ??
+                                      t("app.section.workspaceTitle"),
+                                  }),
   )
 
   const currentWorkspaceSectionCopy = computed(() =>
@@ -257,19 +265,21 @@ export const useExampleNavigation = ({
                           ? t("app.tenant.sectionCopy")
                           : isUserWorkspace.value
                             ? t("app.user.sectionCopy")
-                            : isWorkflowDefinitionsWorkspace.value
-                              ? t("app.workflow.sectionCopy")
-                              : currentModuleReady.value
-                                ? t("app.section.placeholderCopyReady", {
-                                    name:
-                                      selectedNavigationItem.value?.name ??
-                                      t("app.section.workspaceTitle"),
-                                  })
-                                : t("app.section.placeholderCopyOffline", {
-                                    name:
-                                      selectedNavigationItem.value?.name ??
-                                      t("app.section.workspaceTitle"),
-                                  }),
+                            : isPostWorkspace.value
+                              ? t("app.post.sectionCopy")
+                              : isWorkflowDefinitionsWorkspace.value
+                                ? t("app.workflow.sectionCopy")
+                                : currentModuleReady.value
+                                  ? t("app.section.placeholderCopyReady", {
+                                      name:
+                                        selectedNavigationItem.value?.name ??
+                                        t("app.section.workspaceTitle"),
+                                    })
+                                  : t("app.section.placeholderCopyOffline", {
+                                      name:
+                                        selectedNavigationItem.value?.name ??
+                                        t("app.section.workspaceTitle"),
+                                    }),
   )
 
   const currentWorkspaceTitle = computed(() =>
@@ -297,8 +307,10 @@ export const useExampleNavigation = ({
                           ? t("app.tenant.shellTitle")
                           : isUserWorkspace.value
                             ? t("app.user.shellTitle")
-                            : (selectedNavigationItem.value?.name ??
-                              t("app.shell.workspaceTitle")),
+                            : isPostWorkspace.value
+                              ? t("app.post.shellTitle")
+                              : (selectedNavigationItem.value?.name ??
+                                t("app.shell.workspaceTitle")),
   )
 
   const placeholderWorkspaceCopy = computed(() =>
@@ -336,17 +348,24 @@ export const useExampleNavigation = ({
                           ? t("app.tenant.shellDescription")
                           : isUserWorkspace.value
                             ? t("app.user.shellDescription")
-                            : isWorkflowDefinitionsWorkspace.value
-                              ? t("app.workflow.shellDescription")
-                              : currentModuleReady.value
-                                ? t("app.shell.placeholderDescriptionReady", {
-                                    name:
-                                      selectedNavigationItem.value?.name ?? "",
-                                  })
-                                : t("app.shell.placeholderDescriptionOffline", {
-                                    name:
-                                      selectedNavigationItem.value?.name ?? "",
-                                  }),
+                            : isPostWorkspace.value
+                              ? t("app.post.shellDescription")
+                              : isWorkflowDefinitionsWorkspace.value
+                                ? t("app.workflow.shellDescription")
+                                : currentModuleReady.value
+                                  ? t("app.shell.placeholderDescriptionReady", {
+                                      name:
+                                        selectedNavigationItem.value?.name ??
+                                        "",
+                                    })
+                                  : t(
+                                      "app.shell.placeholderDescriptionOffline",
+                                      {
+                                        name:
+                                          selectedNavigationItem.value?.name ??
+                                          "",
+                                      },
+                                    ),
   )
 
   const enterpriseSelectedMenuKey = computed(
@@ -395,6 +414,7 @@ export const useExampleNavigation = ({
     isMenuWorkspace,
     isNotificationWorkspace,
     isOperationLogWorkspace,
+    isPostWorkspace,
     isRoleWorkspace,
     isRuntimeShellTab,
     isSettingWorkspace,

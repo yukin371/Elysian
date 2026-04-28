@@ -1,16 +1,14 @@
 import type { ElyQueryValues } from "@elysian/ui-enterprise-vue"
-import { computed, type ComputedRef, type Ref } from "vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
-type AppTranslate = (
-  key: string,
-  params?: Record<string, unknown>,
-) => string
+type AppTranslate = (key: string, params?: Record<string, unknown>) => string
 
 interface UseExampleQuerySummaryOptions {
   t: AppTranslate
   customerQuerySummary: ComputedRef<string>
   isDictionaryWorkspace: ComputedRef<boolean>
   isDepartmentWorkspace: ComputedRef<boolean>
+  isPostWorkspace: ComputedRef<boolean>
   isRoleWorkspace: ComputedRef<boolean>
   isMenuWorkspace: ComputedRef<boolean>
   isNotificationWorkspace: ComputedRef<boolean>
@@ -20,6 +18,7 @@ interface UseExampleQuerySummaryOptions {
   isTenantWorkspace: ComputedRef<boolean>
   dictionaryQueryValues: Ref<ElyQueryValues>
   departmentQueryValues: Ref<ElyQueryValues>
+  postQueryValues: Ref<ElyQueryValues>
   roleQueryValues: Ref<ElyQueryValues>
   menuQueryValues: Ref<ElyQueryValues>
   notificationQueryValues: Ref<ElyQueryValues>
@@ -29,6 +28,7 @@ interface UseExampleQuerySummaryOptions {
   tenantQueryValues: Ref<ElyQueryValues>
   localizeDictionaryStatus: (status: string) => string
   localizeDepartmentStatus: (status: string) => string
+  localizePostStatus: (status: string) => string
   localizeRoleStatus: (status: string) => string
   localizeMenuType: (type: string) => string
   localizeMenuStatus: (status: string) => string
@@ -118,6 +118,52 @@ export const useExampleQuerySummary = (
         fragments.push(
           `${options.t("app.department.field.status")}: ${options.localizeDepartmentStatus(
             options.departmentQueryValues.value.status,
+          )}`,
+        )
+      }
+
+      return fragments.length > 0
+        ? fragments.join(" / ")
+        : options.t("app.filter.none")
+    }
+
+    if (options.isPostWorkspace.value) {
+      const fragments: string[] = []
+
+      if (
+        typeof options.postQueryValues.value.code === "string" &&
+        options.postQueryValues.value.code.trim()
+      ) {
+        fragments.push(
+          `${options.t("app.post.field.code")}: ${options.postQueryValues.value.code.trim()}`,
+        )
+      }
+
+      if (
+        typeof options.postQueryValues.value.name === "string" &&
+        options.postQueryValues.value.name.trim()
+      ) {
+        fragments.push(
+          `${options.t("app.post.field.name")}: ${options.postQueryValues.value.name.trim()}`,
+        )
+      }
+
+      if (
+        typeof options.postQueryValues.value.remark === "string" &&
+        options.postQueryValues.value.remark.trim()
+      ) {
+        fragments.push(
+          `${options.t("app.post.field.remark")}: ${options.postQueryValues.value.remark.trim()}`,
+        )
+      }
+
+      if (
+        typeof options.postQueryValues.value.status === "string" &&
+        options.postQueryValues.value.status
+      ) {
+        fragments.push(
+          `${options.t("app.post.field.status")}: ${options.localizePostStatus(
+            options.postQueryValues.value.status,
           )}`,
         )
       }

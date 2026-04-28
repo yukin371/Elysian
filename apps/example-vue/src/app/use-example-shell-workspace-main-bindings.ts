@@ -1,6 +1,9 @@
 import { computed } from "vue"
 
-import { read, type UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
+import {
+  type UseExampleShellBindingsOptions,
+  read,
+} from "./use-example-shell-binding-types"
 
 export const useExampleShellWorkspaceMainBindings = ({
   t,
@@ -69,6 +72,15 @@ export const useExampleShellWorkspaceMainBindings = ({
   enterpriseDepartmentTableColumns,
   enterpriseDepartmentTableItems,
   departmentCountLabel,
+  postModuleReady,
+  canEnterPostWorkspace,
+  canViewPosts,
+  postLoading,
+  postErrorMessage,
+  enterprisePostQueryFields,
+  enterprisePostTableColumns,
+  enterprisePostTableItems,
+  postCountLabel,
   menuModuleReady,
   canEnterMenuWorkspace,
   canViewMenus,
@@ -172,6 +184,9 @@ export const useExampleShellWorkspaceMainBindings = ({
   handleDepartmentSearch,
   handleDepartmentReset,
   handleDepartmentRowClick,
+  handlePostSearch,
+  handlePostReset,
+  handlePostRowClick,
   handleMenuSearch,
   handleMenuReset,
   handleMenuRowClick,
@@ -248,7 +263,8 @@ export const useExampleShellWorkspaceMainBindings = ({
     generatorPreviewApplyLoading: read(generatorPreviewApplyLoading),
     generatorPreviewErrorMessage: read(generatorPreviewErrorMessage),
     generatorPreviewSchemaOptions: read(generatorPreviewSchemaOptions),
-    selectedGeneratorPreviewSchemaName: selectedGeneratorPreviewSchemaName.value,
+    selectedGeneratorPreviewSchemaName:
+      selectedGeneratorPreviewSchemaName.value,
     selectedGeneratorPreviewFrontendTarget:
       selectedGeneratorPreviewFrontendTarget.value,
     generatorPreviewQuery: generatorPreviewQuery.value,
@@ -276,6 +292,15 @@ export const useExampleShellWorkspaceMainBindings = ({
     enterpriseDepartmentTableColumns: read(enterpriseDepartmentTableColumns),
     enterpriseDepartmentTableItems: read(enterpriseDepartmentTableItems),
     departmentCountLabel: read(departmentCountLabel),
+    postModuleReady: read(postModuleReady),
+    canEnterPostWorkspace: read(canEnterPostWorkspace),
+    canViewPosts: read(canViewPosts),
+    postLoading: read(postLoading),
+    postErrorMessage: read(postErrorMessage),
+    enterprisePostQueryFields: read(enterprisePostQueryFields),
+    enterprisePostTableColumns: read(enterprisePostTableColumns),
+    enterprisePostTableItems: read(enterprisePostTableItems),
+    postCountLabel: read(postCountLabel),
     menuModuleReady: read(menuModuleReady),
     canEnterMenuWorkspace: read(canEnterMenuWorkspace),
     canViewMenus: read(canViewMenus),
@@ -356,7 +381,9 @@ export const useExampleShellWorkspaceMainBindings = ({
     customerCountLabel: read(customerCountLabel),
     currentQuerySummary: read(currentQuerySummary),
     enterpriseCrudCopy: read(enterpriseCrudCopy),
-    customerFooterStatusLabel: localizePlatformStatus(vueEnterprisePresetStatus),
+    customerFooterStatusLabel: localizePlatformStatus(
+      vueEnterprisePresetStatus,
+    ),
     customerPaginationSummary: read(customerPaginationSummary),
     customerListPageSize: read(customerListPageSize),
     customerListSortValue: read(customerListSortValue),
@@ -406,6 +433,9 @@ export const useExampleShellWorkspaceMainBindings = ({
     "department-search": handleDepartmentSearch,
     "department-reset": handleDepartmentReset,
     "department-row-click": handleDepartmentRowClick,
+    "post-search": handlePostSearch,
+    "post-reset": handlePostReset,
+    "post-row-click": handlePostRowClick,
     "menu-search": handleMenuSearch,
     "menu-reset": handleMenuReset,
     "menu-row-click": handleMenuRowClick,

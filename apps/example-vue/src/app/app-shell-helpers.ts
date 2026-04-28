@@ -15,6 +15,7 @@ export type ExampleWorkspaceKind =
   | "menu"
   | "notification"
   | "operation-log"
+  | "post"
   | "role"
   | "setting"
   | "tenant"
@@ -74,6 +75,7 @@ export const resolveModuleCodeFromPath = (path: string | null | undefined) => {
   if (path.startsWith("/system/roles")) return "role"
   if (path.startsWith("/system/menus")) return "menu"
   if (path.startsWith("/system/departments")) return "department"
+  if (path.startsWith("/system/posts")) return "post"
   if (path.startsWith("/system/dictionaries")) return "dictionary"
   if (path.startsWith("/system/settings")) return "setting"
   if (path.startsWith("/system/operation-logs")) return "operation-log"
@@ -192,6 +194,18 @@ export const createAppShellLocalization = (t: AppTranslate) => {
 
     if (status === "disabled") {
       return t("app.department.status.disabled")
+    }
+
+    return status
+  }
+
+  const localizePostStatus = (status: string) => {
+    if (status === "active") {
+      return t("app.post.status.active")
+    }
+
+    if (status === "disabled") {
+      return t("app.post.status.disabled")
     }
 
     return status
@@ -440,6 +454,29 @@ export const createAppShellLocalization = (t: AppTranslate) => {
     }
   }
 
+  const localizePostFieldLabel = (fieldKey: string) => {
+    switch (fieldKey) {
+      case "id":
+        return t("app.post.field.id")
+      case "code":
+        return t("app.post.field.code")
+      case "name":
+        return t("app.post.field.name")
+      case "sort":
+        return t("app.post.field.sort")
+      case "status":
+        return t("app.post.field.status")
+      case "remark":
+        return t("app.post.field.remark")
+      case "createdAt":
+        return t("app.post.field.createdAt")
+      case "updatedAt":
+        return t("app.post.field.updatedAt")
+      default:
+        return fieldKey
+    }
+  }
+
   const localizeSettingFieldLabel = (fieldKey: string) => {
     switch (fieldKey) {
       case "id":
@@ -559,6 +596,8 @@ export const createAppShellLocalization = (t: AppTranslate) => {
         return t("app.fallback.menus")
       case "system-departments":
         return t("app.fallback.departments")
+      case "system-posts":
+        return t("app.fallback.posts")
       case "system-dictionaries":
         return t("app.fallback.dictionaries")
       case "system-settings":
@@ -700,6 +739,22 @@ export const createAppShellLocalization = (t: AppTranslate) => {
           children: [],
         },
         {
+          id: "enterprise-posts",
+          parentId: "enterprise-system",
+          type: "menu",
+          code: "system-posts",
+          name: t("app.fallback.posts"),
+          path: "/system/posts",
+          component: "system/posts/index",
+          icon: "idcard",
+          sort: 45,
+          isVisible: true,
+          status: "active",
+          permissionCode: "system:post:list",
+          depth: 1,
+          children: [],
+        },
+        {
           id: "enterprise-dictionaries",
           parentId: "enterprise-system",
           type: "menu",
@@ -822,6 +877,8 @@ export const createAppShellLocalization = (t: AppTranslate) => {
     localizeCustomerStatus,
     localizeDepartmentFieldLabel,
     localizeDepartmentStatus,
+    localizePostFieldLabel,
+    localizePostStatus,
     localizeDictionaryFieldLabel,
     localizeDictionaryStatus,
     localizeFieldLabel,

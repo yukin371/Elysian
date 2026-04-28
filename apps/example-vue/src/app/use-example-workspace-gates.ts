@@ -1,5 +1,5 @@
 import { usePermissions } from "@elysian/frontend-vue"
-import { computed, type ComputedRef, type Ref } from "vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
 import type { AuthIdentityResponse } from "../lib/platform-api"
 
@@ -10,6 +10,7 @@ interface UseExampleWorkspaceGatesOptions {
   authIdentity: Ref<AuthIdentityResponse | null>
   customerModuleReady: Ref<boolean>
   departmentModuleReady: Ref<boolean>
+  postModuleReady: Ref<boolean>
   dictionaryModuleReady: Ref<boolean>
   fileModuleReady: Ref<boolean>
   menuModuleReady: Ref<boolean>
@@ -63,6 +64,16 @@ export const useExampleWorkspaceGates = (
       create: "system:file:upload",
       update: "system:file:download",
       delete: "system:file:delete",
+    },
+    options.authModuleReady,
+  )
+
+  const postPermissions = usePermissions(
+    options.permissionCodes,
+    {
+      list: "system:post:list",
+      create: "system:post:create",
+      update: "system:post:update",
     },
     options.authModuleReady,
   )
@@ -175,6 +186,21 @@ export const useExampleWorkspaceGates = (
     () =>
       options.dictionaryModuleReady.value &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
+  )
+
+  const canEnterPostWorkspace = computed(
+    () =>
+      options.postModuleReady.value &&
+      (!options.authModuleReady.value || options.isAuthenticated.value),
+  )
+  const canViewPosts = computed(
+    () => canEnterPostWorkspace.value && postPermissions.list.value,
+  )
+  const canCreatePosts = computed(
+    () => canEnterPostWorkspace.value && postPermissions.create.value,
+  )
+  const canUpdatePosts = computed(
+    () => canEnterPostWorkspace.value && postPermissions.update.value,
   )
   const canViewDictionaries = computed(
     () => canEnterDictionaryWorkspace.value && dictionaryPermissions.list.value,
@@ -351,6 +377,7 @@ export const useExampleWorkspaceGates = (
     canEnterMenuWorkspace,
     canEnterNotificationWorkspace,
     canEnterOperationLogWorkspace,
+    canEnterPostWorkspace,
     canEnterRoleWorkspace,
     canEnterSettingWorkspace,
     canEnterTenantWorkspace,
@@ -362,6 +389,7 @@ export const useExampleWorkspaceGates = (
     canUpdateDictionaryTypes,
     canUpdateMenus,
     canUpdateNotifications,
+    canUpdatePosts,
     canUpdateRoles,
     canUpdateSettings,
     canUpdateTenants,
@@ -374,6 +402,7 @@ export const useExampleWorkspaceGates = (
     canViewMenus,
     canViewNotifications,
     canViewOperationLogs,
+    canViewPosts,
     canViewRoles,
     canViewSettings,
     canViewTenants,

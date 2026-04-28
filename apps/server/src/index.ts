@@ -29,6 +29,8 @@ import {
   createNotificationRepository,
   createOperationLogModule,
   createOperationLogRepository,
+  createPostModule,
+  createPostRepository,
   createRoleModule,
   createRoleRepository,
   createSettingModule,
@@ -60,6 +62,7 @@ if (process.env.DATABASE_URL) {
   const menuRepository = createMenuRepository(db)
   const notificationRepository = createNotificationRepository(db)
   const operationLogRepository = createOperationLogRepository(db)
+  const postRepository = createPostRepository(db)
   const roleRepository = createRoleRepository(db)
   const settingRepository = createSettingRepository(db)
   const tenantRepository = createTenantRepository(db)
@@ -148,6 +151,11 @@ if (process.env.DATABASE_URL) {
     }),
   )
   modules.push(
+    createPostModule(postRepository, {
+      authGuard,
+    }),
+  )
+  modules.push(
     createRoleModule(roleRepository, {
       authGuard,
     }),
@@ -169,7 +177,7 @@ if (process.env.DATABASE_URL) {
   )
 } else {
   logger.warn(
-    "DATABASE_URL is not configured; auth, tenant, customer, dictionary, department, file, menu, notification, operation-log, role, setting, user, and workflow modules are not registered",
+    "DATABASE_URL is not configured; auth, tenant, customer, dictionary, department, file, menu, notification, operation-log, post, role, setting, user, and workflow modules are not registered",
   )
 }
 

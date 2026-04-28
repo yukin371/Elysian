@@ -48,6 +48,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.department.sectionTitle": "部门管理工作区",
       "app.department.sectionCopy":
         "系统部门页先收敛到真实列表、详情与基础编辑，不提前扩成组织树设计器或关系编辑器。",
+      "app.post.sectionTitle": "岗位管理工作区",
+      "app.post.sectionCopy":
+        "系统岗位页先收敛到真实列表、详情与基础编辑，不提前扩成用户岗位关系编排或组织设计器。",
       "app.menu.sectionTitle": "菜单管理工作区",
       "app.menu.sectionCopy":
         "系统菜单页先收敛到真实列表、详情与基础编辑，不提前扩成树设计器、拖拽排序或权限关系编辑器。",
@@ -82,6 +85,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.department.shellTitle": "部门工作区",
       "app.department.shellDescription":
         "列表与详情直接消费系统部门接口，当前只做最小闭环，不在本轮扩写组织树编辑器。",
+      "app.post.shellTitle": "岗位工作区",
+      "app.post.shellDescription":
+        "列表与详情直接消费系统岗位接口，当前只做最小闭环，不在本轮扩写用户岗位绑定或层级编排。",
       "app.menu.shellTitle": "菜单工作区",
       "app.menu.shellDescription":
         "列表与详情直接消费系统菜单接口，当前只做最小闭环，不在本轮扩写树设计器或拖拽排序。",
@@ -133,6 +139,11 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "请先登录，再加载受保护的部门数据。",
       "app.message.departmentNoListPermission":
         "当前身份可以进入工作区，但没有 `system:department:list` 权限。",
+      "app.message.postModuleOffline":
+        "`post` 模块尚未注册。请确认服务端已启用系统岗位模块后再重试。",
+      "app.message.postSignInToLoad": "请先登录，再加载受保护的岗位数据。",
+      "app.message.postNoListPermission":
+        "当前身份可以进入工作区，但没有 `system:post:list` 权限。",
       "app.message.menuModuleOffline":
         "`menu` 模块尚未注册。请确认服务端已启用系统菜单模块后再重试。",
       "app.message.menuSignInToLoad": "请先登录，再加载受保护的菜单数据。",
@@ -251,6 +262,41 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.department.meta.userCount": "关联用户数",
       "app.department.meta.userIds": "关联用户 ID",
       "app.department.meta.empty": "暂无",
+      "app.post.workspaceEyebrow": "真实模块工作区",
+      "app.post.workspaceTitle": "系统岗位清单",
+      "app.post.workspaceDescription":
+        "主区只承接查询与岗位列表，右侧聚焦当前岗位详情与基础编辑，避免在两侧重复堆叠主体信息。",
+      "app.post.emptyTitle": "当前筛选条件下没有岗位",
+      "app.post.emptyDescription": "清空条件或调整关键字后重试。",
+      "app.post.detailEyebrow": "岗位详情",
+      "app.post.detailEmptyDescription":
+        "请选择一条岗位记录查看详情，或直接新建岗位。",
+      "app.post.detailLoading": "正在刷新当前岗位详情...",
+      "app.post.field.id": "ID",
+      "app.post.field.code": "编码",
+      "app.post.field.name": "名称",
+      "app.post.field.sort": "排序",
+      "app.post.field.status": "状态",
+      "app.post.field.remark": "备注",
+      "app.post.field.createdAt": "创建时间",
+      "app.post.field.updatedAt": "更新时间",
+      "app.post.status.active": "启用",
+      "app.post.status.disabled": "停用",
+      "app.post.query.codePlaceholder": "按编码搜索",
+      "app.post.query.namePlaceholder": "按名称搜索",
+      "app.post.query.remarkPlaceholder": "按备注搜索",
+      "app.post.action.create": "新建岗位",
+      "app.post.action.edit": "编辑岗位",
+      "app.post.countLabel": "当前显示 {visible} 条，共 {total} 条",
+      "app.post.panelTitle.create": "新建岗位",
+      "app.post.panelTitle.edit": "编辑岗位",
+      "app.post.panelTitle.detailFallback": "岗位详情",
+      "app.post.panelDesc.create":
+        "创建流程直接调用系统岗位模块接口，示例页只装配表单状态与交互。",
+      "app.post.panelDesc.edit":
+        "编辑模式继续复用 schema 派生字段，并保持岗位状态与备注在同一表单内收口。",
+      "app.post.panelDesc.detail":
+        "右侧详情与动作保持围绕当前岗位，不在主区重复堆叠编辑入口。",
       "app.menu.workspaceEyebrow": "真实模块工作区",
       "app.menu.workspaceTitle": "系统菜单清单",
       "app.menu.workspaceDescription":
@@ -973,8 +1019,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "调整筛选条件，或从右侧上传一个文件完成最小闭环验证。",
       "app.file.countLabel": "当前显示 {visible} 个文件，共 {total} 个文件",
       "app.file.tabsHint": "当前可见 {count} 个文件",
-      "app.file.statsHint":
-        "文件工作区保持列表、详情、上传、下载与删除闭环。",
+      "app.file.statsHint": "文件工作区保持列表、详情、上传、下载与删除闭环。",
       "app.file.detailEyebrow": "文件详情",
       "app.file.detailEmptyTitle": "文件详情",
       "app.file.detailEmptyDescription":
@@ -1013,11 +1058,11 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.file.uploadPrompt": "选择一个文件，右侧即可提交上传。",
       "app.file.mimeTypeEmpty": "未识别",
       "app.file.uploaderEmpty": "系统",
-      "app.file.deleteConfirm": "确认删除文件 {name}？该动作会直接删除当前记录。",
+      "app.file.deleteConfirm":
+        "确认删除文件 {name}？该动作会直接删除当前记录。",
       "app.message.fileModuleOffline":
         "`file` 模块尚未注册。请确认服务端已启用系统文件模块后再重试。",
-      "app.message.fileSignInToLoad":
-        "请先登录，再加载受保护的文件数据。",
+      "app.message.fileSignInToLoad": "请先登录，再加载受保护的文件数据。",
       "app.message.fileNoListPermission":
         "当前身份没有 `system:file:list` 权限；若仍具备上传权限，可以直接使用右侧上传面板。",
       "app.error.loadFiles": "文件列表加载失败",
@@ -1026,11 +1071,18 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.downloadFile": "文件下载失败",
       "app.error.deleteFile": "文件删除失败",
       "app.error.fileRequired": "请先选择一个要上传的文件",
+      "app.error.loadPosts": "岗位列表加载失败",
+      "app.error.loadPostDetail": "岗位详情加载失败",
+      "app.error.createPost": "岗位创建失败",
+      "app.error.updatePost": "岗位更新失败",
+      "app.error.postCodeRequired": "岗位编码不能为空",
+      "app.error.postNameRequired": "岗位名称不能为空",
       "app.fallback.system": "系统管理",
       "app.fallback.users": "用户管理",
       "app.fallback.roles": "角色管理",
       "app.fallback.menus": "菜单管理",
       "app.fallback.departments": "部门管理",
+      "app.fallback.posts": "岗位管理",
       "app.fallback.dictionaries": "字典管理",
       "app.fallback.settings": "系统配置",
       "app.fallback.operationLogs": "操作日志",
@@ -1113,6 +1165,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.department.sectionTitle": "Departments workspace",
       "app.department.sectionCopy":
         "The system-departments page stays focused on a real list, detail, and basic edit loop instead of expanding into an org-tree editor.",
+      "app.post.sectionTitle": "Posts workspace",
+      "app.post.sectionCopy":
+        "The system-posts page stays focused on a real list, detail, and basic edit loop instead of expanding into user-post assignment tooling.",
       "app.menu.sectionTitle": "Menus workspace",
       "app.menu.sectionCopy":
         "The system-menus page stays focused on a real list, detail, and basic edit loop instead of expanding into a tree editor, drag sorting, or relationship editor.",
@@ -1147,6 +1202,9 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.department.shellTitle": "Departments workspace",
       "app.department.shellDescription":
         "The workspace consumes the real system-department API and keeps linked users read-only for this round.",
+      "app.post.shellTitle": "Posts workspace",
+      "app.post.shellDescription":
+        "The workspace consumes the real system-post API and stays scoped to the minimum list-detail-edit loop.",
       "app.menu.shellTitle": "Menus workspace",
       "app.menu.shellDescription":
         "The workspace consumes the real system-menu API and stays scoped to the minimum loop instead of expanding into a tree editor or drag sorting.",
@@ -1199,6 +1257,12 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "Sign in first to load protected department data.",
       "app.message.departmentNoListPermission":
         "This identity can enter the workspace but does not have `system:department:list`.",
+      "app.message.postModuleOffline":
+        "`post` is not registered on this server yet. Enable the system-post module and try again.",
+      "app.message.postSignInToLoad":
+        "Sign in first to load protected post data.",
+      "app.message.postNoListPermission":
+        "This identity can enter the workspace but does not have `system:post:list`.",
       "app.message.menuModuleOffline":
         "`menu` is not registered on this server yet. Enable the system-menu module and try again.",
       "app.message.menuSignInToLoad":
@@ -1324,6 +1388,42 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.department.meta.userCount": "Linked Users",
       "app.department.meta.userIds": "User IDs",
       "app.department.meta.empty": "None",
+      "app.post.workspaceEyebrow": "Real module workspace",
+      "app.post.workspaceTitle": "System posts",
+      "app.post.workspaceDescription":
+        "The main area stays focused on query plus post list, while the side panel keeps the current post detail and basic edit loop.",
+      "app.post.emptyTitle": "No posts match the current filters",
+      "app.post.emptyDescription":
+        "Clear the filters or adjust the search terms.",
+      "app.post.detailEyebrow": "Post detail",
+      "app.post.detailEmptyDescription":
+        "Select a post to inspect its detail, or open the create flow directly.",
+      "app.post.detailLoading": "Refreshing the current post detail...",
+      "app.post.field.id": "ID",
+      "app.post.field.code": "Code",
+      "app.post.field.name": "Name",
+      "app.post.field.sort": "Sort",
+      "app.post.field.status": "Status",
+      "app.post.field.remark": "Remark",
+      "app.post.field.createdAt": "Created At",
+      "app.post.field.updatedAt": "Updated At",
+      "app.post.status.active": "Active",
+      "app.post.status.disabled": "Disabled",
+      "app.post.query.codePlaceholder": "Search by code",
+      "app.post.query.namePlaceholder": "Search by name",
+      "app.post.query.remarkPlaceholder": "Search by remark",
+      "app.post.action.create": "New post",
+      "app.post.action.edit": "Edit post",
+      "app.post.countLabel": "Showing {visible} of {total} posts",
+      "app.post.panelTitle.create": "Create post",
+      "app.post.panelTitle.edit": "Edit post",
+      "app.post.panelTitle.detailFallback": "Post detail",
+      "app.post.panelDesc.create":
+        "Create mode calls the canonical system-post API directly while the example app only owns view state.",
+      "app.post.panelDesc.edit":
+        "Edit mode reuses the same schema-derived fields while status and remark stay in one form.",
+      "app.post.panelDesc.detail":
+        "The side panel stays centered on the current post and keeps edit actions out of the main list area.",
       "app.menu.workspaceEyebrow": "Real module workspace",
       "app.menu.workspaceTitle": "System menus",
       "app.menu.workspaceDescription":
@@ -2111,7 +2211,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.file.action.confirmDelete": "Confirm delete",
       "app.file.action.cancelDelete": "Cancel",
       "app.file.uploadFieldLabel": "Choose file",
-      "app.file.uploadPrompt": "Choose one file, then submit it from the side panel.",
+      "app.file.uploadPrompt":
+        "Choose one file, then submit it from the side panel.",
       "app.file.mimeTypeEmpty": "Unknown",
       "app.file.uploaderEmpty": "System",
       "app.file.deleteConfirm":
@@ -2128,11 +2229,18 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.downloadFile": "Failed to download file",
       "app.error.deleteFile": "Failed to delete file",
       "app.error.fileRequired": "Choose a file before uploading",
+      "app.error.loadPosts": "Failed to load posts",
+      "app.error.loadPostDetail": "Failed to load post detail",
+      "app.error.createPost": "Failed to create post",
+      "app.error.updatePost": "Failed to update post",
+      "app.error.postCodeRequired": "Post code is required",
+      "app.error.postNameRequired": "Post name is required",
       "app.fallback.system": "System",
       "app.fallback.users": "Users",
       "app.fallback.roles": "Roles",
       "app.fallback.menus": "Menus",
       "app.fallback.departments": "Departments",
+      "app.fallback.posts": "Posts",
       "app.fallback.dictionaries": "Dictionaries",
       "app.fallback.settings": "Settings",
       "app.fallback.operationLogs": "Operation Logs",

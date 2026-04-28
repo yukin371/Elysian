@@ -346,6 +346,11 @@ export {
   type ProductStatus,
 } from "./product"
 export {
+  postModuleSchema,
+  type PostRecord,
+  type PostStatus,
+} from "./post"
+export {
   roleModuleSchema,
   type RoleDataScope,
   type RoleDetailRecord,

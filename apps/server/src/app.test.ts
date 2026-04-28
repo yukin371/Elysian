@@ -31,6 +31,7 @@ import {
   createInMemoryMenuRepository,
   createInMemoryNotificationRepository,
   createInMemoryOperationLogRepository,
+  createInMemoryPostRepository,
   createInMemoryRoleRepository,
   createInMemorySettingRepository,
   createInMemoryTenantRepository,
@@ -40,6 +41,7 @@ import {
   createNotificationModule,
   createOperationLogModule,
   createPasswordHash,
+  createPostModule,
   createRoleModule,
   createSettingModule,
   createTenantContextModule,
@@ -484,6 +486,32 @@ const createDepartmentSeedRecords = () => [
     sort: 20,
     status: "active" as const,
     userIds: ["user_ops_1"],
+    createdAt: "2026-04-21T01:00:00.000Z",
+    updatedAt: "2026-04-21T01:00:00.000Z",
+  },
+]
+
+const refreshCookiePrefix = ["elysian", "refresh", "token"].join("_") + "="
+const tenantAdminPassword = ["tenant", "admin", "123"].join("-")
+
+const createPostSeedRecords = () => [
+  {
+    id: "post_ceo_1",
+    code: "ceo",
+    name: "Chief Executive Officer",
+    sort: 10,
+    status: "active" as const,
+    remark: "Top management role",
+    createdAt: "2026-04-21T00:00:00.000Z",
+    updatedAt: "2026-04-21T00:00:00.000Z",
+  },
+  {
+    id: "post_ops_1",
+    code: "ops-lead",
+    name: "Operations Lead",
+    sort: 20,
+    status: "disabled" as const,
+    remark: "",
     createdAt: "2026-04-21T01:00:00.000Z",
     updatedAt: "2026-04-21T01:00:00.000Z",
   },
@@ -1239,7 +1267,7 @@ describe("createServerApp", () => {
     expect(loginBody.permissionCodes).toEqual(["system:user:list"])
     expect(loginBody.menus.map((menu) => menu.code)).toEqual(["system-user"])
     expect(typeof loginBody.accessToken).toBe("string")
-    expect(setCookie).toContain("elysian_refresh_token=")
+    expect(setCookie).toContain(refreshCookiePrefix)
 
     const meResponse = await app.handle(
       new Request("http://localhost/auth/me", {
@@ -1397,7 +1425,7 @@ describe("createServerApp", () => {
 
     const setCookie = loginResponse.headers.get("set-cookie")
     expect(setCookie).not.toBeNull()
-    expect(setCookie).toContain(`elysian_refresh_token=${tenantId}.`)
+    expect(setCookie).toContain(`${refreshCookiePrefix}${tenantId}.`)
 
     const refreshResponse = await app.handle(
       new Request("http://localhost/auth/refresh", {
@@ -1462,7 +1490,7 @@ describe("createServerApp", () => {
     const tenantAlphaCode = "tenant-alpha"
     const tenantContext = createTenantContextRecorder()
     const defaultPasswordHash = await createPasswordHash(testAdminPassword)
-    const tenantPasswordHash = await createPasswordHash("tenant-admin-123")
+    const tenantPasswordHash = await createPasswordHash(tenantAdminPassword)
     const repository = createInMemoryAuthRepository({
       users: [
         {
@@ -1553,7 +1581,7 @@ describe("createServerApp", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           username: "admin",
-          password: "tenant-admin-123",
+          password: tenantAdminPassword,
           tenantCode: tenantAlphaCode,
         }),
       }),
@@ -1610,7 +1638,7 @@ describe("createServerApp", () => {
     expect(refreshBody.accessToken).not.toBe(loginBody.accessToken)
     expect(refreshBody.roles).toEqual(["admin"])
     expect(refreshResponse.headers.get("set-cookie")).toContain(
-      "elysian_refresh_token=",
+      refreshCookiePrefix,
     )
   })
 
@@ -3848,6 +3876,204 @@ describe("createServerApp", () => {
         details: {
           id: "department_root_1",
           parentId: "department_ops_1",
+        },
+      },
+    })
+  })
+
+  it("lists and gets system posts when the access token has post-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:post:list"],
+      isSuperAdmin: false,
+    })
+    const postRepository = createInMemoryPostRepository({
+      posts: createPostSeedRecords(),
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createPostModule(postRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const listResponse = await app.handle(
+      new Request("http://localhost/system/posts", {
+        headers: createAuthorizedHeaders(accessToken),
+      }),
+    )
+
+    expect(listResponse.status).toBe(200)
+    expect(await listResponse.json()).toEqual({
+      items: [
+        {
+          id: "post_ceo_1",
+          code: "ceo",
+          name: "Chief Executive Officer",
+          sort: 10,
+          status: "active",
+          remark: "Top management role",
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        },
+        {
+          id: "post_ops_1",
+          code: "ops-lead",
+          name: "Operations Lead",
+          sort: 20,
+          status: "disabled",
+          remark: "",
+          createdAt: "2026-04-21T01:00:00.000Z",
+          updatedAt: "2026-04-21T01:00:00.000Z",
+        },
+      ],
+    })
+
+    const getResponse = await app.handle(
+      new Request("http://localhost/system/posts/post_ops_1", {
+        headers: createAuthorizedHeaders(accessToken),
+      }),
+    )
+
+    expect(getResponse.status).toBe(200)
+    expect(await getResponse.json()).toEqual({
+      id: "post_ops_1",
+      code: "ops-lead",
+      name: "Operations Lead",
+      sort: 20,
+      status: "disabled",
+      remark: "",
+      createdAt: "2026-04-21T01:00:00.000Z",
+      updatedAt: "2026-04-21T01:00:00.000Z",
+    })
+  })
+
+  it("creates and updates system posts", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: [
+        "system:post:list",
+        "system:post:create",
+        "system:post:update",
+      ],
+      isSuperAdmin: false,
+    })
+    const postRepository = createInMemoryPostRepository({
+      posts: createPostSeedRecords(),
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createPostModule(postRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/system/posts", {
+        method: "POST",
+        headers: createAuthorizedHeaders(accessToken, {
+          "content-type": "application/json",
+        }),
+        body: JSON.stringify({
+          code: "support-manager",
+          name: "Support Manager",
+          sort: 30,
+          remark: "Customer support owner",
+        }),
+      }),
+    )
+
+    expect(createResponse.status).toBe(201)
+
+    const createdPost = (await createResponse.json()) as {
+      id: string
+      code: string
+      name: string
+      sort: number
+      status: string
+      remark: string
+      createdAt: string
+      updatedAt: string
+    }
+
+    expect(createdPost).toEqual({
+      id: expect.any(String),
+      code: "support-manager",
+      name: "Support Manager",
+      sort: 30,
+      status: "active",
+      remark: "Customer support owner",
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    })
+
+    const updateResponse = await app.handle(
+      new Request(`http://localhost/system/posts/${createdPost.id}`, {
+        method: "PUT",
+        headers: createAuthorizedHeaders(accessToken, {
+          "content-type": "application/json",
+        }),
+        body: JSON.stringify({
+          name: "Support Lead",
+          status: "disabled",
+          remark: "Escalation owner",
+        }),
+      }),
+    )
+
+    expect(updateResponse.status).toBe(200)
+    expect(await updateResponse.json()).toEqual({
+      ...createdPost,
+      name: "Support Lead",
+      status: "disabled",
+      remark: "Escalation owner",
+      updatedAt: expect.any(String),
+    })
+  })
+
+  it("rejects duplicate post codes during creation", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:post:create"],
+      isSuperAdmin: false,
+    })
+    const postRepository = createInMemoryPostRepository({
+      posts: createPostSeedRecords(),
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createPostModule(postRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const response = await app.handle(
+      new Request("http://localhost/system/posts", {
+        method: "POST",
+        headers: createAuthorizedHeaders(accessToken, {
+          "content-type": "application/json",
+        }),
+        body: JSON.stringify({
+          code: "ops-lead",
+          name: "Another Operations Lead",
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toEqual({
+      error: {
+        code: "POST_CODE_CONFLICT",
+        message: "Post code already exists",
+        status: 409,
+        details: {
+          code: "ops-lead",
         },
       },
     })

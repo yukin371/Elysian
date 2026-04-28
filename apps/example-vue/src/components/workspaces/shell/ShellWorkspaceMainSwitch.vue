@@ -7,6 +7,7 @@ import GeneratorPreviewWorkspaceMain from "../generator/GeneratorPreviewWorkspac
 import MenuWorkspaceMain from "../menu/MenuWorkspaceMain.vue"
 import NotificationWorkspaceMain from "../notification/NotificationWorkspaceMain.vue"
 import OperationLogWorkspaceMain from "../operation-log/OperationLogWorkspaceMain.vue"
+import PostWorkspaceMain from "../post/PostWorkspaceMain.vue"
 import RoleWorkspaceMain from "../role/RoleWorkspaceMain.vue"
 import DepartmentWorkspaceMain from "../department/DepartmentWorkspaceMain.vue"
 import SettingWorkspaceMain from "../setting/SettingWorkspaceMain.vue"
@@ -88,6 +89,15 @@ interface ShellWorkspaceMainSwitchProps {
   enterpriseDepartmentTableColumns: ReadonlyArray<unknown>
   enterpriseDepartmentTableItems: ReadonlyArray<unknown>
   departmentCountLabel: string
+  postModuleReady: boolean
+  canEnterPostWorkspace: boolean
+  canViewPosts: boolean
+  postLoading: boolean
+  postErrorMessage: string
+  enterprisePostQueryFields: ReadonlyArray<unknown>
+  enterprisePostTableColumns: ReadonlyArray<unknown>
+  enterprisePostTableItems: ReadonlyArray<unknown>
+  postCountLabel: string
   menuModuleReady: boolean
   canEnterMenuWorkspace: boolean
   canViewMenus: boolean
@@ -200,6 +210,9 @@ defineEmits<{
   (event: "department-search", payload: unknown): void
   (event: "department-reset"): void
   (event: "department-row-click", payload: unknown): void
+  (event: "post-search", payload: unknown): void
+  (event: "post-reset"): void
+  (event: "post-row-click", payload: unknown): void
   (event: "menu-search", payload: unknown): void
   (event: "menu-reset"): void
   (event: "menu-row-click", payload: unknown): void
@@ -373,6 +386,29 @@ defineEmits<{
     @search="$emit('department-search', $event)"
     @reset="$emit('department-reset')"
     @row-click="$emit('department-row-click', $event)"
+  />
+
+  <PostWorkspaceMain
+    v-else-if="currentWorkspaceKind === 'post'"
+    :t="t"
+    :module-ready="postModuleReady"
+    :auth-module-ready="authModuleReady"
+    :is-authenticated="isAuthenticated"
+    :can-enter-workspace="canEnterPostWorkspace"
+    :can-view-posts="canViewPosts"
+    :loading="postLoading"
+    :error-message="postErrorMessage"
+    :query-fields="enterprisePostQueryFields"
+    :table-columns="enterprisePostTableColumns"
+    :items="enterprisePostTableItems"
+    :item-count-label="postCountLabel"
+    :empty-title="t('app.post.emptyTitle')"
+    :empty-description="t('app.post.emptyDescription')"
+    :current-query-summary="currentQuerySummary"
+    :copy="enterpriseCrudCopy"
+    @search="$emit('post-search', $event)"
+    @reset="$emit('post-reset')"
+    @row-click="$emit('post-row-click', $event)"
   />
 
   <MenuWorkspaceMain

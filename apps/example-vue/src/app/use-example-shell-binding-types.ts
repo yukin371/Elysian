@@ -52,6 +52,10 @@ export interface UseExampleShellBindingsOptions {
   departmentLoading: ValueSource<boolean>
   canCreateDepartments: ValueSource<boolean>
   canViewDepartments: ValueSource<boolean>
+  isPostWorkspace: ComputedRef<boolean>
+  postLoading: ValueSource<boolean>
+  canCreatePosts: ValueSource<boolean>
+  canViewPosts: ValueSource<boolean>
   isMenuWorkspace: ComputedRef<boolean>
   menuLoading: ValueSource<boolean>
   canCreateMenus: ValueSource<boolean>
@@ -128,6 +132,13 @@ export interface UseExampleShellBindingsOptions {
   enterpriseDepartmentTableColumns: ValueSource<unknown[]>
   enterpriseDepartmentTableItems: ValueSource<unknown[]>
   departmentCountLabel: ValueSource<string>
+  postModuleReady: ValueSource<boolean>
+  canEnterPostWorkspace: ValueSource<boolean>
+  postErrorMessage: ValueSource<string>
+  enterprisePostQueryFields: ValueSource<unknown[]>
+  enterprisePostTableColumns: ValueSource<unknown[]>
+  enterprisePostTableItems: ValueSource<unknown[]>
+  postCountLabel: ValueSource<string>
   menuModuleReady: ValueSource<boolean>
   canEnterMenuWorkspace: ValueSource<boolean>
   menuErrorMessage: ValueSource<string>
@@ -220,6 +231,15 @@ export interface UseExampleShellBindingsOptions {
   enterpriseDepartmentFormFields: ValueSource<unknown[]>
   enterpriseDepartmentFormValues: ValueSource<Record<string, unknown>>
   departmentParentLookup: ValueSource<Record<string, string>>
+  canUpdatePosts: ValueSource<boolean>
+  postDetailLoading: ValueSource<boolean>
+  postDetailErrorMessage: ValueSource<string>
+  postPanelMode: ValueSource<string>
+  postPanelTitle: ValueSource<string>
+  postPanelDescription: ValueSource<string>
+  selectedPost: ValueSource<Record<string, unknown> | null>
+  enterprisePostFormFields: ValueSource<unknown[]>
+  enterprisePostFormValues: ValueSource<Record<string, unknown>>
   canUpdateMenus: ValueSource<boolean>
   menuDetailLoading: ValueSource<boolean>
   menuDetailErrorMessage: ValueSource<string>
@@ -326,6 +346,9 @@ export interface UseExampleShellBindingsOptions {
   handleDepartmentSearch: (payload: unknown) => void
   handleDepartmentReset: () => void
   handleDepartmentRowClick: (payload: unknown) => void
+  handlePostSearch: (payload: unknown) => void
+  handlePostReset: () => void
+  handlePostRowClick: (payload: unknown) => void
   handleMenuSearch: (payload: unknown) => void
   handleMenuReset: () => void
   handleMenuRowClick: (payload: unknown) => void
@@ -368,6 +391,8 @@ export interface UseExampleShellBindingsOptions {
   reloadDictionaries: () => void
   openDepartmentCreatePanel: () => void
   reloadDepartments: () => void
+  openPostCreatePanel: () => void
+  reloadPosts: () => void
   openMenuCreatePanel: () => void
   reloadMenus: () => void
   openNotificationCreatePanel: () => void
@@ -389,6 +414,9 @@ export interface UseExampleShellBindingsOptions {
   startDepartmentEdit: () => void
   submitDepartmentForm: (payload: unknown) => void
   cancelDepartmentPanel: () => void
+  startPostEdit: () => void
+  submitPostForm: (payload: unknown) => void
+  cancelPostPanel: () => void
   startMenuEdit: () => void
   submitMenuForm: (payload: unknown) => void
   cancelMenuPanel: () => void

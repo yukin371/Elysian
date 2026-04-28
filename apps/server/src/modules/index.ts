@@ -47,6 +47,8 @@ export {
   createInMemoryNotificationRepository,
   createNotificationRepository,
 } from "./notification"
+export { createPostModule } from "./post"
+export { createInMemoryPostRepository, createPostRepository } from "./post"
 export { createWorkflowModule } from "./workflow"
 export {
   createInMemoryWorkflowRepository,
