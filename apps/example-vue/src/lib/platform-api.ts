@@ -59,6 +59,12 @@ export {
   updatePost,
 } from "./platform-api/posts"
 export {
+  createSetting,
+  fetchSettingById,
+  fetchSettings,
+  updateSetting,
+} from "./platform-api/settings"
+export {
   createTenant,
   fetchTenantById,
   fetchTenants,
@@ -701,35 +707,6 @@ export const updateMenu = async (
   input: UpdateMenuRequest,
 ): Promise<MenuDetailRecord> =>
   requestJson<MenuDetailRecord>(`/system/menus/${encodeURIComponent(id)}`, {
-    method: "PUT",
-    body: input,
-    auth: true,
-  })
-
-export const fetchSettings = async (): Promise<SettingsResponse> =>
-  requestJson<SettingsResponse>("/system/settings", {
-    auth: true,
-  })
-
-export const fetchSettingById = async (id: string): Promise<SettingRecord> =>
-  requestJson<SettingRecord>(`/system/settings/${encodeURIComponent(id)}`, {
-    auth: true,
-  })
-
-export const createSetting = async (
-  input: CreateSettingRequest,
-): Promise<SettingRecord> =>
-  requestJson<SettingRecord>("/system/settings", {
-    method: "POST",
-    body: input,
-    auth: true,
-  })
-
-export const updateSetting = async (
-  id: string,
-  input: UpdateSettingRequest,
-): Promise<SettingRecord> =>
-  requestJson<SettingRecord>(`/system/settings/${encodeURIComponent(id)}`, {
     method: "PUT",
     body: input,
     auth: true,
