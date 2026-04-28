@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AppTranslate } from "../../../app/app-shell-helpers"
+import AuthSessionWorkspaceMain from "../auth-session/AuthSessionWorkspaceMain.vue"
 import CustomerWorkspaceMain from "../customer/CustomerWorkspaceMain.vue"
 import DictionaryWorkspaceMain from "../dictionary/DictionaryWorkspaceMain.vue"
 import FileWorkspaceMain from "../file/FileWorkspaceMain.vue"
@@ -89,6 +90,15 @@ interface ShellWorkspaceMainSwitchProps {
   enterpriseDepartmentTableColumns: ReadonlyArray<unknown>
   enterpriseDepartmentTableItems: ReadonlyArray<unknown>
   departmentCountLabel: string
+  isSessionWorkspace: boolean
+  sessionModuleReady: boolean
+  canEnterSessionWorkspace: boolean
+  sessionLoading: boolean
+  sessionErrorMessage: string
+  enterpriseSessionQueryFields: ReadonlyArray<unknown>
+  enterpriseSessionTableColumns: ReadonlyArray<unknown>
+  enterpriseSessionTableItems: ReadonlyArray<unknown>
+  sessionCountLabel: string
   postModuleReady: boolean
   canEnterPostWorkspace: boolean
   canViewPosts: boolean
@@ -210,6 +220,9 @@ defineEmits<{
   (event: "department-search", payload: unknown): void
   (event: "department-reset"): void
   (event: "department-row-click", payload: unknown): void
+  (event: "session-search", payload: unknown): void
+  (event: "session-reset"): void
+  (event: "session-row-click", payload: unknown): void
   (event: "post-search", payload: unknown): void
   (event: "post-reset"): void
   (event: "post-row-click", payload: unknown): void
@@ -386,6 +399,28 @@ defineEmits<{
     @search="$emit('department-search', $event)"
     @reset="$emit('department-reset')"
     @row-click="$emit('department-row-click', $event)"
+  />
+
+  <AuthSessionWorkspaceMain
+    v-else-if="currentWorkspaceKind === 'session'"
+    :t="t"
+    :module-ready="sessionModuleReady"
+    :auth-module-ready="authModuleReady"
+    :is-authenticated="isAuthenticated"
+    :can-enter-workspace="canEnterSessionWorkspace"
+    :loading="sessionLoading"
+    :error-message="sessionErrorMessage"
+    :query-fields="enterpriseSessionQueryFields"
+    :table-columns="enterpriseSessionTableColumns"
+    :items="enterpriseSessionTableItems"
+    :item-count-label="sessionCountLabel"
+    :empty-title="t('app.onlineSession.emptyTitle')"
+    :empty-description="t('app.onlineSession.emptyDescription')"
+    :current-query-summary="currentQuerySummary"
+    :copy="enterpriseCrudCopy"
+    @search="$emit('session-search', $event)"
+    @reset="$emit('session-reset')"
+    @row-click="$emit('session-row-click', $event)"
   />
 
   <PostWorkspaceMain

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AppTranslate } from "../../../app/app-shell-helpers"
+import AuthSessionWorkspacePanel from "../auth-session/AuthSessionWorkspacePanel.vue"
 import CustomerWorkspacePanel from "../customer/CustomerWorkspacePanel.vue"
 import DepartmentWorkspacePanel from "../department/DepartmentWorkspacePanel.vue"
 import DictionaryWorkspacePanel from "../dictionary/DictionaryWorkspacePanel.vue"
@@ -63,6 +64,12 @@ interface ShellWorkspaceSecondarySwitchProps {
   enterpriseDepartmentFormFields: ReadonlyArray<unknown>
   enterpriseDepartmentFormValues: Record<string, unknown>
   departmentParentLookup: Record<string, string>
+  sessionModuleReady: boolean
+  canEnterSessionWorkspace: boolean
+  sessionLoading: boolean
+  sessionActionLoading: boolean
+  sessionErrorMessage: string
+  selectedSession: Record<string, unknown> | null
   postModuleReady: boolean
   canEnterPostWorkspace: boolean
   canViewPosts: boolean
@@ -251,6 +258,7 @@ defineEmits<{
   (event: "open-department-create"): void
   (event: "submit-department-form", payload: unknown): void
   (event: "cancel-department-panel"): void
+  (event: "revoke-selected-session"): void
   (event: "start-post-edit"): void
   (event: "open-post-create"): void
   (event: "submit-post-form", payload: unknown): void
@@ -370,6 +378,20 @@ defineEmits<{
     @open-create="$emit('open-department-create')"
     @submit-form="$emit('submit-department-form', $event)"
     @cancel-panel="$emit('cancel-department-panel')"
+  />
+
+  <AuthSessionWorkspacePanel
+    v-else-if="currentWorkspaceKind === 'session'"
+    :t="t"
+    :module-ready="sessionModuleReady"
+    :auth-module-ready="authModuleReady"
+    :is-authenticated="isAuthenticated"
+    :can-enter-workspace="canEnterSessionWorkspace"
+    :loading="sessionLoading"
+    :action-loading="sessionActionLoading"
+    :error-message="sessionErrorMessage"
+    :selected-session="selectedSession"
+    @revoke-selected-session="$emit('revoke-selected-session')"
   />
 
   <PostWorkspacePanel

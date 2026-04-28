@@ -144,6 +144,12 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.message.postSignInToLoad": "请先登录，再加载受保护的岗位数据。",
       "app.message.postNoListPermission":
         "当前身份可以进入工作区，但没有 `system:post:list` 权限。",
+      "app.message.onlineSessionModuleOffline":
+        "`auth` 模块尚未注册。请确认服务端已启用认证模块后再重试。",
+      "app.message.onlineSessionSignInToLoad":
+        "请先登录，再加载当前用户的在线会话。",
+      "app.message.onlineSessionNoAccess":
+        "当前状态下无法进入在线会话工作区，请先恢复登录会话。",
       "app.message.menuModuleOffline":
         "`menu` 模块尚未注册。请确认服务端已启用系统菜单模块后再重试。",
       "app.message.menuSignInToLoad": "请先登录，再加载受保护的菜单数据。",
@@ -297,6 +303,48 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "编辑模式继续复用 schema 派生字段，并保持岗位状态与备注在同一表单内收口。",
       "app.post.panelDesc.detail":
         "右侧详情与动作保持围绕当前岗位，不在主区重复堆叠编辑入口。",
+      "app.onlineSession.sectionTitle": "在线会话工作区",
+      "app.onlineSession.sectionCopy":
+        "当前范围只收敛到当前登录用户的会话治理，不提前扩成管理员在线用户总览或第二套安全中心。",
+      "app.onlineSession.shellTitle": "在线会话工作区",
+      "app.onlineSession.shellDescription":
+        "列表与详情直接消费当前用户会话接口，当前只做最小会话查看与单会话强制下线闭环。",
+      "app.onlineSession.workspaceEyebrow": "当前用户会话",
+      "app.onlineSession.workspaceTitle": "在线会话清单",
+      "app.onlineSession.workspaceDescription":
+        "主区只承接筛选与会话列表，右侧聚焦当前会话详情与强制下线动作，避免堆出第二个安全工作台。",
+      "app.onlineSession.emptyTitle": "当前筛选条件下没有会话",
+      "app.onlineSession.emptyDescription": "清空条件后重试，或等待下一次会话刷新。",
+      "app.onlineSession.countLabel": "当前显示 {visible} 条，共 {total} 条",
+      "app.onlineSession.statsHint": "当前用户可见会话数",
+      "app.onlineSession.tabsHint": "{count} 个会话",
+      "app.onlineSession.detailEyebrow": "会话详情",
+      "app.onlineSession.detailEmptyDescription":
+        "请选择一条会话记录查看详情，或直接管理当前登录会话。",
+      "app.onlineSession.panelTitle.detailFallback": "会话详情",
+      "app.onlineSession.panelDesc.detail":
+        "右侧详情与动作只围绕当前会话，不额外扩写批量踢下线或在线用户总览。",
+      "app.onlineSession.field.keyword": "关键字",
+      "app.onlineSession.field.state": "状态",
+      "app.onlineSession.field.scope": "范围",
+      "app.onlineSession.field.device": "设备",
+      "app.onlineSession.field.ip": "IP",
+      "app.onlineSession.field.lastUsedAt": "最后使用时间",
+      "app.onlineSession.field.expiresAt": "过期时间",
+      "app.onlineSession.field.createdAt": "创建时间",
+      "app.onlineSession.field.updatedAt": "更新时间",
+      "app.onlineSession.field.userAgent": "User-Agent",
+      "app.onlineSession.query.keywordPlaceholder": "按设备或 IP 搜索",
+      "app.onlineSession.query.scopePlaceholder": "选择范围",
+      "app.onlineSession.scope.all": "全部会话",
+      "app.onlineSession.scope.current": "当前会话",
+      "app.onlineSession.scope.history": "历史会话",
+      "app.onlineSession.state.current": "当前会话",
+      "app.onlineSession.state.active": "活跃",
+      "app.onlineSession.state.rotated": "已轮换",
+      "app.onlineSession.state.revoked": "已下线",
+      "app.onlineSession.action.revoke": "强制下线",
+      "app.onlineSession.action.revokeCurrent": "下线当前会话",
       "app.menu.workspaceEyebrow": "真实模块工作区",
       "app.menu.workspaceTitle": "系统菜单清单",
       "app.menu.workspaceDescription":
@@ -1075,6 +1123,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.loadPostDetail": "岗位详情加载失败",
       "app.error.createPost": "岗位创建失败",
       "app.error.updatePost": "岗位更新失败",
+      "app.error.loadOnlineSessions": "在线会话加载失败",
+      "app.error.revokeOnlineSession": "会话强制下线失败",
       "app.error.postCodeRequired": "岗位编码不能为空",
       "app.error.postNameRequired": "岗位名称不能为空",
       "app.fallback.system": "系统管理",
@@ -1083,6 +1133,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.fallback.menus": "菜单管理",
       "app.fallback.departments": "部门管理",
       "app.fallback.posts": "岗位管理",
+      "app.fallback.onlineSessions": "在线会话",
       "app.fallback.dictionaries": "字典管理",
       "app.fallback.settings": "系统配置",
       "app.fallback.operationLogs": "操作日志",
@@ -1263,6 +1314,12 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "Sign in first to load protected post data.",
       "app.message.postNoListPermission":
         "This identity can enter the workspace but does not have `system:post:list`.",
+      "app.message.onlineSessionModuleOffline":
+        "`auth` is not registered on this server yet. Enable the auth module and try again.",
+      "app.message.onlineSessionSignInToLoad":
+        "Sign in first to load the current user's online sessions.",
+      "app.message.onlineSessionNoAccess":
+        "The online-sessions workspace needs a live signed-in session.",
       "app.message.menuModuleOffline":
         "`menu` is not registered on this server yet. Enable the system-menu module and try again.",
       "app.message.menuSignInToLoad":
@@ -1424,6 +1481,49 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
         "Edit mode reuses the same schema-derived fields while status and remark stay in one form.",
       "app.post.panelDesc.detail":
         "The side panel stays centered on the current post and keeps edit actions out of the main list area.",
+      "app.onlineSession.sectionTitle": "Online sessions workspace",
+      "app.onlineSession.sectionCopy":
+        "This round stays scoped to the current signed-in user's session governance instead of expanding into an admin-wide online-user console.",
+      "app.onlineSession.shellTitle": "Online sessions workspace",
+      "app.onlineSession.shellDescription":
+        "List and detail consume the current-user session endpoints directly and keep scope on viewing plus revoking a single session.",
+      "app.onlineSession.workspaceEyebrow": "Current user sessions",
+      "app.onlineSession.workspaceTitle": "Online session list",
+      "app.onlineSession.workspaceDescription":
+        "The main area stays focused on filters and session rows while the side panel owns detail and revoke action.",
+      "app.onlineSession.emptyTitle": "No sessions match the current filters",
+      "app.onlineSession.emptyDescription":
+        "Clear the filters and try again, or wait for the next refresh.",
+      "app.onlineSession.countLabel": "Showing {visible} of {total} sessions",
+      "app.onlineSession.statsHint": "Visible sessions for the current user",
+      "app.onlineSession.tabsHint": "{count} sessions",
+      "app.onlineSession.detailEyebrow": "Session detail",
+      "app.onlineSession.detailEmptyDescription":
+        "Select a session to inspect its detail, or manage the current signed-in session.",
+      "app.onlineSession.panelTitle.detailFallback": "Session detail",
+      "app.onlineSession.panelDesc.detail":
+        "The side panel stays centered on the current session instead of growing into a batch revoke console.",
+      "app.onlineSession.field.keyword": "Keyword",
+      "app.onlineSession.field.state": "State",
+      "app.onlineSession.field.scope": "Scope",
+      "app.onlineSession.field.device": "Device",
+      "app.onlineSession.field.ip": "IP",
+      "app.onlineSession.field.lastUsedAt": "Last used at",
+      "app.onlineSession.field.expiresAt": "Expires at",
+      "app.onlineSession.field.createdAt": "Created at",
+      "app.onlineSession.field.updatedAt": "Updated at",
+      "app.onlineSession.field.userAgent": "User-Agent",
+      "app.onlineSession.query.keywordPlaceholder": "Search by device or IP",
+      "app.onlineSession.query.scopePlaceholder": "Select scope",
+      "app.onlineSession.scope.all": "All sessions",
+      "app.onlineSession.scope.current": "Current session",
+      "app.onlineSession.scope.history": "History sessions",
+      "app.onlineSession.state.current": "Current session",
+      "app.onlineSession.state.active": "Active",
+      "app.onlineSession.state.rotated": "Rotated",
+      "app.onlineSession.state.revoked": "Revoked",
+      "app.onlineSession.action.revoke": "Revoke session",
+      "app.onlineSession.action.revokeCurrent": "Sign out current session",
       "app.menu.workspaceEyebrow": "Real module workspace",
       "app.menu.workspaceTitle": "System menus",
       "app.menu.workspaceDescription":
@@ -2233,6 +2333,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.error.loadPostDetail": "Failed to load post detail",
       "app.error.createPost": "Failed to create post",
       "app.error.updatePost": "Failed to update post",
+      "app.error.loadOnlineSessions": "Failed to load online sessions",
+      "app.error.revokeOnlineSession": "Failed to revoke the selected session",
       "app.error.postCodeRequired": "Post code is required",
       "app.error.postNameRequired": "Post name is required",
       "app.fallback.system": "System",
@@ -2241,6 +2343,7 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.fallback.menus": "Menus",
       "app.fallback.departments": "Departments",
       "app.fallback.posts": "Posts",
+      "app.fallback.onlineSessions": "Online Sessions",
       "app.fallback.dictionaries": "Dictionaries",
       "app.fallback.settings": "Settings",
       "app.fallback.operationLogs": "Operation Logs",

@@ -61,6 +61,7 @@ import { usePostWorkspace } from "./workspaces/use-post-workspace"
 import { useRoleWorkspace } from "./workspaces/use-role-workspace"
 import { useSettingWorkspace } from "./workspaces/use-setting-workspace"
 import { useTenantWorkspace } from "./workspaces/use-tenant-workspace"
+import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useUserWorkspace } from "./workspaces/use-user-workspace"
 import { useWorkflowWorkspace } from "./workspaces/use-workflow-workspace"
 
@@ -188,6 +189,7 @@ const {
   enterpriseSelectedTabKey,
   isCustomerWorkspace,
   isDepartmentWorkspace,
+  isSessionWorkspace,
   isPostWorkspace,
   isDictionaryWorkspace,
   isFileWorkspace,
@@ -230,6 +232,7 @@ const {
   canDownloadFiles,
   canEnterCustomerWorkspace,
   canEnterDepartmentWorkspace,
+  canEnterSessionWorkspace,
   canEnterPostWorkspace,
   canEnterDictionaryWorkspace,
   canEnterFileWorkspace,
@@ -439,6 +442,38 @@ const {
     if (isRecoverableAuthError(error)) {
       authIdentity.value = null
     }
+  },
+})
+
+const {
+  clearWorkspace: clearSessionWorkspace,
+  countLabel: sessionCountLabel,
+  currentQuerySummary: sessionQuerySummary,
+  filteredSessionItems,
+  handleReset: handleSessionReset,
+  handleRowClick: handleSessionRowClick,
+  handleSearch: handleSessionSearch,
+  queryFields: enterpriseSessionQueryFields,
+  reloadSessions,
+  revokeSelectedSession,
+  selectedSession,
+  sessionActionLoading,
+  sessionErrorMessage,
+  sessionLoading,
+  tableColumns: enterpriseSessionTableColumns,
+  tableItems: enterpriseSessionTableItems,
+} = useAuthSessionWorkspace({
+  currentShellTabKey,
+  locale,
+  t,
+  canEnterWorkspace: canEnterSessionWorkspace,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+  onCurrentSessionRevoked: async () => {
+    await submitLogout()
   },
 })
 
@@ -1006,6 +1041,7 @@ const {
   isCustomerWorkspace,
   isDictionaryWorkspace,
   isDepartmentWorkspace,
+  isSessionWorkspace,
   isMenuWorkspace,
   isNotificationWorkspace,
   isOperationLogWorkspace,
@@ -1025,6 +1061,7 @@ const {
   customerItems,
   dictionaryItems: filteredDictionaryTypes,
   departmentItems: filteredDepartmentItems,
+  sessionItems: filteredSessionItems,
   menuItems: filteredMenuItems,
   notificationItems: filteredNotificationItems,
   operationLogItems: filteredOperationLogItems,
@@ -1042,6 +1079,7 @@ const { currentQuerySummary } = useExampleQuerySummary({
   customerQuerySummary,
   isDictionaryWorkspace,
   isDepartmentWorkspace,
+  isSessionWorkspace,
   isPostWorkspace,
   isRoleWorkspace,
   isMenuWorkspace,
@@ -1052,6 +1090,7 @@ const { currentQuerySummary } = useExampleQuerySummary({
   isTenantWorkspace,
   dictionaryQueryValues,
   departmentQueryValues,
+  sessionQuerySummary,
   postQueryValues,
   roleQueryValues,
   menuQueryValues,
@@ -1197,6 +1236,7 @@ const {
   reloadDictionaries,
   reloadCustomers,
   reloadDepartments,
+  reloadSessions,
   reloadPosts,
   reloadMenus,
   reloadOperationLogs,
@@ -1210,6 +1250,7 @@ const {
   clearFileWorkspace,
   clearNotificationWorkspace,
   clearDepartmentWorkspace,
+  clearSessionWorkspace,
   clearPostWorkspace,
   clearMenuWorkspace,
   clearOperationLogWorkspace,
@@ -1300,6 +1341,9 @@ const {
     departmentLoading,
     canCreateDepartments,
     canViewDepartments,
+    isSessionWorkspace,
+    sessionLoading,
+    canEnterSessionWorkspace,
     isPostWorkspace,
     postLoading,
     canCreatePosts,
@@ -1380,6 +1424,18 @@ const {
   enterpriseDepartmentTableColumns,
   enterpriseDepartmentTableItems,
   departmentCountLabel,
+  sessionErrorMessage,
+  enterpriseSessionQueryFields,
+  enterpriseSessionTableColumns,
+  enterpriseSessionTableItems,
+  sessionCountLabel,
+  postModuleReady,
+  canEnterPostWorkspace,
+  postErrorMessage,
+  enterprisePostQueryFields,
+  enterprisePostTableColumns,
+  enterprisePostTableItems,
+  postCountLabel,
   menuModuleReady,
   canEnterMenuWorkspace,
   menuErrorMessage,
@@ -1472,6 +1528,17 @@ const {
   enterpriseDepartmentFormFields,
   enterpriseDepartmentFormValues,
   departmentParentLookup,
+  sessionActionLoading,
+  selectedSession,
+  canUpdatePosts,
+  postDetailLoading,
+  postDetailErrorMessage,
+  postPanelMode,
+  postPanelTitle,
+  postPanelDescription,
+  selectedPost,
+  enterprisePostFormFields,
+  enterprisePostFormValues,
   canUpdateMenus,
   menuDetailLoading,
   menuDetailErrorMessage,
@@ -1578,6 +1645,12 @@ const {
   handleDepartmentSearch,
   handleDepartmentReset,
   handleDepartmentRowClick,
+  handleSessionSearch,
+  handleSessionReset,
+  handleSessionRowClick,
+  handlePostSearch,
+  handlePostReset,
+  handlePostRowClick,
   handleMenuSearch,
   handleMenuReset,
   handleMenuRowClick,
@@ -1641,6 +1714,10 @@ const {
   startDepartmentEdit,
   submitDepartmentForm,
   cancelDepartmentPanel,
+  revokeSelectedSession,
+  startPostEdit,
+  submitPostForm,
+  cancelPostPanel,
   startMenuEdit,
   submitMenuForm,
   cancelMenuPanel,
