@@ -22,7 +22,6 @@ export const departmentStatus = pgEnum("department_status", [
   "active",
   "disabled",
 ])
-export const postStatus = pgEnum("post_status", ["active", "disabled"])
 export const auditResult = pgEnum("audit_result", ["success", "failure"])
 
 export const users = pgTable(
@@ -237,33 +236,6 @@ export const roleDepts = pgTable("role_depts", {
     .defaultNow(),
 })
 
-export const posts = pgTable(
-  "posts",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    tenantId: uuid("tenant_id")
-      .notNull()
-      .references(() => tenants.id, { onDelete: "restrict" }),
-    code: text("code").notNull(),
-    name: text("name").notNull(),
-    sort: integer("sort").notNull().default(0),
-    status: postStatus("status").notNull().default("active"),
-    remark: text("remark"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (table) => ({
-    postsTenantCodeUnique: unique("posts_tenant_code_unique").on(
-      table.tenantId,
-      table.code,
-    ),
-  }),
-)
-
 export const refreshSessions = pgTable("refresh_sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
   tenantId: uuid("tenant_id")
@@ -329,9 +301,14 @@ export type UserDepartmentRow = InferSelectModel<typeof userDepartments>
 export type NewUserDepartmentRow = InferInsertModel<typeof userDepartments>
 export type RoleDeptRow = InferSelectModel<typeof roleDepts>
 export type NewRoleDeptRow = InferInsertModel<typeof roleDepts>
-export type PostRow = InferSelectModel<typeof posts>
-export type NewPostRow = InferInsertModel<typeof posts>
 export type RefreshSessionRow = InferSelectModel<typeof refreshSessions>
 export type NewRefreshSessionRow = InferInsertModel<typeof refreshSessions>
 export type AuditLogRow = InferSelectModel<typeof auditLogs>
 export type NewAuditLogRow = InferInsertModel<typeof auditLogs>
+
+export {
+  type NewPostRow,
+  type PostRow,
+  posts,
+  postStatus,
+} from "./post"

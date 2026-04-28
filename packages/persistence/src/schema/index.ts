@@ -13,8 +13,6 @@ export {
   menus,
   menuType,
   permissions,
-  posts,
-  postStatus,
   refreshSessions,
   userDepartments,
   roleMenus,
@@ -31,7 +29,6 @@ export {
   type NewAuditLogRow,
   type NewDepartmentRow,
   type NewMenuRow,
-  type NewPostRow,
   type NewPermissionRow,
   type NewRefreshSessionRow,
   type NewRoleMenuRow,
@@ -42,7 +39,6 @@ export {
   type NewUserRoleRow,
   type NewUserRow,
   type PermissionRow,
-  type PostRow,
   type RefreshSessionRow,
   type RoleMenuRow,
   type RoleDeptRow,
@@ -52,6 +48,12 @@ export {
   type UserRoleRow,
   type UserRow,
 } from "./auth"
+export {
+  type NewPostRow,
+  type PostRow,
+  posts,
+  postStatus,
+} from "./post"
 export {
   dictionaryItems,
   dictionaryStatus,
