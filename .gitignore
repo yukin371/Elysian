@@ -32,3 +32,5 @@ docs/superpowers/
 .DS_Store
 Thumbs.db
 .worktrees/
+.tmp/
+test-results/
