@@ -11,7 +11,7 @@
 
 ## 决策依据
 
-1. `Phase 6B` 已完成：多租户、数据权限、租户治理、`ADR-0009`、CI tenant e2e 与 `feature/dev/main` 的 `10/10` 滚动观察均已收口。
+1. `Phase 6B` 已完成：多租户、数据权限、租户治理、`ADR-0009`、CI tenant e2e，以及历史功能分支样本、`dev`、`main` 三段 `10/10` 滚动观察均已收口。
 2. `2026-04-25` 已补本地阶段出口复验：`bun run check` 与 `bun run e2e:tenant:full` 通过。
 3. [2026-04-24-system-design-v2-prd.md](./2026-04-24-system-design-v2-prd.md) 已将工作流引擎定义为 `Phase 7` 的首个核心交付，但 PRD 范围过宽，不适合直接作为首轮实现边界。
 4. 当前仓库仍处于 owner 与工程边界优先的阶段；若直接进入全功能 DAG、消息编排和脚本节点，会同时放大 runtime、安全和运维复杂度。

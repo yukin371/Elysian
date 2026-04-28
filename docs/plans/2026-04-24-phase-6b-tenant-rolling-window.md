@@ -2,24 +2,26 @@
 
 ## 目标
 
-记录 `Phase 6B` 从功能分支到主线分支的 `10` 次 tenant 滚动观察结果，验证现有 tenant download / collect / evidence / decision / gate 链路是否可以直接承接 `feature -> dev -> main` 的连续晋级。
+记录 `Phase 6B` 从历史功能分支样本到主线分支的 `10` 次 tenant 滚动观察结果，验证现有 tenant download / collect / evidence / decision / gate 链路是否可以直接承接“历史样本 -> dev -> main”的连续收敛。
 
 ## 观察范围
 
 - 观察对象：
-  - `feature-p6b1-tenant-isolation` 最近 `10` 次成功的 `workflow_dispatch`
+  - 已归档的历史功能分支样本最近 `10` 次成功的 `workflow_dispatch`
   - `dev` 最近 `10` 次可用 tenant artifact
   - `main` 最近 `10` 次可用 tenant artifact
 - 窗口大小：`10`
-- 执行命令：
+- 当前复跑默认命令：
 
 ```bash
-ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from-github -- --branch feature-p6b1-tenant-isolation --limit 10 --scan-limit 20
+ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from-github -- --branch dev --limit 10 --scan-limit 20
 ```
+
+- 历史功能分支样本当时使用同口径命令，差异仅在分支名；该分支现已归档删除。
 
 ## 记录表
 
-### feature-p6b1-tenant-isolation
+### 历史功能分支样本（已归档）
 
 | # | createdAt (UTC) | runId | headSha | 结果 | 备注 |
 |---|---|---|---|---|---|
@@ -81,12 +83,12 @@ ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from
   - `recommendation=candidate_for_next_step`
 - 当前判断：
   - 现有 tenant 收尾链路无需新增脚本，即可支撑 `10` 次滚动观察
-  - 当前 `feature/dev/main` 三条分支窗口内均不存在系统性失败信号
+  - 当前历史功能分支样本、`dev`、`main` 三段窗口内均不存在系统性失败信号
 
 ## 限制说明
 
-- `feature` 窗口是分支级观察，`dev/main` 窗口则是主线级观察；三者结论一致，但仍不替代真实生产发布演练。
-- `feature` 最近 `10` 次样本跨越了 `cca12cf`、`154e343`、`7a6125f` 三个实现头；其中后两个新 head 仅包含文档治理改动，不代表新增 tenant 运行时代码已再次放大验证。
+- 历史功能分支样本窗口是分支级观察，`dev/main` 窗口则是主线级观察；三者结论一致，但仍不替代真实生产发布演练。
+- 历史功能分支样本最近 `10` 次样本跨越了 `cca12cf`、`154e343`、`7a6125f` 三个实现头；其中后两个新 head 仅包含文档治理改动，不代表新增 tenant 运行时代码已再次放大验证。
 
 ## 证据产物
 
@@ -97,6 +99,6 @@ ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10 bun run e2e:tenant:upgrade:finalize:from
 
 ## 下一步
 
-1. 基于现有 `feature/dev/main` 全部 `10/10` 结论，继续按迁移/发布 runbook 推进发布演练。
+1. 基于现有历史功能分支样本、`dev`、`main` 全部 `10/10` 结论，继续按迁移/发布 runbook 推进发布演练。
 2. 等生产部署平台明确后，再补发布后观察的责任边界与平台级命令。
 3. 若后续出现新的 tenant 高风险改动，对最新实现头重新建立 `5/5`，并将 `dev/main` 纳入下一轮 `10/10` 滚动观察。

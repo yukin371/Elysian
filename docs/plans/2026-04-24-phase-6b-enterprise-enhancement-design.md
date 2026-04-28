@@ -1,12 +1,12 @@
 # 2026-04-24 Phase 6B Enterprise Enhancement Design
 
-更新时间：`2026-04-24`
+更新时间：`2026-04-28`
 
 ## 当前阶段结论
 
 - `P6B1` 已完成：租户模型、`tenant_id`、RLS、JWT `tid`、tenant context middleware、tenant-aware seed 与基础测试已落地。
 - `P6B2` 已完成：数据权限框架已落 `roles.data_scope`、`role_depts`、`departments.ancestors` 与 server 侧数据访问过滤。
-- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入、稳定性观察收尾链路，以及迁移/发布演练 runbook、checklist、样例与 GitHub manual rehearsal 已完成；`feature/dev/main` 三条分支均已完成 `10/10` tenant 滚动观察达标，不在本轮引入额外基础设施 owner。
+- `P6B3` 已推进到 `WP-5`：租户管理最小后端闭环、`tenant:init` CLI、tenant-aware setting fallback、真实 PostgreSQL 集成验证、CI 接入、稳定性观察收尾链路，以及迁移/发布演练 runbook、checklist、样例与 GitHub manual rehearsal 已完成；历史功能分支样本、`dev`、`main` 三段均已完成 `10/10` tenant 滚动观察达标，不在本轮引入额外基础设施 owner。
 
 ## 边界摘要
 
@@ -122,9 +122,9 @@
 
 ## 真实观察窗口达标记录
 
-- 样本来源：`workflow_dispatch` / `feature-p6b1-tenant-isolation`
+- 样本来源：`workflow_dispatch` / 已归档的历史功能分支样本
 - GitHub runIds：`24886462252`、`24886403317`、`24886352160`、`24886285868`、`24886175279`
-- 执行方式：`bun run e2e:tenant:upgrade:finalize:from-github -- --branch feature-p6b1-tenant-isolation --limit 5 --scan-limit 15`
+- 历史执行口径：`bun run e2e:tenant:upgrade:finalize:from-github -- --branch <当时功能分支> --limit 5 --scan-limit 15`
 - 结论：
   - `selectedWindowRuns=5`
   - `windowSize=5`
