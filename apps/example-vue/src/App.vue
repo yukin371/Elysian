@@ -331,6 +331,25 @@ const enterpriseCustomerPage = useElyCrudPage(
   permissionCodes,
 )
 
+const customerWorkspace = useCustomerWorkspace({
+  currentShellTabKey,
+  page: enterpriseCustomerPage,
+  locale,
+  t,
+  localizeFieldLabel,
+  localizeStatus: (status) => localizeCustomerStatus(status),
+  localizeActionLabel,
+  canView: canViewCustomers,
+  canCreate: canCreateCustomers,
+  canUpdate: canUpdateCustomers,
+  canDelete: canDeleteCustomers,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   canGoToNextCustomerPage,
   canGoToPreviousCustomerPage,
@@ -383,24 +402,7 @@ const {
   tableColumns: enterpriseTableColumns,
   tableItems: enterpriseTableItems,
   updateCustomerPageInput,
-} = useCustomerWorkspace({
-  currentShellTabKey,
-  page: enterpriseCustomerPage,
-  locale,
-  t,
-  localizeFieldLabel,
-  localizeStatus: (status) => localizeCustomerStatus(status),
-  localizeActionLabel,
-  canView: canViewCustomers,
-  canCreate: canCreateCustomers,
-  canUpdate: canUpdateCustomers,
-  canDelete: canDeleteCustomers,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = customerWorkspace
 
 const {
   cancelPanel: cancelFilePanel,
@@ -446,6 +448,21 @@ const {
   },
 })
 
+const sessionWorkspace = useAuthSessionWorkspace({
+  currentShellTabKey,
+  locale,
+  t,
+  canEnterWorkspace: canEnterSessionWorkspace,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+  onCurrentSessionRevoked: async () => {
+    await submitLogout()
+  },
+})
+
 const {
   clearWorkspace: clearSessionWorkspace,
   countLabel: sessionCountLabel,
@@ -463,20 +480,7 @@ const {
   sessionLoading,
   tableColumns: enterpriseSessionTableColumns,
   tableItems: enterpriseSessionTableItems,
-} = useAuthSessionWorkspace({
-  currentShellTabKey,
-  locale,
-  t,
-  canEnterWorkspace: canEnterSessionWorkspace,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-  onCurrentSessionRevoked: async () => {
-    await submitLogout()
-  },
-})
+} = sessionWorkspace
 
 const enterpriseDictionaryPage = useElyCrudPage(
   dictionaryPageDefinition,
@@ -596,6 +600,23 @@ const {
   },
 })
 
+const dictionaryWorkspace = useDictionaryWorkspace({
+  currentShellTabKey,
+  page: enterpriseDictionaryPage,
+  locale,
+  t,
+  localizeFieldLabel: localizeDictionaryFieldLabel,
+  localizeStatus: localizeDictionaryStatus,
+  canView: canViewDictionaries,
+  canCreate: canCreateDictionaryTypes,
+  canUpdate: canUpdateDictionaryTypes,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   cancelPanel: cancelDictionaryPanel,
   clearWorkspace: clearDictionaryOptions,
@@ -629,22 +650,7 @@ const {
   submitForm: submitDictionaryForm,
   tableColumns: enterpriseDictionaryTableColumns,
   tableItems: enterpriseDictionaryTableItems,
-} = useDictionaryWorkspace({
-  currentShellTabKey,
-  page: enterpriseDictionaryPage,
-  locale,
-  t,
-  localizeFieldLabel: localizeDictionaryFieldLabel,
-  localizeStatus: localizeDictionaryStatus,
-  canView: canViewDictionaries,
-  canCreate: canCreateDictionaryTypes,
-  canUpdate: canUpdateDictionaryTypes,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = dictionaryWorkspace
 
 const {
   cancelPanel: cancelDepartmentPanel,
@@ -793,6 +799,25 @@ const {
   },
 })
 
+const roleWorkspace = useRoleWorkspace({
+  currentShellTabKey,
+  page: enterpriseRolePage,
+  locale,
+  t,
+  localizeFieldLabel: localizeRoleFieldLabel,
+  localizeStatus: localizeRoleStatus,
+  localizeBoolean: localizeRoleBoolean,
+  localizeDataScope: localizeRoleDataScope,
+  canView: canViewRoles,
+  canCreate: canCreateRoles,
+  canUpdate: canUpdateRoles,
+  onRecoverableAuthError: (error) => {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+  },
+})
+
 const {
   cancelPanel: cancelRolePanel,
   clearWorkspace: clearRoleWorkspace,
@@ -824,24 +849,7 @@ const {
   submitForm: submitRoleForm,
   tableColumns: enterpriseRoleTableColumns,
   tableItems: enterpriseRoleTableItems,
-} = useRoleWorkspace({
-  currentShellTabKey,
-  page: enterpriseRolePage,
-  locale,
-  t,
-  localizeFieldLabel: localizeRoleFieldLabel,
-  localizeStatus: localizeRoleStatus,
-  localizeBoolean: localizeRoleBoolean,
-  localizeDataScope: localizeRoleDataScope,
-  canView: canViewRoles,
-  canCreate: canCreateRoles,
-  canUpdate: canUpdateRoles,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
-})
+} = roleWorkspace
 
 const {
   cancelPanel: cancelTenantPanel,
@@ -1324,124 +1332,38 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     vueEnterprisePresetStatus: vueEnterprisePresetManifest.status,
   },
   roleWorkspace: {
+    workspace: roleWorkspace,
     isRoleWorkspace,
-    roleLoading,
     canCreateRoles,
     canViewRoles,
     roleModuleReady,
     canEnterRoleWorkspace,
-    roleErrorMessage,
-    enterpriseRoleQueryFields,
-    enterpriseRoleTableColumns,
-    enterpriseRoleTableItems,
-    roleCountLabel,
     canUpdateRoles,
-    roleDetailLoading,
-    roleDetailErrorMessage,
-    rolePanelMode,
-    rolePanelTitle,
-    rolePanelDescription,
-    selectedRole,
-    selectedRoleDetail,
-    enterpriseRoleFormFields,
-    enterpriseRoleFormValues,
-    handleRoleSearch,
-    handleRoleReset,
-    handleRoleRowClick,
-    openRoleCreatePanel,
-    reloadRoles,
-    startRoleEdit,
-    submitRoleForm,
-    cancelRolePanel,
   },
   customerWorkspace: {
+    workspace: customerWorkspace,
     isCustomerWorkspace,
-    customerLoading,
     canCreateCustomers,
     canViewCustomers,
     canUpdateCustomers,
     canDeleteCustomers,
     customerModuleReady,
     canEnterCustomerWorkspace,
-    customerErrorMessage,
-    enterpriseQueryFields,
-    enterpriseTableColumns,
-    enterpriseTableItems,
-    enterpriseTableActions,
-    customerCountLabel,
     currentQuerySummary,
     enterpriseCrudCopy,
     localizePlatformStatus,
-    customerPaginationSummary,
-    customerListPageSize,
-    customerListSortValue,
-    customerPageInputValue,
-    customerPageSizeOptions,
-    customerSortOptions,
-    canGoToPreviousCustomerPage,
-    canGoToNextCustomerPage,
-    canJumpToCustomerPage,
-    enterpriseFormMode,
-    enterprisePanelTitle,
-    enterprisePanelDescription,
-    deleteConfirmId,
-    selectedCustomer,
-    enterpriseFormFields,
-    enterpriseFormValues,
     openCustomerWorkspace,
-    handleEnterpriseSearch,
-    handleEnterpriseReset,
-    handleEnterpriseAction,
-    handleEnterpriseRowClick,
-    handleCustomerPageSizeChange,
-    handleCustomerSortChange,
-    goToFirstCustomerPage,
-    goToPreviousCustomerPage,
-    goToNextCustomerPage,
-    goToLastCustomerPage,
-    updateCustomerPageInput,
-    submitCustomerPageJump,
-    openCreatePanel,
-    reloadCustomers,
-    confirmDelete,
-    cancelDelete,
-    startEdit,
-    requestDelete,
-    handleEnterpriseFormSubmit,
-    handleEnterpriseFormCancel,
   },
   dictionaryWorkspace: {
+    workspace: dictionaryWorkspace,
     isDictionaryWorkspace,
-    dictionaryLoading,
     canCreateDictionaryTypes,
     canViewDictionaries,
     dictionaryModuleReady,
     canEnterDictionaryWorkspace,
-    dictionaryErrorMessage,
-    enterpriseDictionaryQueryFields,
-    enterpriseDictionaryTableColumns,
-    enterpriseDictionaryTableItems,
-    dictionaryCountLabel,
-    dictionaryDetailLoading,
-    dictionaryDetailErrorMessage,
-    dictionaryPanelMode,
-    dictionaryPanelTitle,
-    dictionaryPanelDescription,
-    selectedDictionaryType,
-    selectedDictionaryTypeItems,
-    enterpriseDictionaryFormFields,
-    enterpriseDictionaryFormValues,
     enterpriseFormCopy,
     localizeDictionaryStatus,
     canUpdateDictionaryTypes,
-    handleDictionarySearch,
-    handleDictionaryReset,
-    handleDictionaryRowClick,
-    openDictionaryCreatePanel,
-    reloadDictionaries,
-    startDictionaryEdit,
-    submitDictionaryForm,
-    cancelDictionaryPanel,
   },
   departmentWorkspace: {
     isDepartmentWorkspace,
@@ -1476,20 +1398,9 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     cancelDepartmentPanel,
   },
   sessionWorkspace: {
+    workspace: sessionWorkspace,
     isSessionWorkspace,
-    sessionLoading,
     canEnterSessionWorkspace,
-    sessionErrorMessage,
-    enterpriseSessionQueryFields,
-    enterpriseSessionTableColumns,
-    enterpriseSessionTableItems,
-    sessionCountLabel,
-    sessionActionLoading,
-    selectedSession,
-    handleSessionSearch,
-    handleSessionReset,
-    handleSessionRowClick,
-    revokeSelectedSession,
   },
   postWorkspace: {
     isPostWorkspace,

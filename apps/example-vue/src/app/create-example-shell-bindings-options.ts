@@ -1,8 +1,14 @@
+import type { useAuthSessionWorkspace } from "../workspaces/use-auth-session-workspace"
+import type { useCustomerWorkspace } from "../workspaces/use-customer-workspace"
+import type { useDictionaryWorkspace } from "../workspaces/use-dictionary-workspace"
+import type { useRoleWorkspace } from "../workspaces/use-role-workspace"
 import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
 
 type BindingSegment<
   Keys extends keyof UseExampleShellBindingsOptions,
 > = Pick<UseExampleShellBindingsOptions, Keys>
+type OptionValue<Key extends keyof UseExampleShellBindingsOptions> =
+  UseExampleShellBindingsOptions[Key]
 
 interface CreateExampleShellBindingsOptionsInput {
   shell: BindingSegment<
@@ -32,126 +38,40 @@ interface CreateExampleShellBindingsOptionsInput {
     | "submitLogin"
     | "vueEnterprisePresetStatus"
   >
-  roleWorkspace: BindingSegment<
-    | "isRoleWorkspace"
-    | "roleLoading"
-    | "canCreateRoles"
-    | "canViewRoles"
-    | "roleModuleReady"
-    | "canEnterRoleWorkspace"
-    | "roleErrorMessage"
-    | "enterpriseRoleQueryFields"
-    | "enterpriseRoleTableColumns"
-    | "enterpriseRoleTableItems"
-    | "roleCountLabel"
-    | "canUpdateRoles"
-    | "roleDetailLoading"
-    | "roleDetailErrorMessage"
-    | "rolePanelMode"
-    | "rolePanelTitle"
-    | "rolePanelDescription"
-    | "selectedRole"
-    | "selectedRoleDetail"
-    | "enterpriseRoleFormFields"
-    | "enterpriseRoleFormValues"
-    | "handleRoleSearch"
-    | "handleRoleReset"
-    | "handleRoleRowClick"
-    | "openRoleCreatePanel"
-    | "reloadRoles"
-    | "startRoleEdit"
-    | "submitRoleForm"
-    | "cancelRolePanel"
-  >
-  customerWorkspace: BindingSegment<
-    | "isCustomerWorkspace"
-    | "customerLoading"
-    | "canCreateCustomers"
-    | "canViewCustomers"
-    | "canUpdateCustomers"
-    | "canDeleteCustomers"
-    | "customerModuleReady"
-    | "canEnterCustomerWorkspace"
-    | "customerErrorMessage"
-    | "enterpriseQueryFields"
-    | "enterpriseTableColumns"
-    | "enterpriseTableItems"
-    | "enterpriseTableActions"
-    | "customerCountLabel"
-    | "currentQuerySummary"
-    | "enterpriseCrudCopy"
-    | "localizePlatformStatus"
-    | "customerPaginationSummary"
-    | "customerListPageSize"
-    | "customerListSortValue"
-    | "customerPageInputValue"
-    | "customerPageSizeOptions"
-    | "customerSortOptions"
-    | "canGoToPreviousCustomerPage"
-    | "canGoToNextCustomerPage"
-    | "canJumpToCustomerPage"
-    | "enterpriseFormMode"
-    | "enterprisePanelTitle"
-    | "enterprisePanelDescription"
-    | "deleteConfirmId"
-    | "selectedCustomer"
-    | "enterpriseFormFields"
-    | "enterpriseFormValues"
-    | "openCustomerWorkspace"
-    | "handleEnterpriseSearch"
-    | "handleEnterpriseReset"
-    | "handleEnterpriseAction"
-    | "handleEnterpriseRowClick"
-    | "handleCustomerPageSizeChange"
-    | "handleCustomerSortChange"
-    | "goToFirstCustomerPage"
-    | "goToPreviousCustomerPage"
-    | "goToNextCustomerPage"
-    | "goToLastCustomerPage"
-    | "updateCustomerPageInput"
-    | "submitCustomerPageJump"
-    | "openCreatePanel"
-    | "reloadCustomers"
-    | "confirmDelete"
-    | "cancelDelete"
-    | "startEdit"
-    | "requestDelete"
-    | "handleEnterpriseFormSubmit"
-    | "handleEnterpriseFormCancel"
-  >
-  dictionaryWorkspace: BindingSegment<
-    | "isDictionaryWorkspace"
-    | "dictionaryLoading"
-    | "canCreateDictionaryTypes"
-    | "canViewDictionaries"
-    | "dictionaryModuleReady"
-    | "canEnterDictionaryWorkspace"
-    | "dictionaryErrorMessage"
-    | "enterpriseDictionaryQueryFields"
-    | "enterpriseDictionaryTableColumns"
-    | "enterpriseDictionaryTableItems"
-    | "dictionaryCountLabel"
-    | "dictionaryDetailLoading"
-    | "dictionaryDetailErrorMessage"
-    | "dictionaryPanelMode"
-    | "dictionaryPanelTitle"
-    | "dictionaryPanelDescription"
-    | "selectedDictionaryType"
-    | "selectedDictionaryTypeItems"
-    | "enterpriseDictionaryFormFields"
-    | "enterpriseDictionaryFormValues"
-    | "enterpriseFormCopy"
-    | "localizeDictionaryStatus"
-    | "canUpdateDictionaryTypes"
-    | "handleDictionarySearch"
-    | "handleDictionaryReset"
-    | "handleDictionaryRowClick"
-    | "openDictionaryCreatePanel"
-    | "reloadDictionaries"
-    | "startDictionaryEdit"
-    | "submitDictionaryForm"
-    | "cancelDictionaryPanel"
-  >
+  roleWorkspace: {
+    workspace: ReturnType<typeof useRoleWorkspace>
+    isRoleWorkspace: OptionValue<"isRoleWorkspace">
+    canCreateRoles: OptionValue<"canCreateRoles">
+    canViewRoles: OptionValue<"canViewRoles">
+    roleModuleReady: OptionValue<"roleModuleReady">
+    canEnterRoleWorkspace: OptionValue<"canEnterRoleWorkspace">
+    canUpdateRoles: OptionValue<"canUpdateRoles">
+  }
+  customerWorkspace: {
+    workspace: ReturnType<typeof useCustomerWorkspace>
+    isCustomerWorkspace: OptionValue<"isCustomerWorkspace">
+    canCreateCustomers: OptionValue<"canCreateCustomers">
+    canViewCustomers: OptionValue<"canViewCustomers">
+    canUpdateCustomers: OptionValue<"canUpdateCustomers">
+    canDeleteCustomers: OptionValue<"canDeleteCustomers">
+    customerModuleReady: OptionValue<"customerModuleReady">
+    canEnterCustomerWorkspace: OptionValue<"canEnterCustomerWorkspace">
+    currentQuerySummary: OptionValue<"currentQuerySummary">
+    enterpriseCrudCopy: OptionValue<"enterpriseCrudCopy">
+    localizePlatformStatus: OptionValue<"localizePlatformStatus">
+    openCustomerWorkspace: OptionValue<"openCustomerWorkspace">
+  }
+  dictionaryWorkspace: {
+    workspace: ReturnType<typeof useDictionaryWorkspace>
+    isDictionaryWorkspace: OptionValue<"isDictionaryWorkspace">
+    canCreateDictionaryTypes: OptionValue<"canCreateDictionaryTypes">
+    canViewDictionaries: OptionValue<"canViewDictionaries">
+    dictionaryModuleReady: OptionValue<"dictionaryModuleReady">
+    canEnterDictionaryWorkspace: OptionValue<"canEnterDictionaryWorkspace">
+    enterpriseFormCopy: OptionValue<"enterpriseFormCopy">
+    localizeDictionaryStatus: OptionValue<"localizeDictionaryStatus">
+    canUpdateDictionaryTypes: OptionValue<"canUpdateDictionaryTypes">
+  }
   departmentWorkspace: BindingSegment<
     | "isDepartmentWorkspace"
     | "departmentLoading"
@@ -184,22 +104,11 @@ interface CreateExampleShellBindingsOptionsInput {
     | "submitDepartmentForm"
     | "cancelDepartmentPanel"
   >
-  sessionWorkspace: BindingSegment<
-    | "isSessionWorkspace"
-    | "sessionLoading"
-    | "canEnterSessionWorkspace"
-    | "sessionErrorMessage"
-    | "enterpriseSessionQueryFields"
-    | "enterpriseSessionTableColumns"
-    | "enterpriseSessionTableItems"
-    | "sessionCountLabel"
-    | "sessionActionLoading"
-    | "selectedSession"
-    | "handleSessionSearch"
-    | "handleSessionReset"
-    | "handleSessionRowClick"
-    | "revokeSelectedSession"
-  >
+  sessionWorkspace: {
+    workspace: ReturnType<typeof useAuthSessionWorkspace>
+    isSessionWorkspace: OptionValue<"isSessionWorkspace">
+    canEnterSessionWorkspace: OptionValue<"canEnterSessionWorkspace">
+  }
   postWorkspace: BindingSegment<
     | "isPostWorkspace"
     | "postLoading"
@@ -494,21 +403,307 @@ interface CreateExampleShellBindingsOptionsInput {
 
 export const createExampleShellBindingsOptions = (
   input: CreateExampleShellBindingsOptionsInput,
-): UseExampleShellBindingsOptions => ({
-  ...input.shell,
-  ...input.roleWorkspace,
-  ...input.customerWorkspace,
-  ...input.dictionaryWorkspace,
-  ...input.departmentWorkspace,
-  ...input.sessionWorkspace,
-  ...input.postWorkspace,
-  ...input.menuWorkspace,
-  ...input.notificationWorkspace,
-  ...input.operationLogWorkspace,
-  ...input.userWorkspace,
-  ...input.settingWorkspace,
-  ...input.tenantWorkspace,
-  ...input.fileWorkspace,
-  ...input.workflowWorkspace,
-  ...input.generatorPreviewWorkspace,
-})
+): UseExampleShellBindingsOptions => {
+  const roleWorkspaceOptions: BindingSegment<
+    | "isRoleWorkspace"
+    | "roleLoading"
+    | "canCreateRoles"
+    | "canViewRoles"
+    | "roleModuleReady"
+    | "canEnterRoleWorkspace"
+    | "roleErrorMessage"
+    | "enterpriseRoleQueryFields"
+    | "enterpriseRoleTableColumns"
+    | "enterpriseRoleTableItems"
+    | "roleCountLabel"
+    | "canUpdateRoles"
+    | "roleDetailLoading"
+    | "roleDetailErrorMessage"
+    | "rolePanelMode"
+    | "rolePanelTitle"
+    | "rolePanelDescription"
+    | "selectedRole"
+    | "selectedRoleDetail"
+    | "enterpriseRoleFormFields"
+    | "enterpriseRoleFormValues"
+    | "handleRoleSearch"
+    | "handleRoleReset"
+    | "handleRoleRowClick"
+    | "openRoleCreatePanel"
+    | "reloadRoles"
+    | "startRoleEdit"
+    | "submitRoleForm"
+    | "cancelRolePanel"
+  > = {
+    isRoleWorkspace: input.roleWorkspace.isRoleWorkspace,
+    roleLoading: input.roleWorkspace.workspace.roleLoading,
+    canCreateRoles: input.roleWorkspace.canCreateRoles,
+    canViewRoles: input.roleWorkspace.canViewRoles,
+    roleModuleReady: input.roleWorkspace.roleModuleReady,
+    canEnterRoleWorkspace: input.roleWorkspace.canEnterRoleWorkspace,
+    roleErrorMessage: input.roleWorkspace.workspace.roleErrorMessage,
+    enterpriseRoleQueryFields: input.roleWorkspace.workspace.queryFields,
+    enterpriseRoleTableColumns: input.roleWorkspace.workspace.tableColumns,
+    enterpriseRoleTableItems: input.roleWorkspace.workspace.tableItems,
+    roleCountLabel: input.roleWorkspace.workspace.countLabel,
+    canUpdateRoles: input.roleWorkspace.canUpdateRoles,
+    roleDetailLoading: input.roleWorkspace.workspace.roleDetailLoading,
+    roleDetailErrorMessage: input.roleWorkspace.workspace.roleDetailErrorMessage,
+    rolePanelMode: input.roleWorkspace.workspace.rolePanelMode,
+    rolePanelTitle: input.roleWorkspace.workspace.panelTitle,
+    rolePanelDescription: input.roleWorkspace.workspace.panelDescription,
+    selectedRole: input.roleWorkspace.workspace.selectedRole,
+    selectedRoleDetail: input.roleWorkspace.workspace.selectedRoleDetail,
+    enterpriseRoleFormFields: input.roleWorkspace.workspace.formFields,
+    enterpriseRoleFormValues: input.roleWorkspace.workspace.formValues,
+    handleRoleSearch: input.roleWorkspace.workspace.handleSearch,
+    handleRoleReset: input.roleWorkspace.workspace.handleReset,
+    handleRoleRowClick: input.roleWorkspace.workspace.handleRowClick,
+    openRoleCreatePanel: input.roleWorkspace.workspace.openCreatePanel,
+    reloadRoles: input.roleWorkspace.workspace.reloadRoles,
+    startRoleEdit: input.roleWorkspace.workspace.startEdit,
+    submitRoleForm: input.roleWorkspace.workspace.submitForm,
+    cancelRolePanel: input.roleWorkspace.workspace.cancelPanel,
+  }
+
+  const customerWorkspaceOptions: BindingSegment<
+    | "isCustomerWorkspace"
+    | "customerLoading"
+    | "canCreateCustomers"
+    | "canViewCustomers"
+    | "canUpdateCustomers"
+    | "canDeleteCustomers"
+    | "customerModuleReady"
+    | "canEnterCustomerWorkspace"
+    | "customerErrorMessage"
+    | "enterpriseQueryFields"
+    | "enterpriseTableColumns"
+    | "enterpriseTableItems"
+    | "enterpriseTableActions"
+    | "customerCountLabel"
+    | "currentQuerySummary"
+    | "enterpriseCrudCopy"
+    | "localizePlatformStatus"
+    | "customerPaginationSummary"
+    | "customerListPageSize"
+    | "customerListSortValue"
+    | "customerPageInputValue"
+    | "customerPageSizeOptions"
+    | "customerSortOptions"
+    | "canGoToPreviousCustomerPage"
+    | "canGoToNextCustomerPage"
+    | "canJumpToCustomerPage"
+    | "enterpriseFormMode"
+    | "enterprisePanelTitle"
+    | "enterprisePanelDescription"
+    | "deleteConfirmId"
+    | "selectedCustomer"
+    | "enterpriseFormFields"
+    | "enterpriseFormValues"
+    | "openCustomerWorkspace"
+    | "handleEnterpriseSearch"
+    | "handleEnterpriseReset"
+    | "handleEnterpriseAction"
+    | "handleEnterpriseRowClick"
+    | "handleCustomerPageSizeChange"
+    | "handleCustomerSortChange"
+    | "goToFirstCustomerPage"
+    | "goToPreviousCustomerPage"
+    | "goToNextCustomerPage"
+    | "goToLastCustomerPage"
+    | "updateCustomerPageInput"
+    | "submitCustomerPageJump"
+    | "openCreatePanel"
+    | "reloadCustomers"
+    | "confirmDelete"
+    | "cancelDelete"
+    | "startEdit"
+    | "requestDelete"
+    | "handleEnterpriseFormSubmit"
+    | "handleEnterpriseFormCancel"
+  > = {
+    isCustomerWorkspace: input.customerWorkspace.isCustomerWorkspace,
+    customerLoading: input.customerWorkspace.workspace.customerLoading,
+    canCreateCustomers: input.customerWorkspace.canCreateCustomers,
+    canViewCustomers: input.customerWorkspace.canViewCustomers,
+    canUpdateCustomers: input.customerWorkspace.canUpdateCustomers,
+    canDeleteCustomers: input.customerWorkspace.canDeleteCustomers,
+    customerModuleReady: input.customerWorkspace.customerModuleReady,
+    canEnterCustomerWorkspace: input.customerWorkspace.canEnterCustomerWorkspace,
+    customerErrorMessage: input.customerWorkspace.workspace.customerErrorMessage,
+    enterpriseQueryFields: input.customerWorkspace.workspace.queryFields,
+    enterpriseTableColumns: input.customerWorkspace.workspace.tableColumns,
+    enterpriseTableItems: input.customerWorkspace.workspace.tableItems,
+    enterpriseTableActions: input.customerWorkspace.workspace.tableActions,
+    customerCountLabel: input.customerWorkspace.workspace.customerCountLabel,
+    currentQuerySummary: input.customerWorkspace.currentQuerySummary,
+    enterpriseCrudCopy: input.customerWorkspace.enterpriseCrudCopy,
+    localizePlatformStatus: input.customerWorkspace.localizePlatformStatus,
+    customerPaginationSummary:
+      input.customerWorkspace.workspace.customerPaginationSummary,
+    customerListPageSize: input.customerWorkspace.workspace.customerListPageSize,
+    customerListSortValue: input.customerWorkspace.workspace.customerListSortValue,
+    customerPageInputValue: input.customerWorkspace.workspace.customerPageInputValue,
+    customerPageSizeOptions:
+      input.customerWorkspace.workspace.customerPageSizeOptions,
+    customerSortOptions: input.customerWorkspace.workspace.customerSortOptions,
+    canGoToPreviousCustomerPage:
+      input.customerWorkspace.workspace.canGoToPreviousCustomerPage,
+    canGoToNextCustomerPage:
+      input.customerWorkspace.workspace.canGoToNextCustomerPage,
+    canJumpToCustomerPage:
+      input.customerWorkspace.workspace.canJumpToCustomerPage,
+    enterpriseFormMode: input.customerWorkspace.workspace.customerFormMode,
+    enterprisePanelTitle: input.customerWorkspace.workspace.panelTitle,
+    enterprisePanelDescription: input.customerWorkspace.workspace.panelDescription,
+    deleteConfirmId: input.customerWorkspace.workspace.deleteConfirmId,
+    selectedCustomer: input.customerWorkspace.workspace.selectedCustomer,
+    enterpriseFormFields: input.customerWorkspace.workspace.formFields,
+    enterpriseFormValues: input.customerWorkspace.workspace.formValues,
+    openCustomerWorkspace: input.customerWorkspace.openCustomerWorkspace,
+    handleEnterpriseSearch: input.customerWorkspace.workspace.handleSearch,
+    handleEnterpriseReset: input.customerWorkspace.workspace.handleReset,
+    handleEnterpriseAction: input.customerWorkspace.workspace.handleAction,
+    handleEnterpriseRowClick: input.customerWorkspace.workspace.handleRowClick,
+    handleCustomerPageSizeChange:
+      input.customerWorkspace.workspace.handlePageSizeChange,
+    handleCustomerSortChange: input.customerWorkspace.workspace.handleSortChange,
+    goToFirstCustomerPage: input.customerWorkspace.workspace.goToFirstCustomerPage,
+    goToPreviousCustomerPage:
+      input.customerWorkspace.workspace.goToPreviousCustomerPage,
+    goToNextCustomerPage: input.customerWorkspace.workspace.goToNextCustomerPage,
+    goToLastCustomerPage: input.customerWorkspace.workspace.goToLastCustomerPage,
+    updateCustomerPageInput:
+      input.customerWorkspace.workspace.updateCustomerPageInput,
+    submitCustomerPageJump: input.customerWorkspace.workspace.submitCustomerPageJump,
+    openCreatePanel: input.customerWorkspace.workspace.openCreatePanel,
+    reloadCustomers: input.customerWorkspace.workspace.reloadCustomers,
+    confirmDelete: input.customerWorkspace.workspace.confirmDelete,
+    cancelDelete: input.customerWorkspace.workspace.cancelDelete,
+    startEdit: input.customerWorkspace.workspace.startEdit,
+    requestDelete: input.customerWorkspace.workspace.requestDelete,
+    handleEnterpriseFormSubmit:
+      input.customerWorkspace.workspace.handleFormSubmit,
+    handleEnterpriseFormCancel:
+      input.customerWorkspace.workspace.handleFormCancel,
+  }
+
+  const dictionaryWorkspaceOptions: BindingSegment<
+    | "isDictionaryWorkspace"
+    | "dictionaryLoading"
+    | "canCreateDictionaryTypes"
+    | "canViewDictionaries"
+    | "dictionaryModuleReady"
+    | "canEnterDictionaryWorkspace"
+    | "dictionaryErrorMessage"
+    | "enterpriseDictionaryQueryFields"
+    | "enterpriseDictionaryTableColumns"
+    | "enterpriseDictionaryTableItems"
+    | "dictionaryCountLabel"
+    | "dictionaryDetailLoading"
+    | "dictionaryDetailErrorMessage"
+    | "dictionaryPanelMode"
+    | "dictionaryPanelTitle"
+    | "dictionaryPanelDescription"
+    | "selectedDictionaryType"
+    | "selectedDictionaryTypeItems"
+    | "enterpriseDictionaryFormFields"
+    | "enterpriseDictionaryFormValues"
+    | "enterpriseFormCopy"
+    | "localizeDictionaryStatus"
+    | "canUpdateDictionaryTypes"
+    | "handleDictionarySearch"
+    | "handleDictionaryReset"
+    | "handleDictionaryRowClick"
+    | "openDictionaryCreatePanel"
+    | "reloadDictionaries"
+    | "startDictionaryEdit"
+    | "submitDictionaryForm"
+    | "cancelDictionaryPanel"
+  > = {
+    isDictionaryWorkspace: input.dictionaryWorkspace.isDictionaryWorkspace,
+    dictionaryLoading: input.dictionaryWorkspace.workspace.dictionaryLoading,
+    canCreateDictionaryTypes: input.dictionaryWorkspace.canCreateDictionaryTypes,
+    canViewDictionaries: input.dictionaryWorkspace.canViewDictionaries,
+    dictionaryModuleReady: input.dictionaryWorkspace.dictionaryModuleReady,
+    canEnterDictionaryWorkspace: input.dictionaryWorkspace.canEnterDictionaryWorkspace,
+    dictionaryErrorMessage: input.dictionaryWorkspace.workspace.dictionaryErrorMessage,
+    enterpriseDictionaryQueryFields: input.dictionaryWorkspace.workspace.queryFields,
+    enterpriseDictionaryTableColumns: input.dictionaryWorkspace.workspace.tableColumns,
+    enterpriseDictionaryTableItems: input.dictionaryWorkspace.workspace.tableItems,
+    dictionaryCountLabel: input.dictionaryWorkspace.workspace.countLabel,
+    dictionaryDetailLoading: input.dictionaryWorkspace.workspace.dictionaryDetailLoading,
+    dictionaryDetailErrorMessage:
+      input.dictionaryWorkspace.workspace.dictionaryDetailErrorMessage,
+    dictionaryPanelMode: input.dictionaryWorkspace.workspace.dictionaryPanelMode,
+    dictionaryPanelTitle: input.dictionaryWorkspace.workspace.panelTitle,
+    dictionaryPanelDescription: input.dictionaryWorkspace.workspace.panelDescription,
+    selectedDictionaryType: input.dictionaryWorkspace.workspace.selectedDictionaryType,
+    selectedDictionaryTypeItems:
+      input.dictionaryWorkspace.workspace.selectedDictionaryTypeItems,
+    enterpriseDictionaryFormFields: input.dictionaryWorkspace.workspace.formFields,
+    enterpriseDictionaryFormValues: input.dictionaryWorkspace.workspace.formValues,
+    enterpriseFormCopy: input.dictionaryWorkspace.enterpriseFormCopy,
+    localizeDictionaryStatus: input.dictionaryWorkspace.localizeDictionaryStatus,
+    canUpdateDictionaryTypes: input.dictionaryWorkspace.canUpdateDictionaryTypes,
+    handleDictionarySearch: input.dictionaryWorkspace.workspace.handleSearch,
+    handleDictionaryReset: input.dictionaryWorkspace.workspace.handleReset,
+    handleDictionaryRowClick: input.dictionaryWorkspace.workspace.handleRowClick,
+    openDictionaryCreatePanel: input.dictionaryWorkspace.workspace.openCreatePanel,
+    reloadDictionaries: input.dictionaryWorkspace.workspace.reloadDictionaries,
+    startDictionaryEdit: input.dictionaryWorkspace.workspace.startEdit,
+    submitDictionaryForm: input.dictionaryWorkspace.workspace.submitForm,
+    cancelDictionaryPanel: input.dictionaryWorkspace.workspace.cancelPanel,
+  }
+
+  const sessionWorkspaceOptions: BindingSegment<
+    | "isSessionWorkspace"
+    | "sessionLoading"
+    | "canEnterSessionWorkspace"
+    | "sessionErrorMessage"
+    | "enterpriseSessionQueryFields"
+    | "enterpriseSessionTableColumns"
+    | "enterpriseSessionTableItems"
+    | "sessionCountLabel"
+    | "sessionActionLoading"
+    | "selectedSession"
+    | "handleSessionSearch"
+    | "handleSessionReset"
+    | "handleSessionRowClick"
+    | "revokeSelectedSession"
+  > = {
+    isSessionWorkspace: input.sessionWorkspace.isSessionWorkspace,
+    sessionLoading: input.sessionWorkspace.workspace.sessionLoading,
+    canEnterSessionWorkspace: input.sessionWorkspace.canEnterSessionWorkspace,
+    sessionErrorMessage: input.sessionWorkspace.workspace.sessionErrorMessage,
+    enterpriseSessionQueryFields: input.sessionWorkspace.workspace.queryFields,
+    enterpriseSessionTableColumns: input.sessionWorkspace.workspace.tableColumns,
+    enterpriseSessionTableItems: input.sessionWorkspace.workspace.tableItems,
+    sessionCountLabel: input.sessionWorkspace.workspace.countLabel,
+    sessionActionLoading: input.sessionWorkspace.workspace.sessionActionLoading,
+    selectedSession: input.sessionWorkspace.workspace.selectedSession,
+    handleSessionSearch: input.sessionWorkspace.workspace.handleSearch,
+    handleSessionReset: input.sessionWorkspace.workspace.handleReset,
+    handleSessionRowClick: input.sessionWorkspace.workspace.handleRowClick,
+    revokeSelectedSession: input.sessionWorkspace.workspace.revokeSelectedSession,
+  }
+
+  return {
+    ...input.shell,
+    ...roleWorkspaceOptions,
+    ...customerWorkspaceOptions,
+    ...dictionaryWorkspaceOptions,
+    ...input.departmentWorkspace,
+    ...sessionWorkspaceOptions,
+    ...input.postWorkspace,
+    ...input.menuWorkspace,
+    ...input.notificationWorkspace,
+    ...input.operationLogWorkspace,
+    ...input.userWorkspace,
+    ...input.settingWorkspace,
+    ...input.tenantWorkspace,
+    ...input.fileWorkspace,
+    ...input.workflowWorkspace,
+    ...input.generatorPreviewWorkspace,
+  }
+}
