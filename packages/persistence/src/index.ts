@@ -122,22 +122,11 @@ export {
   updateDepartment,
 } from "./department"
 export {
-  type CreateRolePersistenceInput,
-  getRoleByCode,
-  getRoleById,
-  insertRole,
-  listExistingRoleIds,
   listExistingPermissionCodes,
   listPermissionCodesForRole,
   listPermissionCodesForUser,
-  listRoleCodesForUser,
-  listRoles,
-  listUserIdsForRole,
   listDataScopesForUser,
   replaceRolePermissionCodes,
-  replaceRoleUserIds,
-  updateRole,
-  type UpdateRolePersistenceInput,
 } from "./auth"
 export {
   type AuditLogResult,
@@ -169,6 +158,20 @@ export {
   type UpdatePostPersistenceInput,
   updatePost,
 } from "./post"
+export {
+  type CreateRolePersistenceInput,
+  getRoleByCode,
+  getRoleById,
+  insertRole,
+  listExistingRoleIds,
+  listRoleCodesForUser,
+  listRoles,
+  listUserIdsForRole,
+  replaceRoleUserIds,
+  type RoleDataScopeValue,
+  type UpdateRolePersistenceInput,
+  updateRole,
+} from "./role"
 export {
   type CreateRefreshSessionPersistenceInput,
   getRefreshSessionById,
