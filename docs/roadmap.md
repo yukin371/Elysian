@@ -1,44 +1,46 @@
 # roadmap
 
-更新时间：`2026-04-27`
+更新时间：`2026-04-28`
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A Round-1` 的最小 workflow 闭环已落地，`Round-2` 也已在 `2026-04-26` 完成收口，当前阶段结果固定为“workflow 验证闭环 + 最小 `claim` 语义与最小所有权历史保留”，不默认继续外扩到 `transfer / delegate`。`Phase 6B` 的多租户、数据权限、租户治理、`ADR-0009`、CI tenant e2e、`feature/dev/main` 的 `10/10` 滚动观察均已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 再次确认阶段出口。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A` 的最小 workflow 闭环已在 `2026-04-26` 完成 `Round-2` 收口，当前按“已完成的能力基线”处理，不继续外扩到 `transfer / delegate`。当前即时优先级切回“若依基础功能对齐”：先把已落后端能力收口成更完整的后台基础功能包，优先补系统模块工作区闭环、在线会话治理、登录安全策略、常用导入导出与仍缺失的高频基础模块；`generator / SQL / workflow` 继续保留为次级推进轨道，而不是当前第一优先级。
 
-### Current Mainline: Phase 7 / P7A ✅ Round-2 已收口
+### Current Mainline: 若依基础能力对齐 🚧
 
-- 已决定：当前主线从 `Phase 6B` 切换至 `Phase 7 / P7A`
-- 入口依据：`P6B1/P6B2/P6B3` 已完成，`feature/dev/main` 均已达到 `10/10` tenant 滚动观察，且本地 `bun run check` 与 `bun run e2e:tenant:full` 已在 `2026-04-25` 复验通过
-- 当前范围：以简化工作流引擎为首个交付包，先服务 agent 自编排辅助工具，不扩成通用 BPM / agent orchestrator；安全合规与统一消息中心保持在 `Phase 7` 规划范围内，但不提前写成已实现事实
-- 当前约束：tenant 迁移/发布演练、平台级发布命令与回滚责任边界仍作为运营收尾项持续跟踪，不虚构生产平台自动化
-- 已推进：workflow definition 的创建 / 查询 / 版本化、instance 发起 / 查询 / 详情、todo 列表已打通
-- 已推进：最小审批动作闭环已落地，当前支持 `approved / rejected` 完成、实例取消、done 列表、实例历史任务读取与最小 `claim`；`claim` 当前只固定“认领后唯一执行人”，不引入 candidate owner、并行网关或独立调度器
-- 已推进：`WP-4` 最小条件分支已落地，当前支持基于实例变量的白名单比较表达式与 `default` 分支，不引入脚本执行器
-- 已推进：workflow 权限已拆分为 definition / instance / task 三组最小权限点，并已补独立 `workflow:task:claim`、server 403 覆盖与默认 seed
-- 已完成：`2026-04-26` 本地自动化回归复验通过，`bun run check`、workflow 定向测试与 `bun run build:vue` 均已通过；详见 [2026-04-26-round-regression-closeout.md](./plans/2026-04-26-round-regression-closeout.md)
-- 已清理风险：`packages/persistence` 的 `db:seed` 已补默认 workflow definitions 样本（`expense-approval v1/v2`、`expense-approval-condition v1`），workflow 示例页默认即可验证版本历史；`apps/example-vue` override seam 仅保留给测试注入
-- 已推进：`packages/persistence` 已新增 workflow repository 独立测试，当前覆盖 definition 版本唯一性、next version 计算、todo/done 查询边界、实例任务排序与取消语义；tenant RLS 仍继续依赖 server 集成测试与真实 PostgreSQL E2E 验证
-- 已推进：workflow 真实运行态 smoke 已并入既有 `e2e:smoke`，当前覆盖 definition 创建、线性 `approved/rejected`、最小 `claim`、显式 instance cancel、条件分支命中与 `default` 分支、todo/done、instance list 与 workflow 审计日志校验，并补高位随机端口与 Windows 端口释放清理，支持临时 PostgreSQL 库下重复执行
-- 已推进：workflow runtime 成功动作已补最小审计证据，当前对 `instance start / task claim / task complete / instance cancel` 写入 `category=workflow` 的 audit log；其中 `task claim / complete` 会携带最小 ownership context，`instance cancel` 会携带被取消待办快照，继续复用既有 operation log/audit log owner，而不新建第二套历史模型
-- 已推进：workflow task 在 `claim` 后会于原任务记录内保留最小所有权历史（`claimSourceAssignee / claimedByUserId / claimedAt`），用于 done/history 与审计辅助判断，但不扩成 `transfer / delegate` 或独立历史 owner
-- 已清理风险：启用 `tenant-context` 数据库上下文时，`/auth/login` 在未传 `tenantCode` 的情况下默认收敛到 `DEFAULT_TENANT_ID`，避免同名用户跨租户误登录
-- 已清理风险：`e2e:smoke:full` 已改为执行 `db:seed -- --reconcile-admin-password`，降低本地脏库因默认管理员密码漂移导致的假失败
-- 当前结论：`Round-2` exit gate 已满足，当前按“验证补齐 + 最小 `claim` 收口”结束本轮，不把 `transfer / delegate` 拉入实现
-- PRD 文档：[2026-04-24-system-design-v2-prd.md](./plans/2026-04-24-system-design-v2-prd.md)
-- 启动文档：[2026-04-25-phase-7a-workflow-engine-kickoff.md](./plans/2026-04-25-phase-7a-workflow-engine-kickoff.md)
-- 首轮清单：[2026-04-25-phase-7a-workflow-engine-round1-checklist.md](./plans/2026-04-25-phase-7a-workflow-engine-round1-checklist.md)
-- Round-2 文档：[2026-04-26-phase-7a-round2-verification-and-task-semantics.md](./plans/2026-04-26-phase-7a-round2-verification-and-task-semantics.md)
+- 已决定：`P7A Round-2` 视为已完成能力基线；当前主线回到“标准后台基础能力收口”，优先按若依常用后台矩阵补齐日常可用能力
+- 入口依据：认证、RBAC、系统模块、多租户、数据权限与 workflow 最小闭环都已具备，不再缺“能不能做”的底座，当前缺的是“后台常用功能是否足够完整”
+- 当前范围：优先收口 `apps/example-vue` 的系统模块工作区、真实路由切换与高频交互；优先补岗位、在线会话治理、登录锁定/失败策略、用户/字典/配置等高频模块的导入导出与日志视图缺口
+- 当前约束：不新增第二套 shared owner，不把示例应用扩写成完整低代码平台，不把 `generator / SQL / workflow` 的次级缺口继续拔高为当前第一优先级
+- 当前补充决策：C 端界面方向维持 `Vue` 第一优先级，`uniapp` 作为第二优先级进入设计储备；当前只允许文档设计，不并行开启第二前端实现主线
+- 已具备基础：用户、角色、菜单、部门、字典、系统配置、操作日志、文件、通知、租户等后端闭环已落地，前端工作区已覆盖其中大部分模块
+- 已具备基础：当前用户 refresh session 列表 / 单会话 revoke 已落最小后端切片，可作为“在线用户/会话治理”入口继续扩写，而不引入第二套 auth owner
+- 已具备基础：`P7A` workflow、`generator-session` 与 SQL preview 已可保留为次级轨道，当前只做必要收口，不继续抢占后台基础功能优先级
+- 当前结论：先把“像若依的基本后台”补齐，再决定是否恢复 `P7B/P7C`、独立 SQL 工作区或更完整 Studio 产品化
+- 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
+- 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
+- C 端第二界面设计：[2026-04-28-c-end-uniapp-second-surface-design.md](./plans/2026-04-28-c-end-uniapp-second-surface-design.md)
+- uniapp 范围规划：[2026-04-28-uniapp-scope-plan.md](./plans/2026-04-28-uniapp-scope-plan.md)
+- workflow 收口文档：[2026-04-26-phase-7a-round2-verification-and-task-semantics.md](./plans/2026-04-26-phase-7a-round2-verification-and-task-semantics.md)
 
 ## Active Tracks
 
-### 1. Phase 2: Auth Foundation ✅ 归档
+### 1. 若依基础功能对齐 🚧
+
+- 当前目标：把仓库现有系统能力收口成“企业后台日常可用”的基础包，优先解决模块闭环覆盖率不足，而不是继续拔高平台能力天花板
+- 第一优先级：收口 `apps/example-vue` 已有系统工作区，优先保证 `users / roles / menus / departments / dictionaries / settings / operation-logs / notifications / tenants` 具备真实路由切换、列表/详情、创建/编辑与必要状态动作
+- 第一优先级：补仍缺的若依高频基础项，优先 `岗位（post）`、在线会话治理、登录失败计数/锁定、登录日志视图与高频模块导入导出
+- 第二优先级：C 端界面扩展方向先固定为 `uniapp`，但当前只保留设计储备，不提前进入实现
+- 第二优先级：在不改变 owner 的前提下，继续把通知、操作日志、租户与数据权限体验向后台常用形态收口
+- 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心
+
+### 2. Phase 2: Auth Foundation ✅ 归档
 
 - 已完成：RBAC 表结构与 seed、login / refresh / logout / me 接口、customer 路由 auth guard、identity contract 收敛、`usePermissions` / `buildPermissionGates` 提取、最小 auth 审计基线
 
-### 2. Phase 3: 标准企业模块 ✅ 归档
+### 3. Phase 3: 标准企业模块 ✅ 归档
 
 - 已完成：`Phase 3A` 用户 / 角色 / 菜单 / 部门四个系统模块的最小后端闭环
 - 已完成：`Phase 3B` 字典 / 系统配置 / 操作日志模块后端闭环，保持既有 canonical owner 不漂移
@@ -51,11 +53,11 @@
 - 已推进：customer 工作区已从前端本地筛选收敛到服务端列表协议，`GET /customers` 当前支持 query / page / pageSize / sortBy / sortOrder，并返回 page metadata 供示例页最小分页交互消费
 - 已确认边界：`apps/example-vue` 当前是“企业预设 + 多工作区联调验证页”，重点验证 customers / notifications / tenants / workflow 等真实闭环，不视为完整多模块后台；后续结构整理仍限制在示例应用内部，不新增 shared owner；详见 [2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md](./plans/2026-04-26-vue-enterprise-example-boundaries-and-benchmark.md)
 
-### 3. Phase 4 Pre-validation ✅ 归档
+### 4. Phase 4 Pre-validation ✅ 归档
 
 - 已完成：`productModuleSchema` 落地、generator 模板硬编码修复（`CustomerStatus` → `{PascalName}Status`、`input.name` → 动态字段检测）、product 生成验证零残留通过
 
-### 4. Phase 6A: 生产基线准备 ✅ Round-2 收口
+### 5. Phase 6A: 生产基线准备 ✅ Round-2 收口
 
 - 已决定：下一阶段优先进入 `Phase 6A`，先补部署、观测、安全和 E2E 基线，避免将工程风险后置
 - 已启动计划文档：[2026-04-22-phase-6a-production-baseline-kickoff.md](./plans/2026-04-22-phase-6a-production-baseline-kickoff.md)
@@ -164,7 +166,7 @@
 - 已完成：新增 `e2e:tenant:stability:download` 与 `e2e:tenant:upgrade:finalize:from-github`，可直接从 GitHub 下载 tenant artifact 并落升级结论
 - 已完成：基于 `workflow_dispatch` 连续 5 次真实样本 `24886462252 / 24886403317 / 24886352160 / 24886285868 / 24886175279` 输出 tenant observation evidence；当前 `selectedWindowRuns=5`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`，门禁返回 `candidate_for_next_step`
 - 已完成：基于 `ELYSIAN_TENANT_STABILITY_WINDOW_SIZE=10` 与最近 `10` 次 tenant artifact（`24887191148 / 24887139395 / 24887089834 / 24887032527 / 24886462252 / 24886403317 / 24886352160 / 24886285868 / 24886175279 / 24885957451`）输出首轮滚动观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
-- 已完成：`feature-p6b1-tenant-isolation -> dev -> main` 已全部晋级，`dev` push / workflow_dispatch 与 `main` push / workflow_dispatch 均已包含 `e2e-tenant` job 与 artifact
+- 已完成：tenant 主线收敛链已完成，历史功能分支样本已收敛到 `dev/main`，且 `dev` push / workflow_dispatch 与 `main` push / workflow_dispatch 均已包含 `e2e-tenant` job 与 artifact
 - 已完成：基于 `dev` 最近 `10` 次 tenant artifact（含 `24888296758 / 24888362434 / 24888586126 / 24888651338 / 24888706653 / 24888757984 / 24888812971 / 24888870698 / 24888923973 / 24888972790`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已新增前期文档草案：[2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md) 与 [2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md)，用于在当前 `Phase 6B` runbook 收尾后评估 `Arco -> TDesign` 迁移窗口
@@ -318,7 +320,7 @@
 
 ## 下一步
 
-1. 先把 `apps/example-vue` 的 enterprise workspace 能力继续按后台常用功能矩阵收口，优先补剩余高频模块与交互缺口，不急着抽象成新的 shared owner。
-2. 在生成主线中继续推进 `Studio 化 / migration 化 / 会话治理化` 三条缺口：当前优先补 apply diff/evidence 强化、proposal 到正式 migration 的人工接入规范，以及 refresh session 设备化治理，再决定是否独立出 SQL 工作区。
-3. 继续保留 `P7A Round-2` 作为 workflow 当前阶段出口，只在需要时补最小所有权/权限边界，不默认进入 `transfer / delegate`。
+1. 先按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
+2. 先补仍缺的高频基础能力：`岗位（post）`、当前用户会话管理页与强制下线、登录失败计数/锁定、以及从操作日志扩展到用户/字典/配置等模块的导入导出能力。
+3. `generator / SQL / workflow` 维持次级推进：优先做必要收口（如会话设备化、diff/evidence 强化），不抢占若依基础功能对齐的第一优先级。
 4. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。
