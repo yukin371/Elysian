@@ -54,6 +54,21 @@ export const createPostModule = (
         },
       )
       .get(
+        "/system/posts/export",
+        async ({ request, set }) => {
+          await authorize(request.headers, postPermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv()
+        },
+        {
+          detail: {
+            tags: ["post"],
+            summary: "Export posts as CSV",
+          },
+        },
+      )
+      .get(
         "/system/posts/:id",
         async ({ params, request }) => {
           await authorize(request.headers, postPermissions.get)

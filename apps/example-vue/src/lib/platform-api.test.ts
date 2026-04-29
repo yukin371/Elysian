@@ -7,6 +7,7 @@ import {
   exportDepartmentsCsv,
   exportDictionaryItemsCsv,
   exportOperationLogsCsv,
+  exportPostsCsv,
   exportRolesCsv,
   fetchPlatform,
   fetchSystemModules,
@@ -449,6 +450,39 @@ describe("platform api department exports", () => {
         {
           url: "http://localhost:3000/system/departments/export",
           authorization: "Bearer department-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api post exports", () => {
+  test("exports posts with bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("post-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,code\npost_ceo_1,ceo\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(exportPostsCsv()).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/posts/export",
+          authorization: "Bearer post-token",
         },
       ])
     } finally {

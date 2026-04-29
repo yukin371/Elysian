@@ -465,6 +465,45 @@ describe("createServerApp system organization", () => {
     })
   })
 
+  it("exports system posts as csv when the access token has post-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:post:list"],
+      isSuperAdmin: false,
+    })
+    const postRepository = createInMemoryPostRepository({
+      posts: createPostSeedRecords(),
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createPostModule(postRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const response = await app.handle(
+      new Request("http://localhost/system/posts/export", {
+        headers: createAuthorizedHeaders(accessToken),
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("text/csv")
+
+    const text = await response.text()
+    expect(text).toContain(
+      "id,code,name,sort,status,remark,createdAt,updatedAt",
+    )
+    expect(text).toContain(
+      "post_ceo_1,ceo,Chief Executive Officer,10,active,Top management role,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+    expect(text).toContain(
+      "post_ops_1,ops-lead,Operations Lead,20,disabled,,2026-04-21T01:00:00.000Z,2026-04-21T01:00:00.000Z",
+    )
+  })
+
   it("creates and updates system posts", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [

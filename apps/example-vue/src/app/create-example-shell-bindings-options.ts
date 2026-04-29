@@ -248,6 +248,7 @@ export const createExampleShellBindingsOptions = (
   const postWorkspaceOptions = {
     isPostWorkspace: input.postWorkspace.isPostWorkspace,
     postLoading: input.postWorkspace.workspace.postLoading,
+    postExportLoading: input.postWorkspace.postExportLoading,
     canCreatePosts: input.postWorkspace.canCreatePosts,
     canViewPosts: input.postWorkspace.canViewPosts,
     postModuleReady: input.postWorkspace.postModuleReady,
@@ -272,6 +273,7 @@ export const createExampleShellBindingsOptions = (
     handlePostRowClick: input.postWorkspace.workspace.handleRowClick,
     openPostCreatePanel: input.postWorkspace.workspace.openCreatePanel,
     reloadPosts: input.postWorkspace.workspace.reloadPosts,
+    handleExportPosts: input.postWorkspace.handleExportPosts,
     startPostEdit: input.postWorkspace.workspace.startEdit,
     submitPostForm: input.postWorkspace.workspace.submitForm,
     cancelPostPanel: input.postWorkspace.workspace.cancelPanel,

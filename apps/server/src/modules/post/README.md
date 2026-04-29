@@ -4,9 +4,10 @@
 
 ## Owns
 
-- `/system/posts` 的列表、详情、创建、更新。
+- `/system/posts` 的列表、详情、导出、创建、更新。
 - 岗位 `code/name` 的必填与唯一性校验。
 - `remark` 的最小规范化。
+- CSV 导出列与岗位模块本地字段契约。
 
 ## Must Not Own
 
@@ -25,7 +26,8 @@
 ```mermaid
 flowchart LR
   A[/system/posts] --> B[module.ts]
-  B --> C[service.ts\ncode/name/remark]
+  A2[/system/posts/export] --> B
+  B --> C[service.ts\ncode/name/remark/csv]
   C --> D[repository.ts]
   D --> E[@elysian/persistence\nposts]
 ```
@@ -34,4 +36,5 @@ flowchart LR
 
 - `service.ts` 已确认 `code/name` 先 trim，再做非空和唯一校验。
 - `service.ts` 已确认 `remark` 会被规范为字符串，避免把空白文本当成有效业务含义。
+- `service.ts` 已确认导出只读取岗位列表并生成 CSV，不接管用户-岗位复杂关系。
 - `repository.ts` 已确认岗位模块目前只桥接 `posts` 持久化，不混入用户或部门关系。

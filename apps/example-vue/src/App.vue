@@ -52,6 +52,7 @@ import {
   exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
   exportOperationLogsCsv,
+  exportPostsCsv,
   exportRolesCsv,
   exportSettingsCsv,
   exportUsersCsv,
@@ -155,6 +156,7 @@ const departmentExportLoading = ref(false)
 const dictionaryTypeExportLoading = ref(false)
 const dictionaryItemsExportLoading = ref(false)
 const operationLogExportLoading = ref(false)
+const postExportLoading = ref(false)
 const roleExportLoading = ref(false)
 const userExportLoading = ref(false)
 const settingExportLoading = ref(false)
@@ -1426,6 +1428,29 @@ const handleExportDepartments = async () => {
   }
 }
 
+const handleExportPosts = async () => {
+  if (!canViewPosts.value || postExportLoading.value) {
+    return
+  }
+
+  postExportLoading.value = true
+  postErrorMessage.value = ""
+
+  try {
+    const blob = await exportPostsCsv()
+    downloadBrowserBlob(blob, createCsvExportFilename("system-posts"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    postErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportPosts")
+  } finally {
+    postExportLoading.value = false
+  }
+}
+
 const handleExportSettings = async () => {
   if (!canViewSettings.value || settingExportLoading.value) {
     return
@@ -1588,11 +1613,13 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   postWorkspace: {
     workspace: postWorkspace,
     isPostWorkspace,
+    postExportLoading,
     canCreatePosts,
     canViewPosts,
     postModuleReady,
     canEnterPostWorkspace,
     canUpdatePosts,
+    handleExportPosts,
   },
   menuWorkspace: {
     workspace: menuWorkspace,

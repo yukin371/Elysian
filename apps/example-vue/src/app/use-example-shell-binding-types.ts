@@ -65,6 +65,7 @@ export interface UseExampleShellBindingsOptions {
   canEnterSessionWorkspace: ValueSource<boolean>
   isPostWorkspace: ComputedRef<boolean>
   postLoading: ValueSource<boolean>
+  postExportLoading: ValueSource<boolean>
   canCreatePosts: ValueSource<boolean>
   canViewPosts: ValueSource<boolean>
   isMenuWorkspace: ComputedRef<boolean>
@@ -425,6 +426,7 @@ export interface UseExampleShellBindingsOptions {
   handleExportDepartments: () => void
   openPostCreatePanel: () => void
   reloadPosts: () => void
+  handleExportPosts: () => void
   openMenuCreatePanel: () => void
   reloadMenus: () => void
   openNotificationCreatePanel: () => void

@@ -28,6 +28,11 @@ defineProps<{
   departmentExportLoading: boolean
   canCreateDepartments: boolean
   canViewDepartments: boolean
+  isPostWorkspace: boolean
+  postLoading: boolean
+  postExportLoading: boolean
+  canCreatePosts: boolean
+  canViewPosts: boolean
   isMenuWorkspace: boolean
   menuLoading: boolean
   canCreateMenus: boolean
@@ -83,6 +88,9 @@ defineEmits<{
   (event: "open-department-create"): void
   (event: "reload-departments"): void
   (event: "export-departments"): void
+  (event: "open-post-create"): void
+  (event: "reload-posts"): void
+  (event: "export-posts"): void
   (event: "open-menu-create"): void
   (event: "reload-menus"): void
   (event: "open-notification-create"): void
@@ -229,6 +237,37 @@ defineEmits<{
       variant="outline"
       :disabled="departmentLoading || !canViewDepartments"
       @click="$emit('reload-departments')"
+    >
+      {{ t("app.action.refresh") }}
+    </TButton>
+    <TButton
+      v-if="isPostWorkspace"
+      size="small"
+      theme="primary"
+      variant="outline"
+      :disabled="!canCreatePosts"
+      @click="$emit('open-post-create')"
+    >
+      {{ t("app.post.action.create") }}
+    </TButton>
+    <TButton
+      v-if="isPostWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="postExportLoading"
+      :disabled="postExportLoading || !canViewPosts"
+      @click="$emit('export-posts')"
+    >
+      {{ t("app.action.exportPosts") }}
+    </TButton>
+    <TButton
+      v-if="isPostWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :disabled="postLoading || !canViewPosts"
+      @click="$emit('reload-posts')"
     >
       {{ t("app.action.refresh") }}
     </TButton>

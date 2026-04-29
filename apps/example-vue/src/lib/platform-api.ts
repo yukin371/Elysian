@@ -58,6 +58,7 @@ export {
 export { fetchPlatform, fetchSystemModules } from "./platform-api/platform"
 export {
   createPost,
+  exportPostsCsv,
   fetchPostById,
   fetchPosts,
   updatePost,

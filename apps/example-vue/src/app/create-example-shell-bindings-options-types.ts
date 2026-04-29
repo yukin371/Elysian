@@ -107,11 +107,13 @@ export interface CreateExampleShellBindingsOptionsInput {
   postWorkspace: {
     workspace: ReturnType<typeof usePostWorkspace>
     isPostWorkspace: OptionValue<"isPostWorkspace">
+    postExportLoading: OptionValue<"postExportLoading">
     canCreatePosts: OptionValue<"canCreatePosts">
     canViewPosts: OptionValue<"canViewPosts">
     postModuleReady: OptionValue<"postModuleReady">
     canEnterPostWorkspace: OptionValue<"canEnterPostWorkspace">
     canUpdatePosts: OptionValue<"canUpdatePosts">
+    handleExportPosts: OptionValue<"handleExportPosts">
   }
   menuWorkspace: {
     workspace: ReturnType<typeof useMenuWorkspace>
@@ -401,6 +403,7 @@ export type SessionWorkspaceBindingsOptions = BindingSegment<
 export type PostWorkspaceBindingsOptions = BindingSegment<
   | "isPostWorkspace"
   | "postLoading"
+  | "postExportLoading"
   | "canCreatePosts"
   | "canViewPosts"
   | "postModuleReady"
@@ -424,6 +427,7 @@ export type PostWorkspaceBindingsOptions = BindingSegment<
   | "handlePostRowClick"
   | "openPostCreatePanel"
   | "reloadPosts"
+  | "handleExportPosts"
   | "startPostEdit"
   | "submitPostForm"
   | "cancelPostPanel"

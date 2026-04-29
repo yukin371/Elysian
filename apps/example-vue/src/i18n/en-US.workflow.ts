@@ -199,6 +199,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadDepartments": "Failed to load departments",
   "app.error.loadDepartmentDetail": "Failed to load department detail",
   "app.error.exportDepartments": "Failed to export departments",
+  "app.error.exportPosts": "Failed to export posts",
   "app.error.loadMenus": "Failed to load menus",
   "app.error.loadMenuDetail": "Failed to load menu detail",
   "app.error.loadRoles": "Failed to load roles",
