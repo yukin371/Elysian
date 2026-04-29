@@ -39,6 +39,7 @@ export {
 } from "./platform-api/files"
 export {
   createMenu,
+  exportMenusCsv,
   fetchMenuById,
   fetchMenus,
   updateMenu,

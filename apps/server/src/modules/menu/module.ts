@@ -54,6 +54,21 @@ export const createMenuModule = (
         },
       )
       .get(
+        "/system/menus/export",
+        async ({ request, set }) => {
+          await authorize(request.headers, menuPermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv()
+        },
+        {
+          detail: {
+            tags: ["menu"],
+            summary: "Export menus as CSV",
+          },
+        },
+      )
+      .get(
         "/system/menus/:id",
         async ({ params, request }) => {
           await authorize(request.headers, menuPermissions.get)

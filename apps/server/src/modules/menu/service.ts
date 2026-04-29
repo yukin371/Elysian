@@ -16,6 +16,44 @@ export interface UpdateMenuPayload extends UpdateMenuInput {}
 
 export const createMenuService = (repository: MenuRepository) => ({
   list: () => repository.list(),
+  async exportCsv() {
+    const items = await repository.list()
+
+    return buildCsv(
+      [
+        "id",
+        "parentId",
+        "type",
+        "code",
+        "name",
+        "path",
+        "component",
+        "icon",
+        "sort",
+        "isVisible",
+        "status",
+        "permissionCode",
+        "createdAt",
+        "updatedAt",
+      ],
+      items.map((item) => [
+        item.id,
+        item.parentId,
+        item.type,
+        item.code,
+        item.name,
+        item.path,
+        item.component,
+        item.icon,
+        item.sort,
+        item.isVisible ? "true" : "false",
+        item.status,
+        item.permissionCode,
+        item.createdAt,
+        item.updatedAt,
+      ]),
+    )
+  },
   async getById(id: string) {
     const menu = await repository.getById(id)
 
@@ -310,5 +348,28 @@ const normalizeStringArray = (values: string[] | undefined) =>
   [
     ...new Set((values ?? []).map((value) => value.trim()).filter(Boolean)),
   ].sort()
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | number | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | number | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : String(value)
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
+}
 
 export type MenuService = ReturnType<typeof createMenuService>

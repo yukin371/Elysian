@@ -54,7 +54,7 @@
 | 在线用户 / 会话治理 | 当前在线会话查看、强制下线 | ✅ 已完成 | 当前用户 refresh session 列表、状态区分与单会话强制下线已在前后端形成最小闭环 | `apps/server` + `apps/example-vue` + `packages/persistence` | 若继续扩写，重点会转向跨端设备治理与批量操作，而非当前阻断项 |
 | 登录安全策略 | 登录失败计数、锁定窗口、解锁策略 | ✅ 已完成 | 已补登录失败计数、锁定窗口、自动到期解锁与成功登录清零，并有审计与回归测试覆盖 | `apps/server` + `packages/persistence` | 当前仅保留最小策略；MFA、设备指纹与更重风控仍不在本轮 |
 | 岗位管理（post）/职位语义 | 用户-部门之外的基础组织能力 | ✅ 已完成 | `post` 模块、权限点与前端工作区已形成最小闭环，并已统一“岗位管理（post）”口径 | `apps/server` + `apps/example-vue` + `packages/persistence` | 后续若扩写，重点会转向更深的用户-岗位治理，而非基础缺位 |
-| 导入导出 | 用户、角色、部门、岗位、字典、配置等高频模块的常用能力 | 🟡 部分完成 | 操作日志当前筛选导出、用户、角色、部门、岗位、字典类型/条目、系统配置导出与前端导出入口已落地 | `apps/server` + `apps/example-vue` | 仍缺导入链路、模板/校验/错误报告，以及批量治理体验 |
+| 导入导出 | 用户、角色、菜单、部门、岗位、字典、配置等高频模块的常用能力 | 🟡 部分完成 | 操作日志当前筛选导出、用户、角色、菜单、部门、岗位、字典类型/条目、系统配置导出与前端导出入口已落地 | `apps/server` + `apps/example-vue` | 仍缺导入链路、模板/校验/错误报告，以及批量治理体验 |
 | 后台前端壳层 | 可切换、可工作的多模块后台 | 🟡 部分完成 | `ElyShell`、动态菜单与多工作区装配已存在 | `packages/ui-enterprise-vue` + `apps/example-vue` | 仍需继续收口页面切换、动作一致性与“不是演示页而是真实后台”的体验 |
 | workflow 扩展 | transfer / delegate / 更通用 BPM | ⛔ 当前不优先 | `P7A Round-2` 最小闭环已完成 | `apps/server` + `packages/persistence` | 当前不继续外扩 |
 | generator / SQL Studio 化 | 更完整的平台产品体验 | ⛔ 当前不优先 | 相关能力已有子矩阵与最小运行态 | `packages/generator` + `apps/server` | 当前降为次级轨道 |
@@ -65,7 +65,7 @@
 
 1. 继续收口已有系统模块工作区，优先保证 `users / roles / menus / departments / dictionaries / settings / operation-logs / notifications / tenants` 在真实路由切换、动作一致性与失败态上更像完整后台。
 2. 继续提升操作日志、通知、文件与租户等工作区的日常可用性；通知当前筛选批量已读与文件当前筛选批量删除已形成小闭环，后续优先补状态反馈与后台常用交互细节。
-3. 在既有导出闭环稳定后，再评估 `users / roles / departments / posts / dictionaries / settings` 的导入链路是否值得进入当前主线。
+3. 在既有导出闭环稳定后，再评估 `users / roles / menus / departments / posts / dictionaries / settings` 的导入链路是否值得进入当前主线。
 
 ### 第二优先级
 

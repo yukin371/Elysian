@@ -4,9 +4,10 @@
 
 ## Owns
 
-- `/system/menus` 的列表、详情、创建、更新。
+- `/system/menus` 的列表、详情、导出、创建、更新。
 - 菜单树父子关系与环路校验。
 - 菜单 `permissionCode` 和 `roleIds` 的引用有效性检查。
+- CSV 导出列与菜单模块本地字段契约。
 
 ## Must Not Own
 
@@ -25,7 +26,8 @@
 ```mermaid
 flowchart LR
   A[/system/menus] --> B[module.ts]
-  B --> C[service.ts\ncode/name/parent/permission/roles]
+  A2[/system/menus/export] --> B
+  B --> C[service.ts\ncode/name/parent/permission/roles/csv]
   C --> D[repository.ts]
   D --> E[menus]
   D --> F[role_menus / permissions / roles]
@@ -36,4 +38,5 @@ flowchart LR
 - `service.ts` 已确认 `code/name` 非空且 `code` 唯一。
 - `service.ts` 已确认 `parentId` 不存在、自指或成环都会被拦截。
 - `service.ts` 已确认 `permissionCode` 必须能在既有权限集合中找到，`roleIds` 也必须全部存在。
+- `service.ts` 已确认导出只读取菜单列表并生成 CSV，不接管前端导航布局或通用树服务。
 - `repository.ts` 已确认菜单-角色替换仍在 persistence owner 内完成。

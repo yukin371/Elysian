@@ -282,6 +282,7 @@ export const createExampleShellBindingsOptions = (
   const menuWorkspaceOptions = {
     isMenuWorkspace: input.menuWorkspace.isMenuWorkspace,
     menuLoading: input.menuWorkspace.workspace.menuLoading,
+    menuExportLoading: input.menuWorkspace.menuExportLoading,
     canCreateMenus: input.menuWorkspace.canCreateMenus,
     canViewMenus: input.menuWorkspace.canViewMenus,
     menuModuleReady: input.menuWorkspace.menuModuleReady,
@@ -308,6 +309,7 @@ export const createExampleShellBindingsOptions = (
     handleMenuRowClick: input.menuWorkspace.workspace.handleRowClick,
     openMenuCreatePanel: input.menuWorkspace.workspace.openCreatePanel,
     reloadMenus: input.menuWorkspace.workspace.reloadMenus,
+    handleExportMenus: input.menuWorkspace.handleExportMenus,
     startMenuEdit: input.menuWorkspace.workspace.startEdit,
     submitMenuForm: input.menuWorkspace.workspace.submitForm,
     cancelMenuPanel: input.menuWorkspace.workspace.cancelPanel,

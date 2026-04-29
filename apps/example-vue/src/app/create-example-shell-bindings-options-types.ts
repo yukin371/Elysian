@@ -118,11 +118,13 @@ export interface CreateExampleShellBindingsOptionsInput {
   menuWorkspace: {
     workspace: ReturnType<typeof useMenuWorkspace>
     isMenuWorkspace: OptionValue<"isMenuWorkspace">
+    menuExportLoading: OptionValue<"menuExportLoading">
     canCreateMenus: OptionValue<"canCreateMenus">
     canViewMenus: OptionValue<"canViewMenus">
     menuModuleReady: OptionValue<"menuModuleReady">
     canEnterMenuWorkspace: OptionValue<"canEnterMenuWorkspace">
     canUpdateMenus: OptionValue<"canUpdateMenus">
+    handleExportMenus: OptionValue<"handleExportMenus">
   }
   notificationWorkspace: {
     workspace: ReturnType<typeof useNotificationWorkspace>
@@ -436,6 +438,7 @@ export type PostWorkspaceBindingsOptions = BindingSegment<
 export type MenuWorkspaceBindingsOptions = BindingSegment<
   | "isMenuWorkspace"
   | "menuLoading"
+  | "menuExportLoading"
   | "canCreateMenus"
   | "canViewMenus"
   | "menuModuleReady"
@@ -461,6 +464,7 @@ export type MenuWorkspaceBindingsOptions = BindingSegment<
   | "handleMenuRowClick"
   | "openMenuCreatePanel"
   | "reloadMenus"
+  | "handleExportMenus"
   | "startMenuEdit"
   | "submitMenuForm"
   | "cancelMenuPanel"

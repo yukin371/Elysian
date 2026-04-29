@@ -70,6 +70,7 @@ export interface UseExampleShellBindingsOptions {
   canViewPosts: ValueSource<boolean>
   isMenuWorkspace: ComputedRef<boolean>
   menuLoading: ValueSource<boolean>
+  menuExportLoading: ValueSource<boolean>
   canCreateMenus: ValueSource<boolean>
   canViewMenus: ValueSource<boolean>
   isNotificationWorkspace: ComputedRef<boolean>
@@ -429,6 +430,7 @@ export interface UseExampleShellBindingsOptions {
   handleExportPosts: () => void
   openMenuCreatePanel: () => void
   reloadMenus: () => void
+  handleExportMenus: () => void
   openNotificationCreatePanel: () => void
   reloadNotifications: () => void
   reloadOperationLogs: () => void

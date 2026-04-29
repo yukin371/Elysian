@@ -821,6 +821,47 @@ describe("createServerApp system access", () => {
     })
   })
 
+  it("exports system menus as csv when the access token has menu-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:menu:list"],
+      isSuperAdmin: false,
+    })
+    const menuRepository = createInMemoryMenuRepository({
+      menus: createMenuSeedRecords(),
+      availablePermissionCodes: ["system:user:list", "system:role:list"],
+      availableRoleIds: ["role_admin_1", "role_operator_1"],
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createMenuModule(menuRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const response = await app.handle(
+      new Request("http://localhost/system/menus/export", {
+        headers: createAuthorizedHeaders(accessToken),
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("text/csv")
+
+    const text = await response.text()
+    expect(text).toContain(
+      "id,parentId,type,code,name,path,component,icon,sort,isVisible,status,permissionCode,createdAt,updatedAt",
+    )
+    expect(text).toContain(
+      "menu_system_root_1,,directory,system-root,System,/system,,settings,10,true,active,,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+    expect(text).toContain(
+      "menu_system_users_1,menu_system_root_1,menu,system-users,Users,/system/users,system/users/index,users,11,true,active,system:user:list,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+  })
+
   it("creates and updates menus with parent, permission, and role bindings", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:menu:list", "system:menu:update"],

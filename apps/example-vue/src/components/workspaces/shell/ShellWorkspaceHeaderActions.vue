@@ -35,6 +35,7 @@ defineProps<{
   canViewPosts: boolean
   isMenuWorkspace: boolean
   menuLoading: boolean
+  menuExportLoading: boolean
   canCreateMenus: boolean
   canViewMenus: boolean
   isNotificationWorkspace: boolean
@@ -93,6 +94,7 @@ defineEmits<{
   (event: "export-posts"): void
   (event: "open-menu-create"): void
   (event: "reload-menus"): void
+  (event: "export-menus"): void
   (event: "open-notification-create"): void
   (event: "reload-notifications"): void
   (event: "mark-visible-notifications-read"): void
@@ -280,6 +282,17 @@ defineEmits<{
       @click="$emit('open-menu-create')"
     >
       {{ t("app.action.newMenu") }}
+    </TButton>
+    <TButton
+      v-if="isMenuWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="menuExportLoading"
+      :disabled="menuExportLoading || !canViewMenus"
+      @click="$emit('export-menus')"
+    >
+      {{ t("app.action.exportMenus") }}
     </TButton>
     <TButton
       v-if="isMenuWorkspace"

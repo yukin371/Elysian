@@ -6,6 +6,7 @@ import {
   clearAccessToken,
   exportDepartmentsCsv,
   exportDictionaryItemsCsv,
+  exportMenusCsv,
   exportOperationLogsCsv,
   exportPostsCsv,
   exportRolesCsv,
@@ -483,6 +484,39 @@ describe("platform api post exports", () => {
         {
           url: "http://localhost:3000/system/posts/export",
           authorization: "Bearer post-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api menu exports", () => {
+  test("exports menus with bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("menu-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,code\nmenu_system_root_1,system-root\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(exportMenusCsv()).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/menus/export",
+          authorization: "Bearer menu-token",
         },
       ])
     } finally {

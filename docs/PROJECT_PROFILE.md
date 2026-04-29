@@ -27,7 +27,7 @@
 - 服务端当前已暴露 `/metrics/prometheus` 指标端点（Prometheus exposition 格式，含 `process_uptime_seconds`、`process_start_time_seconds`、`process_cpu_*_seconds_total`、`process_memory_*`）。
 - 服务端已落首个真实业务模块：`customer`，并已具备完整 CRUD。
 - 服务端已落认证模块：`auth`，并已提供 `POST /auth/login`、`POST /auth/refresh`、`POST /auth/logout`、`GET /auth/me`、`GET /auth/sessions`、`DELETE /auth/sessions/:id`。
-- 服务端已落菜单管理模块：`menu`，并已提供 `GET /system/menus`、`GET /system/menus/:id`、`POST /system/menus`、`PUT /system/menus/:id`。
+- 服务端已落菜单管理模块：`menu`，并已提供 `GET /system/menus`、`GET /system/menus/:id`、`GET /system/menus/export`、`POST /system/menus`、`PUT /system/menus/:id`。
 - 服务端已落角色管理模块：`role`，并已提供 `GET /system/roles`、`GET /system/roles/:id`、`GET /system/roles/export`、`POST /system/roles`、`PUT /system/roles/:id`。
 - 服务端已落用户管理模块：`user`，并已提供 `GET /system/users`、`GET /system/users/:id`、`POST /system/users`、`PUT /system/users/:id`、`POST /system/users/:id/reset-password`。
 - 服务端已落部门管理模块：`department`，并已提供 `GET /system/departments`、`GET /system/departments/:id`、`GET /system/departments/export`、`POST /system/departments`、`PUT /system/departments/:id`。

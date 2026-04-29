@@ -1,4 +1,4 @@
-import { requestJson } from "./core"
+import { requestBlob, requestJson } from "./core"
 
 export interface MenuRecord {
   id: string
@@ -55,6 +55,11 @@ export interface UpdateMenuRequest {
 
 export const fetchMenus = async (): Promise<MenusResponse> =>
   requestJson<MenusResponse>("/system/menus", {
+    auth: true,
+  })
+
+export const exportMenusCsv = async (): Promise<Blob> =>
+  requestBlob("/system/menus/export", {
     auth: true,
   })
 

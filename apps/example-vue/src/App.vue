@@ -51,6 +51,7 @@ import {
   exportDepartmentsCsv,
   exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
+  exportMenusCsv,
   exportOperationLogsCsv,
   exportPostsCsv,
   exportRolesCsv,
@@ -155,6 +156,7 @@ const workflowModuleReady = ref(false)
 const departmentExportLoading = ref(false)
 const dictionaryTypeExportLoading = ref(false)
 const dictionaryItemsExportLoading = ref(false)
+const menuExportLoading = ref(false)
 const operationLogExportLoading = ref(false)
 const postExportLoading = ref(false)
 const roleExportLoading = ref(false)
@@ -1451,6 +1453,29 @@ const handleExportPosts = async () => {
   }
 }
 
+const handleExportMenus = async () => {
+  if (!canViewMenus.value || menuExportLoading.value) {
+    return
+  }
+
+  menuExportLoading.value = true
+  menuErrorMessage.value = ""
+
+  try {
+    const blob = await exportMenusCsv()
+    downloadBrowserBlob(blob, createCsvExportFilename("system-menus"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    menuErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportMenus")
+  } finally {
+    menuExportLoading.value = false
+  }
+}
+
 const handleExportSettings = async () => {
   if (!canViewSettings.value || settingExportLoading.value) {
     return
@@ -1624,11 +1649,13 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   menuWorkspace: {
     workspace: menuWorkspace,
     isMenuWorkspace,
+    menuExportLoading,
     canCreateMenus,
     canViewMenus,
     menuModuleReady,
     canEnterMenuWorkspace,
     canUpdateMenus,
+    handleExportMenus,
   },
   notificationWorkspace: {
     workspace: notificationWorkspace,
