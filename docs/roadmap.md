@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-04-28`
+更新时间：`2026-04-30`
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 

@@ -230,7 +230,7 @@
 - 后端 `/system/operation-logs` 已支持 `authEventType / authFailureReason` 过滤。
 - `apps/example-vue` 已在现有 operation-log workspace 显式展示 auth 事件筛选、详情字段，并补了 auth failure reason 的前端本地文案映射。
 
-### WP-6 高频模块导入导出 🟡 已完成第一轮导出
+### WP-6 高频模块导入导出 ✅ 已完成第一轮导出
 
 目标：
 
@@ -273,7 +273,7 @@
 
 - 已补 `users / roles / menus / departments / posts / dictionary types / dictionary items / settings / tenants / notifications / files` 导出接口与 server 测试。
 - `apps/example-vue` 已在 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / files / operation-logs` 工作区壳层补齐导出入口、loading 与错误回流；字典工作区已同时覆盖类型与条目导出，通知、文件与操作日志导出复用当前筛选条件。
-- 当前仍只完成“先导出”，导入链路继续保持待评估状态。
+- 当前已完成第一轮导出，下一步仅评估导入链路是否值得进入当前主线。
 
 ## 实施顺序
 
@@ -305,13 +305,13 @@
 完成本轮时，应满足：
 
 - [ ] 已有系统工作区完成一轮后台闭环收口
-- [ ] `岗位管理（post）` 最小闭环落地
-- [ ] 在线会话治理页可用
-- [ ] 登录失败计数与锁定策略可验证
-- [ ] 登录日志视图可用
-- [ ] 至少 1 到 3 个高频模块导出能力落地
-- [ ] `bun run build:vue` 通过
-- [ ] 相关 server / persistence / helper 测试通过
+- [x] `岗位管理（post）` 最小闭环落地
+- [x] 在线会话治理页可用
+- [x] 登录失败计数与锁定策略可验证
+- [x] 登录日志视图可用
+- [x] 至少 1 到 3 个高频模块导出能力落地
+- [x] `bun run build:vue` 通过
+- [x] 相关 server / persistence / helper 测试通过
 
 ## 风险与约束
 
