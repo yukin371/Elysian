@@ -61,6 +61,7 @@ defineProps<{
   canViewSettings: boolean
   isTenantWorkspace: boolean
   tenantLoading: boolean
+  tenantExportLoading: boolean
   canCreateTenants: boolean
   canViewTenants: boolean
   isFileWorkspace: boolean
@@ -108,6 +109,7 @@ defineEmits<{
   (event: "export-settings"): void
   (event: "open-tenant-create"): void
   (event: "reload-tenants"): void
+  (event: "export-tenants"): void
   (event: "reload-files"): void
   (event: "delete-visible-files"): void
   (event: "reload-workflow-definitions"): void
@@ -412,6 +414,17 @@ defineEmits<{
       @click="$emit('open-tenant-create')"
     >
       {{ t("app.action.newTenant") }}
+    </TButton>
+    <TButton
+      v-if="isTenantWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="tenantExportLoading"
+      :disabled="tenantExportLoading || !canViewTenants"
+      @click="$emit('export-tenants')"
+    >
+      {{ t("app.action.exportTenants") }}
     </TButton>
     <TButton
       v-if="isTenantWorkspace"

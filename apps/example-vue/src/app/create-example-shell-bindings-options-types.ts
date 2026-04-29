@@ -174,11 +174,13 @@ export interface CreateExampleShellBindingsOptionsInput {
   tenantWorkspace: {
     workspace: ReturnType<typeof useTenantWorkspace>
     isTenantWorkspace: OptionValue<"isTenantWorkspace">
+    tenantExportLoading: OptionValue<"tenantExportLoading">
     canCreateTenants: OptionValue<"canCreateTenants">
     canViewTenants: OptionValue<"canViewTenants">
     tenantModuleReady: OptionValue<"tenantModuleReady">
     canEnterTenantWorkspace: OptionValue<"canEnterTenantWorkspace">
     canUpdateTenants: OptionValue<"canUpdateTenants">
+    handleExportTenants: OptionValue<"handleExportTenants">
   }
   fileWorkspace: {
     workspace: ReturnType<typeof useFileWorkspace>
@@ -604,6 +606,7 @@ export type SettingWorkspaceBindingsOptions = BindingSegment<
 export type TenantWorkspaceBindingsOptions = BindingSegment<
   | "isTenantWorkspace"
   | "tenantLoading"
+  | "tenantExportLoading"
   | "canCreateTenants"
   | "canViewTenants"
   | "tenantModuleReady"
@@ -627,6 +630,7 @@ export type TenantWorkspaceBindingsOptions = BindingSegment<
   | "handleTenantRowClick"
   | "openTenantCreatePanel"
   | "reloadTenants"
+  | "handleExportTenants"
   | "startTenantEdit"
   | "toggleSelectedTenantStatus"
   | "submitTenantForm"

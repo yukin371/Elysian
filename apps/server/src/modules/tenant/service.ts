@@ -15,6 +15,21 @@ export interface UpdateTenantPayload extends UpdateTenantInput {}
 
 export const createTenantService = (repository: TenantRepository) => ({
   list: () => repository.list(),
+  async exportCsv() {
+    const items = await repository.list()
+
+    return buildCsv(
+      ["id", "code", "name", "status", "createdAt", "updatedAt"],
+      items.map((item) => [
+        item.id,
+        item.code,
+        item.name,
+        item.status,
+        item.createdAt,
+        item.updatedAt,
+      ]),
+    )
+  },
   async getById(id: string) {
     const tenant = await repository.getById(id)
 
@@ -163,5 +178,28 @@ export const createTenantService = (repository: TenantRepository) => ({
     return updated
   },
 })
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | number | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | number | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : String(value)
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
+}
 
 export type TenantService = ReturnType<typeof createTenantService>

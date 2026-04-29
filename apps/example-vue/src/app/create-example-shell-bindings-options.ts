@@ -494,6 +494,7 @@ export const createExampleShellBindingsOptions = (
   const tenantWorkspaceOptions = {
     isTenantWorkspace: input.tenantWorkspace.isTenantWorkspace,
     tenantLoading: input.tenantWorkspace.workspace.tenantLoading,
+    tenantExportLoading: input.tenantWorkspace.tenantExportLoading,
     canCreateTenants: input.tenantWorkspace.canCreateTenants,
     canViewTenants: input.tenantWorkspace.canViewTenants,
     tenantModuleReady: input.tenantWorkspace.tenantModuleReady,
@@ -518,6 +519,7 @@ export const createExampleShellBindingsOptions = (
     handleTenantRowClick: input.tenantWorkspace.workspace.handleRowClick,
     openTenantCreatePanel: input.tenantWorkspace.workspace.openCreatePanel,
     reloadTenants: input.tenantWorkspace.workspace.reloadTenants,
+    handleExportTenants: input.tenantWorkspace.handleExportTenants,
     startTenantEdit: input.tenantWorkspace.workspace.startEdit,
     toggleSelectedTenantStatus:
       input.tenantWorkspace.workspace.toggleSelectedStatus,

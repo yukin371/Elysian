@@ -71,6 +71,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.action.newSetting": "新建配置",
   "app.action.exportSettings": "导出配置",
   "app.action.newTenant": "新建租户",
+  "app.action.exportTenants": "导出租户",
   "app.action.newUser": "新建用户",
   "app.action.exportUsers": "导出用户",
   "app.action.deleteVisibleFiles": "删除当前筛选文件（{count}）",

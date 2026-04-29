@@ -72,6 +72,7 @@ describe("createExampleShellBindingsOptions", () => {
     const handleExportMenus = () => Promise.resolve()
     const handleExportOperationLogs = () => Promise.resolve()
     const handleExportSettings = () => Promise.resolve()
+    const handleExportTenants = () => Promise.resolve()
     const markVisibleNotificationsAsRead = () => Promise.resolve()
     const refreshGeneratorPreview = () => Promise.resolve()
 
@@ -126,7 +127,10 @@ describe("createExampleShellBindingsOptions", () => {
         settingExportLoading: true,
         handleExportSettings,
       }),
-      tenantWorkspace: createWorkspaceInput({}),
+      tenantWorkspace: createWorkspaceInput({
+        tenantExportLoading: true,
+        handleExportTenants,
+      }),
       fileWorkspace: createWorkspaceInput({}),
       workflowWorkspace: createWorkspaceInput({}),
       generatorPreviewWorkspace: {
@@ -169,6 +173,8 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.handleExportUsers).toBe(handleExportUsers)
     expect(result.settingExportLoading).toBe(true)
     expect(result.handleExportSettings).toBe(handleExportSettings)
+    expect(result.tenantExportLoading).toBe(true)
+    expect(result.handleExportTenants).toBe(handleExportTenants)
     expect(result.generatorPreviewLoading).toBe(true)
     expect(result.refreshGeneratorPreview).toBe(refreshGeneratorPreview)
   })

@@ -95,6 +95,7 @@ export interface UseExampleShellBindingsOptions {
   canViewSettings: ValueSource<boolean>
   isTenantWorkspace: ComputedRef<boolean>
   tenantLoading: ValueSource<boolean>
+  tenantExportLoading: ValueSource<boolean>
   canCreateTenants: ValueSource<boolean>
   canViewTenants: ValueSource<boolean>
   isFileWorkspace: ComputedRef<boolean>
@@ -443,6 +444,7 @@ export interface UseExampleShellBindingsOptions {
   handleExportSettings: () => void
   openTenantCreatePanel: () => void
   reloadTenants: () => void
+  handleExportTenants: () => void
   reloadFiles: () => void
   deleteVisibleFiles: () => void
   reloadWorkflowDefinitions: () => void

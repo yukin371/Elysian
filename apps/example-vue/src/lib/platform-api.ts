@@ -80,6 +80,7 @@ export {
 } from "./platform-api/settings"
 export {
   createTenant,
+  exportTenantsCsv,
   fetchTenantById,
   fetchTenants,
   updateTenant,

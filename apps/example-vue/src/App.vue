@@ -56,6 +56,7 @@ import {
   exportPostsCsv,
   exportRolesCsv,
   exportSettingsCsv,
+  exportTenantsCsv,
   exportUsersCsv,
 } from "./lib/platform-api"
 import type { AuthIdentityResponse, PlatformResponse } from "./lib/platform-api"
@@ -162,6 +163,7 @@ const postExportLoading = ref(false)
 const roleExportLoading = ref(false)
 const userExportLoading = ref(false)
 const settingExportLoading = ref(false)
+const tenantExportLoading = ref(false)
 const envName = ref("unknown")
 const demoAdminPassword = ["admin", "123"].join("")
 
@@ -1499,6 +1501,29 @@ const handleExportSettings = async () => {
   }
 }
 
+const handleExportTenants = async () => {
+  if (!canViewTenants.value || tenantExportLoading.value) {
+    return
+  }
+
+  tenantExportLoading.value = true
+  tenantErrorMessage.value = ""
+
+  try {
+    const blob = await exportTenantsCsv()
+    downloadBrowserBlob(blob, createCsvExportFilename("system-tenants"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    tenantErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportTenants")
+  } finally {
+    tenantExportLoading.value = false
+  }
+}
+
 const handleExportOperationLogs = async () => {
   if (!canExportOperationLogs.value || operationLogExportLoading.value) {
     return
@@ -1705,11 +1730,13 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   tenantWorkspace: {
     workspace: tenantWorkspace,
     isTenantWorkspace,
+    tenantExportLoading,
     canCreateTenants,
     canViewTenants,
     tenantModuleReady,
     canEnterTenantWorkspace,
     canUpdateTenants,
+    handleExportTenants,
   },
   fileWorkspace: {
     workspace: fileWorkspace,

@@ -67,6 +67,25 @@ export const createTenantModule = (
         },
       )
       .get(
+        "/system/tenants/export",
+        async ({ request, set }) => {
+          const identity = await authorize(
+            request.headers,
+            tenantPermissions.list,
+          )
+          assertSuperAdmin(identity)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv()
+        },
+        {
+          detail: {
+            tags: ["tenant"],
+            summary: "Export tenants as CSV",
+          },
+        },
+      )
+      .get(
         "/system/tenants/:id",
         async ({ params, request }) => {
           const identity = await authorize(

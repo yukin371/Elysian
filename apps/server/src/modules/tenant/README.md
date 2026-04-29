@@ -6,9 +6,10 @@
 
 ## Owns
 
-- `/system/tenants` 的列表、详情、创建、更新、状态切换。
+- `/system/tenants` 的列表、详情、导出、创建、更新、状态切换。
 - super-admin 才能访问的租户管理入口。
 - repository 侧的“暂时清空 tenant context 再操作 tenants 表”桥接。
+- CSV 导出列与租户元数据本地字段契约。
 
 ## Must Not Own
 
@@ -27,6 +28,7 @@
 ```mermaid
 flowchart LR
   A[/system/tenants] --> B[module.ts\npermission + super-admin]
+  A2[/system/tenants/export] --> B
   B --> C[service.ts\ncode/name/status]
   C --> D[repository.ts]
   D --> E[clearTenantContext]
@@ -38,4 +40,5 @@ flowchart LR
 
 - `module.ts` 已确认即使通过权限码，也还要再经过 `assertSuperAdmin(identity)`。
 - `service.ts` 已确认 `code/name` 非空、`code` 唯一，状态更新也会先检查 tenant 是否存在。
+- `service.ts` 已确认导出只读取租户元数据并生成 CSV，不接管 tenant 初始化或发布演练。
 - `repository.ts` 已确认租户管理必须绕过请求级 tenant filter，否则 super-admin 无法跨租户管理。

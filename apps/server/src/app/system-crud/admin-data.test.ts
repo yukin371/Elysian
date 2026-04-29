@@ -839,6 +839,26 @@ describe("createServerApp system admin data", () => {
     expect(getResponse.status).toBe(200)
     expect(await getResponse.json()).toEqual(createTenantSeedRecords()[0])
 
+    const exportResponse = await app.handle(
+      new Request("http://localhost/system/tenants/export", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(exportResponse.status).toBe(200)
+    expect(exportResponse.headers.get("content-type")).toContain("text/csv")
+
+    const exportText = await exportResponse.text()
+    expect(exportText).toContain("id,code,name,status,createdAt,updatedAt")
+    expect(exportText).toContain(
+      "tenant-alpha,Tenant Alpha,active,2026-04-21T01:00:00.000Z,2026-04-21T01:00:00.000Z",
+    )
+    expect(exportText).toContain(
+      "default,Default Tenant,active,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+
     const createResponse = await app.handle(
       new Request("http://localhost/system/tenants", {
         method: "POST",

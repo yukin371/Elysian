@@ -10,6 +10,7 @@ import {
   exportOperationLogsCsv,
   exportPostsCsv,
   exportRolesCsv,
+  exportTenantsCsv,
   fetchPlatform,
   fetchSystemModules,
   fetchTenants,
@@ -351,6 +352,39 @@ describe("platform api tenant requests", () => {
           url: "http://localhost:3000/system/tenants/tenant_default/status",
           method: "PUT",
           body: JSON.stringify({ status: "suspended" }),
+          authorization: "Bearer tenant-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api tenant exports", () => {
+  test("exports tenants with bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("tenant-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,code\ntenant_default,default\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(exportTenantsCsv()).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/tenants/export",
           authorization: "Bearer tenant-token",
         },
       ])

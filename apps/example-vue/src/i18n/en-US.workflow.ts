@@ -211,6 +211,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadSettingDetail": "Failed to load setting detail",
   "app.error.loadTenants": "Failed to load tenants",
   "app.error.loadTenantDetail": "Failed to load tenant detail",
+  "app.error.exportTenants": "Failed to export tenants",
   "app.error.loadDictionaries": "Failed to load dictionary types",
   "app.error.exportDictionaryTypes": "Failed to export dictionary types",
   "app.error.exportDictionaryItems": "Failed to export dictionary items",

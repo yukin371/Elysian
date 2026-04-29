@@ -201,6 +201,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadSettingDetail": "加载系统配置详情失败",
   "app.error.loadTenants": "加载租户列表失败",
   "app.error.loadTenantDetail": "加载租户详情失败",
+  "app.error.exportTenants": "导出租户列表失败",
   "app.error.loadDictionaries": "加载字典类型列表失败",
   "app.error.exportDictionaryTypes": "导出字典类型失败",
   "app.error.exportDictionaryItems": "导出字典条目失败",

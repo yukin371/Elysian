@@ -3,7 +3,7 @@ import type {
   TenantStatus,
 } from "@elysian/schema"
 
-import { requestJson } from "./core"
+import { requestBlob, requestJson } from "./core"
 
 export type TenantRecord = SchemaTenantRecord
 
@@ -25,6 +25,11 @@ export interface UpdateTenantRequest {
 
 export const fetchTenants = async (): Promise<TenantsResponse> =>
   requestJson<TenantsResponse>("/system/tenants", {
+    auth: true,
+  })
+
+export const exportTenantsCsv = async (): Promise<Blob> =>
+  requestBlob("/system/tenants/export", {
     auth: true,
   })
 
