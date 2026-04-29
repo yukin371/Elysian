@@ -40,11 +40,11 @@
 - 运行时错误响应应保持统一 envelope
 - server 只消费 persistence 暴露的持久化能力，不直接持有关系型 schema owner
 
-## 文件体量豁免
+## 文件体量说明
 
-- `src/app/auth/auth.test.ts` 当前仍超过 `1000` 行；根级 `src/app.test.ts` 已按 `src/app/system-crud/`、`src/app/workflow/`、`src/app/auth/` 与 `src/app/customer/` 目录化收敛，剩余超限主要来自 auth fixture、tenant context recorder 与认证会话用例仍在同一 owner 文件内。
-- 暂不在本阶段继续强拆的原因：当前提交目标是先消除根级裸测试文件并归位 customer/workflow 边界；auth fixture 拆分会形成新的阶段性改动，适合单独提交与验证。
-- 后续拆分方向：优先在 `src/app/auth/test-support.ts` 下迁移 auth fixture、cookie helper 与 tenant context recorder，让 `auth.test.ts` 只保留认证行为用例；保持 test support 局部化，不新增跨模块 shared helper。
+- 根级 `src/app.test.ts` 已按 `src/app/system-crud/`、`src/app/workflow/`、`src/app/auth/` 与 `src/app/customer/` 目录化收敛。
+- `src/app/auth/auth.test.ts` 已把 auth fixture、cookie helper 与 tenant context recorder 下沉到同目录 `test-support.ts`，当前 `src/app/` 下没有超过 `1000` 行的测试文件。
+- 后续新增装配级测试时，应优先落在对应 `src/app/<capability>/` 目录，并保持 test support 局部化，不新增跨模块 shared helper。
 
 ## 常见坑
 
