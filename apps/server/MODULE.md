@@ -42,9 +42,9 @@
 
 ## 文件体量豁免
 
-- `src/app.test.ts` 当前仍超过 `1000` 行；本轮已先把系统管理与 workflow 集成测试按 `src/app/system-crud/`、`src/app/workflow/` 拆出，剩余内容主要覆盖 auth、refresh session、tenant login 与 customer guard 等服务端装配级边界。
-- 暂不继续强拆的原因：剩余用例共享登录、token、tenant context 与 customer guard fixture，继续机械拆分容易在未梳理 auth/customer 边界前复制测试支撑代码。
-- 后续拆分方向：优先在 `src/app/auth/` 与 `src/app/customer/` 下按认证会话、租户登录、customer guard 分组迁移，并保持 test support 局部化，不新增跨模块 shared helper。
+- `src/app/auth/auth.test.ts` 当前仍超过 `1000` 行；根级 `src/app.test.ts` 已按 `src/app/system-crud/`、`src/app/workflow/`、`src/app/auth/` 与 `src/app/customer/` 目录化收敛，剩余超限主要来自 auth fixture、tenant context recorder 与认证会话用例仍在同一 owner 文件内。
+- 暂不在本阶段继续强拆的原因：当前提交目标是先消除根级裸测试文件并归位 customer/workflow 边界；auth fixture 拆分会形成新的阶段性改动，适合单独提交与验证。
+- 后续拆分方向：优先在 `src/app/auth/test-support.ts` 下迁移 auth fixture、cookie helper 与 tenant context recorder，让 `auth.test.ts` 只保留认证行为用例；保持 test support 局部化，不新增跨模块 shared helper。
 
 ## 常见坑
 
