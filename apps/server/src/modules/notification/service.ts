@@ -23,6 +23,37 @@ export const createNotificationService = (
 ) => ({
   list: (filter?: ListNotificationsPayload, dataAccess?: DataAccessContext) =>
     repository.list(filter, dataAccess),
+  async exportCsv(
+    filter?: ListNotificationsPayload,
+    dataAccess?: DataAccessContext,
+  ) {
+    const items = await repository.list(filter, dataAccess)
+
+    return buildCsv(
+      [
+        "id",
+        "recipientUserId",
+        "title",
+        "content",
+        "level",
+        "status",
+        "createdByUserId",
+        "readAt",
+        "createdAt",
+      ],
+      items.map((item) => [
+        item.id,
+        item.recipientUserId,
+        item.title,
+        item.content,
+        item.level,
+        item.status,
+        item.createdByUserId,
+        item.readAt,
+        item.createdAt,
+      ]),
+    )
+  },
   async getById(id: string, dataAccess?: DataAccessContext) {
     const notification = await repository.getById(id, dataAccess)
 
@@ -130,5 +161,28 @@ export const createNotificationService = (
     return repository.markManyAsRead(uniqueIds, dataAccess)
   },
 })
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | number | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | number | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : String(value)
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
+}
 
 export type NotificationService = ReturnType<typeof createNotificationService>

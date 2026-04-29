@@ -19,6 +19,16 @@ const notificationPermissions = {
 
 const notificationFilterSchema = t.Object({
   recipientUserId: t.Optional(t.String()),
+  title: t.Optional(t.String()),
+  content: t.Optional(t.String()),
+  level: t.Optional(
+    t.Union([
+      t.Literal("info"),
+      t.Literal("success"),
+      t.Literal("warning"),
+      t.Literal("error"),
+    ]),
+  ),
   status: t.Optional(t.Union([t.Literal("unread"), t.Literal("read")])),
 })
 
@@ -62,6 +72,25 @@ export const createNotificationModule = (
           detail: {
             tags: ["notification"],
             summary: "List notifications",
+          },
+        },
+      )
+      .get(
+        "/system/notifications/export",
+        async ({ query, request, set }) => {
+          const identity = await authorize(
+            request.headers,
+            notificationPermissions.list,
+          )
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv(query, identity?.dataAccess)
+        },
+        {
+          query: notificationFilterSchema,
+          detail: {
+            tags: ["notification"],
+            summary: "Export notifications as CSV",
           },
         },
       )

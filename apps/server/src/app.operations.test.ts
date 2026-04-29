@@ -772,7 +772,7 @@ describe("createServerApp", () => {
 
     const filteredResponse = await app.handle(
       new Request(
-        "http://localhost/system/notifications?status=unread&recipientUserId=user_ops_1",
+        "http://localhost/system/notifications?status=unread&recipientUserId=user_ops_1&title=maintenance&content=22%3A00&level=info",
         {
           headers: {
             authorization: `Bearer ${accessToken}`,
@@ -785,6 +785,29 @@ describe("createServerApp", () => {
     expect(await filteredResponse.json()).toEqual({
       items: [createNotificationSeedRecords()[0]],
     })
+
+    const exportResponse = await app.handle(
+      new Request(
+        "http://localhost/system/notifications/export?status=unread&recipientUserId=user_ops_1&title=maintenance&content=22%3A00&level=info",
+        {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    )
+
+    expect(exportResponse.status).toBe(200)
+    expect(exportResponse.headers.get("content-type")).toContain("text/csv")
+
+    const exportText = await exportResponse.text()
+    expect(exportText).toContain(
+      "id,recipientUserId,title,content,level,status,createdByUserId,readAt,createdAt",
+    )
+    expect(exportText).toContain(
+      "notification_1,user_ops_1,Platform Maintenance,Platform maintenance starts at 22:00.,info,unread,user_admin_1,,2026-04-21T04:00:00.000Z",
+    )
+    expect(exportText).not.toContain("notification_2")
 
     const getResponse = await app.handle(
       new Request("http://localhost/system/notifications/notification_1", {

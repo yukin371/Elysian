@@ -260,6 +260,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.createNotification": "通知创建失败",
   "app.error.markNotificationRead": "通知标记已读失败",
   "app.error.markNotificationsRead": "当前通知批量标记已读失败",
+  "app.error.exportNotifications": "导出通知列表失败",
   "app.error.notificationRecipientRequired": "接收用户不能为空",
   "app.error.notificationTitleRequired": "通知标题不能为空",
   "app.error.notificationContentRequired": "通知内容不能为空",

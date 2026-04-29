@@ -7,6 +7,7 @@ import {
   exportDepartmentsCsv,
   exportDictionaryItemsCsv,
   exportMenusCsv,
+  exportNotificationsCsv,
   exportOperationLogsCsv,
   exportPostsCsv,
   exportRolesCsv,
@@ -633,6 +634,48 @@ describe("platform api role exports", () => {
 })
 
 describe("platform api notification batch actions", () => {
+  test("exports notifications with current server-side filters", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{
+      url: string
+      authorization: string | null
+    }> = []
+
+    setAccessToken("notification-export-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,title\nnotification_1,Platform Maintenance", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(
+        exportNotificationsCsv({
+          recipientUserId: " user_ops_1 ",
+          title: " maintenance ",
+          content: " 22:00 ",
+          level: "info",
+          status: "unread",
+        }),
+      ).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/notifications/export?recipientUserId=user_ops_1&title=maintenance&content=22%3A00&level=info&status=unread",
+          authorization: "Bearer notification-export-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
   test("marks notifications as read with bearer token", async () => {
     const originalFetch = globalThis.fetch
     const fetchCalls: Array<{

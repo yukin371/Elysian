@@ -17,7 +17,7 @@
 - 当前补充决策：C 端界面方向维持 `Vue` 第一优先级，`uniapp` 作为第二优先级进入设计储备；当前只允许文档设计，不并行开启第二前端实现主线
 - 已具备基础：用户、角色、菜单、部门、字典、系统配置、操作日志、文件、通知、租户等后端闭环已落地，前端工作区已覆盖其中大部分模块
 - 已具备基础：当前用户 refresh session 列表 / 单会话 revoke 已落最小后端切片，并已在 `apps/example-vue` 补齐在线会话工作区、当前/历史状态区分与 `revoked / rotated` 二次吊销前后端显式拦截，可作为“在线用户/会话治理”入口继续扩写，而不引入第二套 auth owner
-- 已具备基础：`post` 工作区、登录失败计数/锁定/自动解锁、`users / roles / menus / departments / posts / dictionaries / settings / tenants / operation-logs` 导出、字典条目前端导出入口、通过现有 `operation-log` 工作区显式查询 auth 安全事件、通知当前筛选批量已读，以及文件当前筛选批量删除都已形成最小闭环
+- 已具备基础：`post` 工作区、登录失败计数/锁定/自动解锁、`users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / operation-logs` 导出、字典条目前端导出入口、通过现有 `operation-log` 工作区显式查询 auth 安全事件、通知当前筛选批量已读，以及文件当前筛选批量删除都已形成最小闭环
 - 已具备基础：`P7A` workflow、`generator-session` 与 SQL preview 已可保留为次级轨道，当前只做必要收口，不继续抢占后台基础功能优先级
 - 当前结论：先把“像若依的基本后台”补齐，再决定是否恢复 `P7B/P7C`、独立 SQL 工作区或更完整 Studio 产品化
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
@@ -326,6 +326,6 @@
 ## 下一步
 
 1. 继续按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
-2. 在既有导出稳定后，判断 `users / roles / menus / departments / posts / dictionaries / settings / tenants` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
+2. 在既有导出稳定后，判断 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
 3. `generator / SQL / workflow` 维持次级推进：优先做必要收口（如会话设备化、diff/evidence 强化），不抢占若依基础功能对齐的第一优先级。
 4. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。

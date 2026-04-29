@@ -73,6 +73,7 @@ describe("createExampleShellBindingsOptions", () => {
     const handleExportOperationLogs = () => Promise.resolve()
     const handleExportSettings = () => Promise.resolve()
     const handleExportTenants = () => Promise.resolve()
+    const handleExportNotifications = () => Promise.resolve()
     const markVisibleNotificationsAsRead = () => Promise.resolve()
     const refreshGeneratorPreview = () => Promise.resolve()
 
@@ -111,6 +112,8 @@ describe("createExampleShellBindingsOptions", () => {
         handleExportMenus,
       }),
       notificationWorkspace: createWorkspaceInput({
+        notificationExportLoading: true,
+        handleExportNotifications,
         visibleUnreadNotificationCount: 2,
         "workspace.markVisibleAsRead": markVisibleNotificationsAsRead,
       }),
@@ -162,6 +165,8 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.handleExportPosts).toBe(handleExportPosts)
     expect(result.menuExportLoading).toBe(true)
     expect(result.handleExportMenus).toBe(handleExportMenus)
+    expect(result.notificationExportLoading).toBe(true)
+    expect(result.handleExportNotifications).toBe(handleExportNotifications)
     expect(result.visibleUnreadNotificationCount).toBe(2)
     expect(result.markVisibleNotificationsAsRead).toBe(
       markVisibleNotificationsAsRead,

@@ -79,6 +79,29 @@ export const useNotificationWorkspace = (
     }
 
     if (
+      typeof notificationQueryValues.value.title === "string" &&
+      notificationQueryValues.value.title.trim()
+    ) {
+      query.title = notificationQueryValues.value.title.trim()
+    }
+
+    if (
+      typeof notificationQueryValues.value.content === "string" &&
+      notificationQueryValues.value.content.trim()
+    ) {
+      query.content = notificationQueryValues.value.content.trim()
+    }
+
+    if (
+      notificationQueryValues.value.level === "info" ||
+      notificationQueryValues.value.level === "warning" ||
+      notificationQueryValues.value.level === "success" ||
+      notificationQueryValues.value.level === "error"
+    ) {
+      query.level = notificationQueryValues.value.level
+    }
+
+    if (
       notificationQueryValues.value.status === "unread" ||
       notificationQueryValues.value.status === "read"
     ) {
@@ -580,6 +603,7 @@ export const useNotificationWorkspace = (
     handleSearch,
     markSelectedAsRead,
     markVisibleAsRead,
+    listQuery,
     notificationDetail,
     notificationDetailErrorMessage,
     notificationDetailLoading,

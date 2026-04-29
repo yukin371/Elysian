@@ -75,6 +75,7 @@ export interface UseExampleShellBindingsOptions {
   canViewMenus: ValueSource<boolean>
   isNotificationWorkspace: ComputedRef<boolean>
   notificationLoading: ValueSource<boolean>
+  notificationExportLoading: ValueSource<boolean>
   canCreateNotifications: ValueSource<boolean>
   canViewNotifications: ValueSource<boolean>
   visibleUnreadNotificationCount: ValueSource<number>
@@ -434,6 +435,7 @@ export interface UseExampleShellBindingsOptions {
   handleExportMenus: () => void
   openNotificationCreatePanel: () => void
   reloadNotifications: () => void
+  handleExportNotifications: () => void
   reloadOperationLogs: () => void
   handleExportOperationLogs: () => void
   openUserCreatePanel: () => void

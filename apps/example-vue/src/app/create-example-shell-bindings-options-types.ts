@@ -129,6 +129,7 @@ export interface CreateExampleShellBindingsOptionsInput {
   notificationWorkspace: {
     workspace: ReturnType<typeof useNotificationWorkspace>
     isNotificationWorkspace: OptionValue<"isNotificationWorkspace">
+    notificationExportLoading: OptionValue<"notificationExportLoading">
     canCreateNotifications: OptionValue<"canCreateNotifications">
     canViewNotifications: OptionValue<"canViewNotifications">
     visibleUnreadNotificationCount: OptionValue<"visibleUnreadNotificationCount">
@@ -137,6 +138,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     canUpdateNotifications: OptionValue<"canUpdateNotifications">
     localizeNotificationStatus: OptionValue<"localizeNotificationStatus">
     localizeNotificationLevel: OptionValue<"localizeNotificationLevel">
+    handleExportNotifications: OptionValue<"handleExportNotifications">
   }
   operationLogWorkspace: {
     workspace: ReturnType<typeof useOperationLogWorkspace>
@@ -475,6 +477,7 @@ export type MenuWorkspaceBindingsOptions = BindingSegment<
 export type NotificationWorkspaceBindingsOptions = BindingSegment<
   | "isNotificationWorkspace"
   | "notificationLoading"
+  | "notificationExportLoading"
   | "canCreateNotifications"
   | "canViewNotifications"
   | "visibleUnreadNotificationCount"
@@ -501,6 +504,7 @@ export type NotificationWorkspaceBindingsOptions = BindingSegment<
   | "handleNotificationRowClick"
   | "openNotificationCreatePanel"
   | "reloadNotifications"
+  | "handleExportNotifications"
   | "markSelectedNotificationAsRead"
   | "markVisibleNotificationsAsRead"
   | "submitNotificationForm"

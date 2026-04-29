@@ -46,6 +46,7 @@ export {
 } from "./platform-api/menus"
 export {
   createNotification,
+  exportNotificationsCsv,
   fetchNotificationById,
   fetchNotifications,
   markNotificationAsRead,

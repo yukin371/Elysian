@@ -40,6 +40,7 @@ defineProps<{
   canViewMenus: boolean
   isNotificationWorkspace: boolean
   notificationLoading: boolean
+  notificationExportLoading: boolean
   canCreateNotifications: boolean
   canViewNotifications: boolean
   canUpdateNotifications: boolean
@@ -98,6 +99,7 @@ defineEmits<{
   (event: "export-menus"): void
   (event: "open-notification-create"): void
   (event: "reload-notifications"): void
+  (event: "export-notifications"): void
   (event: "mark-visible-notifications-read"): void
   (event: "reload-operation-logs"): void
   (event: "export-operation-logs"): void
@@ -315,6 +317,17 @@ defineEmits<{
       @click="$emit('open-notification-create')"
     >
       {{ t("app.action.newNotification") }}
+    </TButton>
+    <TButton
+      v-if="isNotificationWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="notificationExportLoading"
+      :disabled="notificationExportLoading || !canViewNotifications"
+      @click="$emit('export-notifications')"
+    >
+      {{ t("app.action.exportNotifications") }}
     </TButton>
     <TButton
       v-if="isNotificationWorkspace"

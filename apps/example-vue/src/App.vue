@@ -52,6 +52,7 @@ import {
   exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
   exportMenusCsv,
+  exportNotificationsCsv,
   exportOperationLogsCsv,
   exportPostsCsv,
   exportRolesCsv,
@@ -158,6 +159,7 @@ const departmentExportLoading = ref(false)
 const dictionaryTypeExportLoading = ref(false)
 const dictionaryItemsExportLoading = ref(false)
 const menuExportLoading = ref(false)
+const notificationExportLoading = ref(false)
 const operationLogExportLoading = ref(false)
 const postExportLoading = ref(false)
 const roleExportLoading = ref(false)
@@ -549,6 +551,7 @@ const {
   handleReset: handleNotificationReset,
   handleRowClick: handleNotificationRowClick,
   handleSearch: handleNotificationSearch,
+  listQuery: notificationListQuery,
   markSelectedAsRead: markSelectedNotificationAsRead,
   markVisibleAsRead: markVisibleNotificationsAsRead,
   notificationDetail,
@@ -1524,6 +1527,31 @@ const handleExportTenants = async () => {
   }
 }
 
+const handleExportNotifications = async () => {
+  if (!canViewNotifications.value || notificationExportLoading.value) {
+    return
+  }
+
+  notificationExportLoading.value = true
+  notificationErrorMessage.value = ""
+
+  try {
+    const blob = await exportNotificationsCsv(notificationListQuery.value)
+    downloadBrowserBlob(blob, createCsvExportFilename("system-notifications"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    notificationErrorMessage.value =
+      error instanceof Error
+        ? error.message
+        : t("app.error.exportNotifications")
+  } finally {
+    notificationExportLoading.value = false
+  }
+}
+
 const handleExportOperationLogs = async () => {
   if (!canExportOperationLogs.value || operationLogExportLoading.value) {
     return
@@ -1685,6 +1713,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   notificationWorkspace: {
     workspace: notificationWorkspace,
     isNotificationWorkspace,
+    notificationExportLoading,
     canCreateNotifications,
     canViewNotifications,
     visibleUnreadNotificationCount,
@@ -1693,6 +1722,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     canUpdateNotifications,
     localizeNotificationStatus,
     localizeNotificationLevel,
+    handleExportNotifications,
   },
   operationLogWorkspace: {
     workspace: operationLogWorkspace,

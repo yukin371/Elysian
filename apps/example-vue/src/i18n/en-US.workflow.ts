@@ -272,6 +272,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.markNotificationRead": "Failed to mark notification as read",
   "app.error.markNotificationsRead":
     "Failed to mark visible notifications as read",
+  "app.error.exportNotifications": "Failed to export notifications",
   "app.error.notificationRecipientRequired": "Recipient user is required",
   "app.error.notificationTitleRequired": "Notification title is required",
   "app.error.notificationContentRequired": "Notification content is required",

@@ -19,6 +19,9 @@ import type {
 
 export interface ListNotificationsInput {
   recipientUserId?: string
+  title?: string
+  content?: string
+  level?: NotificationLevel
   status?: NotificationStatus
 }
 
@@ -160,6 +163,23 @@ export const createInMemoryNotificationRepository = (
           filter.recipientUserId === undefined
             ? true
             : item.recipientUserId === filter.recipientUserId,
+        )
+        .filter((item) =>
+          filter.title?.trim()
+            ? item.title
+                .toLowerCase()
+                .includes(filter.title.trim().toLowerCase())
+            : true,
+        )
+        .filter((item) =>
+          filter.content?.trim()
+            ? item.content
+                .toLowerCase()
+                .includes(filter.content.trim().toLowerCase())
+            : true,
+        )
+        .filter((item) =>
+          filter.level === undefined ? true : item.level === filter.level,
         )
         .filter((item) =>
           filter.status === undefined ? true : item.status === filter.status,

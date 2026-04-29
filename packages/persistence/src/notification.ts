@@ -1,4 +1,4 @@
-import { type SQL, and, desc, eq, inArray } from "drizzle-orm"
+import { type SQL, and, desc, eq, ilike, inArray } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type NotificationRow, notifications } from "./schema"
@@ -19,6 +19,9 @@ export interface CreateNotificationPersistenceInput {
 
 export interface ListNotificationsPersistenceFilter {
   recipientUserId?: string
+  title?: string
+  content?: string
+  level?: "info" | "success" | "warning" | "error"
   status?: "unread" | "read"
   accessCondition?: SQL<unknown>
 }
@@ -31,6 +34,13 @@ export const listNotifications = async (
     filter.recipientUserId
       ? eq(notifications.recipientUserId, filter.recipientUserId)
       : undefined,
+    filter.title?.trim()
+      ? ilike(notifications.title, `%${filter.title.trim()}%`)
+      : undefined,
+    filter.content?.trim()
+      ? ilike(notifications.content, `%${filter.content.trim()}%`)
+      : undefined,
+    filter.level ? eq(notifications.level, filter.level) : undefined,
     filter.status ? eq(notifications.status, filter.status) : undefined,
     filter.accessCondition,
   ].filter(Boolean)

@@ -320,6 +320,8 @@ export const createExampleShellBindingsOptions = (
       input.notificationWorkspace.isNotificationWorkspace,
     notificationLoading:
       input.notificationWorkspace.workspace.notificationLoading,
+    notificationExportLoading:
+      input.notificationWorkspace.notificationExportLoading,
     canCreateNotifications: input.notificationWorkspace.canCreateNotifications,
     canViewNotifications: input.notificationWorkspace.canViewNotifications,
     visibleUnreadNotificationCount:
@@ -366,6 +368,8 @@ export const createExampleShellBindingsOptions = (
       input.notificationWorkspace.workspace.openCreatePanel,
     reloadNotifications:
       input.notificationWorkspace.workspace.reloadNotifications,
+    handleExportNotifications:
+      input.notificationWorkspace.handleExportNotifications,
     markSelectedNotificationAsRead:
       input.notificationWorkspace.workspace.markSelectedAsRead,
     markVisibleNotificationsAsRead:
