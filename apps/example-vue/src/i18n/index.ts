@@ -1,6 +1,6 @@
 import type { SupportedLocale, VueLocaleMessages } from "@elysian/frontend-vue"
-import { enUSLocaleMessages } from "./i18n.en-US"
-import { zhCNLocaleMessages } from "./i18n.zh-CN"
+import { enUSLocaleMessages } from "./en-US"
+import { zhCNLocaleMessages } from "./zh-CN"
 
 export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
   {

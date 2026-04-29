@@ -45,9 +45,9 @@
   - `use-example-shell-bindings.ts`（已收口为薄聚合器）
   - `example-page-definitions.ts`
   - `create-example-shell-bindings-options.ts`
-  - `i18n.ts`（已收口为 locale 聚合器）
-  - `i18n.zh-CN.*.ts`
-  - `i18n.en-US.*.ts`
+  - `i18n/index.ts`（已收口为 locale 聚合器）
+  - `i18n/zh-CN*.ts`
+  - `i18n/en-US*.ts`
   - `ShellWorkspaceHeaderActions.vue`
   - `ShellWorkspaceMainSwitch.vue`
   - `ShellWorkspaceSecondarySwitch.vue`
