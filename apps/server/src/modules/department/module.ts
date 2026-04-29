@@ -54,6 +54,21 @@ export const createDepartmentModule = (
         },
       )
       .get(
+        "/system/departments/export",
+        async ({ request, set }) => {
+          await authorize(request.headers, departmentPermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv()
+        },
+        {
+          detail: {
+            tags: ["department"],
+            summary: "Export departments as CSV",
+          },
+        },
+      )
+      .get(
         "/system/departments/:id",
         async ({ params, request }) => {
           await authorize(request.headers, departmentPermissions.get)

@@ -125,6 +125,48 @@ describe("createServerApp system organization", () => {
     })
   })
 
+  it("exports system departments as csv when the access token has department-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:department:list"],
+      isSuperAdmin: false,
+    })
+    const departmentRepository = createInMemoryDepartmentRepository({
+      departments: createDepartmentSeedRecords(),
+      availableUserIds: ["user_admin_1", "user_ops_1"],
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createDepartmentModule(departmentRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const response = await app.handle(
+      new Request("http://localhost/system/departments/export", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("text/csv")
+
+    const text = await response.text()
+    expect(text).toContain(
+      "id,parentId,code,name,sort,status,createdAt,updatedAt",
+    )
+    expect(text).toContain(
+      "department_root_1,,hq,Headquarters,10,active,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+    expect(text).toContain(
+      "department_ops_1,department_root_1,ops,Operations,20,active,2026-04-21T01:00:00.000Z,2026-04-21T01:00:00.000Z",
+    )
+  })
+
   it("creates and updates departments with parent and user bindings", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [

@@ -188,6 +188,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadCustomers": "加载客户列表失败",
   "app.error.loadDepartments": "加载部门列表失败",
   "app.error.loadDepartmentDetail": "加载部门详情失败",
+  "app.error.exportDepartments": "导出部门列表失败",
   "app.error.loadMenus": "加载菜单列表失败",
   "app.error.loadMenuDetail": "加载菜单详情失败",
   "app.error.loadRoles": "加载角色列表失败",

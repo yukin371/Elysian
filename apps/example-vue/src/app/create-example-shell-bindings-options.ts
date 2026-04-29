@@ -180,6 +180,7 @@ export const createExampleShellBindingsOptions = (
   const departmentWorkspaceOptions = {
     isDepartmentWorkspace: input.departmentWorkspace.isDepartmentWorkspace,
     departmentLoading: input.departmentWorkspace.workspace.departmentLoading,
+    departmentExportLoading: input.departmentWorkspace.departmentExportLoading,
     canCreateDepartments: input.departmentWorkspace.canCreateDepartments,
     canViewDepartments: input.departmentWorkspace.canViewDepartments,
     departmentModuleReady: input.departmentWorkspace.departmentModuleReady,
@@ -219,6 +220,7 @@ export const createExampleShellBindingsOptions = (
     openDepartmentCreatePanel:
       input.departmentWorkspace.workspace.openCreatePanel,
     reloadDepartments: input.departmentWorkspace.workspace.reloadDepartments,
+    handleExportDepartments: input.departmentWorkspace.handleExportDepartments,
     startDepartmentEdit: input.departmentWorkspace.workspace.startEdit,
     submitDepartmentForm: input.departmentWorkspace.workspace.submitForm,
     cancelDepartmentPanel: input.departmentWorkspace.workspace.cancelPanel,

@@ -62,6 +62,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.action.exportDictionaryTypes": "导出字典类型",
   "app.action.exportDictionaryItems": "导出字典条目",
   "app.action.newDepartment": "新建部门",
+  "app.action.exportDepartments": "导出部门",
   "app.action.newMenu": "新建菜单",
   "app.action.newRole": "新建角色",
   "app.action.exportRoles": "导出角色",

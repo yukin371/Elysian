@@ -48,6 +48,7 @@ import { exampleLocaleMessages } from "./i18n"
 import { resolveWorkspaceMenuKey } from "./lib/navigation-workspace"
 import { buildOperationLogListQuery } from "./lib/operation-log-workspace"
 import {
+  exportDepartmentsCsv,
   exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
   exportOperationLogsCsv,
@@ -150,6 +151,7 @@ const tenantModuleReady = ref(false)
 const userModuleReady = ref(false)
 const dictionaryModuleReady = ref(false)
 const workflowModuleReady = ref(false)
+const departmentExportLoading = ref(false)
 const dictionaryTypeExportLoading = ref(false)
 const dictionaryItemsExportLoading = ref(false)
 const operationLogExportLoading = ref(false)
@@ -1401,6 +1403,29 @@ const handleExportRoles = async () => {
   }
 }
 
+const handleExportDepartments = async () => {
+  if (!canViewDepartments.value || departmentExportLoading.value) {
+    return
+  }
+
+  departmentExportLoading.value = true
+  departmentErrorMessage.value = ""
+
+  try {
+    const blob = await exportDepartmentsCsv()
+    downloadBrowserBlob(blob, createCsvExportFilename("system-departments"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    departmentErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportDepartments")
+  } finally {
+    departmentExportLoading.value = false
+  }
+}
+
 const handleExportSettings = async () => {
   if (!canViewSettings.value || settingExportLoading.value) {
     return
@@ -1547,11 +1572,13 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   departmentWorkspace: {
     workspace: departmentWorkspace,
     isDepartmentWorkspace,
+    departmentExportLoading,
     canCreateDepartments,
     canViewDepartments,
     departmentModuleReady,
     canEnterDepartmentWorkspace,
     canUpdateDepartments,
+    handleExportDepartments,
   },
   sessionWorkspace: {
     workspace: sessionWorkspace,

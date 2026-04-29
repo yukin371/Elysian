@@ -1,4 +1,4 @@
-import { requestJson } from "./core"
+import { requestBlob, requestJson } from "./core"
 
 export interface DepartmentRecord {
   id: string
@@ -37,6 +37,11 @@ export interface UpdateDepartmentRequest {
 
 export const fetchDepartments = async (): Promise<DepartmentsResponse> =>
   requestJson<DepartmentsResponse>("/system/departments", {
+    auth: true,
+  })
+
+export const exportDepartmentsCsv = async (): Promise<Blob> =>
+  requestBlob("/system/departments/export", {
     auth: true,
   })
 

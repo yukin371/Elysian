@@ -91,11 +91,13 @@ export interface CreateExampleShellBindingsOptionsInput {
   departmentWorkspace: {
     workspace: ReturnType<typeof useDepartmentWorkspace>
     isDepartmentWorkspace: OptionValue<"isDepartmentWorkspace">
+    departmentExportLoading: OptionValue<"departmentExportLoading">
     canCreateDepartments: OptionValue<"canCreateDepartments">
     canViewDepartments: OptionValue<"canViewDepartments">
     departmentModuleReady: OptionValue<"departmentModuleReady">
     canEnterDepartmentWorkspace: OptionValue<"canEnterDepartmentWorkspace">
     canUpdateDepartments: OptionValue<"canUpdateDepartments">
+    handleExportDepartments: OptionValue<"handleExportDepartments">
   }
   sessionWorkspace: {
     workspace: ReturnType<typeof useAuthSessionWorkspace>
@@ -347,6 +349,7 @@ export type DictionaryWorkspaceBindingsOptions = BindingSegment<
 export type DepartmentWorkspaceBindingsOptions = BindingSegment<
   | "isDepartmentWorkspace"
   | "departmentLoading"
+  | "departmentExportLoading"
   | "canCreateDepartments"
   | "canViewDepartments"
   | "departmentModuleReady"
@@ -372,6 +375,7 @@ export type DepartmentWorkspaceBindingsOptions = BindingSegment<
   | "handleDepartmentRowClick"
   | "openDepartmentCreatePanel"
   | "reloadDepartments"
+  | "handleExportDepartments"
   | "startDepartmentEdit"
   | "submitDepartmentForm"
   | "cancelDepartmentPanel"

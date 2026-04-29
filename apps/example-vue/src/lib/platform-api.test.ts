@@ -4,6 +4,7 @@ import type { TenantRecord, WorkflowDefinitionRecord } from "@elysian/schema"
 
 import {
   clearAccessToken,
+  exportDepartmentsCsv,
   exportDictionaryItemsCsv,
   exportOperationLogsCsv,
   exportRolesCsv,
@@ -415,6 +416,39 @@ describe("platform api dictionary exports", () => {
         {
           url: "http://localhost:3000/system/dictionaries/items/export?typeId=dict-user-status",
           authorization: "Bearer dictionary-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api department exports", () => {
+  test("exports departments with bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("department-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,code\ndepartment_root_1,hq\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(exportDepartmentsCsv()).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/departments/export",
+          authorization: "Bearer department-token",
         },
       ])
     } finally {

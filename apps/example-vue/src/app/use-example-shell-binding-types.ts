@@ -57,6 +57,7 @@ export interface UseExampleShellBindingsOptions {
   canViewDictionaries: ValueSource<boolean>
   isDepartmentWorkspace: ComputedRef<boolean>
   departmentLoading: ValueSource<boolean>
+  departmentExportLoading: ValueSource<boolean>
   canCreateDepartments: ValueSource<boolean>
   canViewDepartments: ValueSource<boolean>
   isSessionWorkspace: ComputedRef<boolean>
@@ -421,6 +422,7 @@ export interface UseExampleShellBindingsOptions {
   handleExportDictionaryItems: () => void
   openDepartmentCreatePanel: () => void
   reloadDepartments: () => void
+  handleExportDepartments: () => void
   openPostCreatePanel: () => void
   reloadPosts: () => void
   openMenuCreatePanel: () => void

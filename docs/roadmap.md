@@ -17,7 +17,7 @@
 - 当前补充决策：C 端界面方向维持 `Vue` 第一优先级，`uniapp` 作为第二优先级进入设计储备；当前只允许文档设计，不并行开启第二前端实现主线
 - 已具备基础：用户、角色、菜单、部门、字典、系统配置、操作日志、文件、通知、租户等后端闭环已落地，前端工作区已覆盖其中大部分模块
 - 已具备基础：当前用户 refresh session 列表 / 单会话 revoke 已落最小后端切片，并已在 `apps/example-vue` 补齐在线会话工作区、当前/历史状态区分与 `revoked / rotated` 二次吊销前后端显式拦截，可作为“在线用户/会话治理”入口继续扩写，而不引入第二套 auth owner
-- 已具备基础：`post` 工作区、登录失败计数/锁定/自动解锁、`users / roles / dictionaries / settings / operation-logs` 导出、字典条目前端导出入口、通过现有 `operation-log` 工作区显式查询 auth 安全事件、通知当前筛选批量已读，以及文件当前筛选批量删除都已形成最小闭环
+- 已具备基础：`post` 工作区、登录失败计数/锁定/自动解锁、`users / roles / departments / dictionaries / settings / operation-logs` 导出、字典条目前端导出入口、通过现有 `operation-log` 工作区显式查询 auth 安全事件、通知当前筛选批量已读，以及文件当前筛选批量删除都已形成最小闭环
 - 已具备基础：`P7A` workflow、`generator-session` 与 SQL preview 已可保留为次级轨道，当前只做必要收口，不继续抢占后台基础功能优先级
 - 当前结论：先把“像若依的基本后台”补齐，再决定是否恢复 `P7B/P7C`、独立 SQL 工作区或更完整 Studio 产品化
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
@@ -36,7 +36,7 @@
 
 - 当前目标：把仓库现有系统能力收口成“企业后台日常可用”的基础包，优先解决模块闭环覆盖率不足，而不是继续拔高平台能力天花板
 - 第一优先级：收口 `apps/example-vue` 已有系统工作区，优先保证 `users / roles / menus / departments / dictionaries / settings / operation-logs / notifications / tenants` 具备真实路由切换、列表/详情、创建/编辑与必要状态动作
-- 第一优先级：继续收口 `users / roles / dictionaries / settings / operation-logs / notifications / files / tenants` 的后台日常体验；登录安全、登录日志显式查询、`岗位（post）`、在线会话治理、第一轮高频导出、字典条目导出入口、操作日志当前筛选导出、通知批量已读与文件当前筛选批量删除已完成最小闭环
+- 第一优先级：继续收口 `users / roles / departments / dictionaries / settings / operation-logs / notifications / files / tenants` 的后台日常体验；登录安全、登录日志显式查询、`岗位（post）`、在线会话治理、第一轮高频导出、字典条目导出入口、操作日志当前筛选导出、通知批量已读与文件当前筛选批量删除已完成最小闭环
 - 第二优先级：C 端界面扩展方向先固定为 `uniapp`，但当前只保留设计储备，不提前进入实现
 - 第二优先级：在不改变 owner 的前提下，继续把通知、操作日志、租户与数据权限体验向后台常用形态收口
 - 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心
@@ -326,6 +326,6 @@
 ## 下一步
 
 1. 继续按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
-2. 在既有导出稳定后，判断 `users / roles / dictionaries / settings` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
+2. 在既有导出稳定后，判断 `users / roles / departments / dictionaries / settings` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
 3. `generator / SQL / workflow` 维持次级推进：优先做必要收口（如会话设备化、diff/evidence 强化），不抢占若依基础功能对齐的第一优先级。
 4. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。

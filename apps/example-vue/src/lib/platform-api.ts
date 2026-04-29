@@ -15,6 +15,7 @@ export {
 } from "./platform-api/customer"
 export {
   createDepartment,
+  exportDepartmentsCsv,
   fetchDepartmentById,
   fetchDepartments,
   updateDepartment,

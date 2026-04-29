@@ -25,6 +25,7 @@ defineProps<{
   canViewDictionaries: boolean
   isDepartmentWorkspace: boolean
   departmentLoading: boolean
+  departmentExportLoading: boolean
   canCreateDepartments: boolean
   canViewDepartments: boolean
   isMenuWorkspace: boolean
@@ -81,6 +82,7 @@ defineEmits<{
   (event: "export-dictionary-items"): void
   (event: "open-department-create"): void
   (event: "reload-departments"): void
+  (event: "export-departments"): void
   (event: "open-menu-create"): void
   (event: "reload-menus"): void
   (event: "open-notification-create"): void
@@ -208,6 +210,17 @@ defineEmits<{
       @click="$emit('open-department-create')"
     >
       {{ t("app.action.newDepartment") }}
+    </TButton>
+    <TButton
+      v-if="isDepartmentWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="departmentExportLoading"
+      :disabled="departmentExportLoading || !canViewDepartments"
+      @click="$emit('export-departments')"
+    >
+      {{ t("app.action.exportDepartments") }}
     </TButton>
     <TButton
       v-if="isDepartmentWorkspace"
