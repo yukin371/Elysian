@@ -19,6 +19,9 @@ export interface AuthServiceOptions {
   accessTokenSecret: string
   accessTokenTtlSeconds?: number
   refreshTokenTtlSeconds?: number
+  maxLoginFailures?: number
+  loginFailureWindowSeconds?: number
+  loginLockDurationSeconds?: number
 }
 
 export interface AuthSessionContext {
@@ -91,6 +94,9 @@ export interface AuthSessionsResponse {
 
 const DEFAULT_ACCESS_TOKEN_TTL_SECONDS = 15 * 60
 const DEFAULT_REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
+const DEFAULT_MAX_LOGIN_FAILURES = 5
+const DEFAULT_LOGIN_FAILURE_WINDOW_SECONDS = 15 * 60
+const DEFAULT_LOGIN_LOCK_DURATION_SECONDS = 15 * 60
 
 export const createAuthService = (
   repository: AuthRepository,
@@ -100,6 +106,12 @@ export const createAuthService = (
     options.accessTokenTtlSeconds ?? DEFAULT_ACCESS_TOKEN_TTL_SECONDS
   const refreshTokenTtlSeconds =
     options.refreshTokenTtlSeconds ?? DEFAULT_REFRESH_TOKEN_TTL_SECONDS
+  const maxLoginFailures =
+    options.maxLoginFailures ?? DEFAULT_MAX_LOGIN_FAILURES
+  const loginFailureWindowSeconds =
+    options.loginFailureWindowSeconds ?? DEFAULT_LOGIN_FAILURE_WINDOW_SECONDS
+  const loginLockDurationSeconds =
+    options.loginLockDurationSeconds ?? DEFAULT_LOGIN_LOCK_DURATION_SECONDS
 
   const buildIdentity = async (user: AuthUserRecord): Promise<AuthIdentity> => {
     const roles = await repository.listRoleCodesForUser(user.id)
@@ -211,6 +223,55 @@ export const createAuthService = (
     return user
   }
 
+  const createLoginLockedError = (
+    username: string,
+    lockedUntil: string,
+  ): AppError =>
+    new AppError({
+      code: "AUTH_LOGIN_LOCKED",
+      message: "Login is temporarily locked",
+      status: 423,
+      expose: true,
+      details: {
+        username,
+        lockedUntil,
+      },
+    })
+
+  const calculateLoginFailureState = (
+    user: AuthUserRecord,
+    now: Date,
+  ): {
+    loginFailureCount: number
+    lastLoginFailedAt: string
+    loginLockedUntil: string | null
+  } => {
+    const nowMs = now.getTime()
+    const lockExpired =
+      user.loginLockedUntil !== null &&
+      new Date(user.loginLockedUntil).getTime() <= nowMs
+    const lastFailedAtMs = user.lastLoginFailedAt
+      ? new Date(user.lastLoginFailedAt).getTime()
+      : null
+    const withinFailureWindow =
+      !lockExpired &&
+      lastFailedAtMs !== null &&
+      nowMs - lastFailedAtMs <= loginFailureWindowSeconds * 1000
+    const loginFailureCount = withinFailureWindow
+      ? user.loginFailureCount + 1
+      : 1
+    const loginLockedUntil =
+      loginFailureCount >= maxLoginFailures
+        ? new Date(nowMs + loginLockDurationSeconds * 1000).toISOString()
+        : null
+
+    return {
+      loginFailureCount,
+      lastLoginFailedAt: now.toISOString(),
+      loginLockedUntil,
+    }
+  }
+
   return {
     async login(
       username: string,
@@ -267,12 +328,41 @@ export const createAuthService = (
         })
       }
 
+      if (
+        user.loginLockedUntil !== null &&
+        new Date(user.loginLockedUntil) > new Date()
+      ) {
+        await recordAudit({
+          tenantId: user.tenantId,
+          action: "login",
+          actorUserId: user.id,
+          result: "failure",
+          requestId: context.requestId ?? null,
+          ip: context.ip ?? null,
+          userAgent: context.userAgent ?? null,
+          details: {
+            username,
+            reason: "login_locked",
+            lockedUntil: user.loginLockedUntil,
+          },
+        })
+        throw createLoginLockedError(username, user.loginLockedUntil)
+      }
+
       const isPasswordValid = await verifyPasswordHash(
         password,
         user.passwordHash,
       )
 
       if (!isPasswordValid) {
+        const now = new Date()
+        const loginFailureState = calculateLoginFailureState(user, now)
+
+        await repository.updateLoginFailureState(
+          user.id,
+          loginFailureState,
+          loginFailureState.lastLoginFailedAt,
+        )
         await recordAudit({
           tenantId: user.tenantId,
           action: "login",
@@ -284,8 +374,16 @@ export const createAuthService = (
           details: {
             username,
             reason: "invalid_password",
+            loginFailureCount: loginFailureState.loginFailureCount,
+            lockedUntil: loginFailureState.loginLockedUntil,
           },
         })
+        if (loginFailureState.loginLockedUntil !== null) {
+          throw createLoginLockedError(
+            username,
+            loginFailureState.loginLockedUntil,
+          )
+        }
         throw new AppError({
           code: "AUTH_INVALID_CREDENTIALS",
           message: "Invalid username or password",
@@ -310,7 +408,7 @@ export const createAuthService = (
       })
       const now = new Date().toISOString()
 
-      await repository.updateLastLoginAt(user.id, now)
+      await repository.recordSuccessfulLogin(user.id, now)
       await recordAudit({
         tenantId: user.tenantId,
         action: "login",

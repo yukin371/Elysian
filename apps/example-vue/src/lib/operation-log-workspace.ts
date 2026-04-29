@@ -4,15 +4,33 @@ import type { OperationLogListQuery, OperationLogRecord } from "./platform-api"
 
 type OperationLogDetailValues = Record<string, unknown>
 
+const operationLogAuthEventTypes = [
+  "login",
+  "logout",
+  "refresh",
+  "session_revoke",
+] as const
+
+const isOperationLogAuthEventType = (
+  value: unknown,
+): value is NonNullable<OperationLogRecord["authEventType"]> =>
+  typeof value === "string" &&
+  operationLogAuthEventTypes.includes(
+    value as NonNullable<OperationLogRecord["authEventType"]>,
+  )
+
 export interface OperationLogWorkspaceQuery {
   category?: string
   action?: string
+  authEventType?: NonNullable<OperationLogRecord["authEventType"]> | ""
+  authFailureReason?: string
   actorUserId?: string
   result?: OperationLogRecord["result"] | ""
 }
 
 export interface OperationLogTableItem
-  extends Omit<OperationLogRecord, "result" | "createdAt"> {
+  extends Omit<OperationLogRecord, "authEventType" | "result" | "createdAt"> {
+  authEventType: string
   result: string
   createdAt: string
 }
@@ -33,6 +51,17 @@ export const buildOperationLogListQuery = (
     query.action = values.action.trim()
   }
 
+  if (isOperationLogAuthEventType(values.authEventType)) {
+    query.authEventType = values.authEventType
+  }
+
+  if (
+    typeof values.authFailureReason === "string" &&
+    values.authFailureReason.trim()
+  ) {
+    query.authFailureReason = values.authFailureReason.trim()
+  }
+
   if (typeof values.actorUserId === "string" && values.actorUserId.trim()) {
     query.actorUserId = values.actorUserId.trim()
   }
@@ -50,6 +79,8 @@ export const filterOperationLogs = (
 ) => {
   const category = normalizeQueryValue(query.category)
   const action = normalizeQueryValue(query.action)
+  const authEventType = query.authEventType ?? ""
+  const authFailureReason = normalizeQueryValue(query.authFailureReason)
   const actorUserId = normalizeQueryValue(query.actorUserId)
   const result = query.result ?? ""
 
@@ -62,6 +93,17 @@ export const filterOperationLogs = (
     }
 
     if (action.length > 0 && !item.action.toLowerCase().includes(action)) {
+      return false
+    }
+
+    if (authEventType && item.authEventType !== authEventType) {
+      return false
+    }
+
+    if (
+      authFailureReason.length > 0 &&
+      !(item.authFailureReason ?? "").toLowerCase().includes(authFailureReason)
+    ) {
       return false
     }
 
@@ -98,12 +140,18 @@ export const resolveOperationLogSelection = (
 export const createOperationLogTableItems = (
   items: OperationLogRecord[],
   options: {
+    localizeAuthEventType: (
+      authEventType: NonNullable<OperationLogRecord["authEventType"]>,
+    ) => string
     localizeResult: (result: OperationLogRecord["result"]) => string
     formatDateTime: (value: string) => string
   },
 ): OperationLogTableItem[] =>
   items.map((item) => ({
     ...item,
+    authEventType: item.authEventType
+      ? options.localizeAuthEventType(item.authEventType)
+      : "",
     result: options.localizeResult(item.result),
     createdAt: options.formatDateTime(item.createdAt),
   }))
@@ -111,6 +159,9 @@ export const createOperationLogTableItems = (
 export const createOperationLogDetailValues = (
   item: OperationLogRecord | null,
   options: {
+    localizeAuthEventType: (
+      authEventType: NonNullable<OperationLogRecord["authEventType"]>,
+    ) => string
     localizeResult: (result: OperationLogRecord["result"]) => string
   },
 ): OperationLogDetailValues => {
@@ -121,6 +172,10 @@ export const createOperationLogDetailValues = (
   return {
     category: item.category,
     action: item.action,
+    authEventType: item.authEventType
+      ? options.localizeAuthEventType(item.authEventType)
+      : "",
+    authFailureReason: item.authFailureReason ?? "",
     actorUserId: item.actorUserId ?? "",
     targetType: item.targetType ?? "",
     targetId: item.targetId ?? "",

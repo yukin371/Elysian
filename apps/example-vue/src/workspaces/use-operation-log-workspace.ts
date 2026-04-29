@@ -25,6 +25,13 @@ type OperationLogPageColumn = {
 } & Record<string, unknown>
 type OperationLogDetailValues = Record<string, unknown>
 
+const operationLogAuthEventTypeOptions = [
+  "login",
+  "logout",
+  "refresh",
+  "session_revoke",
+] as const
+
 interface OperationLogPageContract {
   tableColumns: ComputedRef<OperationLogPageColumn[]>
   queryFields: ComputedRef<ElyQueryField[]>
@@ -44,6 +51,10 @@ interface UseOperationLogWorkspaceOptions {
 export const useOperationLogWorkspace = (
   options: UseOperationLogWorkspaceOptions,
 ) => {
+  const localizeAuthEventType = (
+    authEventType: NonNullable<OperationLogRecord["authEventType"]>,
+  ) => options.t(`app.operationLog.authEventType.${authEventType}`)
+
   const operationLogItems = ref<OperationLogRecord[]>([])
   const operationLogDetail = ref<OperationLogRecord | null>(null)
   const operationLogLoading = ref(false)
@@ -62,6 +73,17 @@ export const useOperationLogWorkspace = (
       action:
         typeof operationLogQueryValues.value.action === "string"
           ? operationLogQueryValues.value.action
+          : undefined,
+      authEventType:
+        operationLogQueryValues.value.authEventType === "login" ||
+        operationLogQueryValues.value.authEventType === "logout" ||
+        operationLogQueryValues.value.authEventType === "refresh" ||
+        operationLogQueryValues.value.authEventType === "session_revoke"
+          ? operationLogQueryValues.value.authEventType
+          : "",
+      authFailureReason:
+        typeof operationLogQueryValues.value.authFailureReason === "string"
+          ? operationLogQueryValues.value.authFailureReason
           : undefined,
       actorUserId:
         typeof operationLogQueryValues.value.actorUserId === "string"
@@ -109,6 +131,8 @@ export const useOperationLogWorkspace = (
     const supportedQueryKeys = new Set([
       "category",
       "action",
+      "authEventType",
+      "authFailureReason",
       "actorUserId",
       "result",
     ])
@@ -124,22 +148,35 @@ export const useOperationLogWorkspace = (
                 ...option,
                 label: options.localizeResult(option.value),
               }))
-            : field.options,
+            : field.key === "authEventType"
+              ? operationLogAuthEventTypeOptions.map((value) => ({
+                  label: localizeAuthEventType(value),
+                  value,
+                }))
+              : field.options,
+        kind: field.key === "authEventType" ? "select" : field.kind,
         placeholder:
           field.key === "category"
             ? options.t("app.operationLog.query.categoryPlaceholder")
             : field.key === "action"
               ? options.t("app.operationLog.query.actionPlaceholder")
-              : field.key === "actorUserId"
-                ? options.t("app.operationLog.query.actorUserIdPlaceholder")
-                : field.key === "result"
-                  ? options.t("app.operationLog.query.resultPlaceholder")
-                  : field.placeholder,
+              : field.key === "authEventType"
+                ? options.t("app.operationLog.query.authEventTypePlaceholder")
+                : field.key === "authFailureReason"
+                  ? options.t(
+                      "app.operationLog.query.authFailureReasonPlaceholder",
+                    )
+                  : field.key === "actorUserId"
+                    ? options.t("app.operationLog.query.actorUserIdPlaceholder")
+                    : field.key === "result"
+                      ? options.t("app.operationLog.query.resultPlaceholder")
+                      : field.placeholder,
       }))
   })
 
   const tableItems = computed(() =>
     createOperationLogTableItems(filteredOperationLogItems.value, {
+      localizeAuthEventType,
       localizeResult: (result) =>
         options.localizeResult(result as OperationLogRecord["result"]),
       formatDateTime: (value) =>
@@ -164,6 +201,18 @@ export const useOperationLogWorkspace = (
     {
       key: "action",
       label: options.t("app.operationLog.field.action"),
+      input: "text",
+      disabled: true,
+    },
+    {
+      key: "authEventType",
+      label: options.t("app.operationLog.field.authEventType"),
+      input: "text",
+      disabled: true,
+    },
+    {
+      key: "authFailureReason",
+      label: options.t("app.operationLog.field.authFailureReason"),
       input: "text",
       disabled: true,
     },
@@ -219,6 +268,7 @@ export const useOperationLogWorkspace = (
 
   const detailValues = computed<OperationLogDetailValues>(() =>
     createOperationLogDetailValues(selectedOperationLog.value, {
+      localizeAuthEventType,
       localizeResult: (result) =>
         options.localizeResult(result as OperationLogRecord["result"]),
     }),

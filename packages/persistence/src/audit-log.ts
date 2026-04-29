@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm"
+import { and, desc, eq, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import type { AuditLogRow } from "./schema"
@@ -28,6 +28,7 @@ export interface ListAuditLogsPersistenceFilter {
   action?: string
   actorUserId?: string
   result?: AuditLogResult
+  detailsReason?: string
 }
 
 export const insertAuditLog = async (
@@ -99,6 +100,9 @@ export const listAuditLogsByFilter = async (
       ? eq(auditLogs.actorUserId, filter.actorUserId)
       : undefined,
     filter.result ? eq(auditLogs.result, filter.result) : undefined,
+    filter.detailsReason
+      ? sql`${auditLogs.details} ->> 'reason' = ${filter.detailsReason}`
+      : undefined,
   ].filter(Boolean)
 
   if (conditions.length === 0) {

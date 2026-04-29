@@ -17,6 +17,10 @@ const dictionaryPermissions = {
   update: "system:dictionary:update",
 } as const
 
+const dictionaryItemFilterSchema = t.Object({
+  typeId: t.Optional(t.String()),
+})
+
 export const createDictionaryModule = (
   repository: DictionaryRepository,
   options: DictionaryModuleOptions = {},
@@ -50,6 +54,21 @@ export const createDictionaryModule = (
           detail: {
             tags: ["dictionary"],
             summary: "List dictionary types",
+          },
+        },
+      )
+      .get(
+        "/system/dictionaries/types/export",
+        async ({ request, set }) => {
+          await authorize(request.headers, dictionaryPermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportTypesCsv()
+        },
+        {
+          detail: {
+            tags: ["dictionary"],
+            summary: "Export dictionary types as CSV",
           },
         },
       )
@@ -128,12 +147,26 @@ export const createDictionaryModule = (
           }
         },
         {
-          query: t.Object({
-            typeId: t.Optional(t.String()),
-          }),
+          query: dictionaryItemFilterSchema,
           detail: {
             tags: ["dictionary"],
             summary: "List dictionary items",
+          },
+        },
+      )
+      .get(
+        "/system/dictionaries/items/export",
+        async ({ query, request, set }) => {
+          await authorize(request.headers, dictionaryPermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportItemsCsv(query.typeId)
+        },
+        {
+          query: dictionaryItemFilterSchema,
+          detail: {
+            tags: ["dictionary"],
+            summary: "Export dictionary items as CSV",
           },
         },
       )

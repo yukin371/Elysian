@@ -757,6 +757,91 @@ describe("createServerApp", () => {
     })
   })
 
+  it("locks repeated login failures and unlocks after the lock window expires", async () => {
+    const fixture = await createAuthTestFixture({
+      maxLoginFailures: 2,
+      loginFailureWindowSeconds: 60,
+      loginLockDurationSeconds: 1,
+    })
+    const app = createTestApp({
+      modules: [fixture.authModule],
+    })
+
+    const firstFailureResponse = await loginWithCredentials(app, {
+      username: "admin",
+      password: testInvalidPassword,
+    })
+    expect(firstFailureResponse.status).toBe(401)
+
+    const secondFailureResponse = await loginWithCredentials(app, {
+      username: "admin",
+      password: testInvalidPassword,
+    })
+    expect(secondFailureResponse.status).toBe(423)
+
+    const secondFailureBody = (await secondFailureResponse.json()) as {
+      error: {
+        code: string
+        message: string
+        status: number
+        details: {
+          username: string
+          lockedUntil: string
+        }
+      }
+    }
+
+    expect(secondFailureBody).toEqual({
+      error: {
+        code: "AUTH_LOGIN_LOCKED",
+        message: "Login is temporarily locked",
+        status: 423,
+        details: {
+          username: "admin",
+          lockedUntil: expect.any(String),
+        },
+      },
+    })
+
+    const lockedUser = await fixture.repository.getUserById(fixture.userId)
+    expect(lockedUser).not.toBeNull()
+    expect(lockedUser?.loginFailureCount).toBe(2)
+    expect(lockedUser?.loginLockedUntil).toBe(
+      secondFailureBody.error.details.lockedUntil,
+    )
+
+    const lockedSuccessResponse = await loginWithCredentials(app, {
+      username: "admin",
+      password: testAdminPassword,
+    })
+    expect(lockedSuccessResponse.status).toBe(423)
+
+    await new Promise((resolve) => setTimeout(resolve, 1100))
+
+    const unlockedSuccessResponse = await loginWithCredentials(app, {
+      username: "admin",
+      password: testAdminPassword,
+    })
+    expect(unlockedSuccessResponse.status).toBe(200)
+
+    const unlockedUser = await fixture.repository.getUserById(fixture.userId)
+    expect(unlockedUser).not.toBeNull()
+    expect(unlockedUser?.loginFailureCount).toBe(0)
+    expect(unlockedUser?.lastLoginFailedAt).toBeNull()
+    expect(unlockedUser?.loginLockedUntil).toBeNull()
+    expect(unlockedUser?.lastLoginAt).toEqual(expect.any(String))
+
+    const auditLogs = await fixture.repository.listAuditLogs(fixture.userId)
+    expect(
+      auditLogs.some(
+        (log) =>
+          log.action === "login" &&
+          log.result === "failure" &&
+          log.details?.reason === "login_locked",
+      ),
+    ).toBe(true)
+  })
+
   it("writes audit logs for workflow permission denial", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [

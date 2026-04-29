@@ -1,4 +1,4 @@
-import { requestJson } from "./core"
+import { requestBlob, requestJson } from "./core"
 
 export interface SettingRecord {
   id: string
@@ -30,6 +30,11 @@ export interface UpdateSettingRequest {
 
 export const fetchSettings = async (): Promise<SettingsResponse> =>
   requestJson<SettingsResponse>("/system/settings", {
+    auth: true,
+  })
+
+export const exportSettingsCsv = async (): Promise<Blob> =>
+  requestBlob("/system/settings/export", {
     auth: true,
   })
 

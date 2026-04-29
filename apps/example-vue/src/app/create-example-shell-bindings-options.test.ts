@@ -63,6 +63,9 @@ describe("createExampleShellBindingsOptions", () => {
   test("keeps shell passthrough and workspace mapping stable", () => {
     const submitLogout = () => undefined
     const reloadRoles = () => Promise.resolve()
+    const handleExportUsers = () => Promise.resolve()
+    const handleExportDictionaryTypes = () => Promise.resolve()
+    const handleExportSettings = () => Promise.resolve()
     const refreshGeneratorPreview = () => Promise.resolve()
 
     const input = {
@@ -78,15 +81,24 @@ describe("createExampleShellBindingsOptions", () => {
         "workspace.reloadRoles": reloadRoles,
       }),
       customerWorkspace: createWorkspaceInput({}),
-      dictionaryWorkspace: createWorkspaceInput({}),
+      dictionaryWorkspace: createWorkspaceInput({
+        dictionaryTypeExportLoading: true,
+        handleExportDictionaryTypes,
+      }),
       departmentWorkspace: createWorkspaceInput({}),
       sessionWorkspace: createWorkspaceInput({}),
       postWorkspace: createWorkspaceInput({}),
       menuWorkspace: createWorkspaceInput({}),
       notificationWorkspace: createWorkspaceInput({}),
       operationLogWorkspace: createWorkspaceInput({}),
-      userWorkspace: createWorkspaceInput({}),
-      settingWorkspace: createWorkspaceInput({}),
+      userWorkspace: createWorkspaceInput({
+        userExportLoading: true,
+        handleExportUsers,
+      }),
+      settingWorkspace: createWorkspaceInput({
+        settingExportLoading: true,
+        handleExportSettings,
+      }),
       tenantWorkspace: createWorkspaceInput({}),
       fileWorkspace: createWorkspaceInput({}),
       workflowWorkspace: createWorkspaceInput({}),
@@ -107,6 +119,12 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.canUpdateRoles).toBe(true)
     expect(result.rolePanelTitle).toBe("Role Details")
     expect(result.reloadRoles).toBe(reloadRoles)
+    expect(result.dictionaryTypeExportLoading).toBe(true)
+    expect(result.handleExportDictionaryTypes).toBe(handleExportDictionaryTypes)
+    expect(result.userExportLoading).toBe(true)
+    expect(result.handleExportUsers).toBe(handleExportUsers)
+    expect(result.settingExportLoading).toBe(true)
+    expect(result.handleExportSettings).toBe(handleExportSettings)
     expect(result.generatorPreviewLoading).toBe(true)
     expect(result.refreshGeneratorPreview).toBe(refreshGeneratorPreview)
   })

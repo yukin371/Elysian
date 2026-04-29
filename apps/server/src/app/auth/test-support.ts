@@ -92,6 +92,9 @@ export const createAuthTestFixture = async (
     permissions?: string[]
     isSuperAdmin?: boolean
     secureCookies?: boolean
+    maxLoginFailures?: number
+    loginFailureWindowSeconds?: number
+    loginLockDurationSeconds?: number
     tenantId?: string
     dataScope?: 1 | 2 | 3 | 4 | 5
     userDepartmentIds?: string[]
@@ -191,6 +194,9 @@ export const createAuthTestFixture = async (
       accessTokenSecret: testAccessTokenSecret,
       refreshCookieName: "elysian_refresh_token",
       secureCookies: options.secureCookies,
+      maxLoginFailures: options.maxLoginFailures,
+      loginFailureWindowSeconds: options.loginFailureWindowSeconds,
+      loginLockDurationSeconds: options.loginLockDurationSeconds,
       tenantContextDb: options.tenantContextDb,
       resolveTenantIdByCode: options.resolveTenantIdByCode,
     }),

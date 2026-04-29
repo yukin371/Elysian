@@ -19,6 +19,15 @@ const operationLogPermissions = {
 const operationLogFilterSchema = t.Object({
   category: t.Optional(t.String()),
   action: t.Optional(t.String()),
+  authEventType: t.Optional(
+    t.Union([
+      t.Literal("login"),
+      t.Literal("logout"),
+      t.Literal("refresh"),
+      t.Literal("session_revoke"),
+    ]),
+  ),
+  authFailureReason: t.Optional(t.String()),
   actorUserId: t.Optional(t.String()),
   result: t.Optional(t.Union([t.Literal("success"), t.Literal("failure")])),
 })

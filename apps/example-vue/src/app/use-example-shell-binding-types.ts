@@ -50,6 +50,7 @@ export interface UseExampleShellBindingsOptions {
   canDeleteCustomers: ValueSource<boolean>
   isDictionaryWorkspace: ComputedRef<boolean>
   dictionaryLoading: ValueSource<boolean>
+  dictionaryTypeExportLoading: ValueSource<boolean>
   canCreateDictionaryTypes: ValueSource<boolean>
   canViewDictionaries: ValueSource<boolean>
   isDepartmentWorkspace: ComputedRef<boolean>
@@ -76,10 +77,12 @@ export interface UseExampleShellBindingsOptions {
   canViewOperationLogs: ValueSource<boolean>
   isUserWorkspace: ComputedRef<boolean>
   userLoading: ValueSource<boolean>
+  userExportLoading: ValueSource<boolean>
   canCreateUsers: ValueSource<boolean>
   canViewUsers: ValueSource<boolean>
   isSettingWorkspace: ComputedRef<boolean>
   settingLoading: ValueSource<boolean>
+  settingExportLoading: ValueSource<boolean>
   canCreateSettings: ValueSource<boolean>
   canViewSettings: ValueSource<boolean>
   isTenantWorkspace: ComputedRef<boolean>
@@ -406,6 +409,7 @@ export interface UseExampleShellBindingsOptions {
   reloadCustomers: () => void
   openDictionaryCreatePanel: () => void
   reloadDictionaries: () => void
+  handleExportDictionaryTypes: () => void
   openDepartmentCreatePanel: () => void
   reloadDepartments: () => void
   openPostCreatePanel: () => void
@@ -417,8 +421,10 @@ export interface UseExampleShellBindingsOptions {
   reloadOperationLogs: () => void
   openUserCreatePanel: () => void
   reloadUsers: () => void
+  handleExportUsers: () => void
   openSettingCreatePanel: () => void
   reloadSettings: () => void
+  handleExportSettings: () => void
   openTenantCreatePanel: () => void
   reloadTenants: () => void
   reloadFiles: () => void

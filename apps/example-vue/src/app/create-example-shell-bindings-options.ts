@@ -118,6 +118,8 @@ export const createExampleShellBindingsOptions = (
   const dictionaryWorkspaceOptions = {
     isDictionaryWorkspace: input.dictionaryWorkspace.isDictionaryWorkspace,
     dictionaryLoading: input.dictionaryWorkspace.workspace.dictionaryLoading,
+    dictionaryTypeExportLoading:
+      input.dictionaryWorkspace.dictionaryTypeExportLoading,
     canCreateDictionaryTypes:
       input.dictionaryWorkspace.canCreateDictionaryTypes,
     canViewDictionaries: input.dictionaryWorkspace.canViewDictionaries,
@@ -162,6 +164,8 @@ export const createExampleShellBindingsOptions = (
     openDictionaryCreatePanel:
       input.dictionaryWorkspace.workspace.openCreatePanel,
     reloadDictionaries: input.dictionaryWorkspace.workspace.reloadDictionaries,
+    handleExportDictionaryTypes:
+      input.dictionaryWorkspace.handleExportDictionaryTypes,
     startDictionaryEdit: input.dictionaryWorkspace.workspace.startEdit,
     submitDictionaryForm: input.dictionaryWorkspace.workspace.submitForm,
     cancelDictionaryPanel: input.dictionaryWorkspace.workspace.cancelPanel,
@@ -399,6 +403,7 @@ export const createExampleShellBindingsOptions = (
   const userWorkspaceOptions = {
     isUserWorkspace: input.userWorkspace.isUserWorkspace,
     userLoading: input.userWorkspace.workspace.userLoading,
+    userExportLoading: input.userWorkspace.userExportLoading,
     canCreateUsers: input.userWorkspace.canCreateUsers,
     canViewUsers: input.userWorkspace.canViewUsers,
     userModuleReady: input.userWorkspace.userModuleReady,
@@ -422,6 +427,7 @@ export const createExampleShellBindingsOptions = (
     handleUserRowClick: input.userWorkspace.workspace.handleRowClick,
     openUserCreatePanel: input.userWorkspace.workspace.openCreatePanel,
     reloadUsers: input.userWorkspace.workspace.reloadUsers,
+    handleExportUsers: input.userWorkspace.handleExportUsers,
     startUserEdit: input.userWorkspace.workspace.startEdit,
     startUserPasswordReset: input.userWorkspace.workspace.startPasswordReset,
     submitUserForm: input.userWorkspace.workspace.submitForm,
@@ -432,6 +438,7 @@ export const createExampleShellBindingsOptions = (
   const settingWorkspaceOptions = {
     isSettingWorkspace: input.settingWorkspace.isSettingWorkspace,
     settingLoading: input.settingWorkspace.workspace.settingLoading,
+    settingExportLoading: input.settingWorkspace.settingExportLoading,
     canCreateSettings: input.settingWorkspace.canCreateSettings,
     canViewSettings: input.settingWorkspace.canViewSettings,
     settingModuleReady: input.settingWorkspace.settingModuleReady,
@@ -457,6 +464,7 @@ export const createExampleShellBindingsOptions = (
     handleSettingRowClick: input.settingWorkspace.workspace.handleRowClick,
     openSettingCreatePanel: input.settingWorkspace.workspace.openCreatePanel,
     reloadSettings: input.settingWorkspace.workspace.reloadSettings,
+    handleExportSettings: input.settingWorkspace.handleExportSettings,
     startSettingEdit: input.settingWorkspace.workspace.startEdit,
     submitSettingForm: input.settingWorkspace.workspace.submitForm,
     cancelSettingPanel: input.settingWorkspace.workspace.cancelPanel,

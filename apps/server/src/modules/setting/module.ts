@@ -54,6 +54,21 @@ export const createSettingModule = (
         },
       )
       .get(
+        "/system/settings/export",
+        async ({ request, set }) => {
+          await authorize(request.headers, settingPermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv()
+        },
+        {
+          detail: {
+            tags: ["setting"],
+            summary: "Export settings as CSV",
+          },
+        },
+      )
+      .get(
         "/system/settings/:id",
         async ({ params, request }) => {
           await authorize(request.headers, settingPermissions.get)

@@ -18,6 +18,7 @@ import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { computed, ref } from "vue"
 import { createAppShellLocalization } from "./app/app-shell-helpers"
 import { createExampleShellBindingsOptions } from "./app/create-example-shell-bindings-options"
+import { downloadBrowserBlob } from "./app/download-browser-blob"
 import {
   customerPageDefinition,
   departmentPageDefinition,
@@ -45,6 +46,11 @@ import ShellWorkspaceSecondarySwitch from "./components/workspaces/shell/ShellWo
 import ShellWorkspaceSectionIntro from "./components/workspaces/shell/ShellWorkspaceSectionIntro.vue"
 import { exampleLocaleMessages } from "./i18n"
 import { resolveWorkspaceMenuKey } from "./lib/navigation-workspace"
+import {
+  exportDictionaryTypesCsv,
+  exportSettingsCsv,
+  exportUsersCsv,
+} from "./lib/platform-api"
 import type { AuthIdentityResponse, PlatformResponse } from "./lib/platform-api"
 import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
@@ -140,6 +146,9 @@ const tenantModuleReady = ref(false)
 const userModuleReady = ref(false)
 const dictionaryModuleReady = ref(false)
 const workflowModuleReady = ref(false)
+const dictionaryTypeExportLoading = ref(false)
+const userExportLoading = ref(false)
+const settingExportLoading = ref(false)
 const envName = ref("unknown")
 const demoAdminPassword = ["admin", "123"].join("")
 
@@ -147,6 +156,9 @@ const loginForm = ref({
   username: "admin",
   password: demoAdminPassword,
 })
+
+const createCsvExportFilename = (basename: string) =>
+  `${basename}-${new Date().toISOString().slice(0, 10)}.csv`
 
 const isAuthenticated = computed(() => authIdentity.value !== null)
 const permissionCodes = computed(
@@ -1275,6 +1287,80 @@ const { isRecoverableAuthError, submitLogin, submitLogout } =
     handleUserReset,
   })
 
+const handleExportDictionaryTypes = async () => {
+  if (!canViewDictionaries.value || dictionaryTypeExportLoading.value) {
+    return
+  }
+
+  dictionaryTypeExportLoading.value = true
+  dictionaryErrorMessage.value = ""
+
+  try {
+    const blob = await exportDictionaryTypesCsv()
+    downloadBrowserBlob(
+      blob,
+      createCsvExportFilename("system-dictionary-types"),
+    )
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    dictionaryErrorMessage.value =
+      error instanceof Error
+        ? error.message
+        : t("app.error.exportDictionaryTypes")
+  } finally {
+    dictionaryTypeExportLoading.value = false
+  }
+}
+
+const handleExportUsers = async () => {
+  if (!canViewUsers.value || userExportLoading.value) {
+    return
+  }
+
+  userExportLoading.value = true
+  userErrorMessage.value = ""
+
+  try {
+    const blob = await exportUsersCsv()
+    downloadBrowserBlob(blob, createCsvExportFilename("system-users"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    userErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportUsers")
+  } finally {
+    userExportLoading.value = false
+  }
+}
+
+const handleExportSettings = async () => {
+  if (!canViewSettings.value || settingExportLoading.value) {
+    return
+  }
+
+  settingExportLoading.value = true
+  settingErrorMessage.value = ""
+
+  try {
+    const blob = await exportSettingsCsv()
+    downloadBrowserBlob(blob, createCsvExportFilename("system-settings"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    settingErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportSettings")
+  } finally {
+    settingExportLoading.value = false
+  }
+}
+
 const handleShellMenuSelect = (menuKey: string) => {
   const nextMenuKey = resolveWorkspaceMenuKey(
     enterpriseNavigation.value,
@@ -1354,6 +1440,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   dictionaryWorkspace: {
     workspace: dictionaryWorkspace,
     isDictionaryWorkspace,
+    dictionaryTypeExportLoading,
     canCreateDictionaryTypes,
     canViewDictionaries,
     dictionaryModuleReady,
@@ -1361,6 +1448,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     enterpriseFormCopy,
     localizeDictionaryStatus,
     canUpdateDictionaryTypes,
+    handleExportDictionaryTypes,
   },
   departmentWorkspace: {
     workspace: departmentWorkspace,
@@ -1415,21 +1503,25 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   userWorkspace: {
     workspace: userWorkspace,
     isUserWorkspace,
+    userExportLoading,
     canCreateUsers,
     canViewUsers,
     userModuleReady,
     canEnterUserWorkspace,
     canUpdateUsers,
     canResetUserPasswords,
+    handleExportUsers,
   },
   settingWorkspace: {
     workspace: settingWorkspace,
     isSettingWorkspace,
+    settingExportLoading,
     canCreateSettings,
     canViewSettings,
     settingModuleReady,
     canEnterSettingWorkspace,
     canUpdateSettings,
+    handleExportSettings,
   },
   tenantWorkspace: {
     workspace: tenantWorkspace,

@@ -6,6 +6,8 @@ export interface OperationLogRecord {
   id: string
   category: string
   action: string
+  authEventType: "login" | "logout" | "refresh" | "session_revoke" | null
+  authFailureReason: string | null
   actorUserId: string | null
   targetType: string | null
   targetId: string | null
@@ -34,6 +36,18 @@ export const operationLogModuleSchema: ModuleSchema = {
       label: "Action",
       kind: "string",
       required: true,
+      searchable: true,
+    },
+    {
+      key: "authEventType",
+      label: "Auth Event Type",
+      kind: "string",
+      searchable: true,
+    },
+    {
+      key: "authFailureReason",
+      label: "Auth Failure Reason",
+      kind: "string",
       searchable: true,
     },
     { key: "actorUserId", label: "Actor User ID", kind: "id" },

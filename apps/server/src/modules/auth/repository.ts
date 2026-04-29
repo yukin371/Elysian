@@ -7,6 +7,7 @@ import {
   type DatabaseClient,
   type MenuRow,
   type RefreshSessionRow,
+  type UpdateUserLoginFailureStateInput,
   type UserRow,
   getRefreshSessionById,
   getRefreshSessionByTokenHash,
@@ -21,10 +22,12 @@ import {
   listPermissionCodesForUser,
   listRefreshSessionsByUserId,
   listRoleCodesForUser,
+  recordUserSuccessfulLogin,
   resolveDataAccessContext,
   revokeRefreshSession,
   touchRefreshSession,
   updateUserLastLoginAt,
+  updateUserLoginFailureState,
 } from "@elysian/persistence"
 
 export type AuthUserStatus = "active" | "disabled"
@@ -42,6 +45,9 @@ export interface AuthUserRecord {
   status: AuthUserStatus
   isSuperAdmin: boolean
   tenantId: string
+  loginFailureCount: number
+  lastLoginFailedAt: string | null
+  loginLockedUntil: string | null
   lastLoginAt: string | null
   createdAt: string
   updatedAt: string
@@ -141,6 +147,12 @@ export interface AuthDataScopeProfile {
   dataAccess: DataAccessContext
 }
 
+export interface UpdateAuthLoginFailureStateInput {
+  loginFailureCount: number
+  lastLoginFailedAt: string | null
+  loginLockedUntil: string | null
+}
+
 export interface AuthRepository {
   findUserByUsername: (
     username: string,
@@ -148,6 +160,12 @@ export interface AuthRepository {
   ) => Promise<AuthUserRecord | null>
   getUserById: (id: string) => Promise<AuthUserRecord | null>
   updateLastLoginAt: (userId: string, timestamp: string) => Promise<void>
+  updateLoginFailureState: (
+    userId: string,
+    input: UpdateAuthLoginFailureStateInput,
+    timestamp: string,
+  ) => Promise<void>
+  recordSuccessfulLogin: (userId: string, timestamp: string) => Promise<void>
   listRoleCodesForUser: (userId: string) => Promise<string[]>
   listPermissionCodesForUser: (userId: string) => Promise<string[]>
   listMenusForUser: (userId: string) => Promise<AuthMenuRecord[]>
@@ -205,8 +223,19 @@ interface InMemoryDepartmentNode {
   parentId: string | null
 }
 
+type InMemoryAuthUserSeed = Omit<
+  AuthUserRecord,
+  "loginFailureCount" | "lastLoginFailedAt" | "loginLockedUntil"
+> &
+  Partial<
+    Pick<
+      AuthUserRecord,
+      "loginFailureCount" | "lastLoginFailedAt" | "loginLockedUntil"
+    >
+  >
+
 export interface InMemoryAuthRepositorySeed {
-  users?: AuthUserRecord[]
+  users?: InMemoryAuthUserSeed[]
   roles?: AuthRoleRecord[]
   permissions?: AuthPermissionRecord[]
   menus?: AuthMenuRecord[]
@@ -231,6 +260,27 @@ export const createAuthRepository = (db: DatabaseClient): AuthRepository => ({
   },
   async updateLastLoginAt(userId, timestamp) {
     await updateUserLastLoginAt(db, userId, new Date(timestamp))
+  },
+  async updateLoginFailureState(userId, input, timestamp) {
+    const persistenceInput: UpdateUserLoginFailureStateInput = {
+      loginFailureCount: input.loginFailureCount,
+      lastLoginFailedAt: input.lastLoginFailedAt
+        ? new Date(input.lastLoginFailedAt)
+        : null,
+      loginLockedUntil: input.loginLockedUntil
+        ? new Date(input.loginLockedUntil)
+        : null,
+    }
+
+    await updateUserLoginFailureState(
+      db,
+      userId,
+      persistenceInput,
+      new Date(timestamp),
+    )
+  },
+  async recordSuccessfulLogin(userId, timestamp) {
+    await recordUserSuccessfulLogin(db, userId, new Date(timestamp))
   },
   listRoleCodesForUser: (userId) => listRoleCodesForUser(db, userId),
   listPermissionCodesForUser: (userId) =>
@@ -306,7 +356,12 @@ export const createAuthRepository = (db: DatabaseClient): AuthRepository => ({
 export const createInMemoryAuthRepository = (
   seed: InMemoryAuthRepositorySeed = {},
 ): AuthRepository => {
-  const users = new Map((seed.users ?? []).map((user) => [user.id, user]))
+  const users = new Map(
+    (seed.users ?? []).map((user) => {
+      const normalizedUser = normalizeInMemoryUser(user)
+      return [normalizedUser.id, normalizedUser] as const
+    }),
+  )
   const roles = new Map((seed.roles ?? []).map((role) => [role.id, role]))
   const permissions = new Map(
     (seed.permissions ?? []).map((permission) => [permission.id, permission]),
@@ -345,6 +400,35 @@ export const createInMemoryAuthRepository = (
       users.set(userId, {
         ...existing,
         lastLoginAt: timestamp,
+        updatedAt: timestamp,
+      })
+    },
+    async updateLoginFailureState(userId, input, timestamp) {
+      const existing = users.get(userId)
+      if (!existing) {
+        return
+      }
+
+      users.set(userId, {
+        ...existing,
+        loginFailureCount: input.loginFailureCount,
+        lastLoginFailedAt: input.lastLoginFailedAt,
+        loginLockedUntil: input.loginLockedUntil,
+        updatedAt: timestamp,
+      })
+    },
+    async recordSuccessfulLogin(userId, timestamp) {
+      const existing = users.get(userId)
+      if (!existing) {
+        return
+      }
+
+      users.set(userId, {
+        ...existing,
+        lastLoginAt: timestamp,
+        loginFailureCount: 0,
+        lastLoginFailedAt: null,
+        loginLockedUntil: null,
         updatedAt: timestamp,
       })
     },
@@ -536,9 +620,19 @@ const mapUserRow = (row: UserRow): AuthUserRecord => ({
   status: row.status,
   isSuperAdmin: row.isSuperAdmin,
   tenantId: row.tenantId,
+  loginFailureCount: row.loginFailureCount,
+  lastLoginFailedAt: row.lastLoginFailedAt?.toISOString() ?? null,
+  loginLockedUntil: row.loginLockedUntil?.toISOString() ?? null,
   lastLoginAt: row.lastLoginAt?.toISOString() ?? null,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
+})
+
+const normalizeInMemoryUser = (user: InMemoryAuthUserSeed): AuthUserRecord => ({
+  ...user,
+  loginFailureCount: user.loginFailureCount ?? 0,
+  lastLoginFailedAt: user.lastLoginFailedAt ?? null,
+  loginLockedUntil: user.loginLockedUntil ?? null,
 })
 
 const resolveInMemoryDataAccess = (input: {

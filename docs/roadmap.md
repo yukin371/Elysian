@@ -12,11 +12,12 @@
 
 - 已决定：`P7A Round-2` 视为已完成能力基线；当前主线回到“标准后台基础能力收口”，优先按若依常用后台矩阵补齐日常可用能力
 - 入口依据：认证、RBAC、系统模块、多租户、数据权限与 workflow 最小闭环都已具备，不再缺“能不能做”的底座，当前缺的是“后台常用功能是否足够完整”
-- 当前范围：优先收口 `apps/example-vue` 的系统模块工作区、真实路由切换与高频交互；优先补岗位、在线会话治理、登录锁定/失败策略、用户/字典/配置等高频模块的导入导出与日志视图缺口
+- 当前范围：优先收口 `apps/example-vue` 的系统模块工作区、真实路由切换与高频交互；当前重点已转向把既有 `post / session / login-security / export / auth-event log` 最小闭环继续打磨成更稳定的后台日常体验
 - 当前约束：不新增第二套 shared owner，不把示例应用扩写成完整低代码平台，不把 `generator / SQL / workflow` 的次级缺口继续拔高为当前第一优先级
 - 当前补充决策：C 端界面方向维持 `Vue` 第一优先级，`uniapp` 作为第二优先级进入设计储备；当前只允许文档设计，不并行开启第二前端实现主线
 - 已具备基础：用户、角色、菜单、部门、字典、系统配置、操作日志、文件、通知、租户等后端闭环已落地，前端工作区已覆盖其中大部分模块
 - 已具备基础：当前用户 refresh session 列表 / 单会话 revoke 已落最小后端切片，并已在 `apps/example-vue` 补齐在线会话工作区、当前/历史状态区分与 `revoked / rotated` 二次吊销前后端显式拦截，可作为“在线用户/会话治理”入口继续扩写，而不引入第二套 auth owner
+- 已具备基础：`post` 工作区、登录失败计数/锁定/自动解锁、`users / dictionaries / settings` 导出，以及通过现有 `operation-log` 工作区显式查询 auth 安全事件都已形成最小闭环
 - 已具备基础：`P7A` workflow、`generator-session` 与 SQL preview 已可保留为次级轨道，当前只做必要收口，不继续抢占后台基础功能优先级
 - 当前结论：先把“像若依的基本后台”补齐，再决定是否恢复 `P7B/P7C`、独立 SQL 工作区或更完整 Studio 产品化
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
@@ -35,7 +36,7 @@
 
 - 当前目标：把仓库现有系统能力收口成“企业后台日常可用”的基础包，优先解决模块闭环覆盖率不足，而不是继续拔高平台能力天花板
 - 第一优先级：收口 `apps/example-vue` 已有系统工作区，优先保证 `users / roles / menus / departments / dictionaries / settings / operation-logs / notifications / tenants` 具备真实路由切换、列表/详情、创建/编辑与必要状态动作
-- 第一优先级：补仍缺的若依高频基础项，优先登录失败计数/锁定、登录日志视图与高频模块导入导出；`岗位（post）` 与在线会话治理本轮最小闭环已完成，继续按统一后台体验做收口
+- 第一优先级：继续收口 `users / dictionaries / settings / operation-logs / notifications / files / tenants` 的后台日常体验；登录安全、登录日志显式查询、`岗位（post）`、在线会话治理与第一轮高频导出已完成最小闭环
 - 第二优先级：C 端界面扩展方向先固定为 `uniapp`，但当前只保留设计储备，不提前进入实现
 - 第二优先级：在不改变 owner 的前提下，继续把通知、操作日志、租户与数据权限体验向后台常用形态收口
 - 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心
@@ -324,7 +325,7 @@
 
 ## 下一步
 
-1. 先按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
-2. 先补仍缺的高频基础能力：`岗位（post）`、当前用户会话管理页与强制下线、登录失败计数/锁定、以及从操作日志扩展到用户/字典/配置等模块的导入导出能力。
+1. 继续按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
+2. 在既有导出稳定后，判断 `users / dictionaries / settings` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
 3. `generator / SQL / workflow` 维持次级推进：优先做必要收口（如会话设备化、diff/evidence 强化），不抢占若依基础功能对齐的第一优先级。
 4. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。

@@ -212,6 +212,28 @@ const createOperationLogSeedRecords = () => [
   },
 ]
 
+const withDerivedAuthFields = (
+  record: typeof createOperationLogSeedRecords extends () => Array<infer T>
+    ? T
+    : never,
+) => {
+  const details = record.details as Record<string, unknown> | undefined
+
+  return {
+    ...record,
+    authEventType:
+      record.category === "auth" &&
+      (record.action === "login" ||
+        record.action === "logout" ||
+        record.action === "refresh" ||
+        record.action === "session_revoke")
+        ? record.action
+        : null,
+    authFailureReason:
+      typeof details?.reason === "string" ? details.reason : null,
+  }
+}
+
 const createFileSeedRecords = () => [
   {
     id: "file_1",
@@ -254,8 +276,16 @@ describe("createServerApp", () => {
       permissions: ["system:operation-log:list"],
       isSuperAdmin: false,
     })
+    const operationLogSeedRecords = createOperationLogSeedRecords()
+    const firstOperationLog = operationLogSeedRecords[0]
+    const filteredOperationLog = operationLogSeedRecords[1]
+
+    if (!firstOperationLog || !filteredOperationLog) {
+      throw new Error("expected seeded operation logs")
+    }
+
     const operationLogRepository = createInMemoryOperationLogRepository(
-      createOperationLogSeedRecords(),
+      operationLogSeedRecords,
     )
     const app = createTestApp({
       modules: [
@@ -277,7 +307,7 @@ describe("createServerApp", () => {
 
     expect(listResponse.status).toBe(200)
     expect(await listResponse.json()).toEqual({
-      items: createOperationLogSeedRecords(),
+      items: operationLogSeedRecords.map(withDerivedAuthFields),
     })
 
     const filteredResponse = await app.handle(
@@ -293,7 +323,7 @@ describe("createServerApp", () => {
 
     expect(filteredResponse.status).toBe(200)
     expect(await filteredResponse.json()).toEqual({
-      items: [createOperationLogSeedRecords()[1]],
+      items: [withDerivedAuthFields(filteredOperationLog)],
     })
 
     const getResponse = await app.handle(
@@ -305,7 +335,9 @@ describe("createServerApp", () => {
     )
 
     expect(getResponse.status).toBe(200)
-    expect(await getResponse.json()).toEqual(createOperationLogSeedRecords()[0])
+    expect(await getResponse.json()).toEqual(
+      withDerivedAuthFields(firstOperationLog),
+    )
   })
 
   it("exports operation logs as csv", async () => {

@@ -19,6 +19,8 @@ const createOperationLog = (
   id: overrides.id,
   category: overrides.category ?? "auth",
   action: overrides.action ?? "login",
+  authEventType: overrides.authEventType ?? null,
+  authFailureReason: overrides.authFailureReason ?? null,
   actorUserId: overrides.actorUserId ?? "user_admin",
   targetType: overrides.targetType ?? "session",
   targetId: overrides.targetId ?? "session_1",
@@ -51,6 +53,15 @@ describe("operation log workspace helpers", () => {
       details: null,
     }),
     createOperationLog({
+      id: "auth_refresh_failure",
+      category: "auth",
+      action: "refresh",
+      authEventType: "refresh",
+      authFailureReason: "token expired",
+      actorUserId: "session_user",
+      result: "failure",
+    }),
+    createOperationLog({
       id: "tenant_update",
       category: "tenant",
       action: "update",
@@ -63,6 +74,8 @@ describe("operation log workspace helpers", () => {
     const values: ElyQueryValues = {
       category: " workflow ",
       action: " reject ",
+      authEventType: "refresh",
+      authFailureReason: " token expired ",
       actorUserId: " manager_1 ",
       result: "failure",
     }
@@ -70,12 +83,14 @@ describe("operation log workspace helpers", () => {
     expect(buildOperationLogListQuery(values)).toEqual({
       category: "workflow",
       action: "reject",
+      authEventType: "refresh",
+      authFailureReason: "token expired",
       actorUserId: "manager_1",
       result: "failure",
     })
   })
 
-  test("filters operation logs across category, action, actor, and result", () => {
+  test("filters operation logs across category, action, auth fields, actor, and result", () => {
     expect(
       filterOperationLogs(logs, { category: "work" }).map((item) => item.id),
     ).toEqual(["workflow_reject"])
@@ -90,6 +105,13 @@ describe("operation log workspace helpers", () => {
         result: "success",
       }).map((item) => item.id),
     ).toEqual(["audit_login", "tenant_update"])
+
+    expect(
+      filterOperationLogs(logs, {
+        authEventType: "refresh",
+        authFailureReason: "expired",
+      }).map((item) => item.id),
+    ).toEqual(["auth_refresh_failure"])
   })
 
   test("keeps the selected operation log when it remains visible", () => {
@@ -113,50 +135,75 @@ describe("operation log workspace helpers", () => {
   test("maps operation log result and timestamps for table display", () => {
     expect(
       createOperationLogTableItems(logs, {
+        localizeAuthEventType: (authEventType) => `event:${authEventType}`,
         localizeResult: (result) => `result:${result}`,
         formatDateTime: (value) => `time:${value}`,
-      }),
+      }).map(({ id, result, createdAt, authEventType, authFailureReason }) => ({
+        id,
+        result,
+        createdAt,
+        authEventType,
+        authFailureReason,
+      })),
     ).toEqual([
-      expect.objectContaining({
+      {
         id: "audit_login",
         result: "result:success",
         createdAt: "time:2026-04-27T08:00:00.000Z",
-      }),
-      expect.objectContaining({
+        authEventType: "",
+        authFailureReason: null,
+      },
+      {
         id: "workflow_reject",
         result: "result:failure",
         createdAt: "time:2026-04-27T08:00:00.000Z",
-      }),
-      expect.objectContaining({
+        authEventType: "",
+        authFailureReason: null,
+      },
+      {
+        id: "auth_refresh_failure",
+        result: "result:failure",
+        createdAt: "time:2026-04-27T08:00:00.000Z",
+        authEventType: "event:refresh",
+        authFailureReason: "token expired",
+      },
+      {
         id: "tenant_update",
         result: "result:success",
         createdAt: "time:2026-04-27T08:00:00.000Z",
-      }),
+        authEventType: "",
+        authFailureReason: null,
+      },
     ])
   })
 
   test("creates read-only detail values and details text", () => {
     const firstLog = logs[0]
     const secondLog = logs[1]
+    const thirdLog = logs[2]
 
     expect(firstLog).toBeDefined()
     expect(secondLog).toBeDefined()
+    expect(thirdLog).toBeDefined()
 
-    if (!firstLog || !secondLog) {
+    if (!firstLog || !secondLog || !thirdLog) {
       throw new Error("expected fixture logs")
     }
 
     expect(
-      createOperationLogDetailValues(firstLog, {
+      createOperationLogDetailValues(thirdLog, {
+        localizeAuthEventType: (authEventType) => `event:${authEventType}`,
         localizeResult: (result) => `result:${result}`,
       }),
     ).toEqual({
       category: "auth",
-      action: "login",
-      actorUserId: "user_admin",
+      action: "refresh",
+      authEventType: "event:refresh",
+      authFailureReason: "token expired",
+      actorUserId: "session_user",
       targetType: "session",
       targetId: "session_1",
-      result: "result:success",
+      result: "result:failure",
       requestId: "req_1",
       ip: "127.0.0.1",
       userAgent: "bun:test",

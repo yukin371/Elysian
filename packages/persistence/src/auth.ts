@@ -2,7 +2,7 @@ import { and, asc, eq, inArray } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import type { RoleDataScopeValue } from "./role"
-import { roleDepts, roles, userRoles } from "./schema"
+import { roleDepts, roles, userRoles, users } from "./schema"
 export {
   type CreateDepartmentPersistenceInput,
   getDepartmentByCode,
@@ -89,6 +89,46 @@ export {
   listAuditLogsByFilter,
   type ListAuditLogsPersistenceFilter,
 } from "./audit-log"
+
+export interface UpdateUserLoginFailureStateInput {
+  loginFailureCount: number
+  lastLoginFailedAt: Date | null
+  loginLockedUntil: Date | null
+}
+
+export const updateUserLoginFailureState = async (
+  db: DatabaseClient,
+  userId: string,
+  input: UpdateUserLoginFailureStateInput,
+  timestamp: Date,
+): Promise<void> => {
+  await db
+    .update(users)
+    .set({
+      loginFailureCount: input.loginFailureCount,
+      lastLoginFailedAt: input.lastLoginFailedAt,
+      loginLockedUntil: input.loginLockedUntil,
+      updatedAt: timestamp,
+    })
+    .where(eq(users.id, userId))
+}
+
+export const recordUserSuccessfulLogin = async (
+  db: DatabaseClient,
+  userId: string,
+  timestamp: Date,
+): Promise<void> => {
+  await db
+    .update(users)
+    .set({
+      lastLoginAt: timestamp,
+      loginFailureCount: 0,
+      lastLoginFailedAt: null,
+      loginLockedUntil: null,
+      updatedAt: timestamp,
+    })
+    .where(eq(users.id, userId))
+}
 
 export interface DataScopeAssignment {
   scope: RoleDataScopeValue

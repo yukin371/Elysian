@@ -121,7 +121,12 @@ export {
   type UpdateDepartmentPersistenceInput,
   updateDepartment,
 } from "./department"
-export { listDataScopesForUser } from "./auth"
+export {
+  listDataScopesForUser,
+  recordUserSuccessfulLogin,
+  type UpdateUserLoginFailureStateInput,
+  updateUserLoginFailureState,
+} from "./auth"
 export {
   type AuditLogResult,
   type CreateAuditLogPersistenceInput,

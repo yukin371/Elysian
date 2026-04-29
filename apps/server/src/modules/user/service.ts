@@ -17,6 +17,36 @@ export interface UpdateUserPayload extends UpdateUserInput {}
 
 export const createUserService = (repository: UserRepository) => ({
   list: () => repository.list(),
+  async exportCsv() {
+    const items = await repository.list()
+
+    return buildCsv(
+      [
+        "id",
+        "username",
+        "displayName",
+        "email",
+        "phone",
+        "status",
+        "isSuperAdmin",
+        "lastLoginAt",
+        "createdAt",
+        "updatedAt",
+      ],
+      items.map((item) => [
+        item.id,
+        item.username,
+        item.displayName,
+        item.email,
+        item.phone,
+        item.status,
+        item.isSuperAdmin,
+        item.lastLoginAt,
+        item.createdAt,
+        item.updatedAt,
+      ]),
+    )
+  },
   async getById(id: string) {
     const user = await repository.getById(id)
 
@@ -184,6 +214,29 @@ export const createUserService = (repository: UserRepository) => ({
 const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim()
   return normalized && normalized.length > 0 ? normalized : undefined
+}
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | boolean | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | boolean | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : String(value)
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
 }
 
 export type UserService = ReturnType<typeof createUserService>

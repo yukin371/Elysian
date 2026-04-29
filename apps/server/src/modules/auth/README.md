@@ -2,7 +2,7 @@
 
 `auth` 是后端鉴权 owner，负责登录、refresh session、当前身份、会话管理和权限校验入口。
 
-> 当前简化边界：当前只覆盖用户名密码登录、短 access token、可轮换 refresh session、最小审计与租户推导；未实现 MFA、登录锁定策略、设备指纹或外部 IdP。
+> 当前简化边界：当前覆盖用户名密码登录、登录失败计数/锁定窗口/自动到期解锁、短 access token、可轮换 refresh session、最小审计与租户推导；未实现 MFA、设备指纹或外部 IdP。
 
 ## Owns
 
@@ -16,7 +16,7 @@
 
 - 用户/角色/菜单的后台 CRUD 工作区。
 - 持久化 schema、refresh session 表结构 owner。
-- 登录失败锁定、MFA、外部 SSO 等未落地能力。
+- MFA、设备指纹、外部 SSO、风控引擎等更重安全能力。
 
 ## Depends On
 
@@ -51,7 +51,7 @@ flowchart TD
 ## Validation
 
 - `module.ts` 已确认 `/auth/me` 与 `/auth/sessions` 需要 Bearer token；`/auth/refresh` 与 `/auth/logout` 依赖 refresh cookie。
-- `service.ts` 已确认登录成功会更新 `lastLoginAt`，refresh 会创建新 session 并 revoke 旧 session。
+- `service.ts` 已确认登录失败会累积失败计数并按窗口锁定，登录成功会更新 `lastLoginAt` 并清零失败状态，refresh 会创建新 session 并 revoke 旧 session。
 - `service.ts` 已确认 `AuthIdentity` 统一输出 `user / deptIds / dataScopes / dataAccess / roles / permissionCodes / menus`。
 - `guard.ts` 已确认其他模块只通过 `AuthGuard.authorize(headers, permissionCode?)` 消费鉴权结果。
 - `tenant.ts` 已确认请求 tenant context 先读 access token 的 `tid`，否则退回 refresh cookie 中的 tenant 信息。

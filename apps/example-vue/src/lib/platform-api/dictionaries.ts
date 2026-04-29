@@ -1,4 +1,4 @@
-import { requestJson } from "./core"
+import { requestBlob, requestJson } from "./core"
 
 export interface DictionaryTypeRecord {
   id: string
@@ -54,6 +54,11 @@ export const fetchDictionaryTypes =
       auth: true,
     })
 
+export const exportDictionaryTypesCsv = async (): Promise<Blob> =>
+  requestBlob("/system/dictionaries/types/export", {
+    auth: true,
+  })
+
 export const fetchDictionaryTypeById = async (
   id: string,
 ): Promise<DictionaryTypeDetailRecord> =>
@@ -93,6 +98,18 @@ export const fetchDictionaryItems = async (
     typeId
       ? `/system/dictionaries/items?typeId=${encodeURIComponent(typeId)}`
       : "/system/dictionaries/items",
+    {
+      auth: true,
+    },
+  )
+
+export const exportDictionaryItemsCsv = async (
+  typeId?: string,
+): Promise<Blob> =>
+  requestBlob(
+    typeId
+      ? `/system/dictionaries/items/export?typeId=${encodeURIComponent(typeId)}`
+      : "/system/dictionaries/items/export",
     {
       auth: true,
     },

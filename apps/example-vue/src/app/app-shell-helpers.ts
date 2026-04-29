@@ -529,6 +529,10 @@ export const createAppShellLocalization = (t: AppTranslate) => {
         return t("app.operationLog.field.category")
       case "action":
         return t("app.operationLog.field.action")
+      case "authEventType":
+        return t("app.operationLog.field.authEventType")
+      case "authFailureReason":
+        return t("app.operationLog.field.authFailureReason")
       case "actorUserId":
         return t("app.operationLog.field.actorUserId")
       case "targetType":

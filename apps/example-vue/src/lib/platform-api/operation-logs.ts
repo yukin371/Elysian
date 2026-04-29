@@ -1,9 +1,26 @@
 import { requestJson } from "./core"
 
+const operationLogAuthEventTypes = [
+  "login",
+  "logout",
+  "refresh",
+  "session_revoke",
+] as const
+
+const isOperationLogAuthEventType = (
+  value: unknown,
+): value is NonNullable<OperationLogRecord["authEventType"]> =>
+  typeof value === "string" &&
+  operationLogAuthEventTypes.includes(
+    value as NonNullable<OperationLogRecord["authEventType"]>,
+  )
+
 export interface OperationLogRecord {
   id: string
   category: string
   action: string
+  authEventType: "login" | "logout" | "refresh" | "session_revoke" | null
+  authFailureReason: string | null
   actorUserId: string | null
   targetType: string | null
   targetId: string | null
@@ -22,6 +39,8 @@ export interface OperationLogsResponse {
 export interface OperationLogListQuery {
   category?: string
   action?: string
+  authEventType?: NonNullable<OperationLogRecord["authEventType"]>
+  authFailureReason?: string
   actorUserId?: string
   result?: OperationLogRecord["result"]
 }
@@ -37,6 +56,14 @@ export const fetchOperationLogs = async (
 
   if (query.action?.trim()) {
     search.set("action", query.action.trim())
+  }
+
+  if (isOperationLogAuthEventType(query.authEventType)) {
+    search.set("authEventType", query.authEventType)
+  }
+
+  if (query.authFailureReason?.trim()) {
+    search.set("authFailureReason", query.authFailureReason.trim())
   }
 
   if (query.actorUserId?.trim()) {

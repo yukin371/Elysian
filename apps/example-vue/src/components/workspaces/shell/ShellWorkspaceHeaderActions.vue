@@ -18,6 +18,7 @@ defineProps<{
   canViewCustomers: boolean
   isDictionaryWorkspace: boolean
   dictionaryLoading: boolean
+  dictionaryTypeExportLoading: boolean
   canCreateDictionaryTypes: boolean
   canViewDictionaries: boolean
   isDepartmentWorkspace: boolean
@@ -37,10 +38,12 @@ defineProps<{
   canViewOperationLogs: boolean
   isUserWorkspace: boolean
   userLoading: boolean
+  userExportLoading: boolean
   canCreateUsers: boolean
   canViewUsers: boolean
   isSettingWorkspace: boolean
   settingLoading: boolean
+  settingExportLoading: boolean
   canCreateSettings: boolean
   canViewSettings: boolean
   isTenantWorkspace: boolean
@@ -63,6 +66,7 @@ defineEmits<{
   (event: "reload-customers"): void
   (event: "open-dictionary-create"): void
   (event: "reload-dictionaries"): void
+  (event: "export-dictionary-types"): void
   (event: "open-department-create"): void
   (event: "reload-departments"): void
   (event: "open-menu-create"): void
@@ -72,8 +76,10 @@ defineEmits<{
   (event: "reload-operation-logs"): void
   (event: "open-user-create"): void
   (event: "reload-users"): void
+  (event: "export-users"): void
   (event: "open-setting-create"): void
   (event: "reload-settings"): void
+  (event: "export-settings"): void
   (event: "open-tenant-create"): void
   (event: "reload-tenants"): void
   (event: "reload-files"): void
@@ -134,6 +140,17 @@ defineEmits<{
       @click="$emit('open-dictionary-create')"
     >
       {{ t("app.action.newDictionaryType") }}
+    </TButton>
+    <TButton
+      v-if="isDictionaryWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="dictionaryTypeExportLoading"
+      :disabled="dictionaryTypeExportLoading || !canViewDictionaries"
+      @click="$emit('export-dictionary-types')"
+    >
+      {{ t("app.action.exportDictionaryTypes") }}
     </TButton>
     <TButton
       v-if="isDictionaryWorkspace"
@@ -240,6 +257,17 @@ defineEmits<{
       size="small"
       theme="default"
       variant="outline"
+      :loading="settingExportLoading"
+      :disabled="settingExportLoading || !canViewSettings"
+      @click="$emit('export-settings')"
+    >
+      {{ t("app.action.exportSettings") }}
+    </TButton>
+    <TButton
+      v-if="isSettingWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
       :disabled="settingLoading || !canViewSettings"
       @click="$emit('reload-settings')"
     >
@@ -264,6 +292,17 @@ defineEmits<{
       @click="$emit('reload-tenants')"
     >
       {{ t("app.action.refresh") }}
+    </TButton>
+    <TButton
+      v-if="isUserWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="userExportLoading"
+      :disabled="userExportLoading || !canViewUsers"
+      @click="$emit('export-users')"
+    >
+      {{ t("app.action.exportUsers") }}
     </TButton>
     <TButton
       v-if="isUserWorkspace"

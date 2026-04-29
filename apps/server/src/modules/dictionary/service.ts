@@ -28,6 +28,22 @@ export interface UpdateDictionaryItemPayload
 
 export const createDictionaryService = (repository: DictionaryRepository) => ({
   listTypes: () => repository.listTypes(),
+  async exportTypesCsv() {
+    const items = await repository.listTypes()
+
+    return buildCsv(
+      ["id", "code", "name", "description", "status", "createdAt", "updatedAt"],
+      items.map((item) => [
+        item.id,
+        item.code,
+        item.name,
+        item.description,
+        item.status,
+        item.createdAt,
+        item.updatedAt,
+      ]),
+    )
+  },
   async getTypeById(id: string) {
     const type = await repository.getTypeById(id)
 
@@ -153,6 +169,34 @@ export const createDictionaryService = (repository: DictionaryRepository) => ({
     return updated
   },
   listItems: (typeId?: string) => repository.listItems(typeId),
+  async exportItemsCsv(typeId?: string) {
+    const items = await repository.listItems(typeId)
+
+    return buildCsv(
+      [
+        "id",
+        "typeId",
+        "value",
+        "label",
+        "sort",
+        "isDefault",
+        "status",
+        "createdAt",
+        "updatedAt",
+      ],
+      items.map((item) => [
+        item.id,
+        item.typeId,
+        item.value,
+        item.label,
+        item.sort,
+        item.isDefault,
+        item.status,
+        item.createdAt,
+        item.updatedAt,
+      ]),
+    )
+  },
   async getItemById(id: string) {
     const item = await repository.getItemById(id)
 
@@ -328,6 +372,29 @@ const assertDictionaryTypeExists = async (
 const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim()
   return normalized && normalized.length > 0 ? normalized : undefined
+}
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | number | boolean | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | number | boolean | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : String(value)
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
 }
 
 export type DictionaryService = ReturnType<typeof createDictionaryService>

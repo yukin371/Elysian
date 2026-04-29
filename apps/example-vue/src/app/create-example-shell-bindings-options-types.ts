@@ -74,6 +74,7 @@ export interface CreateExampleShellBindingsOptionsInput {
   dictionaryWorkspace: {
     workspace: ReturnType<typeof useDictionaryWorkspace>
     isDictionaryWorkspace: OptionValue<"isDictionaryWorkspace">
+    dictionaryTypeExportLoading: OptionValue<"dictionaryTypeExportLoading">
     canCreateDictionaryTypes: OptionValue<"canCreateDictionaryTypes">
     canViewDictionaries: OptionValue<"canViewDictionaries">
     dictionaryModuleReady: OptionValue<"dictionaryModuleReady">
@@ -81,6 +82,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     enterpriseFormCopy: OptionValue<"enterpriseFormCopy">
     localizeDictionaryStatus: OptionValue<"localizeDictionaryStatus">
     canUpdateDictionaryTypes: OptionValue<"canUpdateDictionaryTypes">
+    handleExportDictionaryTypes: OptionValue<"handleExportDictionaryTypes">
   }
   departmentWorkspace: {
     workspace: ReturnType<typeof useDepartmentWorkspace>
@@ -135,21 +137,25 @@ export interface CreateExampleShellBindingsOptionsInput {
   userWorkspace: {
     workspace: ReturnType<typeof useUserWorkspace>
     isUserWorkspace: OptionValue<"isUserWorkspace">
+    userExportLoading: OptionValue<"userExportLoading">
     canCreateUsers: OptionValue<"canCreateUsers">
     canViewUsers: OptionValue<"canViewUsers">
     userModuleReady: OptionValue<"userModuleReady">
     canEnterUserWorkspace: OptionValue<"canEnterUserWorkspace">
     canUpdateUsers: OptionValue<"canUpdateUsers">
     canResetUserPasswords: OptionValue<"canResetUserPasswords">
+    handleExportUsers: OptionValue<"handleExportUsers">
   }
   settingWorkspace: {
     workspace: ReturnType<typeof useSettingWorkspace>
     isSettingWorkspace: OptionValue<"isSettingWorkspace">
+    settingExportLoading: OptionValue<"settingExportLoading">
     canCreateSettings: OptionValue<"canCreateSettings">
     canViewSettings: OptionValue<"canViewSettings">
     settingModuleReady: OptionValue<"settingModuleReady">
     canEnterSettingWorkspace: OptionValue<"canEnterSettingWorkspace">
     canUpdateSettings: OptionValue<"canUpdateSettings">
+    handleExportSettings: OptionValue<"handleExportSettings">
   }
   tenantWorkspace: {
     workspace: ReturnType<typeof useTenantWorkspace>
@@ -293,6 +299,7 @@ export type CustomerWorkspaceBindingsOptions = BindingSegment<
 export type DictionaryWorkspaceBindingsOptions = BindingSegment<
   | "isDictionaryWorkspace"
   | "dictionaryLoading"
+  | "dictionaryTypeExportLoading"
   | "canCreateDictionaryTypes"
   | "canViewDictionaries"
   | "dictionaryModuleReady"
@@ -319,6 +326,7 @@ export type DictionaryWorkspaceBindingsOptions = BindingSegment<
   | "handleDictionaryRowClick"
   | "openDictionaryCreatePanel"
   | "reloadDictionaries"
+  | "handleExportDictionaryTypes"
   | "startDictionaryEdit"
   | "submitDictionaryForm"
   | "cancelDictionaryPanel"
@@ -499,6 +507,7 @@ export type OperationLogWorkspaceBindingsOptions = BindingSegment<
 export type UserWorkspaceBindingsOptions = BindingSegment<
   | "isUserWorkspace"
   | "userLoading"
+  | "userExportLoading"
   | "canCreateUsers"
   | "canViewUsers"
   | "userModuleReady"
@@ -522,6 +531,7 @@ export type UserWorkspaceBindingsOptions = BindingSegment<
   | "handleUserRowClick"
   | "openUserCreatePanel"
   | "reloadUsers"
+  | "handleExportUsers"
   | "startUserEdit"
   | "startUserPasswordReset"
   | "submitUserForm"
@@ -532,6 +542,7 @@ export type UserWorkspaceBindingsOptions = BindingSegment<
 export type SettingWorkspaceBindingsOptions = BindingSegment<
   | "isSettingWorkspace"
   | "settingLoading"
+  | "settingExportLoading"
   | "canCreateSettings"
   | "canViewSettings"
   | "settingModuleReady"
@@ -555,6 +566,7 @@ export type SettingWorkspaceBindingsOptions = BindingSegment<
   | "handleSettingRowClick"
   | "openSettingCreatePanel"
   | "reloadSettings"
+  | "handleExportSettings"
   | "startSettingEdit"
   | "submitSettingForm"
   | "cancelSettingPanel"

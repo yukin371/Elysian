@@ -122,3 +122,55 @@ describe("createInMemoryAuthRepository data scope profile", () => {
     })
   })
 })
+
+describe("createInMemoryAuthRepository login security state", () => {
+  it("tracks failed attempts and clears them after a successful login", async () => {
+    const repository = createInMemoryAuthRepository({
+      users: [
+        {
+          id: "user_login_state_1",
+          username: "admin",
+          displayName: "Administrator",
+          passwordHash: "hash",
+          status: "active",
+          isSuperAdmin: true,
+          tenantId: "tenant-default",
+          lastLoginAt: null,
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T00:00:00.000Z",
+        },
+      ],
+    })
+
+    await repository.updateLoginFailureState(
+      "user_login_state_1",
+      {
+        loginFailureCount: 2,
+        lastLoginFailedAt: "2026-04-21T08:00:00.000Z",
+        loginLockedUntil: "2026-04-21T08:15:00.000Z",
+      },
+      "2026-04-21T08:00:00.000Z",
+    )
+
+    const lockedUser = await repository.getUserById("user_login_state_1")
+    expect(lockedUser).toMatchObject({
+      loginFailureCount: 2,
+      lastLoginFailedAt: "2026-04-21T08:00:00.000Z",
+      loginLockedUntil: "2026-04-21T08:15:00.000Z",
+    })
+
+    await repository.recordSuccessfulLogin(
+      "user_login_state_1",
+      "2026-04-21T08:16:00.000Z",
+    )
+
+    const unlockedUser = await repository.getUserById("user_login_state_1")
+    expect(unlockedUser).toMatchObject({
+      loginFailureCount: 0,
+      lastLoginFailedAt: null,
+      loginLockedUntil: null,
+      lastLoginAt: "2026-04-21T08:16:00.000Z",
+      updatedAt: "2026-04-21T08:16:00.000Z",
+    })
+  })
+})

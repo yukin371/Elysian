@@ -15,6 +15,22 @@ export interface UpdateSettingPayload extends UpdateSettingInput {}
 
 export const createSettingService = (repository: SettingRepository) => ({
   list: () => repository.list(),
+  async exportCsv() {
+    const items = await repository.list()
+
+    return buildCsv(
+      ["id", "key", "value", "description", "status", "createdAt", "updatedAt"],
+      items.map((item) => [
+        item.id,
+        item.key,
+        item.value,
+        item.description,
+        item.status,
+        item.createdAt,
+        item.updatedAt,
+      ]),
+    )
+  },
   async getById(id: string) {
     const setting = await repository.getById(id)
 
@@ -145,6 +161,29 @@ export const createSettingService = (repository: SettingRepository) => ({
 const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim()
   return normalized && normalized.length > 0 ? normalized : undefined
+}
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : value
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
 }
 
 export type SettingService = ReturnType<typeof createSettingService>

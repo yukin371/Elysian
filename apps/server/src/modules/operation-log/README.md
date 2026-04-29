@@ -7,7 +7,7 @@
 ## Owns
 
 - `/system/operation-logs` 的列表、详情、CSV 导出。
-- 按 `category/action/actorUserId/result` 过滤。
+- 按 `category/action/actorUserId/result` 过滤，并通过轻量 `authEventType/authFailureReason` 参数显式查询 auth 安全事件。
 - CSV 序列化与转义。
 
 ## Must Not Own

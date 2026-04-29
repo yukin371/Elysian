@@ -55,6 +55,21 @@ export const createUserModule = (
         },
       )
       .get(
+        "/system/users/export",
+        async ({ request, set }) => {
+          await authorize(request.headers, userPermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv()
+        },
+        {
+          detail: {
+            tags: ["user"],
+            summary: "Export users as CSV",
+          },
+        },
+      )
+      .get(
         "/system/users/:id",
         async ({ params, request }) => {
           await authorize(request.headers, userPermissions.get)

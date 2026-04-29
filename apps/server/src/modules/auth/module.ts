@@ -20,6 +20,9 @@ export interface AuthModuleOptions {
   accessTokenSecret?: string
   accessTokenTtlSeconds?: number
   refreshTokenTtlSeconds?: number
+  maxLoginFailures?: number
+  loginFailureWindowSeconds?: number
+  loginLockDurationSeconds?: number
   refreshCookieName?: string
   secureCookies?: boolean
   tenantContextDb?: DatabaseClient
@@ -42,6 +45,9 @@ export const createAuthModule = (
       accessTokenSecret,
       accessTokenTtlSeconds: options.accessTokenTtlSeconds,
       refreshTokenTtlSeconds,
+      maxLoginFailures: options.maxLoginFailures,
+      loginFailureWindowSeconds: options.loginFailureWindowSeconds,
+      loginLockDurationSeconds: options.loginLockDurationSeconds,
     })
 
     context.logger.info("Registering auth module", {

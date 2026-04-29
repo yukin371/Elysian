@@ -21,6 +21,8 @@ export {
 } from "./platform-api/departments"
 export {
   createDictionaryType,
+  exportDictionaryItemsCsv,
+  exportDictionaryTypesCsv,
   fetchDictionaryItems,
   fetchDictionaryTypeById,
   fetchDictionaryTypes,
@@ -64,6 +66,7 @@ export {
 } from "./platform-api/roles"
 export {
   createSetting,
+  exportSettingsCsv,
   fetchSettingById,
   fetchSettings,
   updateSetting,
@@ -77,6 +80,7 @@ export {
 } from "./platform-api/tenants"
 export {
   createUser,
+  exportUsersCsv,
   fetchUsers,
   resetUserPassword,
   updateUser,

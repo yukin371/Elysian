@@ -210,6 +210,67 @@ describe("createServerApp system admin data", () => {
     })
   })
 
+  it("exports dictionary types and items as csv when the access token has dictionary-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:dictionary:list"],
+      isSuperAdmin: false,
+    })
+    const dictionaryRepository = createInMemoryDictionaryRepository({
+      types: createDictionaryTypeSeedRecords(),
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createDictionaryModule(dictionaryRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const typesResponse = await app.handle(
+      new Request("http://localhost/system/dictionaries/types/export", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(typesResponse.status).toBe(200)
+    expect(typesResponse.headers.get("content-type")).toContain("text/csv")
+
+    const typesText = await typesResponse.text()
+    expect(typesText).toContain(
+      "id,code,name,description,status,createdAt,updatedAt",
+    )
+    expect(typesText).toContain(
+      "dictionary_type_status_1,customer_status,Customer Status,Customer lifecycle status,active,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+
+    const itemsResponse = await app.handle(
+      new Request(
+        "http://localhost/system/dictionaries/items/export?typeId=dictionary_type_status_1",
+        {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    )
+
+    expect(itemsResponse.status).toBe(200)
+    expect(itemsResponse.headers.get("content-type")).toContain("text/csv")
+
+    const itemsText = await itemsResponse.text()
+    expect(itemsText).toContain(
+      "id,typeId,value,label,sort,isDefault,status,createdAt,updatedAt",
+    )
+    expect(itemsText).toContain(
+      "dictionary_item_status_active_1,dictionary_type_status_1,active,Active,10,true,active,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+    expect(itemsText).not.toContain("dictionary_item_priority_low_1")
+  })
+
   it("creates and updates dictionary types and items", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [
@@ -521,6 +582,47 @@ describe("createServerApp system admin data", () => {
       createdAt: "2026-04-20T00:00:00.000Z",
       updatedAt: "2026-04-20T00:00:00.000Z",
     })
+  })
+
+  it("exports system settings as csv when the access token has setting-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:setting:list"],
+      isSuperAdmin: false,
+    })
+    const settingRepository = createInMemorySettingRepository(
+      createSettingSeedRecords(),
+    )
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createSettingModule(settingRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const response = await app.handle(
+      new Request("http://localhost/system/settings/export", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("text/csv")
+
+    const text = await response.text()
+    expect(text).toContain(
+      "id,key,value,description,status,createdAt,updatedAt",
+    )
+    expect(text).toContain(
+      "setting_brand_name_1,platform.brand_name,Elysian,Display brand name,active,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+    expect(text).toContain(
+      "setting_support_email_1,platform.support_email,support@example.com,Support contact email,active,2026-04-20T00:00:00.000Z,2026-04-20T00:00:00.000Z",
+    )
   })
 
   it("creates and updates system settings", async () => {

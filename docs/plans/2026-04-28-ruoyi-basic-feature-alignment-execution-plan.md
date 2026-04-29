@@ -32,10 +32,10 @@
   - 新增 `post` 模块的 schema / persistence / server / example-vue 链路
   - 用户、字典、配置、日志等模块的导入导出体验
 - 计划改动：
-  - 先收口已有工作区
-  - 再补 `post`
-  - 再补会话治理与登录安全
-  - 最后补导入导出与登录日志视图
+- 先收口已有工作区
+- 再补 `post`
+- 再补会话治理与登录安全
+- 最后补导入导出与登录日志显式查询
 - 验证方式：
   - server 合约测试
   - 必要的 persistence 测试
@@ -166,7 +166,7 @@
 - 已补在线会话工作区、当前/历史状态区分与 `revoked / rotated` 二次吊销治理
 - 后端 `DELETE /auth/sessions/:id` 已显式拒绝再次吊销 rotated 会话
 
-### WP-4 登录安全策略
+### WP-4 登录安全策略 ✅ 已完成最小闭环
 
 目标：
 
@@ -194,7 +194,13 @@
 
 - 登录成功 / 失败 / 锁定 / 解锁路径的 server 合约测试
 
-### WP-5 登录日志视图
+本轮收口结果：
+
+- 已在 `packages/persistence` 补用户登录失败计数、最近失败时间与锁定截止时间字段。
+- 已在 `apps/server` auth service 落失败窗口累计、锁定、自动到期解锁与成功登录清零。
+- 已补 auth 合约测试与 repository 测试，避免把策略藏在实现里不验证。
+
+### WP-5 登录日志视图 ✅ 已通过现有 operation-log 工作区显式化
 
 目标：
 
@@ -218,7 +224,13 @@
 - 列表筛选与详情读取测试
 - 前端工作区可展示最小字段集
 
-### WP-6 高频模块导入导出
+本轮收口结果：
+
+- 继续复用既有 `operation-log` owner，没有新增第二套登录日志真源。
+- 后端 `/system/operation-logs` 已支持 `authEventType / authFailureReason` 过滤。
+- `apps/example-vue` 已在现有 operation-log workspace 显式展示 auth 事件筛选、详情字段与 query summary。
+
+### WP-6 高频模块导入导出 🟡 已完成第一轮导出
 
 目标：
 
@@ -250,14 +262,19 @@
 - server 导出接口测试
 - 前端导出入口装配验证
 
+本轮收口结果：
+
+- 已补 `users / dictionary types / dictionary items / settings` 导出接口与 server 测试。
+- `apps/example-vue` 已在 `users / dictionaries / settings` 工作区壳层补齐导出入口、loading 与错误回流。
+- 当前仍只完成“先导出”，导入链路继续保持待评估状态。
+
 ## 实施顺序
 
-### 第一阶段
+### 当前剩余重点
 
 1. `WP-1` 已有工作区闭环收口
-2. `WP-2` 岗位管理（post）模块
-
-### 第二阶段
+2. `WP-6` 导入链路是否进入主线的边界判断
+3. 通知 / 文件 / 租户 / operation-log 的后台日常交互继续打磨
 
 1. `WP-3` 在线会话治理
 2. `WP-4` 登录安全策略

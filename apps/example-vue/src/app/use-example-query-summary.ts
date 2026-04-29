@@ -45,6 +45,19 @@ interface UseExampleQuerySummaryOptions {
 export const useExampleQuerySummary = (
   options: UseExampleQuerySummaryOptions,
 ) => {
+  const localizeOperationLogAuthEventType = (authEventType: string) => {
+    if (
+      authEventType === "login" ||
+      authEventType === "logout" ||
+      authEventType === "refresh" ||
+      authEventType === "session_revoke"
+    ) {
+      return options.t(`app.operationLog.authEventType.${authEventType}`)
+    }
+
+    return authEventType
+  }
+
   const currentQuerySummary = computed(() => {
     if (options.isDictionaryWorkspace.value) {
       const fragments: string[] = []
@@ -394,6 +407,28 @@ export const useExampleQuerySummary = (
       ) {
         fragments.push(
           `${options.t("app.operationLog.field.actorUserId")}: ${options.operationLogQueryValues.value.actorUserId.trim()}`,
+        )
+      }
+
+      if (
+        typeof options.operationLogQueryValues.value.authEventType ===
+          "string" &&
+        options.operationLogQueryValues.value.authEventType.trim()
+      ) {
+        fragments.push(
+          `${options.t("app.operationLog.field.authEventType")}: ${localizeOperationLogAuthEventType(
+            options.operationLogQueryValues.value.authEventType.trim(),
+          )}`,
+        )
+      }
+
+      if (
+        typeof options.operationLogQueryValues.value.authFailureReason ===
+          "string" &&
+        options.operationLogQueryValues.value.authFailureReason.trim()
+      ) {
+        fragments.push(
+          `${options.t("app.operationLog.field.authFailureReason")}: ${options.operationLogQueryValues.value.authFailureReason.trim()}`,
         )
       }
 

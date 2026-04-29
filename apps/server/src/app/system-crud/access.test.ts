@@ -128,6 +128,47 @@ describe("createServerApp system access", () => {
     })
   })
 
+  it("exports system users as csv when the access token has user-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:user:list"],
+      isSuperAdmin: false,
+    })
+    const userRepository = createInMemoryUserRepository(
+      await createUserSeedRecords(),
+    )
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createUserModule(userRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const response = await app.handle(
+      new Request("http://localhost/system/users/export", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("text/csv")
+
+    const text = await response.text()
+    expect(text).toContain(
+      "id,username,displayName,email,phone,status,isSuperAdmin,lastLoginAt,createdAt,updatedAt",
+    )
+    expect(text).toContain(
+      "user_admin_1,admin,Administrator,admin@example.com,13800000000,active,true,2026-04-21T08:00:00.000Z,2026-04-21T00:00:00.000Z,2026-04-21T08:00:00.000Z",
+    )
+    expect(text).toContain(
+      "user_ops_1,operator,Operator,operator@example.com,13900000000,active,false,,2026-04-20T00:00:00.000Z,2026-04-20T00:00:00.000Z",
+    )
+  })
+
   it("creates, updates, and resets a system user through the user module", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [

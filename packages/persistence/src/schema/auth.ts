@@ -28,6 +28,13 @@ export const users = pgTable(
     passwordHash: text("password_hash").notNull(),
     status: userStatus("status").notNull().default("active"),
     isSuperAdmin: boolean("is_super_admin").notNull().default(false),
+    loginFailureCount: smallint("login_failure_count").notNull().default(0),
+    lastLoginFailedAt: timestamp("last_login_failed_at", {
+      withTimezone: true,
+    }),
+    loginLockedUntil: timestamp("login_locked_until", {
+      withTimezone: true,
+    }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
