@@ -440,6 +440,8 @@ export const enUSModulesLocaleMessages: VueLocaleMessages = {
   "app.operationLog.authEventType.logout": "Logout",
   "app.operationLog.authEventType.refresh": "Refresh Token",
   "app.operationLog.authEventType.session_revoke": "Session Revoke",
+  "app.operationLog.authFailureReason.invalid_password": "Invalid Password",
+  "app.operationLog.authFailureReason.account_locked": "Account Locked",
   "app.operationLog.result.success": "Success",
   "app.operationLog.result.failure": "Failure",
   "app.operationLog.query.categoryPlaceholder": "Search by category",

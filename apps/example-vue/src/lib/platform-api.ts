@@ -46,6 +46,7 @@ export {
   fetchNotificationById,
   fetchNotifications,
   markNotificationAsRead,
+  markNotificationsAsRead,
 } from "./platform-api/notifications"
 export {
   fetchOperationLogById,

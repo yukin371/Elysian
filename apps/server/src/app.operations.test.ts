@@ -773,6 +773,35 @@ describe("createServerApp", () => {
       status: "read",
       readAt: expect.any(String),
     })
+
+    const bulkReadResponse = await app.handle(
+      new Request("http://localhost/system/notifications/read", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: [
+            "notification_1",
+            "notification_2",
+            createdNotification.id,
+            "missing_notification",
+          ],
+        }),
+      }),
+    )
+
+    expect(bulkReadResponse.status).toBe(200)
+    expect(await bulkReadResponse.json()).toEqual({
+      items: [
+        {
+          ...createNotificationSeedRecords()[0],
+          status: "read",
+          readAt: expect.any(String),
+        },
+      ],
+    })
   })
 
   it("keeps department-scoped notifications visible after creation", async () => {

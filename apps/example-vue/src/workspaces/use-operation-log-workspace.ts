@@ -55,6 +55,18 @@ export const useOperationLogWorkspace = (
     authEventType: NonNullable<OperationLogRecord["authEventType"]>,
   ) => options.t(`app.operationLog.authEventType.${authEventType}`)
 
+  const localizeAuthFailureReason = (authFailureReason: string) => {
+    if (authFailureReason === "invalid_password") {
+      return options.t("app.operationLog.authFailureReason.invalid_password")
+    }
+
+    if (authFailureReason === "account_locked") {
+      return options.t("app.operationLog.authFailureReason.account_locked")
+    }
+
+    return authFailureReason
+  }
+
   const operationLogItems = ref<OperationLogRecord[]>([])
   const operationLogDetail = ref<OperationLogRecord | null>(null)
   const operationLogLoading = ref(false)
@@ -177,6 +189,7 @@ export const useOperationLogWorkspace = (
   const tableItems = computed(() =>
     createOperationLogTableItems(filteredOperationLogItems.value, {
       localizeAuthEventType,
+      localizeAuthFailureReason,
       localizeResult: (result) =>
         options.localizeResult(result as OperationLogRecord["result"]),
       formatDateTime: (value) =>
@@ -269,6 +282,7 @@ export const useOperationLogWorkspace = (
   const detailValues = computed<OperationLogDetailValues>(() =>
     createOperationLogDetailValues(selectedOperationLog.value, {
       localizeAuthEventType,
+      localizeAuthFailureReason,
       localizeResult: (result) =>
         options.localizeResult(result as OperationLogRecord["result"]),
     }),

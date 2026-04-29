@@ -228,7 +228,7 @@
 
 - 继续复用既有 `operation-log` owner，没有新增第二套登录日志真源。
 - 后端 `/system/operation-logs` 已支持 `authEventType / authFailureReason` 过滤。
-- `apps/example-vue` 已在现有 operation-log workspace 显式展示 auth 事件筛选、详情字段与 query summary。
+- `apps/example-vue` 已在现有 operation-log workspace 显式展示 auth 事件筛选、详情字段，并补了 auth failure reason 的前端本地文案映射。
 
 ### WP-6 高频模块导入导出 🟡 已完成第一轮导出
 
@@ -265,7 +265,7 @@
 本轮收口结果：
 
 - 已补 `users / dictionary types / dictionary items / settings` 导出接口与 server 测试。
-- `apps/example-vue` 已在 `users / dictionaries / settings` 工作区壳层补齐导出入口、loading 与错误回流。
+- `apps/example-vue` 已在 `users / dictionaries / settings` 工作区壳层补齐导出入口、loading 与错误回流；字典工作区已同时覆盖类型与条目导出。
 - 当前仍只完成“先导出”，导入链路继续保持待评估状态。
 
 ## 实施顺序
@@ -274,7 +274,7 @@
 
 1. `WP-1` 已有工作区闭环收口
 2. `WP-6` 导入链路是否进入主线的边界判断
-3. 通知 / 文件 / 租户 / operation-log 的后台日常交互继续打磨
+3. 通知已补当前筛选批量已读小闭环；文件 / 租户 / operation-log 的后台日常交互继续打磨
 
 1. `WP-3` 在线会话治理
 2. `WP-4` 登录安全策略

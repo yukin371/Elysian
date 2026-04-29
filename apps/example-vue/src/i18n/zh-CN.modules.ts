@@ -428,6 +428,8 @@ export const zhCNModulesLocaleMessages: VueLocaleMessages = {
   "app.operationLog.authEventType.logout": "登出",
   "app.operationLog.authEventType.refresh": "刷新令牌",
   "app.operationLog.authEventType.session_revoke": "会话撤销",
+  "app.operationLog.authFailureReason.invalid_password": "密码错误",
+  "app.operationLog.authFailureReason.account_locked": "账号已锁定",
   "app.operationLog.result.success": "成功",
   "app.operationLog.result.failure": "失败",
   "app.operationLog.query.categoryPlaceholder": "按分类搜索",

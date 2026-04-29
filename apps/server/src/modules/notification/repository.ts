@@ -7,6 +7,7 @@ import {
   insertNotification,
   listNotifications,
   markNotificationAsRead,
+  markNotificationsAsRead,
   matchesDataAccess,
   notifications,
 } from "@elysian/persistence"
@@ -44,6 +45,10 @@ export interface NotificationRepository {
     id: string,
     dataAccess?: DataAccessContext,
   ) => Promise<NotificationRecord | null>
+  markManyAsRead: (
+    ids: string[],
+    dataAccess?: DataAccessContext,
+  ) => Promise<NotificationRecord[]>
   recipientExists: (recipientUserId: string) => Promise<boolean>
 }
 
@@ -109,6 +114,20 @@ export const createNotificationRepository = (
         : undefined,
     )
     return row ? mapNotificationRow(row) : null
+  },
+  async markManyAsRead(ids, dataAccess) {
+    const rows = await markNotificationsAsRead(
+      db,
+      ids,
+      new Date(),
+      dataAccess
+        ? buildDataAccessCondition(dataAccess, {
+            deptColumn: notifications.deptId,
+            creatorColumn: notifications.createdByUserId,
+          })
+        : undefined,
+    )
+    return rows.map(mapNotificationRow)
   },
   async recipientExists(recipientUserId) {
     return (await getUserById(db, recipientUserId)) !== null
@@ -204,6 +223,39 @@ export const createInMemoryNotificationRepository = (
 
       items.set(id, updated)
       return mapStoredNotificationToPublic(updated)
+    },
+    async markManyAsRead(ids, dataAccess) {
+      const uniqueIds = [...new Set(ids)]
+      const updatedItems: StoredNotificationRecord[] = []
+
+      for (const id of uniqueIds) {
+        const existing = items.get(id)
+
+        if (!existing || existing.status === "read") {
+          continue
+        }
+
+        if (
+          dataAccess &&
+          !matchesDataAccess(dataAccess, {
+            deptId: existing.deptId,
+            creatorId: existing.createdByUserId,
+          })
+        ) {
+          continue
+        }
+
+        const updated: StoredNotificationRecord = {
+          ...existing,
+          status: "read",
+          readAt: existing.readAt ?? new Date().toISOString(),
+        }
+
+        items.set(id, updated)
+        updatedItems.push(updated)
+      }
+
+      return updatedItems.map(mapStoredNotificationToPublic)
     },
     async recipientExists(recipientUserId) {
       return availableUserIds.has(recipientUserId)

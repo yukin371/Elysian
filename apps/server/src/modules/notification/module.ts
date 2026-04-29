@@ -121,6 +121,28 @@ export const createNotificationModule = (
         },
       )
       .post(
+        "/system/notifications/read",
+        async ({ body, request }) => {
+          const identity = await authorize(
+            request.headers,
+            notificationPermissions.update,
+          )
+
+          return {
+            items: await service.markManyAsRead(body.ids, identity?.dataAccess),
+          }
+        },
+        {
+          body: t.Object({
+            ids: t.Array(t.String()),
+          }),
+          detail: {
+            tags: ["notification"],
+            summary: "Mark notifications as read",
+          },
+        },
+      )
+      .post(
         "/system/notifications/:id/read",
         async ({ params, request }) => {
           const identity = await authorize(

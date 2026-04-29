@@ -72,6 +72,7 @@ export {
   listNotifications,
   type ListNotificationsPersistenceFilter,
   markNotificationAsRead,
+  markNotificationsAsRead,
 } from "./notification"
 export {
   type CreateGeneratorPreviewSessionPersistenceInput,

@@ -120,6 +120,15 @@ export const createNotificationService = (
 
     return updated
   },
+  async markManyAsRead(ids: string[], dataAccess?: DataAccessContext) {
+    const uniqueIds = [...new Set(ids.map((id) => id.trim()))].filter(Boolean)
+
+    if (uniqueIds.length === 0) {
+      return []
+    }
+
+    return repository.markManyAsRead(uniqueIds, dataAccess)
+  },
 })
 
 export type NotificationService = ReturnType<typeof createNotificationService>

@@ -120,6 +120,8 @@ export const createExampleShellBindingsOptions = (
     dictionaryLoading: input.dictionaryWorkspace.workspace.dictionaryLoading,
     dictionaryTypeExportLoading:
       input.dictionaryWorkspace.dictionaryTypeExportLoading,
+    dictionaryItemsExportLoading:
+      input.dictionaryWorkspace.dictionaryItemsExportLoading,
     canCreateDictionaryTypes:
       input.dictionaryWorkspace.canCreateDictionaryTypes,
     canViewDictionaries: input.dictionaryWorkspace.canViewDictionaries,
@@ -166,6 +168,8 @@ export const createExampleShellBindingsOptions = (
     reloadDictionaries: input.dictionaryWorkspace.workspace.reloadDictionaries,
     handleExportDictionaryTypes:
       input.dictionaryWorkspace.handleExportDictionaryTypes,
+    handleExportDictionaryItems:
+      input.dictionaryWorkspace.handleExportDictionaryItems,
     startDictionaryEdit: input.dictionaryWorkspace.workspace.startEdit,
     submitDictionaryForm: input.dictionaryWorkspace.workspace.submitForm,
     cancelDictionaryPanel: input.dictionaryWorkspace.workspace.cancelPanel,
@@ -310,6 +314,8 @@ export const createExampleShellBindingsOptions = (
       input.notificationWorkspace.workspace.notificationLoading,
     canCreateNotifications: input.notificationWorkspace.canCreateNotifications,
     canViewNotifications: input.notificationWorkspace.canViewNotifications,
+    visibleUnreadNotificationCount:
+      input.notificationWorkspace.visibleUnreadNotificationCount,
     notificationModuleReady:
       input.notificationWorkspace.notificationModuleReady,
     canEnterNotificationWorkspace:
@@ -354,6 +360,8 @@ export const createExampleShellBindingsOptions = (
       input.notificationWorkspace.workspace.reloadNotifications,
     markSelectedNotificationAsRead:
       input.notificationWorkspace.workspace.markSelectedAsRead,
+    markVisibleNotificationsAsRead:
+      input.notificationWorkspace.workspace.markVisibleAsRead,
     submitNotificationForm: input.notificationWorkspace.workspace.submitForm,
     cancelNotificationPanel: input.notificationWorkspace.workspace.cancelPanel,
   }

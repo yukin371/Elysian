@@ -9,6 +9,7 @@ import {
   normalizeNotificationLevel,
   normalizeNotificationText,
   resolveNotificationSelection,
+  resolveUnreadNotificationIds,
 } from "./notification-workspace"
 
 const createNotification = (
@@ -114,6 +115,13 @@ describe("notification workspace helpers", () => {
 
   test("returns null when there are no visible notifications", () => {
     expect(resolveNotificationSelection([], null)).toBeNull()
+  })
+
+  test("resolves unread notification ids for batch read actions", () => {
+    expect(resolveUnreadNotificationIds(notifications)).toEqual([
+      "notification_1",
+      "notification_3",
+    ])
   })
 
   test("maps notification status into a dedicated table label without losing the raw status", () => {

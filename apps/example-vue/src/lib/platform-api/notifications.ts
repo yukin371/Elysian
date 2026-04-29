@@ -70,3 +70,12 @@ export const markNotificationAsRead = async (
       auth: true,
     },
   )
+
+export const markNotificationsAsRead = async (
+  ids: string[],
+): Promise<NotificationsResponse> =>
+  requestJson<NotificationsResponse>("/system/notifications/read", {
+    method: "POST",
+    body: { ids },
+    auth: true,
+  })

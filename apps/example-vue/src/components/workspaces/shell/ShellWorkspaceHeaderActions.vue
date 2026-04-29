@@ -19,6 +19,7 @@ defineProps<{
   isDictionaryWorkspace: boolean
   dictionaryLoading: boolean
   dictionaryTypeExportLoading: boolean
+  dictionaryItemsExportLoading: boolean
   canCreateDictionaryTypes: boolean
   canViewDictionaries: boolean
   isDepartmentWorkspace: boolean
@@ -33,6 +34,8 @@ defineProps<{
   notificationLoading: boolean
   canCreateNotifications: boolean
   canViewNotifications: boolean
+  canUpdateNotifications: boolean
+  visibleUnreadNotificationCount: number
   isOperationLogWorkspace: boolean
   operationLogLoading: boolean
   canViewOperationLogs: boolean
@@ -67,12 +70,14 @@ defineEmits<{
   (event: "open-dictionary-create"): void
   (event: "reload-dictionaries"): void
   (event: "export-dictionary-types"): void
+  (event: "export-dictionary-items"): void
   (event: "open-department-create"): void
   (event: "reload-departments"): void
   (event: "open-menu-create"): void
   (event: "reload-menus"): void
   (event: "open-notification-create"): void
   (event: "reload-notifications"): void
+  (event: "mark-visible-notifications-read"): void
   (event: "reload-operation-logs"): void
   (event: "open-user-create"): void
   (event: "reload-users"): void
@@ -157,6 +162,17 @@ defineEmits<{
       size="small"
       theme="default"
       variant="outline"
+      :loading="dictionaryItemsExportLoading"
+      :disabled="dictionaryItemsExportLoading || !canViewDictionaries"
+      @click="$emit('export-dictionary-items')"
+    >
+      {{ t("app.action.exportDictionaryItems") }}
+    </TButton>
+    <TButton
+      v-if="isDictionaryWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
       :disabled="dictionaryLoading || !canViewDictionaries"
       @click="$emit('reload-dictionaries')"
     >
@@ -211,6 +227,21 @@ defineEmits<{
       @click="$emit('open-notification-create')"
     >
       {{ t("app.action.newNotification") }}
+    </TButton>
+    <TButton
+      v-if="isNotificationWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :disabled="
+        notificationLoading ||
+        !canViewNotifications ||
+        !canUpdateNotifications ||
+        visibleUnreadNotificationCount === 0
+      "
+      @click="$emit('mark-visible-notifications-read')"
+    >
+      {{ t("app.action.markVisibleNotificationsRead") }}
     </TButton>
     <TButton
       v-if="isNotificationWorkspace"

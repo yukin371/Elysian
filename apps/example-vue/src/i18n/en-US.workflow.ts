@@ -209,6 +209,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadTenantDetail": "Failed to load tenant detail",
   "app.error.loadDictionaries": "Failed to load dictionary types",
   "app.error.exportDictionaryTypes": "Failed to export dictionary types",
+  "app.error.exportDictionaryItems": "Failed to export dictionary items",
   "app.error.loadDictionaryDetail": "Failed to load dictionary detail",
   "app.error.loadOperationLogs": "Failed to load operation logs",
   "app.error.loadOperationLogDetail": "Failed to load operation log detail",
@@ -263,6 +264,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadNotificationDetail": "Failed to load notification detail",
   "app.error.createNotification": "Failed to create notification",
   "app.error.markNotificationRead": "Failed to mark notification as read",
+  "app.error.markNotificationsRead":
+    "Failed to mark visible notifications as read",
   "app.error.notificationRecipientRequired": "Recipient user is required",
   "app.error.notificationTitleRequired": "Notification title is required",
   "app.error.notificationContentRequired": "Notification content is required",

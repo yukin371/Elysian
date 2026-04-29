@@ -75,6 +75,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     workspace: ReturnType<typeof useDictionaryWorkspace>
     isDictionaryWorkspace: OptionValue<"isDictionaryWorkspace">
     dictionaryTypeExportLoading: OptionValue<"dictionaryTypeExportLoading">
+    dictionaryItemsExportLoading: OptionValue<"dictionaryItemsExportLoading">
     canCreateDictionaryTypes: OptionValue<"canCreateDictionaryTypes">
     canViewDictionaries: OptionValue<"canViewDictionaries">
     dictionaryModuleReady: OptionValue<"dictionaryModuleReady">
@@ -83,6 +84,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     localizeDictionaryStatus: OptionValue<"localizeDictionaryStatus">
     canUpdateDictionaryTypes: OptionValue<"canUpdateDictionaryTypes">
     handleExportDictionaryTypes: OptionValue<"handleExportDictionaryTypes">
+    handleExportDictionaryItems: OptionValue<"handleExportDictionaryItems">
   }
   departmentWorkspace: {
     workspace: ReturnType<typeof useDepartmentWorkspace>
@@ -121,6 +123,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     isNotificationWorkspace: OptionValue<"isNotificationWorkspace">
     canCreateNotifications: OptionValue<"canCreateNotifications">
     canViewNotifications: OptionValue<"canViewNotifications">
+    visibleUnreadNotificationCount: OptionValue<"visibleUnreadNotificationCount">
     notificationModuleReady: OptionValue<"notificationModuleReady">
     canEnterNotificationWorkspace: OptionValue<"canEnterNotificationWorkspace">
     canUpdateNotifications: OptionValue<"canUpdateNotifications">
@@ -300,6 +303,7 @@ export type DictionaryWorkspaceBindingsOptions = BindingSegment<
   | "isDictionaryWorkspace"
   | "dictionaryLoading"
   | "dictionaryTypeExportLoading"
+  | "dictionaryItemsExportLoading"
   | "canCreateDictionaryTypes"
   | "canViewDictionaries"
   | "dictionaryModuleReady"
@@ -327,6 +331,7 @@ export type DictionaryWorkspaceBindingsOptions = BindingSegment<
   | "openDictionaryCreatePanel"
   | "reloadDictionaries"
   | "handleExportDictionaryTypes"
+  | "handleExportDictionaryItems"
   | "startDictionaryEdit"
   | "submitDictionaryForm"
   | "cancelDictionaryPanel"
@@ -451,6 +456,7 @@ export type NotificationWorkspaceBindingsOptions = BindingSegment<
   | "notificationLoading"
   | "canCreateNotifications"
   | "canViewNotifications"
+  | "visibleUnreadNotificationCount"
   | "notificationModuleReady"
   | "canEnterNotificationWorkspace"
   | "notificationErrorMessage"
@@ -475,6 +481,7 @@ export type NotificationWorkspaceBindingsOptions = BindingSegment<
   | "openNotificationCreatePanel"
   | "reloadNotifications"
   | "markSelectedNotificationAsRead"
+  | "markVisibleNotificationsAsRead"
   | "submitNotificationForm"
   | "cancelNotificationPanel"
 >

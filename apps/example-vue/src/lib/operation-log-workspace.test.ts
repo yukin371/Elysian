@@ -57,8 +57,17 @@ describe("operation log workspace helpers", () => {
       category: "auth",
       action: "refresh",
       authEventType: "refresh",
-      authFailureReason: "token expired",
+      authFailureReason: "invalid_password",
       actorUserId: "session_user",
+      result: "failure",
+    }),
+    createOperationLog({
+      id: "account_lock_failure",
+      category: "auth",
+      action: "login",
+      authEventType: "login",
+      authFailureReason: "account_locked",
+      actorUserId: "super_admin",
       result: "failure",
     }),
     createOperationLog({
@@ -75,7 +84,7 @@ describe("operation log workspace helpers", () => {
       category: " workflow ",
       action: " reject ",
       authEventType: "refresh",
-      authFailureReason: " token expired ",
+      authFailureReason: " invalid_password ",
       actorUserId: " manager_1 ",
       result: "failure",
     }
@@ -84,7 +93,7 @@ describe("operation log workspace helpers", () => {
       category: "workflow",
       action: "reject",
       authEventType: "refresh",
-      authFailureReason: "token expired",
+      authFailureReason: "invalid_password",
       actorUserId: "manager_1",
       result: "failure",
     })
@@ -109,7 +118,7 @@ describe("operation log workspace helpers", () => {
     expect(
       filterOperationLogs(logs, {
         authEventType: "refresh",
-        authFailureReason: "expired",
+        authFailureReason: "invalid",
       }).map((item) => item.id),
     ).toEqual(["auth_refresh_failure"])
   })
@@ -136,6 +145,8 @@ describe("operation log workspace helpers", () => {
     expect(
       createOperationLogTableItems(logs, {
         localizeAuthEventType: (authEventType) => `event:${authEventType}`,
+        localizeAuthFailureReason: (authFailureReason) =>
+          `reason:${authFailureReason}`,
         localizeResult: (result) => `result:${result}`,
         formatDateTime: (value) => `time:${value}`,
       }).map(({ id, result, createdAt, authEventType, authFailureReason }) => ({
@@ -151,28 +162,35 @@ describe("operation log workspace helpers", () => {
         result: "result:success",
         createdAt: "time:2026-04-27T08:00:00.000Z",
         authEventType: "",
-        authFailureReason: null,
+        authFailureReason: "",
       },
       {
         id: "workflow_reject",
         result: "result:failure",
         createdAt: "time:2026-04-27T08:00:00.000Z",
         authEventType: "",
-        authFailureReason: null,
+        authFailureReason: "",
       },
       {
         id: "auth_refresh_failure",
         result: "result:failure",
         createdAt: "time:2026-04-27T08:00:00.000Z",
         authEventType: "event:refresh",
-        authFailureReason: "token expired",
+        authFailureReason: "reason:invalid_password",
+      },
+      {
+        id: "account_lock_failure",
+        result: "result:failure",
+        createdAt: "time:2026-04-27T08:00:00.000Z",
+        authEventType: "event:login",
+        authFailureReason: "reason:account_locked",
       },
       {
         id: "tenant_update",
         result: "result:success",
         createdAt: "time:2026-04-27T08:00:00.000Z",
         authEventType: "",
-        authFailureReason: null,
+        authFailureReason: "",
       },
     ])
   })
@@ -193,13 +211,15 @@ describe("operation log workspace helpers", () => {
     expect(
       createOperationLogDetailValues(thirdLog, {
         localizeAuthEventType: (authEventType) => `event:${authEventType}`,
+        localizeAuthFailureReason: (authFailureReason) =>
+          `reason:${authFailureReason}`,
         localizeResult: (result) => `result:${result}`,
       }),
     ).toEqual({
       category: "auth",
       action: "refresh",
       authEventType: "event:refresh",
-      authFailureReason: "token expired",
+      authFailureReason: "reason:invalid_password",
       actorUserId: "session_user",
       targetType: "session",
       targetId: "session_1",

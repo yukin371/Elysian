@@ -1,4 +1,4 @@
-import { type SQL, and, desc, eq } from "drizzle-orm"
+import { type SQL, and, desc, eq, inArray } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type NotificationRow, notifications } from "./schema"
@@ -108,4 +108,32 @@ export const markNotificationAsRead = async (
     .returning()
 
   return row ?? null
+}
+
+export const markNotificationsAsRead = async (
+  db: DatabaseClient,
+  ids: string[],
+  readAt: Date = new Date(),
+  accessCondition?: SQL<unknown>,
+): Promise<NotificationRow[]> => {
+  const uniqueIds = [...new Set(ids.filter((id) => id.trim().length > 0))]
+
+  if (uniqueIds.length === 0) {
+    return []
+  }
+
+  const conditions = [
+    inArray(notifications.id, uniqueIds),
+    eq(notifications.status, "unread"),
+    accessCondition,
+  ].filter(Boolean)
+
+  return db
+    .update(notifications)
+    .set({
+      status: "read",
+      readAt,
+    })
+    .where(and(...conditions))
+    .returning()
 }

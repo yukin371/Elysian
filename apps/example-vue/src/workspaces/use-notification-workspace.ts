@@ -12,6 +12,7 @@ import {
   normalizeNotificationLevel,
   normalizeNotificationText,
   resolveNotificationSelection,
+  resolveUnreadNotificationIds,
 } from "../lib/notification-workspace"
 import {
   type NotificationListQuery,
@@ -20,6 +21,7 @@ import {
   fetchNotificationById,
   fetchNotifications,
   markNotificationAsRead,
+  markNotificationsAsRead,
 } from "../lib/platform-api"
 
 type NotificationFormValues = Record<string, unknown>
@@ -194,6 +196,14 @@ export const useNotificationWorkspace = (
         new Date(value).toLocaleString(options.locale.value),
       readAtEmptyLabel: options.t("app.notification.readAtEmpty"),
     }),
+  )
+
+  const visibleUnreadNotificationIds = computed(() =>
+    resolveUnreadNotificationIds(filteredNotificationItems.value),
+  )
+
+  const visibleUnreadNotificationCount = computed(
+    () => visibleUnreadNotificationIds.value.length,
   )
 
   const countLabel = computed(() =>
@@ -503,6 +513,48 @@ export const useNotificationWorkspace = (
     }
   }
 
+  const markVisibleAsRead = async () => {
+    if (
+      notificationLoading.value ||
+      notificationDetailLoading.value ||
+      !options.canUpdate.value ||
+      visibleUnreadNotificationIds.value.length === 0
+    ) {
+      return
+    }
+
+    notificationLoading.value = true
+    notificationErrorMessage.value = ""
+
+    try {
+      const payload = await markNotificationsAsRead(
+        visibleUnreadNotificationIds.value,
+      )
+      const updatedById = new Map(
+        payload.items.map((notification) => [notification.id, notification]),
+      )
+
+      notificationItems.value = notificationItems.value.map(
+        (notification: NotificationRecord) =>
+          updatedById.get(notification.id) ?? notification,
+      )
+
+      if (selectedNotification.value) {
+        notificationDetail.value =
+          updatedById.get(selectedNotification.value.id) ??
+          selectedNotification.value
+      }
+    } catch (error) {
+      options.onRecoverableAuthError(error)
+      notificationErrorMessage.value =
+        error instanceof Error
+          ? error.message
+          : options.t("app.error.markNotificationsRead")
+    } finally {
+      notificationLoading.value = false
+    }
+  }
+
   const handleRowClick = async (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
     const notification = filteredNotificationItems.value.find(
@@ -527,6 +579,7 @@ export const useNotificationWorkspace = (
     handleRowClick,
     handleSearch,
     markSelectedAsRead,
+    markVisibleAsRead,
     notificationDetail,
     notificationDetailErrorMessage,
     notificationDetailLoading,
@@ -546,5 +599,6 @@ export const useNotificationWorkspace = (
     submitForm,
     tableColumns,
     tableItems,
+    visibleUnreadNotificationCount,
   }
 }

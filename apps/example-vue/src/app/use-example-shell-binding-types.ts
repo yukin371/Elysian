@@ -51,6 +51,7 @@ export interface UseExampleShellBindingsOptions {
   isDictionaryWorkspace: ComputedRef<boolean>
   dictionaryLoading: ValueSource<boolean>
   dictionaryTypeExportLoading: ValueSource<boolean>
+  dictionaryItemsExportLoading: ValueSource<boolean>
   canCreateDictionaryTypes: ValueSource<boolean>
   canViewDictionaries: ValueSource<boolean>
   isDepartmentWorkspace: ComputedRef<boolean>
@@ -72,6 +73,7 @@ export interface UseExampleShellBindingsOptions {
   notificationLoading: ValueSource<boolean>
   canCreateNotifications: ValueSource<boolean>
   canViewNotifications: ValueSource<boolean>
+  visibleUnreadNotificationCount: ValueSource<number>
   isOperationLogWorkspace: ComputedRef<boolean>
   operationLogLoading: ValueSource<boolean>
   canViewOperationLogs: ValueSource<boolean>
@@ -410,6 +412,7 @@ export interface UseExampleShellBindingsOptions {
   openDictionaryCreatePanel: () => void
   reloadDictionaries: () => void
   handleExportDictionaryTypes: () => void
+  handleExportDictionaryItems: () => void
   openDepartmentCreatePanel: () => void
   reloadDepartments: () => void
   openPostCreatePanel: () => void
@@ -445,6 +448,7 @@ export interface UseExampleShellBindingsOptions {
   submitMenuForm: (payload: unknown) => void
   cancelMenuPanel: () => void
   markSelectedNotificationAsRead: () => void
+  markVisibleNotificationsAsRead: () => void
   submitNotificationForm: (payload: unknown) => void
   cancelNotificationPanel: () => void
   startRoleEdit: () => void

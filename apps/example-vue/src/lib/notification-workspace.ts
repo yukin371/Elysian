@@ -107,6 +107,13 @@ export const resolveNotificationSelection = (
   return notifications[0]?.id ?? null
 }
 
+export const resolveUnreadNotificationIds = (
+  notifications: Array<Pick<NotificationRecord, "id" | "status">>,
+) =>
+  notifications
+    .filter((notification) => notification.status === "unread")
+    .map((notification) => notification.id)
+
 export const createNotificationTableItems = (
   notifications: NotificationRecord[],
   options: {

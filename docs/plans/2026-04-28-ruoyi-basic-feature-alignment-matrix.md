@@ -47,14 +47,14 @@
 |---|---|---|---|---|---|
 | 用户 / 角色 / 菜单 / 部门 | 基础系统管理四件套 | 🟡 部分完成 | 后端 CRUD 已闭环，示例前端已有对应工作区 | `apps/server` + `apps/example-vue` | 仍需继续收口真实路由切换、页面动作完整度与后台常用交互 |
 | 字典 / 参数配置 | 平台支撑基础能力 | 🟡 部分完成 | 后端已闭环，前端已有字典与设置工作区，并已补第一轮导出入口 | `apps/server` + `apps/example-vue` | 仍缺导入、批量治理与更完整的后台日常交互 |
-| 操作日志 / 登录日志 | 安全与运维基础视图 | 🟡 部分完成 | 操作日志列表/详情/导出已落地；登录相关事件已在现有 operation-log 工作区内通过 `authEventType / authFailureReason` 显式化 | `apps/server` + `apps/example-vue` + `packages/persistence` | 仍缺更高阶统计视图、失败原因本地文案与更接近日常后台的筛选体验 |
-| 通知 / 公告 | 基础消息触达 | 🟡 部分完成 | 站内通知已支持列表、详情、创建、标记已读 | `apps/server` + `apps/example-vue` | 仍未对齐“公告/通知”常见后台形态，多通道也未进入当前优先级 |
+| 操作日志 / 登录日志 | 安全与运维基础视图 | 🟡 部分完成 | 操作日志列表/详情/导出已落地；登录相关事件已在现有 operation-log 工作区内通过 `authEventType / authFailureReason` 显式化，并补了前端本地失败原因文案映射 | `apps/server` + `apps/example-vue` + `packages/persistence` | 仍缺更高阶统计视图与更接近日常后台的筛选体验 |
+| 通知 / 公告 | 基础消息触达 | 🟡 部分完成 | 站内通知已支持列表、详情、创建、单条已读与当前筛选批量已读 | `apps/server` + `apps/example-vue` | 仍未对齐“公告/通知”常见后台形态，多通道也未进入当前优先级 |
 | 文件 / 附件 | 基础上传下载 | 🟡 部分完成 | 文件上传、下载、删除与元数据已落地 | `apps/server` + `apps/example-vue` | 还缺更完整的后台治理体验与批量操作能力 |
 | 租户 / 数据权限 | 超出若依基础但已具备 | ✅ 已完成 | 多租户、RLS、数据权限与 tenant 管理已闭环 | `apps/server` + `packages/persistence` | 当前不作为阻断项，保持稳定即可 |
 | 在线用户 / 会话治理 | 当前在线会话查看、强制下线 | ✅ 已完成 | 当前用户 refresh session 列表、状态区分与单会话强制下线已在前后端形成最小闭环 | `apps/server` + `apps/example-vue` + `packages/persistence` | 若继续扩写，重点会转向跨端设备治理与批量操作，而非当前阻断项 |
 | 登录安全策略 | 登录失败计数、锁定窗口、解锁策略 | ✅ 已完成 | 已补登录失败计数、锁定窗口、自动到期解锁与成功登录清零，并有审计与回归测试覆盖 | `apps/server` + `packages/persistence` | 当前仅保留最小策略；MFA、设备指纹与更重风控仍不在本轮 |
 | 岗位管理（post）/职位语义 | 用户-部门之外的基础组织能力 | ✅ 已完成 | `post` 模块、权限点与前端工作区已形成最小闭环，并已统一“岗位管理（post）”口径 | `apps/server` + `apps/example-vue` + `packages/persistence` | 后续若扩写，重点会转向更深的用户-岗位治理，而非基础缺位 |
-| 导入导出 | 用户、字典、配置等高频模块的常用能力 | 🟡 部分完成 | 操作日志导出已存在，且本轮已补用户、字典类型/条目、系统配置导出与前端导出入口 | `apps/server` + `apps/example-vue` | 仍缺导入链路、模板/校验/错误报告，以及更细粒度的字典条目前端导出动作 |
+| 导入导出 | 用户、字典、配置等高频模块的常用能力 | 🟡 部分完成 | 操作日志导出已存在，且本轮已补用户、字典类型/条目、系统配置导出与前端导出入口 | `apps/server` + `apps/example-vue` | 仍缺导入链路、模板/校验/错误报告，以及批量治理体验 |
 | 后台前端壳层 | 可切换、可工作的多模块后台 | 🟡 部分完成 | `ElyShell`、动态菜单与多工作区装配已存在 | `packages/ui-enterprise-vue` + `apps/example-vue` | 仍需继续收口页面切换、动作一致性与“不是演示页而是真实后台”的体验 |
 | workflow 扩展 | transfer / delegate / 更通用 BPM | ⛔ 当前不优先 | `P7A Round-2` 最小闭环已完成 | `apps/server` + `packages/persistence` | 当前不继续外扩 |
 | generator / SQL Studio 化 | 更完整的平台产品体验 | ⛔ 当前不优先 | 相关能力已有子矩阵与最小运行态 | `packages/generator` + `apps/server` | 当前降为次级轨道 |

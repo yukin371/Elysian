@@ -65,7 +65,9 @@ describe("createExampleShellBindingsOptions", () => {
     const reloadRoles = () => Promise.resolve()
     const handleExportUsers = () => Promise.resolve()
     const handleExportDictionaryTypes = () => Promise.resolve()
+    const handleExportDictionaryItems = () => Promise.resolve()
     const handleExportSettings = () => Promise.resolve()
+    const markVisibleNotificationsAsRead = () => Promise.resolve()
     const refreshGeneratorPreview = () => Promise.resolve()
 
     const input = {
@@ -83,13 +85,18 @@ describe("createExampleShellBindingsOptions", () => {
       customerWorkspace: createWorkspaceInput({}),
       dictionaryWorkspace: createWorkspaceInput({
         dictionaryTypeExportLoading: true,
+        dictionaryItemsExportLoading: true,
         handleExportDictionaryTypes,
+        handleExportDictionaryItems,
       }),
       departmentWorkspace: createWorkspaceInput({}),
       sessionWorkspace: createWorkspaceInput({}),
       postWorkspace: createWorkspaceInput({}),
       menuWorkspace: createWorkspaceInput({}),
-      notificationWorkspace: createWorkspaceInput({}),
+      notificationWorkspace: createWorkspaceInput({
+        visibleUnreadNotificationCount: 2,
+        "workspace.markVisibleAsRead": markVisibleNotificationsAsRead,
+      }),
       operationLogWorkspace: createWorkspaceInput({}),
       userWorkspace: createWorkspaceInput({
         userExportLoading: true,
@@ -121,6 +128,12 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.reloadRoles).toBe(reloadRoles)
     expect(result.dictionaryTypeExportLoading).toBe(true)
     expect(result.handleExportDictionaryTypes).toBe(handleExportDictionaryTypes)
+    expect(result.dictionaryItemsExportLoading).toBe(true)
+    expect(result.handleExportDictionaryItems).toBe(handleExportDictionaryItems)
+    expect(result.visibleUnreadNotificationCount).toBe(2)
+    expect(result.markVisibleNotificationsAsRead).toBe(
+      markVisibleNotificationsAsRead,
+    )
     expect(result.userExportLoading).toBe(true)
     expect(result.handleExportUsers).toBe(handleExportUsers)
     expect(result.settingExportLoading).toBe(true)

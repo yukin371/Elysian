@@ -47,6 +47,7 @@ import ShellWorkspaceSectionIntro from "./components/workspaces/shell/ShellWorks
 import { exampleLocaleMessages } from "./i18n"
 import { resolveWorkspaceMenuKey } from "./lib/navigation-workspace"
 import {
+  exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
   exportSettingsCsv,
   exportUsersCsv,
@@ -147,6 +148,7 @@ const userModuleReady = ref(false)
 const dictionaryModuleReady = ref(false)
 const workflowModuleReady = ref(false)
 const dictionaryTypeExportLoading = ref(false)
+const dictionaryItemsExportLoading = ref(false)
 const userExportLoading = ref(false)
 const settingExportLoading = ref(false)
 const envName = ref("unknown")
@@ -534,6 +536,7 @@ const {
   handleRowClick: handleNotificationRowClick,
   handleSearch: handleNotificationSearch,
   markSelectedAsRead: markSelectedNotificationAsRead,
+  markVisibleAsRead: markVisibleNotificationsAsRead,
   notificationDetail,
   notificationDetailErrorMessage,
   notificationDetailLoading,
@@ -553,6 +556,7 @@ const {
   submitForm: submitNotificationForm,
   tableColumns: enterpriseNotificationTableColumns,
   tableItems: enterpriseNotificationTableItems,
+  visibleUnreadNotificationCount,
 } = notificationWorkspace
 
 const operationLogWorkspace = useOperationLogWorkspace({
@@ -1315,6 +1319,36 @@ const handleExportDictionaryTypes = async () => {
   }
 }
 
+const handleExportDictionaryItems = async () => {
+  if (!canViewDictionaries.value || dictionaryItemsExportLoading.value) {
+    return
+  }
+
+  dictionaryItemsExportLoading.value = true
+  dictionaryErrorMessage.value = ""
+
+  try {
+    const blob = await exportDictionaryItemsCsv(
+      selectedDictionaryTypeId.value ?? undefined,
+    )
+    downloadBrowserBlob(
+      blob,
+      createCsvExportFilename("system-dictionary-items"),
+    )
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    dictionaryErrorMessage.value =
+      error instanceof Error
+        ? error.message
+        : t("app.error.exportDictionaryItems")
+  } finally {
+    dictionaryItemsExportLoading.value = false
+  }
+}
+
 const handleExportUsers = async () => {
   if (!canViewUsers.value || userExportLoading.value) {
     return
@@ -1441,6 +1475,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     workspace: dictionaryWorkspace,
     isDictionaryWorkspace,
     dictionaryTypeExportLoading,
+    dictionaryItemsExportLoading,
     canCreateDictionaryTypes,
     canViewDictionaries,
     dictionaryModuleReady,
@@ -1449,6 +1484,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     localizeDictionaryStatus,
     canUpdateDictionaryTypes,
     handleExportDictionaryTypes,
+    handleExportDictionaryItems,
   },
   departmentWorkspace: {
     workspace: departmentWorkspace,
@@ -1487,6 +1523,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     isNotificationWorkspace,
     canCreateNotifications,
     canViewNotifications,
+    visibleUnreadNotificationCount,
     notificationModuleReady,
     canEnterNotificationWorkspace,
     canUpdateNotifications,

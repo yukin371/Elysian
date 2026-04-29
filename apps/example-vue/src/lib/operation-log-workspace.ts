@@ -29,8 +29,12 @@ export interface OperationLogWorkspaceQuery {
 }
 
 export interface OperationLogTableItem
-  extends Omit<OperationLogRecord, "authEventType" | "result" | "createdAt"> {
+  extends Omit<
+    OperationLogRecord,
+    "authEventType" | "authFailureReason" | "result" | "createdAt"
+  > {
   authEventType: string
+  authFailureReason: string
   result: string
   createdAt: string
 }
@@ -143,6 +147,7 @@ export const createOperationLogTableItems = (
     localizeAuthEventType: (
       authEventType: NonNullable<OperationLogRecord["authEventType"]>,
     ) => string
+    localizeAuthFailureReason: (authFailureReason: string) => string
     localizeResult: (result: OperationLogRecord["result"]) => string
     formatDateTime: (value: string) => string
   },
@@ -151,6 +156,9 @@ export const createOperationLogTableItems = (
     ...item,
     authEventType: item.authEventType
       ? options.localizeAuthEventType(item.authEventType)
+      : "",
+    authFailureReason: item.authFailureReason
+      ? options.localizeAuthFailureReason(item.authFailureReason)
       : "",
     result: options.localizeResult(item.result),
     createdAt: options.formatDateTime(item.createdAt),
@@ -162,6 +170,7 @@ export const createOperationLogDetailValues = (
     localizeAuthEventType: (
       authEventType: NonNullable<OperationLogRecord["authEventType"]>,
     ) => string
+    localizeAuthFailureReason: (authFailureReason: string) => string
     localizeResult: (result: OperationLogRecord["result"]) => string
   },
 ): OperationLogDetailValues => {
@@ -175,7 +184,9 @@ export const createOperationLogDetailValues = (
     authEventType: item.authEventType
       ? options.localizeAuthEventType(item.authEventType)
       : "",
-    authFailureReason: item.authFailureReason ?? "",
+    authFailureReason: item.authFailureReason
+      ? options.localizeAuthFailureReason(item.authFailureReason)
+      : "",
     actorUserId: item.actorUserId ?? "",
     targetType: item.targetType ?? "",
     targetId: item.targetId ?? "",

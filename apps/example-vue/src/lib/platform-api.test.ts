@@ -4,11 +4,13 @@ import type { TenantRecord, WorkflowDefinitionRecord } from "@elysian/schema"
 
 import {
   clearAccessToken,
+  exportDictionaryItemsCsv,
   fetchPlatform,
   fetchSystemModules,
   fetchTenants,
   fetchWorkflowDefinitionById,
   fetchWorkflowDefinitions,
+  markNotificationsAsRead,
   setAccessToken,
   updateTenantStatus,
 } from "./platform-api"
@@ -345,6 +347,118 @@ describe("platform api tenant requests", () => {
           method: "PUT",
           body: JSON.stringify({ status: "suspended" }),
           authorization: "Bearer tenant-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api dictionary exports", () => {
+  test("exports all dictionary items when no type is provided", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("dictionary-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,value\n1,alpha\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(exportDictionaryItemsCsv()).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/dictionaries/items/export",
+          authorization: "Bearer dictionary-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  test("exports dictionary items for a specific type when typeId is provided", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("dictionary-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,value\n1,alpha\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(
+        exportDictionaryItemsCsv("dict-user-status"),
+      ).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/dictionaries/items/export?typeId=dict-user-status",
+          authorization: "Bearer dictionary-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api notification batch actions", () => {
+  test("marks notifications as read with bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{
+      url: string
+      method: string | undefined
+      authorization: string | null
+      body: string | null
+    }> = []
+
+    setAccessToken("notification-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        method: init?.method,
+        authorization: headers.get("authorization"),
+        body: typeof init?.body === "string" ? init.body : null,
+      })
+
+      return new Response(JSON.stringify({ items: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(
+        markNotificationsAsRead(["notification_1", "notification_2"]),
+      ).resolves.toEqual({ items: [] })
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/notifications/read",
+          method: "POST",
+          authorization: "Bearer notification-token",
+          body: JSON.stringify({
+            ids: ["notification_1", "notification_2"],
+          }),
         },
       ])
     } finally {
