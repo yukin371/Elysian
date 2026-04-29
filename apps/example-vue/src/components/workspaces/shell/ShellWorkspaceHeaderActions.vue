@@ -40,6 +40,7 @@ defineProps<{
   operationLogLoading: boolean
   operationLogExportLoading: boolean
   canViewOperationLogs: boolean
+  canExportOperationLogs: boolean
   isUserWorkspace: boolean
   userLoading: boolean
   userExportLoading: boolean
@@ -267,7 +268,7 @@ defineEmits<{
       variant="outline"
       :loading="operationLogExportLoading"
       :disabled="
-        operationLogLoading || operationLogExportLoading || !canViewOperationLogs
+        operationLogLoading || operationLogExportLoading || !canExportOperationLogs
       "
       @click="$emit('export-operation-logs')"
     >

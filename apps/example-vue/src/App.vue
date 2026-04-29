@@ -237,6 +237,7 @@ const {
   canEnterMenuWorkspace,
   canEnterNotificationWorkspace,
   canEnterOperationLogWorkspace,
+  canExportOperationLogs,
   canEnterRoleWorkspace,
   canEnterSettingWorkspace,
   canEnterTenantWorkspace,
@@ -1399,7 +1400,7 @@ const handleExportSettings = async () => {
 }
 
 const handleExportOperationLogs = async () => {
-  if (!canViewOperationLogs.value || operationLogExportLoading.value) {
+  if (!canExportOperationLogs.value || operationLogExportLoading.value) {
     return
   }
 
@@ -1565,6 +1566,7 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
     isOperationLogWorkspace,
     operationLogExportLoading,
     canViewOperationLogs,
+    canExportOperationLogs,
     operationLogModuleReady,
     canEnterOperationLogWorkspace,
     handleExportOperationLogs,

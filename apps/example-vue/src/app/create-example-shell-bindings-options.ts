@@ -374,6 +374,7 @@ export const createExampleShellBindingsOptions = (
     operationLogExportLoading:
       input.operationLogWorkspace.operationLogExportLoading,
     canViewOperationLogs: input.operationLogWorkspace.canViewOperationLogs,
+    canExportOperationLogs: input.operationLogWorkspace.canExportOperationLogs,
     operationLogModuleReady:
       input.operationLogWorkspace.operationLogModuleReady,
     canEnterOperationLogWorkspace:

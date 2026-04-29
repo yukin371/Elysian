@@ -135,6 +135,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     isOperationLogWorkspace: OptionValue<"isOperationLogWorkspace">
     operationLogExportLoading: OptionValue<"operationLogExportLoading">
     canViewOperationLogs: OptionValue<"canViewOperationLogs">
+    canExportOperationLogs: OptionValue<"canExportOperationLogs">
     operationLogModuleReady: OptionValue<"operationLogModuleReady">
     canEnterOperationLogWorkspace: OptionValue<"canEnterOperationLogWorkspace">
     handleExportOperationLogs: OptionValue<"handleExportOperationLogs">
@@ -493,6 +494,7 @@ export type OperationLogWorkspaceBindingsOptions = BindingSegment<
   | "operationLogLoading"
   | "operationLogExportLoading"
   | "canViewOperationLogs"
+  | "canExportOperationLogs"
   | "operationLogModuleReady"
   | "canEnterOperationLogWorkspace"
   | "operationLogErrorMessage"

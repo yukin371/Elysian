@@ -78,6 +78,7 @@ export interface UseExampleShellBindingsOptions {
   operationLogLoading: ValueSource<boolean>
   operationLogExportLoading: ValueSource<boolean>
   canViewOperationLogs: ValueSource<boolean>
+  canExportOperationLogs: ValueSource<boolean>
   isUserWorkspace: ComputedRef<boolean>
   userLoading: ValueSource<boolean>
   userExportLoading: ValueSource<boolean>

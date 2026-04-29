@@ -100,6 +100,7 @@ describe("createExampleShellBindingsOptions", () => {
       }),
       operationLogWorkspace: createWorkspaceInput({
         operationLogExportLoading: true,
+        canExportOperationLogs: true,
         handleExportOperationLogs,
       }),
       userWorkspace: createWorkspaceInput({
@@ -139,6 +140,7 @@ describe("createExampleShellBindingsOptions", () => {
       markVisibleNotificationsAsRead,
     )
     expect(result.operationLogExportLoading).toBe(true)
+    expect(result.canExportOperationLogs).toBe(true)
     expect(result.handleExportOperationLogs).toBe(handleExportOperationLogs)
     expect(result.userExportLoading).toBe(true)
     expect(result.handleExportUsers).toBe(handleExportUsers)

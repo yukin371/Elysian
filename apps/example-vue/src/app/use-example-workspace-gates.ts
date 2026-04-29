@@ -279,6 +279,12 @@ export const useExampleWorkspaceGates = (
     () =>
       canEnterOperationLogWorkspace.value && operationLogPermissions.list.value,
   )
+  const canExportOperationLogs = computed(
+    () =>
+      canEnterOperationLogWorkspace.value &&
+      (!options.authModuleReady.value ||
+        options.permissionCodes.value.includes("system:operation-log:export")),
+  )
 
   const canEnterRoleWorkspace = computed(
     () =>
@@ -380,6 +386,7 @@ export const useExampleWorkspaceGates = (
     canEnterMenuWorkspace,
     canEnterNotificationWorkspace,
     canEnterOperationLogWorkspace,
+    canExportOperationLogs,
     canEnterPostWorkspace,
     canEnterSessionWorkspace,
     canEnterRoleWorkspace,
