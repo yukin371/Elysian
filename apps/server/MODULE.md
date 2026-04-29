@@ -40,6 +40,12 @@
 - 运行时错误响应应保持统一 envelope
 - server 只消费 persistence 暴露的持久化能力，不直接持有关系型 schema owner
 
+## 文件体量豁免
+
+- `src/app.test.ts` 当前仍超过 `1000` 行；本轮已先把系统管理与 workflow 集成测试按 `src/app/system-crud/`、`src/app/workflow/` 拆出，剩余内容主要覆盖 auth、refresh session、tenant login 与 customer guard 等服务端装配级边界。
+- 暂不继续强拆的原因：剩余用例共享登录、token、tenant context 与 customer guard fixture，继续机械拆分容易在未梳理 auth/customer 边界前复制测试支撑代码。
+- 后续拆分方向：优先在 `src/app/auth/` 与 `src/app/customer/` 下按认证会话、租户登录、customer guard 分组迁移，并保持 test support 局部化，不新增跨模块 shared helper。
+
 ## 常见坑
 
 - 把 schema 和服务实现混写，导致 generator 无法稳定复用
