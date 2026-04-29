@@ -9,7 +9,10 @@ export interface AuthSessionWorkspaceQuery {
 }
 
 export interface AuthSessionTableItem
-  extends Omit<AuthSessionSummary, "createdAt" | "updatedAt" | "expiresAt" | "lastUsedAt"> {
+  extends Omit<
+    AuthSessionSummary,
+    "createdAt" | "updatedAt" | "expiresAt" | "lastUsedAt"
+  > {
   device: string
   state: string
   createdAt: string

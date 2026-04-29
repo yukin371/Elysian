@@ -4,6 +4,8 @@ import type { TenantRecord, WorkflowDefinitionRecord } from "@elysian/schema"
 
 import {
   clearAccessToken,
+  fetchPlatform,
+  fetchSystemModules,
   fetchTenants,
   fetchWorkflowDefinitionById,
   fetchWorkflowDefinitions,
@@ -106,6 +108,69 @@ describe("platform api workflow overrides", () => {
 })
 
 describe("platform api tenant requests", () => {
+  test("keeps platform exports compatible through the barrel", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: string[] = []
+
+    globalThis.fetch = (async (input) => {
+      const url = String(input)
+      fetchCalls.push(url)
+
+      if (url.endsWith("/platform")) {
+        return new Response(
+          JSON.stringify({
+            manifest: {
+              name: "elysian",
+              displayName: "Elysian",
+              version: "0.1.0",
+              runtime: "bun",
+              status: "ready",
+            },
+            capabilities: ["auth", "workflow"],
+          }),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        )
+      }
+
+      return new Response(
+        JSON.stringify({
+          env: "development",
+          modules: ["auth", "customer"],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      )
+    }) as typeof fetch
+
+    try {
+      await expect(fetchPlatform()).resolves.toEqual({
+        manifest: {
+          name: "elysian",
+          displayName: "Elysian",
+          version: "0.1.0",
+          runtime: "bun",
+          status: "ready",
+        },
+        capabilities: ["auth", "workflow"],
+      })
+      await expect(fetchSystemModules()).resolves.toEqual({
+        env: "development",
+        modules: ["auth", "customer"],
+      })
+      expect(fetchCalls).toEqual([
+        "http://localhost:3000/platform",
+        "http://localhost:3000/system/modules",
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
   test("fetches tenants with bearer token", async () => {
     const tenantItems: TenantRecord[] = [
       {
@@ -140,6 +205,96 @@ describe("platform api tenant requests", () => {
         {
           url: "http://localhost:3000/system/tenants",
           authorization: "Bearer tenant-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  test("retries tenant requests after refresh restores the token", async () => {
+    const tenantItems: TenantRecord[] = [
+      {
+        id: "tenant_default",
+        code: "default",
+        name: "Default Tenant",
+        status: "active",
+        createdAt: "2026-04-25T00:00:00.000Z",
+        updatedAt: "2026-04-25T00:00:00.000Z",
+      },
+    ]
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{
+      url: string
+      method: string
+      authorization: string | null
+      credentials: "omit" | "same-origin" | "include" | undefined
+    }> = []
+    let requestCount = 0
+
+    setAccessToken("expired-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      const url = String(input)
+
+      fetchCalls.push({
+        url,
+        method: String(init?.method ?? "GET"),
+        authorization: headers.get("authorization"),
+        credentials: init?.credentials,
+      })
+
+      if (url.endsWith("/auth/refresh")) {
+        return new Response(JSON.stringify({ accessToken: "restored-token" }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        })
+      }
+
+      requestCount += 1
+
+      if (requestCount === 1) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "UNAUTHORIZED",
+              message: "expired",
+              status: 401,
+            },
+          }),
+          {
+            status: 401,
+            headers: { "content-type": "application/json" },
+          },
+        )
+      }
+
+      return new Response(JSON.stringify({ items: tenantItems }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(fetchTenants()).resolves.toEqual({ items: tenantItems })
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/tenants",
+          method: "GET",
+          authorization: "Bearer expired-token",
+          credentials: undefined,
+        },
+        {
+          url: "http://localhost:3000/auth/refresh",
+          method: "POST",
+          authorization: null,
+          credentials: "include",
+        },
+        {
+          url: "http://localhost:3000/system/tenants",
+          method: "GET",
+          authorization: "Bearer restored-token",
+          credentials: undefined,
         },
       ])
     } finally {

@@ -1,13 +1,23 @@
 const LOCAL_DEV_HOSTS = new Set(["127.0.0.1", "localhost"])
 
+interface BrowserLikeGlobal {
+  window?: {
+    location: {
+      hostname: string
+    }
+  }
+}
+
 const normalizeApiBaseUrl = (value: string) => {
-  if (typeof window === "undefined") {
+  const browserWindow = (globalThis as BrowserLikeGlobal).window
+
+  if (!browserWindow) {
     return value
   }
 
   try {
     const apiUrl = new URL(value)
-    const currentHostname = window.location.hostname
+    const currentHostname = browserWindow.location.hostname
 
     if (
       LOCAL_DEV_HOSTS.has(currentHostname) &&
@@ -28,7 +38,11 @@ export const API_BASE_URL = normalizeApiBaseUrl(
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000",
 )
 
-import { clearSessionSnapshot, getAccessToken, setAuthenticatedSession } from "../auth/session"
+import {
+  clearSessionSnapshot,
+  getAccessToken,
+  setAuthenticatedSession,
+} from "../auth/session"
 
 export interface ApiRequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE"
@@ -98,14 +112,14 @@ const request = async <T>(
       dataType: "json",
       withCredentials: true,
       enableCookie: true,
-      success: (response) => {
+      success: (response: ApiResponse<T>) => {
         resolve({
           statusCode: response.statusCode,
           data: response.data as T,
           header: response.header as Record<string, string>,
         })
       },
-      fail: (error) => {
+      fail: (error: { errMsg?: string }) => {
         reject(new Error(error.errMsg || "Network request failed"))
       },
     } as never)
@@ -142,9 +156,11 @@ let refreshPromise: Promise<void> | null = null
 
 const ensureRefreshedSession = async () => {
   if (!refreshPromise) {
-    refreshPromise = refreshAuth().then(() => undefined).finally(() => {
-      refreshPromise = null
-    })
+    refreshPromise = refreshAuth()
+      .then(() => undefined)
+      .finally(() => {
+        refreshPromise = null
+      })
   }
 
   return refreshPromise

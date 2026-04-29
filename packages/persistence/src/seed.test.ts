@@ -63,6 +63,9 @@ describe("createDefaultAuthSeedSpec", () => {
       "system:department:list",
       "system:department:create",
       "system:department:update",
+      "system:post:list",
+      "system:post:create",
+      "system:post:update",
       "system:dictionary:list",
       "system:dictionary:create",
       "system:dictionary:update",
@@ -101,6 +104,7 @@ describe("createDefaultAuthSeedSpec", () => {
       "system-roles",
       "system-menus",
       "system-departments",
+      "system-posts",
       "system-dictionaries",
       "system-settings",
       "system-operation-logs",
@@ -241,6 +245,23 @@ describe("createTenantBootstrapSeedSpec", () => {
     )
     expect(spec.menus.map((menu) => menu.code)).not.toContain("system-tenants")
     expect(spec.adminUser.isSuperAdmin).toBe(false)
+    expect(spec.menus.find((menu) => menu.code === "system-users")).toEqual(
+      expect.objectContaining({
+        parentCode: "system-root",
+        permissionCode: "system:user:list",
+      }),
+    )
+    expect(spec.userRoles).toEqual([
+      {
+        username: "admin",
+        roleCode: "admin",
+      },
+    ])
+    expect(
+      spec.roleMenus.some(
+        (assignment) => assignment.menuCode === "system-tenants",
+      ),
+    ).toBe(false)
   })
 })
 

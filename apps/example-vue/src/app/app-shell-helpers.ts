@@ -26,7 +26,9 @@ export type ExampleWorkspaceKind =
 
 export type ExampleShellTabKey = "workspace" | "runtime"
 
-export const flattenNavigation = (items: UiNavigationNode[]): UiNavigationNode[] =>
+export const flattenNavigation = (
+  items: UiNavigationNode[],
+): UiNavigationNode[] =>
   items.flatMap((item) => [item, ...flattenNavigation(item.children)])
 
 export const findNavigationItemById = (

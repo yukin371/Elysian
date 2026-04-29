@@ -1,10 +1,24 @@
+import type { NotificationRecord as SchemaNotificationRecord } from "@elysian/schema"
+
 import { requestJson } from "./core"
-import type {
-  CreateNotificationRequest,
-  NotificationListQuery,
-  NotificationRecord,
-  NotificationsResponse,
-} from "../platform-api"
+
+export type NotificationRecord = SchemaNotificationRecord
+
+export interface NotificationsResponse {
+  items: NotificationRecord[]
+}
+
+export interface NotificationListQuery {
+  recipientUserId?: string
+  status?: NotificationRecord["status"]
+}
+
+export interface CreateNotificationRequest {
+  recipientUserId: string
+  title: string
+  content: string
+  level?: NotificationRecord["level"]
+}
 
 export const fetchNotifications = async (
   query: NotificationListQuery = {},

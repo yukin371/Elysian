@@ -1,8 +1,8 @@
 import { computed } from "vue"
 
 import {
-  read,
   type UseExampleShellBindingsOptions,
+  read,
 } from "./use-example-shell-binding-types"
 
 export const createExampleShellWorkspaceSecondaryBindings = ({
@@ -398,8 +398,12 @@ export const createExampleShellWorkspaceSecondaryBindings = ({
     operationLogPanelTitle: read(operationLogPanelTitle),
     operationLogPanelDescription: read(operationLogPanelDescription),
     selectedOperationLog: read(selectedOperationLog),
-    enterpriseOperationLogDetailFields: read(enterpriseOperationLogDetailFields),
-    enterpriseOperationLogDetailValues: read(enterpriseOperationLogDetailValues),
+    enterpriseOperationLogDetailFields: read(
+      enterpriseOperationLogDetailFields,
+    ),
+    enterpriseOperationLogDetailValues: read(
+      enterpriseOperationLogDetailValues,
+    ),
     operationLogDetailsText: read(operationLogDetailsText),
     roleModuleReady: read(roleModuleReady),
     canEnterRoleWorkspace: read(canEnterRoleWorkspace),

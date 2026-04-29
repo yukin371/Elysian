@@ -6,16 +6,16 @@ import type {
 import { type ComputedRef, type Ref, computed, ref } from "vue"
 
 import {
+  type AuthSessionState,
+  createAuthSessionTableItems,
+  filterAuthSessions,
+  resolveAuthSessionSelection,
+} from "../lib/auth-session-workspace"
+import {
   type AuthSessionSummary,
   fetchAuthSessions,
   revokeAuthSession,
 } from "../lib/platform-api"
-import {
-  createAuthSessionTableItems,
-  filterAuthSessions,
-  resolveAuthSessionSelection,
-  type AuthSessionState,
-} from "../lib/auth-session-workspace"
 
 interface UseAuthSessionWorkspaceOptions {
   currentShellTabKey: Ref<string>
@@ -72,7 +72,9 @@ export const useAuthSessionWorkspace = (
       filteredSessionItems.value.find(
         (session) => session.id === selectedSessionId.value,
       ) ??
-      sessionItems.value.find((session) => session.id === selectedSessionId.value) ??
+      sessionItems.value.find(
+        (session: AuthSessionSummary) => session.id === selectedSessionId.value,
+      ) ??
       null,
   )
 

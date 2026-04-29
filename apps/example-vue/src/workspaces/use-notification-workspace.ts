@@ -118,7 +118,8 @@ export const useNotificationWorkspace = (
   const selectedNotificationListItem = computed(
     () =>
       notificationItems.value.find(
-        (notification) => notification.id === selectedNotificationId.value,
+        (notification: NotificationRecord) =>
+          notification.id === selectedNotificationId.value,
       ) ?? null,
   )
 
@@ -486,8 +487,9 @@ export const useNotificationWorkspace = (
       const updated = await markNotificationAsRead(
         selectedNotification.value.id,
       )
-      notificationItems.value = notificationItems.value.map((notification) =>
-        notification.id === updated.id ? updated : notification,
+      notificationItems.value = notificationItems.value.map(
+        (notification: NotificationRecord) =>
+          notification.id === updated.id ? updated : notification,
       )
       notificationDetail.value = updated
       await reloadNotifications()

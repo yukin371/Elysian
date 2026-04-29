@@ -50,7 +50,8 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
   const selectedWorkflowListItem = computed(
     () =>
       workflowDefinitions.value.find(
-        (definition) => definition.id === selectedWorkflowDefinitionId.value,
+        (definition: WorkflowDefinitionRecord) =>
+          definition.id === selectedWorkflowDefinitionId.value,
       ) ?? null,
   )
 
@@ -82,12 +83,14 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
     WorkflowDefinitionDetailCard[]
   >(
     () =>
-      selectedWorkflowDefinition.value?.definition.nodes.map((node) => ({
-        id: node.id,
-        name: node.name,
-        typeLabel: options.localizeNodeType(node.type),
-        description: options.describeNode(node),
-      })) ?? [],
+      selectedWorkflowDefinition.value?.definition.nodes.map(
+        (node: WorkflowNode) => ({
+          id: node.id,
+          name: node.name,
+          typeLabel: options.localizeNodeType(node.type),
+          description: options.describeNode(node),
+        }),
+      ) ?? [],
   )
 
   const workflowVersionHistoryCards = computed<WorkflowDefinitionCard[]>(() =>
@@ -202,7 +205,7 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
 
   const handleWorkflowDefinitionSelect = async (definitionId: string) => {
     const definition = workflowDefinitions.value.find(
-      (item) => item.id === definitionId,
+      (item: WorkflowDefinitionRecord) => item.id === definitionId,
     )
 
     if (!definition || workflowDetailLoading.value) {

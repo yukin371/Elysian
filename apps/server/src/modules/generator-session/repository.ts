@@ -1,14 +1,14 @@
 import { readFile } from "node:fs/promises"
 
+import type { GenerationPreviewReport } from "@elysian/generator"
 import {
   type DatabaseClient,
+  type GeneratorPreviewSessionRow,
   getGeneratorPreviewSessionById,
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
   markGeneratorPreviewSessionApplied,
-  type GeneratorPreviewSessionRow,
 } from "@elysian/persistence"
-import type { GenerationPreviewReport } from "@elysian/generator"
 
 export type GeneratorPreviewSessionSourceType = "registered-schema"
 export type GeneratorPreviewSessionStatus = "ready" | "applied"
@@ -286,9 +286,11 @@ const mapPreviewSessionRow = (
   appliedByUsername: row.appliedByUsername,
   applyManifestPath: row.applyManifestPath,
   applyRequestId: row.applyRequestId,
-  conflictStrategy: row.conflictStrategy as GeneratorPreviewSessionRecord["conflictStrategy"],
+  conflictStrategy:
+    row.conflictStrategy as GeneratorPreviewSessionRecord["conflictStrategy"],
   createdAt: row.createdAt.toISOString(),
-  frontendTarget: row.frontendTarget as GeneratorPreviewSessionRecord["frontendTarget"],
+  frontendTarget:
+    row.frontendTarget as GeneratorPreviewSessionRecord["frontendTarget"],
   hasBlockingConflicts: row.hasBlockingConflicts,
   outputDir: row.outputDir,
   previewFileCount: row.previewFileCount,
@@ -298,7 +300,8 @@ const mapPreviewSessionRow = (
   sourceType: row.sourceType as GeneratorPreviewSessionSourceType,
   sourceValue: row.sourceValue,
   status: row.status as GeneratorPreviewSessionStatus,
-  targetPreset: row.targetPreset as GeneratorPreviewSessionRecord["targetPreset"],
+  targetPreset:
+    row.targetPreset as GeneratorPreviewSessionRecord["targetPreset"],
   tenantId: row.tenantId,
 })
 

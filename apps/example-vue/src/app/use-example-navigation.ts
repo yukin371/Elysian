@@ -25,7 +25,10 @@ interface UseExampleNavigationOptions {
   buildFallbackNavigation: () => UiNavigationNode[]
 }
 
-const appendSessionNavigation = (items: UiNavigationNode[], t: AppTranslate) => {
+const appendSessionNavigation = (
+  items: UiNavigationNode[],
+  t: AppTranslate,
+) => {
   const hasSessionEntry = flattenNavigation(items).some(
     (item) => item.path === "/system/sessions",
   )
@@ -204,23 +207,23 @@ export const useExampleNavigation = ({
                 ? "post"
                 : isSessionWorkspace.value
                   ? "session"
-                : isMenuWorkspace.value
-                  ? "menu"
-                  : isNotificationWorkspace.value
-                    ? "notification"
-                    : isOperationLogWorkspace.value
-                      ? "operation-log"
-                      : isRoleWorkspace.value
-                        ? "role"
-                        : isSettingWorkspace.value
-                          ? "setting"
-                          : isTenantWorkspace.value
-                            ? "tenant"
-                            : isUserWorkspace.value
-                              ? "user"
-                              : isWorkflowDefinitionsWorkspace.value
-                                ? "workflow-definitions"
-                                : "placeholder",
+                  : isMenuWorkspace.value
+                    ? "menu"
+                    : isNotificationWorkspace.value
+                      ? "notification"
+                      : isOperationLogWorkspace.value
+                        ? "operation-log"
+                        : isRoleWorkspace.value
+                          ? "role"
+                          : isSettingWorkspace.value
+                            ? "setting"
+                            : isTenantWorkspace.value
+                              ? "tenant"
+                              : isUserWorkspace.value
+                                ? "user"
+                                : isWorkflowDefinitionsWorkspace.value
+                                  ? "workflow-definitions"
+                                  : "placeholder",
   )
 
   const customerNavigationItem = computed(
@@ -285,13 +288,13 @@ export const useExampleNavigation = ({
                               ? t("app.post.sectionTitle")
                               : isSessionWorkspace.value
                                 ? t("app.onlineSession.sectionTitle")
-                              : isWorkflowDefinitionsWorkspace.value
-                                ? t("app.workflow.sectionTitle")
-                                : t("app.section.placeholderTitle", {
-                                    name:
-                                      selectedNavigationItem.value?.name ??
-                                      t("app.section.workspaceTitle"),
-                                  }),
+                                : isWorkflowDefinitionsWorkspace.value
+                                  ? t("app.workflow.sectionTitle")
+                                  : t("app.section.placeholderTitle", {
+                                      name:
+                                        selectedNavigationItem.value?.name ??
+                                        t("app.section.workspaceTitle"),
+                                    }),
   )
 
   const currentWorkspaceSectionCopy = computed(() =>
@@ -323,19 +326,19 @@ export const useExampleNavigation = ({
                               ? t("app.post.sectionCopy")
                               : isSessionWorkspace.value
                                 ? t("app.onlineSession.sectionCopy")
-                              : isWorkflowDefinitionsWorkspace.value
-                                ? t("app.workflow.sectionCopy")
-                                : currentModuleReady.value
-                                  ? t("app.section.placeholderCopyReady", {
-                                      name:
-                                        selectedNavigationItem.value?.name ??
-                                        t("app.section.workspaceTitle"),
-                                    })
-                                  : t("app.section.placeholderCopyOffline", {
-                                      name:
-                                        selectedNavigationItem.value?.name ??
-                                        t("app.section.workspaceTitle"),
-                                    }),
+                                : isWorkflowDefinitionsWorkspace.value
+                                  ? t("app.workflow.sectionCopy")
+                                  : currentModuleReady.value
+                                    ? t("app.section.placeholderCopyReady", {
+                                        name:
+                                          selectedNavigationItem.value?.name ??
+                                          t("app.section.workspaceTitle"),
+                                      })
+                                    : t("app.section.placeholderCopyOffline", {
+                                        name:
+                                          selectedNavigationItem.value?.name ??
+                                          t("app.section.workspaceTitle"),
+                                      }),
   )
 
   const currentWorkspaceTitle = computed(() =>
@@ -367,8 +370,8 @@ export const useExampleNavigation = ({
                               ? t("app.post.shellTitle")
                               : isSessionWorkspace.value
                                 ? t("app.onlineSession.shellTitle")
-                              : (selectedNavigationItem.value?.name ??
-                                t("app.shell.workspaceTitle")),
+                                : (selectedNavigationItem.value?.name ??
+                                  t("app.shell.workspaceTitle")),
   )
 
   const placeholderWorkspaceCopy = computed(() =>
@@ -410,22 +413,25 @@ export const useExampleNavigation = ({
                               ? t("app.post.shellDescription")
                               : isSessionWorkspace.value
                                 ? t("app.onlineSession.shellDescription")
-                              : isWorkflowDefinitionsWorkspace.value
-                                ? t("app.workflow.shellDescription")
-                                : currentModuleReady.value
-                                  ? t("app.shell.placeholderDescriptionReady", {
-                                      name:
-                                        selectedNavigationItem.value?.name ??
-                                        "",
-                                    })
-                                  : t(
-                                      "app.shell.placeholderDescriptionOffline",
-                                      {
-                                        name:
-                                          selectedNavigationItem.value?.name ??
-                                          "",
-                                      },
-                                    ),
+                                : isWorkflowDefinitionsWorkspace.value
+                                  ? t("app.workflow.shellDescription")
+                                  : currentModuleReady.value
+                                    ? t(
+                                        "app.shell.placeholderDescriptionReady",
+                                        {
+                                          name:
+                                            selectedNavigationItem.value
+                                              ?.name ?? "",
+                                        },
+                                      )
+                                    : t(
+                                        "app.shell.placeholderDescriptionOffline",
+                                        {
+                                          name:
+                                            selectedNavigationItem.value
+                                              ?.name ?? "",
+                                        },
+                                      ),
   )
 
   const enterpriseSelectedMenuKey = computed(

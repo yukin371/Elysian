@@ -34,9 +34,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
 
-import ShellPanel from "../../components/common/ShellPanel.vue"
 import { UNIAPP_ROUTES } from "../../app/routes/index"
 import { bootstrapSession } from "../../app/session/use-session-bootstrap"
+import ShellPanel from "../../components/common/ShellPanel.vue"
 import { login } from "../../lib/auth/login"
 import { getSessionSnapshot } from "../../lib/auth/session"
 

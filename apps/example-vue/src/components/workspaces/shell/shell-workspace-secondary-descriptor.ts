@@ -320,6 +320,17 @@ type ShellWorkspaceSecondaryResolver = (
   emit: ShellWorkspaceSecondarySwitchEmitFn,
 ) => ShellWorkspaceSecondaryDescriptor
 
+const emitSecondaryEvent = (
+  emit: ShellWorkspaceSecondarySwitchEmitFn,
+  event: string,
+  ...args: unknown[]
+) => {
+  ;(emit as unknown as (event: string, ...args: unknown[]) => void)(
+    event,
+    ...args,
+  )
+}
+
 const editPanelListeners = (
   emit: ShellWorkspaceSecondarySwitchEmitFn,
   startEditEvent:
@@ -351,10 +362,11 @@ const editPanelListeners = (
     | "cancel-role-panel"
     | "cancel-setting-panel",
 ) => ({
-  "start-edit": () => emit(startEditEvent),
-  "open-create": () => emit(openCreateEvent),
-  "submit-form": (payload: unknown) => emit(submitEvent, payload),
-  "cancel-panel": () => emit(cancelEvent),
+  "start-edit": () => emitSecondaryEvent(emit, startEditEvent),
+  "open-create": () => emitSecondaryEvent(emit, openCreateEvent),
+  "submit-form": (payload: unknown) =>
+    emitSecondaryEvent(emit, submitEvent, payload),
+  "cancel-panel": () => emitSecondaryEvent(emit, cancelEvent),
 })
 
 const statusResolver: ShellWorkspaceSecondaryResolver = (props) => ({

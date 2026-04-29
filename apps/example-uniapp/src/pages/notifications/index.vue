@@ -48,16 +48,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
 import { onShow } from "@dcloudio/uni-app"
+import { ref } from "vue"
 
 import { UNIAPP_ROUTES, buildNotificationDetailRoute } from "../../app/routes"
 import { bootstrapSession } from "../../app/session/use-session-bootstrap"
 import { getAccessToken, getSessionSnapshot } from "../../lib/auth/session"
 import {
-  fetchNotifications,
   type NotificationLevel,
   type NotificationRecord,
+  fetchNotifications,
 } from "../../lib/notifications/list"
 
 const notifications = ref<NotificationRecord[]>([])

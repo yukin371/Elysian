@@ -89,7 +89,7 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
   const selectedCustomer = computed(
     () =>
       customerItems.value.find(
-        (customer) => customer.id === selectedCustomerId.value,
+        (customer: CustomerRecord) => customer.id === selectedCustomerId.value,
       ) ?? null,
   )
 
@@ -615,7 +615,9 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
 
   const handleAction = (key: string, row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
-    const customer = customerItems.value.find((item) => item.id === rowId)
+    const customer = customerItems.value.find(
+      (item: CustomerRecord) => item.id === rowId,
+    )
 
     if (!customer) {
       return
@@ -633,7 +635,9 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
 
   const handleRowClick = (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
-    const customer = customerItems.value.find((item) => item.id === rowId)
+    const customer = customerItems.value.find(
+      (item: CustomerRecord) => item.id === rowId,
+    )
 
     if (customer) {
       focusCustomer(customer)

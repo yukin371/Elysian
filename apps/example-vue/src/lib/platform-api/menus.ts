@@ -1,10 +1,57 @@
 import { requestJson } from "./core"
-import type {
-  CreateMenuRequest,
-  MenuDetailRecord,
-  MenusResponse,
-  UpdateMenuRequest,
-} from "../platform-api"
+
+export interface MenuRecord {
+  id: string
+  parentId: string | null
+  type: "directory" | "menu" | "button"
+  code: string
+  name: string
+  path: string | null
+  component: string | null
+  icon: string | null
+  sort: number
+  isVisible: boolean
+  status: "active" | "disabled"
+  permissionCode: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MenuDetailRecord extends MenuRecord {
+  roleIds: string[]
+}
+
+export interface MenusResponse {
+  items: MenuRecord[]
+}
+
+export interface CreateMenuRequest {
+  parentId?: string | null
+  type: MenuRecord["type"]
+  code: string
+  name: string
+  path?: string | null
+  component?: string | null
+  icon?: string | null
+  sort?: number
+  isVisible?: boolean
+  status?: MenuRecord["status"]
+  permissionCode?: string | null
+}
+
+export interface UpdateMenuRequest {
+  parentId?: string | null
+  type?: MenuRecord["type"]
+  code?: string
+  name?: string
+  path?: string | null
+  component?: string | null
+  icon?: string | null
+  sort?: number
+  isVisible?: boolean
+  status?: MenuRecord["status"]
+  permissionCode?: string | null
+}
 
 export const fetchMenus = async (): Promise<MenusResponse> =>
   requestJson<MenusResponse>("/system/menus", {

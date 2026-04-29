@@ -254,9 +254,7 @@ export const createGeneratorSessionModule = (
   },
 })
 
-const toSessionResponse = (
-  session: GeneratorPreviewSessionRecord,
-) => ({
+const toSessionResponse = (session: GeneratorPreviewSessionRecord) => ({
   id: session.id,
   actorDisplayName: session.actorDisplayName,
   actorUserId: session.actorUserId,
@@ -313,9 +311,7 @@ const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
   }
 }
 
-const buildDiffSummary = (
-  report: GeneratorPreviewSessionDetail["report"],
-) => {
+const buildDiffSummary = (report: GeneratorPreviewSessionDetail["report"]) => {
   const createCount = report.files.filter(
     (file) => file.plannedAction === "create",
   ).length

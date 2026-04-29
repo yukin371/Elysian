@@ -125,7 +125,7 @@ export const createPostService = (repository: PostRepository) => ({
       status: input.status,
       remark:
         input.remark !== undefined
-          ? normalizeOptionalText(input.remark) ?? ""
+          ? (normalizeOptionalText(input.remark) ?? "")
           : undefined,
     })
 

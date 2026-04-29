@@ -1,7 +1,10 @@
 import type { ComputedRef, Ref } from "vue"
 
 import type { FileWorkspaceQuery } from "../lib/file-workspace"
-import type { AuthIdentityResponse, PlatformResponse } from "../lib/platform-api"
+import type {
+  AuthIdentityResponse,
+  PlatformResponse,
+} from "../lib/platform-api"
 import type { AppTranslate } from "./app-shell-helpers"
 
 export type ValueSource<T> = Ref<T> | ComputedRef<T>

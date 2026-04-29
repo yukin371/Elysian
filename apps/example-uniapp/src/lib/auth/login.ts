@@ -1,12 +1,12 @@
 import { buildApiUrl } from "../api/client"
 import { requestJson } from "../api/client"
 import {
+  type SessionUserSummary,
   clearSessionSnapshot,
   getAccessToken,
   getSessionSnapshot,
   setAuthenticatedSession,
   setSessionSnapshot,
-  type SessionUserSummary,
 } from "./session"
 
 export interface LoginRequest {
@@ -28,7 +28,9 @@ interface LoginResponse extends AuthIdentityResponse {
 
 export const loginEndpoint = () => buildApiUrl("/auth/login")
 
-export const login = async (input: LoginRequest): Promise<AuthIdentityResponse> => {
+export const login = async (
+  input: LoginRequest,
+): Promise<AuthIdentityResponse> => {
   const payload = await requestJson<LoginResponse>("/auth/login", {
     method: "POST",
     body: input.tenantCode?.trim()
@@ -49,23 +51,22 @@ export const login = async (input: LoginRequest): Promise<AuthIdentityResponse> 
   return identity
 }
 
-export const fetchCurrentIdentity = async (): Promise<AuthIdentityResponse> =>
-  {
-    const identity = await requestJson<AuthIdentityResponse>("/auth/me", {
-      auth: true,
-    })
+export const fetchCurrentIdentity = async (): Promise<AuthIdentityResponse> => {
+  const identity = await requestJson<AuthIdentityResponse>("/auth/me", {
+    auth: true,
+  })
 
-    setSessionSnapshot(
-      {
-        user: identity.user,
-        roles: identity.roles,
-        permissionCodes: identity.permissionCodes,
-      },
-      getAccessToken(),
-    )
+  setSessionSnapshot(
+    {
+      user: identity.user,
+      roles: identity.roles,
+      permissionCodes: identity.permissionCodes,
+    },
+    getAccessToken(),
+  )
 
-    return identity
-  }
+  return identity
+}
 
 export const logout = async () => {
   try {
@@ -78,14 +79,15 @@ export const logout = async () => {
   }
 }
 
-export const hydrateCurrentIdentity = async (): Promise<AuthIdentityResponse | null> => {
-  const snapshot = getSessionSnapshot()
+export const hydrateCurrentIdentity =
+  async (): Promise<AuthIdentityResponse | null> => {
+    const snapshot = getSessionSnapshot()
 
-  if (!snapshot?.user) {
-    return null
+    if (!snapshot?.user) {
+      return null
+    }
+
+    const identity = await fetchCurrentIdentity()
+
+    return identity
   }
-
-  const identity = await fetchCurrentIdentity()
-
-  return identity
-}

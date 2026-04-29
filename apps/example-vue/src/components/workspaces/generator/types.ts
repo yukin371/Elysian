@@ -2,8 +2,8 @@ import type { GeneratorPreviewFileCard } from "../../../lib/generator-preview-wo
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
-  GeneratorPreviewSqlPreview,
   GeneratorPreviewSessionRecord,
+  GeneratorPreviewSqlPreview,
 } from "../../../lib/platform-api"
 
 export type GeneratorPreviewTranslation = (

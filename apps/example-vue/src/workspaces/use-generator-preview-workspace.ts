@@ -1,16 +1,16 @@
-import { computed, ref, watch, type Ref } from "vue"
+import { type Ref, computed, ref, watch } from "vue"
 
 import {
+  type FrontendTarget,
   getRegisteredSchema,
   listRegisteredSchemaNames,
-  type FrontendTarget,
 } from "../lib/generator-preview-browser"
 import {
-  applyGeneratorPreviewSession,
-  createGeneratorPreviewSession,
   type GeneratorPreviewDiffSummary,
   type GeneratorPreviewReport,
   type GeneratorPreviewSessionRecord,
+  applyGeneratorPreviewSession,
+  createGeneratorPreviewSession,
 } from "../lib/platform-api"
 
 import {
@@ -61,8 +61,8 @@ export const useGeneratorPreviewWorkspace = (
       : null,
   )
 
-  const previewFiles = computed(() =>
-    currentReport.value?.files.map(toGeneratorPreviewFileCard) ?? [],
+  const previewFiles = computed(
+    () => currentReport.value?.files.map(toGeneratorPreviewFileCard) ?? [],
   )
 
   const filteredPreviewFiles = computed(() =>

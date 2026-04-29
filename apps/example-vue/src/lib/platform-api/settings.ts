@@ -1,10 +1,32 @@
 import { requestJson } from "./core"
-import type {
-  CreateSettingRequest,
-  SettingRecord,
-  SettingsResponse,
-  UpdateSettingRequest,
-} from "../platform-api"
+
+export interface SettingRecord {
+  id: string
+  key: string
+  value: string
+  description?: string
+  status: "active" | "disabled"
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SettingsResponse {
+  items: SettingRecord[]
+}
+
+export interface CreateSettingRequest {
+  key: string
+  value: string
+  description?: string
+  status?: SettingRecord["status"]
+}
+
+export interface UpdateSettingRequest {
+  key?: string
+  value?: string
+  description?: string
+  status?: SettingRecord["status"]
+}
 
 export const fetchSettings = async (): Promise<SettingsResponse> =>
   requestJson<SettingsResponse>("/system/settings", {

@@ -54,21 +54,15 @@ describe("generator preview session persistence", () => {
         targetPreset: "staging",
       })
 
-      await setSessionCreatedAt(
-        client,
-        older.id,
-        "2026-04-27T09:00:00.000Z",
-      )
-      await setSessionCreatedAt(
-        client,
-        newer.id,
-        "2026-04-27T10:00:00.000Z",
-      )
+      await setSessionCreatedAt(client, older.id, "2026-04-27T09:00:00.000Z")
+      await setSessionCreatedAt(client, newer.id, "2026-04-27T10:00:00.000Z")
 
       const rows = await listGeneratorPreviewSessions(db)
 
       expect(rows.map((row) => row.id)).toEqual([newer.id, older.id])
-      expect(rows[0]?.reportPath).toBe("E:/generated/reports/newer.preview.json")
+      expect(rows[0]?.reportPath).toBe(
+        "E:/generated/reports/newer.preview.json",
+      )
       expect(rows[1]?.hasBlockingConflicts).toBe(true)
     })
   })
@@ -111,7 +105,9 @@ describe("generator preview session persistence", () => {
       expect(updated?.skippedFileCount).toBe(1)
 
       const persisted = await getGeneratorPreviewSessionById(db, created.id)
-      expect(persisted?.appliedAt?.toISOString()).toBe("2026-04-27T10:15:00.000Z")
+      expect(persisted?.appliedAt?.toISOString()).toBe(
+        "2026-04-27T10:15:00.000Z",
+      )
       expect(persisted?.applyRequestId).toBe("req-generator-session-apply-1")
       expect(persisted?.status).toBe("applied")
     })

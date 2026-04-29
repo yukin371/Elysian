@@ -1,6 +1,9 @@
 import { computed } from "vue"
 
-import { read, type UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
+import {
+  type UseExampleShellBindingsOptions,
+  read,
+} from "./use-example-shell-binding-types"
 
 export const useExampleShellHeaderBindings = ({
   t,

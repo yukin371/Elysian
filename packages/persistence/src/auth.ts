@@ -2,11 +2,7 @@ import { and, asc, eq, inArray } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import type { RoleDataScopeValue } from "./role"
-import {
-  roleDepts,
-  roles,
-  userRoles,
-} from "./schema"
+import { roleDepts, roles, userRoles } from "./schema"
 export {
   type CreateDepartmentPersistenceInput,
   getDepartmentByCode,

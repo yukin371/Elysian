@@ -76,7 +76,9 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
 
   const selectedFileListItem = computed(
     () =>
-      fileItems.value.find((file) => file.id === selectedFileId.value) ?? null,
+      fileItems.value.find(
+        (file: FileRecord) => file.id === selectedFileId.value,
+      ) ?? null,
   )
 
   const selectedFile = computed(

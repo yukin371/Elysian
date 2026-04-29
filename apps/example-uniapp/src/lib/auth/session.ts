@@ -1,8 +1,8 @@
 import {
+  type StoredSessionSnapshot,
   clearStoredSessionSnapshot,
   readStoredSessionSnapshot,
   writeStoredSessionSnapshot,
-  type StoredSessionSnapshot,
 } from "../storage/session-storage"
 
 export interface SessionUserSummary {

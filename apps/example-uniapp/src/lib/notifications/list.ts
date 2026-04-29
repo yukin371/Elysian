@@ -22,10 +22,12 @@ export interface NotificationsResponse {
   items: NotificationRecord[]
 }
 
-export const fetchNotifications = async (query: {
-  recipientUserId?: string
-  status?: NotificationStatus
-} = {}) => {
+export const fetchNotifications = async (
+  query: {
+    recipientUserId?: string
+    status?: NotificationStatus
+  } = {},
+) => {
   const search = new URLSearchParams()
 
   if (query.recipientUserId?.trim()) {

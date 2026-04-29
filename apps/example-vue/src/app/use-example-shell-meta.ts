@@ -3,16 +3,13 @@ import type {
   ElyShellTab,
   ElyShellUserSummary,
 } from "@elysian/ui-enterprise-vue"
-import { computed, type ComputedRef, type Ref } from "vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
-import type {
-  AppTranslate,
-  ExampleWorkspaceKind,
-} from "./app-shell-helpers"
 import type {
   AuthIdentityResponse,
   PlatformResponse,
 } from "../lib/platform-api"
+import type { AppTranslate, ExampleWorkspaceKind } from "./app-shell-helpers"
 
 type ItemCollection = Ref<unknown[]> | ComputedRef<unknown[]>
 
@@ -308,43 +305,43 @@ export const useExampleShellMeta = ({
                 ? t("app.onlineSession.tabsHint", {
                     count: sessionItems.value.length,
                   })
-              : isMenuWorkspace.value
-                ? t("app.menu.tabsHint", {
-                    count: menuItems.value.length,
-                  })
-                : isNotificationWorkspace.value
-                  ? t("app.notification.tabsHint", {
-                      count: notificationItems.value.length,
+                : isMenuWorkspace.value
+                  ? t("app.menu.tabsHint", {
+                      count: menuItems.value.length,
                     })
-                  : isOperationLogWorkspace.value
-                    ? t("app.operationLog.tabsHint", {
-                        count: operationLogItems.value.length,
+                  : isNotificationWorkspace.value
+                    ? t("app.notification.tabsHint", {
+                        count: notificationItems.value.length,
                       })
-                    : isRoleWorkspace.value
-                      ? t("app.role.tabsHint", {
-                          count: roleItems.value.length,
+                    : isOperationLogWorkspace.value
+                      ? t("app.operationLog.tabsHint", {
+                          count: operationLogItems.value.length,
                         })
-                      : isSettingWorkspace.value
-                        ? t("app.setting.tabsHint", {
-                            count: settingItems.value.length,
+                      : isRoleWorkspace.value
+                        ? t("app.role.tabsHint", {
+                            count: roleItems.value.length,
                           })
-                        : isTenantWorkspace.value
-                          ? t("app.tenant.tabsHint", {
-                              count: tenantItems.value.length,
+                        : isSettingWorkspace.value
+                          ? t("app.setting.tabsHint", {
+                              count: settingItems.value.length,
                             })
-                          : isUserWorkspace.value
-                            ? t("app.user.tabsHint", {
-                                count: userItems.value.length,
+                          : isTenantWorkspace.value
+                            ? t("app.tenant.tabsHint", {
+                                count: tenantItems.value.length,
                               })
-                            : isGeneratorPreviewWorkspace.value
-                              ? t("app.generatorPreview.tabsHint", {
-                                  count: generatorPreviewFiles.value.length,
+                            : isUserWorkspace.value
+                              ? t("app.user.tabsHint", {
+                                  count: userItems.value.length,
                                 })
-                              : isWorkflowDefinitionsWorkspace.value
-                                ? t("app.workflow.tabsHint", {
-                                    count: workflowDefinitions.value.length,
+                              : isGeneratorPreviewWorkspace.value
+                                ? t("app.generatorPreview.tabsHint", {
+                                    count: generatorPreviewFiles.value.length,
                                   })
-                                : currentNavigationPath.value,
+                                : isWorkflowDefinitionsWorkspace.value
+                                  ? t("app.workflow.tabsHint", {
+                                      count: workflowDefinitions.value.length,
+                                    })
+                                  : currentNavigationPath.value,
     },
     {
       key: "runtime",
@@ -357,7 +354,9 @@ export const useExampleShellMeta = ({
   ])
 
   const shellWorkspaceTitle = computed(() =>
-    isRuntimeShellTab.value ? t("app.runtime.title") : currentWorkspaceTitle.value,
+    isRuntimeShellTab.value
+      ? t("app.runtime.title")
+      : currentWorkspaceTitle.value,
   )
 
   const shellWorkspaceDescription = computed(() =>

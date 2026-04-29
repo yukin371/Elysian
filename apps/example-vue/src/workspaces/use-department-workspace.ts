@@ -90,7 +90,8 @@ export const useDepartmentWorkspace = (
   const selectedDepartmentListItem = computed(
     () =>
       departmentItems.value.find(
-        (department) => department.id === selectedDepartmentId.value,
+        (department: DepartmentRecord) =>
+          department.id === selectedDepartmentId.value,
       ) ?? null,
   )
 

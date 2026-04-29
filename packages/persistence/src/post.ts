@@ -24,7 +24,10 @@ export interface UpdatePostPersistenceInput {
 }
 
 export const listPosts = async (db: DatabaseClient): Promise<PostRow[]> =>
-  db.select().from(posts).orderBy(asc(posts.sort), asc(posts.code), asc(posts.createdAt))
+  db
+    .select()
+    .from(posts)
+    .orderBy(asc(posts.sort), asc(posts.code), asc(posts.createdAt))
 
 export const getPostById = async (
   db: DatabaseClient,

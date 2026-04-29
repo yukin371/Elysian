@@ -1,4 +1,4 @@
-import { watch, type ComputedRef, type Ref } from "vue"
+import { type ComputedRef, type Ref, watch } from "vue"
 
 import { resolveNotificationSelection } from "../lib/notification-workspace"
 import { resolveOperationLogSelection } from "../lib/operation-log-workspace"
@@ -293,7 +293,10 @@ export const useExampleWorkspaceSync = (
         return
       }
 
-      const nextPostId = resolvePostSelection(items, options.selectedPostId.value)
+      const nextPostId = resolvePostSelection(
+        items,
+        options.selectedPostId.value,
+      )
 
       if (!nextPostId) {
         options.selectedPostId.value = null

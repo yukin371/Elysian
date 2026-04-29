@@ -1,8 +1,8 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-import { tenants } from "./tenant"
 import { users } from "./auth"
+import { tenants } from "./tenant"
 
 export const refreshSessions = pgTable("refresh_sessions", {
   id: uuid("id").defaultRandom().primaryKey(),

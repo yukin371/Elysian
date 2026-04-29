@@ -272,6 +272,17 @@ type ShellWorkspaceMainResolver = (
   emit: ShellWorkspaceMainSwitchEmitFn,
 ) => ShellWorkspaceMainDescriptor
 
+const emitMainEvent = (
+  emit: ShellWorkspaceMainSwitchEmitFn,
+  event: string,
+  ...args: unknown[]
+) => {
+  ;(emit as unknown as (event: string, ...args: unknown[]) => void)(
+    event,
+    ...args,
+  )
+}
+
 const workspaceListListeners = (
   emit: ShellWorkspaceMainSwitchEmitFn,
   searchEvent:
@@ -311,9 +322,10 @@ const workspaceListListeners = (
     | "tenant-row-click"
     | "user-row-click",
 ) => ({
-  search: (payload: unknown) => emit(searchEvent, payload),
-  reset: () => emit(resetEvent),
-  "row-click": (payload: unknown) => emit(rowClickEvent, payload),
+  search: (payload: unknown) => emitMainEvent(emit, searchEvent, payload),
+  reset: () => emitMainEvent(emit, resetEvent),
+  "row-click": (payload: unknown) =>
+    emitMainEvent(emit, rowClickEvent, payload),
 })
 
 const runtimeResolver: ShellWorkspaceMainResolver = (props) => ({

@@ -314,7 +314,8 @@ export const exampleLocaleMessages: Record<SupportedLocale, VueLocaleMessages> =
       "app.onlineSession.workspaceDescription":
         "主区只承接筛选与会话列表，右侧聚焦当前会话详情与强制下线动作，避免堆出第二个安全工作台。",
       "app.onlineSession.emptyTitle": "当前筛选条件下没有会话",
-      "app.onlineSession.emptyDescription": "清空条件后重试，或等待下一次会话刷新。",
+      "app.onlineSession.emptyDescription":
+        "清空条件后重试，或等待下一次会话刷新。",
       "app.onlineSession.countLabel": "当前显示 {visible} 条，共 {total} 条",
       "app.onlineSession.statsHint": "当前用户可见会话数",
       "app.onlineSession.tabsHint": "{count} 个会话",

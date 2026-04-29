@@ -30,26 +30,24 @@ import enUs from "tdesign-vue-next/es/locale/en_US"
 import zhCn from "tdesign-vue-next/es/locale/zh_CN"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { computed, ref } from "vue"
-import ShellWorkspaceHeaderActions from "./components/workspaces/shell/ShellWorkspaceHeaderActions.vue"
-import ShellHeroBanner from "./components/workspaces/shell/ShellHeroBanner.vue"
-import ShellWorkspaceMainSwitch from "./components/workspaces/shell/ShellWorkspaceMainSwitch.vue"
-import ShellWorkspaceSectionIntro from "./components/workspaces/shell/ShellWorkspaceSectionIntro.vue"
-import ShellWorkspaceSecondarySwitch from "./components/workspaces/shell/ShellWorkspaceSecondarySwitch.vue"
 import { createAppShellLocalization } from "./app/app-shell-helpers"
 import { createExampleShellBindingsOptions } from "./app/create-example-shell-bindings-options"
-import { useExampleQuerySummary } from "./app/use-example-query-summary"
 import { useExampleNavigation } from "./app/use-example-navigation"
-import { useExampleShellBindings } from "./app/use-example-shell-bindings"
+import { useExampleQuerySummary } from "./app/use-example-query-summary"
 import { useExampleSessionOrchestration } from "./app/use-example-session-orchestration"
+import { useExampleShellBindings } from "./app/use-example-shell-bindings"
 import { useExampleShellMeta } from "./app/use-example-shell-meta"
 import { useExampleWorkspaceGates } from "./app/use-example-workspace-gates"
 import { useExampleWorkspaceSync } from "./app/use-example-workspace-sync"
+import ShellHeroBanner from "./components/workspaces/shell/ShellHeroBanner.vue"
+import ShellWorkspaceHeaderActions from "./components/workspaces/shell/ShellWorkspaceHeaderActions.vue"
+import ShellWorkspaceMainSwitch from "./components/workspaces/shell/ShellWorkspaceMainSwitch.vue"
+import ShellWorkspaceSecondarySwitch from "./components/workspaces/shell/ShellWorkspaceSecondarySwitch.vue"
+import ShellWorkspaceSectionIntro from "./components/workspaces/shell/ShellWorkspaceSectionIntro.vue"
 import { exampleLocaleMessages } from "./i18n"
 import { resolveWorkspaceMenuKey } from "./lib/navigation-workspace"
-import {
-  type AuthIdentityResponse,
-  type PlatformResponse,
-} from "./lib/platform-api"
+import type { AuthIdentityResponse, PlatformResponse } from "./lib/platform-api"
+import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
 import { useDepartmentWorkspace } from "./workspaces/use-department-workspace"
 import { useDictionaryWorkspace } from "./workspaces/use-dictionary-workspace"
@@ -62,7 +60,6 @@ import { usePostWorkspace } from "./workspaces/use-post-workspace"
 import { useRoleWorkspace } from "./workspaces/use-role-workspace"
 import { useSettingWorkspace } from "./workspaces/use-setting-workspace"
 import { useTenantWorkspace } from "./workspaces/use-tenant-workspace"
-import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useUserWorkspace } from "./workspaces/use-user-workspace"
 import { useWorkflowWorkspace } from "./workspaces/use-workflow-workspace"
 
@@ -1229,74 +1226,71 @@ useExampleWorkspaceSync({
   selectWorkflowDefinition,
 })
 
-const {
-  isRecoverableAuthError,
-  submitLogin,
-  submitLogout,
-} = useExampleSessionOrchestration({
-  t,
-  platform,
-  authIdentity,
-  registeredModuleCodes,
-  loading,
-  authLoading,
-  errorMessage,
-  authErrorMessage,
-  envName,
-  loginForm,
-  authModuleReady,
-  customerModuleReady,
-  departmentModuleReady,
-  postModuleReady,
-  fileModuleReady,
-  menuModuleReady,
-  notificationModuleReady,
-  operationLogModuleReady,
-  roleModuleReady,
-  settingModuleReady,
-  tenantModuleReady,
-  userModuleReady,
-  dictionaryModuleReady,
-  workflowModuleReady,
-  enterpriseFormMode,
-  notificationQueryValues,
-  reloadFiles,
-  reloadNotifications,
-  reloadDictionaries,
-  reloadCustomers,
-  reloadDepartments,
-  reloadSessions,
-  reloadPosts,
-  reloadMenus,
-  reloadOperationLogs,
-  reloadRoles,
-  reloadSettings,
-  reloadTenants,
-  reloadUsers,
-  reloadWorkflowDefinitions,
-  clearCustomerWorkspace,
-  clearDictionaryOptions,
-  clearFileWorkspace,
-  clearNotificationWorkspace,
-  clearDepartmentWorkspace,
-  clearSessionWorkspace,
-  clearPostWorkspace,
-  clearMenuWorkspace,
-  clearOperationLogWorkspace,
-  clearRoleWorkspace,
-  clearSettingWorkspace,
-  clearTenantWorkspace,
-  clearUserWorkspace,
-  clearWorkflowDefinitions,
-  resetDepartmentQuery,
-  resetPostQuery,
-  resetMenuQuery,
-  resetOperationLogQuery,
-  resetRoleQuery,
-  resetSettingQuery,
-  resetTenantQuery,
-  handleUserReset,
-})
+const { isRecoverableAuthError, submitLogin, submitLogout } =
+  useExampleSessionOrchestration({
+    t,
+    platform,
+    authIdentity,
+    registeredModuleCodes,
+    loading,
+    authLoading,
+    errorMessage,
+    authErrorMessage,
+    envName,
+    loginForm,
+    authModuleReady,
+    customerModuleReady,
+    departmentModuleReady,
+    postModuleReady,
+    fileModuleReady,
+    menuModuleReady,
+    notificationModuleReady,
+    operationLogModuleReady,
+    roleModuleReady,
+    settingModuleReady,
+    tenantModuleReady,
+    userModuleReady,
+    dictionaryModuleReady,
+    workflowModuleReady,
+    enterpriseFormMode,
+    notificationQueryValues,
+    reloadFiles,
+    reloadNotifications,
+    reloadDictionaries,
+    reloadCustomers,
+    reloadDepartments,
+    reloadSessions,
+    reloadPosts,
+    reloadMenus,
+    reloadOperationLogs,
+    reloadRoles,
+    reloadSettings,
+    reloadTenants,
+    reloadUsers,
+    reloadWorkflowDefinitions,
+    clearCustomerWorkspace,
+    clearDictionaryOptions,
+    clearFileWorkspace,
+    clearNotificationWorkspace,
+    clearDepartmentWorkspace,
+    clearSessionWorkspace,
+    clearPostWorkspace,
+    clearMenuWorkspace,
+    clearOperationLogWorkspace,
+    clearRoleWorkspace,
+    clearSettingWorkspace,
+    clearTenantWorkspace,
+    clearUserWorkspace,
+    clearWorkflowDefinitions,
+    resetDepartmentQuery,
+    resetPostQuery,
+    resetMenuQuery,
+    resetOperationLogQuery,
+    resetRoleQuery,
+    resetSettingQuery,
+    resetTenantQuery,
+    handleUserReset,
+  })
 
 const handleShellMenuSelect = (menuKey: string) => {
   const nextMenuKey = resolveWorkspaceMenuKey(

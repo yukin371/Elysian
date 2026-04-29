@@ -2,8 +2,8 @@ import { desc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import {
-  generatorPreviewSessions,
   type GeneratorPreviewSessionRow,
+  generatorPreviewSessions,
 } from "./schema"
 
 export interface CreateGeneratorPreviewSessionPersistenceInput {

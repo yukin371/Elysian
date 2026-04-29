@@ -1,9 +1,29 @@
 import { requestJson } from "./core"
-import type {
-  CustomerListQuery,
-  CustomerRecord,
-  CustomersResponse,
-} from "../platform-api"
+
+export interface CustomerRecord {
+  id: string
+  name: string
+  status: "active" | "inactive"
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CustomersResponse {
+  items: CustomerRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+export interface CustomerListQuery {
+  q?: string
+  status?: CustomerRecord["status"]
+  page?: number
+  pageSize?: number
+  sortBy?: "createdAt" | "name"
+  sortOrder?: "asc" | "desc"
+}
 
 export const fetchCustomers = async (
   query: CustomerListQuery = {},
@@ -45,7 +65,7 @@ export const fetchCustomers = async (
 export const createCustomer = (input: {
   name: string
   status: "active" | "inactive"
-}) =>
+}): Promise<CustomerRecord> =>
   requestJson<CustomerRecord>("/customers", {
     method: "POST",
     body: input,
@@ -55,14 +75,14 @@ export const createCustomer = (input: {
 export const updateCustomer = (
   id: string,
   input: { name?: string; status?: "active" | "inactive" },
-) =>
+): Promise<CustomerRecord> =>
   requestJson<CustomerRecord>(`/customers/${id}`, {
     method: "PUT",
     body: input,
     auth: true,
   })
 
-export const deleteCustomer = (id: string) =>
+export const deleteCustomer = (id: string): Promise<void> =>
   requestJson<void>(`/customers/${id}`, {
     method: "DELETE",
     auth: true,

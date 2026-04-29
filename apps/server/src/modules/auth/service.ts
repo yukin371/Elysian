@@ -333,7 +333,9 @@ export const createAuthService = (
       const sessions = await repository.listRefreshSessionsForUser(user.id)
 
       return {
-        items: sessions.map((session) => mapSessionSummary(session, payload.sid)),
+        items: sessions.map((session) =>
+          mapSessionSummary(session, payload.sid),
+        ),
       }
     },
     async authorize(

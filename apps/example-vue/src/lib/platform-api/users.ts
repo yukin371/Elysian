@@ -1,10 +1,40 @@
 import { requestJson } from "./core"
-import type {
-  CreateUserRequest,
-  UpdateUserRequest,
-  UserRecord,
-  UsersResponse,
-} from "../platform-api"
+
+export interface UserRecord {
+  id: string
+  username: string
+  displayName: string
+  email?: string
+  phone?: string
+  status: "active" | "disabled"
+  isSuperAdmin: boolean
+  lastLoginAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UsersResponse {
+  items: UserRecord[]
+}
+
+export interface CreateUserRequest {
+  username: string
+  displayName: string
+  email?: string
+  phone?: string
+  password: string
+  status?: UserRecord["status"]
+  isSuperAdmin?: boolean
+}
+
+export interface UpdateUserRequest {
+  username?: string
+  displayName?: string
+  email?: string
+  phone?: string
+  status?: UserRecord["status"]
+  isSuperAdmin?: boolean
+}
 
 export const fetchUsers = async (): Promise<UsersResponse> =>
   requestJson<UsersResponse>("/system/users", {

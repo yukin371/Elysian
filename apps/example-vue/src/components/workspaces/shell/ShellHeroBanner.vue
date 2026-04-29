@@ -17,9 +17,7 @@ defineProps<{
   workspaceItemCount: string
 }>()
 
-defineEmits<{
-  (event: "select-locale", localeKey: string): void
-}>()
+defineEmits<(event: "select-locale", localeKey: string) => void>()
 </script>
 
 <template>

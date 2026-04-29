@@ -107,4 +107,89 @@ describe("platform api file requests", () => {
       globalThis.fetch = originalFetch
     }
   })
+
+  test("retries blob downloads after auth refresh", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{
+      url: string
+      method: string
+      authorization: string | null
+      credentials: "omit" | "same-origin" | "include" | undefined
+    }> = []
+    let downloadAttempts = 0
+
+    setAccessToken("expired-file-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      const url = String(input)
+
+      fetchCalls.push({
+        url,
+        method: String(init?.method ?? "GET"),
+        authorization: headers.get("authorization"),
+        credentials: init?.credentials,
+      })
+
+      if (url.endsWith("/auth/refresh")) {
+        return new Response(
+          JSON.stringify({ accessToken: "file-token-next" }),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        )
+      }
+
+      downloadAttempts += 1
+
+      if (downloadAttempts === 1) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "UNAUTHORIZED",
+              message: "expired",
+              status: 401,
+            },
+          }),
+          {
+            status: 401,
+            headers: { "content-type": "application/json" },
+          },
+        )
+      }
+
+      return new Response(new Blob(["download after refresh"]), {
+        status: 200,
+        headers: { "content-type": "application/octet-stream" },
+      })
+    }) as typeof fetch
+
+    try {
+      const payload = await downloadFileBlob("file_download_2")
+
+      expect(await payload.text()).toBe("download after refresh")
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/files/file_download_2/download",
+          method: "GET",
+          authorization: "Bearer expired-file-token",
+          credentials: undefined,
+        },
+        {
+          url: "http://localhost:3000/auth/refresh",
+          method: "POST",
+          authorization: null,
+          credentials: "include",
+        },
+        {
+          url: "http://localhost:3000/system/files/file_download_2/download",
+          method: "GET",
+          authorization: "Bearer file-token-next",
+          credentials: undefined,
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
 })

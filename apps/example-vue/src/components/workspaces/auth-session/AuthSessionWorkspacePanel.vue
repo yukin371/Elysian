@@ -18,9 +18,7 @@ interface AuthSessionWorkspacePanelProps {
 
 defineProps<AuthSessionWorkspacePanelProps>()
 
-defineEmits<{
-  (e: "revoke-selected-session"): void
-}>()
+defineEmits<(e: "revoke-selected-session") => void>()
 </script>
 
 <template>

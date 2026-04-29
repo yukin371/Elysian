@@ -92,7 +92,9 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
 
   const selectedUser = computed(
     () =>
-      userItems.value.find((user) => user.id === selectedUserId.value) ?? null,
+      userItems.value.find(
+        (user: UserRecord) => user.id === selectedUserId.value,
+      ) ?? null,
   )
 
   const tableColumns = computed(() =>

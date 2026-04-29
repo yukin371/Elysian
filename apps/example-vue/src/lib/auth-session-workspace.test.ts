@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test"
 
-import type { AuthSessionSummary } from "./platform-api"
 import {
   createAuthSessionTableItems,
   filterAuthSessions,
@@ -8,6 +7,7 @@ import {
   resolveSessionDeviceLabel,
   resolveSessionState,
 } from "./auth-session-workspace"
+import type { AuthSessionSummary } from "./platform-api"
 
 const createSession = (
   overrides: Partial<AuthSessionSummary> & Pick<AuthSessionSummary, "id">,
@@ -25,29 +25,30 @@ const createSession = (
 })
 
 describe("auth session workspace helpers", () => {
-  const sessions = [
-    createSession({
-      id: "session_current",
-      userAgent:
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/135.0 Safari/537.36",
-      ip: "10.0.0.10",
-      isCurrent: true,
-    }),
-    createSession({
-      id: "session_rotated",
-      userAgent:
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15",
-      ip: "10.0.0.20",
-      replacedBySessionId: "session_current",
-    }),
-    createSession({
-      id: "session_revoked",
-      userAgent:
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148",
-      ip: "10.0.0.30",
-      revokedAt: "2026-04-28T11:00:00.000Z",
-    }),
-  ]
+  const sessions: [AuthSessionSummary, AuthSessionSummary, AuthSessionSummary] =
+    [
+      createSession({
+        id: "session_current",
+        userAgent:
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/135.0 Safari/537.36",
+        ip: "10.0.0.10",
+        isCurrent: true,
+      }),
+      createSession({
+        id: "session_rotated",
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15",
+        ip: "10.0.0.20",
+        replacedBySessionId: "session_current",
+      }),
+      createSession({
+        id: "session_revoked",
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148",
+        ip: "10.0.0.30",
+        revokedAt: "2026-04-28T11:00:00.000Z",
+      }),
+    ]
 
   test("derives device label and session state", () => {
     expect(resolveSessionDeviceLabel(sessions[0]?.userAgent ?? null)).toBe(
@@ -60,9 +61,9 @@ describe("auth session workspace helpers", () => {
       "Mobile browser on iOS",
     )
 
-    expect(resolveSessionState(sessions[0]!)).toBe("current")
-    expect(resolveSessionState(sessions[1]!)).toBe("rotated")
-    expect(resolveSessionState(sessions[2]!)).toBe("revoked")
+    expect(resolveSessionState(sessions[0])).toBe("current")
+    expect(resolveSessionState(sessions[1])).toBe("rotated")
+    expect(resolveSessionState(sessions[2])).toBe("revoked")
   })
 
   test("filters sessions across device, ip, state, and current/history scope", () => {

@@ -114,7 +114,9 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
 
   const selectedMenuListItem = computed(
     () =>
-      menuItems.value.find((menu) => menu.id === selectedMenuId.value) ?? null,
+      menuItems.value.find(
+        (menu: MenuRecord) => menu.id === selectedMenuId.value,
+      ) ?? null,
   )
 
   const selectedMenu = computed(

@@ -92,7 +92,9 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
 
   const selectedRoleListItem = computed(
     () =>
-      roleItems.value.find((role) => role.id === selectedRoleId.value) ?? null,
+      roleItems.value.find(
+        (role: RoleRecord) => role.id === selectedRoleId.value,
+      ) ?? null,
   )
 
   const selectedRole = computed(

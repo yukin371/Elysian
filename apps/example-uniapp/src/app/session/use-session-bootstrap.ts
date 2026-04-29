@@ -1,10 +1,10 @@
+import { requestJson } from "../../lib/api/client"
 import { fetchCurrentIdentity } from "../../lib/auth/login"
 import {
   clearSessionSnapshot,
   getSessionSnapshot,
   setSessionSnapshot,
 } from "../../lib/auth/session"
-import { requestJson } from "../../lib/api/client"
 
 interface LoginResponse {
   accessToken: string

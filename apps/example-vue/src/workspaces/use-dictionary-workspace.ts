@@ -94,7 +94,8 @@ export const useDictionaryWorkspace = (
   const selectedDictionaryTypeListItem = computed(
     () =>
       dictionaryTypes.value.find(
-        (type) => type.id === selectedDictionaryTypeId.value,
+        (type: DictionaryTypeRecord) =>
+          type.id === selectedDictionaryTypeId.value,
       ) ?? null,
   )
 
@@ -128,7 +129,8 @@ export const useDictionaryWorkspace = (
     }
 
     return dictionaryItems.value.filter(
-      (item) => item.typeId === selectedDictionaryTypeId.value,
+      (item: DictionaryItemRecord) =>
+        item.typeId === selectedDictionaryTypeId.value,
     )
   })
 

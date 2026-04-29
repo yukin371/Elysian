@@ -1,11 +1,52 @@
 import { requestJson } from "./core"
-import type {
-  CreateDictionaryTypeRequest,
-  DictionaryItemsResponse,
-  DictionaryTypeDetailRecord,
-  DictionaryTypesResponse,
-  UpdateDictionaryTypeRequest,
-} from "../platform-api"
+
+export interface DictionaryTypeRecord {
+  id: string
+  code: string
+  name: string
+  description?: string
+  status: "active" | "disabled"
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DictionaryItemRecord {
+  id: string
+  typeId: string
+  value: string
+  label: string
+  sort: number
+  isDefault: boolean
+  status: "active" | "disabled"
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DictionaryTypeDetailRecord extends DictionaryTypeRecord {
+  items: DictionaryItemRecord[]
+}
+
+export interface DictionaryTypesResponse {
+  items: DictionaryTypeRecord[]
+}
+
+export interface DictionaryItemsResponse {
+  items: DictionaryItemRecord[]
+}
+
+export interface CreateDictionaryTypeRequest {
+  code: string
+  name: string
+  description?: string
+  status?: DictionaryTypeRecord["status"]
+}
+
+export interface UpdateDictionaryTypeRequest {
+  code?: string
+  name?: string
+  description?: string
+  status?: DictionaryTypeRecord["status"]
+}
 
 export const fetchDictionaryTypes =
   async (): Promise<DictionaryTypesResponse> =>

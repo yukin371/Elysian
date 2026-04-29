@@ -78,7 +78,7 @@ export const useOperationLogWorkspace = (
   const selectedOperationLogListItem = computed(
     () =>
       operationLogItems.value.find(
-        (item) => item.id === selectedOperationLogId.value,
+        (item: OperationLogRecord) => item.id === selectedOperationLogId.value,
       ) ?? null,
   )
 

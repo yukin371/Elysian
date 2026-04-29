@@ -1,4 +1,4 @@
-import { type ModuleSchema } from "@elysian/schema"
+import type { ModuleSchema } from "@elysian/schema"
 import {
   type UiCrudPageDefinition,
   type UiFormField,
@@ -325,18 +325,19 @@ export const createVueLocaleRuntime = (options: {
   messages: Record<SupportedLocale, VueLocaleMessages>
 }): VueLocaleRuntime => {
   const locale = ref<SupportedLocale>(options.defaultLocale)
-  const fallbackLocale = options.fallbackLocale ?? "en-US"
+  const fallbackLocale: SupportedLocale = options.fallbackLocale ?? "en-US"
 
   return {
     locale,
     fallbackLocale,
     messages: options.messages,
-    setLocale: (nextLocale) => {
+    setLocale: (nextLocale: SupportedLocale) => {
       locale.value = nextLocale
     },
-    t: (key, params) => {
+    t: (key: string, params?: Record<string, string | number | boolean>) => {
+      const currentLocale = locale.value as SupportedLocale
       const localized =
-        options.messages[locale.value]?.[key] ??
+        options.messages[currentLocale]?.[key] ??
         options.messages[fallbackLocale]?.[key] ??
         key
 

@@ -1,12 +1,27 @@
-import type { TenantStatus } from "@elysian/schema"
+import type {
+  TenantRecord as SchemaTenantRecord,
+  TenantStatus,
+} from "@elysian/schema"
 
 import { requestJson } from "./core"
-import type {
-  CreateTenantRequest,
-  TenantRecord,
-  TenantsResponse,
-  UpdateTenantRequest,
-} from "../platform-api"
+
+export type TenantRecord = SchemaTenantRecord
+
+export interface TenantsResponse {
+  items: TenantRecord[]
+}
+
+export interface CreateTenantRequest {
+  code: string
+  name: string
+  status?: TenantStatus
+}
+
+export interface UpdateTenantRequest {
+  code?: string
+  name?: string
+  status?: TenantStatus
+}
 
 export const fetchTenants = async (): Promise<TenantsResponse> =>
   requestJson<TenantsResponse>("/system/tenants", {
@@ -41,8 +56,11 @@ export const updateTenantStatus = async (
   id: string,
   status: TenantStatus,
 ): Promise<TenantRecord> =>
-  requestJson<TenantRecord>(`/system/tenants/${encodeURIComponent(id)}/status`, {
-    method: "PUT",
-    body: { status },
-    auth: true,
-  })
+  requestJson<TenantRecord>(
+    `/system/tenants/${encodeURIComponent(id)}/status`,
+    {
+      method: "PUT",
+      body: { status },
+      auth: true,
+    },
+  )

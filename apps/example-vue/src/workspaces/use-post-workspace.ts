@@ -87,7 +87,10 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
   )
 
   const selectedPostListItem = computed(
-    () => postItems.value.find((post) => post.id === selectedPostId.value) ?? null,
+    () =>
+      postItems.value.find(
+        (post: PostRecord) => post.id === selectedPostId.value,
+      ) ?? null,
   )
 
   const selectedPost = computed(
@@ -237,7 +240,10 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
       return options.t("app.post.panelTitle.create")
     }
 
-    return selectedPost.value?.name ?? options.t("app.post.panelTitle.detailFallback")
+    return (
+      selectedPost.value?.name ??
+      options.t("app.post.panelTitle.detailFallback")
+    )
   })
 
   const panelDescription = computed(() => {
@@ -286,7 +292,9 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
     } catch (error) {
       options.onRecoverableAuthError(error)
       postDetailErrorMessage.value =
-        error instanceof Error ? error.message : options.t("app.error.loadPostDetail")
+        error instanceof Error
+          ? error.message
+          : options.t("app.error.loadPostDetail")
     } finally {
       postDetailLoading.value = false
     }
@@ -325,7 +333,9 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
         return
       }
 
-      const nextPost = payload.items.find((item) => item.id === selectedPostId.value)
+      const nextPost = payload.items.find(
+        (item) => item.id === selectedPostId.value,
+      )
 
       if (nextPost) {
         await selectPost(nextPost)
@@ -334,7 +344,9 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
       options.onRecoverableAuthError(error)
       clearWorkspace()
       postErrorMessage.value =
-        error instanceof Error ? error.message : options.t("app.error.loadPosts")
+        error instanceof Error
+          ? error.message
+          : options.t("app.error.loadPosts")
     } finally {
       postLoading.value = false
     }

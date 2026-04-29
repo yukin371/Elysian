@@ -84,7 +84,7 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
   const selectedTenantListItem = computed(
     () =>
       tenantItems.value.find(
-        (tenant) => tenant.id === selectedTenantId.value,
+        (tenant: TenantRecord) => tenant.id === selectedTenantId.value,
       ) ?? null,
   )
 
@@ -461,7 +461,7 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
         selectedTenant.value.id,
         nextStatus,
       )
-      tenantItems.value = tenantItems.value.map((tenant) =>
+      tenantItems.value = tenantItems.value.map((tenant: TenantRecord) =>
         tenant.id === updated.id ? updated : tenant,
       )
       tenantDetail.value = updated

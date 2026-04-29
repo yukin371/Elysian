@@ -88,7 +88,7 @@ export const useSettingWorkspace = (options: UseSettingWorkspaceOptions) => {
   const selectedSettingListItem = computed(
     () =>
       settingItems.value.find(
-        (setting) => setting.id === selectedSettingId.value,
+        (setting: SettingRecord) => setting.id === selectedSettingId.value,
       ) ?? null,
   )
 

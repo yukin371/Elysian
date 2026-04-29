@@ -16,9 +16,7 @@ interface ShellWorkspaceStatusMainProps {
 
 defineProps<ShellWorkspaceStatusMainProps>()
 
-const emit = defineEmits<{
-  (e: "back-to-customer"): void
-}>()
+const emit = defineEmits<(e: "back-to-customer") => void>()
 </script>
 
 <template>

@@ -42,14 +42,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
 import { onLoad } from "@dcloudio/uni-app"
+import { ref } from "vue"
 
-import ShellPanel from "../../components/common/ShellPanel.vue"
 import { UNIAPP_ROUTES } from "../../app/routes"
 import { bootstrapSession } from "../../app/session/use-session-bootstrap"
+import ShellPanel from "../../components/common/ShellPanel.vue"
 import { getAccessToken, getSessionSnapshot } from "../../lib/auth/session"
-import { type NotificationLevel, type NotificationRecord } from "../../lib/notifications/list"
+import type {
+  NotificationLevel,
+  NotificationRecord,
+} from "../../lib/notifications/list"
 import {
   fetchNotificationById,
   markNotificationAsRead,

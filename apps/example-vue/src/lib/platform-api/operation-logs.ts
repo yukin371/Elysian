@@ -1,9 +1,30 @@
 import { requestJson } from "./core"
-import type {
-  OperationLogListQuery,
-  OperationLogRecord,
-  OperationLogsResponse,
-} from "../platform-api"
+
+export interface OperationLogRecord {
+  id: string
+  category: string
+  action: string
+  actorUserId: string | null
+  targetType: string | null
+  targetId: string | null
+  result: "success" | "failure"
+  requestId: string | null
+  ip: string | null
+  userAgent: string | null
+  details: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface OperationLogsResponse {
+  items: OperationLogRecord[]
+}
+
+export interface OperationLogListQuery {
+  category?: string
+  action?: string
+  actorUserId?: string
+  result?: OperationLogRecord["result"]
+}
 
 export const fetchOperationLogs = async (
   query: OperationLogListQuery = {},

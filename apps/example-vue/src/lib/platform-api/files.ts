@@ -1,5 +1,17 @@
 import { requestBlob, requestJson } from "./core"
-import type { FileRecord, FilesResponse } from "../platform-api"
+
+export interface FileRecord {
+  id: string
+  originalName: string
+  mimeType?: string
+  size: number
+  uploaderUserId?: string
+  createdAt: string
+}
+
+export interface FilesResponse {
+  items: FileRecord[]
+}
 
 export const fetchFiles = async (): Promise<FilesResponse> =>
   requestJson<FilesResponse>("/system/files", {

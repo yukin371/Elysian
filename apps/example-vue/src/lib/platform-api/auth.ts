@@ -65,7 +65,7 @@ export const refreshAuth = async (): Promise<AuthIdentityResponse> => {
   return identity
 }
 
-export const fetchMe = () =>
+export const fetchMe = (): Promise<AuthIdentityResponse> =>
   requestJson<AuthIdentityResponse>("/auth/me", {
     auth: true,
   })
@@ -78,7 +78,7 @@ export const logout = async (): Promise<void> => {
   clearAccessToken()
 }
 
-export const fetchAuthSessions = () =>
+export const fetchAuthSessions = (): Promise<AuthSessionsResponse> =>
   requestJson<AuthSessionsResponse>("/auth/sessions", {
     auth: true,
   })

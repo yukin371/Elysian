@@ -25,11 +25,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
 
-import ShellPanel from "../../components/common/ShellPanel.vue"
 import { UNIAPP_ROUTES } from "../../app/routes/index"
+import { bootstrapSession } from "../../app/session/use-session-bootstrap"
+import ShellPanel from "../../components/common/ShellPanel.vue"
 import { fetchCurrentIdentity, logout } from "../../lib/auth/login"
 import { getAccessToken, getSessionSnapshot } from "../../lib/auth/session"
-import { bootstrapSession } from "../../app/session/use-session-bootstrap"
 
 const loading = ref(true)
 const sessionUser = ref(getSessionSnapshot()?.user ?? null)

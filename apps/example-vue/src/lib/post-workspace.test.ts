@@ -76,18 +76,17 @@ describe("post workspace helpers", () => {
       "post_ops",
     ])
 
-    expect(filterPosts(posts, { name: "support" }).map((post) => post.id)).toEqual([
-      "post_support",
-    ])
+    expect(
+      filterPosts(posts, { name: "support" }).map((post) => post.id),
+    ).toEqual(["post_support"])
 
-    expect(filterPosts(posts, { remark: "management" }).map((post) => post.id)).toEqual([
-      "post_ceo",
-    ])
+    expect(
+      filterPosts(posts, { remark: "management" }).map((post) => post.id),
+    ).toEqual(["post_ceo"])
 
-    expect(filterPosts(posts, { status: "active" }).map((post) => post.id)).toEqual([
-      "post_ceo",
-      "post_support",
-    ])
+    expect(
+      filterPosts(posts, { status: "active" }).map((post) => post.id),
+    ).toEqual(["post_ceo", "post_support"])
   })
 
   test("keeps the current selection when the post remains visible", () => {

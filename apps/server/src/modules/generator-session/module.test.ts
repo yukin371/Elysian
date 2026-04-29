@@ -323,9 +323,13 @@ describe("generator session module", () => {
     expect(applyBody.session.status).toBe("applied")
     expect(applyBody.session.appliedAt).toBeTruthy()
     expect(applyBody.session.appliedFileCount).toBe(5)
-    expect(applyBody.session.appliedByUserId).toBe(createBody.session.actorUserId)
+    expect(applyBody.session.appliedByUserId).toBe(
+      createBody.session.actorUserId,
+    )
     expect(applyBody.session.skippedFileCount).toBe(0)
-    expect(applyBody.session.applyRequestId).toBe("req-generator-session-apply-1")
+    expect(applyBody.session.applyRequestId).toBe(
+      "req-generator-session-apply-1",
+    )
     expect(applyBody.session.applyManifestPath).toBe(
       applyBody.apply.manifestPath,
     )

@@ -1,10 +1,35 @@
 import { requestJson } from "./core"
-import type {
-  CreatePostRequest,
-  PostRecord,
-  PostsResponse,
-  UpdatePostRequest,
-} from "../platform-api"
+
+export interface PostRecord {
+  id: string
+  code: string
+  name: string
+  sort: number
+  status: "active" | "disabled"
+  remark?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PostsResponse {
+  items: PostRecord[]
+}
+
+export interface CreatePostRequest {
+  code: string
+  name: string
+  sort?: number
+  status?: PostRecord["status"]
+  remark?: string
+}
+
+export interface UpdatePostRequest {
+  code?: string
+  name?: string
+  sort?: number
+  status?: PostRecord["status"]
+  remark?: string
+}
 
 export const fetchPosts = async (): Promise<PostsResponse> =>
   requestJson<PostsResponse>("/system/posts", {
@@ -16,7 +41,9 @@ export const fetchPostById = async (id: string): Promise<PostRecord> =>
     auth: true,
   })
 
-export const createPost = async (input: CreatePostRequest): Promise<PostRecord> =>
+export const createPost = async (
+  input: CreatePostRequest,
+): Promise<PostRecord> =>
   requestJson<PostRecord>("/system/posts", {
     method: "POST",
     body: input,

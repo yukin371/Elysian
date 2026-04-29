@@ -155,11 +155,15 @@ export interface AuthRepository {
   createRefreshSession: (
     input: CreateRefreshSessionInput,
   ) => Promise<RefreshSessionRecord>
-  getRefreshSessionById: (sessionId: string) => Promise<RefreshSessionRecord | null>
+  getRefreshSessionById: (
+    sessionId: string,
+  ) => Promise<RefreshSessionRecord | null>
   getRefreshSessionByTokenHash: (
     tokenHash: string,
   ) => Promise<RefreshSessionRecord | null>
-  listRefreshSessionsForUser: (userId: string) => Promise<RefreshSessionRecord[]>
+  listRefreshSessionsForUser: (
+    userId: string,
+  ) => Promise<RefreshSessionRecord[]>
   revokeRefreshSession: (
     sessionId: string,
     replacedBySessionId?: string | null,

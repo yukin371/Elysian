@@ -1,5 +1,12 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
-import { boolean, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core"
 
 import { tenants } from "./tenant"
 
@@ -40,7 +47,9 @@ export const generatorPreviewSessions = pgTable("generator_preview_sessions", {
     .defaultNow(),
 })
 
-export type GeneratorPreviewSessionRow =
-  InferSelectModel<typeof generatorPreviewSessions>
-export type NewGeneratorPreviewSessionRow =
-  InferInsertModel<typeof generatorPreviewSessions>
+export type GeneratorPreviewSessionRow = InferSelectModel<
+  typeof generatorPreviewSessions
+>
+export type NewGeneratorPreviewSessionRow = InferInsertModel<
+  typeof generatorPreviewSessions
+>
