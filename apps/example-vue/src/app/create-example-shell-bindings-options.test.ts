@@ -63,6 +63,7 @@ describe("createExampleShellBindingsOptions", () => {
   test("keeps shell passthrough and workspace mapping stable", () => {
     const submitLogout = () => undefined
     const reloadRoles = () => Promise.resolve()
+    const handleExportRoles = () => Promise.resolve()
     const handleExportUsers = () => Promise.resolve()
     const handleExportDictionaryTypes = () => Promise.resolve()
     const handleExportDictionaryItems = () => Promise.resolve()
@@ -78,7 +79,9 @@ describe("createExampleShellBindingsOptions", () => {
       },
       roleWorkspace: createWorkspaceInput({
         isRoleWorkspace: true,
+        roleExportLoading: true,
         canUpdateRoles: true,
+        handleExportRoles,
         "workspace.roleLoading": true,
         "workspace.panelTitle": "Role Details",
         "workspace.reloadRoles": reloadRoles,
@@ -128,9 +131,11 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.submitLogout).toBe(submitLogout)
     expect(result.isRoleWorkspace).toBe(true)
     expect(result.roleLoading).toBe(true)
+    expect(result.roleExportLoading).toBe(true)
     expect(result.canUpdateRoles).toBe(true)
     expect(result.rolePanelTitle).toBe("Role Details")
     expect(result.reloadRoles).toBe(reloadRoles)
+    expect(result.handleExportRoles).toBe(handleExportRoles)
     expect(result.dictionaryTypeExportLoading).toBe(true)
     expect(result.handleExportDictionaryTypes).toBe(handleExportDictionaryTypes)
     expect(result.dictionaryItemsExportLoading).toBe(true)

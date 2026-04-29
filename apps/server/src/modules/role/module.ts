@@ -62,6 +62,21 @@ export const createRoleModule = (
         },
       )
       .get(
+        "/system/roles/export",
+        async ({ request, set }) => {
+          await authorize(request.headers, rolePermissions.list)
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv()
+        },
+        {
+          detail: {
+            tags: ["role"],
+            summary: "Export roles as CSV",
+          },
+        },
+      )
+      .get(
         "/system/roles/:id",
         async ({ params, request }) => {
           await authorize(request.headers, rolePermissions.get)

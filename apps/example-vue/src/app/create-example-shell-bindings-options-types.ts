@@ -51,11 +51,13 @@ export interface CreateExampleShellBindingsOptionsInput {
   roleWorkspace: {
     workspace: ReturnType<typeof useRoleWorkspace>
     isRoleWorkspace: OptionValue<"isRoleWorkspace">
+    roleExportLoading: OptionValue<"roleExportLoading">
     canCreateRoles: OptionValue<"canCreateRoles">
     canViewRoles: OptionValue<"canViewRoles">
     roleModuleReady: OptionValue<"roleModuleReady">
     canEnterRoleWorkspace: OptionValue<"canEnterRoleWorkspace">
     canUpdateRoles: OptionValue<"canUpdateRoles">
+    handleExportRoles: OptionValue<"handleExportRoles">
   }
   customerWorkspace: {
     workspace: ReturnType<typeof useCustomerWorkspace>
@@ -216,6 +218,7 @@ export interface CreateExampleShellBindingsOptionsInput {
 export type RoleWorkspaceBindingsOptions = BindingSegment<
   | "isRoleWorkspace"
   | "roleLoading"
+  | "roleExportLoading"
   | "canCreateRoles"
   | "canViewRoles"
   | "roleModuleReady"
@@ -240,6 +243,7 @@ export type RoleWorkspaceBindingsOptions = BindingSegment<
   | "handleRoleRowClick"
   | "openRoleCreatePanel"
   | "reloadRoles"
+  | "handleExportRoles"
   | "startRoleEdit"
   | "submitRoleForm"
   | "cancelRolePanel"

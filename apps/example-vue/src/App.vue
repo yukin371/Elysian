@@ -51,6 +51,7 @@ import {
   exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
   exportOperationLogsCsv,
+  exportRolesCsv,
   exportSettingsCsv,
   exportUsersCsv,
 } from "./lib/platform-api"
@@ -152,6 +153,7 @@ const workflowModuleReady = ref(false)
 const dictionaryTypeExportLoading = ref(false)
 const dictionaryItemsExportLoading = ref(false)
 const operationLogExportLoading = ref(false)
+const roleExportLoading = ref(false)
 const userExportLoading = ref(false)
 const settingExportLoading = ref(false)
 const envName = ref("unknown")
@@ -1376,6 +1378,29 @@ const handleExportUsers = async () => {
   }
 }
 
+const handleExportRoles = async () => {
+  if (!canViewRoles.value || roleExportLoading.value) {
+    return
+  }
+
+  roleExportLoading.value = true
+  roleErrorMessage.value = ""
+
+  try {
+    const blob = await exportRolesCsv()
+    downloadBrowserBlob(blob, createCsvExportFilename("system-roles"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    roleErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportRoles")
+  } finally {
+    roleExportLoading.value = false
+  }
+}
+
 const handleExportSettings = async () => {
   if (!canViewSettings.value || settingExportLoading.value) {
     return
@@ -1482,11 +1507,13 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   roleWorkspace: {
     workspace: roleWorkspace,
     isRoleWorkspace,
+    roleExportLoading,
     canCreateRoles,
     canViewRoles,
     roleModuleReady,
     canEnterRoleWorkspace,
     canUpdateRoles,
+    handleExportRoles,
   },
   customerWorkspace: {
     workspace: customerWorkspace,

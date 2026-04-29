@@ -10,6 +10,7 @@ defineProps<{
   authLoading: boolean
   isRoleWorkspace: boolean
   roleLoading: boolean
+  roleExportLoading: boolean
   canCreateRoles: boolean
   canViewRoles: boolean
   isCustomerWorkspace: boolean
@@ -71,6 +72,7 @@ defineProps<{
 defineEmits<{
   (event: "open-role-create"): void
   (event: "reload-roles"): void
+  (event: "export-roles"): void
   (event: "open-customer-create"): void
   (event: "reload-customers"): void
   (event: "open-dictionary-create"): void
@@ -113,6 +115,17 @@ defineEmits<{
       @click="$emit('open-role-create')"
     >
       {{ t("app.action.newRole") }}
+    </TButton>
+    <TButton
+      v-if="isRoleWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="roleExportLoading"
+      :disabled="roleExportLoading || !canViewRoles"
+      @click="$emit('export-roles')"
+    >
+      {{ t("app.action.exportRoles") }}
     </TButton>
     <TButton
       v-if="isRoleWorkspace"

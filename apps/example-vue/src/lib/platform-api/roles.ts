@@ -1,4 +1,4 @@
-import { requestJson } from "./core"
+import { requestBlob, requestJson } from "./core"
 
 export interface RoleRecord {
   id: string
@@ -42,6 +42,11 @@ export interface UpdateRoleRequest {
 
 export const fetchRoles = async (): Promise<RolesResponse> =>
   requestJson<RolesResponse>("/system/roles", {
+    auth: true,
+  })
+
+export const exportRolesCsv = async (): Promise<Blob> =>
+  requestBlob("/system/roles/export", {
     auth: true,
   })
 

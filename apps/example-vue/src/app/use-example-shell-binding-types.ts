@@ -40,6 +40,7 @@ export interface UseExampleShellBindingsOptions {
   authLoading: Ref<boolean>
   isRoleWorkspace: ComputedRef<boolean>
   roleLoading: ValueSource<boolean>
+  roleExportLoading: ValueSource<boolean>
   canCreateRoles: ValueSource<boolean>
   canViewRoles: ValueSource<boolean>
   isCustomerWorkspace: ComputedRef<boolean>
@@ -411,6 +412,7 @@ export interface UseExampleShellBindingsOptions {
   submitCustomerPageJump: () => void
   openRoleCreatePanel: () => void
   reloadRoles: () => void
+  handleExportRoles: () => void
   openCreatePanel: () => void
   reloadCustomers: () => void
   openDictionaryCreatePanel: () => void

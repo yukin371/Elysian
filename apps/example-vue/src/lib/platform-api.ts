@@ -63,6 +63,7 @@ export {
 } from "./platform-api/posts"
 export {
   createRole,
+  exportRolesCsv,
   fetchRoleById,
   fetchRoles,
   updateRole,

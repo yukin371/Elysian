@@ -192,6 +192,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadMenuDetail": "加载菜单详情失败",
   "app.error.loadRoles": "加载角色列表失败",
   "app.error.loadRoleDetail": "加载角色详情失败",
+  "app.error.exportRoles": "导出角色列表失败",
   "app.error.loadSettings": "加载系统配置列表失败",
   "app.error.exportSettings": "导出系统配置失败",
   "app.error.loadSettingDetail": "加载系统配置详情失败",

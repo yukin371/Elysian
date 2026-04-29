@@ -64,6 +64,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.action.newDepartment": "New department",
   "app.action.newMenu": "New menu",
   "app.action.newRole": "New role",
+  "app.action.exportRoles": "Export roles",
   "app.action.newSetting": "New setting",
   "app.action.exportSettings": "Export settings",
   "app.action.newTenant": "New tenant",

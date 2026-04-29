@@ -16,6 +16,34 @@ export interface UpdateRolePayload extends UpdateRoleInput {}
 
 export const createRoleService = (repository: RoleRepository) => ({
   list: () => repository.list(),
+  async exportCsv() {
+    const items = await repository.list()
+
+    return buildCsv(
+      [
+        "id",
+        "code",
+        "name",
+        "description",
+        "status",
+        "isSystem",
+        "dataScope",
+        "createdAt",
+        "updatedAt",
+      ],
+      items.map((item) => [
+        item.id,
+        item.code,
+        item.name,
+        item.description,
+        item.status,
+        item.isSystem,
+        item.dataScope,
+        item.createdAt,
+        item.updatedAt,
+      ]),
+    )
+  },
   async getById(id: string) {
     const role = await repository.getById(id)
 
@@ -286,6 +314,29 @@ const normalizeStringArray = (values: string[] | undefined) =>
   [
     ...new Set((values ?? []).map((value) => value.trim()).filter(Boolean)),
   ].sort()
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | number | boolean | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | number | boolean | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : String(value)
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
+}
 
 const assertValidDataScope = (value: RoleDataScope | undefined) => {
   if (value === undefined) {

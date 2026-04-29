@@ -6,6 +6,7 @@ import {
   clearAccessToken,
   exportDictionaryItemsCsv,
   exportOperationLogsCsv,
+  exportRolesCsv,
   fetchPlatform,
   fetchSystemModules,
   fetchTenants,
@@ -454,6 +455,39 @@ describe("platform api operation log exports", () => {
         {
           url: "http://localhost:3000/system/operation-logs/export?category=auth&authEventType=login&authFailureReason=invalid_password&result=failure",
           authorization: "Bearer operation-log-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api role exports", () => {
+  test("exports roles with bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("role-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,code\nrole_admin_1,admin\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(exportRolesCsv()).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/roles/export",
+          authorization: "Bearer role-token",
         },
       ])
     } finally {

@@ -454,6 +454,55 @@ describe("createServerApp system access", () => {
     })
   })
 
+  it("exports system roles as csv when the access token has role-list permission", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:role:list"],
+      isSuperAdmin: false,
+    })
+    const roleRepository = createInMemoryRoleRepository({
+      roles: createRoleSeedRecords(),
+      availablePermissionCodes: [
+        "system:user:list",
+        "system:role:list",
+        "system:role:create",
+        "system:role:update",
+        "customer:customer:list",
+      ],
+      availableUserIds: ["user_admin_1", "user_ops_1"],
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createRoleModule(roleRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const response = await app.handle(
+      new Request("http://localhost/system/roles/export", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("text/csv")
+
+    const text = await response.text()
+    expect(text).toContain(
+      "id,code,name,description,status,isSystem,dataScope,createdAt,updatedAt",
+    )
+    expect(text).toContain(
+      "role_admin_1,admin,Admin,System administrator,active,true,1,2026-04-21T00:00:00.000Z,2026-04-21T00:00:00.000Z",
+    )
+    expect(text).toContain(
+      "role_operator_1,operator,Operator,Operator role,active,false,1,2026-04-20T00:00:00.000Z,2026-04-20T00:00:00.000Z",
+    )
+  })
+
   it("creates and updates a role with permission and user assignments", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [

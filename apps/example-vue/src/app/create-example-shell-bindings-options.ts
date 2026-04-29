@@ -7,6 +7,7 @@ export const createExampleShellBindingsOptions = (
   const roleWorkspaceOptions = {
     isRoleWorkspace: input.roleWorkspace.isRoleWorkspace,
     roleLoading: input.roleWorkspace.workspace.roleLoading,
+    roleExportLoading: input.roleWorkspace.roleExportLoading,
     canCreateRoles: input.roleWorkspace.canCreateRoles,
     canViewRoles: input.roleWorkspace.canViewRoles,
     roleModuleReady: input.roleWorkspace.roleModuleReady,
@@ -32,6 +33,7 @@ export const createExampleShellBindingsOptions = (
     handleRoleRowClick: input.roleWorkspace.workspace.handleRowClick,
     openRoleCreatePanel: input.roleWorkspace.workspace.openCreatePanel,
     reloadRoles: input.roleWorkspace.workspace.reloadRoles,
+    handleExportRoles: input.roleWorkspace.handleExportRoles,
     startRoleEdit: input.roleWorkspace.workspace.startEdit,
     submitRoleForm: input.roleWorkspace.workspace.submitForm,
     cancelRolePanel: input.roleWorkspace.workspace.cancelPanel,

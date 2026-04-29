@@ -64,6 +64,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.action.newDepartment": "新建部门",
   "app.action.newMenu": "新建菜单",
   "app.action.newRole": "新建角色",
+  "app.action.exportRoles": "导出角色",
   "app.action.newSetting": "新建配置",
   "app.action.exportSettings": "导出配置",
   "app.action.newTenant": "新建租户",
