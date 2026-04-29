@@ -33,10 +33,12 @@ export {
   deleteFile,
   deleteFiles,
   downloadFileBlob,
+  exportFilesCsv,
   fetchFileById,
   fetchFiles,
   uploadFile,
 } from "./platform-api/files"
+export type { FileListQuery } from "./platform-api/files"
 export {
   createMenu,
   exportMenusCsv,

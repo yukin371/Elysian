@@ -6,10 +6,11 @@
 
 ## Owns
 
-- `/system/files` 的列表、详情、上传、下载、删除，以及显式 ID 列表批量删除。
+- `/system/files` 的列表、详情、元数据导出、上传、下载、删除，以及显式 ID 列表批量删除。
 - 上传时的 multipart `file` 校验。
 - 二进制存储适配器 `FileStorage` 的 server runtime owner。
 - 元数据与文件内容的双阶段处理：先存内容，再写元数据；删除时先删内容，再删元数据。
+- 文件元数据筛选字段 `originalName / mimeType / uploaderUserId` 的列表与导出一致性。
 
 ## Must Not Own
 
@@ -27,6 +28,7 @@
 
 ```mermaid
 flowchart LR
+  A0[GET /system/files/export] --> C0[service.exportCsv\nmetadata only]
   A[POST /system/files] --> B[module.ts\nmultipart check]
   B --> C[service.upload]
   C --> D[FileStorage.save]
@@ -45,6 +47,7 @@ flowchart TD
 ## Validation
 
 - `module.ts` 已确认上传接口从 `formData.get("file")` 取文件，缺失时返回 `FILE_UPLOAD_REQUIRED`。
+- `service.ts` 已确认导出只读取文件元数据并生成 CSV，不读取二进制内容，不接管对象存储或生命周期治理。
 - `service.ts` 已确认下载和删除都基于 `getStoredById`，先做 metadata + dataAccess 判定，再触达存储层。
 - `POST /system/files/delete` 只接受显式 `ids`，按当前身份 dataAccess 删除可见文件，并返回实际删除的文件元数据；不会扩展为通用批处理平台。
 - `storage.ts` 已确认默认落点是 `process.cwd()/.elysian/uploads`，内容缺失会返回 `FILE_CONTENT_NOT_FOUND`。

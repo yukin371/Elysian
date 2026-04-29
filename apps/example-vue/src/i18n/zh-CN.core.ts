@@ -75,6 +75,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.action.newUser": "新建用户",
   "app.action.exportUsers": "导出用户",
   "app.action.deleteVisibleFiles": "删除当前筛选文件（{count}）",
+  "app.action.exportFiles": "导出文件",
   "app.action.refresh": "刷新",
   "app.action.signOut": "退出登录",
   "app.workspace.eyebrow": "标准列表页",

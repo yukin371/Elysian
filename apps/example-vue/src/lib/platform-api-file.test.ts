@@ -4,6 +4,7 @@ import {
   clearAccessToken,
   deleteFiles,
   downloadFileBlob,
+  exportFilesCsv,
   setAccessToken,
   uploadFile,
 } from "./platform-api"
@@ -13,6 +14,43 @@ afterEach(() => {
 })
 
 describe("platform api file requests", () => {
+  test("exports file metadata with current filters and bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("file-export-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,originalName\nfile_1,platform-guide.txt", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(
+        exportFilesCsv({
+          originalName: " platform ",
+          mimeType: " text/plain ",
+          uploaderUserId: " user_admin_1 ",
+        }),
+      ).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/files/export?originalName=platform&mimeType=text%2Fplain&uploaderUserId=user_admin_1",
+          authorization: "Bearer file-export-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
   test("uploads files with multipart form data and bearer token", async () => {
     const originalFetch = globalThis.fetch
     const fetchCalls: Array<{

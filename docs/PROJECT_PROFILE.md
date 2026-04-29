@@ -36,7 +36,7 @@
 - 服务端已落系统配置模块：`setting`，并已提供 `GET /system/settings`、`GET /system/settings/:id`、`POST /system/settings`、`PUT /system/settings/:id`。
 - 服务端已落租户管理模块：`tenant`，并已提供 `GET /system/tenants`、`GET /system/tenants/:id`、`GET /system/tenants/export`、`POST /system/tenants`、`PUT /system/tenants/:id`、`PUT /system/tenants/:id/status`。
 - 服务端已落操作日志模块：`operation-log`，并已提供 `GET /system/operation-logs`、`GET /system/operation-logs/:id`、`GET /system/operation-logs/export`。
-- 服务端已落文件管理模块：`file`，并已提供 `GET /system/files`、`GET /system/files/:id`、`POST /system/files`、`POST /system/files/delete`、`GET /system/files/:id/download`、`DELETE /system/files/:id`。
+- 服务端已落文件管理模块：`file`，并已提供 `GET /system/files`、`GET /system/files/:id`、`GET /system/files/export`、`POST /system/files`、`POST /system/files/delete`、`GET /system/files/:id/download`、`DELETE /system/files/:id`。
 - 服务端已落通知管理模块：`notification`，并已提供 `GET /system/notifications`、`GET /system/notifications/:id`、`GET /system/notifications/export`、`POST /system/notifications`、`POST /system/notifications/read`、`POST /system/notifications/:id/read`。
 - 服务端已落 `workflow` 简化运行态，当前提供 `GET /workflow/definitions`、`GET /workflow/definitions/:id`、`POST /workflow/definitions`、`PUT /workflow/definitions/:id`、`POST /workflow/instances`、`GET /workflow/instances`、`GET /workflow/instances/:id`、`GET /workflow/tasks/todo`、`GET /workflow/tasks/done`、`POST /workflow/tasks/:id/claim`、`POST /workflow/tasks/:id/complete`、`POST /workflow/instances/:id/cancel`，并已支持最小条件分支运行时、认领后唯一执行人语义，以及任务级最小认领历史保留（`claimSourceAssignee / claimedByUserId / claimedAt`）。
 - workflow 权限已从 definition owner 内拆分为 `workflow:definition:*`、`workflow:instance:*` 与 `workflow:task:*` 三组最小权限点，并已新增独立 `workflow:task:claim`；`transfer / delegate` 等更复杂任务语义仍未进入实现。

@@ -467,6 +467,53 @@ describe("createServerApp", () => {
       ],
     })
 
+    const filteredResponse = await app.handle(
+      new Request(
+        "http://localhost/system/files?originalName=platform&mimeType=text%2Fplain&uploaderUserId=user_admin_1",
+        {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    )
+
+    expect(filteredResponse.status).toBe(200)
+    expect(await filteredResponse.json()).toEqual({
+      items: [
+        {
+          id: "file_1",
+          originalName: "platform-guide.txt",
+          mimeType: "text/plain",
+          size: 20,
+          uploaderUserId: "user_admin_1",
+          createdAt: "2026-04-21T03:00:00.000Z",
+        },
+      ],
+    })
+
+    const exportResponse = await app.handle(
+      new Request(
+        "http://localhost/system/files/export?originalName=platform&mimeType=text%2Fplain&uploaderUserId=user_admin_1",
+        {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        },
+      ),
+    )
+
+    expect(exportResponse.status).toBe(200)
+    expect(exportResponse.headers.get("content-type")).toContain("text/csv")
+
+    const exportText = await exportResponse.text()
+    expect(exportText).toContain(
+      "id,originalName,mimeType,size,uploaderUserId,createdAt",
+    )
+    expect(exportText).toContain(
+      "file_1,platform-guide.txt,text/plain,20,user_admin_1,2026-04-21T03:00:00.000Z",
+    )
+
     const uploadBody = new FormData()
     uploadBody.set(
       "file",

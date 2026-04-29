@@ -20,6 +20,12 @@ const filePermissions = {
   delete: "system:file:delete",
 } as const
 
+const fileFilterSchema = t.Object({
+  originalName: t.Optional(t.String()),
+  mimeType: t.Optional(t.String()),
+  uploaderUserId: t.Optional(t.String()),
+})
+
 export const createFileModule = (
   repository: FileRepository,
   storage: FileStorage,
@@ -46,20 +52,40 @@ export const createFileModule = (
     return app
       .get(
         "/system/files",
-        async ({ request }) => {
+        async ({ query, request }) => {
           const identity = await authorize(
             request.headers,
             filePermissions.list,
           )
 
           return {
-            items: await service.list(identity?.dataAccess),
+            items: await service.list(query, identity?.dataAccess),
           }
         },
         {
+          query: fileFilterSchema,
           detail: {
             tags: ["file"],
             summary: "List files",
+          },
+        },
+      )
+      .get(
+        "/system/files/export",
+        async ({ query, request, set }) => {
+          const identity = await authorize(
+            request.headers,
+            filePermissions.list,
+          )
+
+          set.headers["content-type"] = "text/csv; charset=utf-8"
+          return service.exportCsv(query, identity?.dataAccess)
+        },
+        {
+          query: fileFilterSchema,
+          detail: {
+            tags: ["file"],
+            summary: "Export file metadata as CSV",
           },
         },
       )

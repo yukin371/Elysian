@@ -75,6 +75,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.action.newUser": "New user",
   "app.action.exportUsers": "Export users",
   "app.action.deleteVisibleFiles": "Delete filtered files ({count})",
+  "app.action.exportFiles": "Export files",
   "app.action.refresh": "Refresh",
   "app.action.signOut": "Sign out",
   "app.workspace.eyebrow": "Standard List Page",

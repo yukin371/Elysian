@@ -187,12 +187,14 @@ export interface CreateExampleShellBindingsOptionsInput {
   fileWorkspace: {
     workspace: ReturnType<typeof useFileWorkspace>
     isFileWorkspace: OptionValue<"isFileWorkspace">
+    fileExportLoading: OptionValue<"fileExportLoading">
     canViewFiles: OptionValue<"canViewFiles">
     canUploadFiles: OptionValue<"canUploadFiles">
     canDownloadFiles: OptionValue<"canDownloadFiles">
     canDeleteFiles: OptionValue<"canDeleteFiles">
     fileModuleReady: OptionValue<"fileModuleReady">
     canEnterFileWorkspace: OptionValue<"canEnterFileWorkspace">
+    handleExportFiles: OptionValue<"handleExportFiles">
   }
   workflowWorkspace: {
     workspace: ReturnType<typeof useWorkflowWorkspace>
@@ -644,6 +646,7 @@ export type TenantWorkspaceBindingsOptions = BindingSegment<
 export type FileWorkspaceBindingsOptions = BindingSegment<
   | "isFileWorkspace"
   | "fileLoading"
+  | "fileExportLoading"
   | "canViewFiles"
   | "canUploadFiles"
   | "canDownloadFiles"
@@ -670,6 +673,7 @@ export type FileWorkspaceBindingsOptions = BindingSegment<
   | "selectFile"
   | "openFileUploadPanel"
   | "reloadFiles"
+  | "handleExportFiles"
   | "deleteVisibleFiles"
   | "setPendingUploadFile"
   | "submitFileUpload"

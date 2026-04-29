@@ -10,6 +10,7 @@ import {
   resolveVisibleFileIds,
 } from "../lib/file-workspace"
 import {
+  type FileListQuery,
   type FileRecord,
   deleteFile,
   deleteFiles,
@@ -72,6 +73,24 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
   const filePanelMode = ref<FilePanelMode>("detail")
   const fileQuery = ref<FileWorkspaceQuery>({})
   const pendingUploadFile = ref<File | null>(null)
+
+  const listQuery = computed<FileListQuery>(() => {
+    const query: FileListQuery = {}
+
+    if (fileQuery.value.originalName?.trim()) {
+      query.originalName = fileQuery.value.originalName.trim()
+    }
+
+    if (fileQuery.value.mimeType?.trim()) {
+      query.mimeType = fileQuery.value.mimeType.trim()
+    }
+
+    if (fileQuery.value.uploaderUserId?.trim()) {
+      query.uploaderUserId = fileQuery.value.uploaderUserId.trim()
+    }
+
+    return query
+  })
 
   const filteredFileItems = computed(() =>
     filterFiles(fileItems.value, fileQuery.value),
@@ -232,7 +251,7 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
     fileDetailErrorMessage.value = ""
 
     try {
-      const payload = await fetchFiles()
+      const payload = await fetchFiles(listQuery.value)
       fileItems.value = payload.items
 
       const nextFileId = resolveFileSelection(
@@ -525,6 +544,7 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
     filterSummary,
     filteredFileItems,
     hasActiveFilters,
+    listQuery,
     openDeletePanel,
     openUploadPanel,
     panelDescription,

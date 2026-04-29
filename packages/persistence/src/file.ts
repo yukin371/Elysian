@@ -1,4 +1,4 @@
-import { type SQL, and, asc, desc, eq } from "drizzle-orm"
+import { type SQL, and, asc, desc, eq, ilike } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type FileRow, files } from "./schema"
@@ -16,23 +16,42 @@ export interface CreateFilePersistenceInput {
 }
 
 export interface FilePersistenceQueryOptions {
+  originalName?: string
+  mimeType?: string
+  uploaderUserId?: string
   accessCondition?: SQL<unknown>
 }
 
 export const listFiles = async (
   db: DatabaseClient,
   options: FilePersistenceQueryOptions = {},
-): Promise<FileRow[]> =>
-  options.accessCondition
-    ? db
-        .select()
-        .from(files)
-        .where(options.accessCondition)
-        .orderBy(desc(files.createdAt), asc(files.originalName))
-    : db
-        .select()
-        .from(files)
-        .orderBy(desc(files.createdAt), asc(files.originalName))
+): Promise<FileRow[]> => {
+  const conditions = [
+    options.originalName?.trim()
+      ? ilike(files.originalName, `%${options.originalName.trim()}%`)
+      : undefined,
+    options.mimeType?.trim()
+      ? ilike(files.mimeType, `%${options.mimeType.trim()}%`)
+      : undefined,
+    options.uploaderUserId?.trim()
+      ? ilike(files.uploaderUserId, `%${options.uploaderUserId.trim()}%`)
+      : undefined,
+    options.accessCondition,
+  ].filter(Boolean)
+
+  if (conditions.length === 0) {
+    return db
+      .select()
+      .from(files)
+      .orderBy(desc(files.createdAt), asc(files.originalName))
+  }
+
+  return db
+    .select()
+    .from(files)
+    .where(and(...conditions))
+    .orderBy(desc(files.createdAt), asc(files.originalName))
+}
 
 export const getFileById = async (
   db: DatabaseClient,

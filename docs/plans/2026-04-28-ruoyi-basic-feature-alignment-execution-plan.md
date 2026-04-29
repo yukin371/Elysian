@@ -247,6 +247,7 @@
 - `settings`
 - `tenants`
 - `notifications`
+- `files`
 
 默认顺序：
 
@@ -270,8 +271,8 @@
 
 本轮收口结果：
 
-- 已补 `users / roles / menus / departments / posts / dictionary types / dictionary items / settings / tenants / notifications` 导出接口与 server 测试。
-- `apps/example-vue` 已在 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / operation-logs` 工作区壳层补齐导出入口、loading 与错误回流；字典工作区已同时覆盖类型与条目导出，通知与操作日志导出复用当前筛选条件。
+- 已补 `users / roles / menus / departments / posts / dictionary types / dictionary items / settings / tenants / notifications / files` 导出接口与 server 测试。
+- `apps/example-vue` 已在 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / files / operation-logs` 工作区壳层补齐导出入口、loading 与错误回流；字典工作区已同时覆盖类型与条目导出，通知、文件与操作日志导出复用当前筛选条件。
 - 当前仍只完成“先导出”，导入链路继续保持待评估状态。
 
 ## 实施顺序

@@ -101,6 +101,7 @@ export interface UseExampleShellBindingsOptions {
   canViewTenants: ValueSource<boolean>
   isFileWorkspace: ComputedRef<boolean>
   fileLoading: ValueSource<boolean>
+  fileExportLoading: ValueSource<boolean>
   canViewFiles: ValueSource<boolean>
   canUploadFiles: ValueSource<boolean>
   canDownloadFiles: ValueSource<boolean>
@@ -448,6 +449,7 @@ export interface UseExampleShellBindingsOptions {
   reloadTenants: () => void
   handleExportTenants: () => void
   reloadFiles: () => void
+  handleExportFiles: () => void
   deleteVisibleFiles: () => void
   reloadWorkflowDefinitions: () => void
   openCurrentWorkspaceTab: () => void

@@ -13,10 +13,55 @@ export interface FilesResponse {
   items: FileRecord[]
 }
 
-export const fetchFiles = async (): Promise<FilesResponse> =>
-  requestJson<FilesResponse>("/system/files", {
-    auth: true,
-  })
+export interface FileListQuery {
+  originalName?: string
+  mimeType?: string
+  uploaderUserId?: string
+}
+
+const buildFileSearch = (query: FileListQuery = {}) => {
+  const search = new URLSearchParams()
+
+  if (query.originalName?.trim()) {
+    search.set("originalName", query.originalName.trim())
+  }
+
+  if (query.mimeType?.trim()) {
+    search.set("mimeType", query.mimeType.trim())
+  }
+
+  if (query.uploaderUserId?.trim()) {
+    search.set("uploaderUserId", query.uploaderUserId.trim())
+  }
+
+  return search
+}
+
+export const fetchFiles = async (
+  query: FileListQuery = {},
+): Promise<FilesResponse> => {
+  const search = buildFileSearch(query)
+
+  return requestJson<FilesResponse>(
+    `/system/files${search.size > 0 ? `?${search.toString()}` : ""}`,
+    {
+      auth: true,
+    },
+  )
+}
+
+export const exportFilesCsv = async (
+  query: FileListQuery = {},
+): Promise<Blob> => {
+  const search = buildFileSearch(query)
+
+  return requestBlob(
+    `/system/files/export${search.size > 0 ? `?${search.toString()}` : ""}`,
+    {
+      auth: true,
+    },
+  )
+}
 
 export const fetchFileById = async (id: string): Promise<FileRecord> =>
   requestJson<FileRecord>(`/system/files/${encodeURIComponent(id)}`, {

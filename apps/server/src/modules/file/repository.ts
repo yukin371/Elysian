@@ -12,6 +12,12 @@ import {
 } from "@elysian/persistence"
 import type { FileRecord } from "@elysian/schema"
 
+export interface ListFilesInput {
+  originalName?: string
+  mimeType?: string
+  uploaderUserId?: string
+}
+
 export interface CreateFileInput {
   originalName: string
   storageKey: string
@@ -27,7 +33,10 @@ export interface StoredFileRecord extends FileRecord {
 }
 
 export interface FileRepository {
-  list: (dataAccess?: DataAccessContext) => Promise<FileRecord[]>
+  list: (
+    filter?: ListFilesInput,
+    dataAccess?: DataAccessContext,
+  ) => Promise<FileRecord[]>
   getById: (
     id: string,
     dataAccess?: DataAccessContext,
@@ -44,8 +53,9 @@ export interface FileRepository {
 }
 
 export const createFileRepository = (db: DatabaseClient): FileRepository => ({
-  async list(dataAccess) {
+  async list(filter, dataAccess) {
     const rows = await listFiles(db, {
+      ...(filter ?? {}),
       accessCondition: dataAccess
         ? buildDataAccessCondition(dataAccess, {
             deptColumn: files.deptId,
@@ -108,7 +118,9 @@ export const createInMemoryFileRepository = (
   const items = new Map(seed.map((item) => [item.id, item]))
 
   return {
-    async list(dataAccess) {
+    async list(filter, dataAccess) {
+      const normalizedFilter = filter ?? {}
+
       return [...items.values()]
         .filter((item) =>
           dataAccess
@@ -116,6 +128,27 @@ export const createInMemoryFileRepository = (
                 deptId: item.deptId,
                 creatorId: item.uploaderUserId,
               })
+            : true,
+        )
+        .filter((item) =>
+          normalizedFilter.originalName?.trim()
+            ? item.originalName
+                .toLowerCase()
+                .includes(normalizedFilter.originalName.trim().toLowerCase())
+            : true,
+        )
+        .filter((item) =>
+          normalizedFilter.mimeType?.trim()
+            ? (item.mimeType ?? "")
+                .toLowerCase()
+                .includes(normalizedFilter.mimeType.trim().toLowerCase())
+            : true,
+        )
+        .filter((item) =>
+          normalizedFilter.uploaderUserId?.trim()
+            ? (item.uploaderUserId ?? "")
+                .toLowerCase()
+                .includes(normalizedFilter.uploaderUserId.trim().toLowerCase())
             : true,
         )
         .sort(compareFiles)

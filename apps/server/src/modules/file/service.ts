@@ -1,7 +1,11 @@
 import type { DataAccessContext } from "@elysian/persistence"
 import type { FileRecord } from "@elysian/schema"
 import { AppError } from "../../errors"
-import type { FileRepository, StoredFileRecord } from "./repository"
+import type {
+  FileRepository,
+  ListFilesInput,
+  StoredFileRecord,
+} from "./repository"
 import type { FileStorage } from "./storage"
 
 export interface UploadFilePayload {
@@ -14,7 +18,23 @@ export const createFileService = (
   repository: FileRepository,
   storage: FileStorage,
 ) => ({
-  list: (dataAccess?: DataAccessContext) => repository.list(dataAccess),
+  list: (filter?: ListFilesInput, dataAccess?: DataAccessContext) =>
+    repository.list(filter, dataAccess),
+  async exportCsv(filter?: ListFilesInput, dataAccess?: DataAccessContext) {
+    const items = await repository.list(filter, dataAccess)
+
+    return buildCsv(
+      ["id", "originalName", "mimeType", "size", "uploaderUserId", "createdAt"],
+      items.map((item) => [
+        item.id,
+        item.originalName,
+        item.mimeType,
+        item.size,
+        item.uploaderUserId,
+        item.createdAt,
+      ]),
+    )
+  },
   async getById(id: string, dataAccess?: DataAccessContext) {
     const file = await repository.getById(id, dataAccess)
 
@@ -112,5 +132,28 @@ const mapPublicStoredFile = (file: StoredFileRecord): FileRecord => ({
   uploaderUserId: file.uploaderUserId,
   createdAt: file.createdAt,
 })
+
+const buildCsv = (
+  header: string[],
+  rows: Array<Array<string | number | null | undefined>>,
+) =>
+  [header.join(","), ...rows.map((row) => row.map(escapeCsv).join(","))].join(
+    "\n",
+  )
+
+const escapeCsv = (value: string | number | null | undefined) => {
+  const normalized = value === null || value === undefined ? "" : String(value)
+
+  if (
+    normalized.includes(",") ||
+    normalized.includes('"') ||
+    normalized.includes("\n") ||
+    normalized.includes("\r")
+  ) {
+    return `"${normalized.replaceAll('"', '""')}"`
+  }
+
+  return normalized
+}
 
 export type FileService = ReturnType<typeof createFileService>

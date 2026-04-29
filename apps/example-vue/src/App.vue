@@ -51,6 +51,7 @@ import {
   exportDepartmentsCsv,
   exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
+  exportFilesCsv,
   exportMenusCsv,
   exportNotificationsCsv,
   exportOperationLogsCsv,
@@ -158,6 +159,7 @@ const workflowModuleReady = ref(false)
 const departmentExportLoading = ref(false)
 const dictionaryTypeExportLoading = ref(false)
 const dictionaryItemsExportLoading = ref(false)
+const fileExportLoading = ref(false)
 const menuExportLoading = ref(false)
 const notificationExportLoading = ref(false)
 const operationLogExportLoading = ref(false)
@@ -446,6 +448,7 @@ const {
   fileQuery,
   filterSummary: fileFilterSummary,
   filteredFileItems,
+  listQuery: fileListQuery,
   openDeletePanel: openFileDeletePanel,
   openUploadPanel: openFileUploadPanel,
   pendingUploadFile,
@@ -1579,6 +1582,29 @@ const handleExportOperationLogs = async () => {
   }
 }
 
+const handleExportFiles = async () => {
+  if (!canViewFiles.value || fileExportLoading.value) {
+    return
+  }
+
+  fileExportLoading.value = true
+  fileErrorMessage.value = ""
+
+  try {
+    const blob = await exportFilesCsv(fileListQuery.value)
+    downloadBrowserBlob(blob, createCsvExportFilename("system-files"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    fileErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.exportFiles")
+  } finally {
+    fileExportLoading.value = false
+  }
+}
+
 const handleShellMenuSelect = (menuKey: string) => {
   const nextMenuKey = resolveWorkspaceMenuKey(
     enterpriseNavigation.value,
@@ -1771,12 +1797,14 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   fileWorkspace: {
     workspace: fileWorkspace,
     isFileWorkspace,
+    fileExportLoading,
     canViewFiles,
     canUploadFiles,
     canDownloadFiles,
     canDeleteFiles,
     fileModuleReady,
     canEnterFileWorkspace,
+    handleExportFiles,
   },
   workflowWorkspace: {
     workspace: workflowWorkspace,

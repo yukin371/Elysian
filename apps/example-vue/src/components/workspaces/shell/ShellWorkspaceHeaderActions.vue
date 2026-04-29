@@ -67,6 +67,7 @@ defineProps<{
   canViewTenants: boolean
   isFileWorkspace: boolean
   fileLoading: boolean
+  fileExportLoading: boolean
   canViewFiles: boolean
   canUploadFiles: boolean
   canDeleteFiles: boolean
@@ -113,6 +114,7 @@ defineEmits<{
   (event: "reload-tenants"): void
   (event: "export-tenants"): void
   (event: "reload-files"): void
+  (event: "export-files"): void
   (event: "delete-visible-files"): void
   (event: "reload-workflow-definitions"): void
   (event: "open-current-workspace-tab"): void
@@ -469,6 +471,17 @@ defineEmits<{
       @click="$emit('reload-users')"
     >
       {{ t("app.action.refresh") }}
+    </TButton>
+    <TButton
+      v-if="isFileWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="fileExportLoading"
+      :disabled="fileExportLoading || !canViewFiles"
+      @click="$emit('export-files')"
+    >
+      {{ t("app.action.exportFiles") }}
     </TButton>
     <TButton
       v-if="isFileWorkspace"

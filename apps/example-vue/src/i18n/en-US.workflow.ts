@@ -287,6 +287,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.downloadFile": "Failed to download file",
   "app.error.deleteFile": "Failed to delete file",
   "app.error.deleteFiles": "Failed to delete filtered files",
+  "app.error.exportFiles": "Failed to export files",
   "app.error.fileRequired": "Choose a file before uploading",
   "app.error.loadPosts": "Failed to load posts",
   "app.error.loadPostDetail": "Failed to load post detail",

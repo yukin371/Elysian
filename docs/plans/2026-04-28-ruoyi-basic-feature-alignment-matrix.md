@@ -49,12 +49,12 @@
 | 字典 / 参数配置 | 平台支撑基础能力 | 🟡 部分完成 | 后端已闭环，前端已有字典与设置工作区，并已补第一轮导出入口 | `apps/server` + `apps/example-vue` | 仍缺导入、批量治理与更完整的后台日常交互 |
 | 操作日志 / 登录日志 | 安全与运维基础视图 | 🟡 部分完成 | 操作日志列表/详情/导出已落地；登录相关事件已在现有 operation-log 工作区内通过 `authEventType / authFailureReason` 显式化，并补了前端本地失败原因文案映射；前端已接上当前筛选导出入口 | `apps/server` + `apps/example-vue` + `packages/persistence` | 仍缺更高阶统计视图与更接近日常后台的筛选体验 |
 | 通知 / 公告 | 基础消息触达 | 🟡 部分完成 | 站内通知已支持列表、详情、当前筛选导出、创建、单条已读与当前筛选批量已读 | `apps/server` + `apps/example-vue` | 仍未对齐“公告/通知”常见后台形态，多通道也未进入当前优先级 |
-| 文件 / 附件 | 基础上传下载 | 🟡 部分完成 | 文件上传、下载、删除、当前筛选结果批量删除与元数据已落地 | `apps/server` + `apps/example-vue` | 还缺预览、生命周期治理与更完整的后台文件管理体验 |
+| 文件 / 附件 | 基础上传下载 | 🟡 部分完成 | 文件上传、下载、删除、当前筛选结果批量删除与元数据导出已落地 | `apps/server` + `apps/example-vue` | 还缺预览、生命周期治理与更完整的后台文件管理体验 |
 | 租户 / 数据权限 | 超出若依基础但已具备 | ✅ 已完成 | 多租户、RLS、数据权限、tenant 管理与租户导出已闭环 | `apps/server` + `apps/example-vue` + `packages/persistence` | 当前不作为阻断项，保持稳定即可 |
 | 在线用户 / 会话治理 | 当前在线会话查看、强制下线 | ✅ 已完成 | 当前用户 refresh session 列表、状态区分与单会话强制下线已在前后端形成最小闭环 | `apps/server` + `apps/example-vue` + `packages/persistence` | 若继续扩写，重点会转向跨端设备治理与批量操作，而非当前阻断项 |
 | 登录安全策略 | 登录失败计数、锁定窗口、解锁策略 | ✅ 已完成 | 已补登录失败计数、锁定窗口、自动到期解锁与成功登录清零，并有审计与回归测试覆盖 | `apps/server` + `packages/persistence` | 当前仅保留最小策略；MFA、设备指纹与更重风控仍不在本轮 |
 | 岗位管理（post）/职位语义 | 用户-部门之外的基础组织能力 | ✅ 已完成 | `post` 模块、权限点与前端工作区已形成最小闭环，并已统一“岗位管理（post）”口径 | `apps/server` + `apps/example-vue` + `packages/persistence` | 后续若扩写，重点会转向更深的用户-岗位治理，而非基础缺位 |
-| 导入导出 | 用户、角色、菜单、部门、岗位、字典、配置、租户、通知等高频模块的常用能力 | 🟡 部分完成 | 操作日志与通知当前筛选导出、用户、角色、菜单、部门、岗位、字典类型/条目、系统配置、租户导出与前端导出入口已落地 | `apps/server` + `apps/example-vue` | 仍缺导入链路、模板/校验/错误报告，以及批量治理体验 |
+| 导入导出 | 用户、角色、菜单、部门、岗位、字典、配置、租户、通知、文件等高频模块的常用能力 | 🟡 部分完成 | 操作日志、通知与文件元数据当前筛选导出，用户、角色、菜单、部门、岗位、字典类型/条目、系统配置、租户导出与前端导出入口已落地 | `apps/server` + `apps/example-vue` | 仍缺导入链路、模板/校验/错误报告，以及批量治理体验 |
 | 后台前端壳层 | 可切换、可工作的多模块后台 | 🟡 部分完成 | `ElyShell`、动态菜单与多工作区装配已存在 | `packages/ui-enterprise-vue` + `apps/example-vue` | 仍需继续收口页面切换、动作一致性与“不是演示页而是真实后台”的体验 |
 | workflow 扩展 | transfer / delegate / 更通用 BPM | ⛔ 当前不优先 | `P7A Round-2` 最小闭环已完成 | `apps/server` + `packages/persistence` | 当前不继续外扩 |
 | generator / SQL Studio 化 | 更完整的平台产品体验 | ⛔ 当前不优先 | 相关能力已有子矩阵与最小运行态 | `packages/generator` + `apps/server` | 当前降为次级轨道 |
@@ -64,8 +64,8 @@
 ### 第一优先级
 
 1. 继续收口已有系统模块工作区，优先保证 `users / roles / menus / departments / dictionaries / settings / operation-logs / notifications / tenants` 在真实路由切换、动作一致性与失败态上更像完整后台。
-2. 继续提升操作日志、通知、文件与租户等工作区的日常可用性；通知当前筛选批量已读与文件当前筛选批量删除已形成小闭环，后续优先补状态反馈与后台常用交互细节。
-3. 在既有导出闭环稳定后，再评估 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications` 的导入链路是否值得进入当前主线。
+2. 继续提升操作日志、通知、文件与租户等工作区的日常可用性；通知当前筛选批量已读、文件当前筛选导出与批量删除已形成小闭环，后续优先补状态反馈与后台常用交互细节。
+3. 在既有导出闭环稳定后，再评估 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / files` 的导入链路是否值得进入当前主线。
 
 ### 第二优先级
 

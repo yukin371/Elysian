@@ -534,6 +534,7 @@ export const createExampleShellBindingsOptions = (
   const fileWorkspaceOptions = {
     isFileWorkspace: input.fileWorkspace.isFileWorkspace,
     fileLoading: input.fileWorkspace.workspace.fileLoading,
+    fileExportLoading: input.fileWorkspace.fileExportLoading,
     canViewFiles: input.fileWorkspace.canViewFiles,
     canUploadFiles: input.fileWorkspace.canUploadFiles,
     canDownloadFiles: input.fileWorkspace.canDownloadFiles,
@@ -561,6 +562,7 @@ export const createExampleShellBindingsOptions = (
     selectFile: input.fileWorkspace.workspace.selectFile,
     openFileUploadPanel: input.fileWorkspace.workspace.openUploadPanel,
     reloadFiles: input.fileWorkspace.workspace.reloadFiles,
+    handleExportFiles: input.fileWorkspace.handleExportFiles,
     deleteVisibleFiles: input.fileWorkspace.workspace.deleteVisibleFiles,
     setPendingUploadFile: input.fileWorkspace.workspace.setPendingUploadFile,
     submitFileUpload: input.fileWorkspace.workspace.submitUpload,
