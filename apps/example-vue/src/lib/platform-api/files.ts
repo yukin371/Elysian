@@ -45,3 +45,10 @@ export const deleteFile = async (id: string): Promise<void> =>
     method: "DELETE",
     auth: true,
   })
+
+export const deleteFiles = async (ids: string[]): Promise<FilesResponse> =>
+  requestJson<FilesResponse>("/system/files/delete", {
+    method: "POST",
+    body: { ids },
+    auth: true,
+  })

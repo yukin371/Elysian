@@ -1,6 +1,7 @@
 import type { DataAccessContext } from "@elysian/persistence"
+import type { FileRecord } from "@elysian/schema"
 import { AppError } from "../../errors"
-import type { FileRepository } from "./repository"
+import type { FileRepository, StoredFileRecord } from "./repository"
 import type { FileStorage } from "./storage"
 
 export interface UploadFilePayload {
@@ -67,6 +68,27 @@ export const createFileService = (
     await storage.remove(file.storageKey)
     await repository.delete(id, dataAccess)
   },
+  async removeMany(ids: string[], dataAccess?: DataAccessContext) {
+    const normalizedIds = normalizeFileIds(ids)
+    const deletedFiles: FileRecord[] = []
+
+    for (const id of normalizedIds) {
+      const file = await repository.getStoredById(id, dataAccess)
+
+      if (!file) {
+        continue
+      }
+
+      await storage.remove(file.storageKey)
+      const deleted = await repository.delete(id, dataAccess)
+
+      if (deleted) {
+        deletedFiles.push(mapPublicStoredFile(deleted))
+      }
+    }
+
+    return deletedFiles
+  },
 })
 
 const buildFileNotFoundError = (id: string) =>
@@ -77,5 +99,18 @@ const buildFileNotFoundError = (id: string) =>
     expose: true,
     details: { id },
   })
+
+const normalizeFileIds = (ids: string[]) => [
+  ...new Set(ids.map((id) => id.trim()).filter(Boolean)),
+]
+
+const mapPublicStoredFile = (file: StoredFileRecord): FileRecord => ({
+  id: file.id,
+  originalName: file.originalName,
+  mimeType: file.mimeType,
+  size: file.size,
+  uploaderUserId: file.uploaderUserId,
+  createdAt: file.createdAt,
+})
 
 export type FileService = ReturnType<typeof createFileService>

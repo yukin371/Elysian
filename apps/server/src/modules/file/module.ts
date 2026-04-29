@@ -113,6 +113,28 @@ export const createFileModule = (
           },
         },
       )
+      .post(
+        "/system/files/delete",
+        async ({ body, request }) => {
+          const identity = await authorize(
+            request.headers,
+            filePermissions.delete,
+          )
+
+          return {
+            items: await service.removeMany(body.ids, identity?.dataAccess),
+          }
+        },
+        {
+          body: t.Object({
+            ids: t.Array(t.String()),
+          }),
+          detail: {
+            tags: ["file"],
+            summary: "Delete files by id list",
+          },
+        },
+      )
       .get(
         "/system/files/:id/download",
         async ({ params, request, set }) => {

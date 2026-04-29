@@ -116,6 +116,8 @@ export interface UseExampleShellBindingsOptions {
   fileFilterSummary: ValueSource<string>
   fileCountLabel: ValueSource<string>
   fileTableItems: ValueSource<unknown[]>
+  hasActiveFileFilters: ValueSource<boolean>
+  visibleFileCount: ValueSource<number>
   selectedFileId: ValueSource<string | null>
   generatorPreviewLoading: ValueSource<boolean>
   generatorPreviewApplyLoading: ValueSource<boolean>
@@ -431,6 +433,7 @@ export interface UseExampleShellBindingsOptions {
   openTenantCreatePanel: () => void
   reloadTenants: () => void
   reloadFiles: () => void
+  deleteVisibleFiles: () => void
   reloadWorkflowDefinitions: () => void
   openCurrentWorkspaceTab: () => void
   submitLogout: () => void

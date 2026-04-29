@@ -30,6 +30,7 @@ export {
 } from "./platform-api/dictionaries"
 export {
   deleteFile,
+  deleteFiles,
   downloadFileBlob,
   fetchFileById,
   fetchFiles,

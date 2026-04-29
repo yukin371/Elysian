@@ -5,11 +5,14 @@ import {
   createFileTableItems,
   filterFiles,
   formatFileSize,
+  hasActiveFileQuery,
   resolveFileSelection,
+  resolveVisibleFileIds,
 } from "../lib/file-workspace"
 import {
   type FileRecord,
   deleteFile,
+  deleteFiles,
   downloadFileBlob,
   fetchFileById,
   fetchFiles,
@@ -73,6 +76,11 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
   const filteredFileItems = computed(() =>
     filterFiles(fileItems.value, fileQuery.value),
   )
+  const hasActiveFilters = computed(() => hasActiveFileQuery(fileQuery.value))
+  const visibleFileIds = computed(() =>
+    resolveVisibleFileIds(filteredFileItems.value),
+  )
+  const visibleFileCount = computed(() => visibleFileIds.value.length)
 
   const selectedFileListItem = computed(
     () =>
@@ -427,6 +435,37 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
     }
   }
 
+  const deleteVisibleFiles = async () => {
+    if (
+      !options.canDelete.value ||
+      !options.canView.value ||
+      !hasActiveFilters.value ||
+      visibleFileIds.value.length === 0 ||
+      fileActionLoading.value
+    ) {
+      return
+    }
+
+    fileActionLoading.value = true
+    fileErrorMessage.value = ""
+
+    try {
+      await deleteFiles(visibleFileIds.value)
+      selectedFileId.value = null
+      fileDetail.value = null
+      filePanelMode.value = "detail"
+      await reloadFiles()
+    } catch (error) {
+      options.onRecoverableAuthError(error)
+      fileErrorMessage.value =
+        error instanceof Error
+          ? error.message
+          : options.t("app.error.deleteFiles")
+    } finally {
+      fileActionLoading.value = false
+    }
+  }
+
   watch(
     filteredFileItems,
     async (items) => {
@@ -472,6 +511,7 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
     clearWorkspace,
     confirmDelete,
     countLabel,
+    deleteVisibleFiles,
     downloadSelectedFile,
     fileActionLoading,
     fileDetail,
@@ -484,6 +524,7 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
     fileQuery,
     filterSummary,
     filteredFileItems,
+    hasActiveFilters,
     openDeletePanel,
     openUploadPanel,
     panelDescription,
@@ -498,5 +539,7 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
     submitUpload,
     tableItems,
     updateQuery,
+    visibleFileCount,
+    visibleFileIds,
   }
 }

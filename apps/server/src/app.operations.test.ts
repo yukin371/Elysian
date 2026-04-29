@@ -587,6 +587,88 @@ describe("createServerApp", () => {
     })
   })
 
+  it("bulk deletes files and leaves unrelated files intact", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: [
+        "system:file:list",
+        "system:file:download",
+        "system:file:delete",
+      ],
+      isSuperAdmin: false,
+    })
+    const fileRepository = createInMemoryFileRepository([
+      ...createFileSeedRecords(),
+      {
+        id: "file_2",
+        originalName: "release-note.txt",
+        storageKey: "file_storage_2",
+        mimeType: "text/plain",
+        size: 18,
+        uploaderUserId: "user_admin_1",
+        createdAt: "2026-04-21T04:00:00.000Z",
+      },
+    ])
+    const fileStorage = createInMemoryFileStorage({
+      file_storage_1: new TextEncoder().encode("platform guide bytes"),
+      file_storage_2: new TextEncoder().encode("release note bytes"),
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createFileModule(fileRepository, fileStorage, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const deleteResponse = await app.handle(
+      new Request("http://localhost/system/files/delete", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          ids: ["file_1", "file_missing", "file_1"],
+        }),
+      }),
+    )
+
+    expect(deleteResponse.status).toBe(200)
+    expect(await deleteResponse.json()).toEqual({
+      items: [
+        {
+          id: "file_1",
+          originalName: "platform-guide.txt",
+          mimeType: "text/plain",
+          size: 20,
+          uploaderUserId: "user_admin_1",
+          createdAt: "2026-04-21T03:00:00.000Z",
+        },
+      ],
+    })
+
+    const deletedDownloadResponse = await app.handle(
+      new Request("http://localhost/system/files/file_1/download", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+    expect(deletedDownloadResponse.status).toBe(404)
+
+    const keptDownloadResponse = await app.handle(
+      new Request("http://localhost/system/files/file_2/download", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+    expect(keptDownloadResponse.status).toBe(200)
+    expect(await keptDownloadResponse.text()).toBe("release note bytes")
+  })
+
   it("filters files by self-only data access", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:file:list"],

@@ -267,6 +267,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.uploadFile": "文件上传失败",
   "app.error.downloadFile": "文件下载失败",
   "app.error.deleteFile": "文件删除失败",
+  "app.error.deleteFiles": "当前筛选文件批量删除失败",
   "app.error.fileRequired": "请先选择一个要上传的文件",
   "app.error.loadPosts": "岗位列表加载失败",
   "app.error.loadPostDetail": "岗位详情加载失败",

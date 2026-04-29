@@ -6,7 +6,9 @@ import {
   createFileTableItems,
   filterFiles,
   formatFileSize,
+  hasActiveFileQuery,
   resolveFileSelection,
+  resolveVisibleFileIds,
 } from "./file-workspace"
 
 const createFileRecord = (
@@ -63,6 +65,23 @@ describe("file workspace helpers", () => {
 
   test("returns null when the file list is empty", () => {
     expect(resolveFileSelection([], null)).toBeNull()
+  })
+
+  test("detects active filters before batch delete actions", () => {
+    expect(hasActiveFileQuery({})).toBe(false)
+    expect(hasActiveFileQuery({ originalName: "  " })).toBe(false)
+    expect(hasActiveFileQuery({ mimeType: " pdf " })).toBe(true)
+  })
+
+  test("resolves unique visible file ids for batch delete actions", () => {
+    expect(
+      resolveVisibleFileIds([
+        { id: " file_alpha " },
+        { id: "file_alpha" },
+        { id: "" },
+        { id: "file_beta" },
+      ]),
+    ).toEqual(["file_alpha", "file_beta"])
   })
 
   test("formats file sizes across common thresholds", () => {

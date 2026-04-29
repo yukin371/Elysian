@@ -63,6 +63,17 @@ export const resolveFileSelection = (
   return files[0]?.id ?? null
 }
 
+export const hasActiveFileQuery = (query: FileWorkspaceQuery) =>
+  Boolean(
+    query.originalName?.trim() ||
+      query.mimeType?.trim() ||
+      query.uploaderUserId?.trim(),
+  )
+
+export const resolveVisibleFileIds = (files: Array<Pick<FileRecord, "id">>) => [
+  ...new Set(files.map((file) => file.id.trim()).filter(Boolean)),
+]
+
 export const formatFileSize = (size: number) => {
   if (size < 1024) {
     return `${size} B`

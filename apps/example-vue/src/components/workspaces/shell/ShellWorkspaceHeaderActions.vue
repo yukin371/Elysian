@@ -57,6 +57,10 @@ defineProps<{
   fileLoading: boolean
   canViewFiles: boolean
   canUploadFiles: boolean
+  canDeleteFiles: boolean
+  fileActionLoading: boolean
+  hasActiveFileFilters: boolean
+  visibleFileCount: number
   isWorkflowDefinitionsWorkspace: boolean
   workflowLoading: boolean
   canViewWorkflowDefinitions: boolean
@@ -88,6 +92,7 @@ defineEmits<{
   (event: "open-tenant-create"): void
   (event: "reload-tenants"): void
   (event: "reload-files"): void
+  (event: "delete-visible-files"): void
   (event: "reload-workflow-definitions"): void
   (event: "open-current-workspace-tab"): void
   (event: "submit-logout"): void
@@ -344,6 +349,24 @@ defineEmits<{
       @click="$emit('reload-users')"
     >
       {{ t("app.action.refresh") }}
+    </TButton>
+    <TButton
+      v-if="isFileWorkspace"
+      size="small"
+      theme="danger"
+      variant="outline"
+      :loading="fileActionLoading"
+      :disabled="
+        fileLoading ||
+        fileActionLoading ||
+        !canViewFiles ||
+        !canDeleteFiles ||
+        !hasActiveFileFilters ||
+        visibleFileCount === 0
+      "
+      @click="$emit('delete-visible-files')"
+    >
+      {{ t("app.action.deleteVisibleFiles", { count: visibleFileCount }) }}
     </TButton>
     <TButton
       v-if="isFileWorkspace"

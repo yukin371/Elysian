@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test"
 
 import {
   clearAccessToken,
+  deleteFiles,
   downloadFileBlob,
   setAccessToken,
   uploadFile,
@@ -101,6 +102,68 @@ describe("platform api file requests", () => {
         {
           url: "http://localhost:3000/system/files/file_download_1/download",
           authorization: "Bearer file-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  test("deletes multiple files with bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{
+      url: string
+      method: string
+      authorization: string | null
+      body: unknown
+    }> = []
+
+    setAccessToken("file-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        method: String(init?.method ?? "GET"),
+        authorization: headers.get("authorization"),
+        body: JSON.parse(String(init?.body)),
+      })
+
+      return new Response(
+        JSON.stringify({
+          items: [
+            {
+              id: "file_alpha",
+              originalName: "alpha.txt",
+              mimeType: "text/plain",
+              size: 12,
+              uploaderUserId: "user_admin_1",
+              createdAt: "2026-04-27T08:00:00.000Z",
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      )
+    }) as typeof fetch
+
+    try {
+      await expect(deleteFiles(["file_alpha", "file_beta"])).resolves.toEqual({
+        items: [
+          expect.objectContaining({
+            id: "file_alpha",
+            originalName: "alpha.txt",
+          }),
+        ],
+      })
+
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/files/delete",
+          method: "POST",
+          authorization: "Bearer file-token",
+          body: { ids: ["file_alpha", "file_beta"] },
         },
       ])
     } finally {
