@@ -2,23 +2,9 @@
 import {
   applyCrudDictionaryOptions,
   buildCrudDictionaryOptionCatalog,
-  buildVueCustomCrudPage,
   createVueLocaleRuntime,
   provideVueLocaleRuntime,
 } from "@elysian/frontend-vue"
-import {
-  customerModuleSchema,
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  menuModuleSchema,
-  notificationModuleSchema,
-  operationLogModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  tenantModuleSchema,
-  userModuleSchema,
-} from "@elysian/schema"
 import {
   ElyCrudWorkspace,
   ElyShell,
@@ -32,6 +18,19 @@ import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { computed, ref } from "vue"
 import { createAppShellLocalization } from "./app/app-shell-helpers"
 import { createExampleShellBindingsOptions } from "./app/create-example-shell-bindings-options"
+import {
+  customerPageDefinition,
+  departmentPageDefinition,
+  dictionaryPageDefinition,
+  menuPageDefinition,
+  notificationPageDefinition,
+  operationLogPageDefinition,
+  postPageDefinition,
+  rolePageDefinition,
+  settingPageDefinition,
+  tenantPageDefinition,
+  userPageDefinition,
+} from "./app/example-page-definitions"
 import { useExampleNavigation } from "./app/use-example-navigation"
 import { useExampleQuerySummary } from "./app/use-example-query-summary"
 import { useExampleSessionOrchestration } from "./app/use-example-session-orchestration"
@@ -62,22 +61,6 @@ import { useSettingWorkspace } from "./workspaces/use-setting-workspace"
 import { useTenantWorkspace } from "./workspaces/use-tenant-workspace"
 import { useUserWorkspace } from "./workspaces/use-user-workspace"
 import { useWorkflowWorkspace } from "./workspaces/use-workflow-workspace"
-
-const customerPageDefinition = buildVueCustomCrudPage(customerModuleSchema)
-const dictionaryPageDefinition = buildVueCustomCrudPage(dictionaryModuleSchema)
-const departmentPageDefinition = buildVueCustomCrudPage(departmentModuleSchema)
-const menuPageDefinition = buildVueCustomCrudPage(menuModuleSchema)
-const notificationPageDefinition = buildVueCustomCrudPage(
-  notificationModuleSchema,
-)
-const operationLogPageDefinition = buildVueCustomCrudPage(
-  operationLogModuleSchema,
-)
-const postPageDefinition = buildVueCustomCrudPage(postModuleSchema)
-const rolePageDefinition = buildVueCustomCrudPage(roleModuleSchema)
-const settingPageDefinition = buildVueCustomCrudPage(settingModuleSchema)
-const tenantPageDefinition = buildVueCustomCrudPage(tenantModuleSchema)
-const userPageDefinition = buildVueCustomCrudPage(userModuleSchema)
 
 const localeRuntime = provideVueLocaleRuntime(
   createVueLocaleRuntime({
