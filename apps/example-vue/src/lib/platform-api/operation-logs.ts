@@ -1,4 +1,4 @@
-import { requestJson } from "./core"
+import { requestBlob, requestJson } from "./core"
 
 const operationLogAuthEventTypes = [
   "login",
@@ -45,9 +45,7 @@ export interface OperationLogListQuery {
   result?: OperationLogRecord["result"]
 }
 
-export const fetchOperationLogs = async (
-  query: OperationLogListQuery = {},
-): Promise<OperationLogsResponse> => {
+const buildOperationLogSearch = (query: OperationLogListQuery = {}) => {
   const search = new URLSearchParams()
 
   if (query.category?.trim()) {
@@ -74,8 +72,29 @@ export const fetchOperationLogs = async (
     search.set("result", query.result)
   }
 
+  return search
+}
+
+export const fetchOperationLogs = async (
+  query: OperationLogListQuery = {},
+): Promise<OperationLogsResponse> => {
+  const search = buildOperationLogSearch(query)
+
   return requestJson<OperationLogsResponse>(
     `/system/operation-logs${search.size > 0 ? `?${search.toString()}` : ""}`,
+    {
+      auth: true,
+    },
+  )
+}
+
+export const exportOperationLogsCsv = async (
+  query: OperationLogListQuery = {},
+): Promise<Blob> => {
+  const search = buildOperationLogSearch(query)
+
+  return requestBlob(
+    `/system/operation-logs/export${search.size > 0 ? `?${search.toString()}` : ""}`,
     {
       auth: true,
     },

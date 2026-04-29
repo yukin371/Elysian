@@ -5,6 +5,7 @@ import type { TenantRecord, WorkflowDefinitionRecord } from "@elysian/schema"
 import {
   clearAccessToken,
   exportDictionaryItemsCsv,
+  exportOperationLogsCsv,
   fetchPlatform,
   fetchSystemModules,
   fetchTenants,
@@ -413,6 +414,46 @@ describe("platform api dictionary exports", () => {
         {
           url: "http://localhost:3000/system/dictionaries/items/export?typeId=dict-user-status",
           authorization: "Bearer dictionary-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api operation log exports", () => {
+  test("exports operation logs with current filters and bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("operation-log-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return new Response("id,category\n1,auth\n", {
+        status: 200,
+        headers: { "content-type": "text/csv" },
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(
+        exportOperationLogsCsv({
+          category: " auth ",
+          authEventType: "login",
+          authFailureReason: "invalid_password",
+          result: "failure",
+        }),
+      ).resolves.toBeInstanceOf(Blob)
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/operation-logs/export?category=auth&authEventType=login&authFailureReason=invalid_password&result=failure",
+          authorization: "Bearer operation-log-token",
         },
       ])
     } finally {

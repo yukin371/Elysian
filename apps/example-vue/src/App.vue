@@ -46,9 +46,11 @@ import ShellWorkspaceSecondarySwitch from "./components/workspaces/shell/ShellWo
 import ShellWorkspaceSectionIntro from "./components/workspaces/shell/ShellWorkspaceSectionIntro.vue"
 import { exampleLocaleMessages } from "./i18n"
 import { resolveWorkspaceMenuKey } from "./lib/navigation-workspace"
+import { buildOperationLogListQuery } from "./lib/operation-log-workspace"
 import {
   exportDictionaryItemsCsv,
   exportDictionaryTypesCsv,
+  exportOperationLogsCsv,
   exportSettingsCsv,
   exportUsersCsv,
 } from "./lib/platform-api"
@@ -149,6 +151,7 @@ const dictionaryModuleReady = ref(false)
 const workflowModuleReady = ref(false)
 const dictionaryTypeExportLoading = ref(false)
 const dictionaryItemsExportLoading = ref(false)
+const operationLogExportLoading = ref(false)
 const userExportLoading = ref(false)
 const settingExportLoading = ref(false)
 const envName = ref("unknown")
@@ -1395,6 +1398,33 @@ const handleExportSettings = async () => {
   }
 }
 
+const handleExportOperationLogs = async () => {
+  if (!canViewOperationLogs.value || operationLogExportLoading.value) {
+    return
+  }
+
+  operationLogExportLoading.value = true
+  operationLogErrorMessage.value = ""
+
+  try {
+    const blob = await exportOperationLogsCsv(
+      buildOperationLogListQuery(operationLogQueryValues.value),
+    )
+    downloadBrowserBlob(blob, createCsvExportFilename("system-operation-logs"))
+  } catch (error) {
+    if (isRecoverableAuthError(error)) {
+      authIdentity.value = null
+    }
+
+    operationLogErrorMessage.value =
+      error instanceof Error
+        ? error.message
+        : t("app.error.exportOperationLogs")
+  } finally {
+    operationLogExportLoading.value = false
+  }
+}
+
 const handleShellMenuSelect = (menuKey: string) => {
   const nextMenuKey = resolveWorkspaceMenuKey(
     enterpriseNavigation.value,
@@ -1533,9 +1563,11 @@ const shellBindingsOptions = createExampleShellBindingsOptions({
   operationLogWorkspace: {
     workspace: operationLogWorkspace,
     isOperationLogWorkspace,
+    operationLogExportLoading,
     canViewOperationLogs,
     operationLogModuleReady,
     canEnterOperationLogWorkspace,
+    handleExportOperationLogs,
   },
   userWorkspace: {
     workspace: userWorkspace,

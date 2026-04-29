@@ -66,6 +66,7 @@ describe("createExampleShellBindingsOptions", () => {
     const handleExportUsers = () => Promise.resolve()
     const handleExportDictionaryTypes = () => Promise.resolve()
     const handleExportDictionaryItems = () => Promise.resolve()
+    const handleExportOperationLogs = () => Promise.resolve()
     const handleExportSettings = () => Promise.resolve()
     const markVisibleNotificationsAsRead = () => Promise.resolve()
     const refreshGeneratorPreview = () => Promise.resolve()
@@ -97,7 +98,10 @@ describe("createExampleShellBindingsOptions", () => {
         visibleUnreadNotificationCount: 2,
         "workspace.markVisibleAsRead": markVisibleNotificationsAsRead,
       }),
-      operationLogWorkspace: createWorkspaceInput({}),
+      operationLogWorkspace: createWorkspaceInput({
+        operationLogExportLoading: true,
+        handleExportOperationLogs,
+      }),
       userWorkspace: createWorkspaceInput({
         userExportLoading: true,
         handleExportUsers,
@@ -134,6 +138,8 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.markVisibleNotificationsAsRead).toBe(
       markVisibleNotificationsAsRead,
     )
+    expect(result.operationLogExportLoading).toBe(true)
+    expect(result.handleExportOperationLogs).toBe(handleExportOperationLogs)
     expect(result.userExportLoading).toBe(true)
     expect(result.handleExportUsers).toBe(handleExportUsers)
     expect(result.settingExportLoading).toBe(true)

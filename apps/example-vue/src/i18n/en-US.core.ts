@@ -260,6 +260,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.platform.status.bootstrap": "bootstrap",
   "app.action.newNotification": "New notification",
   "app.action.markVisibleNotificationsRead": "Mark visible as read",
+  "app.action.exportOperationLogs": "Export logs",
   "app.fallback.system": "System",
   "app.fallback.users": "Users",
   "app.fallback.roles": "Roles",

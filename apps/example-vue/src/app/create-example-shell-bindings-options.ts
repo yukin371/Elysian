@@ -371,6 +371,8 @@ export const createExampleShellBindingsOptions = (
       input.operationLogWorkspace.isOperationLogWorkspace,
     operationLogLoading:
       input.operationLogWorkspace.workspace.operationLogLoading,
+    operationLogExportLoading:
+      input.operationLogWorkspace.operationLogExportLoading,
     canViewOperationLogs: input.operationLogWorkspace.canViewOperationLogs,
     operationLogModuleReady:
       input.operationLogWorkspace.operationLogModuleReady,
@@ -406,6 +408,8 @@ export const createExampleShellBindingsOptions = (
       input.operationLogWorkspace.workspace.handleRowClick,
     reloadOperationLogs:
       input.operationLogWorkspace.workspace.reloadOperationLogs,
+    handleExportOperationLogs:
+      input.operationLogWorkspace.handleExportOperationLogs,
   }
 
   const userWorkspaceOptions = {

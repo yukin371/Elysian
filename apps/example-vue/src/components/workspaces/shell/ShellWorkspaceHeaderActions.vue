@@ -38,6 +38,7 @@ defineProps<{
   visibleUnreadNotificationCount: number
   isOperationLogWorkspace: boolean
   operationLogLoading: boolean
+  operationLogExportLoading: boolean
   canViewOperationLogs: boolean
   isUserWorkspace: boolean
   userLoading: boolean
@@ -83,6 +84,7 @@ defineEmits<{
   (event: "reload-notifications"): void
   (event: "mark-visible-notifications-read"): void
   (event: "reload-operation-logs"): void
+  (event: "export-operation-logs"): void
   (event: "open-user-create"): void
   (event: "reload-users"): void
   (event: "export-users"): void
@@ -257,6 +259,19 @@ defineEmits<{
       @click="$emit('reload-notifications')"
     >
       {{ t("app.action.refresh") }}
+    </TButton>
+    <TButton
+      v-if="isOperationLogWorkspace"
+      size="small"
+      theme="default"
+      variant="outline"
+      :loading="operationLogExportLoading"
+      :disabled="
+        operationLogLoading || operationLogExportLoading || !canViewOperationLogs
+      "
+      @click="$emit('export-operation-logs')"
+    >
+      {{ t("app.action.exportOperationLogs") }}
     </TButton>
     <TButton
       v-if="isOperationLogWorkspace"

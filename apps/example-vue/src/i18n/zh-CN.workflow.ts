@@ -203,6 +203,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadDictionaryDetail": "加载字典详情失败",
   "app.error.loadOperationLogs": "加载操作日志列表失败",
   "app.error.loadOperationLogDetail": "加载操作日志详情失败",
+  "app.error.exportOperationLogs": "导出操作日志失败",
   "app.error.loadUsers": "加载用户列表失败",
   "app.error.exportUsers": "导出用户列表失败",
   "app.error.signIn": "登录失败",

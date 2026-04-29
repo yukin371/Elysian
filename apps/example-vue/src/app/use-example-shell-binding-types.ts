@@ -76,6 +76,7 @@ export interface UseExampleShellBindingsOptions {
   visibleUnreadNotificationCount: ValueSource<number>
   isOperationLogWorkspace: ComputedRef<boolean>
   operationLogLoading: ValueSource<boolean>
+  operationLogExportLoading: ValueSource<boolean>
   canViewOperationLogs: ValueSource<boolean>
   isUserWorkspace: ComputedRef<boolean>
   userLoading: ValueSource<boolean>
@@ -424,6 +425,7 @@ export interface UseExampleShellBindingsOptions {
   openNotificationCreatePanel: () => void
   reloadNotifications: () => void
   reloadOperationLogs: () => void
+  handleExportOperationLogs: () => void
   openUserCreatePanel: () => void
   reloadUsers: () => void
   handleExportUsers: () => void

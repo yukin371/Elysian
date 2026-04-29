@@ -50,6 +50,7 @@ export {
   markNotificationsAsRead,
 } from "./platform-api/notifications"
 export {
+  exportOperationLogsCsv,
   fetchOperationLogById,
   fetchOperationLogs,
 } from "./platform-api/operation-logs"

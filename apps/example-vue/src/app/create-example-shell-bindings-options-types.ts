@@ -133,9 +133,11 @@ export interface CreateExampleShellBindingsOptionsInput {
   operationLogWorkspace: {
     workspace: ReturnType<typeof useOperationLogWorkspace>
     isOperationLogWorkspace: OptionValue<"isOperationLogWorkspace">
+    operationLogExportLoading: OptionValue<"operationLogExportLoading">
     canViewOperationLogs: OptionValue<"canViewOperationLogs">
     operationLogModuleReady: OptionValue<"operationLogModuleReady">
     canEnterOperationLogWorkspace: OptionValue<"canEnterOperationLogWorkspace">
+    handleExportOperationLogs: OptionValue<"handleExportOperationLogs">
   }
   userWorkspace: {
     workspace: ReturnType<typeof useUserWorkspace>
@@ -489,6 +491,7 @@ export type NotificationWorkspaceBindingsOptions = BindingSegment<
 export type OperationLogWorkspaceBindingsOptions = BindingSegment<
   | "isOperationLogWorkspace"
   | "operationLogLoading"
+  | "operationLogExportLoading"
   | "canViewOperationLogs"
   | "operationLogModuleReady"
   | "canEnterOperationLogWorkspace"
@@ -509,6 +512,7 @@ export type OperationLogWorkspaceBindingsOptions = BindingSegment<
   | "handleOperationLogReset"
   | "handleOperationLogRowClick"
   | "reloadOperationLogs"
+  | "handleExportOperationLogs"
 >
 
 export type UserWorkspaceBindingsOptions = BindingSegment<
