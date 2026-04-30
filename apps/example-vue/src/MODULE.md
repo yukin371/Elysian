@@ -37,6 +37,7 @@
   - `create-example-app-shell-bindings-options.ts`
   - `create-example-session-orchestration-options.ts`
   - `example-auth-errors.ts`
+  - `use-example-app-bootstrap.ts`
   - `use-example-navigation.ts`
   - `use-example-workspace-gates.ts`
   - `use-example-runtime-state.ts`

@@ -2,18 +2,13 @@
 import {
   applyCrudDictionaryOptions,
   buildCrudDictionaryOptionCatalog,
-  createVueLocaleRuntime,
-  provideVueLocaleRuntime,
 } from "@elysian/frontend-vue"
 import {
   useElyCrudPage,
   vueEnterprisePresetManifest,
 } from "@elysian/ui-enterprise-vue"
 import { ConfigProvider as TConfigProvider } from "tdesign-vue-next/es/config-provider"
-import enUs from "tdesign-vue-next/es/locale/en_US"
-import zhCn from "tdesign-vue-next/es/locale/zh_CN"
 import { computed } from "vue"
-import { createAppShellLocalization } from "./app/app-shell-helpers"
 import { createExampleAppShellBindingsOptions } from "./app/create-example-app-shell-bindings-options"
 import { createExampleSessionOrchestrationOptions } from "./app/create-example-session-orchestration-options"
 import { isRecoverableAuthError } from "./app/example-auth-errors"
@@ -30,6 +25,7 @@ import {
   tenantPageDefinition,
   userPageDefinition,
 } from "./app/example-page-definitions"
+import { useExampleAppBootstrap } from "./app/use-example-app-bootstrap"
 import { useExampleCsvExports } from "./app/use-example-csv-exports"
 import { useExampleNavigation } from "./app/use-example-navigation"
 import { useExampleQuerySummary } from "./app/use-example-query-summary"
@@ -40,7 +36,6 @@ import { useExampleShellMeta } from "./app/use-example-shell-meta"
 import { useExampleWorkspaceGates } from "./app/use-example-workspace-gates"
 import { useExampleWorkspaceSync } from "./app/use-example-workspace-sync"
 import ExampleAppStageGate from "./components/layout/ExampleAppStageGate.vue"
-import { exampleLocaleMessages } from "./i18n"
 import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
 import { useDepartmentWorkspace } from "./workspaces/use-department-workspace"
@@ -57,19 +52,7 @@ import { useTenantWorkspace } from "./workspaces/use-tenant-workspace"
 import { useUserWorkspace } from "./workspaces/use-user-workspace"
 import { useWorkflowWorkspace } from "./workspaces/use-workflow-workspace"
 
-const localeRuntime = provideVueLocaleRuntime(
-  createVueLocaleRuntime({
-    defaultLocale: "zh-CN",
-    fallbackLocale: "en-US",
-    messages: exampleLocaleMessages,
-  }),
-)
-
-const { locale, t } = localeRuntime
-
-const tdesignGlobalConfig = computed(() =>
-  locale.value === "zh-CN" ? zhCn : enUs,
-)
+const { locale, localizers, t, tdesignGlobalConfig } = useExampleAppBootstrap()
 
 const {
   describeWorkflowNode,
@@ -106,7 +89,7 @@ const {
   localizeUserStatus,
   localizeWorkflowNodeType,
   localizeWorkflowStatus,
-} = createAppShellLocalization(t)
+} = localizers
 
 const exampleRuntimeState = useExampleRuntimeState()
 
