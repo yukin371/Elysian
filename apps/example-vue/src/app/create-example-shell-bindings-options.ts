@@ -130,14 +130,13 @@ export const createExampleShellBindingsOptions = (
     dictionaryModuleReady: input.dictionaryWorkspace.dictionaryModuleReady,
     canEnterDictionaryWorkspace:
       input.dictionaryWorkspace.canEnterDictionaryWorkspace,
+    dictionaryWorkspaceState: input.dictionaryWorkspace.workspace,
     dictionaryErrorMessage:
       input.dictionaryWorkspace.workspace.dictionaryErrorMessage,
     enterpriseDictionaryQueryFields:
       input.dictionaryWorkspace.workspace.queryFields,
     enterpriseDictionaryTableColumns:
       input.dictionaryWorkspace.workspace.tableColumns,
-    enterpriseDictionaryTableItems:
-      input.dictionaryWorkspace.workspace.tableItems,
     dictionaryCountLabel: input.dictionaryWorkspace.workspace.countLabel,
     dictionaryDetailLoading:
       input.dictionaryWorkspace.workspace.dictionaryDetailLoading,

@@ -148,10 +148,10 @@ export interface UseExampleShellBindingsOptions {
   generatorPreviewSession: ValueSource<Record<string, unknown> | null>
   dictionaryModuleReady: ValueSource<boolean>
   canEnterDictionaryWorkspace: ValueSource<boolean>
+  dictionaryWorkspaceState: Record<string, unknown>
   dictionaryErrorMessage: ValueSource<string>
   enterpriseDictionaryQueryFields: ValueSource<unknown[]>
   enterpriseDictionaryTableColumns: ValueSource<unknown[]>
-  enterpriseDictionaryTableItems: ValueSource<unknown[]>
   dictionaryCountLabel: ValueSource<string>
   departmentModuleReady: ValueSource<boolean>
   canEnterDepartmentWorkspace: ValueSource<boolean>

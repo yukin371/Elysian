@@ -33,4 +33,23 @@ describe("resolveProvidedWorkspaceState", () => {
 
     expect(resolved).toBeNull()
   })
+
+  test("provides the dictionary workspace state for the dictionary main surface", () => {
+    const dictionaryLoading = ref(false)
+    const dictionaryErrorMessage = ref("")
+    const tableItems = ref([{ id: "dictionary-type-1" }])
+
+    const resolved = resolveProvidedWorkspaceState("dictionary", null, {
+      dictionaryErrorMessage,
+      tableItems,
+      dictionaryLoading,
+    })
+
+    expect(resolved?.kind).toBe("dictionary")
+    expect(resolved?.loading).toBe(dictionaryLoading)
+    expect(resolved?.errorMessage).toBe(dictionaryErrorMessage)
+    expect(
+      (resolved?.state as { tableItems: typeof tableItems }).tableItems,
+    ).toBe(tableItems)
+  })
 })

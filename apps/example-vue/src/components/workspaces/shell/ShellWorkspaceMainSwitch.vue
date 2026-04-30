@@ -28,6 +28,11 @@ const providedWorkspaceState = computed(() =>
       customerItems: { value: unknown[] }
       customerLoading: { value: boolean }
     } | null,
+    (props.dictionaryWorkspaceState ?? null) as {
+      dictionaryErrorMessage: { value: string }
+      tableItems: { value: unknown[] }
+      dictionaryLoading: { value: boolean }
+    } | null,
   ),
 )
 

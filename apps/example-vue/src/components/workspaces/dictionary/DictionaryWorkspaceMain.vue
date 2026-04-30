@@ -6,7 +6,9 @@ import {
   type ElyQueryValues,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { DictionaryTypeRecord } from "../../../lib/platform-api"
 
 type DictionaryWorkspaceTranslation = (
@@ -21,25 +23,57 @@ interface DictionaryWorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewDictionaries: boolean
-  loading: boolean
-  errorMessage: string
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  items: DictionaryTypeRecord[]
   itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
   currentQuerySummary: string
   copy: ElyCrudWorkspaceProps["copy"]
+  workspaceStateInjected?: boolean
 }
 
-defineProps<DictionaryWorkspaceMainProps>()
+const props = defineProps<DictionaryWorkspaceMainProps>()
 
 const emit = defineEmits<{
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: DictionaryTypeRecord): void
 }>()
+
+interface DictionaryWorkspaceInjectedState {
+  dictionaryErrorMessage: { value: string }
+  dictionaryLoading: { value: boolean }
+  tableItems: { value: DictionaryTypeRecord[] }
+}
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedDictionaryWorkspaceState =
+  computed<DictionaryWorkspaceInjectedState | null>(() => {
+    const context = injectedWorkspaceState.value
+
+    if (!props.workspaceStateInjected || context?.kind !== "dictionary") {
+      return null
+    }
+
+    return context.state as DictionaryWorkspaceInjectedState
+  })
+
+const resolvedLoading = computed(
+  () =>
+    resolvedDictionaryWorkspaceState.value?.dictionaryLoading.value ?? false,
+)
+const resolvedErrorMessage = computed(
+  () =>
+    resolvedDictionaryWorkspaceState.value?.dictionaryErrorMessage.value ?? "",
+)
+const resolvedItems = computed(
+  () => resolvedDictionaryWorkspaceState.value?.tableItems.value ?? [],
+)
 </script>
 
 <template>
@@ -62,8 +96,11 @@ const emit = defineEmits<{
       {{ t("app.message.dictionaryNoListPermission") }}
     </div>
 
-    <div v-else-if="errorMessage" class="enterprise-message enterprise-message-danger">
-      {{ errorMessage }}
+    <div
+      v-else-if="resolvedErrorMessage"
+      class="enterprise-message enterprise-message-danger"
+    >
+      {{ resolvedErrorMessage }}
     </div>
 
     <ElyCrudWorkspace
@@ -72,10 +109,10 @@ const emit = defineEmits<{
       :title="t('app.dictionary.workspaceTitle')"
       :description="t('app.dictionary.workspaceDescription')"
       :query-fields="queryFields"
-      :query-loading="loading"
+      :query-loading="resolvedLoading"
       :table-columns="tableColumns"
-      :items="items"
-      :table-loading="loading"
+      :items="resolvedItems"
+      :table-loading="resolvedLoading"
       :table-actions="[]"
       :item-count-label="itemCountLabel"
       :empty-title="emptyTitle"

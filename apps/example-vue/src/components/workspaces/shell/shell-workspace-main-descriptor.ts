@@ -78,11 +78,9 @@ export interface ShellWorkspaceMainSwitchProps {
   dictionaryModuleReady: boolean
   canEnterDictionaryWorkspace: boolean
   canViewDictionaries: boolean
-  dictionaryLoading: boolean
-  dictionaryErrorMessage: string
+  dictionaryWorkspaceState: Record<string, unknown>
   enterpriseDictionaryQueryFields: ReadonlyArray<unknown>
   enterpriseDictionaryTableColumns: ReadonlyArray<unknown>
-  enterpriseDictionaryTableItems: ReadonlyArray<unknown>
   dictionaryCountLabel: string
   departmentModuleReady: boolean
   canEnterDepartmentWorkspace: boolean
@@ -516,16 +514,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterDictionaryWorkspace,
       canViewDictionaries: props.canViewDictionaries,
-      loading: props.dictionaryLoading,
-      errorMessage: props.dictionaryErrorMessage,
       queryFields: props.enterpriseDictionaryQueryFields,
       tableColumns: props.enterpriseDictionaryTableColumns,
-      items: props.enterpriseDictionaryTableItems,
       itemCountLabel: props.dictionaryCountLabel,
       emptyTitle: props.t("app.dictionary.emptyTitle"),
       emptyDescription: props.t("app.dictionary.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
