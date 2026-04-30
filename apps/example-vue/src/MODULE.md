@@ -34,6 +34,7 @@
 
 - 已从 `App.vue` 下沉：
   - `app-shell-helpers.ts`
+  - `create-example-app-shell-bindings-options.ts`
   - `example-auth-errors.ts`
   - `use-example-navigation.ts`
   - `use-example-workspace-gates.ts`
