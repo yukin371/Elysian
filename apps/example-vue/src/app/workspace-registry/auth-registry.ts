@@ -7,6 +7,17 @@ export const authWorkspaceRegistrations = [
     kind: "session",
     moduleCode: "auth",
     permissionPrefix: "auth:session",
+    navigation: {
+      id: "enterprise-sessions",
+      parentId: "enterprise-system",
+      parentCode: "system-root",
+      code: "system-sessions",
+      nameKey: "app.fallback.onlineSessions",
+      component: "system/sessions/index",
+      icon: "time",
+      sort: 47,
+      permissionCode: null,
+    },
     i18nKeys: {
       sectionTitle: "app.onlineSession.sectionTitle",
       sectionCopy: "app.onlineSession.sectionCopy",

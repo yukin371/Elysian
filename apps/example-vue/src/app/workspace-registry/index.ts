@@ -12,6 +12,8 @@ export const workspaceRegistry = [
 export { WORKSPACE_STATE_KEY } from "./injection-keys"
 export type {
   RegisteredWorkspaceKind,
+  WorkspaceNavigationGroupRegistration,
+  WorkspaceNavigationRegistration,
   WorkspaceRegistration,
   WorkspaceRegistryDomain,
   WorkspaceState,

@@ -25,6 +25,28 @@ export interface WorkspaceRegistration {
   }
   kind: RegisteredWorkspaceKind
   moduleCode: string
+  navigation?: WorkspaceNavigationRegistration
   path: string
   permissionPrefix: string
+}
+
+export interface WorkspaceNavigationGroupRegistration {
+  code: string
+  icon: string
+  id: string
+  nameKey: string
+  sort: number
+}
+
+export interface WorkspaceNavigationRegistration {
+  code: string
+  component: string
+  group?: WorkspaceNavigationGroupRegistration
+  icon: string
+  id: string
+  nameKey: string
+  parentCode: string | null
+  parentId: string | null
+  permissionCode: string | null
+  sort: number
 }

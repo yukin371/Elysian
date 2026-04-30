@@ -5,10 +5,6 @@ import { type Ref, computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { resolveWorkspaceMenuKey } from "../lib/navigation-workspace"
 import type { AuthIdentityResponse } from "../lib/platform-api"
 import {
-  appendStudioNavigation,
-  buildStudioNavigation,
-} from "../lib/studio-navigation"
-import {
   listenWorkspaceRouteChange,
   readCurrentWorkspaceRouteMenuKey,
   replaceCurrentWorkspaceRoute,
@@ -25,59 +21,13 @@ import {
   findNavigationItemById,
   flattenNavigation,
 } from "./app-shell-helpers"
+import { appendWorkspaceRegistryNavigation } from "./workspace-registry/navigation"
 
 interface UseExampleNavigationOptions {
   authIdentity: Ref<AuthIdentityResponse | null>
   registeredModuleCodes: Ref<string[]>
   t: AppTranslate
   localizeNavigationItems: (items: UiNavigationNode[]) => UiNavigationNode[]
-}
-
-const appendSessionNavigation = (
-  items: UiNavigationNode[],
-  t: AppTranslate,
-) => {
-  const hasSessionEntry = flattenNavigation(items).some(
-    (item) => item.path === "/system/sessions",
-  )
-
-  if (hasSessionEntry) {
-    return items
-  }
-
-  const sessionItem: UiNavigationNode = {
-    id: "enterprise-sessions",
-    parentId: "enterprise-system",
-    type: "menu",
-    code: "system-sessions",
-    name: t("app.fallback.onlineSessions"),
-    path: "/system/sessions",
-    component: "system/sessions/index",
-    icon: "time",
-    sort: 47,
-    isVisible: true,
-    status: "active",
-    permissionCode: null,
-    depth: 1,
-    children: [],
-  }
-
-  const systemIndex = items.findIndex((item) => item.code === "system-root")
-
-  if (systemIndex < 0) {
-    return [...items, sessionItem]
-  }
-
-  return items.map((item, index) =>
-    index === systemIndex
-      ? {
-          ...item,
-          children: [...item.children, sessionItem].sort(
-            (left, right) => left.sort - right.sort,
-          ),
-        }
-      : item,
-  )
 }
 
 export const useExampleNavigation = ({
@@ -100,14 +50,9 @@ export const useExampleNavigation = ({
       : [],
   )
 
-  const studioNavigation = computed(() => buildStudioNavigation(t))
-
   const enterpriseNavigation = computed(() =>
     authIdentity.value
-      ? appendStudioNavigation(
-          appendSessionNavigation(navigationTree.value, t),
-          studioNavigation.value,
-        )
+      ? appendWorkspaceRegistryNavigation(navigationTree.value, t)
       : [],
   )
 
