@@ -1,13 +1,12 @@
-import type {
-  ElyFormField,
-  ElyQueryField,
-  ElyQueryValues,
-} from "@elysian/ui-enterprise-vue"
+import type { ElyFormField, ElyQueryField } from "@elysian/ui-enterprise-vue"
 import { type ComputedRef, type Ref, computed, ref } from "vue"
 
 import {
+  type CreateUserRequest,
+  type UpdateUserRequest,
   type UserRecord,
   createUser,
+  fetchUserById,
   fetchUsers,
   resetUserPassword,
   updateUser,
@@ -22,9 +21,13 @@ import {
   normalizeUserText,
   resolveUserSelection,
 } from "../lib/user-workspace"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 export type UserPanelMode = "detail" | "create" | "edit" | "reset"
 type UserFormValues = Record<string, unknown>
+type UserUpsertPayload = UpdateUserRequest & {
+  password?: CreateUserRequest["password"]
+}
 
 type UserPageColumn = {
   key: string
@@ -54,15 +57,127 @@ interface UseUserWorkspaceOptions {
 }
 
 export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
-  const userItems = ref<UserRecord[]>([])
-  const userLoading = ref(false)
-  const userErrorMessage = ref("")
-  const selectedUserId = ref<string | null>(null)
-  const userPanelMode = ref<UserPanelMode>("detail")
-  const userQueryValues = ref<ElyQueryValues>({})
-  const userCreateForm = ref(createDefaultUserDraft())
-  const userEditForm = ref(createDefaultUserDraft())
   const userPasswordInput = ref("")
+  const resetPanelActive = ref(false)
+
+  const userWorkspace = createCrudWorkspace<
+    UserRecord,
+    ReturnType<typeof createDefaultUserDraft>,
+    UserUpsertPayload
+  >({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultUserDraft,
+    createRecord: async (payload) => {
+      const password = normalizeUserText(payload.password)
+
+      if (password.length === 0) {
+        throw new Error(options.t("app.error.userPasswordRequired"))
+      }
+
+      return createUser({
+        username: normalizeUserText(payload.username),
+        displayName: normalizeUserText(payload.displayName),
+        email: payload.email,
+        phone: payload.phone,
+        status: payload.status,
+        isSuperAdmin: payload.isSuperAdmin,
+        password,
+      })
+    },
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchUserById,
+    fetchList: fetchUsers,
+    getCreateErrorMessage: () => options.t("app.error.createUser"),
+    getLoadDetailErrorMessage: () => options.t("app.error.loadUserDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadUsers"),
+    getUpdateErrorMessage: () => options.t("app.error.updateUser"),
+    normalizePayload: (values) => {
+      const payload = {
+        username: normalizeUserText(values.username),
+        displayName: normalizeUserText(values.displayName),
+        email: normalizeOptionalUserText(values.email),
+        phone: normalizeOptionalUserText(values.phone),
+        status: normalizeUserStatus(values.status),
+        isSuperAdmin: normalizeUserBoolean(values.isSuperAdmin),
+      }
+
+      if (payload.username.length === 0) {
+        return {
+          message: options.t("app.error.userUsernameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.displayName.length === 0) {
+        return {
+          message: options.t("app.error.userDisplayNameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (userWorkspace.panelMode.value === "create") {
+        const password = normalizeUserText(userPasswordInput.value)
+
+        if (password.length === 0) {
+          return {
+            message: options.t("app.error.userPasswordRequired"),
+            status: "invalid" as const,
+          }
+        }
+
+        return {
+          payload: {
+            ...payload,
+            password,
+          },
+          status: "valid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolveUserSelection,
+    toEditDraft: (user) => ({
+      username: user.username,
+      displayName: user.displayName,
+      email: user.email ?? "",
+      phone: user.phone ?? "",
+      status: user.status,
+      isSuperAdmin: user.isSuperAdmin,
+    }),
+    updateRecord: async (id, payload) => {
+      const { password: _password, ...updatePayload } = payload
+      return updateUser(id, updatePayload)
+    },
+  })
+
+  const userItems = userWorkspace.items
+  const userLoading = userWorkspace.loading
+  const userErrorMessage = userWorkspace.errorMessage
+  const selectedUserId = userWorkspace.selectedId
+  const userQueryValues = userWorkspace.queryValues
+  const userCreateForm = userWorkspace.createForm
+  const userEditForm = userWorkspace.editForm
+  const basePanelMode = userWorkspace.panelMode
+
+  const userPanelMode = computed<UserPanelMode>({
+    get: () => (resetPanelActive.value ? "reset" : basePanelMode.value),
+    set: (value) => {
+      if (value === "reset") {
+        resetPanelActive.value = true
+        return
+      }
+
+      resetPanelActive.value = false
+      basePanelMode.value = value
+    },
+  })
 
   const filteredUserItems = computed(() =>
     filterUsers(userItems.value, {
@@ -90,12 +205,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     }),
   )
 
-  const selectedUser = computed(
-    () =>
-      userItems.value.find(
-        (user: UserRecord) => user.id === selectedUserId.value,
-      ) ?? null,
-  )
+  const selectedUser = userWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
     options.page.tableColumns.value.map((column) => ({
@@ -275,86 +385,25 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
       : options.t("app.user.detailEmptyDescription")
   })
 
-  const resetPanelInputs = () => {
-    userCreateForm.value = createDefaultUserDraft()
-    userEditForm.value = createDefaultUserDraft()
-    userPasswordInput.value = ""
-  }
-
   const clearWorkspace = () => {
-    userItems.value = []
-    selectedUserId.value = null
-    userErrorMessage.value = ""
-    userPanelMode.value = "detail"
-    resetPanelInputs()
+    resetPanelActive.value = false
+    userPasswordInput.value = ""
+    userWorkspace.clearWorkspace()
   }
 
-  const reloadUsers = async () => {
-    if (!options.canView.value) {
-      clearWorkspace()
-      return
-    }
-
-    userLoading.value = true
-    userErrorMessage.value = ""
-
-    try {
-      const payload = await fetchUsers()
-      userItems.value = payload.items
-      selectedUserId.value = resolveUserSelection(
-        payload.items,
-        selectedUserId.value,
-      )
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      clearWorkspace()
-      userErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadUsers")
-    } finally {
-      userLoading.value = false
-    }
-  }
-
-  const handleSearch = (values: ElyQueryValues) => {
-    userQueryValues.value = values
-  }
-
-  const handleReset = () => {
-    userQueryValues.value = {}
-  }
-
+  const reloadUsers = userWorkspace.reloadRecords
+  const handleSearch = userWorkspace.handleSearch
+  const handleReset = userWorkspace.handleReset
   const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedUserId.value = null
-    userErrorMessage.value = ""
-    resetPanelInputs()
-    userPanelMode.value = "create"
+    resetPanelActive.value = false
+    userPasswordInput.value = ""
+    userWorkspace.openCreatePanel()
   }
 
   const startEdit = (user: UserRecord) => {
-    if (!options.canUpdate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedUserId.value = user.id
-    userErrorMessage.value = ""
-    userEditForm.value = {
-      username: user.username,
-      displayName: user.displayName,
-      email: user.email ?? "",
-      phone: user.phone ?? "",
-      status: user.status,
-      isSuperAdmin: user.isSuperAdmin,
-    }
+    resetPanelActive.value = false
     userPasswordInput.value = ""
-    userPanelMode.value = "edit"
+    userWorkspace.startEdit(user)
   }
 
   const startPasswordReset = (user: UserRecord) => {
@@ -366,6 +415,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     selectedUserId.value = user.id
     userErrorMessage.value = ""
     userPasswordInput.value = ""
+    basePanelMode.value = "detail"
     userPanelMode.value = "reset"
   }
 
@@ -373,84 +423,34 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     userErrorMessage.value = ""
     userPasswordInput.value = ""
 
-    if (selectedUser.value) {
-      userPanelMode.value = "detail"
+    if (userPanelMode.value === "reset") {
+      if (selectedUser.value) {
+        resetPanelActive.value = false
+        basePanelMode.value = "detail"
+        return
+      }
+
+      if (options.canCreate.value) {
+        resetPanelActive.value = false
+        basePanelMode.value = "create"
+        return
+      }
+
+      resetPanelActive.value = false
+      basePanelMode.value = "detail"
       return
     }
 
-    if (options.canCreate.value) {
-      userPanelMode.value = "create"
-      return
-    }
-
-    userPanelMode.value = "detail"
+    userWorkspace.cancelPanel()
   }
 
   const submitForm = async (values: UserFormValues) => {
-    if (userLoading.value) {
-      return
-    }
+    userPasswordInput.value =
+      userPanelMode.value === "create"
+        ? normalizeUserText(userPasswordInput.value)
+        : ""
 
-    const payload = {
-      username: normalizeUserText(values.username),
-      displayName: normalizeUserText(values.displayName),
-      email: normalizeOptionalUserText(values.email),
-      phone: normalizeOptionalUserText(values.phone),
-      status: normalizeUserStatus(values.status),
-      isSuperAdmin: normalizeUserBoolean(values.isSuperAdmin),
-    }
-
-    if (payload.username.length === 0) {
-      userErrorMessage.value = options.t("app.error.userUsernameRequired")
-      return
-    }
-
-    if (payload.displayName.length === 0) {
-      userErrorMessage.value = options.t("app.error.userDisplayNameRequired")
-      return
-    }
-
-    userLoading.value = true
-    userErrorMessage.value = ""
-
-    try {
-      if (userPanelMode.value === "edit" && selectedUser.value) {
-        const updated = await updateUser(selectedUser.value.id, payload)
-        selectedUserId.value = updated.id
-        userPanelMode.value = "detail"
-        await reloadUsers()
-        return
-      }
-
-      if (!options.canCreate.value) {
-        return
-      }
-
-      const password = normalizeUserText(userPasswordInput.value)
-
-      if (password.length === 0) {
-        userErrorMessage.value = options.t("app.error.userPasswordRequired")
-        return
-      }
-
-      const created = await createUser({
-        ...payload,
-        password,
-      })
-      selectedUserId.value = created.id
-      userPanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadUsers()
-    } catch (error) {
-      userErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : userPanelMode.value === "edit"
-            ? options.t("app.error.updateUser")
-            : options.t("app.error.createUser")
-    } finally {
-      userLoading.value = false
-    }
+    await userWorkspace.submitForm(values)
   }
 
   const submitPasswordReset = async () => {
@@ -475,7 +475,8 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     try {
       await resetUserPassword(selectedUser.value.id, password)
       userPasswordInput.value = ""
-      userPanelMode.value = "detail"
+      resetPanelActive.value = false
+      basePanelMode.value = "detail"
       await reloadUsers()
     } catch (error) {
       userErrorMessage.value =
@@ -487,7 +488,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     }
   }
 
-  const handleRowClick = (row: Record<string, unknown>) => {
+  const handleRowClick = async (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
     const user = filteredUserItems.value.find((item) => item.id === rowId)
 
@@ -495,10 +496,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
       return
     }
 
-    options.currentShellTabKey.value = "workspace"
-    selectedUserId.value = user.id
-    userErrorMessage.value = ""
-    userPanelMode.value = "detail"
+    await userWorkspace.selectRecord(user)
   }
 
   return {
@@ -524,6 +522,8 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     submitPasswordReset,
     tableColumns,
     tableItems,
+    userCreateForm,
+    userEditForm,
     userErrorMessage,
     userItems,
     userLoading,

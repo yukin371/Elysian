@@ -220,6 +220,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadOperationLogDetail": "Failed to load operation log detail",
   "app.error.exportOperationLogs": "Failed to export operation logs",
   "app.error.loadUsers": "Failed to load users",
+  "app.error.loadUserDetail": "Failed to load user detail",
   "app.error.exportUsers": "Failed to export users",
   "app.error.signIn": "Failed to sign in",
   "app.error.signOut": "Failed to sign out",

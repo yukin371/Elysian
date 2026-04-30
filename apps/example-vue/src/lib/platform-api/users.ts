@@ -41,6 +41,11 @@ export const fetchUsers = async (): Promise<UsersResponse> =>
     auth: true,
   })
 
+export const fetchUserById = async (id: string): Promise<UserRecord> =>
+  requestJson<UserRecord>(`/system/users/${encodeURIComponent(id)}`, {
+    auth: true,
+  })
+
 export const exportUsersCsv = async (): Promise<Blob> =>
   requestBlob("/system/users/export", {
     auth: true,

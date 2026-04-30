@@ -92,6 +92,7 @@ export {
 export {
   createUser,
   exportUsersCsv,
+  fetchUserById,
   fetchUsers,
   resetUserPassword,
   updateUser,
