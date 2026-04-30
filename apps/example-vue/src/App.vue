@@ -39,8 +39,7 @@ import { useExampleShellBindings } from "./app/use-example-shell-bindings"
 import { useExampleShellMeta } from "./app/use-example-shell-meta"
 import { useExampleWorkspaceGates } from "./app/use-example-workspace-gates"
 import { useExampleWorkspaceSync } from "./app/use-example-workspace-sync"
-import AdminLoginPage from "./components/auth/AdminLoginPage.vue"
-import AdminShellLayout from "./components/layout/AdminShellLayout.vue"
+import ExampleAppStageGate from "./components/layout/ExampleAppStageGate.vue"
 import { exampleLocaleMessages } from "./i18n"
 import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
@@ -1323,63 +1322,45 @@ const {
 
 <template>
   <TConfigProvider :global-config="tdesignGlobalConfig">
-    <main class="app-shell min-h-screen">
-      <div class="admin-frame">
-        <p v-if="loading" class="admin-loading">
-          {{ t("app.loading.workspace") }}
-        </p>
-        <p v-else-if="errorMessage" class="admin-error">
-          {{ errorMessage }}
-        </p>
-
-        <template v-else>
-          <AdminLoginPage
-            v-if="exampleAppLayout === 'auth'"
-            :t="t"
-            :title="t('app.shell.title')"
-            :subtitle="t('app.shell.subtitle')"
-            :env-name="envName"
-            :auth-module-ready="authModuleReady"
-            :auth-loading="authLoading"
-            :username="loginForm.username"
-            :credential="loginForm.password"
-            :error-message="authErrorMessage"
-            @update:username="loginForm.username = $event"
-            @update:credential="loginForm.password = $event"
-            @submit-login="submitLogin"
-          />
-          <AdminShellLayout
-            v-else
-            :t="t"
-            :locale="locale"
-            :title="t('app.shell.title')"
-            :subtitle="t('app.shell.subtitle')"
-            :workspace-title="shellWorkspaceTitle"
-            :workspace-description="shellWorkspaceDescription"
-            :preset-label="t('app.shell.presetLabel')"
-            :environment="envName"
-            :status="
-              authModuleReady
-                ? t('app.shell.status.sessionAware')
-                : t('app.shell.status.preview')
-            "
-            :copy="enterpriseShellCopy"
-            :navigation="enterpriseNavigation"
-            :selected-menu-key="enterpriseSelectedMenuKey"
-            :tabs="enterpriseShellTabs"
-            :selected-tab-key="enterpriseSelectedTabKey"
-            :user="enterpriseShellUser"
-            :header-action-props="shellHeaderActionProps"
-            :header-action-listeners="shellHeaderActionListeners"
-            :workspace-main-props="shellWorkspaceMainProps"
-            :workspace-main-listeners="shellWorkspaceMainListeners"
-            :workspace-secondary-props="shellWorkspaceSecondaryProps"
-            :workspace-secondary-listeners="shellWorkspaceSecondaryListeners"
-            @menu-select="selectShellMenu"
-            @tab-select="selectShellTab"
-          />
-        </template>
-      </div>
-    </main>
+    <ExampleAppStageGate
+      :t="t"
+      :loading="loading"
+      :error-message="errorMessage"
+      :layout="exampleAppLayout"
+      :title="t('app.shell.title')"
+      :subtitle="t('app.shell.subtitle')"
+      :env-name="envName"
+      :auth-module-ready="authModuleReady"
+      :auth-loading="authLoading"
+      :username="loginForm.username"
+      :credential="loginForm.password"
+      :auth-error-message="authErrorMessage"
+      :locale="locale"
+      :workspace-title="shellWorkspaceTitle"
+      :workspace-description="shellWorkspaceDescription"
+      :preset-label="t('app.shell.presetLabel')"
+      :status="
+        authModuleReady
+          ? t('app.shell.status.sessionAware')
+          : t('app.shell.status.preview')
+      "
+      :copy="enterpriseShellCopy"
+      :navigation="enterpriseNavigation"
+      :selected-menu-key="enterpriseSelectedMenuKey"
+      :tabs="enterpriseShellTabs"
+      :selected-tab-key="enterpriseSelectedTabKey"
+      :user="enterpriseShellUser"
+      :header-action-props="shellHeaderActionProps"
+      :header-action-listeners="shellHeaderActionListeners"
+      :workspace-main-props="shellWorkspaceMainProps"
+      :workspace-main-listeners="shellWorkspaceMainListeners"
+      :workspace-secondary-props="shellWorkspaceSecondaryProps"
+      :workspace-secondary-listeners="shellWorkspaceSecondaryListeners"
+      @update:username="loginForm.username = $event"
+      @update:credential="loginForm.password = $event"
+      @submit-login="submitLogin"
+      @menu-select="selectShellMenu"
+      @tab-select="selectShellTab"
+    />
   </TConfigProvider>
 </template>

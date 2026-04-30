@@ -57,6 +57,7 @@
   - `i18n/en-US*.ts`
   - `router/example-router.ts`
   - `components/auth/AdminLoginPage.vue`
+  - `components/layout/ExampleAppStageGate.vue`
   - `components/layout/AdminShellLayout.vue`
   - `ShellWorkspaceHeaderActions.vue`
   - `ShellWorkspaceMainSwitch.vue`
