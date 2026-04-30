@@ -2,30 +2,25 @@ import { usePermissions } from "@elysian/frontend-vue"
 import { type ComputedRef, type Ref, computed } from "vue"
 
 import type { AuthIdentityResponse } from "../lib/platform-api"
+import type {
+  RegisteredWorkspaceKind,
+  WorkspaceModuleReadyMap,
+} from "./workspace-registry"
 
 interface UseExampleWorkspaceGatesOptions {
   permissionCodes: ComputedRef<string[]>
   authModuleReady: Ref<boolean>
   isAuthenticated: ComputedRef<boolean>
   authIdentity: Ref<AuthIdentityResponse | null>
-  customerModuleReady: Ref<boolean>
-  departmentModuleReady: Ref<boolean>
-  postModuleReady: Ref<boolean>
-  dictionaryModuleReady: Ref<boolean>
-  fileModuleReady: Ref<boolean>
-  menuModuleReady: Ref<boolean>
-  notificationModuleReady: Ref<boolean>
-  operationLogModuleReady: Ref<boolean>
-  roleModuleReady: Ref<boolean>
-  settingModuleReady: Ref<boolean>
-  tenantModuleReady: Ref<boolean>
-  userModuleReady: Ref<boolean>
-  workflowModuleReady: Ref<boolean>
+  workspaceModuleReady: WorkspaceModuleReadyMap
 }
 
 export const useExampleWorkspaceGates = (
   options: UseExampleWorkspaceGatesOptions,
 ) => {
+  const workspaceReady = (kind: RegisteredWorkspaceKind) =>
+    options.workspaceModuleReady.get(kind)?.value ?? false
+
   const customerPermissions = usePermissions(
     options.permissionCodes,
     {
@@ -149,7 +144,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterCustomerWorkspace = computed(
     () =>
-      options.customerModuleReady.value &&
+      workspaceReady("customer") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewCustomers = computed(
@@ -167,7 +162,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterDepartmentWorkspace = computed(
     () =>
-      options.departmentModuleReady.value &&
+      workspaceReady("department") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewDepartments = computed(
@@ -184,13 +179,13 @@ export const useExampleWorkspaceGates = (
 
   const canEnterDictionaryWorkspace = computed(
     () =>
-      options.dictionaryModuleReady.value &&
+      workspaceReady("dictionary") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
 
   const canEnterPostWorkspace = computed(
     () =>
-      options.postModuleReady.value &&
+      workspaceReady("post") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canEnterSessionWorkspace = computed(
@@ -219,7 +214,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterFileWorkspace = computed(
     () =>
-      options.fileModuleReady.value &&
+      workspaceReady("file") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewFiles = computed(
@@ -237,7 +232,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterMenuWorkspace = computed(
     () =>
-      options.menuModuleReady.value &&
+      workspaceReady("menu") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewMenus = computed(
@@ -252,7 +247,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterNotificationWorkspace = computed(
     () =>
-      options.notificationModuleReady.value &&
+      workspaceReady("notification") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewNotifications = computed(
@@ -272,7 +267,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterOperationLogWorkspace = computed(
     () =>
-      options.operationLogModuleReady.value &&
+      workspaceReady("operation-log") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewOperationLogs = computed(
@@ -288,7 +283,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterRoleWorkspace = computed(
     () =>
-      options.roleModuleReady.value &&
+      workspaceReady("role") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewRoles = computed(
@@ -303,7 +298,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterSettingWorkspace = computed(
     () =>
-      options.settingModuleReady.value &&
+      workspaceReady("setting") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewSettings = computed(
@@ -318,7 +313,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterTenantWorkspace = computed(
     () =>
-      options.tenantModuleReady.value &&
+      workspaceReady("tenant") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canManageTenantsAsSuperAdmin = computed(
@@ -338,7 +333,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterUserWorkspace = computed(
     () =>
-      options.userModuleReady.value &&
+      workspaceReady("user") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewUsers = computed(
@@ -356,7 +351,7 @@ export const useExampleWorkspaceGates = (
 
   const canEnterWorkflowWorkspace = computed(
     () =>
-      options.workflowModuleReady.value &&
+      workspaceReady("workflow-definitions") &&
       (!options.authModuleReady.value || options.isAuthenticated.value),
   )
   const canViewWorkflowDefinitions = computed(

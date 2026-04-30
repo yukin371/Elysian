@@ -10,6 +10,8 @@ export const workspaceRegistry = [
 ] as const satisfies readonly WorkspaceRegistration[]
 
 export { WORKSPACE_STATE_KEY } from "./injection-keys"
+export { createWorkspaceModuleReadyMap } from "./readiness"
+export type { WorkspaceModuleReadyMap } from "./readiness"
 export type {
   RegisteredWorkspaceKind,
   WorkspaceNavigationGroupRegistration,
