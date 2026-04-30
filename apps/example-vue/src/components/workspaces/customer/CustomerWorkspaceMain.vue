@@ -14,6 +14,10 @@ import { computed, inject } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { CustomerRecord } from "../../../lib/platform-api"
+import {
+  readInjectedValue,
+  resolveCustomerWorkspaceMainState,
+} from "./customer-workspace-state"
 
 type CustomerWorkspaceTranslation = (
   key: string,
@@ -70,36 +74,31 @@ const emit = defineEmits<{
   (e: "submit-page-jump"): void
 }>()
 
-interface CustomerWorkspaceInjectedState {
-  customerErrorMessage: { value: string }
-  customerItems: { value: CustomerRecord[] }
-  customerLoading: { value: boolean }
-}
-
 const injectedWorkspaceState = inject(
   WORKSPACE_STATE_KEY,
   computed(() => null),
 )
 
-const resolvedCustomerWorkspaceState =
-  computed<CustomerWorkspaceInjectedState | null>(() => {
-    const context = injectedWorkspaceState.value
-
-    if (!props.workspaceStateInjected || context?.kind !== "customer") {
-      return null
-    }
-
-    return context.state as CustomerWorkspaceInjectedState
-  })
-
-const resolvedLoading = computed(
-  () => resolvedCustomerWorkspaceState.value?.customerLoading.value ?? false,
+const resolvedCustomerWorkspaceState = computed(() =>
+  resolveCustomerWorkspaceMainState(
+    injectedWorkspaceState.value,
+    Boolean(props.workspaceStateInjected),
+  ),
 )
-const resolvedErrorMessage = computed(
-  () => resolvedCustomerWorkspaceState.value?.customerErrorMessage.value ?? "",
+
+const resolvedLoading = readInjectedValue(
+  computed(() => resolvedCustomerWorkspaceState.value?.customerLoading ?? null),
+  false,
 )
-const resolvedItems = computed(
-  () => resolvedCustomerWorkspaceState.value?.customerItems.value ?? [],
+const resolvedErrorMessage = readInjectedValue(
+  computed(
+    () => resolvedCustomerWorkspaceState.value?.customerErrorMessage ?? null,
+  ),
+  "",
+)
+const resolvedItems = readInjectedValue(
+  computed(() => resolvedCustomerWorkspaceState.value?.customerItems ?? null),
+  [] as CustomerRecord[],
 )
 </script>
 

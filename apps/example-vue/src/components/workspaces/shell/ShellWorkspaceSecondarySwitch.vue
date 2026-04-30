@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, provide } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import ShellWorkspaceSessionCard from "./ShellWorkspaceSessionCard.vue"
 import {
   type ShellWorkspaceSecondarySwitchEmitFn,
   type ShellWorkspaceSecondarySwitchProps,
   resolveShellWorkspaceSecondaryDescriptor,
 } from "./shell-workspace-secondary-descriptor"
+import { resolveProvidedWorkspaceState } from "./workspace-state-provider"
 
 const props = defineProps<ShellWorkspaceSecondarySwitchProps>()
 const emit = defineEmits<ShellWorkspaceSecondarySwitchEmitFn>()
@@ -17,6 +19,26 @@ const activeWorkspace = computed(() =>
 const activeWorkspaceListeners = computed(
   () => activeWorkspace.value.listeners ?? {},
 )
+
+const providedWorkspaceState = computed(() =>
+  resolveProvidedWorkspaceState(
+    props.currentWorkspaceKind,
+    (props.customerWorkspaceState ?? null) as {
+      customerErrorMessage: { value: string }
+      customerItems: { value: unknown[] }
+      customerLoading: { value: boolean }
+      customerFormMode: { value: "create" | "detail" | "edit" }
+      deleteConfirmId: { value: string | null }
+      formFields: { value: unknown[] }
+      formValues: { value: Record<string, unknown> }
+      panelDescription: { value: string }
+      panelTitle: { value: string }
+      selectedCustomer: { value: unknown | null }
+    } | null,
+  ),
+)
+
+provide(WORKSPACE_STATE_KEY, providedWorkspaceState)
 </script>
 
 <template>

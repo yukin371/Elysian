@@ -230,14 +230,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canCreateCustomers: boolean
   canUpdateCustomers: boolean
   canDeleteCustomers: boolean
-  customerLoading: boolean
-  enterpriseFormMode: string
-  enterprisePanelTitle: string
-  enterprisePanelDescription: string
-  deleteConfirmId: string | null
-  selectedCustomer: Record<string, unknown> | null
-  enterpriseFormFields: ReadonlyArray<unknown>
-  enterpriseFormValues: Record<string, unknown>
+  customerWorkspaceState: Record<string, unknown>
   platformDisplayName: string
   platformVersion: string
   platformStatusLabel: string
@@ -395,15 +388,8 @@ const customerResolver: ShellWorkspaceSecondaryResolver = (props, emit) => ({
     canCreateCustomers: props.canCreateCustomers,
     canUpdateCustomers: props.canUpdateCustomers,
     canDeleteCustomers: props.canDeleteCustomers,
-    loading: props.customerLoading,
-    panelMode: props.enterpriseFormMode,
-    panelTitle: props.enterprisePanelTitle,
-    panelDescription: props.enterprisePanelDescription,
-    deleteConfirmId: props.deleteConfirmId,
-    selectedCustomer: props.selectedCustomer,
-    formFields: props.enterpriseFormFields,
-    formValues: props.enterpriseFormValues,
     formCopy: props.enterpriseFormCopy,
+    workspaceStateInjected: true,
   },
   listeners: {
     "confirm-delete": () => emit("confirm-delete"),
