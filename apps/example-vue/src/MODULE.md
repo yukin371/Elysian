@@ -38,6 +38,7 @@
   - `example-auth-errors.ts`
   - `use-example-navigation.ts`
   - `use-example-workspace-gates.ts`
+  - `use-example-runtime-state.ts`
   - `use-example-query-summary.ts`
   - `use-example-shell-meta.ts`
   - `use-example-csv-exports.ts`

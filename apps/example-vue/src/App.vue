@@ -12,7 +12,7 @@ import {
 import { ConfigProvider as TConfigProvider } from "tdesign-vue-next/es/config-provider"
 import enUs from "tdesign-vue-next/es/locale/en_US"
 import zhCn from "tdesign-vue-next/es/locale/zh_CN"
-import { computed, ref } from "vue"
+import { computed } from "vue"
 import { createAppShellLocalization } from "./app/app-shell-helpers"
 import { createExampleAppShellBindingsOptions } from "./app/create-example-app-shell-bindings-options"
 import { isRecoverableAuthError } from "./app/example-auth-errors"
@@ -32,6 +32,7 @@ import {
 import { useExampleCsvExports } from "./app/use-example-csv-exports"
 import { useExampleNavigation } from "./app/use-example-navigation"
 import { useExampleQuerySummary } from "./app/use-example-query-summary"
+import { useExampleRuntimeState } from "./app/use-example-runtime-state"
 import { useExampleSessionOrchestration } from "./app/use-example-session-orchestration"
 import { useExampleShellBindings } from "./app/use-example-shell-bindings"
 import { useExampleShellMeta } from "./app/use-example-shell-meta"
@@ -40,8 +41,6 @@ import { useExampleWorkspaceSync } from "./app/use-example-workspace-sync"
 import AdminLoginPage from "./components/auth/AdminLoginPage.vue"
 import AdminShellLayout from "./components/layout/AdminShellLayout.vue"
 import { exampleLocaleMessages } from "./i18n"
-import type { AuthIdentityResponse, PlatformResponse } from "./lib/platform-api"
-import { useExampleAppLayout } from "./router/example-router"
 import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
 import { useDepartmentWorkspace } from "./workspaces/use-department-workspace"
@@ -109,46 +108,46 @@ const {
   localizeWorkflowStatus,
 } = createAppShellLocalization(t)
 
-const platform = ref<PlatformResponse | null>(null)
-const authIdentity = ref<AuthIdentityResponse | null>(null)
-const registeredModuleCodes = ref<string[]>([])
-const loading = ref(true)
-const authLoading = ref(false)
-const errorMessage = ref("")
-const authErrorMessage = ref("")
-const authModuleReady = ref(false)
-const customerModuleReady = ref(false)
-const departmentModuleReady = ref(false)
-const postModuleReady = ref(false)
-const fileModuleReady = ref(false)
-const menuModuleReady = ref(false)
-const notificationModuleReady = ref(false)
-const operationLogModuleReady = ref(false)
-const roleModuleReady = ref(false)
-const settingModuleReady = ref(false)
-const tenantModuleReady = ref(false)
-const userModuleReady = ref(false)
-const dictionaryModuleReady = ref(false)
-const workflowModuleReady = ref(false)
-const departmentExportLoading = ref(false)
-const dictionaryTypeExportLoading = ref(false)
-const dictionaryItemsExportLoading = ref(false)
-const fileExportLoading = ref(false)
-const menuExportLoading = ref(false)
-const notificationExportLoading = ref(false)
-const operationLogExportLoading = ref(false)
-const postExportLoading = ref(false)
-const roleExportLoading = ref(false)
-const userExportLoading = ref(false)
-const settingExportLoading = ref(false)
-const tenantExportLoading = ref(false)
-const envName = ref("unknown")
-const demoAdminPassword = ["admin", "123"].join("")
-
-const loginForm = ref({
-  username: "admin",
-  password: demoAdminPassword,
-})
+const {
+  authErrorMessage,
+  authIdentity,
+  authLoading,
+  authModuleReady,
+  customerModuleReady,
+  departmentExportLoading,
+  departmentModuleReady,
+  dictionaryItemsExportLoading,
+  dictionaryModuleReady,
+  dictionaryTypeExportLoading,
+  envName,
+  errorMessage,
+  exampleAppLayout,
+  fileExportLoading,
+  fileModuleReady,
+  isAuthenticated,
+  loading,
+  loginForm,
+  menuExportLoading,
+  menuModuleReady,
+  notificationExportLoading,
+  notificationModuleReady,
+  operationLogExportLoading,
+  operationLogModuleReady,
+  permissionCodes,
+  platform,
+  postExportLoading,
+  postModuleReady,
+  registeredModuleCodes,
+  roleExportLoading,
+  roleModuleReady,
+  settingExportLoading,
+  settingModuleReady,
+  tenantExportLoading,
+  tenantModuleReady,
+  userExportLoading,
+  userModuleReady,
+  workflowModuleReady,
+} = useExampleRuntimeState()
 
 const handleRecoverableAuthError = (error: unknown) => {
   if (isRecoverableAuthError(error)) {
@@ -156,13 +155,6 @@ const handleRecoverableAuthError = (error: unknown) => {
   }
 }
 
-const isAuthenticated = computed(() => authIdentity.value !== null)
-const exampleAppLayout = useExampleAppLayout({
-  isAuthenticated,
-})
-const permissionCodes = computed(
-  () => authIdentity.value?.permissionCodes ?? [],
-)
 const exampleNavigation = useExampleNavigation({
   authIdentity,
   registeredModuleCodes,
