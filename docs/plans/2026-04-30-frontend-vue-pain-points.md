@@ -2,6 +2,9 @@
 
 > 记录日期：2026-04-30
 > 触发场景：梳理 example-vue 前端架构时，发现 App.vue 职责过重只是表象，根因是缺少 workspace 注册/协议机制，每新增一个 workspace 需要改动 7+ 个文件
+> 状态更新：`2026-05-01`
+> - 痛点 3 / 痛点 6 的第一阶段已完成，归档见 [2026-05-01-frontend-arch-spine-closeout.md](./2026-05-01-frontend-arch-spine-closeout.md)
+> - 本文档继续保留为历史诊断输入；未完成项主要是痛点 4 / 5 / 2
 
 ---
 

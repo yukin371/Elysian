@@ -5,6 +5,10 @@
 > - [后端架构痛点与改进方案](./2026-04-30-backend-query-pain-points.md)
 > - [前端 Vue 架构痛点与改进方案](./2026-04-30-frontend-vue-pain-points.md)
 
+> 状态更新：`2026-05-01`
+> - 前端脊柱搭建第一阶段已按修订后边界完成，归档见 [2026-05-01-frontend-arch-spine-closeout.md](./2026-05-01-frontend-arch-spine-closeout.md)
+> - 本文档继续保留为后续未完成里程碑的执行计划，不再把已收口的前端脊柱任务当作当前活动项
+
 ---
 
 ## 总览
@@ -158,9 +162,17 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 ---
 
-## 里程碑 4：前端脊柱搭建
+## 里程碑 4：前端脊柱搭建 ✅ 已按修订边界归档
 
 **目标**：解决前端痛点 3 + 6，建立 workspace 注册表和 CRUD 工厂
+
+归档说明：
+
+- 归档文档：[2026-05-01-frontend-arch-spine-closeout.md](./2026-05-01-frontend-arch-spine-closeout.md)
+- 实际归档边界：
+  - workspace 注册表、路由/导航/ready 推导、CRUD 工厂、本地直接回归补强已完成
+  - `customer` 与 `operation-log` 已明确不纳入“标准 CRUD 工厂全覆盖”统计
+- 本节保留为历史执行记录，不再作为当前活动任务列表
 
 ### 任务组 4A：workspace 注册表（前端痛点 6）
 
@@ -182,11 +194,11 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 |------|------|---------|
 | 4B-1 设计并实现 `BaseCrudState` 接口 | `workspaces/create-crud-workspace.ts` | 满足 `WorkspaceState` 最小公共接口 |
 | 4B-2 实现 `createCrudWorkspace` 工厂函数 | 同上 | 内置分页/排序/loading/CRUD + extend 钩子 |
-| 4B-3 重构 `use-customer-workspace` 使用工厂 | `workspaces/use-customer-workspace.ts` | 从 20KB 降到 ~3KB |
+| 4B-3 重构 `use-customer-workspace` 使用工厂 | `workspaces/use-customer-workspace.ts` | 已按修订边界排除，不强制迁移 |
 | 4B-4 重构 `use-dictionary-workspace` 使用工厂 | `workspaces/use-dictionary-workspace.ts` | 验证 extend 钩子可用（字典有树形结构） |
 | 4B-5 重构 `use-setting-workspace` 使用工厂 | `workspaces/use-setting-workspace.ts` | 第三个验证点 |
-| 4B-6 验证 3 个重构 workspace 功能无回归 | 手动验证 + 现有测试 | 列表、搜索、分页、CRUD 操作正常 |
-| 4B-7 逐个重构其余标准 CRUD workspace | 各 composable 文件 | customer/dictionary 已完成，剩余 role/menu/notification/department/tenant/user/setting/post/operation-log |
+| 4B-6 验证 3 个重构 workspace 功能无回归 | 手动验证 + 现有测试 | 已由直接回归与全链路检查补强 |
+| 4B-7 逐个重构其余标准 CRUD workspace | 各 composable 文件 | 已完成 `dictionary / department / post / menu / notification / role / setting / tenant / user`；`operation-log` 按边界排除 |
 
 ### 任务组 4C：App.vue 初步收敛
 
@@ -196,11 +208,11 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 | 4C-2 App.vue 删除硬编码的 workspace 初始化 | `App.vue` | 改为从注册表遍历 |
 | 4C-3 验证所有 workspace 功能正常 | 手动全量验证 | 每个 workspace 的列表/详情/CRUD 均正常 |
 
-**检查点 CP4**：注册表覆盖全部 16 个 workspace + CRUD 工厂覆盖所有标准 workspace + App.vue 不再包含独立 moduleReady ref + 全部 workspace 功能验证通过
+**检查点 CP4**：已按修订边界达成并归档。后续不再在本计划中重复跟踪。
 
 ---
 
-## 里程碑 5：前端体验升级
+## 里程碑 5：前端体验升级 🚧 当前主线
 
 **目标**：解决前端痛点 4 + 5，消除 props 爆炸，样式收敛
 
@@ -227,7 +239,7 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 ---
 
-## 里程碑 6：类型自动化 + 后端测试补位
+## 里程碑 6：类型自动化 + 后端测试补位 🚧 当前候选后续项
 
 **目标**：解决前端痛点 2 中期方案 + 后端痛点 8 持续补位
 
