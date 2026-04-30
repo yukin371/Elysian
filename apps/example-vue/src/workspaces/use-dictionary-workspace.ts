@@ -1,8 +1,4 @@
-import type {
-  ElyFormField,
-  ElyQueryField,
-  ElyQueryValues,
-} from "@elysian/ui-enterprise-vue"
+import type { ElyFormField, ElyQueryField } from "@elysian/ui-enterprise-vue"
 import { type ComputedRef, type Ref, computed, ref } from "vue"
 
 import {
@@ -24,6 +20,7 @@ import {
   fetchDictionaryTypes,
   updateDictionaryType,
 } from "../lib/platform-api"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 export type DictionaryPanelMode = "detail" | "create" | "edit"
 type DictionaryFormValues = Record<string, unknown>
@@ -56,18 +53,76 @@ interface UseDictionaryWorkspaceOptions {
 export const useDictionaryWorkspace = (
   options: UseDictionaryWorkspaceOptions,
 ) => {
-  const dictionaryTypes = ref<DictionaryTypeRecord[]>([])
   const dictionaryItems = ref<DictionaryItemRecord[]>([])
-  const dictionaryTypeDetail = ref<DictionaryTypeDetailRecord | null>(null)
-  const dictionaryLoading = ref(false)
-  const dictionaryDetailLoading = ref(false)
-  const dictionaryErrorMessage = ref("")
-  const dictionaryDetailErrorMessage = ref("")
-  const selectedDictionaryTypeId = ref<string | null>(null)
-  const dictionaryPanelMode = ref<DictionaryPanelMode>("detail")
-  const dictionaryQueryValues = ref<ElyQueryValues>({})
-  const dictionaryCreateForm = ref(createDefaultDictionaryTypeDraft())
-  const dictionaryEditForm = ref(createDefaultDictionaryTypeDraft())
+
+  const dictionaryWorkspace = createCrudWorkspace<
+    DictionaryTypeRecord,
+    ReturnType<typeof createDefaultDictionaryTypeDraft>,
+    Parameters<typeof createDictionaryType>[0],
+    DictionaryTypeDetailRecord
+  >({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultDictionaryTypeDraft,
+    createRecord: createDictionaryType,
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchDictionaryTypeById,
+    fetchList: fetchDictionaryTypes,
+    getCreateErrorMessage: () => options.t("app.error.createDictionary"),
+    getLoadDetailErrorMessage: () =>
+      options.t("app.error.loadDictionaryDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadDictionaries"),
+    getUpdateErrorMessage: () => options.t("app.error.updateDictionary"),
+    normalizePayload: (values) => {
+      const payload = {
+        code: normalizeDictionaryText(values.code),
+        name: normalizeDictionaryText(values.name),
+        description: normalizeOptionalDictionaryText(values.description),
+        status: normalizeDictionaryStatus(values.status),
+      }
+
+      if (payload.code.length === 0) {
+        return {
+          message: options.t("app.error.dictionaryCodeRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.name.length === 0) {
+        return {
+          message: options.t("app.error.dictionaryNameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolveDictionaryTypeSelection,
+    toEditDraft: (dictionaryType) => ({
+      code: dictionaryType.code,
+      name: dictionaryType.name,
+      description: dictionaryType.description ?? "",
+      status: dictionaryType.status,
+    }),
+    updateRecord: updateDictionaryType,
+  })
+
+  const dictionaryTypes = dictionaryWorkspace.items
+  const dictionaryTypeDetail = dictionaryWorkspace.detail
+  const dictionaryLoading = dictionaryWorkspace.loading
+  const dictionaryDetailLoading = dictionaryWorkspace.detailLoading
+  const dictionaryErrorMessage = dictionaryWorkspace.errorMessage
+  const dictionaryDetailErrorMessage = dictionaryWorkspace.detailErrorMessage
+  const selectedDictionaryTypeId = dictionaryWorkspace.selectedId
+  const dictionaryPanelMode = dictionaryWorkspace.panelMode
+  const dictionaryQueryValues = dictionaryWorkspace.queryValues
+  const dictionaryCreateForm = dictionaryWorkspace.createForm
+  const dictionaryEditForm = dictionaryWorkspace.editForm
 
   const filteredDictionaryTypes = computed(() =>
     filterDictionaryTypes(dictionaryTypes.value, {
@@ -91,26 +146,7 @@ export const useDictionaryWorkspace = (
     }),
   )
 
-  const selectedDictionaryTypeListItem = computed(
-    () =>
-      dictionaryTypes.value.find(
-        (type: DictionaryTypeRecord) =>
-          type.id === selectedDictionaryTypeId.value,
-      ) ?? null,
-  )
-
-  const selectedDictionaryType = computed<
-    DictionaryTypeRecord | DictionaryTypeDetailRecord | null
-  >(() => {
-    if (
-      dictionaryTypeDetail.value &&
-      dictionaryTypeDetail.value.id === selectedDictionaryTypeId.value
-    ) {
-      return dictionaryTypeDetail.value
-    }
-
-    return selectedDictionaryTypeListItem.value
-  })
+  const selectedDictionaryType = dictionaryWorkspace.selectedRecord
 
   const selectedDictionaryTypeDetail = computed(() =>
     dictionaryTypeDetail.value &&
@@ -294,44 +330,9 @@ export const useDictionaryWorkspace = (
       : options.t("app.dictionary.detailEmptyDescription")
   })
 
-  const resetPanelInputs = () => {
-    dictionaryCreateForm.value = createDefaultDictionaryTypeDraft()
-    dictionaryEditForm.value = createDefaultDictionaryTypeDraft()
-  }
-
-  const resetQuery = () => {
-    dictionaryQueryValues.value = {}
-  }
-
   const clearWorkspace = () => {
-    dictionaryTypes.value = []
     dictionaryItems.value = []
-    dictionaryTypeDetail.value = null
-    selectedDictionaryTypeId.value = null
-    dictionaryErrorMessage.value = ""
-    dictionaryDetailErrorMessage.value = ""
-    dictionaryPanelMode.value = "detail"
-    resetPanelInputs()
-  }
-
-  const selectDictionaryType = async (type: DictionaryTypeRecord) => {
-    options.currentShellTabKey.value = "workspace"
-    selectedDictionaryTypeId.value = type.id
-    dictionaryTypeDetail.value = null
-    dictionaryDetailLoading.value = true
-    dictionaryDetailErrorMessage.value = ""
-
-    try {
-      dictionaryTypeDetail.value = await fetchDictionaryTypeById(type.id)
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      dictionaryDetailErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadDictionaryDetail")
-    } finally {
-      dictionaryDetailLoading.value = false
-    }
+    dictionaryWorkspace.clearWorkspace()
   }
 
   const reloadDictionaries = async () => {
@@ -340,182 +341,39 @@ export const useDictionaryWorkspace = (
       return
     }
 
-    dictionaryLoading.value = true
-    dictionaryErrorMessage.value = ""
+    const dictionaryItemsPromise = fetchDictionaryItems()
+    await dictionaryWorkspace.reloadRecords()
 
     try {
-      const [typePayload, itemPayload] = await Promise.all([
-        fetchDictionaryTypes(),
-        fetchDictionaryItems(),
-      ])
+      const itemPayload = await dictionaryItemsPromise
 
-      dictionaryTypes.value = typePayload.items
-      dictionaryItems.value = itemPayload.items
-
-      if (typePayload.items.length === 0) {
+      if (dictionaryTypes.value.length === 0) {
         dictionaryItems.value = []
-        selectedDictionaryTypeId.value = null
-        dictionaryTypeDetail.value = null
-
-        if (options.canCreate.value) {
-          dictionaryPanelMode.value = "create"
-        }
-
         return
       }
 
-      selectedDictionaryTypeId.value = resolveDictionaryTypeSelection(
-        typePayload.items,
-        selectedDictionaryTypeId.value,
-      )
-
-      if (dictionaryPanelMode.value !== "detail") {
-        return
-      }
-
-      const nextType = typePayload.items.find(
-        (type) => type.id === selectedDictionaryTypeId.value,
-      )
-
-      if (nextType) {
-        await selectDictionaryType(nextType)
-      }
+      dictionaryItems.value = itemPayload.items
     } catch (error) {
       options.onRecoverableAuthError(error)
-      clearWorkspace()
+      dictionaryItems.value = []
       dictionaryErrorMessage.value =
         error instanceof Error
           ? error.message
           : options.t("app.error.loadDictionaries")
-    } finally {
-      dictionaryLoading.value = false
     }
   }
 
-  const handleSearch = (values: ElyQueryValues) => {
-    dictionaryQueryValues.value = values
-  }
-
-  const handleReset = () => {
-    resetQuery()
-  }
-
+  const cancelPanel = dictionaryWorkspace.cancelPanel
+  const handleReset = dictionaryWorkspace.handleReset
+  const handleSearch = dictionaryWorkspace.handleSearch
   const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedDictionaryTypeId.value = null
-    dictionaryTypeDetail.value = null
-    dictionaryErrorMessage.value = ""
-    dictionaryDetailErrorMessage.value = ""
-    resetPanelInputs()
-    dictionaryPanelMode.value = "create"
+    dictionaryItems.value = []
+    dictionaryWorkspace.openCreatePanel()
   }
-
-  const startEdit = (
-    dictionaryType: DictionaryTypeRecord | DictionaryTypeDetailRecord,
-  ) => {
-    if (!options.canUpdate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedDictionaryTypeId.value = dictionaryType.id
-    dictionaryErrorMessage.value = ""
-    dictionaryDetailErrorMessage.value = ""
-    dictionaryEditForm.value = {
-      code: dictionaryType.code,
-      name: dictionaryType.name,
-      description: dictionaryType.description ?? "",
-      status: dictionaryType.status,
-    }
-    dictionaryPanelMode.value = "edit"
-  }
-
-  const cancelPanel = () => {
-    dictionaryErrorMessage.value = ""
-
-    if (selectedDictionaryType.value) {
-      dictionaryPanelMode.value = "detail"
-      return
-    }
-
-    if (options.canCreate.value) {
-      dictionaryPanelMode.value = "create"
-      return
-    }
-
-    dictionaryPanelMode.value = "detail"
-  }
-
-  const submitForm = async (values: DictionaryFormValues) => {
-    if (dictionaryLoading.value || dictionaryDetailLoading.value) {
-      return
-    }
-
-    const payload = {
-      code: normalizeDictionaryText(values.code),
-      name: normalizeDictionaryText(values.name),
-      description: normalizeOptionalDictionaryText(values.description),
-      status: normalizeDictionaryStatus(values.status),
-    }
-
-    if (payload.code.length === 0) {
-      dictionaryErrorMessage.value = options.t(
-        "app.error.dictionaryCodeRequired",
-      )
-      return
-    }
-
-    if (payload.name.length === 0) {
-      dictionaryErrorMessage.value = options.t(
-        "app.error.dictionaryNameRequired",
-      )
-      return
-    }
-
-    dictionaryLoading.value = true
-    dictionaryErrorMessage.value = ""
-
-    try {
-      if (
-        dictionaryPanelMode.value === "edit" &&
-        selectedDictionaryTypeId.value
-      ) {
-        const updated = await updateDictionaryType(
-          selectedDictionaryTypeId.value,
-          payload,
-        )
-        selectedDictionaryTypeId.value = updated.id
-        dictionaryTypeDetail.value = updated
-        dictionaryPanelMode.value = "detail"
-        await reloadDictionaries()
-        return
-      }
-
-      if (!options.canCreate.value) {
-        return
-      }
-
-      const created = await createDictionaryType(payload)
-      selectedDictionaryTypeId.value = created.id
-      dictionaryTypeDetail.value = created
-      dictionaryPanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadDictionaries()
-    } catch (error) {
-      dictionaryErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : dictionaryPanelMode.value === "edit"
-            ? options.t("app.error.updateDictionary")
-            : options.t("app.error.createDictionary")
-    } finally {
-      dictionaryLoading.value = false
-    }
-  }
+  const resetQuery = dictionaryWorkspace.resetQuery
+  const selectDictionaryType = dictionaryWorkspace.selectRecord
+  const startEdit = dictionaryWorkspace.startEdit
+  const submitForm = dictionaryWorkspace.submitForm
 
   const handleRowClick = async (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
