@@ -13,7 +13,7 @@ import type { AppTranslate, ExampleWorkspaceKind } from "./app-shell-helpers"
 
 type ItemCollection = Ref<unknown[]> | ComputedRef<unknown[]>
 
-interface UseExampleShellMetaOptions {
+export interface UseExampleShellMetaOptions {
   t: AppTranslate
   platform: Ref<PlatformResponse | null>
   authIdentity: Ref<AuthIdentityResponse | null>

@@ -35,6 +35,7 @@
 - 已从 `App.vue` 下沉：
   - `app-shell-helpers.ts`
   - `create-example-app-shell-bindings-options.ts`
+  - `create-example-shell-meta-options.ts`
   - `create-example-session-orchestration-options.ts`
   - `example-auth-errors.ts`
   - `use-example-app-bootstrap.ts`

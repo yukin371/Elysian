@@ -11,6 +11,7 @@ import { ConfigProvider as TConfigProvider } from "tdesign-vue-next/es/config-pr
 import { computed } from "vue"
 import { createExampleAppShellBindingsOptions } from "./app/create-example-app-shell-bindings-options"
 import { createExampleSessionOrchestrationOptions } from "./app/create-example-session-orchestration-options"
+import { createExampleShellMetaOptions } from "./app/create-example-shell-meta-options"
 import { isRecoverableAuthError } from "./app/example-auth-errors"
 import {
   customerPageDefinition,
@@ -944,48 +945,29 @@ const {
   tableItems: enterpriseSettingTableItems,
 } = settingWorkspace
 
-const shellMeta = useExampleShellMeta({
+const shellMetaOptions = createExampleShellMetaOptions({
   t,
-  platform,
-  authIdentity,
-  authModuleReady,
-  authLoading,
-  isAuthenticated,
-  isCustomerWorkspace,
-  isDictionaryWorkspace,
-  isDepartmentWorkspace,
-  isSessionWorkspace,
-  isMenuWorkspace,
-  isNotificationWorkspace,
-  isOperationLogWorkspace,
-  isRoleWorkspace,
-  isSettingWorkspace,
-  isTenantWorkspace,
-  isUserWorkspace,
-  isWorkflowDefinitionsWorkspace,
-  isFileWorkspace,
-  isGeneratorPreviewWorkspace,
-  isRuntimeShellTab,
-  currentWorkspaceKind,
-  currentWorkspaceTitle,
-  currentWorkspaceDescription,
-  currentNavigationPath,
-  navigationItemCount,
-  customerItems,
-  dictionaryItems: filteredDictionaryTypes,
-  departmentItems: filteredDepartmentItems,
-  sessionItems: filteredSessionItems,
-  menuItems: filteredMenuItems,
-  notificationItems: filteredNotificationItems,
-  operationLogItems: filteredOperationLogItems,
-  roleItems: filteredRoleItems,
-  settingItems: filteredSettingItems,
-  tenantItems: filteredTenantItems,
-  userItems: filteredUserItems,
-  workflowDefinitions: workflowDefinitionCards,
-  fileItems: filteredFileItems,
-  generatorPreviewFiles: generatorPreviewWorkspace.filteredPreviewFiles,
+  runtimeState: exampleRuntimeState,
+  navigation: exampleNavigation,
+  workspaces: {
+    customerWorkspace,
+    dictionaryWorkspace,
+    departmentWorkspace,
+    fileWorkspace,
+    generatorPreviewWorkspace,
+    menuWorkspace,
+    notificationWorkspace,
+    operationLogWorkspace,
+    roleWorkspace,
+    sessionWorkspace,
+    settingWorkspace,
+    tenantWorkspace,
+    userWorkspace,
+    workflowWorkspace,
+  },
 })
+
+const shellMeta = useExampleShellMeta(shellMetaOptions)
 
 const {
   enterpriseShellCopy,
