@@ -36,7 +36,6 @@ import { useExampleShellBindings } from "./app/use-example-shell-bindings"
 import { useExampleShellMeta } from "./app/use-example-shell-meta"
 import { useExampleWorkspaceGates } from "./app/use-example-workspace-gates"
 import { useExampleWorkspaceSync } from "./app/use-example-workspace-sync"
-import { createWorkspaceModuleReadyMap } from "./app/workspace-registry"
 import ExampleAppStageGate from "./components/layout/ExampleAppStageGate.vue"
 import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
@@ -134,6 +133,7 @@ const {
   userExportLoading,
   userModuleReady,
   workflowModuleReady,
+  workspaceModuleReady,
 } = exampleRuntimeState
 
 const handleRecoverableAuthError = (error: unknown) => {
@@ -147,23 +147,6 @@ const exampleNavigation = useExampleNavigation({
   registeredModuleCodes,
   t,
   localizeNavigationItems,
-})
-
-const workspaceModuleReady = createWorkspaceModuleReadyMap({
-  authModuleReady,
-  customerModuleReady,
-  departmentModuleReady,
-  dictionaryModuleReady,
-  fileModuleReady,
-  menuModuleReady,
-  notificationModuleReady,
-  operationLogModuleReady,
-  postModuleReady,
-  roleModuleReady,
-  settingModuleReady,
-  tenantModuleReady,
-  userModuleReady,
-  workflowModuleReady,
 })
 
 const {

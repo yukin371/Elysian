@@ -5,6 +5,7 @@ import type {
   PlatformResponse,
 } from "../lib/platform-api"
 import { useExampleAppLayout } from "../router/example-router"
+import { createWorkspaceModuleReadyMap } from "./workspace-registry"
 
 export const useExampleRuntimeState = () => {
   const platform = ref<PlatformResponse | null>(null)
@@ -55,6 +56,22 @@ export const useExampleRuntimeState = () => {
   const permissionCodes = computed(
     () => authIdentity.value?.permissionCodes ?? [],
   )
+  const workspaceModuleReady = createWorkspaceModuleReadyMap({
+    authModuleReady,
+    customerModuleReady,
+    departmentModuleReady,
+    dictionaryModuleReady,
+    fileModuleReady,
+    menuModuleReady,
+    notificationModuleReady,
+    operationLogModuleReady,
+    postModuleReady,
+    roleModuleReady,
+    settingModuleReady,
+    tenantModuleReady,
+    userModuleReady,
+    workflowModuleReady,
+  })
 
   return {
     authErrorMessage,
@@ -95,5 +112,6 @@ export const useExampleRuntimeState = () => {
     userExportLoading,
     userModuleReady,
     workflowModuleReady,
+    workspaceModuleReady,
   }
 }
