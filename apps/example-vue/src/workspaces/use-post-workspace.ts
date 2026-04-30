@@ -1,9 +1,5 @@
-import type {
-  ElyFormField,
-  ElyQueryField,
-  ElyQueryValues,
-} from "@elysian/ui-enterprise-vue"
-import { type ComputedRef, type Ref, computed, ref } from "vue"
+import type { ElyFormField, ElyQueryField } from "@elysian/ui-enterprise-vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
 import {
   type PostRecord,
@@ -22,6 +18,7 @@ import {
   normalizePostText,
   resolvePostSelection,
 } from "../lib/post-workspace"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 export type PostPanelMode = "detail" | "create" | "edit"
 type PostFormValues = Record<string, unknown>
@@ -52,17 +49,70 @@ interface UsePostWorkspaceOptions {
 }
 
 export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
-  const postItems = ref<PostRecord[]>([])
-  const postDetail = ref<PostRecord | null>(null)
-  const postLoading = ref(false)
-  const postDetailLoading = ref(false)
-  const postErrorMessage = ref("")
-  const postDetailErrorMessage = ref("")
-  const selectedPostId = ref<string | null>(null)
-  const postPanelMode = ref<PostPanelMode>("detail")
-  const postQueryValues = ref<ElyQueryValues>({})
-  const postCreateForm = ref(createDefaultPostDraft())
-  const postEditForm = ref(createDefaultPostDraft())
+  const postWorkspace = createCrudWorkspace({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultPostDraft,
+    createRecord: createPost,
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchPostById,
+    fetchList: fetchPosts,
+    getCreateErrorMessage: () => options.t("app.error.createPost"),
+    getLoadDetailErrorMessage: () => options.t("app.error.loadPostDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadPosts"),
+    getUpdateErrorMessage: () => options.t("app.error.updatePost"),
+    normalizePayload: (values) => {
+      const payload = {
+        code: normalizePostText(values.code),
+        name: normalizePostText(values.name),
+        sort: normalizePostSort(values.sort),
+        status: normalizePostStatus(values.status),
+        remark: normalizeOptionalPostText(values.remark),
+      }
+
+      if (payload.code.length === 0) {
+        return {
+          message: options.t("app.error.postCodeRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.name.length === 0) {
+        return {
+          message: options.t("app.error.postNameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolvePostSelection,
+    toEditDraft: (post) => ({
+      code: post.code,
+      name: post.name,
+      sort: post.sort,
+      status: post.status,
+      remark: post.remark ?? "",
+    }),
+    updateRecord: updatePost,
+  })
+
+  const postItems = postWorkspace.items
+  const postDetail = postWorkspace.detail
+  const postLoading = postWorkspace.loading
+  const postDetailLoading = postWorkspace.detailLoading
+  const postErrorMessage = postWorkspace.errorMessage
+  const postDetailErrorMessage = postWorkspace.detailErrorMessage
+  const selectedPostId = postWorkspace.selectedId
+  const postPanelMode = postWorkspace.panelMode
+  const postQueryValues = postWorkspace.queryValues
+  const postCreateForm = postWorkspace.createForm
+  const postEditForm = postWorkspace.editForm
 
   const filteredPostItems = computed(() =>
     filterPosts(postItems.value, {
@@ -86,19 +136,7 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
     }),
   )
 
-  const selectedPostListItem = computed(
-    () =>
-      postItems.value.find(
-        (post: PostRecord) => post.id === selectedPostId.value,
-      ) ?? null,
-  )
-
-  const selectedPost = computed(
-    () =>
-      (postDetail.value && postDetail.value.id === selectedPostId.value
-        ? postDetail.value
-        : selectedPostListItem.value) ?? null,
-  )
+  const selectedPost = postWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
     options.page.tableColumns.value.map((column) => ({
@@ -260,212 +298,16 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
       : options.t("app.post.detailEmptyDescription")
   })
 
-  const resetPanelInputs = () => {
-    postCreateForm.value = createDefaultPostDraft()
-    postEditForm.value = createDefaultPostDraft()
-  }
-
-  const resetQuery = () => {
-    postQueryValues.value = {}
-  }
-
-  const clearWorkspace = () => {
-    postItems.value = []
-    postDetail.value = null
-    selectedPostId.value = null
-    postErrorMessage.value = ""
-    postDetailErrorMessage.value = ""
-    postPanelMode.value = "detail"
-    resetPanelInputs()
-  }
-
-  const selectPost = async (post: PostRecord) => {
-    options.currentShellTabKey.value = "workspace"
-    selectedPostId.value = post.id
-    postPanelMode.value = "detail"
-    postDetail.value = null
-    postDetailLoading.value = true
-    postDetailErrorMessage.value = ""
-
-    try {
-      postDetail.value = await fetchPostById(post.id)
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      postDetailErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadPostDetail")
-    } finally {
-      postDetailLoading.value = false
-    }
-  }
-
-  const reloadPosts = async () => {
-    if (!options.canView.value) {
-      clearWorkspace()
-      return
-    }
-
-    postLoading.value = true
-    postErrorMessage.value = ""
-
-    try {
-      const payload = await fetchPosts()
-      postItems.value = payload.items
-
-      if (payload.items.length === 0) {
-        selectedPostId.value = null
-        postDetail.value = null
-
-        if (options.canCreate.value) {
-          postPanelMode.value = "create"
-        }
-
-        return
-      }
-
-      selectedPostId.value = resolvePostSelection(
-        payload.items,
-        selectedPostId.value,
-      )
-
-      if (postPanelMode.value !== "detail") {
-        return
-      }
-
-      const nextPost = payload.items.find(
-        (item) => item.id === selectedPostId.value,
-      )
-
-      if (nextPost) {
-        await selectPost(nextPost)
-      }
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      clearWorkspace()
-      postErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadPosts")
-    } finally {
-      postLoading.value = false
-    }
-  }
-
-  const handleSearch = (values: ElyQueryValues) => {
-    postQueryValues.value = values
-  }
-
-  const handleReset = () => {
-    resetQuery()
-  }
-
-  const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedPostId.value = null
-    postDetail.value = null
-    postErrorMessage.value = ""
-    postDetailErrorMessage.value = ""
-    resetPanelInputs()
-    postPanelMode.value = "create"
-  }
-
-  const startEdit = (post: PostRecord) => {
-    if (!options.canUpdate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedPostId.value = post.id
-    postErrorMessage.value = ""
-    postDetailErrorMessage.value = ""
-    postEditForm.value = {
-      code: post.code,
-      name: post.name,
-      sort: post.sort,
-      status: post.status,
-      remark: post.remark ?? "",
-    }
-    postPanelMode.value = "edit"
-  }
-
-  const cancelPanel = () => {
-    postErrorMessage.value = ""
-
-    if (selectedPost.value) {
-      postPanelMode.value = "detail"
-      return
-    }
-
-    if (options.canCreate.value) {
-      postPanelMode.value = "create"
-      return
-    }
-
-    postPanelMode.value = "detail"
-  }
-
-  const submitForm = async (values: PostFormValues) => {
-    if (postLoading.value || postDetailLoading.value) {
-      return
-    }
-
-    const payload = {
-      code: normalizePostText(values.code),
-      name: normalizePostText(values.name),
-      sort: normalizePostSort(values.sort),
-      status: normalizePostStatus(values.status),
-      remark: normalizeOptionalPostText(values.remark),
-    }
-
-    if (payload.code.length === 0) {
-      postErrorMessage.value = options.t("app.error.postCodeRequired")
-      return
-    }
-
-    if (payload.name.length === 0) {
-      postErrorMessage.value = options.t("app.error.postNameRequired")
-      return
-    }
-
-    postLoading.value = true
-    postErrorMessage.value = ""
-
-    try {
-      if (postPanelMode.value === "edit" && selectedPostId.value) {
-        const updated = await updatePost(selectedPostId.value, payload)
-        selectedPostId.value = updated.id
-        postDetail.value = updated
-        postPanelMode.value = "detail"
-        await reloadPosts()
-        return
-      }
-
-      if (!options.canCreate.value) {
-        return
-      }
-
-      const created = await createPost(payload)
-      selectedPostId.value = created.id
-      postDetail.value = created
-      postPanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadPosts()
-    } catch (error) {
-      postErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : postPanelMode.value === "edit"
-            ? options.t("app.error.updatePost")
-            : options.t("app.error.createPost")
-    } finally {
-      postLoading.value = false
-    }
-  }
+  const cancelPanel = postWorkspace.cancelPanel
+  const clearWorkspace = postWorkspace.clearWorkspace
+  const handleReset = postWorkspace.handleReset
+  const handleSearch = postWorkspace.handleSearch
+  const openCreatePanel = postWorkspace.openCreatePanel
+  const reloadPosts = postWorkspace.reloadRecords
+  const resetQuery = postWorkspace.resetQuery
+  const selectPost = postWorkspace.selectRecord
+  const startEdit = postWorkspace.startEdit
+  const submitForm = postWorkspace.submitForm
 
   const handleRowClick = async (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
