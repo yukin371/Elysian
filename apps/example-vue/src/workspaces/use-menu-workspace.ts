@@ -1,9 +1,5 @@
-import type {
-  ElyFormField,
-  ElyQueryField,
-  ElyQueryValues,
-} from "@elysian/ui-enterprise-vue"
-import { type ComputedRef, type Ref, computed, ref } from "vue"
+import type { ElyFormField, ElyQueryField } from "@elysian/ui-enterprise-vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
 import {
   createDefaultMenuDraft,
@@ -28,6 +24,7 @@ import {
   fetchMenus,
   updateMenu,
 } from "../lib/platform-api"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 export type MenuPanelMode = "detail" | "create" | "edit"
 type MenuFormValues = Record<string, unknown>
@@ -60,17 +57,87 @@ interface UseMenuWorkspaceOptions {
 }
 
 export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
-  const menuItems = ref<MenuRecord[]>([])
-  const menuDetail = ref<MenuDetailRecord | null>(null)
-  const menuLoading = ref(false)
-  const menuDetailLoading = ref(false)
-  const menuErrorMessage = ref("")
-  const menuDetailErrorMessage = ref("")
-  const selectedMenuId = ref<string | null>(null)
-  const menuPanelMode = ref<MenuPanelMode>("detail")
-  const menuQueryValues = ref<ElyQueryValues>({})
-  const menuCreateForm = ref(createDefaultMenuDraft())
-  const menuEditForm = ref(createDefaultMenuDraft())
+  const menuWorkspace = createCrudWorkspace<
+    MenuRecord,
+    ReturnType<typeof createDefaultMenuDraft>,
+    Parameters<typeof createMenu>[0],
+    MenuDetailRecord
+  >({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultMenuDraft,
+    createRecord: createMenu,
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchMenuById,
+    fetchList: fetchMenus,
+    getCreateErrorMessage: () => options.t("app.error.createMenu"),
+    getLoadDetailErrorMessage: () => options.t("app.error.loadMenuDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadMenus"),
+    getUpdateErrorMessage: () => options.t("app.error.updateMenu"),
+    normalizePayload: (values) => {
+      const payload = {
+        parentId: normalizeOptionalMenuId(values.parentId) ?? null,
+        type: normalizeMenuType(values.type),
+        code: normalizeMenuText(values.code),
+        name: normalizeMenuText(values.name),
+        path: normalizeOptionalMenuText(values.path),
+        component: normalizeOptionalMenuText(values.component),
+        icon: normalizeOptionalMenuText(values.icon),
+        sort: normalizeMenuSort(values.sort),
+        isVisible: normalizeMenuBoolean(values.isVisible),
+        status: normalizeMenuStatus(values.status),
+        permissionCode: normalizeOptionalMenuText(values.permissionCode),
+      }
+
+      if (payload.code.length === 0) {
+        return {
+          message: options.t("app.error.menuCodeRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.name.length === 0) {
+        return {
+          message: options.t("app.error.menuNameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolveMenuSelection,
+    toEditDraft: (menu) => ({
+      parentId: menu.parentId ?? "",
+      type: menu.type,
+      code: menu.code,
+      name: menu.name,
+      path: menu.path ?? "",
+      component: menu.component ?? "",
+      icon: menu.icon ?? "",
+      sort: menu.sort,
+      isVisible: menu.isVisible,
+      status: menu.status,
+      permissionCode: menu.permissionCode ?? "",
+    }),
+    updateRecord: updateMenu,
+  })
+
+  const menuItems = menuWorkspace.items
+  const menuDetail = menuWorkspace.detail
+  const menuLoading = menuWorkspace.loading
+  const menuDetailLoading = menuWorkspace.detailLoading
+  const menuErrorMessage = menuWorkspace.errorMessage
+  const menuDetailErrorMessage = menuWorkspace.detailErrorMessage
+  const selectedMenuId = menuWorkspace.selectedId
+  const menuPanelMode = menuWorkspace.panelMode
+  const menuQueryValues = menuWorkspace.queryValues
+  const menuCreateForm = menuWorkspace.createForm
+  const menuEditForm = menuWorkspace.editForm
 
   const filteredMenuItems = computed(() =>
     filterMenus(menuItems.value, {
@@ -112,19 +179,7 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
     }),
   )
 
-  const selectedMenuListItem = computed(
-    () =>
-      menuItems.value.find(
-        (menu: MenuRecord) => menu.id === selectedMenuId.value,
-      ) ?? null,
-  )
-
-  const selectedMenu = computed(
-    () =>
-      (menuDetail.value && menuDetail.value.id === selectedMenuId.value
-        ? menuDetail.value
-        : selectedMenuListItem.value) ?? null,
-  )
+  const selectedMenu = menuWorkspace.selectedRecord
 
   const selectedMenuDetail = computed(() =>
     menuDetail.value && menuDetail.value.id === selectedMenuId.value
@@ -373,224 +428,16 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
       : options.t("app.menu.detailEmptyDescription")
   })
 
-  const resetPanelInputs = () => {
-    menuCreateForm.value = createDefaultMenuDraft()
-    menuEditForm.value = createDefaultMenuDraft()
-  }
-
-  const resetQuery = () => {
-    menuQueryValues.value = {}
-  }
-
-  const clearWorkspace = () => {
-    menuItems.value = []
-    menuDetail.value = null
-    selectedMenuId.value = null
-    menuErrorMessage.value = ""
-    menuDetailErrorMessage.value = ""
-    menuPanelMode.value = "detail"
-    resetPanelInputs()
-  }
-
-  const selectMenu = async (menu: MenuRecord) => {
-    options.currentShellTabKey.value = "workspace"
-    selectedMenuId.value = menu.id
-    menuPanelMode.value = "detail"
-    menuDetail.value = null
-    menuDetailLoading.value = true
-    menuDetailErrorMessage.value = ""
-
-    try {
-      menuDetail.value = await fetchMenuById(menu.id)
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      menuDetailErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadMenuDetail")
-    } finally {
-      menuDetailLoading.value = false
-    }
-  }
-
-  const reloadMenus = async () => {
-    if (!options.canView.value) {
-      clearWorkspace()
-      return
-    }
-
-    menuLoading.value = true
-    menuErrorMessage.value = ""
-
-    try {
-      const payload = await fetchMenus()
-      menuItems.value = payload.items
-
-      if (payload.items.length === 0) {
-        selectedMenuId.value = null
-        menuDetail.value = null
-
-        if (options.canCreate.value) {
-          menuPanelMode.value = "create"
-        }
-
-        return
-      }
-
-      selectedMenuId.value = resolveMenuSelection(
-        payload.items,
-        selectedMenuId.value,
-      )
-
-      if (menuPanelMode.value !== "detail") {
-        return
-      }
-
-      const nextMenu = payload.items.find(
-        (item) => item.id === selectedMenuId.value,
-      )
-
-      if (nextMenu) {
-        await selectMenu(nextMenu)
-      }
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      clearWorkspace()
-      menuErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadMenus")
-    } finally {
-      menuLoading.value = false
-    }
-  }
-
-  const handleSearch = (values: ElyQueryValues) => {
-    menuQueryValues.value = values
-  }
-
-  const handleReset = () => {
-    resetQuery()
-  }
-
-  const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedMenuId.value = null
-    menuDetail.value = null
-    menuErrorMessage.value = ""
-    menuDetailErrorMessage.value = ""
-    resetPanelInputs()
-    menuPanelMode.value = "create"
-  }
-
-  const startEdit = (menu: MenuRecord | MenuDetailRecord) => {
-    if (!options.canUpdate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedMenuId.value = menu.id
-    menuErrorMessage.value = ""
-    menuDetailErrorMessage.value = ""
-    menuEditForm.value = {
-      parentId: menu.parentId ?? "",
-      type: menu.type,
-      code: menu.code,
-      name: menu.name,
-      path: menu.path ?? "",
-      component: menu.component ?? "",
-      icon: menu.icon ?? "",
-      sort: menu.sort,
-      isVisible: menu.isVisible,
-      status: menu.status,
-      permissionCode: menu.permissionCode ?? "",
-    }
-    menuPanelMode.value = "edit"
-  }
-
-  const cancelPanel = () => {
-    menuErrorMessage.value = ""
-
-    if (selectedMenu.value) {
-      menuPanelMode.value = "detail"
-      return
-    }
-
-    if (options.canCreate.value) {
-      menuPanelMode.value = "create"
-      return
-    }
-
-    menuPanelMode.value = "detail"
-  }
-
-  const submitForm = async (values: MenuFormValues) => {
-    if (menuLoading.value || menuDetailLoading.value) {
-      return
-    }
-
-    const payload = {
-      parentId: normalizeOptionalMenuId(values.parentId) ?? null,
-      type: normalizeMenuType(values.type),
-      code: normalizeMenuText(values.code),
-      name: normalizeMenuText(values.name),
-      path: normalizeOptionalMenuText(values.path),
-      component: normalizeOptionalMenuText(values.component),
-      icon: normalizeOptionalMenuText(values.icon),
-      sort: normalizeMenuSort(values.sort),
-      isVisible: normalizeMenuBoolean(values.isVisible),
-      status: normalizeMenuStatus(values.status),
-      permissionCode: normalizeOptionalMenuText(values.permissionCode),
-    }
-
-    if (payload.code.length === 0) {
-      menuErrorMessage.value = options.t("app.error.menuCodeRequired")
-      return
-    }
-
-    if (payload.name.length === 0) {
-      menuErrorMessage.value = options.t("app.error.menuNameRequired")
-      return
-    }
-
-    menuLoading.value = true
-    menuErrorMessage.value = ""
-
-    try {
-      if (menuPanelMode.value === "edit" && selectedMenuId.value) {
-        const updated = await updateMenu(selectedMenuId.value, payload)
-        selectedMenuId.value = updated.id
-        menuDetail.value = updated
-        menuPanelMode.value = "detail"
-        await reloadMenus()
-        return
-      }
-
-      if (!options.canCreate.value) {
-        return
-      }
-
-      const created = await createMenu(payload)
-      selectedMenuId.value = created.id
-      menuDetail.value = created
-      menuPanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadMenus()
-    } catch (error) {
-      menuErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : menuPanelMode.value === "edit"
-            ? options.t("app.error.updateMenu")
-            : options.t("app.error.createMenu")
-    } finally {
-      menuLoading.value = false
-    }
-  }
+  const cancelPanel = menuWorkspace.cancelPanel
+  const clearWorkspace = menuWorkspace.clearWorkspace
+  const handleReset = menuWorkspace.handleReset
+  const handleSearch = menuWorkspace.handleSearch
+  const openCreatePanel = menuWorkspace.openCreatePanel
+  const reloadMenus = menuWorkspace.reloadRecords
+  const resetQuery = menuWorkspace.resetQuery
+  const selectMenu = menuWorkspace.selectRecord
+  const startEdit = menuWorkspace.startEdit
+  const submitForm = menuWorkspace.submitForm
 
   const handleRowClick = async (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
