@@ -33,6 +33,11 @@ const providedWorkspaceState = computed(() =>
       tableItems: { value: unknown[] }
       dictionaryLoading: { value: boolean }
     } | null,
+    (props.roleWorkspaceState ?? null) as {
+      roleErrorMessage: { value: string }
+      tableItems: { value: unknown[] }
+      roleLoading: { value: boolean }
+    } | null,
   ),
 )
 

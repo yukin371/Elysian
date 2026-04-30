@@ -17,10 +17,17 @@ interface DictionaryWorkspaceProviderState {
   dictionaryLoading: Ref<boolean>
 }
 
+interface RoleWorkspaceProviderState {
+  roleErrorMessage: Ref<string>
+  tableItems: Ref<unknown[]>
+  roleLoading: Ref<boolean>
+}
+
 export const resolveProvidedWorkspaceState = (
   kind: string,
   customerWorkspaceState: CustomerWorkspaceProviderState | null,
   dictionaryWorkspaceState: DictionaryWorkspaceProviderState | null = null,
+  roleWorkspaceState: RoleWorkspaceProviderState | null = null,
 ): WorkspaceStateContext | null => {
   if (kind === "customer" && customerWorkspaceState) {
     return {
@@ -37,6 +44,15 @@ export const resolveProvidedWorkspaceState = (
       loading: dictionaryWorkspaceState.dictionaryLoading,
       errorMessage: dictionaryWorkspaceState.dictionaryErrorMessage,
       state: dictionaryWorkspaceState,
+    }
+  }
+
+  if (kind === "role" && roleWorkspaceState) {
+    return {
+      kind: kind as RegisteredWorkspaceKind,
+      loading: roleWorkspaceState.roleLoading,
+      errorMessage: roleWorkspaceState.roleErrorMessage,
+      state: roleWorkspaceState,
     }
   }
 

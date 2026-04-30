@@ -52,4 +52,23 @@ describe("resolveProvidedWorkspaceState", () => {
       (resolved?.state as { tableItems: typeof tableItems }).tableItems,
     ).toBe(tableItems)
   })
+
+  test("provides the role workspace state for the role main surface", () => {
+    const roleLoading = ref(false)
+    const roleErrorMessage = ref("")
+    const tableItems = ref([{ id: "role-1" }])
+
+    const resolved = resolveProvidedWorkspaceState("role", null, null, {
+      roleErrorMessage,
+      tableItems,
+      roleLoading,
+    })
+
+    expect(resolved?.kind).toBe("role")
+    expect(resolved?.loading).toBe(roleLoading)
+    expect(resolved?.errorMessage).toBe(roleErrorMessage)
+    expect(
+      (resolved?.state as { tableItems: typeof tableItems }).tableItems,
+    ).toBe(tableItems)
+  })
 })

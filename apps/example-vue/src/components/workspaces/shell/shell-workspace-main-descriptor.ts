@@ -139,11 +139,9 @@ export interface ShellWorkspaceMainSwitchProps {
   roleModuleReady: boolean
   canEnterRoleWorkspace: boolean
   canViewRoles: boolean
-  roleLoading: boolean
-  roleErrorMessage: string
+  roleWorkspaceState: Record<string, unknown>
   enterpriseRoleQueryFields: ReadonlyArray<unknown>
   enterpriseRoleTableColumns: ReadonlyArray<unknown>
-  enterpriseRoleTableItems: ReadonlyArray<unknown>
   roleCountLabel: string
   settingModuleReady: boolean
   canEnterSettingWorkspace: boolean
@@ -700,16 +698,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterRoleWorkspace,
       canViewRoles: props.canViewRoles,
-      loading: props.roleLoading,
-      errorMessage: props.roleErrorMessage,
       queryFields: props.enterpriseRoleQueryFields,
       tableColumns: props.enterpriseRoleTableColumns,
-      items: props.enterpriseRoleTableItems,
       itemCountLabel: props.roleCountLabel,
       emptyTitle: props.t("app.role.emptyTitle"),
       emptyDescription: props.t("app.role.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,

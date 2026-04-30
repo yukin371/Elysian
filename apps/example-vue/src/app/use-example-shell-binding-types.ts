@@ -195,10 +195,10 @@ export interface UseExampleShellBindingsOptions {
   operationLogCountLabel: ValueSource<string>
   roleModuleReady: ValueSource<boolean>
   canEnterRoleWorkspace: ValueSource<boolean>
+  roleWorkspaceState: Record<string, unknown>
   roleErrorMessage: ValueSource<string>
   enterpriseRoleQueryFields: ValueSource<unknown[]>
   enterpriseRoleTableColumns: ValueSource<unknown[]>
-  enterpriseRoleTableItems: ValueSource<unknown[]>
   roleCountLabel: ValueSource<string>
   settingModuleReady: ValueSource<boolean>
   canEnterSettingWorkspace: ValueSource<boolean>
