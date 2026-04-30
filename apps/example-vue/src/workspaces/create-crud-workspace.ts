@@ -22,14 +22,15 @@ interface CreateCrudWorkspaceOptions<
   TRecord extends CrudRecord,
   TDraft extends object,
   TPayload extends object,
+  TDetailRecord extends TRecord = TRecord,
 > {
   canCreate: ComputedRef<boolean>
   canUpdate: ComputedRef<boolean>
   canView: ComputedRef<boolean>
   createDefaultDraft: () => TDraft
-  createRecord: (payload: TPayload) => Promise<TRecord>
+  createRecord: (payload: TPayload) => Promise<TDetailRecord>
   currentShellTabKey: Ref<string>
-  fetchDetail: (id: string) => Promise<TRecord>
+  fetchDetail: (id: string) => Promise<TDetailRecord>
   fetchList: () => Promise<{ items: TRecord[] }>
   getCreateErrorMessage: () => string
   getLoadDetailErrorMessage: () => string
@@ -41,19 +42,20 @@ interface CreateCrudWorkspaceOptions<
     items: Array<Pick<TRecord, "id">>,
     selectedId: string | null,
   ) => string | null
-  toEditDraft: (record: TRecord) => TDraft
-  updateRecord: (id: string, payload: TPayload) => Promise<TRecord>
+  toEditDraft: (record: TRecord | TDetailRecord) => TDraft
+  updateRecord: (id: string, payload: TPayload) => Promise<TDetailRecord>
 }
 
 export const createCrudWorkspace = <
   TRecord extends CrudRecord,
   TDraft extends object,
   TPayload extends object,
+  TDetailRecord extends TRecord = TRecord,
 >(
-  options: CreateCrudWorkspaceOptions<TRecord, TDraft, TPayload>,
+  options: CreateCrudWorkspaceOptions<TRecord, TDraft, TPayload, TDetailRecord>,
 ) => {
   const items = ref<TRecord[]>([]) as Ref<TRecord[]>
-  const detail = ref<TRecord | null>(null) as Ref<TRecord | null>
+  const detail = ref<TDetailRecord | null>(null) as Ref<TDetailRecord | null>
   const loading = ref(false)
   const detailLoading = ref(false)
   const errorMessage = ref("")
@@ -189,7 +191,7 @@ export const createCrudWorkspace = <
     panelMode.value = "create"
   }
 
-  const startEdit = (record: TRecord) => {
+  const startEdit = (record: TRecord | TDetailRecord) => {
     if (!options.canUpdate.value) {
       return
     }

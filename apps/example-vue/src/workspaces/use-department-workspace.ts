@@ -1,9 +1,5 @@
-import type {
-  ElyFormField,
-  ElyQueryField,
-  ElyQueryValues,
-} from "@elysian/ui-enterprise-vue"
-import { type ComputedRef, type Ref, computed, ref } from "vue"
+import type { ElyFormField, ElyQueryField } from "@elysian/ui-enterprise-vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
 import {
   createDefaultDepartmentDraft,
@@ -25,6 +21,7 @@ import {
   fetchDepartments,
   updateDepartment,
 } from "../lib/platform-api"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 export type DepartmentPanelMode = "detail" | "create" | "edit"
 type DepartmentFormValues = Record<string, unknown>
@@ -57,17 +54,76 @@ interface UseDepartmentWorkspaceOptions {
 export const useDepartmentWorkspace = (
   options: UseDepartmentWorkspaceOptions,
 ) => {
-  const departmentItems = ref<DepartmentRecord[]>([])
-  const departmentDetail = ref<DepartmentDetailRecord | null>(null)
-  const departmentLoading = ref(false)
-  const departmentDetailLoading = ref(false)
-  const departmentErrorMessage = ref("")
-  const departmentDetailErrorMessage = ref("")
-  const selectedDepartmentId = ref<string | null>(null)
-  const departmentPanelMode = ref<DepartmentPanelMode>("detail")
-  const departmentQueryValues = ref<ElyQueryValues>({})
-  const departmentCreateForm = ref(createDefaultDepartmentDraft())
-  const departmentEditForm = ref(createDefaultDepartmentDraft())
+  const departmentWorkspace = createCrudWorkspace<
+    DepartmentRecord,
+    ReturnType<typeof createDefaultDepartmentDraft>,
+    Parameters<typeof createDepartment>[0],
+    DepartmentDetailRecord
+  >({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultDepartmentDraft,
+    createRecord: createDepartment,
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchDepartmentById,
+    fetchList: fetchDepartments,
+    getCreateErrorMessage: () => options.t("app.error.createDepartment"),
+    getLoadDetailErrorMessage: () =>
+      options.t("app.error.loadDepartmentDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadDepartments"),
+    getUpdateErrorMessage: () => options.t("app.error.updateDepartment"),
+    normalizePayload: (values) => {
+      const payload = {
+        parentId: normalizeOptionalDepartmentId(values.parentId) ?? null,
+        code: normalizeDepartmentText(values.code),
+        name: normalizeDepartmentText(values.name),
+        sort: normalizeDepartmentSort(values.sort),
+        status: normalizeDepartmentStatus(values.status),
+      }
+
+      if (payload.code.length === 0) {
+        return {
+          message: options.t("app.error.departmentCodeRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.name.length === 0) {
+        return {
+          message: options.t("app.error.departmentNameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolveDepartmentSelection,
+    toEditDraft: (department) => ({
+      parentId: department.parentId ?? "",
+      code: department.code,
+      name: department.name,
+      sort: department.sort,
+      status: department.status,
+    }),
+    updateRecord: updateDepartment,
+  })
+
+  const departmentItems = departmentWorkspace.items
+  const departmentDetail = departmentWorkspace.detail
+  const departmentLoading = departmentWorkspace.loading
+  const departmentDetailLoading = departmentWorkspace.detailLoading
+  const departmentErrorMessage = departmentWorkspace.errorMessage
+  const departmentDetailErrorMessage = departmentWorkspace.detailErrorMessage
+  const selectedDepartmentId = departmentWorkspace.selectedId
+  const departmentPanelMode = departmentWorkspace.panelMode
+  const departmentQueryValues = departmentWorkspace.queryValues
+  const departmentCreateForm = departmentWorkspace.createForm
+  const departmentEditForm = departmentWorkspace.editForm
 
   const filteredDepartmentItems = computed(() =>
     filterDepartments(departmentItems.value, {
@@ -87,21 +143,7 @@ export const useDepartmentWorkspace = (
     }),
   )
 
-  const selectedDepartmentListItem = computed(
-    () =>
-      departmentItems.value.find(
-        (department: DepartmentRecord) =>
-          department.id === selectedDepartmentId.value,
-      ) ?? null,
-  )
-
-  const selectedDepartment = computed(
-    () =>
-      (departmentDetail.value &&
-      departmentDetail.value.id === selectedDepartmentId.value
-        ? departmentDetail.value
-        : selectedDepartmentListItem.value) ?? null,
-  )
+  const selectedDepartment = departmentWorkspace.selectedRecord
 
   const selectedDepartmentDetail = computed(() =>
     departmentDetail.value &&
@@ -289,219 +331,16 @@ export const useDepartmentWorkspace = (
       : options.t("app.department.detailEmptyDescription")
   })
 
-  const resetPanelInputs = () => {
-    departmentCreateForm.value = createDefaultDepartmentDraft()
-    departmentEditForm.value = createDefaultDepartmentDraft()
-  }
-
-  const resetQuery = () => {
-    departmentQueryValues.value = {}
-  }
-
-  const clearWorkspace = () => {
-    departmentItems.value = []
-    departmentDetail.value = null
-    selectedDepartmentId.value = null
-    departmentErrorMessage.value = ""
-    departmentDetailErrorMessage.value = ""
-    departmentPanelMode.value = "detail"
-    resetPanelInputs()
-  }
-
-  const selectDepartment = async (department: DepartmentRecord) => {
-    options.currentShellTabKey.value = "workspace"
-    selectedDepartmentId.value = department.id
-    departmentPanelMode.value = "detail"
-    departmentDetail.value = null
-    departmentDetailLoading.value = true
-    departmentDetailErrorMessage.value = ""
-
-    try {
-      departmentDetail.value = await fetchDepartmentById(department.id)
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      departmentDetailErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadDepartmentDetail")
-    } finally {
-      departmentDetailLoading.value = false
-    }
-  }
-
-  const reloadDepartments = async () => {
-    if (!options.canView.value) {
-      clearWorkspace()
-      return
-    }
-
-    departmentLoading.value = true
-    departmentErrorMessage.value = ""
-
-    try {
-      const payload = await fetchDepartments()
-      departmentItems.value = payload.items
-
-      if (payload.items.length === 0) {
-        selectedDepartmentId.value = null
-        departmentDetail.value = null
-
-        if (options.canCreate.value) {
-          departmentPanelMode.value = "create"
-        }
-
-        return
-      }
-
-      selectedDepartmentId.value = resolveDepartmentSelection(
-        payload.items,
-        selectedDepartmentId.value,
-      )
-
-      if (departmentPanelMode.value !== "detail") {
-        return
-      }
-
-      const nextDepartment = payload.items.find(
-        (item) => item.id === selectedDepartmentId.value,
-      )
-
-      if (nextDepartment) {
-        await selectDepartment(nextDepartment)
-      }
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      clearWorkspace()
-      departmentErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadDepartments")
-    } finally {
-      departmentLoading.value = false
-    }
-  }
-
-  const handleSearch = (values: ElyQueryValues) => {
-    departmentQueryValues.value = values
-  }
-
-  const handleReset = () => {
-    resetQuery()
-  }
-
-  const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedDepartmentId.value = null
-    departmentDetail.value = null
-    departmentErrorMessage.value = ""
-    departmentDetailErrorMessage.value = ""
-    resetPanelInputs()
-    departmentPanelMode.value = "create"
-  }
-
-  const startEdit = (department: DepartmentRecord | DepartmentDetailRecord) => {
-    if (!options.canUpdate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedDepartmentId.value = department.id
-    departmentErrorMessage.value = ""
-    departmentDetailErrorMessage.value = ""
-    departmentEditForm.value = {
-      parentId: department.parentId ?? "",
-      code: department.code,
-      name: department.name,
-      sort: department.sort,
-      status: department.status,
-    }
-    departmentPanelMode.value = "edit"
-  }
-
-  const cancelPanel = () => {
-    departmentErrorMessage.value = ""
-
-    if (selectedDepartment.value) {
-      departmentPanelMode.value = "detail"
-      return
-    }
-
-    if (options.canCreate.value) {
-      departmentPanelMode.value = "create"
-      return
-    }
-
-    departmentPanelMode.value = "detail"
-  }
-
-  const submitForm = async (values: DepartmentFormValues) => {
-    if (departmentLoading.value || departmentDetailLoading.value) {
-      return
-    }
-
-    const payload = {
-      parentId: normalizeOptionalDepartmentId(values.parentId) ?? null,
-      code: normalizeDepartmentText(values.code),
-      name: normalizeDepartmentText(values.name),
-      sort: normalizeDepartmentSort(values.sort),
-      status: normalizeDepartmentStatus(values.status),
-    }
-
-    if (payload.code.length === 0) {
-      departmentErrorMessage.value = options.t(
-        "app.error.departmentCodeRequired",
-      )
-      return
-    }
-
-    if (payload.name.length === 0) {
-      departmentErrorMessage.value = options.t(
-        "app.error.departmentNameRequired",
-      )
-      return
-    }
-
-    departmentLoading.value = true
-    departmentErrorMessage.value = ""
-
-    try {
-      if (departmentPanelMode.value === "edit" && selectedDepartmentId.value) {
-        const updated = await updateDepartment(
-          selectedDepartmentId.value,
-          payload,
-        )
-        selectedDepartmentId.value = updated.id
-        departmentDetail.value = updated
-        departmentPanelMode.value = "detail"
-        await reloadDepartments()
-        return
-      }
-
-      if (!options.canCreate.value) {
-        return
-      }
-
-      const created = await createDepartment(payload)
-      selectedDepartmentId.value = created.id
-      departmentDetail.value = created
-      departmentPanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadDepartments()
-    } catch (error) {
-      departmentErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : departmentPanelMode.value === "edit"
-            ? options.t("app.error.updateDepartment")
-            : options.t("app.error.createDepartment")
-    } finally {
-      departmentLoading.value = false
-    }
-  }
+  const cancelPanel = departmentWorkspace.cancelPanel
+  const clearWorkspace = departmentWorkspace.clearWorkspace
+  const handleReset = departmentWorkspace.handleReset
+  const handleSearch = departmentWorkspace.handleSearch
+  const openCreatePanel = departmentWorkspace.openCreatePanel
+  const reloadDepartments = departmentWorkspace.reloadRecords
+  const resetQuery = departmentWorkspace.resetQuery
+  const selectDepartment = departmentWorkspace.selectRecord
+  const startEdit = departmentWorkspace.startEdit
+  const submitForm = departmentWorkspace.submitForm
 
   const handleRowClick = async (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
