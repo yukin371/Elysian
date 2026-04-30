@@ -1,9 +1,5 @@
-import type {
-  ElyFormField,
-  ElyQueryField,
-  ElyQueryValues,
-} from "@elysian/ui-enterprise-vue"
-import { type ComputedRef, type Ref, computed, ref } from "vue"
+import type { ElyFormField, ElyQueryField } from "@elysian/ui-enterprise-vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
 import {
   type TenantRecord,
@@ -21,6 +17,7 @@ import {
   normalizeTenantText,
   resolveTenantSelection,
 } from "../lib/tenant-workspace"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 export type TenantPanelMode = "detail" | "create" | "edit"
 type TenantFormValues = Record<string, unknown>
@@ -51,17 +48,70 @@ interface UseTenantWorkspaceOptions {
 }
 
 export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
-  const tenantItems = ref<TenantRecord[]>([])
-  const tenantDetail = ref<TenantRecord | null>(null)
-  const tenantLoading = ref(false)
-  const tenantDetailLoading = ref(false)
-  const tenantErrorMessage = ref("")
-  const tenantDetailErrorMessage = ref("")
-  const selectedTenantId = ref<string | null>(null)
-  const tenantPanelMode = ref<TenantPanelMode>("detail")
-  const tenantQueryValues = ref<ElyQueryValues>({})
-  const tenantCreateForm = ref(createDefaultTenantDraft())
-  const tenantEditForm = ref(createDefaultTenantDraft())
+  const tenantWorkspace = createCrudWorkspace<
+    TenantRecord,
+    ReturnType<typeof createDefaultTenantDraft>,
+    Parameters<typeof createTenant>[0]
+  >({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultTenantDraft,
+    createRecord: createTenant,
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchTenantById,
+    fetchList: fetchTenants,
+    getCreateErrorMessage: () => options.t("app.error.createTenant"),
+    getLoadDetailErrorMessage: () => options.t("app.error.loadTenantDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadTenants"),
+    getUpdateErrorMessage: () => options.t("app.error.updateTenant"),
+    normalizePayload: (values) => {
+      const payload = {
+        code: normalizeTenantText(values.code),
+        name: normalizeTenantText(values.name),
+        status: normalizeTenantStatus(values.status),
+      }
+
+      if (payload.code.length === 0) {
+        return {
+          message: options.t("app.error.tenantCodeRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.name.length === 0) {
+        return {
+          message: options.t("app.error.tenantNameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolveTenantSelection,
+    toEditDraft: (tenant) => ({
+      code: tenant.code,
+      name: tenant.name,
+      status: tenant.status,
+    }),
+    updateRecord: updateTenant,
+  })
+
+  const tenantItems = tenantWorkspace.items
+  const tenantDetail = tenantWorkspace.detail
+  const tenantLoading = tenantWorkspace.loading
+  const tenantDetailLoading = tenantWorkspace.detailLoading
+  const tenantErrorMessage = tenantWorkspace.errorMessage
+  const tenantDetailErrorMessage = tenantWorkspace.detailErrorMessage
+  const selectedTenantId = tenantWorkspace.selectedId
+  const tenantPanelMode = tenantWorkspace.panelMode
+  const tenantQueryValues = tenantWorkspace.queryValues
+  const tenantCreateForm = tenantWorkspace.createForm
+  const tenantEditForm = tenantWorkspace.editForm
 
   const filteredTenantItems = computed(() =>
     filterTenants(tenantItems.value, {
@@ -81,19 +131,7 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
     }),
   )
 
-  const selectedTenantListItem = computed(
-    () =>
-      tenantItems.value.find(
-        (tenant: TenantRecord) => tenant.id === selectedTenantId.value,
-      ) ?? null,
-  )
-
-  const selectedTenant = computed(
-    () =>
-      (tenantDetail.value && tenantDetail.value.id === selectedTenantId.value
-        ? tenantDetail.value
-        : selectedTenantListItem.value) ?? null,
-  )
+  const selectedTenant = tenantWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
     options.page.tableColumns.value.map((column) => ({
@@ -240,206 +278,16 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
       : options.t("app.tenant.detailEmptyDescription")
   })
 
-  const resetPanelInputs = () => {
-    tenantCreateForm.value = createDefaultTenantDraft()
-    tenantEditForm.value = createDefaultTenantDraft()
-  }
-
-  const resetQuery = () => {
-    tenantQueryValues.value = {}
-  }
-
-  const clearWorkspace = () => {
-    tenantItems.value = []
-    tenantDetail.value = null
-    selectedTenantId.value = null
-    tenantErrorMessage.value = ""
-    tenantDetailErrorMessage.value = ""
-    tenantPanelMode.value = "detail"
-    resetPanelInputs()
-  }
-
-  const selectTenant = async (tenant: TenantRecord) => {
-    options.currentShellTabKey.value = "workspace"
-    selectedTenantId.value = tenant.id
-    tenantPanelMode.value = "detail"
-    tenantDetail.value = null
-    tenantDetailLoading.value = true
-    tenantDetailErrorMessage.value = ""
-
-    try {
-      tenantDetail.value = await fetchTenantById(tenant.id)
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      tenantDetailErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadTenantDetail")
-    } finally {
-      tenantDetailLoading.value = false
-    }
-  }
-
-  const reloadTenants = async () => {
-    if (!options.canView.value) {
-      clearWorkspace()
-      return
-    }
-
-    tenantLoading.value = true
-    tenantErrorMessage.value = ""
-
-    try {
-      const payload = await fetchTenants()
-      tenantItems.value = payload.items
-      selectedTenantId.value = resolveTenantSelection(
-        payload.items,
-        selectedTenantId.value,
-      )
-
-      if (payload.items.length === 0) {
-        tenantDetail.value = null
-
-        if (options.canCreate.value) {
-          tenantPanelMode.value = "create"
-        }
-
-        return
-      }
-
-      if (tenantPanelMode.value !== "detail") {
-        return
-      }
-
-      const nextTenant = payload.items.find(
-        (item) => item.id === selectedTenantId.value,
-      )
-
-      if (nextTenant) {
-        await selectTenant(nextTenant)
-      }
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      clearWorkspace()
-      tenantErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadTenants")
-    } finally {
-      tenantLoading.value = false
-    }
-  }
-
-  const handleSearch = (values: ElyQueryValues) => {
-    tenantQueryValues.value = values
-  }
-
-  const handleReset = () => {
-    resetQuery()
-  }
-
-  const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedTenantId.value = null
-    tenantDetail.value = null
-    tenantErrorMessage.value = ""
-    tenantDetailErrorMessage.value = ""
-    resetPanelInputs()
-    tenantPanelMode.value = "create"
-  }
-
-  const startEdit = (tenant: TenantRecord) => {
-    if (!options.canUpdate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedTenantId.value = tenant.id
-    tenantErrorMessage.value = ""
-    tenantDetailErrorMessage.value = ""
-    tenantEditForm.value = {
-      code: tenant.code,
-      name: tenant.name,
-      status: tenant.status,
-    }
-    tenantPanelMode.value = "edit"
-  }
-
-  const cancelPanel = () => {
-    tenantErrorMessage.value = ""
-
-    if (selectedTenant.value) {
-      tenantPanelMode.value = "detail"
-      return
-    }
-
-    if (options.canCreate.value) {
-      tenantPanelMode.value = "create"
-      return
-    }
-
-    tenantPanelMode.value = "detail"
-  }
-
-  const submitForm = async (values: TenantFormValues) => {
-    if (tenantLoading.value || tenantDetailLoading.value) {
-      return
-    }
-
-    const payload = {
-      code: normalizeTenantText(values.code),
-      name: normalizeTenantText(values.name),
-      status: normalizeTenantStatus(values.status),
-    }
-
-    if (payload.code.length === 0) {
-      tenantErrorMessage.value = options.t("app.error.tenantCodeRequired")
-      return
-    }
-
-    if (payload.name.length === 0) {
-      tenantErrorMessage.value = options.t("app.error.tenantNameRequired")
-      return
-    }
-
-    tenantLoading.value = true
-    tenantErrorMessage.value = ""
-
-    try {
-      if (tenantPanelMode.value === "edit" && selectedTenantId.value) {
-        const updated = await updateTenant(selectedTenantId.value, payload)
-        selectedTenantId.value = updated.id
-        tenantDetail.value = updated
-        tenantPanelMode.value = "detail"
-        await reloadTenants()
-        return
-      }
-
-      if (!options.canCreate.value) {
-        return
-      }
-
-      const created = await createTenant(payload)
-      selectedTenantId.value = created.id
-      tenantDetail.value = created
-      tenantPanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadTenants()
-    } catch (error) {
-      tenantErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : tenantPanelMode.value === "edit"
-            ? options.t("app.error.updateTenant")
-            : options.t("app.error.createTenant")
-    } finally {
-      tenantLoading.value = false
-    }
-  }
+  const cancelPanel = tenantWorkspace.cancelPanel
+  const clearWorkspace = tenantWorkspace.clearWorkspace
+  const handleReset = tenantWorkspace.handleReset
+  const handleSearch = tenantWorkspace.handleSearch
+  const openCreatePanel = tenantWorkspace.openCreatePanel
+  const reloadTenants = tenantWorkspace.reloadRecords
+  const resetQuery = tenantWorkspace.resetQuery
+  const selectTenant = tenantWorkspace.selectRecord
+  const startEdit = tenantWorkspace.startEdit
+  const submitForm = tenantWorkspace.submitForm
 
   const toggleSelectedStatus = async () => {
     if (
