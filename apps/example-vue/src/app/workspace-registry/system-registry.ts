@@ -1,0 +1,95 @@
+import type { WorkspaceRegistration } from "./types"
+
+export const systemWorkspaceRegistrations = [
+  {
+    domain: "system",
+    path: "/system/dictionaries",
+    kind: "dictionary",
+    moduleCode: "dictionary",
+    permissionPrefix: "system:dictionary",
+    i18nKeys: {
+      sectionTitle: "app.dictionary.sectionTitle",
+      sectionCopy: "app.dictionary.sectionCopy",
+      shellTitle: "app.dictionary.shellTitle",
+      shellDescription: "app.dictionary.shellDescription",
+    },
+  },
+  {
+    domain: "system",
+    path: "/system/departments",
+    kind: "department",
+    moduleCode: "department",
+    permissionPrefix: "system:department",
+    i18nKeys: {
+      sectionTitle: "app.department.sectionTitle",
+      sectionCopy: "app.department.sectionCopy",
+      shellTitle: "app.department.shellTitle",
+      shellDescription: "app.department.shellDescription",
+    },
+  },
+  {
+    domain: "system",
+    path: "/system/posts",
+    kind: "post",
+    moduleCode: "post",
+    permissionPrefix: "system:post",
+    i18nKeys: {
+      sectionTitle: "app.post.sectionTitle",
+      sectionCopy: "app.post.sectionCopy",
+      shellTitle: "app.post.shellTitle",
+      shellDescription: "app.post.shellDescription",
+    },
+  },
+  {
+    domain: "system",
+    path: "/system/menus",
+    kind: "menu",
+    moduleCode: "menu",
+    permissionPrefix: "system:menu",
+    i18nKeys: {
+      sectionTitle: "app.menu.sectionTitle",
+      sectionCopy: "app.menu.sectionCopy",
+      shellTitle: "app.menu.shellTitle",
+      shellDescription: "app.menu.shellDescription",
+    },
+  },
+  {
+    domain: "system",
+    path: "/system/roles",
+    kind: "role",
+    moduleCode: "role",
+    permissionPrefix: "system:role",
+    i18nKeys: {
+      sectionTitle: "app.role.sectionTitle",
+      sectionCopy: "app.role.sectionCopy",
+      shellTitle: "app.role.shellTitle",
+      shellDescription: "app.role.shellDescription",
+    },
+  },
+  {
+    domain: "system",
+    path: "/system/settings",
+    kind: "setting",
+    moduleCode: "setting",
+    permissionPrefix: "system:setting",
+    i18nKeys: {
+      sectionTitle: "app.setting.sectionTitle",
+      sectionCopy: "app.setting.sectionCopy",
+      shellTitle: "app.setting.shellTitle",
+      shellDescription: "app.setting.shellDescription",
+    },
+  },
+  {
+    domain: "system",
+    path: "/system/users",
+    kind: "user",
+    moduleCode: "user",
+    permissionPrefix: "system:user",
+    i18nKeys: {
+      sectionTitle: "app.user.sectionTitle",
+      sectionCopy: "app.user.sectionCopy",
+      shellTitle: "app.user.shellTitle",
+      shellDescription: "app.user.shellDescription",
+    },
+  },
+] as const satisfies WorkspaceRegistration[]

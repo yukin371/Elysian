@@ -46,6 +46,7 @@
   - `use-example-shell-meta.ts`
   - `use-example-csv-exports.ts`
   - `use-example-workspace-sync.ts`
+  - `workspace-registry/*`
   - `use-example-session-orchestration.ts`
   - `use-example-shell-binding-types.ts`
   - `use-example-shell-header-bindings.ts`
