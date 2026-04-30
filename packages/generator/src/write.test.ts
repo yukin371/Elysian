@@ -53,7 +53,7 @@ describe("writeModuleFiles", () => {
       frontendTarget: "vue",
     })
 
-    expect(results).toHaveLength(5)
+    expect(results).toHaveLength(6)
     expect(results.every((item) => item.written)).toBe(true)
 
     const schemaFile = await readFile(
@@ -291,7 +291,7 @@ describe("applyGenerationPreviewReport", () => {
       "utf8",
     )
 
-    expect(result.files).toHaveLength(5)
+    expect(result.files).toHaveLength(6)
     expect(result.files.every((item) => item.written)).toBe(true)
     expect(result.manifestPath).toContain(".elysian-generator")
     expect(manifestFile).toContain('"targetPreset": "staging"')

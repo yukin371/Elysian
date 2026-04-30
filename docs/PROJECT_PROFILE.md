@@ -77,6 +77,8 @@
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
 - `packages/generator` 已新增 preview/report 能力，可在不写入目标目录的前提下输出文件动作预览、内容快照报告与 review-only SQL preview。
 - `packages/generator` 已新增 `DatabaseChangePlan` 中性数据库变更描述，可从 `ModuleSchema` 产出 reviewable create-table 计划，继续保持正式 migration owner 在 `packages/persistence`。
+- `packages/schema` 当前已允许可选 `frontend` 注册元数据（`workspaceDomain`、`routePath`、`permissionPrefix`），作为 generator 输出前端静态注册 artifact 的最小契约入口。
+- `packages/generator` 当前除 `schema/repository/service/routes/page` 外，还会额外生成 `*.frontend.ts` 静态前端注册 artifact，用于承接标准 CRUD 模块的 route/permission/page 绑定信息，但尚未自动接入 `apps/example-vue` 注册中心。
 - `packages/persistence` 已新增 migration proposal 草案生成能力，可消费 `DatabaseChangePlan` 形状并输出 review-only SQL draft、Drizzle schema snippet 与风险说明；正式 `db:generate / db:migrate` 仍保持人工确认后进入。
 - `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
 - `packages/schema` 已把 `enum` 字段必须提供 `options` 或 `dictionaryTypeCode` 收紧为 runtime 硬约束，避免裸 enum 误过 `P5A` handoff。

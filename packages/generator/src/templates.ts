@@ -9,6 +9,18 @@ export interface RenderModuleTemplatesOptions {
   schemaArtifactSource?: "package" | "inline"
 }
 
+export interface GeneratedFrontendModuleArtifact {
+  fieldKeys: string[]
+  frontendTarget: FrontendTarget
+  moduleCode: string
+  pageComponentPath: string
+  permissionPrefix: string | null
+  primaryFieldKey: string
+  routePath: string | null
+  searchableFieldKeys: string[]
+  workspaceDomain: "business" | "system" | null
+}
+
 const getPageExtension = (frontendTarget: FrontendTarget) =>
   frontendTarget === "vue" ? "vue" : "tsx"
 
@@ -398,6 +410,50 @@ export const renderPagePath = (
 ) =>
   `modules/${schema.name}/${schema.name}.page.${getPageExtension(frontendTarget)}`
 
+export const renderFrontendArtifactPath = (schema: ModuleSchema) =>
+  `modules/${schema.name}/${schema.name}.frontend.ts`
+
+export const renderFrontendArtifactTemplate = (
+  schema: ModuleSchema,
+  frontendTarget: FrontendTarget,
+) => {
+  const artifactName = `${toCamelCase(schema.name)}FrontendModuleArtifact`
+  const pageComponentPath = renderPagePath(schema, frontendTarget)
+  const primaryFieldKey = getPrimaryDisplayField(schema)?.key ?? "id"
+  const searchableFieldKeys = schema.fields
+    .filter((field) => field.searchable === true)
+    .map((field) => field.key)
+
+  return `export interface GeneratedFrontendModuleArtifact {
+  fieldKeys: string[]
+  frontendTarget: "vue" | "react"
+  moduleCode: string
+  pageComponentPath: string
+  permissionPrefix: string | null
+  primaryFieldKey: string
+  routePath: string | null
+  searchableFieldKeys: string[]
+  workspaceDomain: "business" | "system" | null
+}
+
+export const ${artifactName}: GeneratedFrontendModuleArtifact = {
+  moduleCode: ${JSON.stringify(schema.name)},
+  frontendTarget: ${JSON.stringify(frontendTarget)},
+  workspaceDomain: ${JSON.stringify(schema.frontend?.workspaceDomain ?? null)},
+  routePath: ${JSON.stringify(schema.frontend?.routePath ?? null)},
+  permissionPrefix: ${JSON.stringify(schema.frontend?.permissionPrefix ?? null)},
+  pageComponentPath: ${JSON.stringify(pageComponentPath)},
+  primaryFieldKey: ${JSON.stringify(primaryFieldKey)},
+  fieldKeys: ${JSON.stringify(
+    schema.fields.map((field) => field.key),
+    null,
+    2,
+  )},
+  searchableFieldKeys: ${JSON.stringify(searchableFieldKeys, null, 2)},
+}
+`
+}
+
 export const getTemplateReason = (path: string) => {
   if (path.endsWith(".schema.ts")) {
     return "Persist the module schema alongside generated module artifacts."
@@ -413,6 +469,10 @@ export const getTemplateReason = (path: string) => {
 
   if (path.endsWith(".routes.ts")) {
     return "Expose the server-side route registration entry for the module."
+  }
+
+  if (path.endsWith(".frontend.ts")) {
+    return "Emit a static frontend registration artifact for generated module integration."
   }
 
   return "Provide a generated management page implementation for the selected frontend target."

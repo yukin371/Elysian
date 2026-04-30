@@ -239,14 +239,14 @@ describe("generator session module", () => {
     expect(createBody.session.schemaName).toBe("customer")
     expect(createBody.session.sourceType).toBe("registered-schema")
     expect(createBody.session.actorUsername).toBe("admin")
-    expect(createBody.session.previewFileCount).toBe(5)
+    expect(createBody.session.previewFileCount).toBe(6)
     expect(createBody.session.applyEvidence).toBeNull()
     expect(createBody.diff).toEqual({
-      totalFileCount: 5,
-      changedFileCount: 5,
+      totalFileCount: 6,
+      changedFileCount: 6,
       unchangedFileCount: 0,
       actionCounts: {
-        create: 5,
+        create: 6,
         overwrite: 0,
         skip: 0,
         block: 0,
@@ -322,7 +322,7 @@ describe("generator session module", () => {
     expect(applyBody.session.id).toBe(createBody.session.id)
     expect(applyBody.session.status).toBe("applied")
     expect(applyBody.session.appliedAt).toBeTruthy()
-    expect(applyBody.session.appliedFileCount).toBe(5)
+    expect(applyBody.session.appliedFileCount).toBe(6)
     expect(applyBody.session.appliedByUserId).toBe(
       createBody.session.actorUserId,
     )
@@ -408,8 +408,8 @@ describe("generator session module", () => {
         schemaName: "customer",
       },
     })
-    expect(detailBody.diffSummary.totalFileCount).toBe(5)
-    expect(detailBody.diffSummary.actionCounts.create).toBe(5)
+    expect(detailBody.diffSummary.totalFileCount).toBe(6)
+    expect(detailBody.diffSummary.actionCounts.create).toBe(6)
     expect(detailBody.applyEvidence).toMatchObject({
       actorUserId: createBody.session.actorUserId,
       requestId: "req-generator-session-apply-1",

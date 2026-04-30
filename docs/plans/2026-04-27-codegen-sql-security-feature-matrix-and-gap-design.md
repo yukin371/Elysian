@@ -80,7 +80,7 @@
 | Studio 内 diff / 冲突审查 | 🟡 部分完成 | preview / apply 响应已返回 diff summary、blocking conflict 与 apply evidence，`apps/example-vue` 已消费主区/侧栏装配 | `apps/server` + `apps/example-vue` | 缺更细粒度目标目录 diff 与冲突解释 |
 | 模板配置中心 / 生成参数模板 | ⚪ 未开始 | 没有平台内的 generator profile / preset 管理 | 无 | 仍以 CLI 参数为主 |
 | 数据表导入后反推模块 schema | ⚪ 未开始 | 没有“库表 -> ModuleSchema” 导入链 | 无 | 对齐后台平台常见 codegen 能力仍缺关键入口 |
-| 代码生成结果注册回平台导航 | 🟡 部分完成 | 生成物可落盘，但不会自动进入平台模块注册中心 | `packages/generator` / `apps/example-vue` | 缺页面注册 / 路由注册 owner |
+| 代码生成结果注册回平台导航 | 🟡 部分完成 | 生成物可落盘，且 `ModuleSchema.frontend` + `*.frontend.ts` 已形成最小静态前端注册 artifact；但仍不会自动进入平台模块注册中心 | `packages/generator` / `apps/example-vue` / `packages/schema` | 缺 artifact 消费接线与最终注册 owner 收口 |
 
 ### B. SQL 生成能力矩阵
 

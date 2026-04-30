@@ -8,6 +8,8 @@ import {
   type FrontendTarget,
   type RenderModuleTemplatesOptions,
   getTemplateReason,
+  renderFrontendArtifactPath,
+  renderFrontendArtifactTemplate,
   renderPagePath,
   renderPageTemplate,
   renderRepositoryTemplate,
@@ -61,6 +63,11 @@ export const planModuleFiles = (
     {
       path: `${basePath}/${schema.name}.routes.ts`,
       reason: getTemplateReason(`${basePath}/${schema.name}.routes.ts`),
+      mergeStrategy: DEFAULT_MERGE_STRATEGY,
+    },
+    {
+      path: renderFrontendArtifactPath(schema),
+      reason: getTemplateReason(renderFrontendArtifactPath(schema)),
       mergeStrategy: DEFAULT_MERGE_STRATEGY,
     },
     {
@@ -121,6 +128,10 @@ const renderTemplateForPath = (
 
   if (path.endsWith(".routes.ts")) {
     return renderRoutesTemplate(schema)
+  }
+
+  if (path.endsWith(".frontend.ts")) {
+    return renderFrontendArtifactTemplate(schema, frontendTarget)
   }
 
   return renderPageTemplate(schema, frontendTarget)

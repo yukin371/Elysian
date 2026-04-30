@@ -40,7 +40,7 @@ describe("previewModuleFiles", () => {
       frontendTarget: "vue",
     })
 
-    expect(preview).toHaveLength(5)
+    expect(preview).toHaveLength(6)
     expect(preview.every((item) => item.plannedAction === "create")).toBe(true)
     expect(preview.every((item) => item.currentContents === null)).toBe(true)
   })

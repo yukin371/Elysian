@@ -21,6 +21,7 @@ const moduleSchemaKeySet = new Set<keyof ModuleSchema>([
   "name",
   "label",
   "fields",
+  "frontend",
 ])
 const moduleFieldKeySet = new Set<keyof ModuleField>([
   "key",
@@ -74,10 +75,19 @@ export interface ModuleField {
   dictionaryTypeCode?: string
 }
 
+export type ModuleFrontendWorkspaceDomain = "business" | "system"
+
+export interface ModuleFrontendSchema {
+  workspaceDomain: ModuleFrontendWorkspaceDomain
+  routePath: string
+  permissionPrefix?: string
+}
+
 export interface ModuleSchema {
   name: string
   label: string
   fields: ModuleField[]
+  frontend?: ModuleFrontendSchema
 }
 
 export const validateModuleSchema = (
@@ -116,6 +126,64 @@ export const validateModuleSchema = (
       message: "Module fields must be a non-empty array.",
     })
     return issues
+  }
+
+  if ("frontend" in input && input.frontend !== undefined) {
+    if (!isRecord(input.frontend)) {
+      issues.push({
+        path: "frontend",
+        message: "Frontend metadata must be an object when provided.",
+      })
+    } else {
+      const frontendKeySet = new Set<keyof ModuleFrontendSchema>([
+        "workspaceDomain",
+        "routePath",
+        "permissionPrefix",
+      ])
+
+      pushUnknownKeyIssues(
+        issues,
+        input.frontend,
+        frontendKeySet,
+        "frontend",
+        "Frontend metadata",
+      )
+
+      if (
+        input.frontend.workspaceDomain !== "business" &&
+        input.frontend.workspaceDomain !== "system"
+      ) {
+        issues.push({
+          path: "frontend.workspaceDomain",
+          message:
+            'Frontend workspaceDomain must be either "business" or "system".',
+        })
+      }
+
+      if (!isNonEmptyString(input.frontend.routePath)) {
+        issues.push({
+          path: "frontend.routePath",
+          message: "Frontend routePath must be a non-empty string.",
+        })
+      } else if (!input.frontend.routePath.startsWith("/")) {
+        issues.push({
+          path: "frontend.routePath",
+          message: 'Frontend routePath must start with "/".',
+        })
+      }
+
+      if (
+        "permissionPrefix" in input.frontend &&
+        input.frontend.permissionPrefix !== undefined &&
+        !isNonEmptyString(input.frontend.permissionPrefix)
+      ) {
+        issues.push({
+          path: "frontend.permissionPrefix",
+          message:
+            "Frontend permissionPrefix must be a non-empty string when provided.",
+        })
+      }
+    }
   }
 
   const seenKeys = new Map<string, number>()

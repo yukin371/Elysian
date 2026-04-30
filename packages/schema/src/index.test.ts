@@ -116,6 +116,60 @@ describe("validateModuleSchema", () => {
     ).toBe(false)
   })
 
+  it("accepts bounded frontend registration metadata", () => {
+    const issues = validateModuleSchema({
+      name: "supplier",
+      label: "Supplier",
+      frontend: {
+        workspaceDomain: "system",
+        routePath: "/system/suppliers",
+        permissionPrefix: "system:supplier",
+      },
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "name", label: "Name", kind: "string", required: true },
+      ],
+    })
+
+    expect(issues).toEqual([])
+  })
+
+  it("rejects malformed frontend registration metadata", () => {
+    const issues = validateModuleSchema({
+      name: "supplier",
+      label: "Supplier",
+      frontend: {
+        workspaceDomain: "admin",
+        routePath: "system/suppliers",
+        permissionPrefix: " ",
+        icon: "briefcase",
+      },
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "name", label: "Name", kind: "string", required: true },
+      ],
+    })
+
+    expect(issues).toContainEqual({
+      path: "frontend.workspaceDomain",
+      message:
+        'Frontend workspaceDomain must be either "business" or "system".',
+    })
+    expect(issues).toContainEqual({
+      path: "frontend.routePath",
+      message: 'Frontend routePath must start with "/".',
+    })
+    expect(issues).toContainEqual({
+      path: "frontend.permissionPrefix",
+      message:
+        "Frontend permissionPrefix must be a non-empty string when provided.",
+    })
+    expect(issues).toContainEqual({
+      path: "frontend.icon",
+      message: 'Frontend metadata does not allow unknown property "icon".',
+    })
+  })
+
   it("rejects out-of-bound field and option metadata", () => {
     const issues = validateModuleSchema({
       name: "supplier",
