@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-04-30`
+更新时间：`2026-05-01`
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -22,6 +22,9 @@
 - 当前结论：先把“像若依的基本后台”补齐，再决定是否恢复 `P7B/P7C`、独立 SQL 工作区或更完整 Studio 产品化
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
+- 前端重构执行计划：[2026-04-30-architecture-refactor-execution-plan.md](./plans/2026-04-30-architecture-refactor-execution-plan.md)
+- 前端脊柱归档：[2026-05-01-frontend-arch-spine-closeout.md](./plans/2026-05-01-frontend-arch-spine-closeout.md)
+- generator / frontend 边界顺序：[2026-05-01-generator-frontend-boundary-and-sequencing.md](./plans/2026-05-01-generator-frontend-boundary-and-sequencing.md)
 - C 端第二界面设计：[2026-04-28-c-end-uniapp-second-surface-design.md](./plans/2026-04-28-c-end-uniapp-second-surface-design.md)
 - uniapp 范围规划：[2026-04-28-uniapp-scope-plan.md](./plans/2026-04-28-uniapp-scope-plan.md)
 - uniapp 范围细化清单：[2026-04-28-uniapp-scope-checklist.md](./plans/2026-04-28-uniapp-scope-checklist.md)
@@ -40,6 +43,8 @@
 - 第二优先级：C 端界面扩展方向先固定为 `uniapp`，但当前只保留设计储备，不提前进入实现
 - 第二优先级：在不改变 owner 的前提下，继续把通知、操作日志、租户与数据权限体验向后台常用形态收口
 - 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心
+- 前端局部收口继续入口：优先沿 `M5 / M6A` 推进 `provide/inject`、共享样式收口与类型网关，不再继续扩写手写 CRUD 接线
+- generator 次级推进入口：在完成本地前端收口后，优先消费 `*.frontend.ts` 静态注册产物，逐步替换标准 CRUD 模块的手写注册
 
 ### 2. Phase 2: Auth Foundation ✅ 归档
 
