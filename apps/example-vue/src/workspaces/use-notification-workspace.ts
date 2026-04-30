@@ -3,7 +3,7 @@ import type {
   ElyQueryField,
   ElyQueryValues,
 } from "@elysian/ui-enterprise-vue"
-import { type ComputedRef, type Ref, computed, ref } from "vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
 import {
   createDefaultNotificationDraft,
@@ -23,6 +23,7 @@ import {
   markNotificationAsRead,
   markNotificationsAsRead,
 } from "../lib/platform-api"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 type NotificationFormValues = Record<string, unknown>
 export type NotificationPanelMode = "detail" | "create"
@@ -56,16 +57,74 @@ interface UseNotificationWorkspaceOptions {
 export const useNotificationWorkspace = (
   options: UseNotificationWorkspaceOptions,
 ) => {
-  const notificationItems = ref<NotificationRecord[]>([])
-  const notificationDetail = ref<NotificationRecord | null>(null)
-  const notificationLoading = ref(false)
-  const notificationDetailLoading = ref(false)
-  const notificationErrorMessage = ref("")
-  const notificationDetailErrorMessage = ref("")
-  const selectedNotificationId = ref<string | null>(null)
-  const notificationPanelMode = ref<NotificationPanelMode>("detail")
-  const notificationQueryValues = ref<ElyQueryValues>({})
-  const notificationCreateForm = ref(createDefaultNotificationDraft())
+  const notificationWorkspace = createCrudWorkspace<
+    NotificationRecord,
+    ReturnType<typeof createDefaultNotificationDraft>,
+    Parameters<typeof createNotification>[0]
+  >({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultNotificationDraft,
+    createRecord: createNotification,
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchNotificationById,
+    fetchList: () => fetchNotifications(listQuery.value),
+    getCreateErrorMessage: () => options.t("app.error.createNotification"),
+    getLoadDetailErrorMessage: () =>
+      options.t("app.error.loadNotificationDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadNotifications"),
+    getUpdateErrorMessage: () => options.t("app.error.createNotification"),
+    normalizePayload: (values) => {
+      const payload = {
+        recipientUserId: normalizeNotificationText(values.recipientUserId),
+        title: normalizeNotificationText(values.title),
+        content: normalizeNotificationText(values.content),
+        level: normalizeNotificationLevel(values.level),
+      }
+
+      if (payload.recipientUserId.length === 0) {
+        return {
+          message: options.t("app.error.notificationRecipientRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.title.length === 0) {
+        return {
+          message: options.t("app.error.notificationTitleRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.content.length === 0) {
+        return {
+          message: options.t("app.error.notificationContentRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolveNotificationSelection,
+    toEditDraft: () => createDefaultNotificationDraft(),
+    updateRecord: async (id) => fetchNotificationById(id),
+  })
+
+  const notificationItems = notificationWorkspace.items
+  const notificationDetail = notificationWorkspace.detail
+  const notificationLoading = notificationWorkspace.loading
+  const notificationDetailLoading = notificationWorkspace.detailLoading
+  const notificationErrorMessage = notificationWorkspace.errorMessage
+  const notificationDetailErrorMessage =
+    notificationWorkspace.detailErrorMessage
+  const selectedNotificationId = notificationWorkspace.selectedId
+  const notificationQueryValues = notificationWorkspace.queryValues
+  const notificationCreateForm = notificationWorkspace.createForm
 
   const listQuery = computed<NotificationListQuery>(() => {
     const query: NotificationListQuery = {}
@@ -140,21 +199,7 @@ export const useNotificationWorkspace = (
     }),
   )
 
-  const selectedNotificationListItem = computed(
-    () =>
-      notificationItems.value.find(
-        (notification: NotificationRecord) =>
-          notification.id === selectedNotificationId.value,
-      ) ?? null,
-  )
-
-  const selectedNotification = computed(
-    () =>
-      (notificationDetail.value &&
-      notificationDetail.value.id === selectedNotificationId.value
-        ? notificationDetail.value
-        : selectedNotificationListItem.value) ?? null,
-  )
+  const selectedNotification = notificationWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
     options.page.tableColumns.value.map((column) => ({
@@ -177,8 +222,8 @@ export const useNotificationWorkspace = (
   const queryFields = computed<ElyQueryField[]>(() => [
     {
       key: "recipientUserId",
-      label: options.t("app.notification.field.recipientUserId"),
       kind: "text",
+      label: options.t("app.notification.field.recipientUserId"),
       placeholder: options.t(
         "app.notification.query.recipientUserIdPlaceholder",
       ),
@@ -236,6 +281,10 @@ export const useNotificationWorkspace = (
     }),
   )
 
+  const notificationPanelMode = computed<NotificationPanelMode>(() =>
+    notificationWorkspace.panelMode.value === "create" ? "create" : "detail",
+  )
+
   const formFields = computed<ElyFormField[]>(() => {
     const allowedFieldKeys =
       notificationPanelMode.value === "create"
@@ -255,8 +304,9 @@ export const useNotificationWorkspace = (
       .filter((field) => allowedFieldKeys.has(field.key))
       .map((field) => ({
         ...field,
-        label: options.localizeFieldLabel(field.key),
+        disabled: notificationPanelMode.value === "detail" || field.disabled,
         input: field.key === "content" ? ("textarea" as const) : field.input,
+        label: options.localizeFieldLabel(field.key),
         options:
           field.key === "level" && field.options
             ? field.options.map((option) => ({
@@ -269,7 +319,6 @@ export const useNotificationWorkspace = (
                   label: options.localizeStatus(option.value),
                 }))
               : field.options,
-        disabled: notificationPanelMode.value === "detail" || field.disabled,
         placeholder:
           field.key === "recipientUserId"
             ? options.t("app.notification.query.recipientUserIdPlaceholder")
@@ -324,182 +373,30 @@ export const useNotificationWorkspace = (
         : options.t("app.notification.detailEmptyDescription"),
   )
 
-  const resetPanelInputs = () => {
-    notificationCreateForm.value = createDefaultNotificationDraft()
-  }
-
-  const clearWorkspace = () => {
-    notificationItems.value = []
-    notificationDetail.value = null
-    selectedNotificationId.value = null
-    notificationErrorMessage.value = ""
-    notificationDetailErrorMessage.value = ""
-    notificationPanelMode.value = "detail"
-    resetPanelInputs()
-  }
-
-  const selectNotification = async (notification: NotificationRecord) => {
-    options.currentShellTabKey.value = "workspace"
-    selectedNotificationId.value = notification.id
-    notificationDetail.value = notification
-    notificationDetailLoading.value = true
-    notificationDetailErrorMessage.value = ""
-
-    try {
-      notificationDetail.value = await fetchNotificationById(notification.id)
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      notificationDetailErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadNotificationDetail")
-    } finally {
-      notificationDetailLoading.value = false
-    }
-  }
+  const clearWorkspace = notificationWorkspace.clearWorkspace
 
   const reloadNotifications = async () => {
-    if (!options.canView.value) {
-      clearWorkspace()
-      return
-    }
-
-    notificationLoading.value = true
-    notificationErrorMessage.value = ""
     notificationDetailErrorMessage.value = ""
-
-    try {
-      const payload = await fetchNotifications(listQuery.value)
-      notificationItems.value = payload.items
-
-      if (payload.items.length === 0) {
-        selectedNotificationId.value = null
-        notificationDetail.value = null
-
-        if (options.canCreate.value) {
-          notificationPanelMode.value = "create"
-        }
-
-        return
-      }
-
-      selectedNotificationId.value = resolveNotificationSelection(
-        payload.items,
-        selectedNotificationId.value,
-      )
-
-      if (notificationPanelMode.value !== "create") {
-        const nextNotification = payload.items.find(
-          (item) => item.id === selectedNotificationId.value,
-        )
-
-        if (nextNotification) {
-          await selectNotification(nextNotification)
-        }
-      }
-    } catch (error) {
-      clearWorkspace()
-      options.onRecoverableAuthError(error)
-      notificationErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadNotifications")
-    } finally {
-      notificationLoading.value = false
-    }
+    await notificationWorkspace.reloadRecords()
   }
 
   const handleSearch = async (values: ElyQueryValues) => {
-    notificationQueryValues.value = values
+    notificationWorkspace.handleSearch(values)
     await reloadNotifications()
   }
 
   const handleReset = async () => {
-    notificationQueryValues.value = {}
+    notificationWorkspace.handleReset()
     await reloadNotifications()
   }
 
-  const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedNotificationId.value = null
-    notificationDetail.value = null
-    notificationErrorMessage.value = ""
-    notificationDetailErrorMessage.value = ""
-    resetPanelInputs()
-    notificationPanelMode.value = "create"
-  }
+  const openCreatePanel = notificationWorkspace.openCreatePanel
+  const selectNotification = notificationWorkspace.selectRecord
+  const submitForm = notificationWorkspace.submitForm
 
   const cancelPanel = () => {
     notificationErrorMessage.value = ""
-
-    if (selectedNotification.value) {
-      notificationPanelMode.value = "detail"
-      return
-    }
-
-    if (options.canCreate.value) {
-      notificationPanelMode.value = "create"
-      return
-    }
-
-    notificationPanelMode.value = "detail"
-  }
-
-  const submitForm = async (values: NotificationFormValues) => {
-    if (notificationLoading.value || notificationDetailLoading.value) {
-      return
-    }
-
-    const payload = {
-      recipientUserId: normalizeNotificationText(values.recipientUserId),
-      title: normalizeNotificationText(values.title),
-      content: normalizeNotificationText(values.content),
-      level: normalizeNotificationLevel(values.level),
-    }
-
-    if (payload.recipientUserId.length === 0) {
-      notificationErrorMessage.value = options.t(
-        "app.error.notificationRecipientRequired",
-      )
-      return
-    }
-
-    if (payload.title.length === 0) {
-      notificationErrorMessage.value = options.t(
-        "app.error.notificationTitleRequired",
-      )
-      return
-    }
-
-    if (payload.content.length === 0) {
-      notificationErrorMessage.value = options.t(
-        "app.error.notificationContentRequired",
-      )
-      return
-    }
-
-    notificationLoading.value = true
-    notificationErrorMessage.value = ""
-
-    try {
-      const created = await createNotification(payload)
-      selectedNotificationId.value = created.id
-      notificationDetail.value = created
-      notificationPanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadNotifications()
-    } catch (error) {
-      notificationErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.createNotification")
-    } finally {
-      notificationLoading.value = false
-    }
+    notificationWorkspace.cancelPanel()
   }
 
   const markSelectedAsRead = async () => {
@@ -601,9 +498,9 @@ export const useNotificationWorkspace = (
     handleReset,
     handleRowClick,
     handleSearch,
+    listQuery,
     markSelectedAsRead,
     markVisibleAsRead,
-    listQuery,
     notificationDetail,
     notificationDetailErrorMessage,
     notificationDetailLoading,
