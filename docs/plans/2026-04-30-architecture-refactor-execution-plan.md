@@ -8,6 +8,7 @@
 > 状态更新：`2026-05-01`
 > - 前端脊柱搭建第一阶段已按修订后边界完成，归档见 [2026-05-01-frontend-arch-spine-closeout.md](./2026-05-01-frontend-arch-spine-closeout.md)
 > - 本文档继续保留为后续未完成里程碑的执行计划，不再把已收口的前端脊柱任务当作当前活动项
+> - 关于“前端本地收口”和“generator 应接管的标准 CRUD 产物”之间的边界与顺序，见 [2026-05-01-generator-frontend-boundary-and-sequencing.md](./2026-05-01-generator-frontend-boundary-and-sequencing.md)
 
 ---
 
