@@ -7,6 +7,7 @@ export const authWorkspaceRegistrations = [
     kind: "session",
     moduleCode: "auth",
     permissionPrefix: "auth:session",
+    permissions: {},
     navigation: {
       id: "enterprise-sessions",
       parentId: "enterprise-system",

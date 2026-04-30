@@ -7,6 +7,12 @@ export const businessWorkspaceRegistrations = [
     kind: "customer",
     moduleCode: "customer",
     permissionPrefix: "customer:customer",
+    permissions: {
+      list: "customer:customer:list",
+      create: "customer:customer:create",
+      update: "customer:customer:update",
+      delete: "customer:customer:delete",
+    },
     i18nKeys: {
       sectionTitle: "app.section.workspaceTitle",
       sectionCopy: "app.section.workspaceCopy",
@@ -20,6 +26,12 @@ export const businessWorkspaceRegistrations = [
     kind: "file",
     moduleCode: "file",
     permissionPrefix: "system:file",
+    permissions: {
+      list: "system:file:list",
+      create: "system:file:upload",
+      update: "system:file:download",
+      delete: "system:file:delete",
+    },
     i18nKeys: {
       sectionTitle: "app.file.sectionTitle",
       sectionCopy: "app.file.sectionCopy",
@@ -33,6 +45,11 @@ export const businessWorkspaceRegistrations = [
     kind: "notification",
     moduleCode: "notification",
     permissionPrefix: "system:notification",
+    permissions: {
+      list: "system:notification:list",
+      create: "system:notification:create",
+      update: "system:notification:update",
+    },
     i18nKeys: {
       sectionTitle: "app.notification.sectionTitle",
       sectionCopy: "app.notification.sectionCopy",
@@ -46,6 +63,10 @@ export const businessWorkspaceRegistrations = [
     kind: "operation-log",
     moduleCode: "operation-log",
     permissionPrefix: "system:operation-log",
+    permissions: {
+      list: "system:operation-log:list",
+      export: "system:operation-log:export",
+    },
     i18nKeys: {
       sectionTitle: "app.operationLog.sectionTitle",
       sectionCopy: "app.operationLog.sectionCopy",
@@ -59,6 +80,11 @@ export const businessWorkspaceRegistrations = [
     kind: "tenant",
     moduleCode: "tenant",
     permissionPrefix: "system:tenant",
+    permissions: {
+      list: "system:tenant:list",
+      create: "system:tenant:create",
+      update: "system:tenant:update",
+    },
     i18nKeys: {
       sectionTitle: "app.tenant.sectionTitle",
       sectionCopy: "app.tenant.sectionCopy",
@@ -72,6 +98,11 @@ export const businessWorkspaceRegistrations = [
     kind: "workflow-definitions",
     moduleCode: "workflow",
     permissionPrefix: "workflow:definition",
+    permissions: {
+      list: "workflow:definition:list",
+      create: "workflow:definition:create",
+      update: "workflow:definition:update",
+    },
     i18nKeys: {
       sectionTitle: "app.workflow.sectionTitle",
       sectionCopy: "app.workflow.sectionCopy",
@@ -85,6 +116,7 @@ export const businessWorkspaceRegistrations = [
     kind: "generator-preview",
     moduleCode: "generator-preview",
     permissionPrefix: "studio:generator-preview",
+    permissions: {},
     navigation: {
       id: "enterprise-studio-generator-preview",
       parentId: "enterprise-studio",

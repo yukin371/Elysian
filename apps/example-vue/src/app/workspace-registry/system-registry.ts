@@ -7,6 +7,11 @@ export const systemWorkspaceRegistrations = [
     kind: "dictionary",
     moduleCode: "dictionary",
     permissionPrefix: "system:dictionary",
+    permissions: {
+      list: "system:dictionary:list",
+      create: "system:dictionary:create",
+      update: "system:dictionary:update",
+    },
     i18nKeys: {
       sectionTitle: "app.dictionary.sectionTitle",
       sectionCopy: "app.dictionary.sectionCopy",
@@ -20,6 +25,11 @@ export const systemWorkspaceRegistrations = [
     kind: "department",
     moduleCode: "department",
     permissionPrefix: "system:department",
+    permissions: {
+      list: "system:department:list",
+      create: "system:department:create",
+      update: "system:department:update",
+    },
     i18nKeys: {
       sectionTitle: "app.department.sectionTitle",
       sectionCopy: "app.department.sectionCopy",
@@ -33,6 +43,11 @@ export const systemWorkspaceRegistrations = [
     kind: "post",
     moduleCode: "post",
     permissionPrefix: "system:post",
+    permissions: {
+      list: "system:post:list",
+      create: "system:post:create",
+      update: "system:post:update",
+    },
     i18nKeys: {
       sectionTitle: "app.post.sectionTitle",
       sectionCopy: "app.post.sectionCopy",
@@ -46,6 +61,11 @@ export const systemWorkspaceRegistrations = [
     kind: "menu",
     moduleCode: "menu",
     permissionPrefix: "system:menu",
+    permissions: {
+      list: "system:menu:list",
+      create: "system:menu:update",
+      update: "system:menu:update",
+    },
     i18nKeys: {
       sectionTitle: "app.menu.sectionTitle",
       sectionCopy: "app.menu.sectionCopy",
@@ -59,6 +79,11 @@ export const systemWorkspaceRegistrations = [
     kind: "role",
     moduleCode: "role",
     permissionPrefix: "system:role",
+    permissions: {
+      list: "system:role:list",
+      create: "system:role:create",
+      update: "system:role:update",
+    },
     i18nKeys: {
       sectionTitle: "app.role.sectionTitle",
       sectionCopy: "app.role.sectionCopy",
@@ -72,6 +97,11 @@ export const systemWorkspaceRegistrations = [
     kind: "setting",
     moduleCode: "setting",
     permissionPrefix: "system:setting",
+    permissions: {
+      list: "system:setting:list",
+      create: "system:setting:create",
+      update: "system:setting:update",
+    },
     i18nKeys: {
       sectionTitle: "app.setting.sectionTitle",
       sectionCopy: "app.setting.sectionCopy",
@@ -85,6 +115,12 @@ export const systemWorkspaceRegistrations = [
     kind: "user",
     moduleCode: "user",
     permissionPrefix: "system:user",
+    permissions: {
+      list: "system:user:list",
+      create: "system:user:create",
+      update: "system:user:update",
+      delete: "system:user:reset-password",
+    },
     i18nKeys: {
       sectionTitle: "app.user.sectionTitle",
       sectionCopy: "app.user.sectionCopy",

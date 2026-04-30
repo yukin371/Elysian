@@ -27,6 +27,7 @@ export interface WorkspaceRegistration {
   moduleCode: string
   navigation?: WorkspaceNavigationRegistration
   path: string
+  permissions?: WorkspacePermissionRegistration
   permissionPrefix: string
 }
 
@@ -49,4 +50,12 @@ export interface WorkspaceNavigationRegistration {
   parentId: string | null
   permissionCode: string | null
   sort: number
+}
+
+export interface WorkspacePermissionRegistration {
+  create?: string
+  delete?: string
+  export?: string
+  list?: string
+  update?: string
 }

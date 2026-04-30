@@ -6,6 +6,7 @@ import type {
   RegisteredWorkspaceKind,
   WorkspaceModuleReadyMap,
 } from "./workspace-registry"
+import { getWorkspacePermissions } from "./workspace-registry"
 
 interface UseExampleWorkspaceGatesOptions {
   permissionCodes: ComputedRef<string[]>
@@ -20,125 +21,78 @@ export const useExampleWorkspaceGates = (
 ) => {
   const workspaceReady = (kind: RegisteredWorkspaceKind) =>
     options.workspaceModuleReady.get(kind)?.value ?? false
+  const permissions = (kind: RegisteredWorkspaceKind) =>
+    getWorkspacePermissions(kind) as Record<string, string>
 
   const customerPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "customer:customer:list",
-      create: "customer:customer:create",
-      update: "customer:customer:update",
-      delete: "customer:customer:delete",
-    },
+    permissions("customer"),
     options.authModuleReady,
   )
 
   const dictionaryPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:dictionary:list",
-      create: "system:dictionary:create",
-      update: "system:dictionary:update",
-    },
+    permissions("dictionary"),
     options.authModuleReady,
   )
 
   const departmentPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:department:list",
-      create: "system:department:create",
-      update: "system:department:update",
-    },
+    permissions("department"),
     options.authModuleReady,
   )
 
   const filePermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:file:list",
-      create: "system:file:upload",
-      update: "system:file:download",
-      delete: "system:file:delete",
-    },
+    permissions("file"),
     options.authModuleReady,
   )
 
   const postPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:post:list",
-      create: "system:post:create",
-      update: "system:post:update",
-    },
+    permissions("post"),
     options.authModuleReady,
   )
 
   const menuPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:menu:list",
-      create: "system:menu:update",
-      update: "system:menu:update",
-    },
+    permissions("menu"),
     options.authModuleReady,
   )
 
   const notificationPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:notification:list",
-      create: "system:notification:create",
-      update: "system:notification:update",
-    },
+    permissions("notification"),
     options.authModuleReady,
   )
 
   const operationLogPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:operation-log:list",
-    },
+    permissions("operation-log"),
     options.authModuleReady,
   )
 
   const rolePermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:role:list",
-      create: "system:role:create",
-      update: "system:role:update",
-    },
+    permissions("role"),
     options.authModuleReady,
   )
 
   const settingPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:setting:list",
-      create: "system:setting:create",
-      update: "system:setting:update",
-    },
+    permissions("setting"),
     options.authModuleReady,
   )
 
   const tenantPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:tenant:list",
-      create: "system:tenant:create",
-      update: "system:tenant:update",
-    },
+    permissions("tenant"),
     options.authModuleReady,
   )
 
   const userPermissions = usePermissions(
     options.permissionCodes,
-    {
-      list: "system:user:list",
-      create: "system:user:create",
-      update: "system:user:update",
-      delete: "system:user:reset-password",
-    },
+    permissions("user"),
     options.authModuleReady,
   )
 
@@ -278,7 +232,9 @@ export const useExampleWorkspaceGates = (
     () =>
       canEnterOperationLogWorkspace.value &&
       (!options.authModuleReady.value ||
-        options.permissionCodes.value.includes("system:operation-log:export")),
+        options.permissionCodes.value.includes(
+          getWorkspacePermissions("operation-log").export ?? "",
+        )),
   )
 
   const canEnterRoleWorkspace = computed(
@@ -358,7 +314,9 @@ export const useExampleWorkspaceGates = (
     () =>
       canEnterWorkflowWorkspace.value &&
       (!options.authModuleReady.value ||
-        options.permissionCodes.value.includes("workflow:definition:list")),
+        options.permissionCodes.value.includes(
+          getWorkspacePermissions("workflow-definitions").list ?? "",
+        )),
   )
 
   return {
