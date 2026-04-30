@@ -56,20 +56,15 @@ defineEmits<{
       </span>
     </div>
 
-    <div class="enterprise-metadata enterprise-status-metadata">
+    <div
+      v-if="authModuleReady && isAuthenticated"
+      class="enterprise-metadata enterprise-status-metadata"
+    >
       <div>
-        <span>{{ t("app.platform.version") }}</span>
-        <strong>{{ platformVersion }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.platform.status") }}</span>
-        <strong class="capitalize">{{ platformStatusLabel }}</strong>
-      </div>
-      <div v-if="authModuleReady && isAuthenticated">
         <span>{{ t("app.session.roles") }}</span>
         <strong>{{ authRolesLabel }}</strong>
       </div>
-      <div v-if="authModuleReady && isAuthenticated">
+      <div>
         <span>{{ t("app.session.permissions") }}</span>
         <strong>{{ permissionCount }}</strong>
       </div>
@@ -141,10 +136,10 @@ defineEmits<{
 
 <style scoped>
 .enterprise-card {
-  border-radius: 16px;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.2rem;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 1rem;
   color: #0f172a;
 }
 
@@ -175,8 +170,8 @@ defineEmits<{
 }
 
 .enterprise-metadata div {
-  border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 4px;
   background: rgba(248, 250, 252, 0.58);
   padding: 0.85rem 0.95rem;
 }
@@ -211,7 +206,7 @@ defineEmits<{
 }
 
 .enterprise-message {
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 0.9rem 1rem;
   line-height: 1.75;
 }
@@ -225,8 +220,8 @@ defineEmits<{
 .enterprise-toolbar-pill {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
   border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 4px;
   background: rgba(255, 255, 255, 0.92);
   padding: 0.45rem 0.85rem;
   font-size: 0.78rem;

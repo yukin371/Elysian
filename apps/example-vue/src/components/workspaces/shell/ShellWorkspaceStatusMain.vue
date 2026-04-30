@@ -69,10 +69,10 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
 
 <style scoped>
 .enterprise-card {
-  border-radius: 16px;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.2rem;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 1rem;
   color: #0f172a;
 }
 
@@ -105,8 +105,8 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
 .enterprise-toolbar-pill {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
   border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 4px;
   background: rgba(255, 255, 255, 0.92);
   padding: 0.45rem 0.85rem;
   font-size: 0.78rem;
@@ -121,8 +121,8 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
 }
 
 .enterprise-metadata div {
-  border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 4px;
   background: rgba(248, 250, 252, 0.58);
   padding: 0.85rem 0.95rem;
 }
@@ -150,7 +150,7 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
 
 .enterprise-button {
   border: 1px solid rgba(36, 87, 214, 0.18);
-  border-radius: 12px;
+  border-radius: 4px;
   background: linear-gradient(135deg, #2457d6, #173ea6);
   color: white;
   font-size: 0.82rem;

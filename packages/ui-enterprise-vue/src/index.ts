@@ -32,6 +32,7 @@ export { default as ElyNavNodes } from "./components/ElyNavNodes.vue"
 export { default as ElyPreviewSkeleton } from "./components/ElyPreviewSkeleton.vue"
 export { default as ElyQueryBar } from "./components/ElyQueryBar.vue"
 export { default as ElyShell } from "./components/ElyShell.vue"
+export { default as ElyShellTabs } from "./components/ElyShellTabs.vue"
 export { default as ElyTable } from "./components/ElyTable.vue"
 export type {
   ElyCrudWorkspaceEmits,

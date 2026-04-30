@@ -134,7 +134,7 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
 
 .ely-crud-card {
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 16px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.96);
   padding: 1rem 1rem 0.85rem;
 }
@@ -170,7 +170,7 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   place-items: center;
   width: 72px;
   height: 72px;
-  border-radius: 14px;
+  border-radius: 6px;
   background: rgba(36, 87, 214, 0.1);
   color: #2457d6;
   font-size: 1.8rem;

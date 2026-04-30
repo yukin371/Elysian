@@ -73,6 +73,48 @@ export const normalizeWorkspaceNavigationPath = (
   return WORKSPACE_PATH_ALIASES[path] ?? path
 }
 
+export const normalizeWorkspaceRoutePath = (
+  routePath: string | null | undefined,
+) => {
+  const rawPath = routePath?.trim()
+
+  if (!rawPath) {
+    return null
+  }
+
+  const hashPath = rawPath.startsWith("#") ? rawPath.slice(1) : rawPath
+  const pathWithoutQuery = hashPath.split("?")[0]?.trim()
+
+  if (!pathWithoutQuery || pathWithoutQuery === "/") {
+    return null
+  }
+
+  const normalizedPath = pathWithoutQuery.startsWith("/")
+    ? pathWithoutQuery
+    : `/${pathWithoutQuery}`
+
+  return normalizeWorkspaceNavigationPath(normalizedPath)
+}
+
+export const toWorkspaceRouteHash = (path: string | null | undefined) => {
+  const normalizedPath = normalizeWorkspaceRoutePath(path)
+
+  return normalizedPath ? `#${normalizedPath}` : ""
+}
+
+export const resolveWorkspaceMenuKeyByPath = (
+  items: UiNavigationNode[],
+  routePath: string | null | undefined,
+) => {
+  const normalizedPath = normalizeWorkspaceRoutePath(routePath)
+
+  if (!normalizedPath) {
+    return null
+  }
+
+  return findNavigationItemByPath(items, normalizedPath)?.id ?? null
+}
+
 export const resolveWorkspaceMenuKey = (
   items: UiNavigationNode[],
   menuKey: string,

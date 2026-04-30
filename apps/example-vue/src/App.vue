@@ -6,19 +6,16 @@ import {
   provideVueLocaleRuntime,
 } from "@elysian/frontend-vue"
 import {
-  ElyCrudWorkspace,
-  ElyShell,
   useElyCrudPage,
   vueEnterprisePresetManifest,
 } from "@elysian/ui-enterprise-vue"
 import { ConfigProvider as TConfigProvider } from "tdesign-vue-next/es/config-provider"
 import enUs from "tdesign-vue-next/es/locale/en_US"
 import zhCn from "tdesign-vue-next/es/locale/zh_CN"
-import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { computed, ref } from "vue"
 import { createAppShellLocalization } from "./app/app-shell-helpers"
 import { createExampleShellBindingsOptions } from "./app/create-example-shell-bindings-options"
-import { downloadBrowserBlob } from "./app/download-browser-blob"
+import { isRecoverableAuthError } from "./app/example-auth-errors"
 import {
   customerPageDefinition,
   departmentPageDefinition,
@@ -32,6 +29,7 @@ import {
   tenantPageDefinition,
   userPageDefinition,
 } from "./app/example-page-definitions"
+import { useExampleCsvExports } from "./app/use-example-csv-exports"
 import { useExampleNavigation } from "./app/use-example-navigation"
 import { useExampleQuerySummary } from "./app/use-example-query-summary"
 import { useExampleSessionOrchestration } from "./app/use-example-session-orchestration"
@@ -39,29 +37,11 @@ import { useExampleShellBindings } from "./app/use-example-shell-bindings"
 import { useExampleShellMeta } from "./app/use-example-shell-meta"
 import { useExampleWorkspaceGates } from "./app/use-example-workspace-gates"
 import { useExampleWorkspaceSync } from "./app/use-example-workspace-sync"
-import ShellHeroBanner from "./components/workspaces/shell/ShellHeroBanner.vue"
-import ShellWorkspaceHeaderActions from "./components/workspaces/shell/ShellWorkspaceHeaderActions.vue"
-import ShellWorkspaceMainSwitch from "./components/workspaces/shell/ShellWorkspaceMainSwitch.vue"
-import ShellWorkspaceSecondarySwitch from "./components/workspaces/shell/ShellWorkspaceSecondarySwitch.vue"
-import ShellWorkspaceSectionIntro from "./components/workspaces/shell/ShellWorkspaceSectionIntro.vue"
+import AdminLoginPage from "./components/auth/AdminLoginPage.vue"
+import AdminShellLayout from "./components/layout/AdminShellLayout.vue"
 import { exampleLocaleMessages } from "./i18n"
-import { resolveWorkspaceMenuKey } from "./lib/navigation-workspace"
-import { buildOperationLogListQuery } from "./lib/operation-log-workspace"
-import {
-  exportDepartmentsCsv,
-  exportDictionaryItemsCsv,
-  exportDictionaryTypesCsv,
-  exportFilesCsv,
-  exportMenusCsv,
-  exportNotificationsCsv,
-  exportOperationLogsCsv,
-  exportPostsCsv,
-  exportRolesCsv,
-  exportSettingsCsv,
-  exportTenantsCsv,
-  exportUsersCsv,
-} from "./lib/platform-api"
 import type { AuthIdentityResponse, PlatformResponse } from "./lib/platform-api"
+import { useExampleAppLayout } from "./router/example-router"
 import { useAuthSessionWorkspace } from "./workspaces/use-auth-session-workspace"
 import { useCustomerWorkspace } from "./workspaces/use-customer-workspace"
 import { useDepartmentWorkspace } from "./workspaces/use-department-workspace"
@@ -92,13 +72,7 @@ const tdesignGlobalConfig = computed(() =>
   locale.value === "zh-CN" ? zhCn : enUs,
 )
 
-const localeOptions = [
-  { key: "zh-CN", labelKey: "app.locale.zhCN" },
-  { key: "en-US", labelKey: "app.locale.enUS" },
-] as const
-
 const {
-  buildFallbackNavigation,
   describeWorkflowNode,
   localizeActionLabel,
   localizeCustomerStatus,
@@ -176,24 +150,27 @@ const loginForm = ref({
   password: demoAdminPassword,
 })
 
-const createCsvExportFilename = (basename: string) =>
-  `${basename}-${new Date().toISOString().slice(0, 10)}.csv`
+const handleRecoverableAuthError = (error: unknown) => {
+  if (isRecoverableAuthError(error)) {
+    authIdentity.value = null
+  }
+}
 
 const isAuthenticated = computed(() => authIdentity.value !== null)
+const exampleAppLayout = useExampleAppLayout({
+  isAuthenticated,
+})
 const permissionCodes = computed(
   () => authIdentity.value?.permissionCodes ?? [],
 )
 const {
   currentMenuKey,
   currentModuleCodeLabel,
-  currentModuleReady,
   currentModuleStatusLabel,
   currentNavigationPath,
   currentShellTabKey,
   currentWorkspaceDescription,
   currentWorkspaceKind,
-  currentWorkspaceSectionCopy,
-  currentWorkspaceSectionTitle,
   currentWorkspaceTitle,
   customerNavigationItem,
   enterpriseNavigation,
@@ -219,13 +196,14 @@ const {
   openCurrentWorkspaceTab,
   openCustomerWorkspace,
   placeholderWorkspaceCopy,
+  selectShellMenu,
+  selectShellTab,
   selectedNavigationItem,
 } = useExampleNavigation({
   authIdentity,
   registeredModuleCodes,
   t,
   localizeNavigationItems,
-  buildFallbackNavigation,
 })
 
 const {
@@ -355,11 +333,7 @@ const customerWorkspace = useCustomerWorkspace({
   canCreate: canCreateCustomers,
   canUpdate: canUpdateCustomers,
   canDelete: canDeleteCustomers,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -425,11 +399,7 @@ const fileWorkspace = useFileWorkspace({
   canUpload: canUploadFiles,
   canDownload: canDownloadFiles,
   canDelete: canDeleteFiles,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -468,11 +438,7 @@ const sessionWorkspace = useAuthSessionWorkspace({
   locale,
   t,
   canEnterWorkspace: canEnterSessionWorkspace,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
   onCurrentSessionRevoked: async () => {
     await submitLogout()
   },
@@ -537,11 +503,7 @@ const notificationWorkspace = useNotificationWorkspace({
   canView: canViewNotifications,
   canCreate: canCreateNotifications,
   canUpdate: canUpdateNotifications,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -587,11 +549,7 @@ const operationLogWorkspace = useOperationLogWorkspace({
   localizeFieldLabel: localizeOperationLogFieldLabel,
   localizeResult: localizeOperationLogResult,
   canView: canViewOperationLogs,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -632,11 +590,7 @@ const dictionaryWorkspace = useDictionaryWorkspace({
   canView: canViewDictionaries,
   canCreate: canCreateDictionaryTypes,
   canUpdate: canUpdateDictionaryTypes,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -684,11 +638,7 @@ const departmentWorkspace = useDepartmentWorkspace({
   canView: canViewDepartments,
   canCreate: canCreateDepartments,
   canUpdate: canUpdateDepartments,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -735,11 +685,7 @@ const postWorkspace = usePostWorkspace({
   canView: canViewPosts,
   canCreate: canCreatePosts,
   canUpdate: canUpdatePosts,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -786,11 +732,7 @@ const menuWorkspace = useMenuWorkspace({
   canView: canViewMenus,
   canCreate: canCreateMenus,
   canUpdate: canUpdateMenus,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -839,11 +781,7 @@ const roleWorkspace = useRoleWorkspace({
   canView: canViewRoles,
   canCreate: canCreateRoles,
   canUpdate: canUpdateRoles,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -889,11 +827,7 @@ const tenantWorkspace = useTenantWorkspace({
   canView: canViewTenants,
   canCreate: canCreateTenants,
   canUpdate: canUpdateTenants,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -941,11 +875,7 @@ const userWorkspace = useUserWorkspace({
   canCreate: canCreateUsers,
   canUpdate: canUpdateUsers,
   canResetPassword: canResetUserPasswords,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -986,11 +916,7 @@ const workflowWorkspace = useWorkflowWorkspace({
   localizeNodeType: localizeWorkflowNodeType,
   describeNode: describeWorkflowNode,
   canView: canViewWorkflowDefinitions,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -1003,6 +929,7 @@ const {
   selectedWorkflowDefinitionId,
   setWorkflowStatusFilter,
   workflowDefinitionCards,
+  workflowDefinitionDetail,
   workflowDefinitionDetailCards,
   workflowDefinitions,
   workflowDetailErrorMessage,
@@ -1025,11 +952,7 @@ const settingWorkspace = useSettingWorkspace({
   canView: canViewSettings,
   canCreate: canCreateSettings,
   canUpdate: canUpdateSettings,
-  onRecoverableAuthError: (error) => {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-  },
+  onRecoverableAuthError: handleRecoverableAuthError,
 })
 
 const {
@@ -1066,12 +989,9 @@ const {
 
 const {
   authStatusLabel,
-  authStatusTone,
-  currentWorkspaceItemCount,
   enterpriseCrudCopy,
   enterpriseFormCopy,
   enterpriseShellCopy,
-  enterpriseShellStats,
   enterpriseShellTabs,
   enterpriseShellUser,
   shellWorkspaceDescription,
@@ -1245,387 +1165,128 @@ useExampleWorkspaceSync({
   selectWorkflowDefinition,
 })
 
-const { isRecoverableAuthError, submitLogin, submitLogout } =
-  useExampleSessionOrchestration({
-    t,
-    platform,
-    authIdentity,
-    registeredModuleCodes,
-    loading,
-    authLoading,
-    errorMessage,
-    authErrorMessage,
-    envName,
-    loginForm,
-    authModuleReady,
-    customerModuleReady,
-    departmentModuleReady,
-    postModuleReady,
-    fileModuleReady,
-    menuModuleReady,
-    notificationModuleReady,
-    operationLogModuleReady,
-    roleModuleReady,
-    settingModuleReady,
-    tenantModuleReady,
-    userModuleReady,
-    dictionaryModuleReady,
-    workflowModuleReady,
-    enterpriseFormMode,
-    notificationQueryValues,
-    reloadFiles,
-    reloadNotifications,
-    reloadDictionaries,
-    reloadCustomers,
-    reloadDepartments,
-    reloadSessions,
-    reloadPosts,
-    reloadMenus,
-    reloadOperationLogs,
-    reloadRoles,
-    reloadSettings,
-    reloadTenants,
-    reloadUsers,
-    reloadWorkflowDefinitions,
-    clearCustomerWorkspace,
-    clearDictionaryOptions,
-    clearFileWorkspace,
-    clearNotificationWorkspace,
-    clearDepartmentWorkspace,
-    clearSessionWorkspace,
-    clearPostWorkspace,
-    clearMenuWorkspace,
-    clearOperationLogWorkspace,
-    clearRoleWorkspace,
-    clearSettingWorkspace,
-    clearTenantWorkspace,
-    clearUserWorkspace,
-    clearWorkflowDefinitions,
-    resetDepartmentQuery,
-    resetPostQuery,
-    resetMenuQuery,
-    resetOperationLogQuery,
-    resetRoleQuery,
-    resetSettingQuery,
-    resetTenantQuery,
-    handleUserReset,
-  })
+const { submitLogin, submitLogout } = useExampleSessionOrchestration({
+  t,
+  platform,
+  authIdentity,
+  registeredModuleCodes,
+  loading,
+  authLoading,
+  errorMessage,
+  authErrorMessage,
+  envName,
+  loginForm,
+  authModuleReady,
+  customerModuleReady,
+  departmentModuleReady,
+  postModuleReady,
+  fileModuleReady,
+  menuModuleReady,
+  notificationModuleReady,
+  operationLogModuleReady,
+  roleModuleReady,
+  settingModuleReady,
+  tenantModuleReady,
+  userModuleReady,
+  dictionaryModuleReady,
+  workflowModuleReady,
+  enterpriseFormMode,
+  notificationQueryValues,
+  reloadFiles,
+  reloadNotifications,
+  reloadDictionaries,
+  reloadCustomers,
+  reloadDepartments,
+  reloadSessions,
+  reloadPosts,
+  reloadMenus,
+  reloadOperationLogs,
+  reloadRoles,
+  reloadSettings,
+  reloadTenants,
+  reloadUsers,
+  reloadWorkflowDefinitions,
+  clearCustomerWorkspace,
+  clearDictionaryOptions,
+  clearFileWorkspace,
+  clearNotificationWorkspace,
+  clearDepartmentWorkspace,
+  clearSessionWorkspace,
+  clearPostWorkspace,
+  clearMenuWorkspace,
+  clearOperationLogWorkspace,
+  clearRoleWorkspace,
+  clearSettingWorkspace,
+  clearTenantWorkspace,
+  clearUserWorkspace,
+  clearWorkflowDefinitions,
+  resetDepartmentQuery,
+  resetPostQuery,
+  resetMenuQuery,
+  resetOperationLogQuery,
+  resetRoleQuery,
+  resetSettingQuery,
+  resetTenantQuery,
+  handleUserReset,
+})
 
-const handleExportDictionaryTypes = async () => {
-  if (!canViewDictionaries.value || dictionaryTypeExportLoading.value) {
-    return
-  }
+const {
+  handleExportDepartments,
+  handleExportDictionaryItems,
+  handleExportDictionaryTypes,
+  handleExportFiles,
+  handleExportMenus,
+  handleExportNotifications,
+  handleExportOperationLogs,
+  handleExportPosts,
+  handleExportRoles,
+  handleExportSettings,
+  handleExportTenants,
+  handleExportUsers,
+} = useExampleCsvExports({
+  t,
+  authIdentity,
+  isRecoverableAuthError,
+  canViewDictionaries,
+  dictionaryTypeExportLoading,
+  dictionaryItemsExportLoading,
+  dictionaryErrorMessage,
+  selectedDictionaryTypeId,
+  canViewUsers,
+  userExportLoading,
+  userErrorMessage,
+  canViewRoles,
+  roleExportLoading,
+  roleErrorMessage,
+  canViewDepartments,
+  departmentExportLoading,
+  departmentErrorMessage,
+  canViewPosts,
+  postExportLoading,
+  postErrorMessage,
+  canViewMenus,
+  menuExportLoading,
+  menuErrorMessage,
+  canViewSettings,
+  settingExportLoading,
+  settingErrorMessage,
+  canViewTenants,
+  tenantExportLoading,
+  tenantErrorMessage,
+  canViewNotifications,
+  notificationExportLoading,
+  notificationErrorMessage,
+  notificationListQuery,
+  canExportOperationLogs,
+  operationLogExportLoading,
+  operationLogErrorMessage,
+  operationLogQueryValues,
+  canViewFiles,
+  fileExportLoading,
+  fileErrorMessage,
+  fileListQuery,
+})
 
-  dictionaryTypeExportLoading.value = true
-  dictionaryErrorMessage.value = ""
-
-  try {
-    const blob = await exportDictionaryTypesCsv()
-    downloadBrowserBlob(
-      blob,
-      createCsvExportFilename("system-dictionary-types"),
-    )
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    dictionaryErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.exportDictionaryTypes")
-  } finally {
-    dictionaryTypeExportLoading.value = false
-  }
-}
-
-const handleExportDictionaryItems = async () => {
-  if (!canViewDictionaries.value || dictionaryItemsExportLoading.value) {
-    return
-  }
-
-  dictionaryItemsExportLoading.value = true
-  dictionaryErrorMessage.value = ""
-
-  try {
-    const blob = await exportDictionaryItemsCsv(
-      selectedDictionaryTypeId.value ?? undefined,
-    )
-    downloadBrowserBlob(
-      blob,
-      createCsvExportFilename("system-dictionary-items"),
-    )
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    dictionaryErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.exportDictionaryItems")
-  } finally {
-    dictionaryItemsExportLoading.value = false
-  }
-}
-
-const handleExportUsers = async () => {
-  if (!canViewUsers.value || userExportLoading.value) {
-    return
-  }
-
-  userExportLoading.value = true
-  userErrorMessage.value = ""
-
-  try {
-    const blob = await exportUsersCsv()
-    downloadBrowserBlob(blob, createCsvExportFilename("system-users"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    userErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportUsers")
-  } finally {
-    userExportLoading.value = false
-  }
-}
-
-const handleExportRoles = async () => {
-  if (!canViewRoles.value || roleExportLoading.value) {
-    return
-  }
-
-  roleExportLoading.value = true
-  roleErrorMessage.value = ""
-
-  try {
-    const blob = await exportRolesCsv()
-    downloadBrowserBlob(blob, createCsvExportFilename("system-roles"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    roleErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportRoles")
-  } finally {
-    roleExportLoading.value = false
-  }
-}
-
-const handleExportDepartments = async () => {
-  if (!canViewDepartments.value || departmentExportLoading.value) {
-    return
-  }
-
-  departmentExportLoading.value = true
-  departmentErrorMessage.value = ""
-
-  try {
-    const blob = await exportDepartmentsCsv()
-    downloadBrowserBlob(blob, createCsvExportFilename("system-departments"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    departmentErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportDepartments")
-  } finally {
-    departmentExportLoading.value = false
-  }
-}
-
-const handleExportPosts = async () => {
-  if (!canViewPosts.value || postExportLoading.value) {
-    return
-  }
-
-  postExportLoading.value = true
-  postErrorMessage.value = ""
-
-  try {
-    const blob = await exportPostsCsv()
-    downloadBrowserBlob(blob, createCsvExportFilename("system-posts"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    postErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportPosts")
-  } finally {
-    postExportLoading.value = false
-  }
-}
-
-const handleExportMenus = async () => {
-  if (!canViewMenus.value || menuExportLoading.value) {
-    return
-  }
-
-  menuExportLoading.value = true
-  menuErrorMessage.value = ""
-
-  try {
-    const blob = await exportMenusCsv()
-    downloadBrowserBlob(blob, createCsvExportFilename("system-menus"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    menuErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportMenus")
-  } finally {
-    menuExportLoading.value = false
-  }
-}
-
-const handleExportSettings = async () => {
-  if (!canViewSettings.value || settingExportLoading.value) {
-    return
-  }
-
-  settingExportLoading.value = true
-  settingErrorMessage.value = ""
-
-  try {
-    const blob = await exportSettingsCsv()
-    downloadBrowserBlob(blob, createCsvExportFilename("system-settings"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    settingErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportSettings")
-  } finally {
-    settingExportLoading.value = false
-  }
-}
-
-const handleExportTenants = async () => {
-  if (!canViewTenants.value || tenantExportLoading.value) {
-    return
-  }
-
-  tenantExportLoading.value = true
-  tenantErrorMessage.value = ""
-
-  try {
-    const blob = await exportTenantsCsv()
-    downloadBrowserBlob(blob, createCsvExportFilename("system-tenants"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    tenantErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportTenants")
-  } finally {
-    tenantExportLoading.value = false
-  }
-}
-
-const handleExportNotifications = async () => {
-  if (!canViewNotifications.value || notificationExportLoading.value) {
-    return
-  }
-
-  notificationExportLoading.value = true
-  notificationErrorMessage.value = ""
-
-  try {
-    const blob = await exportNotificationsCsv(notificationListQuery.value)
-    downloadBrowserBlob(blob, createCsvExportFilename("system-notifications"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    notificationErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.exportNotifications")
-  } finally {
-    notificationExportLoading.value = false
-  }
-}
-
-const handleExportOperationLogs = async () => {
-  if (!canExportOperationLogs.value || operationLogExportLoading.value) {
-    return
-  }
-
-  operationLogExportLoading.value = true
-  operationLogErrorMessage.value = ""
-
-  try {
-    const blob = await exportOperationLogsCsv(
-      buildOperationLogListQuery(operationLogQueryValues.value),
-    )
-    downloadBrowserBlob(blob, createCsvExportFilename("system-operation-logs"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    operationLogErrorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t("app.error.exportOperationLogs")
-  } finally {
-    operationLogExportLoading.value = false
-  }
-}
-
-const handleExportFiles = async () => {
-  if (!canViewFiles.value || fileExportLoading.value) {
-    return
-  }
-
-  fileExportLoading.value = true
-  fileErrorMessage.value = ""
-
-  try {
-    const blob = await exportFilesCsv(fileListQuery.value)
-    downloadBrowserBlob(blob, createCsvExportFilename("system-files"))
-  } catch (error) {
-    if (isRecoverableAuthError(error)) {
-      authIdentity.value = null
-    }
-
-    fileErrorMessage.value =
-      error instanceof Error ? error.message : t("app.error.exportFiles")
-  } finally {
-    fileExportLoading.value = false
-  }
-}
-
-const handleShellMenuSelect = (menuKey: string) => {
-  const nextMenuKey = resolveWorkspaceMenuKey(
-    enterpriseNavigation.value,
-    menuKey,
-  )
-
-  if (!nextMenuKey) {
-    return
-  }
-
-  currentMenuKey.value = nextMenuKey
-  currentShellTabKey.value = "workspace"
-}
-
-const handleShellTabSelect = (tabKey: string) => {
-  if (tabKey !== "workspace" && tabKey !== "runtime") {
-    return
-  }
-
-  currentShellTabKey.value = tabKey
-}
 const selectedNavigationItemName = computed(
   () => selectedNavigationItem.value?.name ?? t("app.runtime.title"),
 )
@@ -1849,85 +1510,61 @@ const {
 
 <template>
   <TConfigProvider :global-config="tdesignGlobalConfig">
-    <main class="app-shell min-h-screen px-5 py-6 text-stone-100 sm:px-8 lg:px-10">
-      <div class="mx-auto flex max-w-7xl flex-col gap-6">
-        <ShellHeroBanner
-          :t="t"
-          :locale="locale"
-          :locale-options="localeOptions"
-          :runtime-label="platform?.manifest.runtime ?? t('app.loading.short')"
-          :enterprise-status-label="
-            localizePlatformStatus(vueEnterprisePresetManifest.status)
-          "
-          :auth-status-label="authStatusLabel"
-          :auth-status-tone="authStatusTone"
-          :workspace-item-count="currentWorkspaceItemCount"
-          @select-locale="localeRuntime.setLocale"
-        />
-
-        <p v-if="loading" class="text-sm uppercase tracking-[0.28em] text-stone-400">
+    <main class="app-shell min-h-screen">
+      <div class="admin-frame">
+        <p v-if="loading" class="admin-loading">
           {{ t("app.loading.workspace") }}
         </p>
-        <p
-          v-else-if="errorMessage"
-          class="rounded-2xl border border-rose-400/20 bg-rose-500/10 p-5 text-rose-200"
-        >
+        <p v-else-if="errorMessage" class="admin-error">
           {{ errorMessage }}
         </p>
 
         <template v-else>
-          <section class="content-panel p-3 lg:p-4">
-              <ShellWorkspaceSectionIntro
-                :t="t"
-                :title="currentWorkspaceSectionTitle"
-                :copy="currentWorkspaceSectionCopy"
-              />
-
-              <ElyShell
-                :key="locale"
-                :title="t('app.shell.title')"
-                :subtitle="t('app.shell.subtitle')"
-                :workspace-title="shellWorkspaceTitle"
-                :workspace-description="shellWorkspaceDescription"
-                :preset-label="t('app.shell.presetLabel')"
-                :environment="envName"
-                :status="
-                  authModuleReady
-                    ? t('app.shell.status.sessionAware')
-                    : t('app.shell.status.preview')
-                "
-                :copy="enterpriseShellCopy"
-                :navigation="enterpriseNavigation"
-                :stats="enterpriseShellStats"
-                :selected-menu-key="enterpriseSelectedMenuKey"
-                :tabs="enterpriseShellTabs"
-                :selected-tab-key="enterpriseSelectedTabKey"
-                :user="enterpriseShellUser"
-                @menu-select="handleShellMenuSelect"
-                @tab-select="handleShellTabSelect"
-              >
-                <template #header-actions>
-                  <ShellWorkspaceHeaderActions
-                    v-bind="shellHeaderActionProps"
-                    v-on="shellHeaderActionListeners"
-                  />
-                </template>
-
-                <template #workspace>
-                  <ShellWorkspaceMainSwitch
-                    v-bind="shellWorkspaceMainProps"
-                    v-on="shellWorkspaceMainListeners"
-                  />
-                </template>
-
-                <template #secondary>
-                  <ShellWorkspaceSecondarySwitch
-                    v-bind="shellWorkspaceSecondaryProps"
-                    v-on="shellWorkspaceSecondaryListeners"
-                  />
-                </template>
-              </ElyShell>
-          </section>
+          <AdminLoginPage
+            v-if="exampleAppLayout === 'auth'"
+            :t="t"
+            :title="t('app.shell.title')"
+            :subtitle="t('app.shell.subtitle')"
+            :env-name="envName"
+            :auth-module-ready="authModuleReady"
+            :auth-loading="authLoading"
+            :username="loginForm.username"
+            :credential="loginForm.password"
+            :error-message="authErrorMessage"
+            @update:username="loginForm.username = $event"
+            @update:credential="loginForm.password = $event"
+            @submit-login="submitLogin"
+          />
+          <AdminShellLayout
+            v-else
+            :t="t"
+            :locale="locale"
+            :title="t('app.shell.title')"
+            :subtitle="t('app.shell.subtitle')"
+            :workspace-title="shellWorkspaceTitle"
+            :workspace-description="shellWorkspaceDescription"
+            :preset-label="t('app.shell.presetLabel')"
+            :environment="envName"
+            :status="
+              authModuleReady
+                ? t('app.shell.status.sessionAware')
+                : t('app.shell.status.preview')
+            "
+            :copy="enterpriseShellCopy"
+            :navigation="enterpriseNavigation"
+            :selected-menu-key="enterpriseSelectedMenuKey"
+            :tabs="enterpriseShellTabs"
+            :selected-tab-key="enterpriseSelectedTabKey"
+            :user="enterpriseShellUser"
+            :header-action-props="shellHeaderActionProps"
+            :header-action-listeners="shellHeaderActionListeners"
+            :workspace-main-props="shellWorkspaceMainProps"
+            :workspace-main-listeners="shellWorkspaceMainListeners"
+            :workspace-secondary-props="shellWorkspaceSecondaryProps"
+            :workspace-secondary-listeners="shellWorkspaceSecondaryListeners"
+            @menu-select="selectShellMenu"
+            @tab-select="selectShellTab"
+          />
         </template>
       </div>
     </main>

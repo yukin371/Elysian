@@ -45,8 +45,8 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
     "{name} is now reachable through real navigation, but `example-vue` has not wired the matching workspace yet.",
   "app.section.placeholderCopyOffline":
     "{name} does not have a usable workspace yet because the runtime module is offline or the example page is still unwired.",
-  "app.shell.title": "Elysian Enterprise",
-  "app.shell.subtitle": "Official Vue preset",
+  "app.shell.title": "Elysian Admin",
+  "app.shell.subtitle": "Core operations workspace",
   "app.shell.workspaceTitle": "Customer operations",
   "app.shell.workspaceDescription":
     "A session-aware admin shell with schema-mapped CRUD templates and a reusable enterprise workspace contract.",
@@ -54,7 +54,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
     "{name} is reachable from the left navigation, and its page integration is still being completed.",
   "app.shell.placeholderDescriptionOffline":
     "{name} currently stays in an informational state because the backing runtime module is not registered.",
-  "app.shell.presetLabel": "TDesign Vue Preset",
+  "app.shell.presetLabel": "Admin navigation",
   "app.shell.status.sessionAware": "session-aware",
   "app.shell.status.preview": "preview mode",
   "app.action.newCustomer": "New customer",
@@ -74,6 +74,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.action.exportTenants": "Export tenants",
   "app.action.newUser": "New user",
   "app.action.exportUsers": "Export users",
+  "app.action.uploadFile": "Upload file",
   "app.action.deleteVisibleFiles": "Delete filtered files ({count})",
   "app.action.exportFiles": "Export files",
   "app.action.refresh": "Refresh",
@@ -194,6 +195,8 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.session.title.offline": "Auth offline",
   "app.session.offlineCopy":
     "Auth is not registered on this server yet. Add `DATABASE_URL`, run `bun run db:migrate` and seed, then restart the server.",
+  "app.session.loginRequiredCopy":
+    "Sign in first to load the real menu and admin workspaces.",
   "app.session.signedInAs": "Signed in as {displayName} / {username}",
   "app.session.roles": "Roles",
   "app.session.permissions": "Permissions",

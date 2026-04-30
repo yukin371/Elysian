@@ -104,7 +104,6 @@ const resolvedColumns = computed(() => {
       :data="props.items"
       :loading="loading"
       :row-key="rowKey ?? 'id'"
-      :pagination="false"
       :scroll="{ y: 420 }"
       table-layout="fixed"
       hover
@@ -116,12 +115,12 @@ const resolvedColumns = computed(() => {
 
 <style scoped>
 .ely-table {
-  border-radius: 12px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .ely-table-inner {
-  border-radius: 12px;
+  border-radius: 6px;
 }
 
 .ely-table-inner :deep(tbody tr) {

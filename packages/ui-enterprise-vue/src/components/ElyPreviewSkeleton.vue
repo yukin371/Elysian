@@ -112,7 +112,7 @@ defineProps<ElyPreviewSkeletonProps>()
 
 <style scoped>
 .ely-preview-card {
-  border-radius: 16px;
+  border-radius: 6px;
 }
 
 .ely-preview-heading {

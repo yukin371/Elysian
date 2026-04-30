@@ -97,7 +97,7 @@ const handleReset = () => {
 .ely-query-bar {
   padding: 16px 20px;
   background: rgba(248, 250, 252, 0.92);
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(15, 23, 42, 0.06);
 }
 

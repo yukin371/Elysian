@@ -285,63 +285,65 @@ export const useExampleShellMeta = ({
     {
       key: "workspace",
       label: t("app.tabs.workspace"),
-      hint: isCustomerWorkspace.value
-        ? t("app.tabs.workspaceHint", {
-            count: customerItems.value.length,
-          })
-        : isDictionaryWorkspace.value
-          ? t("app.dictionary.tabsHint", {
-              count: dictionaryItems.value.length,
+      hint: !isAuthenticated.value
+        ? t("app.session.signIn")
+        : isCustomerWorkspace.value
+          ? t("app.tabs.workspaceHint", {
+              count: customerItems.value.length,
             })
-          : isFileWorkspace.value
-            ? t("app.file.tabsHint", {
-                count: fileItems.value.length,
+          : isDictionaryWorkspace.value
+            ? t("app.dictionary.tabsHint", {
+                count: dictionaryItems.value.length,
               })
-            : isDepartmentWorkspace.value
-              ? t("app.department.tabsHint", {
-                  count: departmentItems.value.length,
+            : isFileWorkspace.value
+              ? t("app.file.tabsHint", {
+                  count: fileItems.value.length,
                 })
-              : isSessionWorkspace.value
-                ? t("app.onlineSession.tabsHint", {
-                    count: sessionItems.value.length,
+              : isDepartmentWorkspace.value
+                ? t("app.department.tabsHint", {
+                    count: departmentItems.value.length,
                   })
-                : isMenuWorkspace.value
-                  ? t("app.menu.tabsHint", {
-                      count: menuItems.value.length,
+                : isSessionWorkspace.value
+                  ? t("app.onlineSession.tabsHint", {
+                      count: sessionItems.value.length,
                     })
-                  : isNotificationWorkspace.value
-                    ? t("app.notification.tabsHint", {
-                        count: notificationItems.value.length,
+                  : isMenuWorkspace.value
+                    ? t("app.menu.tabsHint", {
+                        count: menuItems.value.length,
                       })
-                    : isOperationLogWorkspace.value
-                      ? t("app.operationLog.tabsHint", {
-                          count: operationLogItems.value.length,
+                    : isNotificationWorkspace.value
+                      ? t("app.notification.tabsHint", {
+                          count: notificationItems.value.length,
                         })
-                      : isRoleWorkspace.value
-                        ? t("app.role.tabsHint", {
-                            count: roleItems.value.length,
+                      : isOperationLogWorkspace.value
+                        ? t("app.operationLog.tabsHint", {
+                            count: operationLogItems.value.length,
                           })
-                        : isSettingWorkspace.value
-                          ? t("app.setting.tabsHint", {
-                              count: settingItems.value.length,
+                        : isRoleWorkspace.value
+                          ? t("app.role.tabsHint", {
+                              count: roleItems.value.length,
                             })
-                          : isTenantWorkspace.value
-                            ? t("app.tenant.tabsHint", {
-                                count: tenantItems.value.length,
+                          : isSettingWorkspace.value
+                            ? t("app.setting.tabsHint", {
+                                count: settingItems.value.length,
                               })
-                            : isUserWorkspace.value
-                              ? t("app.user.tabsHint", {
-                                  count: userItems.value.length,
+                            : isTenantWorkspace.value
+                              ? t("app.tenant.tabsHint", {
+                                  count: tenantItems.value.length,
                                 })
-                              : isGeneratorPreviewWorkspace.value
-                                ? t("app.generatorPreview.tabsHint", {
-                                    count: generatorPreviewFiles.value.length,
+                              : isUserWorkspace.value
+                                ? t("app.user.tabsHint", {
+                                    count: userItems.value.length,
                                   })
-                                : isWorkflowDefinitionsWorkspace.value
-                                  ? t("app.workflow.tabsHint", {
-                                      count: workflowDefinitions.value.length,
+                                : isGeneratorPreviewWorkspace.value
+                                  ? t("app.generatorPreview.tabsHint", {
+                                      count: generatorPreviewFiles.value.length,
                                     })
-                                  : currentNavigationPath.value,
+                                  : isWorkflowDefinitionsWorkspace.value
+                                    ? t("app.workflow.tabsHint", {
+                                        count: workflowDefinitions.value.length,
+                                      })
+                                    : currentNavigationPath.value,
     },
     {
       key: "runtime",
@@ -372,11 +374,7 @@ export const useExampleShellMeta = ({
           username: authIdentity.value.user.username,
           roles: authIdentity.value.roles,
         }
-      : {
-          displayName: t("app.previewUser.name"),
-          username: t("app.previewUser.username"),
-          roles: ["preset", "demo"],
-        },
+      : null,
   )
 
   const enterpriseCrudCopy = computed(() => ({

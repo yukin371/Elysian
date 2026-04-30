@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Button as TButton } from "tdesign-vue-next/es/button"
-
 import type { AppTranslate } from "../../../app/app-shell-helpers"
+import ShellHeaderActionButton from "./ShellHeaderActionButton.vue"
 
 defineProps<{
   t: AppTranslate
@@ -114,6 +113,7 @@ defineEmits<{
   (event: "reload-tenants"): void
   (event: "export-tenants"): void
   (event: "reload-files"): void
+  (event: "open-file-upload"): void
   (event: "export-files"): void
   (event: "delete-visible-files"): void
   (event: "reload-workflow-definitions"): void
@@ -124,19 +124,17 @@ defineEmits<{
 
 <template>
   <template v-if="!isRuntimeShellTab">
-    <TButton
+    <ShellHeaderActionButton
       v-if="isRoleWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateRoles"
       @click="$emit('open-role-create')"
     >
       {{ t("app.action.newRole") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isRoleWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="roleExportLoading"
@@ -144,50 +142,45 @@ defineEmits<{
       @click="$emit('export-roles')"
     >
       {{ t("app.action.exportRoles") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isRoleWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="roleLoading || !canViewRoles"
       @click="$emit('reload-roles')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isCustomerWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateCustomers"
       @click="$emit('open-customer-create')"
     >
       {{ t("app.action.newCustomer") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isCustomerWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="customerLoading || !canViewCustomers"
       @click="$emit('reload-customers')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isDictionaryWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateDictionaryTypes"
       @click="$emit('open-dictionary-create')"
     >
       {{ t("app.action.newDictionaryType") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isDictionaryWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="dictionaryTypeExportLoading"
@@ -195,10 +188,9 @@ defineEmits<{
       @click="$emit('export-dictionary-types')"
     >
       {{ t("app.action.exportDictionaryTypes") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isDictionaryWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="dictionaryItemsExportLoading"
@@ -206,30 +198,27 @@ defineEmits<{
       @click="$emit('export-dictionary-items')"
     >
       {{ t("app.action.exportDictionaryItems") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isDictionaryWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="dictionaryLoading || !canViewDictionaries"
       @click="$emit('reload-dictionaries')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isDepartmentWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateDepartments"
       @click="$emit('open-department-create')"
     >
       {{ t("app.action.newDepartment") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isDepartmentWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="departmentExportLoading"
@@ -237,30 +226,27 @@ defineEmits<{
       @click="$emit('export-departments')"
     >
       {{ t("app.action.exportDepartments") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isDepartmentWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="departmentLoading || !canViewDepartments"
       @click="$emit('reload-departments')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isPostWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreatePosts"
       @click="$emit('open-post-create')"
     >
       {{ t("app.post.action.create") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isPostWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="postExportLoading"
@@ -268,30 +254,27 @@ defineEmits<{
       @click="$emit('export-posts')"
     >
       {{ t("app.action.exportPosts") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isPostWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="postLoading || !canViewPosts"
       @click="$emit('reload-posts')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isMenuWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateMenus"
       @click="$emit('open-menu-create')"
     >
       {{ t("app.action.newMenu") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isMenuWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="menuExportLoading"
@@ -299,30 +282,27 @@ defineEmits<{
       @click="$emit('export-menus')"
     >
       {{ t("app.action.exportMenus") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isMenuWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="menuLoading || !canViewMenus"
       @click="$emit('reload-menus')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isNotificationWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateNotifications"
       @click="$emit('open-notification-create')"
     >
       {{ t("app.action.newNotification") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isNotificationWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="notificationExportLoading"
@@ -330,10 +310,9 @@ defineEmits<{
       @click="$emit('export-notifications')"
     >
       {{ t("app.action.exportNotifications") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isNotificationWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="
@@ -345,20 +324,18 @@ defineEmits<{
       @click="$emit('mark-visible-notifications-read')"
     >
       {{ t("app.action.markVisibleNotificationsRead") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isNotificationWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="notificationLoading || !canViewNotifications"
       @click="$emit('reload-notifications')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isOperationLogWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="operationLogExportLoading"
@@ -368,40 +345,36 @@ defineEmits<{
       @click="$emit('export-operation-logs')"
     >
       {{ t("app.action.exportOperationLogs") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isOperationLogWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="operationLogLoading || !canViewOperationLogs"
       @click="$emit('reload-operation-logs')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isUserWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateUsers"
       @click="$emit('open-user-create')"
     >
       {{ t("app.action.newUser") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isSettingWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateSettings"
       @click="$emit('open-setting-create')"
     >
       {{ t("app.action.newSetting") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isSettingWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="settingExportLoading"
@@ -409,30 +382,27 @@ defineEmits<{
       @click="$emit('export-settings')"
     >
       {{ t("app.action.exportSettings") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isSettingWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="settingLoading || !canViewSettings"
       @click="$emit('reload-settings')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isTenantWorkspace"
-      size="small"
       theme="primary"
       variant="outline"
       :disabled="!canCreateTenants"
       @click="$emit('open-tenant-create')"
     >
       {{ t("app.action.newTenant") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isTenantWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="tenantExportLoading"
@@ -440,20 +410,18 @@ defineEmits<{
       @click="$emit('export-tenants')"
     >
       {{ t("app.action.exportTenants") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isTenantWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="tenantLoading || !canViewTenants"
       @click="$emit('reload-tenants')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isUserWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="userExportLoading"
@@ -461,20 +429,27 @@ defineEmits<{
       @click="$emit('export-users')"
     >
       {{ t("app.action.exportUsers") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isUserWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :disabled="userLoading || !canViewUsers"
       @click="$emit('reload-users')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isFileWorkspace"
-      size="small"
+      theme="primary"
+      variant="outline"
+      :disabled="fileActionLoading || !canUploadFiles"
+      @click="$emit('open-file-upload')"
+    >
+      {{ t("app.action.uploadFile") }}
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
+      v-if="isFileWorkspace"
       theme="default"
       variant="outline"
       :loading="fileExportLoading"
@@ -482,10 +457,9 @@ defineEmits<{
       @click="$emit('export-files')"
     >
       {{ t("app.action.exportFiles") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isFileWorkspace"
-      size="small"
       theme="danger"
       variant="outline"
       :loading="fileActionLoading"
@@ -500,10 +474,9 @@ defineEmits<{
       @click="$emit('delete-visible-files')"
     >
       {{ t("app.action.deleteVisibleFiles", { count: visibleFileCount }) }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isFileWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="fileLoading"
@@ -511,10 +484,9 @@ defineEmits<{
       @click="$emit('reload-files')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
-    <TButton
+    </ShellHeaderActionButton>
+    <ShellHeaderActionButton
       v-if="isWorkflowDefinitionsWorkspace"
-      size="small"
       theme="default"
       variant="outline"
       :loading="workflowLoading"
@@ -522,25 +494,23 @@ defineEmits<{
       @click="$emit('reload-workflow-definitions')"
     >
       {{ t("app.action.refresh") }}
-    </TButton>
+    </ShellHeaderActionButton>
   </template>
-  <TButton
+  <ShellHeaderActionButton
     v-if="isRuntimeShellTab"
-    size="small"
     theme="default"
     variant="outline"
     @click="$emit('open-current-workspace-tab')"
   >
     {{ t("app.runtime.backToWorkspace") }}
-  </TButton>
-  <TButton
+  </ShellHeaderActionButton>
+  <ShellHeaderActionButton
     v-if="isAuthenticated"
-    size="small"
     theme="default"
     variant="text"
     :disabled="authLoading"
     @click="$emit('submit-logout')"
   >
     {{ t("app.action.signOut") }}
-  </TButton>
+  </ShellHeaderActionButton>
 </template>

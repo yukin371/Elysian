@@ -1,20 +1,29 @@
 import { buildVueNavigation } from "@elysian/frontend-vue"
 import type { UiNavigationNode } from "@elysian/ui-core"
-import { type Ref, computed, ref, watch } from "vue"
+import { type Ref, computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
+import { resolveWorkspaceMenuKey } from "../lib/navigation-workspace"
 import type { AuthIdentityResponse } from "../lib/platform-api"
 import {
   appendStudioNavigation,
   buildStudioNavigation,
 } from "../lib/studio-navigation"
 import {
+  listenWorkspaceRouteChange,
+  readCurrentWorkspaceRouteMenuKey,
+  replaceCurrentWorkspaceRoute,
+} from "../router/example-router"
+import {
+  resolveExampleWorkspaceModuleCode,
+  resolveExampleWorkspaceRoute,
+  translateWorkspaceRouteText,
+} from "../router/example-workspace-routes"
+import {
   type AppTranslate,
   type ExampleShellTabKey,
-  type ExampleWorkspaceKind,
   findFirstMenuItem,
   findNavigationItemById,
   flattenNavigation,
-  resolveModuleCodeFromPath,
 } from "./app-shell-helpers"
 
 interface UseExampleNavigationOptions {
@@ -22,7 +31,6 @@ interface UseExampleNavigationOptions {
   registeredModuleCodes: Ref<string[]>
   t: AppTranslate
   localizeNavigationItems: (items: UiNavigationNode[]) => UiNavigationNode[]
-  buildFallbackNavigation: () => UiNavigationNode[]
 }
 
 const appendSessionNavigation = (
@@ -77,7 +85,6 @@ export const useExampleNavigation = ({
   registeredModuleCodes,
   t,
   localizeNavigationItems,
-  buildFallbackNavigation,
 }: UseExampleNavigationOptions) => {
   const currentMenuKey = ref<string | null>(null)
   const currentShellTabKey = ref<ExampleShellTabKey>("workspace")
@@ -93,19 +100,15 @@ export const useExampleNavigation = ({
       : [],
   )
 
-  const fallbackNavigation = computed(() => buildFallbackNavigation())
   const studioNavigation = computed(() => buildStudioNavigation(t))
 
   const enterpriseNavigation = computed(() =>
-    appendStudioNavigation(
-      appendSessionNavigation(
-        navigationTree.value.length > 0
-          ? navigationTree.value
-          : fallbackNavigation.value,
-        t,
-      ),
-      studioNavigation.value,
-    ),
+    authIdentity.value
+      ? appendStudioNavigation(
+          appendSessionNavigation(navigationTree.value, t),
+          studioNavigation.value,
+        )
+      : [],
   )
 
   const navigationItemCount = computed(
@@ -129,9 +132,25 @@ export const useExampleNavigation = ({
         : null) ?? defaultNavigationItem.value,
   )
 
+  const readRouteMenuKey = (items: UiNavigationNode[]) => {
+    return readCurrentWorkspaceRouteMenuKey(items)
+  }
+
+  const syncMenuKeyFromRoute = () => {
+    const routeMenuKey = readRouteMenuKey(enterpriseNavigation.value)
+
+    if (!routeMenuKey) {
+      return
+    }
+
+    currentMenuKey.value = routeMenuKey
+    currentShellTabKey.value = "workspace"
+  }
+
   watch(
     enterpriseNavigation,
     (items) => {
+      const routeMenuKey = readRouteMenuKey(items)
       const fallbackItem =
         flattenNavigation(items).find((item) => item.path === "/customers") ??
         findFirstMenuItem(items)
@@ -139,91 +158,76 @@ export const useExampleNavigation = ({
         ? findNavigationItemById(items, currentMenuKey.value)
         : null
 
-      currentMenuKey.value = currentItem?.id ?? fallbackItem?.id ?? null
+      currentMenuKey.value =
+        routeMenuKey ?? currentItem?.id ?? fallbackItem?.id ?? null
     },
     {
       immediate: true,
     },
   )
 
-  const isCustomerWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/customers",
-  )
-  const isDictionaryWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/dictionaries",
-  )
-  const isDepartmentWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/departments",
-  )
-  const isPostWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/posts",
-  )
-  const isSessionWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/sessions",
-  )
-  const isMenuWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/menus",
-  )
-  const isNotificationWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/notifications",
-  )
-  const isOperationLogWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/operation-logs",
-  )
-  const isRoleWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/roles",
-  )
-  const isSettingWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/settings",
-  )
-  const isTenantWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/tenants",
-  )
-  const isUserWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/users",
-  )
-  const isWorkflowDefinitionsWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/workflow/definitions",
-  )
-  const isFileWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/system/files",
-  )
-  const isGeneratorPreviewWorkspace = computed(
-    () => selectedNavigationItem.value?.path === "/studio/generator-preview",
+  watch(
+    selectedNavigationItem,
+    (item) => {
+      replaceCurrentWorkspaceRoute(item?.path)
+    },
+    {
+      immediate: true,
+    },
   )
 
-  const currentWorkspaceKind = computed<ExampleWorkspaceKind>(() =>
-    isCustomerWorkspace.value
-      ? "customer"
-      : isDictionaryWorkspace.value
-        ? "dictionary"
-        : isFileWorkspace.value
-          ? "file"
-          : isGeneratorPreviewWorkspace.value
-            ? "generator-preview"
-            : isDepartmentWorkspace.value
-              ? "department"
-              : isPostWorkspace.value
-                ? "post"
-                : isSessionWorkspace.value
-                  ? "session"
-                  : isMenuWorkspace.value
-                    ? "menu"
-                    : isNotificationWorkspace.value
-                      ? "notification"
-                      : isOperationLogWorkspace.value
-                        ? "operation-log"
-                        : isRoleWorkspace.value
-                          ? "role"
-                          : isSettingWorkspace.value
-                            ? "setting"
-                            : isTenantWorkspace.value
-                              ? "tenant"
-                              : isUserWorkspace.value
-                                ? "user"
-                                : isWorkflowDefinitionsWorkspace.value
-                                  ? "workflow-definitions"
-                                  : "placeholder",
+  let cleanupWorkspaceRouteListener = () => {}
+
+  onMounted(() => {
+    syncMenuKeyFromRoute()
+    cleanupWorkspaceRouteListener =
+      listenWorkspaceRouteChange(syncMenuKeyFromRoute)
+  })
+
+  onBeforeUnmount(() => {
+    cleanupWorkspaceRouteListener()
+  })
+
+  const selectedWorkspaceRoute = computed(() =>
+    resolveExampleWorkspaceRoute(selectedNavigationItem.value?.path),
+  )
+  const currentWorkspaceKind = computed(
+    () => selectedWorkspaceRoute.value?.kind ?? "placeholder",
+  )
+  const isCustomerWorkspace = computed(
+    () => currentWorkspaceKind.value === "customer",
+  )
+  const isDictionaryWorkspace = computed(
+    () => currentWorkspaceKind.value === "dictionary",
+  )
+  const isDepartmentWorkspace = computed(
+    () => currentWorkspaceKind.value === "department",
+  )
+  const isPostWorkspace = computed(() => currentWorkspaceKind.value === "post")
+  const isSessionWorkspace = computed(
+    () => currentWorkspaceKind.value === "session",
+  )
+  const isMenuWorkspace = computed(() => currentWorkspaceKind.value === "menu")
+  const isNotificationWorkspace = computed(
+    () => currentWorkspaceKind.value === "notification",
+  )
+  const isOperationLogWorkspace = computed(
+    () => currentWorkspaceKind.value === "operation-log",
+  )
+  const isRoleWorkspace = computed(() => currentWorkspaceKind.value === "role")
+  const isSettingWorkspace = computed(
+    () => currentWorkspaceKind.value === "setting",
+  )
+  const isTenantWorkspace = computed(
+    () => currentWorkspaceKind.value === "tenant",
+  )
+  const isUserWorkspace = computed(() => currentWorkspaceKind.value === "user")
+  const isWorkflowDefinitionsWorkspace = computed(
+    () => currentWorkspaceKind.value === "workflow-definitions",
+  )
+  const isFileWorkspace = computed(() => currentWorkspaceKind.value === "file")
+  const isGeneratorPreviewWorkspace = computed(
+    () => currentWorkspaceKind.value === "generator-preview",
   )
 
   const customerNavigationItem = computed(
@@ -239,7 +243,7 @@ export const useExampleNavigation = ({
   )
 
   const currentModuleCode = computed(() =>
-    resolveModuleCodeFromPath(selectedNavigationItem.value?.path),
+    resolveExampleWorkspaceModuleCode(selectedNavigationItem.value?.path),
   )
 
   const currentModuleCodeLabel = computed(
@@ -260,178 +264,85 @@ export const useExampleNavigation = ({
   )
 
   const currentWorkspaceSectionTitle = computed(() =>
-    isCustomerWorkspace.value
-      ? t("app.section.workspaceTitle")
-      : isDictionaryWorkspace.value
-        ? t("app.dictionary.sectionTitle")
-        : isFileWorkspace.value
-          ? t("app.file.sectionTitle")
-          : isGeneratorPreviewWorkspace.value
-            ? t("app.generatorPreview.sectionTitle")
-            : isDepartmentWorkspace.value
-              ? t("app.department.sectionTitle")
-              : isMenuWorkspace.value
-                ? t("app.menu.sectionTitle")
-                : isNotificationWorkspace.value
-                  ? t("app.notification.sectionTitle")
-                  : isOperationLogWorkspace.value
-                    ? t("app.operationLog.sectionTitle")
-                    : isRoleWorkspace.value
-                      ? t("app.role.sectionTitle")
-                      : isSettingWorkspace.value
-                        ? t("app.setting.sectionTitle")
-                        : isTenantWorkspace.value
-                          ? t("app.tenant.sectionTitle")
-                          : isUserWorkspace.value
-                            ? t("app.user.sectionTitle")
-                            : isPostWorkspace.value
-                              ? t("app.post.sectionTitle")
-                              : isSessionWorkspace.value
-                                ? t("app.onlineSession.sectionTitle")
-                                : isWorkflowDefinitionsWorkspace.value
-                                  ? t("app.workflow.sectionTitle")
-                                  : t("app.section.placeholderTitle", {
-                                      name:
-                                        selectedNavigationItem.value?.name ??
-                                        t("app.section.workspaceTitle"),
-                                    }),
+    selectedWorkspaceRoute.value
+      ? translateWorkspaceRouteText(
+          selectedWorkspaceRoute.value,
+          "sectionTitleKey",
+          t,
+        )
+      : t("app.section.placeholderTitle", {
+          name:
+            selectedNavigationItem.value?.name ??
+            t("app.section.workspaceTitle"),
+        }),
   )
 
   const currentWorkspaceSectionCopy = computed(() =>
-    isCustomerWorkspace.value
-      ? t("app.section.workspaceCopy")
-      : isDictionaryWorkspace.value
-        ? t("app.dictionary.sectionCopy")
-        : isFileWorkspace.value
-          ? t("app.file.sectionCopy")
-          : isGeneratorPreviewWorkspace.value
-            ? t("app.generatorPreview.sectionCopy")
-            : isDepartmentWorkspace.value
-              ? t("app.department.sectionCopy")
-              : isMenuWorkspace.value
-                ? t("app.menu.sectionCopy")
-                : isNotificationWorkspace.value
-                  ? t("app.notification.sectionCopy")
-                  : isOperationLogWorkspace.value
-                    ? t("app.operationLog.sectionCopy")
-                    : isRoleWorkspace.value
-                      ? t("app.role.sectionCopy")
-                      : isSettingWorkspace.value
-                        ? t("app.setting.sectionCopy")
-                        : isTenantWorkspace.value
-                          ? t("app.tenant.sectionCopy")
-                          : isUserWorkspace.value
-                            ? t("app.user.sectionCopy")
-                            : isPostWorkspace.value
-                              ? t("app.post.sectionCopy")
-                              : isSessionWorkspace.value
-                                ? t("app.onlineSession.sectionCopy")
-                                : isWorkflowDefinitionsWorkspace.value
-                                  ? t("app.workflow.sectionCopy")
-                                  : currentModuleReady.value
-                                    ? t("app.section.placeholderCopyReady", {
-                                        name:
-                                          selectedNavigationItem.value?.name ??
-                                          t("app.section.workspaceTitle"),
-                                      })
-                                    : t("app.section.placeholderCopyOffline", {
-                                        name:
-                                          selectedNavigationItem.value?.name ??
-                                          t("app.section.workspaceTitle"),
-                                      }),
+    selectedWorkspaceRoute.value
+      ? translateWorkspaceRouteText(
+          selectedWorkspaceRoute.value,
+          "sectionCopyKey",
+          t,
+        )
+      : currentModuleReady.value
+        ? t("app.section.placeholderCopyReady", {
+            name:
+              selectedNavigationItem.value?.name ??
+              t("app.section.workspaceTitle"),
+          })
+        : t("app.section.placeholderCopyOffline", {
+            name:
+              selectedNavigationItem.value?.name ??
+              t("app.section.workspaceTitle"),
+          }),
   )
 
   const currentWorkspaceTitle = computed(() =>
-    isCustomerWorkspace.value
-      ? t("app.shell.workspaceTitle")
-      : isDictionaryWorkspace.value
-        ? t("app.dictionary.shellTitle")
-        : isFileWorkspace.value
-          ? t("app.file.shellTitle")
-          : isGeneratorPreviewWorkspace.value
-            ? t("app.generatorPreview.shellTitle")
-            : isDepartmentWorkspace.value
-              ? t("app.department.shellTitle")
-              : isMenuWorkspace.value
-                ? t("app.menu.shellTitle")
-                : isNotificationWorkspace.value
-                  ? t("app.notification.shellTitle")
-                  : isOperationLogWorkspace.value
-                    ? t("app.operationLog.shellTitle")
-                    : isRoleWorkspace.value
-                      ? t("app.role.shellTitle")
-                      : isSettingWorkspace.value
-                        ? t("app.setting.shellTitle")
-                        : isTenantWorkspace.value
-                          ? t("app.tenant.shellTitle")
-                          : isUserWorkspace.value
-                            ? t("app.user.shellTitle")
-                            : isPostWorkspace.value
-                              ? t("app.post.shellTitle")
-                              : isSessionWorkspace.value
-                                ? t("app.onlineSession.shellTitle")
-                                : (selectedNavigationItem.value?.name ??
-                                  t("app.shell.workspaceTitle")),
+    !authIdentity.value
+      ? t("app.session.title.online")
+      : selectedWorkspaceRoute.value
+        ? translateWorkspaceRouteText(
+            selectedWorkspaceRoute.value,
+            "shellTitleKey",
+            t,
+          )
+        : (selectedNavigationItem.value?.name ?? t("app.runtime.title")),
   )
 
   const placeholderWorkspaceCopy = computed(() =>
     currentModuleReady.value
       ? t("app.placeholder.descriptionReady", {
-          name: selectedNavigationItem.value?.name ?? "",
+          name:
+            selectedNavigationItem.value?.name ??
+            t("app.placeholder.fallbackModule"),
         })
       : t("app.placeholder.descriptionOffline", {
-          name: selectedNavigationItem.value?.name ?? "",
+          name:
+            selectedNavigationItem.value?.name ??
+            t("app.placeholder.fallbackModule"),
         }),
   )
 
   const currentWorkspaceDescription = computed(() =>
-    isCustomerWorkspace.value
-      ? t("app.shell.workspaceDescription")
-      : isDictionaryWorkspace.value
-        ? t("app.dictionary.shellDescription")
-        : isFileWorkspace.value
-          ? t("app.file.shellDescription")
-          : isGeneratorPreviewWorkspace.value
-            ? t("app.generatorPreview.shellDescription")
-            : isDepartmentWorkspace.value
-              ? t("app.department.shellDescription")
-              : isMenuWorkspace.value
-                ? t("app.menu.shellDescription")
-                : isNotificationWorkspace.value
-                  ? t("app.notification.shellDescription")
-                  : isOperationLogWorkspace.value
-                    ? t("app.operationLog.shellDescription")
-                    : isRoleWorkspace.value
-                      ? t("app.role.shellDescription")
-                      : isSettingWorkspace.value
-                        ? t("app.setting.shellDescription")
-                        : isTenantWorkspace.value
-                          ? t("app.tenant.shellDescription")
-                          : isUserWorkspace.value
-                            ? t("app.user.shellDescription")
-                            : isPostWorkspace.value
-                              ? t("app.post.shellDescription")
-                              : isSessionWorkspace.value
-                                ? t("app.onlineSession.shellDescription")
-                                : isWorkflowDefinitionsWorkspace.value
-                                  ? t("app.workflow.shellDescription")
-                                  : currentModuleReady.value
-                                    ? t(
-                                        "app.shell.placeholderDescriptionReady",
-                                        {
-                                          name:
-                                            selectedNavigationItem.value
-                                              ?.name ?? "",
-                                        },
-                                      )
-                                    : t(
-                                        "app.shell.placeholderDescriptionOffline",
-                                        {
-                                          name:
-                                            selectedNavigationItem.value
-                                              ?.name ?? "",
-                                        },
-                                      ),
+    !authIdentity.value
+      ? t("app.session.loginRequiredCopy")
+      : selectedWorkspaceRoute.value
+        ? translateWorkspaceRouteText(
+            selectedWorkspaceRoute.value,
+            "shellDescriptionKey",
+            t,
+          )
+        : currentModuleReady.value
+          ? t("app.shell.placeholderDescriptionReady", {
+              name:
+                selectedNavigationItem.value?.name ??
+                t("app.placeholder.fallbackModule"),
+            })
+          : t("app.shell.placeholderDescriptionOffline", {
+              name:
+                selectedNavigationItem.value?.name ??
+                t("app.placeholder.fallbackModule"),
+            }),
   )
 
   const enterpriseSelectedMenuKey = computed(
@@ -453,6 +364,28 @@ export const useExampleNavigation = ({
 
   const openCurrentWorkspaceTab = () => {
     currentShellTabKey.value = "workspace"
+  }
+
+  const selectShellMenu = (menuKey: string) => {
+    const nextMenuKey = resolveWorkspaceMenuKey(
+      enterpriseNavigation.value,
+      menuKey,
+    )
+
+    if (!nextMenuKey) {
+      return
+    }
+
+    currentMenuKey.value = nextMenuKey
+    currentShellTabKey.value = "workspace"
+  }
+
+  const selectShellTab = (tabKey: string) => {
+    if (tabKey !== "workspace" && tabKey !== "runtime") {
+      return
+    }
+
+    currentShellTabKey.value = tabKey
   }
 
   return {
@@ -492,6 +425,8 @@ export const useExampleNavigation = ({
     openCurrentWorkspaceTab,
     openCustomerWorkspace,
     placeholderWorkspaceCopy,
+    selectShellMenu,
+    selectShellTab,
     selectedNavigationItem,
   }
 }

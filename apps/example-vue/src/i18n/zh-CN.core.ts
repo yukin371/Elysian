@@ -45,8 +45,8 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
     "{name} 已经进入真实导航切换，但 `example-vue` 还没有接入对应工作区。当前先保留入口与模块状态，用于验证壳层与页面切换边界。",
   "app.section.placeholderCopyOffline":
     "{name} 当前还没有可用工作区；对应模块未注册，或示例页尚未接入。",
-  "app.shell.title": "Elysian 企业预设",
-  "app.shell.subtitle": "官方 Vue 预设",
+  "app.shell.title": "Elysian 管理后台",
+  "app.shell.subtitle": "基础功能工作台",
   "app.shell.workspaceTitle": "客户工作区",
   "app.shell.workspaceDescription":
     "一个面向会话的后台壳层，承接 schema 映射的 CRUD 模板与可复用企业工作区契约。",
@@ -54,7 +54,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
     "{name} 已经可以通过左侧导航进入，页面接入正在持续完善。",
   "app.shell.placeholderDescriptionOffline":
     "{name} 当前对应模块未在运行时中注册，页面保持只读说明状态。",
-  "app.shell.presetLabel": "TDesign Vue 预设",
+  "app.shell.presetLabel": "后台导航",
   "app.shell.status.sessionAware": "会话感知",
   "app.shell.status.preview": "预览模式",
   "app.action.newCustomer": "新建客户",
@@ -74,6 +74,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.action.exportTenants": "导出租户",
   "app.action.newUser": "新建用户",
   "app.action.exportUsers": "导出用户",
+  "app.action.uploadFile": "上传文件",
   "app.action.deleteVisibleFiles": "删除当前筛选文件（{count}）",
   "app.action.exportFiles": "导出文件",
   "app.action.refresh": "刷新",
@@ -126,9 +127,9 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.placeholder.sideDecisionEscalation":
     "如果需要跨页面注册、会话管理或路由编排，应先确认 canonical owner。",
   "app.placeholder.descriptionReady":
-    "{name} 的导航入口已经可切换，真实工作区正在接入。",
+    "{name}的导航入口已经可切换，真实工作区正在接入。",
   "app.placeholder.descriptionOffline":
-    "{name} 的运行时模块尚未注册，当前页面继续展示接入说明。",
+    "{name}的运行时模块尚未注册，当前页面继续展示接入说明。",
   "app.placeholder.route": "页面路径",
   "app.placeholder.moduleCode": "模块编码",
   "app.placeholder.moduleStatus": "模块状态",
@@ -191,6 +192,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.session.title.offline": "鉴权模块离线",
   "app.session.offlineCopy":
     "鉴权模块尚未注册。请配置 `DATABASE_URL`，执行 `bun run db:migrate` 与 seed 后重启服务。",
+  "app.session.loginRequiredCopy": "请先登录，再加载真实菜单和后台工作区。",
   "app.session.signedInAs": "当前登录：{displayName} / {username}",
   "app.session.roles": "角色",
   "app.session.permissions": "权限数",

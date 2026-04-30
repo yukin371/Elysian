@@ -394,6 +394,7 @@ export const useExampleWorkspaceGates = (
     canEnterTenantWorkspace,
     canEnterUserWorkspace,
     canEnterWorkflowWorkspace,
+    canCreatePosts,
     canResetUserPasswords,
     canUpdateCustomers,
     canUpdateDepartments,

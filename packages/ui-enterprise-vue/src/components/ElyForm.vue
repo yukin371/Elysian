@@ -194,7 +194,7 @@ const handleCancel = () => emit("cancel")
   display: flex;
   align-items: center;
   padding: 0 14px;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(248, 250, 252, 0.9);
   color: #0f172a;

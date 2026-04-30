@@ -14,13 +14,16 @@ const emit = defineEmits<ShellWorkspaceSecondarySwitchEmitFn>()
 const activeWorkspace = computed(() =>
   resolveShellWorkspaceSecondaryDescriptor(props, emit),
 )
+const activeWorkspaceListeners = computed(
+  () => activeWorkspace.value.listeners ?? {},
+)
 </script>
 
 <template>
   <component
     :is="activeWorkspace.component"
     v-bind="activeWorkspace.props"
-    v-on="activeWorkspace.listeners"
+    v-on="activeWorkspaceListeners"
   />
 
   <ShellWorkspaceSessionCard

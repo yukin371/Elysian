@@ -8,6 +8,7 @@
   - 登录态恢复与会话页装配
   - 各 workspace composable 的接线
   - 示例应用级导航、权限 gate、工作区切换与展示派生
+  - 示例应用本地路由层装配
 - 不拥有：
   - server / auth / persistence 业务逻辑
   - shared base / shared utils
@@ -15,7 +16,8 @@
 
 ## 当前边界
 
-- 入口拆分只允许继续下沉到 `apps/example-vue/src/app/*` 或 `apps/example-vue/src/components/workspaces/*`。
+- 入口拆分只允许继续下沉到 `apps/example-vue/src/app/*`、`apps/example-vue/src/components/layout/*` 或 `apps/example-vue/src/components/workspaces/*`。
+- 本地路由判断与 hash 同步优先下沉到 `apps/example-vue/src/router/*`。
 - 若是纯展示块，优先拆成 workspace 组件。
 - 若是入口级派生或装配逻辑，优先拆成本地 composable。
 - 不为了压行数把职责推到错误 owner。
@@ -32,10 +34,12 @@
 
 - 已从 `App.vue` 下沉：
   - `app-shell-helpers.ts`
+  - `example-auth-errors.ts`
   - `use-example-navigation.ts`
   - `use-example-workspace-gates.ts`
   - `use-example-query-summary.ts`
   - `use-example-shell-meta.ts`
+  - `use-example-csv-exports.ts`
   - `use-example-workspace-sync.ts`
   - `use-example-session-orchestration.ts`
   - `use-example-shell-binding-types.ts`
@@ -48,6 +52,9 @@
   - `i18n/index.ts`（已收口为 locale 聚合器）
   - `i18n/zh-CN*.ts`
   - `i18n/en-US*.ts`
+  - `router/example-router.ts`
+  - `components/auth/AdminLoginPage.vue`
+  - `components/layout/AdminShellLayout.vue`
   - `ShellWorkspaceHeaderActions.vue`
   - `ShellWorkspaceMainSwitch.vue`
   - `ShellWorkspaceSecondarySwitch.vue`

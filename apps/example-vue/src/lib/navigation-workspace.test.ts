@@ -3,7 +3,10 @@ import type { UiNavigationNode } from "@elysian/ui-core"
 
 import {
   normalizeWorkspaceNavigationPath,
+  normalizeWorkspaceRoutePath,
   resolveWorkspaceMenuKey,
+  resolveWorkspaceMenuKeyByPath,
+  toWorkspaceRouteHash,
 } from "./navigation-workspace"
 
 const navigationItems: UiNavigationNode[] = [
@@ -127,6 +130,23 @@ describe("navigation workspace helpers", () => {
     expect(normalizeWorkspaceNavigationPath(null)).toBeNull()
   })
 
+  test("normalizes workspace route hashes and query strings", () => {
+    expect(normalizeWorkspaceRoutePath("#/system/files")).toBe("/system/files")
+    expect(
+      normalizeWorkspaceRoutePath("#/workflow/tasks/todo?state=open"),
+    ).toBe("/workflow/definitions")
+    expect(normalizeWorkspaceRoutePath("system/files")).toBe("/system/files")
+    expect(normalizeWorkspaceRoutePath("#/")).toBeNull()
+  })
+
+  test("formats normalized workspace hashes for browser navigation", () => {
+    expect(toWorkspaceRouteHash("/system/files")).toBe("#/system/files")
+    expect(toWorkspaceRouteHash("/workflow/tasks/done")).toBe(
+      "#/workflow/definitions",
+    )
+    expect(toWorkspaceRouteHash(null)).toBe("")
+  })
+
   test("resolves workflow task navigation to the canonical definitions menu key", () => {
     expect(resolveWorkspaceMenuKey(navigationItems, "workflow-instances")).toBe(
       "workflow-definitions",
@@ -140,6 +160,18 @@ describe("navigation workspace helpers", () => {
     expect(resolveWorkspaceMenuKey(navigationItems, "system-files")).toBe(
       "system-files",
     )
+  })
+
+  test("resolves browser route paths to workspace menu keys", () => {
+    expect(
+      resolveWorkspaceMenuKeyByPath(navigationItems, "#/system/files"),
+    ).toBe("system-files")
+    expect(
+      resolveWorkspaceMenuKeyByPath(navigationItems, "#/workflow/tasks/todo"),
+    ).toBe("workflow-definitions")
+    expect(
+      resolveWorkspaceMenuKeyByPath(navigationItems, "#/system/users"),
+    ).toBe(null)
   })
 
   test("falls back from directories to the first navigable child", () => {

@@ -17,6 +17,7 @@ import {
   resolveElyShellCopy,
 } from "../contracts"
 import ElyNavNodes from "./ElyNavNodes.vue"
+import ElyShellTabs from "./ElyShellTabs.vue"
 
 const props = withDefaults(defineProps<ElyShellProps>(), {
   navigationLabel: undefined,
@@ -134,19 +135,12 @@ const handleTabSelect = (key: string) => {
           </div>
         </THeader>
 
-        <div v-if="tabs && tabs.length > 0" class="ely-shell-tabs">
-          <button
-            v-for="tab in tabs"
-            :key="tab.key"
-            type="button"
-            class="ely-shell-tab"
-            :class="{ 'ely-shell-tab-active': tab.key === selectedTabKey }"
-            @click="handleTabSelect(tab.key)"
-          >
-            <strong>{{ tab.label }}</strong>
-            <span v-if="tab.hint">{{ tab.hint }}</span>
-          </button>
-        </div>
+        <ElyShellTabs
+          v-if="tabs && tabs.length > 0"
+          :tabs="tabs"
+          :selected-key="selectedTabKey"
+          @select="handleTabSelect"
+        />
 
         <TContent class="ely-shell-content">
           <div v-if="stats.length > 0" class="ely-stat-grid">
@@ -197,36 +191,37 @@ const handleTabSelect = (key: string) => {
   --elysian-ely-surface: rgba(255, 255, 255, 0.96);
   --elysian-ely-accent: #2457d6;
   --elysian-ely-accent-soft: rgba(36, 87, 214, 0.1);
-  background:
-    radial-gradient(circle at top left, rgba(191, 219, 254, 0.46), transparent 32%),
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid rgba(226, 232, 240, 0.88);
-  border-radius: 16px;
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.07);
+  height: 100vh;
+  min-height: 100vh;
+  background: #eef2f7;
   color: var(--elysian-ely-ink);
   overflow: hidden;
 }
 
 .ely-shell-layout {
-  min-height: 820px;
+  height: 100%;
+  min-height: 0;
   background: transparent;
 }
 
 .ely-shell-sider {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.4rem 1rem;
-  background:
-    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(242, 246, 251, 0.98));
+  gap: 0.75rem;
+  flex-shrink: 0;
+  height: 100vh;
+  min-height: 0;
+  padding: 1rem 0.75rem;
+  background: #ffffff;
   border-right: 1px solid var(--elysian-ely-border);
+  overflow: hidden;
 }
 
 .ely-brand {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  padding: 0.45rem 0.35rem 1rem;
+  padding: 0.25rem 0.25rem 0.75rem;
 }
 
 .ely-brand-mark {
@@ -234,12 +229,11 @@ const handleTabSelect = (key: string) => {
   place-items: center;
   width: 2.9rem;
   height: 2.9rem;
-  border-radius: 12px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #173ea6, #2457d6);
   color: white;
   font-size: 1.15rem;
   font-weight: 700;
-  box-shadow: 0 8px 18px rgba(36, 87, 214, 0.16);
 }
 
 .ely-brand-copy p {
@@ -288,8 +282,10 @@ const handleTabSelect = (key: string) => {
 
 .ely-nav {
   flex: 1;
+  min-height: 0;
   background: transparent;
   border: 0;
+  overflow-y: auto;
 }
 
 .ely-nav :deep(.t-default-menu),
@@ -299,8 +295,8 @@ const handleTabSelect = (key: string) => {
 
 .ely-nav :deep(.t-menu__item),
 .ely-nav :deep(.t-submenu__title) {
-  border-radius: 12px;
-  min-height: 58px;
+  border-radius: 6px;
+  min-height: 44px;
   height: auto;
   align-items: stretch;
   box-sizing: border-box;
@@ -330,7 +326,14 @@ const handleTabSelect = (key: string) => {
 }
 
 .ely-shell-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  min-height: 0;
   background: transparent;
+  overflow: hidden;
 }
 
 .ely-shell-header {
@@ -338,9 +341,11 @@ const handleTabSelect = (key: string) => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1.5rem;
+  flex-shrink: 0;
   min-height: auto;
-  padding: 1.5rem 2rem 1rem;
-  background: transparent;
+  padding: 0.9rem 1rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--elysian-ely-border);
 }
 
 .ely-shell-header > div:first-child {
@@ -350,8 +355,8 @@ const handleTabSelect = (key: string) => {
 
 .ely-shell-header h2 {
   margin: 0;
-  font-size: clamp(1.55rem, 1.5rem + 0.85vw, 2rem);
-  line-height: 1.08;
+  font-size: 1.25rem;
+  line-height: 1.25;
   word-break: keep-all;
   color: var(--elysian-ely-ink);
 }
@@ -359,7 +364,7 @@ const handleTabSelect = (key: string) => {
 .ely-header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -381,7 +386,7 @@ const handleTabSelect = (key: string) => {
   gap: 0.8rem;
   padding: 0.55rem 0.85rem;
   border: 1px solid var(--elysian-ely-border);
-  border-radius: 12px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.72);
 }
 
@@ -404,46 +409,11 @@ const handleTabSelect = (key: string) => {
 }
 
 .ely-shell-content {
-  padding: 0 2rem 2rem;
+  flex: 1;
+  min-height: 0;
+  padding: 0.75rem;
   background: transparent;
-}
-
-.ely-shell-tabs {
-  display: flex;
-  gap: 0.85rem;
-  padding: 0 2rem 0.3rem;
-  overflow-x: auto;
-}
-
-.ely-shell-tab {
-  appearance: none;
-  min-width: 180px;
-  padding: 0.95rem 1rem;
-  border: 1px solid var(--elysian-ely-border);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  cursor: pointer;
-  text-align: left;
-}
-
-.ely-shell-tab strong,
-.ely-shell-tab span {
-  display: block;
-}
-
-.ely-shell-tab strong {
-  color: var(--elysian-ely-ink);
-}
-
-.ely-shell-tab span {
-  margin-top: 0.35rem;
-  font-size: 0.78rem;
-  color: var(--elysian-ely-slate);
-}
-
-.ely-shell-tab-active {
-  background: rgba(36, 87, 214, 0.08);
-  border-color: rgba(36, 87, 214, 0.2);
+  overflow: auto;
 }
 
 .ely-stat-grid {
@@ -455,7 +425,7 @@ const handleTabSelect = (key: string) => {
 .ely-stat-card,
 .ely-fallback-card {
   border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 12px;
+  border-radius: 6px;
   background: rgba(248, 250, 252, 0.62);
   box-shadow: none;
 }
@@ -476,9 +446,9 @@ const handleTabSelect = (key: string) => {
 
 .ely-workspace-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
   grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .ely-workspace-single {
@@ -489,12 +459,12 @@ const handleTabSelect = (key: string) => {
 .ely-workspace-side {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 @media (max-width: 1100px) {
   .ely-shell-layout {
-    min-height: auto;
+    min-height: 0;
   }
 
   .ely-stat-grid,
@@ -514,14 +484,31 @@ const handleTabSelect = (key: string) => {
 }
 
 @media (max-width: 860px) {
+  .ely-shell {
+    height: auto;
+    overflow: visible;
+  }
+
   .ely-shell-layout {
     display: block;
+    height: auto;
   }
 
   .ely-shell-sider {
     width: 100% !important;
+    height: auto;
+    overflow: visible;
     border-right: 0;
     border-bottom: 1px solid var(--elysian-ely-border);
+  }
+
+  .ely-shell-main {
+    height: auto;
+    overflow: visible;
+  }
+
+  .ely-shell-content {
+    overflow: visible;
   }
 }
 </style>

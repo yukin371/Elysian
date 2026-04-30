@@ -1,15 +1,18 @@
-import type { ComputedRef, Ref } from "vue"
+import { type ComputedRef, type Ref, isRef } from "vue"
 
 import type { FileWorkspaceQuery } from "../lib/file-workspace"
 import type {
   AuthIdentityResponse,
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewSqlPreview,
   PlatformResponse,
 } from "../lib/platform-api"
 import type { AppTranslate } from "./app-shell-helpers"
 
 export type ValueSource<T> = Ref<T> | ComputedRef<T>
 
-export const read = <T>(source: ValueSource<T>): T => source.value
+export const read = <T>(source: ValueSource<T> | T): T =>
+  isRef(source) ? source.value : source
 
 export interface LoginFormState {
   username: string
@@ -139,7 +142,7 @@ export interface UseExampleShellBindingsOptions {
   generatorPreviewFiles: ValueSource<unknown[]>
   selectedGeneratorPreviewFilePath: Ref<string | null>
   canApplyGeneratorPreview: ValueSource<boolean>
-  generatorPreviewDiffSummary: ValueSource<string>
+  generatorPreviewDiffSummary: ValueSource<GeneratorPreviewDiffSummary | null>
   generatorPreviewSession: ValueSource<Record<string, unknown> | null>
   dictionaryModuleReady: ValueSource<boolean>
   canEnterDictionaryWorkspace: ValueSource<boolean>
@@ -228,7 +231,7 @@ export interface UseExampleShellBindingsOptions {
   enterpriseCrudCopy: ValueSource<Record<string, unknown>>
   localizePlatformStatus: (status: string | null | undefined) => string
   customerPaginationSummary: ValueSource<string>
-  customerListPageSize: ValueSource<string>
+  customerListPageSize: ValueSource<number>
   customerListSortValue: ValueSource<string>
   customerPageInputValue: ValueSource<string>
   customerPageSizeOptions: ValueSource<unknown[]>
@@ -351,7 +354,7 @@ export interface UseExampleShellBindingsOptions {
   pendingUploadFile: Ref<File | null>
   selectedGeneratorPreviewSchema: ValueSource<{ name?: string } | null>
   selectedGeneratorPreviewFile: ValueSource<Record<string, unknown> | null>
-  generatorPreviewSqlPreview: ValueSource<string>
+  generatorPreviewSqlPreview: ValueSource<GeneratorPreviewSqlPreview | null>
   enterpriseFormMode: ValueSource<string>
   enterprisePanelTitle: ValueSource<string>
   enterprisePanelDescription: ValueSource<string>

@@ -10,6 +10,7 @@ import {
   logout,
   refreshAuth,
 } from "../lib/platform-api"
+import { isRecoverableAuthError } from "./example-auth-errors"
 
 type AppTranslate = (key: string, params?: Record<string, unknown>) => string
 
@@ -86,14 +87,6 @@ interface UseExampleSessionOrchestrationOptions {
 export const useExampleSessionOrchestration = (
   options: UseExampleSessionOrchestrationOptions,
 ) => {
-  const isRecoverableAuthError = (error: unknown) =>
-    error instanceof Error &&
-    (error.message.includes("[AUTH_REFRESH_TOKEN_REQUIRED]") ||
-      error.message.includes("[AUTH_REFRESH_TOKEN_INVALID]") ||
-      error.message.includes("[AUTH_REFRESH_TOKEN_EXPIRED]") ||
-      error.message.includes("[AUTH_ACCESS_TOKEN_REQUIRED]") ||
-      error.message.includes("[AUTH_ACCESS_TOKEN_INVALID]"))
-
   const reloadAllWorkspaces = async () => {
     await options.reloadFiles()
     await options.reloadNotifications()

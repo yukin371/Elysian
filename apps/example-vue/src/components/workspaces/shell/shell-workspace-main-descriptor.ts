@@ -1,12 +1,14 @@
 import type { Component } from "vue"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
+import type { FileWorkspaceQuery } from "../../../lib/file-workspace"
 import AuthSessionWorkspaceMain from "../auth-session/AuthSessionWorkspaceMain.vue"
 import CustomerWorkspaceMain from "../customer/CustomerWorkspaceMain.vue"
 import DepartmentWorkspaceMain from "../department/DepartmentWorkspaceMain.vue"
 import DictionaryWorkspaceMain from "../dictionary/DictionaryWorkspaceMain.vue"
 import FileWorkspaceMain from "../file/FileWorkspaceMain.vue"
 import GeneratorPreviewWorkspaceMain from "../generator/GeneratorPreviewWorkspaceMain.vue"
+import type { GeneratorPreviewDiffSummary } from "../generator/types"
 import MenuWorkspaceMain from "../menu/MenuWorkspaceMain.vue"
 import NotificationWorkspaceMain from "../notification/NotificationWorkspaceMain.vue"
 import OperationLogWorkspaceMain from "../operation-log/OperationLogWorkspaceMain.vue"
@@ -55,7 +57,7 @@ export interface ShellWorkspaceMainSwitchProps {
   canUploadFiles: boolean
   fileErrorMessage: string
   fileLoading: boolean
-  fileQuery: string
+  fileQuery: FileWorkspaceQuery
   fileFilterSummary: string
   fileCountLabel: string
   fileTableItems: ReadonlyArray<unknown>
@@ -71,7 +73,7 @@ export interface ShellWorkspaceMainSwitchProps {
   generatorPreviewFiles: ReadonlyArray<unknown>
   selectedGeneratorPreviewFilePath: string | null
   canApplyGeneratorPreview: boolean
-  generatorPreviewDiffSummary: string
+  generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null
   generatorPreviewSession: GeneratorPreviewSessionSummary | null
   dictionaryModuleReady: boolean
   canEnterDictionaryWorkspace: boolean
@@ -187,7 +189,7 @@ export interface ShellWorkspaceMainSwitchProps {
   enterpriseCrudCopy: Record<string, unknown>
   customerFooterStatusLabel: string
   customerPaginationSummary: string
-  customerListPageSize: string
+  customerListPageSize: number
   customerListSortValue: string
   customerPageInputValue: string
   customerPageSizeOptions: ReadonlyArray<unknown>

@@ -53,20 +53,9 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 <template>
   <section class="enterprise-card enterprise-main-card">
     <div class="workspace-header">
-      <div>
-        <p class="enterprise-eyebrow">{{ t("app.file.workspaceEyebrow") }}</p>
-        <h3 class="enterprise-heading">{{ t("app.file.workspaceTitle") }}</h3>
-        <p class="enterprise-copy">{{ t("app.file.workspaceDescription") }}</p>
-      </div>
-
-      <button
-        v-if="canUploadFiles"
-        type="button"
-        class="enterprise-button enterprise-button-primary"
-        @click="emit('open-upload')"
-      >
-        {{ t("app.file.action.upload") }}
-      </button>
+      <p class="enterprise-eyebrow">{{ t("app.file.workspaceEyebrow") }}</p>
+      <h3 class="enterprise-heading">{{ t("app.file.workspaceTitle") }}</h3>
+      <p class="enterprise-copy">{{ t("app.file.workspaceDescription") }}</p>
     </div>
 
     <div
@@ -229,7 +218,7 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 }
 
 .enterprise-message {
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 1rem 1.1rem;
   line-height: 1.75;
 }
@@ -255,7 +244,7 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 .enterprise-toolbar-pill {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 4px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255, 255, 255, 0.92);
   padding: 0.45rem 0.85rem;
@@ -265,7 +254,7 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 
 .enterprise-button {
   border: none;
-  border-radius: 999px;
+  border-radius: 4px;
   padding: 0.72rem 1.2rem;
   font-size: 0.86rem;
   font-weight: 600;
@@ -289,9 +278,13 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 .file-summary-row,
 .file-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.workspace-header {
+  flex-direction: column;
 }
 
 .workspace-stack {
@@ -307,7 +300,7 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 
 .file-table-shell {
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255, 255, 255, 0.96);
 }

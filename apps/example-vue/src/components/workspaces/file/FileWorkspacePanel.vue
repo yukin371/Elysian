@@ -135,55 +135,55 @@ const handleFileInput = (event: Event) => {
         v-if="panelMode === 'upload' && canUploadFiles"
         class="panel-stack"
       >
-      <label class="upload-dropzone">
-        <span class="enterprise-subheading">
-          {{ t("app.file.uploadFieldLabel") }}
-        </span>
-        <input
-          class="upload-input"
-          type="file"
-          @change="handleFileInput"
-        />
-        <span class="upload-copy">
-          {{
-            pendingUploadFile
-              ? pendingUploadFile.name
-              : t("app.file.uploadPrompt")
-          }}
-        </span>
-      </label>
+        <label class="upload-dropzone">
+          <span class="enterprise-subheading">
+            {{ t("app.file.uploadFieldLabel") }}
+          </span>
+          <input
+            class="upload-input"
+            type="file"
+            @change="handleFileInput"
+          />
+          <span class="upload-copy">
+            {{
+              pendingUploadFile
+                ? pendingUploadFile.name
+                : t("app.file.uploadPrompt")
+            }}
+          </span>
+        </label>
 
-      <div v-if="pendingUploadFile" class="enterprise-metadata">
-        <div>
-          <span>{{ t("app.file.meta.mimeType") }}</span>
-          <strong>
-            {{ pendingUploadFile.type || t("app.file.mimeTypeEmpty") }}
-          </strong>
+        <div v-if="pendingUploadFile" class="enterprise-metadata">
+          <div>
+            <span>{{ t("app.file.meta.mimeType") }}</span>
+            <strong>
+              {{ pendingUploadFile.type || t("app.file.mimeTypeEmpty") }}
+            </strong>
+          </div>
+          <div>
+            <span>{{ t("app.file.meta.size") }}</span>
+            <strong>{{ pendingUploadFileSizeLabel }}</strong>
+          </div>
         </div>
-        <div>
-          <span>{{ t("app.file.meta.size") }}</span>
-          <strong>{{ pendingUploadFileSizeLabel }}</strong>
-        </div>
-      </div>
 
-      <div class="enterprise-button-row">
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-primary"
-          :disabled="actionLoading || loading"
-          @click="emit('submit-upload')"
-        >
-          {{ t("app.file.action.submitUpload") }}
-        </button>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="actionLoading"
-          @click="emit('cancel-panel')"
-        >
-          {{ t("copy.form.cancel") }}
-        </button>
-      </div>
+        <div class="enterprise-button-row">
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-primary"
+            :disabled="actionLoading || loading"
+            @click="emit('submit-upload')"
+          >
+            {{ t("app.file.action.submitUpload") }}
+          </button>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="actionLoading"
+            @click="emit('cancel-panel')"
+          >
+            {{ t("copy.form.cancel") }}
+          </button>
+        </div>
       </div>
 
       <div
@@ -309,7 +309,7 @@ const handleFileInput = (event: Event) => {
 
 .enterprise-inline-warning {
   margin-top: 1rem;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(245, 158, 11, 0.16);
   background: rgba(255, 251, 235, 0.96);
   padding: 0.85rem 0.95rem;
@@ -342,7 +342,7 @@ const handleFileInput = (event: Event) => {
 
 .enterprise-button {
   border: none;
-  border-radius: 999px;
+  border-radius: 4px;
   padding: 0.72rem 1.2rem;
   font-size: 0.86rem;
   font-weight: 600;
@@ -373,7 +373,7 @@ const handleFileInput = (event: Event) => {
 }
 
 .enterprise-metadata div {
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(248, 250, 252, 0.92);
   padding: 0.85rem 0.95rem;
@@ -389,7 +389,7 @@ const handleFileInput = (event: Event) => {
 .upload-dropzone {
   display: grid;
   gap: 0.85rem;
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px dashed rgba(36, 87, 214, 0.28);
   background: rgba(239, 246, 255, 0.82);
   padding: 1rem;
@@ -405,7 +405,7 @@ const handleFileInput = (event: Event) => {
 
 .enterprise-empty-state {
   margin-top: 1.2rem;
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px dashed rgba(15, 23, 42, 0.12);
   padding: 1rem;
   color: #0f172a;

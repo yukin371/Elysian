@@ -7,6 +7,10 @@ import DepartmentWorkspacePanel from "../department/DepartmentWorkspacePanel.vue
 import DictionaryWorkspacePanel from "../dictionary/DictionaryWorkspacePanel.vue"
 import FileWorkspacePanel from "../file/FileWorkspacePanel.vue"
 import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspacePanel.vue"
+import type {
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewSqlPreview,
+} from "../generator/types"
 import MenuWorkspacePanel from "../menu/MenuWorkspacePanel.vue"
 import NotificationWorkspacePanel from "../notification/NotificationWorkspacePanel.vue"
 import OperationLogWorkspacePanel from "../operation-log/OperationLogWorkspacePanel.vue"
@@ -217,9 +221,9 @@ export interface ShellWorkspaceSecondarySwitchProps {
   selectedGeneratorPreviewSchemaName: string
   selectedGeneratorPreviewFrontendTarget: string
   selectedGeneratorPreviewFile: Record<string, unknown> | null
-  generatorPreviewSqlPreview: string
+  generatorPreviewSqlPreview: GeneratorPreviewSqlPreview | null
   generatorPreviewSession: Record<string, unknown> | null
-  generatorPreviewDiffSummary: string
+  generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null
   generatorPreviewApplyEvidence: unknown
   customerModuleReady: boolean
   canCreateCustomers: boolean
