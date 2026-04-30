@@ -1,9 +1,5 @@
-import type {
-  ElyFormField,
-  ElyQueryField,
-  ElyQueryValues,
-} from "@elysian/ui-enterprise-vue"
-import { type ComputedRef, type Ref, computed, ref } from "vue"
+import type { ElyFormField, ElyQueryField } from "@elysian/ui-enterprise-vue"
+import { type ComputedRef, type Ref, computed } from "vue"
 
 import {
   type RoleDetailRecord,
@@ -24,6 +20,7 @@ import {
   normalizeRoleText,
   resolveRoleSelection,
 } from "../lib/role-workspace"
+import { createCrudWorkspace } from "./create-crud-workspace"
 
 export type RolePanelMode = "detail" | "create" | "edit"
 type RoleFormValues = Record<string, unknown>
@@ -56,17 +53,77 @@ interface UseRoleWorkspaceOptions {
 }
 
 export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
-  const roleItems = ref<RoleRecord[]>([])
-  const roleDetail = ref<RoleDetailRecord | null>(null)
-  const roleLoading = ref(false)
-  const roleDetailLoading = ref(false)
-  const roleErrorMessage = ref("")
-  const roleDetailErrorMessage = ref("")
-  const selectedRoleId = ref<string | null>(null)
-  const rolePanelMode = ref<RolePanelMode>("detail")
-  const roleQueryValues = ref<ElyQueryValues>({})
-  const roleCreateForm = ref(createDefaultRoleDraft())
-  const roleEditForm = ref(createDefaultRoleDraft())
+  const roleWorkspace = createCrudWorkspace<
+    RoleRecord,
+    ReturnType<typeof createDefaultRoleDraft>,
+    Parameters<typeof createRole>[0],
+    RoleDetailRecord
+  >({
+    canCreate: options.canCreate,
+    canUpdate: options.canUpdate,
+    canView: options.canView,
+    createDefaultDraft: createDefaultRoleDraft,
+    createRecord: createRole,
+    currentShellTabKey: options.currentShellTabKey,
+    fetchDetail: fetchRoleById,
+    fetchList: fetchRoles,
+    getCreateErrorMessage: () => options.t("app.error.createRole"),
+    getLoadDetailErrorMessage: () => options.t("app.error.loadRoleDetail"),
+    getLoadListErrorMessage: () => options.t("app.error.loadRoles"),
+    getUpdateErrorMessage: () => options.t("app.error.updateRole"),
+    normalizePayload: (values) => {
+      const payload = {
+        code: normalizeRoleText(values.code),
+        name: normalizeRoleText(values.name),
+        description: normalizeOptionalRoleText(values.description),
+        status: normalizeRoleStatus(values.status),
+        isSystem: normalizeRoleBoolean(values.isSystem),
+        dataScope: normalizeRoleDataScope(values.dataScope),
+      }
+
+      if (payload.code.length === 0) {
+        return {
+          message: options.t("app.error.roleCodeRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      if (payload.name.length === 0) {
+        return {
+          message: options.t("app.error.roleNameRequired"),
+          status: "invalid" as const,
+        }
+      }
+
+      return {
+        payload,
+        status: "valid" as const,
+      }
+    },
+    onRecoverableAuthError: options.onRecoverableAuthError,
+    resolveSelection: resolveRoleSelection,
+    toEditDraft: (role) => ({
+      code: role.code,
+      name: role.name,
+      description: role.description ?? "",
+      status: role.status,
+      isSystem: role.isSystem,
+      dataScope: role.dataScope,
+    }),
+    updateRecord: updateRole,
+  })
+
+  const roleItems = roleWorkspace.items
+  const roleDetail = roleWorkspace.detail
+  const roleLoading = roleWorkspace.loading
+  const roleDetailLoading = roleWorkspace.detailLoading
+  const roleErrorMessage = roleWorkspace.errorMessage
+  const roleDetailErrorMessage = roleWorkspace.detailErrorMessage
+  const selectedRoleId = roleWorkspace.selectedId
+  const rolePanelMode = roleWorkspace.panelMode
+  const roleQueryValues = roleWorkspace.queryValues
+  const roleCreateForm = roleWorkspace.createForm
+  const roleEditForm = roleWorkspace.editForm
 
   const filteredRoleItems = computed(() =>
     filterRoles(roleItems.value, {
@@ -90,19 +147,7 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
     }),
   )
 
-  const selectedRoleListItem = computed(
-    () =>
-      roleItems.value.find(
-        (role: RoleRecord) => role.id === selectedRoleId.value,
-      ) ?? null,
-  )
-
-  const selectedRole = computed(
-    () =>
-      (roleDetail.value && roleDetail.value.id === selectedRoleId.value
-        ? roleDetail.value
-        : selectedRoleListItem.value) ?? null,
-  )
+  const selectedRole = roleWorkspace.selectedRecord
 
   const selectedRoleDetail = computed(() =>
     roleDetail.value && roleDetail.value.id === selectedRoleId.value
@@ -310,214 +355,16 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
       : options.t("app.role.detailEmptyDescription")
   })
 
-  const resetPanelInputs = () => {
-    roleCreateForm.value = createDefaultRoleDraft()
-    roleEditForm.value = createDefaultRoleDraft()
-  }
-
-  const resetQuery = () => {
-    roleQueryValues.value = {}
-  }
-
-  const clearWorkspace = () => {
-    roleItems.value = []
-    roleDetail.value = null
-    selectedRoleId.value = null
-    roleErrorMessage.value = ""
-    roleDetailErrorMessage.value = ""
-    rolePanelMode.value = "detail"
-    resetPanelInputs()
-  }
-
-  const selectRole = async (role: RoleRecord) => {
-    options.currentShellTabKey.value = "workspace"
-    selectedRoleId.value = role.id
-    rolePanelMode.value = "detail"
-    roleDetail.value = null
-    roleDetailLoading.value = true
-    roleDetailErrorMessage.value = ""
-
-    try {
-      roleDetail.value = await fetchRoleById(role.id)
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      roleDetailErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadRoleDetail")
-    } finally {
-      roleDetailLoading.value = false
-    }
-  }
-
-  const reloadRoles = async () => {
-    if (!options.canView.value) {
-      clearWorkspace()
-      return
-    }
-
-    roleLoading.value = true
-    roleErrorMessage.value = ""
-
-    try {
-      const payload = await fetchRoles()
-      roleItems.value = payload.items
-
-      if (payload.items.length === 0) {
-        selectedRoleId.value = null
-        roleDetail.value = null
-
-        if (options.canCreate.value) {
-          rolePanelMode.value = "create"
-        }
-
-        return
-      }
-
-      selectedRoleId.value = resolveRoleSelection(
-        payload.items,
-        selectedRoleId.value,
-      )
-
-      if (rolePanelMode.value !== "detail") {
-        return
-      }
-
-      const nextRole = payload.items.find(
-        (item) => item.id === selectedRoleId.value,
-      )
-
-      if (nextRole) {
-        await selectRole(nextRole)
-      }
-    } catch (error) {
-      options.onRecoverableAuthError(error)
-      clearWorkspace()
-      roleErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : options.t("app.error.loadRoles")
-    } finally {
-      roleLoading.value = false
-    }
-  }
-
-  const openCreatePanel = () => {
-    if (!options.canCreate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedRoleId.value = null
-    roleDetail.value = null
-    roleErrorMessage.value = ""
-    roleDetailErrorMessage.value = ""
-    resetPanelInputs()
-    rolePanelMode.value = "create"
-  }
-
-  const startEdit = (role: RoleRecord | RoleDetailRecord) => {
-    if (!options.canUpdate.value) {
-      return
-    }
-
-    options.currentShellTabKey.value = "workspace"
-    selectedRoleId.value = role.id
-    roleErrorMessage.value = ""
-    roleDetailErrorMessage.value = ""
-    roleEditForm.value = {
-      code: role.code,
-      name: role.name,
-      description: role.description ?? "",
-      status: role.status,
-      isSystem: role.isSystem,
-      dataScope: role.dataScope,
-    }
-    rolePanelMode.value = "edit"
-  }
-
-  const cancelPanel = () => {
-    roleErrorMessage.value = ""
-
-    if (selectedRole.value) {
-      rolePanelMode.value = "detail"
-      return
-    }
-
-    if (options.canCreate.value) {
-      rolePanelMode.value = "create"
-      return
-    }
-
-    rolePanelMode.value = "detail"
-  }
-
-  const submitForm = async (values: RoleFormValues) => {
-    if (roleLoading.value || roleDetailLoading.value) {
-      return
-    }
-
-    const payload = {
-      code: normalizeRoleText(values.code),
-      name: normalizeRoleText(values.name),
-      description: normalizeOptionalRoleText(values.description),
-      status: normalizeRoleStatus(values.status),
-      isSystem: normalizeRoleBoolean(values.isSystem),
-      dataScope: normalizeRoleDataScope(values.dataScope),
-    }
-
-    if (payload.code.length === 0) {
-      roleErrorMessage.value = options.t("app.error.roleCodeRequired")
-      return
-    }
-
-    if (payload.name.length === 0) {
-      roleErrorMessage.value = options.t("app.error.roleNameRequired")
-      return
-    }
-
-    roleLoading.value = true
-    roleErrorMessage.value = ""
-
-    try {
-      if (rolePanelMode.value === "edit" && selectedRoleId.value) {
-        const updated = await updateRole(selectedRoleId.value, payload)
-        selectedRoleId.value = updated.id
-        roleDetail.value = updated
-        rolePanelMode.value = "detail"
-        await reloadRoles()
-        return
-      }
-
-      if (!options.canCreate.value) {
-        return
-      }
-
-      const created = await createRole(payload)
-      selectedRoleId.value = created.id
-      roleDetail.value = created
-      rolePanelMode.value = "detail"
-      resetPanelInputs()
-      await reloadRoles()
-    } catch (error) {
-      roleErrorMessage.value =
-        error instanceof Error
-          ? error.message
-          : rolePanelMode.value === "edit"
-            ? options.t("app.error.updateRole")
-            : options.t("app.error.createRole")
-    } finally {
-      roleLoading.value = false
-    }
-  }
-
-  const handleSearch = (values: ElyQueryValues) => {
-    roleQueryValues.value = values
-  }
-
-  const handleReset = () => {
-    resetQuery()
-  }
+  const cancelPanel = roleWorkspace.cancelPanel
+  const clearWorkspace = roleWorkspace.clearWorkspace
+  const handleReset = roleWorkspace.handleReset
+  const handleSearch = roleWorkspace.handleSearch
+  const openCreatePanel = roleWorkspace.openCreatePanel
+  const reloadRoles = roleWorkspace.reloadRecords
+  const resetQuery = roleWorkspace.resetQuery
+  const selectRole = roleWorkspace.selectRecord
+  const startEdit = roleWorkspace.startEdit
+  const submitForm = roleWorkspace.submitForm
 
   const handleRowClick = async (row: Record<string, unknown>) => {
     const rowId = String(row.id ?? "")
