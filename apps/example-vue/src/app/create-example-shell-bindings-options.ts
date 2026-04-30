@@ -42,6 +42,7 @@ export const createExampleShellBindingsOptions = (
   const customerWorkspaceOptions = {
     isCustomerWorkspace: input.customerWorkspace.isCustomerWorkspace,
     customerLoading: input.customerWorkspace.workspace.customerLoading,
+    customerWorkspaceState: input.customerWorkspace.workspace,
     canCreateCustomers: input.customerWorkspace.canCreateCustomers,
     canViewCustomers: input.customerWorkspace.canViewCustomers,
     canUpdateCustomers: input.customerWorkspace.canUpdateCustomers,
@@ -53,7 +54,6 @@ export const createExampleShellBindingsOptions = (
       input.customerWorkspace.workspace.customerErrorMessage,
     enterpriseQueryFields: input.customerWorkspace.workspace.queryFields,
     enterpriseTableColumns: input.customerWorkspace.workspace.tableColumns,
-    enterpriseTableItems: input.customerWorkspace.workspace.tableItems,
     enterpriseTableActions: input.customerWorkspace.workspace.tableActions,
     customerCountLabel: input.customerWorkspace.workspace.customerCountLabel,
     currentQuerySummary: input.customerWorkspace.currentQuerySummary,

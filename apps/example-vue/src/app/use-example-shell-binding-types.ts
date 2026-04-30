@@ -49,6 +49,7 @@ export interface UseExampleShellBindingsOptions {
   canViewRoles: ValueSource<boolean>
   isCustomerWorkspace: ComputedRef<boolean>
   customerLoading: ValueSource<boolean>
+  customerWorkspaceState: Record<string, unknown>
   canCreateCustomers: ValueSource<boolean>
   canViewCustomers: ValueSource<boolean>
   canUpdateCustomers: ValueSource<boolean>
@@ -225,7 +226,6 @@ export interface UseExampleShellBindingsOptions {
   customerErrorMessage: ValueSource<string>
   enterpriseQueryFields: ValueSource<unknown[]>
   enterpriseTableColumns: ValueSource<unknown[]>
-  enterpriseTableItems: ValueSource<unknown[]>
   enterpriseTableActions: ValueSource<unknown[]>
   customerCountLabel: ValueSource<string>
   currentQuerySummary: ValueSource<string>

@@ -21,4 +21,5 @@ export type {
   WorkspaceRegistration,
   WorkspaceRegistryDomain,
   WorkspaceState,
+  WorkspaceStateContext,
 } from "./types"

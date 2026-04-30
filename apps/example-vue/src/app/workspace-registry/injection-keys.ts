@@ -1,7 +1,7 @@
-import type { InjectionKey } from "vue"
+import type { ComputedRef, InjectionKey } from "vue"
 
-import type { WorkspaceState } from "./types"
+import type { WorkspaceStateContext } from "./types"
 
-export const WORKSPACE_STATE_KEY: InjectionKey<WorkspaceState> = Symbol(
-  "example-workspace-state",
-)
+export const WORKSPACE_STATE_KEY: InjectionKey<
+  ComputedRef<WorkspaceStateContext | null>
+> = Symbol("example-workspace-state")

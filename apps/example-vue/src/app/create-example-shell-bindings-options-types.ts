@@ -264,6 +264,7 @@ export type RoleWorkspaceBindingsOptions = BindingSegment<
 export type CustomerWorkspaceBindingsOptions = BindingSegment<
   | "isCustomerWorkspace"
   | "customerLoading"
+  | "customerWorkspaceState"
   | "canCreateCustomers"
   | "canViewCustomers"
   | "canUpdateCustomers"
@@ -273,7 +274,6 @@ export type CustomerWorkspaceBindingsOptions = BindingSegment<
   | "customerErrorMessage"
   | "enterpriseQueryFields"
   | "enterpriseTableColumns"
-  | "enterpriseTableItems"
   | "enterpriseTableActions"
   | "customerCountLabel"
   | "currentQuerySummary"

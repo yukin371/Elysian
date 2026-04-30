@@ -15,6 +15,13 @@ export interface WorkspaceState {
   loading: Ref<boolean>
 }
 
+export interface WorkspaceStateContext {
+  errorMessage: Ref<string>
+  kind: RegisteredWorkspaceKind
+  loading: Ref<boolean>
+  state: unknown
+}
+
 export interface WorkspaceRegistration {
   domain: WorkspaceRegistryDomain
   i18nKeys: {

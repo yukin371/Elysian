@@ -180,9 +180,9 @@ export interface ShellWorkspaceMainSwitchProps {
   canViewCustomers: boolean
   customerLoading: boolean
   customerErrorMessage: string
+  customerWorkspaceState: Record<string, unknown>
   enterpriseQueryFields: ReadonlyArray<unknown>
   enterpriseTableColumns: ReadonlyArray<unknown>
-  enterpriseTableItems: ReadonlyArray<unknown>
   enterpriseTableActions: ReadonlyArray<unknown>
   customerCountLabel: string
   currentQuerySummary: string
@@ -378,11 +378,8 @@ const customerResolver: ShellWorkspaceMainResolver = (props, emit) => ({
     isAuthenticated: props.isAuthenticated,
     canEnterWorkspace: props.canEnterCustomerWorkspace,
     canViewCustomers: props.canViewCustomers,
-    loading: props.customerLoading,
-    errorMessage: props.customerErrorMessage,
     queryFields: props.enterpriseQueryFields,
     tableColumns: props.enterpriseTableColumns,
-    items: props.enterpriseTableItems,
     tableActions: props.enterpriseTableActions,
     itemCountLabel: props.customerCountLabel,
     emptyTitle: props.t("app.workspace.emptyTitle"),
@@ -399,6 +396,7 @@ const customerResolver: ShellWorkspaceMainResolver = (props, emit) => ({
     canGoToPreviousPage: props.canGoToPreviousCustomerPage,
     canGoToNextPage: props.canGoToNextCustomerPage,
     canJumpToPage: props.canJumpToCustomerPage,
+    workspaceStateInjected: true,
   },
   listeners: {
     search: (payload: unknown) => emit("customer-search", payload),

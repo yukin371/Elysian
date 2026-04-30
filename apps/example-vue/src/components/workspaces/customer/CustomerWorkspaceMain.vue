@@ -10,7 +10,9 @@ import {
 import { Button as TButton } from "tdesign-vue-next/es/button"
 import { Input as TInput } from "tdesign-vue-next/es/input"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { CustomerRecord } from "../../../lib/platform-api"
 
 type CustomerWorkspaceTranslation = (
@@ -30,11 +32,8 @@ interface CustomerWorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewCustomers: boolean
-  loading: boolean
-  errorMessage: string
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  items: CustomerRecord[]
   tableActions: ElyTableAction[]
   itemCountLabel: string
   emptyTitle: string
@@ -51,9 +50,10 @@ interface CustomerWorkspaceMainProps {
   canGoToPreviousPage: boolean
   canGoToNextPage: boolean
   canJumpToPage: boolean
+  workspaceStateInjected?: boolean
 }
 
-defineProps<CustomerWorkspaceMainProps>()
+const props = defineProps<CustomerWorkspaceMainProps>()
 
 const emit = defineEmits<{
   (e: "search", values: ElyQueryValues): void
@@ -69,6 +69,38 @@ const emit = defineEmits<{
   (e: "update-page-input", value: string | number): void
   (e: "submit-page-jump"): void
 }>()
+
+interface CustomerWorkspaceInjectedState {
+  customerErrorMessage: { value: string }
+  customerItems: { value: CustomerRecord[] }
+  customerLoading: { value: boolean }
+}
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedCustomerWorkspaceState =
+  computed<CustomerWorkspaceInjectedState | null>(() => {
+    const context = injectedWorkspaceState.value
+
+    if (!props.workspaceStateInjected || context?.kind !== "customer") {
+      return null
+    }
+
+    return context.state as CustomerWorkspaceInjectedState
+  })
+
+const resolvedLoading = computed(
+  () => resolvedCustomerWorkspaceState.value?.customerLoading.value ?? false,
+)
+const resolvedErrorMessage = computed(
+  () => resolvedCustomerWorkspaceState.value?.customerErrorMessage.value ?? "",
+)
+const resolvedItems = computed(
+  () => resolvedCustomerWorkspaceState.value?.customerItems.value ?? [],
+)
 </script>
 
 <template>
@@ -90,8 +122,11 @@ const emit = defineEmits<{
     {{ t("app.message.workspaceNoListPermission") }}
   </div>
 
-  <div v-else-if="errorMessage" class="enterprise-message enterprise-message-danger">
-    {{ errorMessage }}
+  <div
+    v-else-if="resolvedErrorMessage"
+    class="enterprise-message enterprise-message-danger"
+  >
+    {{ resolvedErrorMessage }}
   </div>
 
   <ElyCrudWorkspace
@@ -100,10 +135,10 @@ const emit = defineEmits<{
     :title="t('app.workspace.title')"
     :description="t('app.workspace.description')"
     :query-fields="queryFields"
-    :query-loading="loading"
+    :query-loading="resolvedLoading"
     :table-columns="tableColumns"
-    :items="items"
-    :table-loading="loading"
+    :items="resolvedItems"
+    :table-loading="resolvedLoading"
     :table-actions="tableActions"
     :item-count-label="itemCountLabel"
     :empty-title="emptyTitle"
@@ -160,7 +195,7 @@ const emit = defineEmits<{
             <TButton
               variant="outline"
               size="small"
-              :disabled="loading || !canGoToPreviousPage"
+              :disabled="resolvedLoading || !canGoToPreviousPage"
               @click="emit('go-first-page')"
             >
               {{ t("app.workspace.paginationFirst") }}
@@ -168,7 +203,7 @@ const emit = defineEmits<{
             <TButton
               variant="outline"
               size="small"
-              :disabled="loading || !canGoToPreviousPage"
+              :disabled="resolvedLoading || !canGoToPreviousPage"
               @click="emit('go-previous-page')"
             >
               {{ t("app.workspace.paginationPrev") }}
@@ -176,7 +211,7 @@ const emit = defineEmits<{
             <TButton
               variant="outline"
               size="small"
-              :disabled="loading || !canGoToNextPage"
+              :disabled="resolvedLoading || !canGoToNextPage"
               @click="emit('go-next-page')"
             >
               {{ t("app.workspace.paginationNext") }}
@@ -184,7 +219,7 @@ const emit = defineEmits<{
             <TButton
               variant="outline"
               size="small"
-              :disabled="loading || !canGoToNextPage"
+              :disabled="resolvedLoading || !canGoToNextPage"
               @click="emit('go-last-page')"
             >
               {{ t("app.workspace.paginationLast") }}
@@ -205,7 +240,7 @@ const emit = defineEmits<{
                 <TButton
                   size="small"
                   theme="primary"
-                  :disabled="loading || !canJumpToPage"
+                  :disabled="resolvedLoading || !canJumpToPage"
                   @click="emit('submit-page-jump')"
                 >
                   {{ t("app.workspace.paginationJumpSubmit") }}
