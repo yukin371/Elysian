@@ -9,6 +9,20 @@ import {
 
 export type ExampleAppLayout = "auth" | "admin"
 
+interface ExampleBrowserWindow {
+  addEventListener: (type: "hashchange", listener: () => void) => void
+  history: {
+    replaceState: (data: unknown, unused: string, url?: string | URL) => void
+  }
+  location: {
+    hash: string
+  }
+  removeEventListener: (type: "hashchange", listener: () => void) => void
+}
+
+const getBrowserWindow = () =>
+  (globalThis as { window?: ExampleBrowserWindow }).window ?? null
+
 export const resolveExampleAppLayout = (
   isAuthenticated: boolean,
 ): ExampleAppLayout => (isAuthenticated ? "admin" : "auth")
@@ -23,37 +37,43 @@ export const useExampleAppLayout = ({
   )
 
 export const readCurrentWorkspaceRouteMenuKey = (items: UiNavigationNode[]) => {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow()
+
+  if (!browserWindow) {
     return null
   }
 
-  return resolveWorkspaceMenuKeyByPath(items, window.location.hash)
+  return resolveWorkspaceMenuKeyByPath(items, browserWindow.location.hash)
 }
 
 export const replaceCurrentWorkspaceRoute = (
   path: string | null | undefined,
 ) => {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow()
+
+  if (!browserWindow) {
     return
   }
 
   const nextHash = toWorkspaceRouteHash(path)
 
-  if (!nextHash || window.location.hash === nextHash) {
+  if (!nextHash || browserWindow.location.hash === nextHash) {
     return
   }
 
-  window.history.replaceState(null, "", nextHash)
+  browserWindow.history.replaceState(null, "", nextHash)
 }
 
 export const listenWorkspaceRouteChange = (listener: () => void) => {
-  if (typeof window === "undefined") {
+  const browserWindow = getBrowserWindow()
+
+  if (!browserWindow) {
     return () => {}
   }
 
-  window.addEventListener("hashchange", listener)
+  browserWindow.addEventListener("hashchange", listener)
 
   return () => {
-    window.removeEventListener("hashchange", listener)
+    browserWindow.removeEventListener("hashchange", listener)
   }
 }

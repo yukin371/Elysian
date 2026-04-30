@@ -9,6 +9,7 @@ import FileWorkspacePanel from "../file/FileWorkspacePanel.vue"
 import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspacePanel.vue"
 import type {
   GeneratorPreviewDiffSummary,
+  GeneratorPreviewFileCard,
   GeneratorPreviewSqlPreview,
 } from "../generator/types"
 import MenuWorkspacePanel from "../menu/MenuWorkspacePanel.vue"
@@ -220,7 +221,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   pendingUploadFile: File | null
   selectedGeneratorPreviewSchemaName: string
   selectedGeneratorPreviewFrontendTarget: string
-  selectedGeneratorPreviewFile: Record<string, unknown> | null
+  selectedGeneratorPreviewFile: GeneratorPreviewFileCard | null
   generatorPreviewSqlPreview: GeneratorPreviewSqlPreview | null
   generatorPreviewSession: Record<string, unknown> | null
   generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null

@@ -15,6 +15,7 @@ import zhCn from "tdesign-vue-next/es/locale/zh_CN"
 import { computed } from "vue"
 import { createAppShellLocalization } from "./app/app-shell-helpers"
 import { createExampleAppShellBindingsOptions } from "./app/create-example-app-shell-bindings-options"
+import { createExampleSessionOrchestrationOptions } from "./app/create-example-session-orchestration-options"
 import { isRecoverableAuthError } from "./app/example-auth-errors"
 import {
   customerPageDefinition,
@@ -108,6 +109,8 @@ const {
   localizeWorkflowStatus,
 } = createAppShellLocalization(t)
 
+const exampleRuntimeState = useExampleRuntimeState()
+
 const {
   authErrorMessage,
   authIdentity,
@@ -147,7 +150,7 @@ const {
   userExportLoading,
   userModuleReady,
   workflowModuleReady,
-} = useExampleRuntimeState()
+} = exampleRuntimeState
 
 const handleRecoverableAuthError = (error: unknown) => {
   if (isRecoverableAuthError(error)) {
@@ -1136,70 +1139,32 @@ useExampleWorkspaceSync({
   selectWorkflowDefinition,
 })
 
-const { submitLogin, submitLogout } = useExampleSessionOrchestration({
+const sessionOrchestrationOptions = createExampleSessionOrchestrationOptions({
   t,
-  platform,
-  authIdentity,
-  registeredModuleCodes,
-  loading,
-  authLoading,
-  errorMessage,
-  authErrorMessage,
-  envName,
-  loginForm,
-  authModuleReady,
-  customerModuleReady,
-  departmentModuleReady,
-  postModuleReady,
-  fileModuleReady,
-  menuModuleReady,
-  notificationModuleReady,
-  operationLogModuleReady,
-  roleModuleReady,
-  settingModuleReady,
-  tenantModuleReady,
-  userModuleReady,
-  dictionaryModuleReady,
-  workflowModuleReady,
+  runtimeState: exampleRuntimeState,
   enterpriseFormMode,
   notificationQueryValues,
-  reloadFiles,
-  reloadNotifications,
-  reloadDictionaries,
-  reloadCustomers,
-  reloadDepartments,
-  reloadSessions,
-  reloadPosts,
-  reloadMenus,
-  reloadOperationLogs,
-  reloadRoles,
-  reloadSettings,
-  reloadTenants,
-  reloadUsers,
-  reloadWorkflowDefinitions,
-  clearCustomerWorkspace,
-  clearDictionaryOptions,
-  clearFileWorkspace,
-  clearNotificationWorkspace,
-  clearDepartmentWorkspace,
-  clearSessionWorkspace,
-  clearPostWorkspace,
-  clearMenuWorkspace,
-  clearOperationLogWorkspace,
-  clearRoleWorkspace,
-  clearSettingWorkspace,
-  clearTenantWorkspace,
-  clearUserWorkspace,
-  clearWorkflowDefinitions,
-  resetDepartmentQuery,
-  resetPostQuery,
-  resetMenuQuery,
-  resetOperationLogQuery,
-  resetRoleQuery,
-  resetSettingQuery,
-  resetTenantQuery,
-  handleUserReset,
+  workspaces: {
+    customerWorkspace,
+    dictionaryWorkspace,
+    departmentWorkspace,
+    fileWorkspace,
+    menuWorkspace,
+    notificationWorkspace,
+    operationLogWorkspace,
+    postWorkspace,
+    roleWorkspace,
+    sessionWorkspace,
+    settingWorkspace,
+    tenantWorkspace,
+    userWorkspace,
+    workflowWorkspace,
+  },
 })
+
+const { submitLogin, submitLogout } = useExampleSessionOrchestration(
+  sessionOrchestrationOptions,
+)
 
 const {
   handleExportDepartments,

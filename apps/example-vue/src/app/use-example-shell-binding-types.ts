@@ -1,6 +1,7 @@
 import { type ComputedRef, type Ref, isRef } from "vue"
 
 import type { FileWorkspaceQuery } from "../lib/file-workspace"
+import type { GeneratorPreviewFileCard } from "../lib/generator-preview-workspace"
 import type {
   AuthIdentityResponse,
   GeneratorPreviewDiffSummary,
@@ -353,7 +354,7 @@ export interface UseExampleShellBindingsOptions {
   selectedFile: ValueSource<Record<string, unknown> | null>
   pendingUploadFile: Ref<File | null>
   selectedGeneratorPreviewSchema: ValueSource<{ name?: string } | null>
-  selectedGeneratorPreviewFile: ValueSource<Record<string, unknown> | null>
+  selectedGeneratorPreviewFile: ValueSource<GeneratorPreviewFileCard | null>
   generatorPreviewSqlPreview: ValueSource<GeneratorPreviewSqlPreview | null>
   enterpriseFormMode: ValueSource<string>
   enterprisePanelTitle: ValueSource<string>

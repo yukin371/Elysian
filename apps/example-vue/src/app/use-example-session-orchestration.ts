@@ -19,7 +19,7 @@ interface LoginFormState {
   password: string
 }
 
-interface UseExampleSessionOrchestrationOptions {
+export interface UseExampleSessionOrchestrationOptions {
   t: AppTranslate
   platform: Ref<PlatformResponse | null>
   authIdentity: Ref<AuthIdentityResponse | null>
