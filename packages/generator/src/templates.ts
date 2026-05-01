@@ -12,9 +12,17 @@ export interface RenderModuleTemplatesOptions {
 export interface GeneratedFrontendModuleArtifact {
   fieldKeys: string[]
   frontendTarget: FrontendTarget
+  i18nKeys: {
+    sectionCopy: string
+    sectionTitle: string
+    shellDescription: string
+    shellTitle: string
+  }
+  kind: string
   moduleCode: string
   pageComponentPath: string
   permissionPrefix: string | null
+  permissions: Record<string, string>
   primaryFieldKey: string
   routePath: string | null
   searchableFieldKeys: string[]
@@ -413,6 +421,33 @@ export const renderPagePath = (
 export const renderFrontendArtifactPath = (schema: ModuleSchema) =>
   `modules/${schema.name}/${schema.name}.frontend.ts`
 
+const deriveArtifactPermissions = (
+  schema: ModuleSchema,
+): Record<string, string> => {
+  const prefix = schema.frontend?.permissionPrefix ?? schema.name
+  const actions = schema.frontend?.permissionActions ?? {
+    list: true,
+    create: true,
+    update: true,
+  }
+  const permissions: Record<string, string> = {}
+
+  if (actions.list) permissions.list = `${prefix}:list`
+  if (actions.create) permissions.create = `${prefix}:create`
+  if (actions.update) permissions.update = `${prefix}:update`
+  if (actions.delete) permissions.delete = `${prefix}:delete`
+  if (actions.export) permissions.export = `${prefix}:export`
+
+  return permissions
+}
+
+const deriveArtifactI18nKeys = (moduleName: string) => ({
+  sectionTitle: `app.${moduleName}.sectionTitle`,
+  sectionCopy: `app.${moduleName}.sectionCopy`,
+  shellTitle: `app.${moduleName}.shellTitle`,
+  shellDescription: `app.${moduleName}.shellDescription`,
+})
+
 export const renderFrontendArtifactTemplate = (
   schema: ModuleSchema,
   frontendTarget: FrontendTarget,
@@ -423,13 +458,25 @@ export const renderFrontendArtifactTemplate = (
   const searchableFieldKeys = schema.fields
     .filter((field) => field.searchable === true)
     .map((field) => field.key)
+  const kind = schema.frontend?.workspaceKind ?? schema.name
+  const moduleCode = schema.frontend?.moduleCode ?? schema.name
+  const permissions = deriveArtifactPermissions(schema)
+  const i18nKeys = deriveArtifactI18nKeys(schema.name)
 
   return `export interface GeneratedFrontendModuleArtifact {
   fieldKeys: string[]
   frontendTarget: "vue" | "react"
+  i18nKeys: {
+    sectionCopy: string
+    sectionTitle: string
+    shellDescription: string
+    shellTitle: string
+  }
+  kind: string
   moduleCode: string
   pageComponentPath: string
   permissionPrefix: string | null
+  permissions: Record<string, string>
   primaryFieldKey: string
   routePath: string | null
   searchableFieldKeys: string[]
@@ -437,7 +484,7 @@ export const renderFrontendArtifactTemplate = (
 }
 
 export const ${artifactName}: GeneratedFrontendModuleArtifact = {
-  moduleCode: ${JSON.stringify(schema.name)},
+  moduleCode: ${JSON.stringify(moduleCode)},
   frontendTarget: ${JSON.stringify(frontendTarget)},
   workspaceDomain: ${JSON.stringify(schema.frontend?.workspaceDomain ?? null)},
   routePath: ${JSON.stringify(schema.frontend?.routePath ?? null)},
@@ -450,6 +497,9 @@ export const ${artifactName}: GeneratedFrontendModuleArtifact = {
     2,
   )},
   searchableFieldKeys: ${JSON.stringify(searchableFieldKeys, null, 2)},
+  kind: ${JSON.stringify(kind)},
+  permissions: ${JSON.stringify(permissions, null, 2)},
+  i18nKeys: ${JSON.stringify(i18nKeys, null, 2)},
 }
 `
 }

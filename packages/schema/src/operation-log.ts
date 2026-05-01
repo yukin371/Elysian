@@ -79,4 +79,10 @@ export const operationLogModuleSchema: ModuleSchema = {
     { key: "userAgent", label: "User Agent", kind: "string", searchable: true },
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "business",
+    routePath: "/system/operation-logs",
+    permissionPrefix: "system:operation-log",
+    permissionActions: { list: true, export: true },
+  },
 }

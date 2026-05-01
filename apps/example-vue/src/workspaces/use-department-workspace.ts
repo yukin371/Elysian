@@ -30,7 +30,7 @@ type DepartmentPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface DepartmentPageContract {
   tableColumns: ComputedRef<DepartmentPageColumn[]>

@@ -1,115 +1,22 @@
+import { buildWorkspaceRegistration } from "@elysian/frontend-vue"
+import {
+  customerModuleSchema,
+  fileModuleSchema,
+  notificationModuleSchema,
+  operationLogModuleSchema,
+  tenantModuleSchema,
+  workflowModuleSchema,
+} from "@elysian/schema"
+
 import type { WorkspaceRegistration } from "./types"
 
 export const businessWorkspaceRegistrations = [
-  {
-    domain: "business",
-    path: "/customers",
-    kind: "customer",
-    moduleCode: "customer",
-    permissionPrefix: "customer:customer",
-    permissions: {
-      list: "customer:customer:list",
-      create: "customer:customer:create",
-      update: "customer:customer:update",
-      delete: "customer:customer:delete",
-    },
-    i18nKeys: {
-      sectionTitle: "app.section.workspaceTitle",
-      sectionCopy: "app.section.workspaceCopy",
-      shellTitle: "app.shell.workspaceTitle",
-      shellDescription: "app.shell.workspaceDescription",
-    },
-  },
-  {
-    domain: "business",
-    path: "/system/files",
-    kind: "file",
-    moduleCode: "file",
-    permissionPrefix: "system:file",
-    permissions: {
-      list: "system:file:list",
-      create: "system:file:upload",
-      update: "system:file:download",
-      delete: "system:file:delete",
-    },
-    i18nKeys: {
-      sectionTitle: "app.file.sectionTitle",
-      sectionCopy: "app.file.sectionCopy",
-      shellTitle: "app.file.shellTitle",
-      shellDescription: "app.file.shellDescription",
-    },
-  },
-  {
-    domain: "business",
-    path: "/system/notifications",
-    kind: "notification",
-    moduleCode: "notification",
-    permissionPrefix: "system:notification",
-    permissions: {
-      list: "system:notification:list",
-      create: "system:notification:create",
-      update: "system:notification:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.notification.sectionTitle",
-      sectionCopy: "app.notification.sectionCopy",
-      shellTitle: "app.notification.shellTitle",
-      shellDescription: "app.notification.shellDescription",
-    },
-  },
-  {
-    domain: "business",
-    path: "/system/operation-logs",
-    kind: "operation-log",
-    moduleCode: "operation-log",
-    permissionPrefix: "system:operation-log",
-    permissions: {
-      list: "system:operation-log:list",
-      export: "system:operation-log:export",
-    },
-    i18nKeys: {
-      sectionTitle: "app.operationLog.sectionTitle",
-      sectionCopy: "app.operationLog.sectionCopy",
-      shellTitle: "app.operationLog.shellTitle",
-      shellDescription: "app.operationLog.shellDescription",
-    },
-  },
-  {
-    domain: "business",
-    path: "/system/tenants",
-    kind: "tenant",
-    moduleCode: "tenant",
-    permissionPrefix: "system:tenant",
-    permissions: {
-      list: "system:tenant:list",
-      create: "system:tenant:create",
-      update: "system:tenant:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.tenant.sectionTitle",
-      sectionCopy: "app.tenant.sectionCopy",
-      shellTitle: "app.tenant.shellTitle",
-      shellDescription: "app.tenant.shellDescription",
-    },
-  },
-  {
-    domain: "business",
-    path: "/workflow/definitions",
-    kind: "workflow-definitions",
-    moduleCode: "workflow",
-    permissionPrefix: "workflow:definition",
-    permissions: {
-      list: "workflow:definition:list",
-      create: "workflow:definition:create",
-      update: "workflow:definition:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.workflow.sectionTitle",
-      sectionCopy: "app.workflow.sectionCopy",
-      shellTitle: "app.workflow.shellTitle",
-      shellDescription: "app.workflow.shellDescription",
-    },
-  },
+  buildWorkspaceRegistration(customerModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(fileModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(notificationModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(operationLogModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(tenantModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(workflowModuleSchema) as WorkspaceRegistration,
   {
     domain: "business",
     path: "/studio/generator-preview",
@@ -142,4 +49,4 @@ export const businessWorkspaceRegistrations = [
       shellDescription: "app.generatorPreview.shellDescription",
     },
   },
-] as const satisfies WorkspaceRegistration[]
+] as const satisfies readonly WorkspaceRegistration[]

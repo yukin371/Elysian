@@ -1,0 +1,77 @@
+import type { useNotificationWorkspace } from "../workspaces/use-notification-workspace"
+
+export type ExampleNotificationWorkspace = ReturnType<
+  typeof useNotificationWorkspace
+>
+
+export const useExampleNotificationWorkspaceBindings = (
+  notificationWorkspace: ExampleNotificationWorkspace,
+) => {
+  const {
+    cancelPanel: cancelNotificationPanel,
+    clearWorkspace: clearNotificationWorkspace,
+    countLabel: notificationCountLabel,
+    filteredNotificationItems,
+    formFields: enterpriseNotificationFormFields,
+    formValues: enterpriseNotificationFormValues,
+    handleReset: handleNotificationReset,
+    handleRowClick: handleNotificationRowClick,
+    handleSearch: handleNotificationSearch,
+    listQuery: notificationListQuery,
+    markSelectedAsRead: markSelectedNotificationAsRead,
+    markVisibleAsRead: markVisibleNotificationsAsRead,
+    notificationDetail,
+    notificationDetailErrorMessage,
+    notificationDetailLoading,
+    notificationErrorMessage,
+    notificationItems,
+    notificationLoading,
+    notificationPanelMode,
+    notificationQueryValues,
+    openCreatePanel: openNotificationCreatePanel,
+    panelDescription: notificationPanelDescription,
+    panelTitle: notificationPanelTitle,
+    queryFields: enterpriseNotificationQueryFields,
+    reloadNotifications,
+    selectedNotification,
+    selectedNotificationId,
+    selectNotification,
+    submitForm: submitNotificationForm,
+    tableColumns: enterpriseNotificationTableColumns,
+    tableItems: enterpriseNotificationTableItems,
+  } = notificationWorkspace
+
+  return {
+    cancelNotificationPanel,
+    clearNotificationWorkspace,
+    notificationCountLabel,
+    filteredNotificationItems,
+    enterpriseNotificationFormFields,
+    enterpriseNotificationFormValues,
+    handleNotificationReset,
+    handleNotificationRowClick,
+    handleNotificationSearch,
+    notificationListQuery,
+    markSelectedNotificationAsRead,
+    markVisibleNotificationsAsRead,
+    notificationDetail,
+    notificationDetailErrorMessage,
+    notificationDetailLoading,
+    notificationErrorMessage,
+    notificationItems,
+    notificationLoading,
+    notificationPanelMode,
+    notificationQueryValues,
+    openNotificationCreatePanel,
+    notificationPanelDescription,
+    notificationPanelTitle,
+    enterpriseNotificationQueryFields,
+    reloadNotifications,
+    selectedNotification,
+    selectedNotificationId,
+    selectNotification,
+    submitNotificationForm,
+    enterpriseNotificationTableColumns,
+    enterpriseNotificationTableItems,
+  }
+}

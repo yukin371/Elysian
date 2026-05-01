@@ -77,10 +77,21 @@ export interface ModuleField {
 
 export type ModuleFrontendWorkspaceDomain = "business" | "system"
 
+export interface ModulePermissionActions {
+  create?: boolean
+  delete?: boolean
+  export?: boolean
+  list?: boolean
+  update?: boolean
+}
+
 export interface ModuleFrontendSchema {
-  workspaceDomain: ModuleFrontendWorkspaceDomain
-  routePath: string
+  moduleCode?: string
+  permissionActions?: ModulePermissionActions
   permissionPrefix?: string
+  routePath: string
+  workspaceDomain: ModuleFrontendWorkspaceDomain
+  workspaceKind?: string
 }
 
 export interface ModuleSchema {
@@ -136,9 +147,12 @@ export const validateModuleSchema = (
       })
     } else {
       const frontendKeySet = new Set<keyof ModuleFrontendSchema>([
-        "workspaceDomain",
-        "routePath",
+        "moduleCode",
+        "permissionActions",
         "permissionPrefix",
+        "routePath",
+        "workspaceDomain",
+        "workspaceKind",
       ])
 
       pushUnknownKeyIssues(
@@ -173,6 +187,18 @@ export const validateModuleSchema = (
       }
 
       if (
+        "moduleCode" in input.frontend &&
+        input.frontend.moduleCode !== undefined &&
+        !isNonEmptyString(input.frontend.moduleCode)
+      ) {
+        issues.push({
+          path: "frontend.moduleCode",
+          message:
+            "Frontend moduleCode must be a non-empty string when provided.",
+        })
+      }
+
+      if (
         "permissionPrefix" in input.frontend &&
         input.frontend.permissionPrefix !== undefined &&
         !isNonEmptyString(input.frontend.permissionPrefix)
@@ -181,6 +207,48 @@ export const validateModuleSchema = (
           path: "frontend.permissionPrefix",
           message:
             "Frontend permissionPrefix must be a non-empty string when provided.",
+        })
+      }
+
+      if (
+        "permissionActions" in input.frontend &&
+        input.frontend.permissionActions !== undefined
+      ) {
+        if (!isRecord(input.frontend.permissionActions)) {
+          issues.push({
+            path: "frontend.permissionActions",
+            message:
+              "Frontend permissionActions must be an object when provided.",
+          })
+        } else {
+          const validActionKeys = new Set([
+            "list",
+            "create",
+            "update",
+            "delete",
+            "export",
+          ])
+
+          for (const key of Object.keys(input.frontend.permissionActions)) {
+            if (!validActionKeys.has(key)) {
+              issues.push({
+                path: `frontend.permissionActions.${key}`,
+                message: `Unknown permission action "${key}".`,
+              })
+            }
+          }
+        }
+      }
+
+      if (
+        "workspaceKind" in input.frontend &&
+        input.frontend.workspaceKind !== undefined &&
+        !isNonEmptyString(input.frontend.workspaceKind)
+      ) {
+        issues.push({
+          path: "frontend.workspaceKind",
+          message:
+            "Frontend workspaceKind must be a non-empty string when provided.",
         })
       }
     }

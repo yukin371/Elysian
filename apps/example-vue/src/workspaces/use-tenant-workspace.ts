@@ -26,7 +26,7 @@ type TenantPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface TenantPageContract {
   tableColumns: ComputedRef<TenantPageColumn[]>

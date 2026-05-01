@@ -22,7 +22,7 @@ type OperationLogPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 type OperationLogDetailValues = Record<string, unknown>
 
 const operationLogAuthEventTypeOptions = [

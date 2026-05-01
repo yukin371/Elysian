@@ -32,7 +32,7 @@ type NotificationPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface NotificationPageContract {
   tableColumns: ComputedRef<NotificationPageColumn[]>

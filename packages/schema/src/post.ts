@@ -48,4 +48,10 @@ export const postModuleSchema: ModuleSchema = {
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
     { key: "updatedAt", label: "Updated At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "system",
+    routePath: "/system/posts",
+    permissionPrefix: "system:post",
+    permissionActions: { list: true, create: true, update: true },
+  },
 }

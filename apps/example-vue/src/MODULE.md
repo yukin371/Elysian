@@ -46,6 +46,7 @@
   - `use-example-shell-meta.ts`
   - `use-example-csv-exports.ts`
   - `use-example-workspace-sync.ts`
+  - `use-example-app-shell-orchestration.ts`
   - `workspace-registry/*`
   - `use-example-session-orchestration.ts`
   - `use-example-shell-binding-types.ts`
@@ -53,12 +54,14 @@
   - `use-example-shell-workspace-main-bindings.ts`
   - `use-example-shell-workspace-secondary-bindings.ts`
   - `use-example-shell-bindings.ts`（已收口为薄聚合器）
+  - `use-example-workspaces.ts`
   - `example-page-definitions.ts`
   - `create-example-shell-bindings-options.ts`
   - `i18n/index.ts`（已收口为 locale 聚合器）
   - `i18n/zh-CN*.ts`
   - `i18n/en-US*.ts`
   - `router/example-router.ts`
+  - `router/example-workspace-routes.ts`（registry-driven route catalog）
   - `components/auth/AdminLoginPage.vue`
   - `components/layout/ExampleAppStageGate.vue`
   - `components/layout/AdminShellLayout.vue`
@@ -74,5 +77,5 @@
 
 1. 继续评估 `App.vue` 中剩余的大体量入口编排是否可按“本地装配组”继续下沉到 `src/app/*`，但不把业务 owner 推向 shared 层。
 2. 若 `App.vue` 仍长期显著超限，再拆 shell 里剩余的纯装配块，优先保持 `apps/example-vue` 内部 owner 闭合。
-3. 继续评估 `use-example-shell-binding-types.ts` 与 `ShellWorkspaceSecondarySwitch.vue` 是否还能在本模块 owner 内进一步收口，避免把入口风险转移到新的本地巨型文件。
+3. 继续评估 `use-example-workspaces.ts` 与 `use-example-shell-binding-types.ts` 是否还能在本模块 owner 内进一步收口，避免把入口风险转移到新的本地巨型文件。
 4. 如确实因入口装配职责无法继续安全拆分，保留豁免并在本文件持续更新原因与后续计划。

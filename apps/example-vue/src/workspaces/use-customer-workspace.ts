@@ -27,12 +27,12 @@ type CustomerPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 type CustomerPageAction = {
   key: string
   label: string
-} & Record<string, unknown>
+}
 
 interface CustomerPageContract {
   tableColumns: ComputedRef<CustomerPageColumn[]>

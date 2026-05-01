@@ -72,4 +72,10 @@ export const notificationModuleSchema: ModuleSchema = {
     { key: "readAt", label: "Read At", kind: "datetime" },
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "business",
+    routePath: "/system/notifications",
+    permissionPrefix: "system:notification",
+    permissionActions: { list: true, create: true, update: true },
+  },
 }

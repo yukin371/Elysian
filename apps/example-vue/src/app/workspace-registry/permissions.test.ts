@@ -11,8 +11,10 @@ describe("workspace registry permissions", () => {
       delete: "customer:customer:delete",
     })
     expect(getWorkspacePermissions("file")).toMatchObject({
-      create: "system:file:upload",
-      update: "system:file:download",
+      list: "system:file:list",
+      create: "system:file:create",
+      update: "system:file:update",
+      delete: "system:file:delete",
     })
   })
 

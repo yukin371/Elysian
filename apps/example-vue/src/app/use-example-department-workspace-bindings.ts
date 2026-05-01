@@ -1,0 +1,77 @@
+import type { useDepartmentWorkspace } from "../workspaces/use-department-workspace"
+
+export type ExampleDepartmentWorkspace = ReturnType<
+  typeof useDepartmentWorkspace
+>
+
+export const useExampleDepartmentWorkspaceBindings = (
+  departmentWorkspace: ExampleDepartmentWorkspace,
+) => {
+  const {
+    cancelPanel: cancelDepartmentPanel,
+    clearWorkspace: clearDepartmentWorkspace,
+    countLabel: departmentCountLabel,
+    departmentDetail,
+    departmentDetailErrorMessage,
+    departmentDetailLoading,
+    departmentErrorMessage,
+    departmentLoading,
+    departmentPanelMode,
+    departmentQueryValues,
+    filteredDepartmentItems,
+    formFields: enterpriseDepartmentFormFields,
+    formValues: enterpriseDepartmentFormValues,
+    handleReset: handleDepartmentReset,
+    handleRowClick: handleDepartmentRowClick,
+    handleSearch: handleDepartmentSearch,
+    openCreatePanel: openDepartmentCreatePanel,
+    panelDescription: departmentPanelDescription,
+    panelTitle: departmentPanelTitle,
+    parentLookup: departmentParentLookup,
+    queryFields: enterpriseDepartmentQueryFields,
+    reloadDepartments,
+    resetQuery: resetDepartmentQuery,
+    selectDepartment,
+    selectedDepartment,
+    selectedDepartmentDetail,
+    selectedDepartmentId,
+    startEdit: startDepartmentEdit,
+    submitForm: submitDepartmentForm,
+    tableColumns: enterpriseDepartmentTableColumns,
+    tableItems: enterpriseDepartmentTableItems,
+  } = departmentWorkspace
+
+  return {
+    cancelDepartmentPanel,
+    clearDepartmentWorkspace,
+    departmentCountLabel,
+    departmentDetail,
+    departmentDetailErrorMessage,
+    departmentDetailLoading,
+    departmentErrorMessage,
+    departmentLoading,
+    departmentPanelMode,
+    departmentQueryValues,
+    filteredDepartmentItems,
+    enterpriseDepartmentFormFields,
+    enterpriseDepartmentFormValues,
+    handleDepartmentReset,
+    handleDepartmentRowClick,
+    handleDepartmentSearch,
+    openDepartmentCreatePanel,
+    departmentPanelDescription,
+    departmentPanelTitle,
+    departmentParentLookup,
+    enterpriseDepartmentQueryFields,
+    reloadDepartments,
+    resetDepartmentQuery,
+    selectDepartment,
+    selectedDepartment,
+    selectedDepartmentDetail,
+    selectedDepartmentId,
+    startDepartmentEdit,
+    submitDepartmentForm,
+    enterpriseDepartmentTableColumns,
+    enterpriseDepartmentTableItems,
+  }
+}

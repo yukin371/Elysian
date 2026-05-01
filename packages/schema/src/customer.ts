@@ -37,4 +37,10 @@ export const customerModuleSchema: ModuleSchema = {
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
     { key: "updatedAt", label: "Updated At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "business",
+    routePath: "/customers",
+    permissionPrefix: "customer:customer",
+    permissionActions: { list: true, create: true, update: true, delete: true },
+  },
 }

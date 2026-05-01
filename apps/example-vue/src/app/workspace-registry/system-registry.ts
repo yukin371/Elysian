@@ -1,131 +1,22 @@
+import { buildWorkspaceRegistration } from "@elysian/frontend-vue"
+import {
+  departmentModuleSchema,
+  dictionaryModuleSchema,
+  menuModuleSchema,
+  postModuleSchema,
+  roleModuleSchema,
+  settingModuleSchema,
+  userModuleSchema,
+} from "@elysian/schema"
+
 import type { WorkspaceRegistration } from "./types"
 
 export const systemWorkspaceRegistrations = [
-  {
-    domain: "system",
-    path: "/system/dictionaries",
-    kind: "dictionary",
-    moduleCode: "dictionary",
-    permissionPrefix: "system:dictionary",
-    permissions: {
-      list: "system:dictionary:list",
-      create: "system:dictionary:create",
-      update: "system:dictionary:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.dictionary.sectionTitle",
-      sectionCopy: "app.dictionary.sectionCopy",
-      shellTitle: "app.dictionary.shellTitle",
-      shellDescription: "app.dictionary.shellDescription",
-    },
-  },
-  {
-    domain: "system",
-    path: "/system/departments",
-    kind: "department",
-    moduleCode: "department",
-    permissionPrefix: "system:department",
-    permissions: {
-      list: "system:department:list",
-      create: "system:department:create",
-      update: "system:department:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.department.sectionTitle",
-      sectionCopy: "app.department.sectionCopy",
-      shellTitle: "app.department.shellTitle",
-      shellDescription: "app.department.shellDescription",
-    },
-  },
-  {
-    domain: "system",
-    path: "/system/posts",
-    kind: "post",
-    moduleCode: "post",
-    permissionPrefix: "system:post",
-    permissions: {
-      list: "system:post:list",
-      create: "system:post:create",
-      update: "system:post:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.post.sectionTitle",
-      sectionCopy: "app.post.sectionCopy",
-      shellTitle: "app.post.shellTitle",
-      shellDescription: "app.post.shellDescription",
-    },
-  },
-  {
-    domain: "system",
-    path: "/system/menus",
-    kind: "menu",
-    moduleCode: "menu",
-    permissionPrefix: "system:menu",
-    permissions: {
-      list: "system:menu:list",
-      create: "system:menu:update",
-      update: "system:menu:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.menu.sectionTitle",
-      sectionCopy: "app.menu.sectionCopy",
-      shellTitle: "app.menu.shellTitle",
-      shellDescription: "app.menu.shellDescription",
-    },
-  },
-  {
-    domain: "system",
-    path: "/system/roles",
-    kind: "role",
-    moduleCode: "role",
-    permissionPrefix: "system:role",
-    permissions: {
-      list: "system:role:list",
-      create: "system:role:create",
-      update: "system:role:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.role.sectionTitle",
-      sectionCopy: "app.role.sectionCopy",
-      shellTitle: "app.role.shellTitle",
-      shellDescription: "app.role.shellDescription",
-    },
-  },
-  {
-    domain: "system",
-    path: "/system/settings",
-    kind: "setting",
-    moduleCode: "setting",
-    permissionPrefix: "system:setting",
-    permissions: {
-      list: "system:setting:list",
-      create: "system:setting:create",
-      update: "system:setting:update",
-    },
-    i18nKeys: {
-      sectionTitle: "app.setting.sectionTitle",
-      sectionCopy: "app.setting.sectionCopy",
-      shellTitle: "app.setting.shellTitle",
-      shellDescription: "app.setting.shellDescription",
-    },
-  },
-  {
-    domain: "system",
-    path: "/system/users",
-    kind: "user",
-    moduleCode: "user",
-    permissionPrefix: "system:user",
-    permissions: {
-      list: "system:user:list",
-      create: "system:user:create",
-      update: "system:user:update",
-      delete: "system:user:reset-password",
-    },
-    i18nKeys: {
-      sectionTitle: "app.user.sectionTitle",
-      sectionCopy: "app.user.sectionCopy",
-      shellTitle: "app.user.shellTitle",
-      shellDescription: "app.user.shellDescription",
-    },
-  },
-] as const satisfies WorkspaceRegistration[]
+  buildWorkspaceRegistration(dictionaryModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(departmentModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(postModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(menuModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(roleModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(settingModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistration(userModuleSchema) as WorkspaceRegistration,
+] as const satisfies readonly WorkspaceRegistration[]

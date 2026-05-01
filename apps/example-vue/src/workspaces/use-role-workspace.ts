@@ -29,7 +29,7 @@ type RolePageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface RolePageContract {
   tableColumns: ComputedRef<RolePageColumn[]>

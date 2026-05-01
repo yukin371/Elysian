@@ -1,4 +1,8 @@
-import type { ModuleSchema } from "@elysian/schema"
+import type {
+  ModuleFrontendSchema,
+  ModulePermissionActions,
+  ModuleSchema,
+} from "@elysian/schema"
 import {
   type UiCrudPageDefinition,
   type UiFormField,
@@ -131,6 +135,73 @@ export const buildVueCustomCrudPage = (
     },
   ],
 })
+
+export interface WorkspaceRegistrationLike {
+  domain: "business" | "system"
+  i18nKeys: {
+    sectionCopy: string
+    sectionTitle: string
+    shellDescription: string
+    shellTitle: string
+  }
+  kind: string
+  moduleCode: string
+  path: string
+  permissions: Record<string, string>
+  permissionPrefix: string
+}
+
+const DEFAULT_PERMISSION_ACTIONS: ModulePermissionActions = {
+  create: true,
+  list: true,
+  update: true,
+}
+
+const derivePermissions = (
+  permissionPrefix: string,
+  actions: ModulePermissionActions | undefined,
+): Record<string, string> => {
+  const resolved = { ...DEFAULT_PERMISSION_ACTIONS, ...actions }
+  const permissions: Record<string, string> = {}
+
+  if (resolved.list) permissions.list = `${permissionPrefix}:list`
+  if (resolved.create) permissions.create = `${permissionPrefix}:create`
+  if (resolved.update) permissions.update = `${permissionPrefix}:update`
+  if (resolved.delete) permissions.delete = `${permissionPrefix}:delete`
+  if (resolved.export) permissions.export = `${permissionPrefix}:export`
+
+  return permissions
+}
+
+const deriveI18nKeys = (moduleName: string) => ({
+  sectionTitle: `app.${moduleName}.sectionTitle`,
+  sectionCopy: `app.${moduleName}.sectionCopy`,
+  shellTitle: `app.${moduleName}.shellTitle`,
+  shellDescription: `app.${moduleName}.shellDescription`,
+})
+
+export const buildWorkspaceRegistration = (
+  schema: ModuleSchema,
+): WorkspaceRegistrationLike => {
+  const frontend: ModuleFrontendSchema = schema.frontend ?? {
+    workspaceDomain: "system",
+    routePath: `/${schema.name}s`,
+  }
+  const permissionPrefix = frontend.permissionPrefix ?? schema.name
+
+  return {
+    domain: frontend.workspaceDomain,
+    path: frontend.routePath,
+    kind: frontend.workspaceKind ?? schema.name,
+    moduleCode: frontend.moduleCode ?? schema.name,
+    permissionPrefix,
+    permissions: derivePermissions(
+      permissionPrefix,
+      frontend.permissionActions,
+    ),
+    i18nKeys: deriveI18nKeys(schema.name),
+  }
+}
 
 export interface CrudDictionaryTypeRecord {
   id: string

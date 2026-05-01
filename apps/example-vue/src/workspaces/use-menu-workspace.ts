@@ -33,7 +33,7 @@ type MenuPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface MenuPageContract {
   tableColumns: ComputedRef<MenuPageColumn[]>

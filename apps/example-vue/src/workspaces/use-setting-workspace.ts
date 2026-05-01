@@ -26,7 +26,7 @@ type SettingPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface SettingPageContract {
   tableColumns: ComputedRef<SettingPageColumn[]>

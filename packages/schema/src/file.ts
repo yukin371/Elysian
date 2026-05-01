@@ -40,4 +40,10 @@ export const fileModuleSchema: ModuleSchema = {
     },
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "business",
+    routePath: "/system/files",
+    permissionPrefix: "system:file",
+    permissionActions: { list: true, create: true, update: true, delete: true },
+  },
 }

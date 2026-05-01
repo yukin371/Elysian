@@ -81,7 +81,12 @@ describe("renderModuleFiles", () => {
       "export interface GeneratedFrontendModuleArtifact",
     )
     expect(frontendFile?.contents).toContain('moduleCode: "customer"')
-    expect(frontendFile?.contents).toContain("workspaceDomain: null")
+    expect(frontendFile?.contents).toContain('workspaceDomain: "business"')
+    expect(frontendFile?.contents).toContain('kind: "customer"')
+    expect(frontendFile?.contents).toContain('"list": "customer:customer:list"')
+    expect(frontendFile?.contents).toContain(
+      '"sectionTitle": "app.customer.sectionTitle"',
+    )
     expect(pageFile?.path).toBe("modules/customer/customer.page.vue")
     expect(pageFile?.contents).toContain(
       'import type { CustomerRecord } from "./customer.schema"',

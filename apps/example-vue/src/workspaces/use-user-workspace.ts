@@ -33,7 +33,7 @@ type UserPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface UserPageContract {
   tableColumns: ComputedRef<UserPageColumn[]>

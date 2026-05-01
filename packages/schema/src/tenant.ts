@@ -44,4 +44,10 @@ export const tenantModuleSchema: ModuleSchema = {
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
     { key: "updatedAt", label: "Updated At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "business",
+    routePath: "/system/tenants",
+    permissionPrefix: "system:tenant",
+    permissionActions: { list: true, create: true, update: true },
+  },
 }

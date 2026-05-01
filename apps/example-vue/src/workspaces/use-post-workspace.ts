@@ -27,7 +27,7 @@ type PostPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface PostPageContract {
   tableColumns: ComputedRef<PostPageColumn[]>

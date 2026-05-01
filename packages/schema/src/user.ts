@@ -71,4 +71,10 @@ export const userModuleSchema: ModuleSchema = {
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
     { key: "updatedAt", label: "Updated At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "system",
+    routePath: "/system/users",
+    permissionPrefix: "system:user",
+    permissionActions: { list: true, create: true, update: true, delete: true },
+  },
 }

@@ -29,7 +29,7 @@ type DictionaryPageColumn = {
   key: string
   label?: string
   width?: string
-} & Record<string, unknown>
+}
 
 interface DictionaryPageContract {
   tableColumns: ComputedRef<DictionaryPageColumn[]>

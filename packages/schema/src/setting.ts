@@ -51,4 +51,10 @@ export const settingModuleSchema: ModuleSchema = {
     { key: "createdAt", label: "Created At", kind: "datetime", required: true },
     { key: "updatedAt", label: "Updated At", kind: "datetime", required: true },
   ],
+  frontend: {
+    workspaceDomain: "system",
+    routePath: "/system/settings",
+    permissionPrefix: "system:setting",
+    permissionActions: { list: true, create: true, update: true },
+  },
 }
