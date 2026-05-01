@@ -1,8 +1,15 @@
-import type { NotificationRecord as SchemaNotificationRecord } from "@elysian/schema"
+import type { NotificationRecord } from "./types"
 
 import { requestBlob, requestJson } from "./core"
+export type { NotificationRecord } from "./types"
 
-export type NotificationRecord = SchemaNotificationRecord
+export interface NotificationListResponse {
+  items: NotificationRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
 
 export interface NotificationsResponse {
   items: NotificationRecord[]
@@ -14,6 +21,8 @@ export interface NotificationListQuery {
   content?: string
   level?: NotificationRecord["level"]
   status?: NotificationRecord["status"]
+  page?: number
+  pageSize?: number
 }
 
 export interface CreateNotificationRequest {
@@ -46,15 +55,23 @@ const buildNotificationSearch = (query: NotificationListQuery = {}) => {
     search.set("status", query.status)
   }
 
+  if (typeof query.page === "number" && Number.isFinite(query.page)) {
+    search.set("page", String(Math.trunc(query.page)))
+  }
+
+  if (typeof query.pageSize === "number" && Number.isFinite(query.pageSize)) {
+    search.set("pageSize", String(Math.trunc(query.pageSize)))
+  }
+
   return search
 }
 
 export const fetchNotifications = async (
   query: NotificationListQuery = {},
-): Promise<NotificationsResponse> => {
+): Promise<NotificationListResponse> => {
   const search = buildNotificationSearch(query)
 
-  return requestJson<NotificationsResponse>(
+  return requestJson<NotificationListResponse>(
     `/system/notifications${search.size > 0 ? `?${search.toString()}` : ""}`,
     {
       auth: true,

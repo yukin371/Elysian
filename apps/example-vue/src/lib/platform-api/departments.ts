@@ -1,19 +1,6 @@
 import { requestBlob, requestJson } from "./core"
-
-export interface DepartmentRecord {
-  id: string
-  parentId: string | null
-  code: string
-  name: string
-  sort: number
-  status: "active" | "disabled"
-  createdAt: string
-  updatedAt: string
-}
-
-export interface DepartmentDetailRecord extends DepartmentRecord {
-  userIds: string[]
-}
+import type { DepartmentDetailRecord, DepartmentRecord } from "./types"
+export type { DepartmentDetailRecord, DepartmentRecord } from "./types"
 
 export interface DepartmentsResponse {
   items: DepartmentRecord[]

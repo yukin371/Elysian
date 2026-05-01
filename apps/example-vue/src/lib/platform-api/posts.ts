@@ -1,15 +1,6 @@
 import { requestBlob, requestJson } from "./core"
-
-export interface PostRecord {
-  id: string
-  code: string
-  name: string
-  sort: number
-  status: "active" | "disabled"
-  remark?: string
-  createdAt: string
-  updatedAt: string
-}
+import type { PostRecord } from "./types"
+export type { PostRecord } from "./types"
 
 export interface PostsResponse {
   items: PostRecord[]

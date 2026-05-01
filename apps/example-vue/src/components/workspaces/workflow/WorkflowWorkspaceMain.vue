@@ -49,40 +49,40 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
 
     <div
       v-if="!moduleReady"
-      class="enterprise-message enterprise-message-warning section-gap"
+      class="enterprise-message enterprise-message-warning enterprise-section-gap"
     >
       {{ t("app.message.workflowModuleOffline") }}
     </div>
 
     <div
       v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info section-gap"
+      class="enterprise-message enterprise-message-info enterprise-section-gap"
     >
       {{ t("app.message.workflowSignInToLoad") }}
     </div>
 
     <div
       v-else-if="canEnterWorkspace && !canViewDefinitions"
-      class="enterprise-message enterprise-message-warning section-gap"
+      class="enterprise-message enterprise-message-warning enterprise-section-gap"
     >
       {{ t("app.message.workflowNoListPermission") }}
     </div>
 
     <div
       v-else-if="errorMessage"
-      class="enterprise-message enterprise-message-danger section-gap"
+      class="enterprise-message enterprise-message-danger enterprise-section-gap"
     >
       {{ errorMessage }}
     </div>
 
     <div
       v-else-if="loading"
-      class="enterprise-message enterprise-message-info section-gap"
+      class="enterprise-message enterprise-message-info enterprise-section-gap"
     >
       {{ t("app.workflow.loading") }}
     </div>
 
-    <div v-else class="workspace-stack">
+    <div v-else class="enterprise-workspace-stack">
       <div class="workflow-filter-bar">
         <label class="enterprise-field workflow-filter-search">
           <span>{{ t("app.workflow.filter.searchLabel") }}</span>
@@ -196,95 +196,6 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
 </template>
 
 <style scoped>
-.enterprise-eyebrow,
-.enterprise-subheading {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin: 0.7rem 0 0;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin: 0.75rem 0 0;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  color: #334155;
-}
-
-.enterprise-message {
-  border-radius: 12px;
-  padding: 1rem 1.1rem;
-  line-height: 1.75;
-}
-
-.enterprise-message-info {
-  border: 1px solid rgba(14, 165, 233, 0.18);
-  background: rgba(14, 165, 233, 0.08);
-  color: #0c4a6e;
-}
-
-.enterprise-message-warning {
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  background: rgba(245, 158, 11, 0.1);
-  color: #92400e;
-}
-
-.enterprise-message-danger {
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  background: rgba(239, 68, 68, 0.08);
-  color: #991b1b;
-}
-
-.enterprise-toolbar-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.78rem;
-  color: #475569;
-}
-
-.enterprise-button {
-  border: 1px solid rgba(36, 87, 214, 0.18);
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2457d6, #173ea6);
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.65rem 1rem;
-}
-
-.enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-}
-
-.section-gap {
-  margin-top: 1.25rem;
-}
-
-.workspace-stack {
-  display: grid;
-  gap: 1.25rem;
-  margin-top: 1.25rem;
-}
-
 .workflow-filter-bar {
   display: grid;
   gap: 1rem;

@@ -1,12 +1,6 @@
 import { requestJson } from "./core"
-
-export interface CustomerRecord {
-  id: string
-  name: string
-  status: "active" | "inactive"
-  createdAt: string
-  updatedAt: string
-}
+import type { CustomerRecord } from "./types"
+export type { CustomerRecord } from "./types"
 
 export interface CustomersResponse {
   items: CustomerRecord[]

@@ -103,7 +103,7 @@ const selectedChangeLabel = computed(() =>
       </div>
     </div>
 
-    <div v-if="session" class="panel-stack">
+    <div v-if="session" class="enterprise-panel-stack">
       <section class="panel-section">
         <p class="enterprise-subheading">{{ t("app.generatorPreview.sessionTitle") }}</p>
         <div class="enterprise-metadata">
@@ -167,7 +167,7 @@ const selectedChangeLabel = computed(() =>
       </section>
     </div>
 
-    <div v-if="selectedFile" class="panel-stack">
+    <div v-if="selectedFile" class="enterprise-panel-stack">
       <section class="panel-section">
         <p class="enterprise-subheading">{{ t("app.generatorPreview.sourceTitle") }}</p>
         <pre class="generator-code-block"><code>{{ selectedFile.contents }}</code></pre>
@@ -194,62 +194,6 @@ const selectedChangeLabel = computed(() =>
 </template>
 
 <style scoped>
-.enterprise-eyebrow,
-.enterprise-subheading,
-.enterprise-metadata span {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin: 0.7rem 0 0;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin: 0.75rem 0 0;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-inline-warning {
-  margin-top: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  background: rgba(255, 251, 235, 0.96);
-  padding: 0.85rem 0.95rem;
-  color: #92400e;
-}
-
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-}
-
-.enterprise-metadata div {
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background: rgba(248, 250, 252, 0.56);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata strong {
-  display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
-}
-
-.panel-stack {
-  display: grid;
-  gap: 1.25rem;
-  margin-top: 1.25rem;
-}
-
 .panel-section {
   display: grid;
   gap: 0.75rem;

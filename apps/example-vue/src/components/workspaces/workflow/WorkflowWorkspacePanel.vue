@@ -89,7 +89,7 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
       </div>
     </div>
 
-    <div v-if="selectedDefinition" class="panel-stack">
+    <div v-if="selectedDefinition" class="enterprise-panel-stack">
       <div>
         <p class="enterprise-subheading">
           {{ t("app.workflow.versionHistoryTitle") }}
@@ -142,62 +142,6 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 </template>
 
 <style scoped>
-.enterprise-eyebrow,
-.enterprise-subheading,
-.enterprise-metadata span {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin: 0.7rem 0 0;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin: 0.75rem 0 0;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-inline-warning {
-  margin-top: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  background: rgba(255, 251, 235, 0.96);
-  padding: 0.85rem 0.95rem;
-  color: #92400e;
-}
-
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.enterprise-metadata div {
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(248, 250, 252, 0.92);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata strong {
-  display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
-}
-
-.panel-stack {
-  display: grid;
-  gap: 1.25rem;
-  margin-top: 1.25rem;
-}
-
 .workflow-version-history {
   display: flex;
   flex-wrap: wrap;

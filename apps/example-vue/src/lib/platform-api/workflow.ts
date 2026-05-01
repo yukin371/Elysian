@@ -1,6 +1,7 @@
-import type { WorkflowDefinitionRecord } from "@elysian/schema"
+import type { WorkflowDefinitionRecord } from "./types"
 
 import { requestJson } from "./core"
+export type { WorkflowDefinitionRecord } from "./types"
 
 export interface WorkflowDefinitionsResponse {
   items: WorkflowDefinitionRecord[]

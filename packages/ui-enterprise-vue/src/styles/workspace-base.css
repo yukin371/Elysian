@@ -1,0 +1,190 @@
+.enterprise-card {
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1.2rem;
+  color: #0f172a;
+}
+
+.enterprise-message {
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  line-height: 1.75;
+}
+
+.enterprise-message-info {
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  background: rgba(14, 165, 233, 0.08);
+  color: #0c4a6e;
+}
+
+.enterprise-message-warning {
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+}
+
+.enterprise-message-danger {
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.08);
+  color: #991b1b;
+}
+
+.enterprise-message-success {
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: rgba(240, 253, 244, 0.96);
+  color: #166534;
+}
+
+.enterprise-toolbar-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.enterprise-eyebrow,
+.enterprise-subheading,
+.enterprise-heading,
+.enterprise-copy,
+.enterprise-inline-warning,
+.enterprise-field span,
+.enterprise-metadata span,
+.enterprise-danger-zone p {
+  margin: 0;
+}
+
+.enterprise-eyebrow,
+.enterprise-subheading {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.enterprise-heading {
+  margin-top: 0.7rem;
+  font-size: 1.35rem;
+  color: #0f172a;
+}
+
+.enterprise-copy {
+  margin-top: 0.75rem;
+  line-height: 1.75;
+  color: #475569;
+}
+
+.enterprise-inline-warning {
+  margin-top: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.16);
+  background: rgba(255, 251, 235, 0.96);
+  padding: 0.85rem 0.95rem;
+  color: #92400e;
+}
+
+.enterprise-inline-info {
+  border-color: rgba(14, 165, 233, 0.16);
+  background: rgba(240, 249, 255, 0.96);
+  color: #0c4a6e;
+}
+
+.enterprise-inline-danger {
+  border-color: rgba(239, 68, 68, 0.16);
+  background: rgba(254, 242, 242, 0.96);
+  color: #991b1b;
+}
+
+.enterprise-inline-success {
+  border-color: rgba(34, 197, 94, 0.2);
+  background: rgba(240, 253, 244, 0.96);
+  color: #166534;
+}
+
+.enterprise-metadata {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-top: 1rem;
+}
+
+.enterprise-metadata div {
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: rgba(248, 250, 252, 0.58);
+  padding: 0.85rem 0.95rem;
+}
+
+.enterprise-metadata strong {
+  display: block;
+  margin-top: 0.45rem;
+  color: #0f172a;
+}
+
+.enterprise-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  color: #334155;
+}
+
+.enterprise-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.enterprise-button {
+  border: 1px solid rgba(36, 87, 214, 0.18);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2457d6, #173ea6);
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 1rem;
+}
+
+.enterprise-button-ghost {
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+}
+
+.enterprise-button-danger {
+  border-color: rgba(220, 38, 38, 0.18);
+  background: linear-gradient(135deg, #dc2626, #7f1d1d);
+}
+
+.enterprise-danger-zone {
+  margin-top: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.16);
+  background: rgba(254, 242, 242, 0.96);
+  padding: 0.85rem 0.95rem;
+  color: #991b1b;
+}
+
+.enterprise-panel-stack {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.enterprise-workspace-stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.enterprise-section-gap {
+  margin-top: 1.25rem;
+}
+
+.enterprise-pre {
+  margin-top: 0.75rem;
+  white-space: pre-wrap;
+}

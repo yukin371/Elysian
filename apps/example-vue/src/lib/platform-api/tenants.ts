@@ -1,11 +1,7 @@
-import type {
-  TenantRecord as SchemaTenantRecord,
-  TenantStatus,
-} from "@elysian/schema"
+import type { TenantRecord, TenantStatus } from "./types"
 
 import { requestBlob, requestJson } from "./core"
-
-export type TenantRecord = SchemaTenantRecord
+export type { TenantRecord } from "./types"
 
 export interface TenantsResponse {
   items: TenantRecord[]

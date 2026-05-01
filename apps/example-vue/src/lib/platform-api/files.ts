@@ -1,12 +1,13 @@
 import { requestBlob, requestJson } from "./core"
+import type { FileRecord } from "./types"
+export type { FileRecord } from "./types"
 
-export interface FileRecord {
-  id: string
-  originalName: string
-  mimeType?: string
-  size: number
-  uploaderUserId?: string
-  createdAt: string
+export interface FileListResponse {
+  items: FileRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
 }
 
 export interface FilesResponse {
@@ -17,6 +18,8 @@ export interface FileListQuery {
   originalName?: string
   mimeType?: string
   uploaderUserId?: string
+  page?: number
+  pageSize?: number
 }
 
 const buildFileSearch = (query: FileListQuery = {}) => {
@@ -34,15 +37,23 @@ const buildFileSearch = (query: FileListQuery = {}) => {
     search.set("uploaderUserId", query.uploaderUserId.trim())
   }
 
+  if (typeof query.page === "number" && Number.isFinite(query.page)) {
+    search.set("page", String(Math.trunc(query.page)))
+  }
+
+  if (typeof query.pageSize === "number" && Number.isFinite(query.pageSize)) {
+    search.set("pageSize", String(Math.trunc(query.pageSize)))
+  }
+
   return search
 }
 
 export const fetchFiles = async (
   query: FileListQuery = {},
-): Promise<FilesResponse> => {
+): Promise<FileListResponse> => {
   const search = buildFileSearch(query)
 
-  return requestJson<FilesResponse>(
+  return requestJson<FileListResponse>(
     `/system/files${search.size > 0 ? `?${search.toString()}` : ""}`,
     {
       auth: true,

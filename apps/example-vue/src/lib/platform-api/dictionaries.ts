@@ -1,30 +1,14 @@
 import { requestBlob, requestJson } from "./core"
-
-export interface DictionaryTypeRecord {
-  id: string
-  code: string
-  name: string
-  description?: string
-  status: "active" | "disabled"
-  createdAt: string
-  updatedAt: string
-}
-
-export interface DictionaryItemRecord {
-  id: string
-  typeId: string
-  value: string
-  label: string
-  sort: number
-  isDefault: boolean
-  status: "active" | "disabled"
-  createdAt: string
-  updatedAt: string
-}
-
-export interface DictionaryTypeDetailRecord extends DictionaryTypeRecord {
-  items: DictionaryItemRecord[]
-}
+import type {
+  DictionaryItemRecord,
+  DictionaryTypeDetailRecord,
+  DictionaryTypeRecord,
+} from "./types"
+export type {
+  DictionaryItemRecord,
+  DictionaryTypeDetailRecord,
+  DictionaryTypeRecord,
+} from "./types"
 
 export interface DictionaryTypesResponse {
   items: DictionaryTypeRecord[]

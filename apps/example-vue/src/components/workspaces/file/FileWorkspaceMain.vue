@@ -60,40 +60,40 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 
     <div
       v-if="!moduleReady"
-      class="enterprise-message enterprise-message-warning section-gap"
+      class="enterprise-message enterprise-message-warning enterprise-section-gap"
     >
       {{ t("app.message.fileModuleOffline") }}
     </div>
 
     <div
       v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info section-gap"
+      class="enterprise-message enterprise-message-info enterprise-section-gap"
     >
       {{ t("app.message.fileSignInToLoad") }}
     </div>
 
     <div
       v-else-if="canEnterWorkspace && !canViewFiles"
-      class="enterprise-message enterprise-message-warning section-gap"
+      class="enterprise-message enterprise-message-warning enterprise-section-gap"
     >
       {{ t("app.message.fileNoListPermission") }}
     </div>
 
     <div
       v-else-if="errorMessage"
-      class="enterprise-message enterprise-message-danger section-gap"
+      class="enterprise-message enterprise-message-danger enterprise-section-gap"
     >
       {{ errorMessage }}
     </div>
 
     <div
       v-else-if="loading"
-      class="enterprise-message enterprise-message-info section-gap"
+      class="enterprise-message enterprise-message-info enterprise-section-gap"
     >
       {{ t("app.file.loading") }}
     </div>
 
-    <div v-else class="workspace-stack">
+    <div v-else class="enterprise-workspace-stack">
       <div class="file-toolbar">
         <label class="enterprise-field">
           <span>{{ t("app.file.field.originalName") }}</span>
@@ -185,93 +185,13 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 </template>
 
 <style scoped>
-.enterprise-eyebrow {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin: 0.7rem 0 0;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
 .enterprise-copy,
 .empty-copy {
-  margin: 0.75rem 0 0;
-  line-height: 1.75;
-  color: #475569;
+  margin-top: 0.75rem;
 }
 
 .empty-copy {
   margin-top: 0.45rem;
-}
-
-.enterprise-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  color: #334155;
-}
-
-.enterprise-message {
-  border-radius: 6px;
-  padding: 1rem 1.1rem;
-  line-height: 1.75;
-}
-
-.enterprise-message-info {
-  border: 1px solid rgba(14, 165, 233, 0.18);
-  background: rgba(14, 165, 233, 0.08);
-  color: #0c4a6e;
-}
-
-.enterprise-message-warning {
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  background: rgba(245, 158, 11, 0.1);
-  color: #92400e;
-}
-
-.enterprise-message-danger {
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  background: rgba(239, 68, 68, 0.08);
-  color: #991b1b;
-}
-
-.enterprise-toolbar-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 4px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.78rem;
-  color: #475569;
-}
-
-.enterprise-button {
-  border: none;
-  border-radius: 4px;
-  padding: 0.72rem 1.2rem;
-  font-size: 0.86rem;
-  font-weight: 600;
-}
-
-.enterprise-button-primary {
-  background: #2457d6;
-  color: #eff6ff;
-}
-
-.enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.92);
-  color: #173ea6;
-}
-
-.section-gap {
-  margin-top: 1.25rem;
 }
 
 .workspace-header,
@@ -285,11 +205,6 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 
 .workspace-header {
   flex-direction: column;
-}
-
-.workspace-stack {
-  display: grid;
-  gap: 1.25rem;
 }
 
 .file-toolbar {

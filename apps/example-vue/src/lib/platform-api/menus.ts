@@ -1,25 +1,6 @@
 import { requestBlob, requestJson } from "./core"
-
-export interface MenuRecord {
-  id: string
-  parentId: string | null
-  type: "directory" | "menu" | "button"
-  code: string
-  name: string
-  path: string | null
-  component: string | null
-  icon: string | null
-  sort: number
-  isVisible: boolean
-  status: "active" | "disabled"
-  permissionCode: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface MenuDetailRecord extends MenuRecord {
-  roleIds: string[]
-}
+import type { MenuDetailRecord, MenuRecord } from "./types"
+export type { MenuDetailRecord, MenuRecord } from "./types"
 
 export interface MenusResponse {
   items: MenuRecord[]
