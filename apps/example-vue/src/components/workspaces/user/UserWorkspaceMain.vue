@@ -6,8 +6,14 @@ import {
   type ElyQueryValues,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { UserRecord } from "../../../lib/platform-api"
+import {
+  readInjectedValue,
+  resolveUserWorkspaceMainState,
+} from "./user-workspace-state"
 
 type UserWorkspaceTranslation = (
   key: string,
@@ -21,25 +27,48 @@ interface UserWorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewUsers: boolean
-  loading: boolean
-  errorMessage: string
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  items: UserRecord[]
   itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
   currentQuerySummary: string
   copy: ElyCrudWorkspaceProps["copy"]
+  workspaceStateInjected?: boolean
 }
 
-defineProps<UserWorkspaceMainProps>()
+const props = defineProps<UserWorkspaceMainProps>()
 
 const emit = defineEmits<{
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: UserRecord): void
 }>()
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedUserWorkspaceState = computed(() =>
+  resolveUserWorkspaceMainState(
+    injectedWorkspaceState.value,
+    Boolean(props.workspaceStateInjected),
+  ),
+)
+
+const resolvedLoading = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.userLoading ?? null),
+  false,
+)
+const resolvedErrorMessage = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.userErrorMessage ?? null),
+  "",
+)
+const resolvedItems = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.tableItems ?? null),
+  [] as UserRecord[],
+)
 </script>
 
 <template>
@@ -62,8 +91,11 @@ const emit = defineEmits<{
       {{ t("app.message.userNoListPermission") }}
     </div>
 
-    <div v-else-if="errorMessage" class="enterprise-message enterprise-message-danger">
-      {{ errorMessage }}
+    <div
+      v-else-if="resolvedErrorMessage"
+      class="enterprise-message enterprise-message-danger"
+    >
+      {{ resolvedErrorMessage }}
     </div>
 
     <ElyCrudWorkspace
@@ -72,10 +104,10 @@ const emit = defineEmits<{
       :title="t('app.user.workspaceTitle')"
       :description="t('app.user.workspaceDescription')"
       :query-fields="queryFields"
-      :query-loading="loading"
+      :query-loading="resolvedLoading"
       :table-columns="tableColumns"
-      :items="items"
-      :table-loading="loading"
+      :items="resolvedItems"
+      :table-loading="resolvedLoading"
       :table-actions="[]"
       :item-count-label="itemCountLabel"
       :empty-title="emptyTitle"
@@ -93,40 +125,3 @@ const emit = defineEmits<{
     </ElyCrudWorkspace>
   </section>
 </template>
-
-<style scoped>
-.enterprise-message {
-  border-radius: 12px;
-  padding: 1rem 1.1rem;
-  line-height: 1.75;
-}
-
-.enterprise-message-info {
-  border: 1px solid rgba(14, 165, 233, 0.18);
-  background: rgba(14, 165, 233, 0.08);
-  color: #0c4a6e;
-}
-
-.enterprise-message-warning {
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  background: rgba(245, 158, 11, 0.1);
-  color: #92400e;
-}
-
-.enterprise-message-danger {
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  background: rgba(239, 68, 68, 0.08);
-  color: #991b1b;
-}
-
-.enterprise-toolbar-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.78rem;
-  color: #475569;
-}
-</style>

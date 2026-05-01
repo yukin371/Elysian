@@ -62,6 +62,7 @@ export interface UseExampleShellBindingsOptions {
   canViewDictionaries: ValueSource<boolean>
   isDepartmentWorkspace: ComputedRef<boolean>
   departmentLoading: ValueSource<boolean>
+  departmentWorkspaceState: Record<string, unknown>
   departmentExportLoading: ValueSource<boolean>
   canCreateDepartments: ValueSource<boolean>
   canViewDepartments: ValueSource<boolean>
@@ -70,16 +71,19 @@ export interface UseExampleShellBindingsOptions {
   canEnterSessionWorkspace: ValueSource<boolean>
   isPostWorkspace: ComputedRef<boolean>
   postLoading: ValueSource<boolean>
+  postWorkspaceState: Record<string, unknown>
   postExportLoading: ValueSource<boolean>
   canCreatePosts: ValueSource<boolean>
   canViewPosts: ValueSource<boolean>
   isMenuWorkspace: ComputedRef<boolean>
   menuLoading: ValueSource<boolean>
+  menuWorkspaceState: Record<string, unknown>
   menuExportLoading: ValueSource<boolean>
   canCreateMenus: ValueSource<boolean>
   canViewMenus: ValueSource<boolean>
   isNotificationWorkspace: ComputedRef<boolean>
   notificationLoading: ValueSource<boolean>
+  notificationWorkspaceState: Record<string, unknown>
   notificationExportLoading: ValueSource<boolean>
   canCreateNotifications: ValueSource<boolean>
   canViewNotifications: ValueSource<boolean>
@@ -91,16 +95,19 @@ export interface UseExampleShellBindingsOptions {
   canExportOperationLogs: ValueSource<boolean>
   isUserWorkspace: ComputedRef<boolean>
   userLoading: ValueSource<boolean>
+  userWorkspaceState: Record<string, unknown>
   userExportLoading: ValueSource<boolean>
   canCreateUsers: ValueSource<boolean>
   canViewUsers: ValueSource<boolean>
   isSettingWorkspace: ComputedRef<boolean>
   settingLoading: ValueSource<boolean>
+  settingWorkspaceState: Record<string, unknown>
   settingExportLoading: ValueSource<boolean>
   canCreateSettings: ValueSource<boolean>
   canViewSettings: ValueSource<boolean>
   isTenantWorkspace: ComputedRef<boolean>
   tenantLoading: ValueSource<boolean>
+  tenantWorkspaceState: Record<string, unknown>
   tenantExportLoading: ValueSource<boolean>
   canCreateTenants: ValueSource<boolean>
   canViewTenants: ValueSource<boolean>
@@ -170,21 +177,17 @@ export interface UseExampleShellBindingsOptions {
   postErrorMessage: ValueSource<string>
   enterprisePostQueryFields: ValueSource<unknown[]>
   enterprisePostTableColumns: ValueSource<unknown[]>
-  enterprisePostTableItems: ValueSource<unknown[]>
   postCountLabel: ValueSource<string>
   menuModuleReady: ValueSource<boolean>
   canEnterMenuWorkspace: ValueSource<boolean>
   menuErrorMessage: ValueSource<string>
   enterpriseMenuQueryFields: ValueSource<unknown[]>
   enterpriseMenuTableColumns: ValueSource<unknown[]>
-  enterpriseMenuTableItems: ValueSource<unknown[]>
   menuCountLabel: ValueSource<string>
   notificationModuleReady: ValueSource<boolean>
   canEnterNotificationWorkspace: ValueSource<boolean>
-  notificationErrorMessage: ValueSource<string>
   enterpriseNotificationQueryFields: ValueSource<unknown[]>
   enterpriseNotificationTableColumns: ValueSource<unknown[]>
-  enterpriseNotificationTableItems: ValueSource<unknown[]>
   notificationCountLabel: ValueSource<string>
   operationLogModuleReady: ValueSource<boolean>
   canEnterOperationLogWorkspace: ValueSource<boolean>
@@ -202,24 +205,18 @@ export interface UseExampleShellBindingsOptions {
   roleCountLabel: ValueSource<string>
   settingModuleReady: ValueSource<boolean>
   canEnterSettingWorkspace: ValueSource<boolean>
-  settingErrorMessage: ValueSource<string>
   enterpriseSettingQueryFields: ValueSource<unknown[]>
   enterpriseSettingTableColumns: ValueSource<unknown[]>
-  enterpriseSettingTableItems: ValueSource<unknown[]>
   settingCountLabel: ValueSource<string>
   tenantModuleReady: ValueSource<boolean>
   canEnterTenantWorkspace: ValueSource<boolean>
-  tenantErrorMessage: ValueSource<string>
   enterpriseTenantQueryFields: ValueSource<unknown[]>
   enterpriseTenantTableColumns: ValueSource<unknown[]>
-  enterpriseTenantTableItems: ValueSource<unknown[]>
   tenantCountLabel: ValueSource<string>
   userModuleReady: ValueSource<boolean>
   canEnterUserWorkspace: ValueSource<boolean>
-  userErrorMessage: ValueSource<string>
   enterpriseUserQueryFields: ValueSource<unknown[]>
   enterpriseUserTableColumns: ValueSource<unknown[]>
-  enterpriseUserTableItems: ValueSource<unknown[]>
   userCountLabel: ValueSource<string>
   customerModuleReady: ValueSource<boolean>
   canEnterCustomerWorkspace: ValueSource<boolean>
@@ -286,14 +283,6 @@ export interface UseExampleShellBindingsOptions {
   enterpriseMenuFormValues: ValueSource<Record<string, unknown>>
   menuParentLookup: ValueSource<Record<string, string>>
   canUpdateNotifications: ValueSource<boolean>
-  notificationDetailLoading: ValueSource<boolean>
-  notificationDetailErrorMessage: ValueSource<string>
-  notificationPanelMode: ValueSource<string>
-  notificationPanelTitle: ValueSource<string>
-  notificationPanelDescription: ValueSource<string>
-  selectedNotification: ValueSource<Record<string, unknown> | null>
-  enterpriseNotificationFormFields: ValueSource<unknown[]>
-  enterpriseNotificationFormValues: ValueSource<Record<string, unknown>>
   localizeNotificationStatus: (status: string) => string
   localizeNotificationLevel: (level: string) => string
   operationLogDetailLoading: ValueSource<boolean>
@@ -315,31 +304,9 @@ export interface UseExampleShellBindingsOptions {
   enterpriseRoleFormFields: ValueSource<unknown[]>
   enterpriseRoleFormValues: ValueSource<Record<string, unknown>>
   canUpdateSettings: ValueSource<boolean>
-  settingDetailLoading: ValueSource<boolean>
-  settingDetailErrorMessage: ValueSource<string>
-  settingPanelMode: ValueSource<string>
-  settingPanelTitle: ValueSource<string>
-  settingPanelDescription: ValueSource<string>
-  selectedSetting: ValueSource<Record<string, unknown> | null>
-  enterpriseSettingFormFields: ValueSource<unknown[]>
-  enterpriseSettingFormValues: ValueSource<Record<string, unknown>>
   canUpdateTenants: ValueSource<boolean>
-  tenantDetailLoading: ValueSource<boolean>
-  tenantDetailErrorMessage: ValueSource<string>
-  tenantPanelMode: ValueSource<string>
-  tenantPanelTitle: ValueSource<string>
-  tenantPanelDescription: ValueSource<string>
-  selectedTenant: ValueSource<Record<string, unknown> | null>
-  enterpriseTenantFormFields: ValueSource<unknown[]>
-  enterpriseTenantFormValues: ValueSource<Record<string, unknown>>
   canUpdateUsers: ValueSource<boolean>
   canResetUserPasswords: ValueSource<boolean>
-  userPanelMode: ValueSource<string>
-  userPanelTitle: ValueSource<string>
-  userPanelDescription: ValueSource<string>
-  selectedUser: ValueSource<Record<string, unknown> | null>
-  enterpriseUserFormFields: ValueSource<unknown[]>
-  enterpriseUserFormValues: ValueSource<Record<string, unknown>>
   userPasswordInput: Ref<string>
   workflowDetailLoading: ValueSource<boolean>
   workflowDetailErrorMessage: ValueSource<string>

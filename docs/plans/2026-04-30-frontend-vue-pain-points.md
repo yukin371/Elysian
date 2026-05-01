@@ -4,7 +4,11 @@
 > 触发场景：梳理 example-vue 前端架构时，发现 App.vue 职责过重只是表象，根因是缺少 workspace 注册/协议机制，每新增一个 workspace 需要改动 7+ 个文件
 > 状态更新：`2026-05-01`
 > - 痛点 3 / 痛点 6 的第一阶段已完成，归档见 [2026-05-01-frontend-arch-spine-closeout.md](./2026-05-01-frontend-arch-spine-closeout.md)
-> - 本文档继续保留为历史诊断输入；未完成项主要是痛点 4 / 5 / 2
+> - 本文档继续保留为历史诊断输入；未完成项主要是痛点 5 / 痛点 2 的后续收口
+> 状态补记：`2026-05-02`
+> - 痛点 4 的标准 CRUD 主线已基本收口：shell provide/inject 与 injected-state 契约已覆盖 `customer / department / dictionary / menu / notification / post / role / setting / tenant / user`
+> - 痛点 5（共享样式下沉）已完成当前共享主线：共享 workspace 基础样式、panel 元数据/字段/按钮/危险态等 class 已进入 `ui-enterprise-vue`，标准 CRUD panel 主线不再保留同构 `<style>`；`file` 面板仅保留上传区与空态等模块私有样式，其他剩余样式集中在非标准面板
+> - 痛点 2 的短期方案（类型网关）已完成当前主线：标准 Record/Status 类型已统一进入 `lib/platform-api/types.ts`，`platform-api` 子模块不再各自手写或直连 schema 的同构定义
 
 ---
 
@@ -308,7 +312,7 @@ packages/ui-enterprise-vue/src/styles/
 
 各 workspace 组件的 `<style scoped>` 改为使用共享 class。圆角/间距等 token 统一到 DESIGN.md 规范。
 
-日常迭代逐步收敛，不要求一次性改完。
+当前标准 CRUD main/panel 主线已经稳定回落到共享样式；后续只保留非标准 panel 与文件上传区这类模块私有语义样式，不再把它们误记为共享样式缺口。
 
 ### 影响面
 
@@ -478,15 +482,15 @@ i18n/
 
 奠定统一的 workspace 创建和发现机制，所有后续工作都建立在这个骨架上。
 
-### 第二阶段：体验升级（痛点 4）
+### 第二阶段：体验升级（痛点 4，标准 CRUD 主线已完成）
 
 | 工作内容 | 产出 |
 |---------|------|
-| 痛点 4：引入 provide/inject，基于注册表提供的 workspaceFactory 和统一 WorkspaceState 注入 | `injection-keys.ts` + workspace 组件 props 精简 |
+| 痛点 4：引入 provide/inject，基于注册表提供的 workspaceFactory 和统一 WorkspaceState 注入 | 已完成标准 CRUD 主线收口；`injection-keys.ts`、workspace state provider、workspace 组件 props 精简均已落地 |
 
 消除 props 爆炸，组件之间耦合大幅下降。
 
-### 第三阶段：并行优化（痛点 2/5/7）
+### 第三阶段：并行优化（痛点 2/5/7，当前主要剩余项）
 
 | 工作内容 | 产出 |
 |---------|------|

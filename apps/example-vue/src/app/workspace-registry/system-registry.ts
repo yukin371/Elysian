@@ -1,22 +1,37 @@
-import { buildWorkspaceRegistration } from "@elysian/frontend-vue"
+import { buildWorkspaceRegistrationFromArtifact } from "@elysian/frontend-vue"
+
 import {
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  menuModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  userModuleSchema,
-} from "@elysian/schema"
+  departmentFrontendModuleArtifact,
+  dictionaryFrontendModuleArtifact,
+  menuFrontendModuleArtifact,
+  postFrontendModuleArtifact,
+  roleFrontendModuleArtifact,
+  settingFrontendModuleArtifact,
+  userFrontendModuleArtifact,
+} from "./generated"
 
 import type { WorkspaceRegistration } from "./types"
 
 export const systemWorkspaceRegistrations = [
-  buildWorkspaceRegistration(dictionaryModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(departmentModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(postModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(menuModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(roleModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(settingModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(userModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    dictionaryFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    departmentFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    postFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    menuFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    roleFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    settingFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    userFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
 ] as const satisfies readonly WorkspaceRegistration[]

@@ -6,6 +6,8 @@ import {
   applyCrudDictionaryOptions,
   buildCrudDictionaryOptionCatalog,
   buildVueCustomCrudPage,
+  buildWorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact,
   createVueLocaleRuntime,
   getCrudPageDictionaryTypeCodes,
   usePermissions,
@@ -176,6 +178,77 @@ describe("frontend-vue preset helpers", () => {
       "order_status",
       "order_channel",
     ])
+  })
+
+  it("builds equivalent workspace registrations from schema and artifact inputs", () => {
+    const schemaRegistration = buildWorkspaceRegistration({
+      ...ticketModuleSchema,
+      frontend: {
+        workspaceDomain: "system",
+        routePath: "/system/tickets",
+        permissionPrefix: "system:ticket",
+      },
+    })
+
+    const artifactRegistration = buildWorkspaceRegistrationFromArtifact({
+      workspaceDomain: "system",
+      routePath: "/system/tickets",
+      permissionPrefix: "system:ticket",
+      moduleCode: "ticket",
+      kind: "ticket",
+      permissions: {
+        list: "system:ticket:list",
+        create: "system:ticket:create",
+        update: "system:ticket:update",
+      },
+      i18nKeys: {
+        sectionTitle: "app.ticket.sectionTitle",
+        sectionCopy: "app.ticket.sectionCopy",
+        shellTitle: "app.ticket.shellTitle",
+        shellDescription: "app.ticket.shellDescription",
+      },
+    })
+
+    expect(artifactRegistration).toEqual(schemaRegistration)
+  })
+
+  it("respects explicit permission action narrowing from schema metadata", () => {
+    const registration = buildWorkspaceRegistration({
+      ...ticketModuleSchema,
+      frontend: {
+        workspaceDomain: "system",
+        routePath: "/system/tickets",
+        permissionPrefix: "system:ticket",
+        permissionActions: {
+          list: true,
+          export: true,
+        },
+      },
+    })
+
+    expect(registration.permissions).toEqual({
+      list: "system:ticket:list",
+      export: "system:ticket:export",
+    })
+  })
+
+  it("rejects incomplete artifact registrations", () => {
+    expect(() =>
+      buildWorkspaceRegistrationFromArtifact({
+        workspaceDomain: null,
+        routePath: "/system/tickets",
+        permissionPrefix: "system:ticket",
+        moduleCode: "ticket",
+        kind: "ticket",
+        permissions: {},
+        i18nKeys: {
+          sectionTitle: "app.ticket.sectionTitle",
+          sectionCopy: "app.ticket.sectionCopy",
+          shellTitle: "app.ticket.shellTitle",
+          shellDescription: "app.ticket.shellDescription",
+        },
+      }),
+    ).toThrow("workspaceDomain")
   })
 
   it("ignores disabled dictionary types and items when building runtime catalog", () => {

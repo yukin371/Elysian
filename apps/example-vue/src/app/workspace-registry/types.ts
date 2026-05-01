@@ -1,3 +1,4 @@
+import type { FrontendWorkspaceStateContext } from "@elysian/frontend-vue"
 import type { Ref } from "vue"
 
 import type { ExampleWorkspaceKind } from "../app-shell-helpers"
@@ -15,10 +16,8 @@ export interface WorkspaceState {
   loading: Ref<boolean>
 }
 
-export interface WorkspaceStateContext {
-  errorMessage: Ref<string>
-  kind: RegisteredWorkspaceKind
-  loading: Ref<boolean>
+export interface WorkspaceStateContext
+  extends FrontendWorkspaceStateContext<RegisteredWorkspaceKind> {
   state: unknown
 }
 

@@ -6,8 +6,14 @@ import {
   type ElyFormValues,
 } from "@elysian/ui-enterprise-vue"
 import { Input as TInput } from "tdesign-vue-next/es/input"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { UserRecord } from "../../../lib/platform-api"
+import {
+  readInjectedValue,
+  resolveUserWorkspacePanelState,
+} from "./user-workspace-state"
 
 type UserWorkspaceTranslation = (
   key: string,
@@ -24,16 +30,9 @@ interface UserWorkspacePanelProps {
   canCreateUsers: boolean
   canUpdateUsers: boolean
   canResetUserPasswords: boolean
-  loading: boolean
-  errorMessage: string
-  panelMode: "detail" | "create" | "edit" | "reset"
-  panelTitle: string
-  panelDescription: string
-  selectedUser: UserRecord | null
-  formFields: ElyFormField[]
-  formValues: ElyFormValues
   formCopy: ElyFormCopy
   passwordInput: string
+  workspaceStateInjected?: boolean
 }
 
 const props = defineProps<UserWorkspacePanelProps>()
@@ -51,13 +50,58 @@ const emit = defineEmits<{
 const handlePasswordInput = (value: string | number) => {
   emit("update:password-input", String(value))
 }
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedUserWorkspaceState = computed(() =>
+  resolveUserWorkspacePanelState(
+    injectedWorkspaceState.value,
+    Boolean(props.workspaceStateInjected),
+  ),
+)
+
+const resolvedLoading = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.userLoading ?? null),
+  false,
+)
+const resolvedErrorMessage = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.userErrorMessage ?? null),
+  "",
+)
+const resolvedPanelMode = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.userPanelMode ?? null),
+  "detail" as "detail" | "create" | "edit" | "reset",
+)
+const resolvedPanelTitle = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.panelTitle ?? null),
+  "",
+)
+const resolvedPanelDescription = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.panelDescription ?? null),
+  "",
+)
+const resolvedSelectedUser = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.selectedUser ?? null),
+  null as UserRecord | null,
+)
+const resolvedFormFields = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.formFields ?? null),
+  [] as ElyFormField[],
+)
+const resolvedFormValues = readInjectedValue(
+  computed(() => resolvedUserWorkspaceState.value?.formValues ?? null),
+  {} as ElyFormValues,
+)
 </script>
 
 <template>
   <section class="enterprise-card">
     <p class="enterprise-eyebrow">{{ t("app.user.detailEyebrow") }}</p>
-    <h3 class="enterprise-heading">{{ panelTitle }}</h3>
-    <p class="enterprise-copy">{{ panelDescription }}</p>
+    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
+    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.userModuleOffline") }}
@@ -74,18 +118,18 @@ const handlePasswordInput = (value: string | number) => {
       {{ t("app.message.userNoListPermission") }}
     </div>
 
-    <div v-else-if="errorMessage" class="enterprise-inline-warning">
-      {{ errorMessage }}
+    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedErrorMessage }}
     </div>
 
-    <template v-else-if="panelMode === 'detail' && selectedUser">
+    <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedUser">
       <div class="enterprise-button-row">
         <button
           v-if="canUpdateUsers"
           type="button"
           class="enterprise-button"
-          :disabled="loading"
-          @click="emit('start-edit', selectedUser)"
+          :disabled="resolvedLoading"
+          @click="emit('start-edit', resolvedSelectedUser)"
         >
           {{ t("app.user.action.edit") }}
         </button>
@@ -93,8 +137,8 @@ const handlePasswordInput = (value: string | number) => {
           v-if="canResetUserPasswords"
           type="button"
           class="enterprise-button enterprise-button-danger"
-          :disabled="loading"
-          @click="emit('start-password-reset', selectedUser)"
+          :disabled="resolvedLoading"
+          @click="emit('start-password-reset', resolvedSelectedUser)"
         >
           {{ t("app.user.action.resetPassword") }}
         </button>
@@ -110,46 +154,48 @@ const handlePasswordInput = (value: string | number) => {
 
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
         readonly
-        :loading="loading"
+        :loading="resolvedLoading"
         :copy="formCopy"
       />
     </template>
 
-    <template v-else-if="panelMode === 'create' || panelMode === 'edit'">
+    <template
+      v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
+    >
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
-        :loading="loading"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
+        :loading="resolvedLoading"
         :copy="formCopy"
         @submit="emit('submit-form', $event)"
         @cancel="emit('cancel-panel')"
       />
 
-      <label v-if="panelMode === 'create'" class="enterprise-field mt-2">
+      <label v-if="resolvedPanelMode === 'create'" class="enterprise-field mt-2">
         <span>{{ t("app.user.field.password") }}</span>
         <TInput
           :model-value="passwordInput"
           type="password"
-          :disabled="loading"
+          :disabled="resolvedLoading"
           :placeholder="t('app.user.passwordPlaceholder')"
           @update:model-value="handlePasswordInput"
         />
       </label>
     </template>
 
-    <template v-else-if="panelMode === 'reset' && selectedUser">
+    <template v-else-if="resolvedPanelMode === 'reset' && resolvedSelectedUser">
       <div class="enterprise-metadata mt-5">
         <div>
           <span>{{ t("app.user.field.username") }}</span>
-          <strong>{{ selectedUser.username }}</strong>
+          <strong>{{ resolvedSelectedUser.username }}</strong>
         </div>
         <div>
           <span>{{ t("app.user.field.displayName") }}</span>
-          <strong>{{ selectedUser.displayName }}</strong>
+          <strong>{{ resolvedSelectedUser.displayName }}</strong>
         </div>
       </div>
 
@@ -158,7 +204,7 @@ const handlePasswordInput = (value: string | number) => {
         <TInput
           :model-value="passwordInput"
           type="password"
-          :disabled="loading"
+          :disabled="resolvedLoading"
           :placeholder="t('app.user.passwordPlaceholder')"
           @update:model-value="handlePasswordInput"
         />
@@ -168,7 +214,7 @@ const handlePasswordInput = (value: string | number) => {
         <button
           type="button"
           class="enterprise-button enterprise-button-danger"
-          :disabled="loading"
+          :disabled="resolvedLoading"
           @click="emit('submit-password-reset')"
         >
           {{ t("app.user.action.confirmResetPassword") }}
@@ -188,104 +234,3 @@ const handlePasswordInput = (value: string | number) => {
     </div>
   </section>
 </template>
-
-<style scoped>
-.enterprise-card {
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.2rem;
-  color: #0f172a;
-}
-
-.enterprise-eyebrow,
-.enterprise-heading,
-.enterprise-copy,
-.enterprise-inline-warning,
-.enterprise-field span,
-.enterprise-metadata span {
-  margin: 0;
-}
-
-.enterprise-eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin-top: 0.7rem;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin-top: 0.75rem;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-inline-warning {
-  margin-top: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  background: rgba(255, 251, 235, 0.96);
-  padding: 0.85rem 0.95rem;
-  color: #92400e;
-}
-
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  margin-top: 1rem;
-}
-
-.enterprise-metadata div {
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background: rgba(248, 250, 252, 0.58);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata strong {
-  display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
-}
-
-.enterprise-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  color: #334155;
-}
-
-.enterprise-button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.enterprise-button {
-  border: 1px solid rgba(36, 87, 214, 0.18);
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2457d6, #173ea6);
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.65rem 1rem;
-}
-
-.enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-}
-
-.enterprise-button-danger {
-  background: linear-gradient(135deg, #dc2626, #7f1d1d);
-}
-</style>

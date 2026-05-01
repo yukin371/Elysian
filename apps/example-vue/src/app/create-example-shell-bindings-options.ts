@@ -179,6 +179,7 @@ export const createExampleShellBindingsOptions = (
   const departmentWorkspaceOptions = {
     isDepartmentWorkspace: input.departmentWorkspace.isDepartmentWorkspace,
     departmentLoading: input.departmentWorkspace.workspace.departmentLoading,
+    departmentWorkspaceState: input.departmentWorkspace.workspace,
     departmentExportLoading: input.departmentWorkspace.departmentExportLoading,
     canCreateDepartments: input.departmentWorkspace.canCreateDepartments,
     canViewDepartments: input.departmentWorkspace.canViewDepartments,
@@ -247,6 +248,7 @@ export const createExampleShellBindingsOptions = (
   const postWorkspaceOptions = {
     isPostWorkspace: input.postWorkspace.isPostWorkspace,
     postLoading: input.postWorkspace.workspace.postLoading,
+    postWorkspaceState: input.postWorkspace.workspace,
     postExportLoading: input.postWorkspace.postExportLoading,
     canCreatePosts: input.postWorkspace.canCreatePosts,
     canViewPosts: input.postWorkspace.canViewPosts,
@@ -255,7 +257,6 @@ export const createExampleShellBindingsOptions = (
     postErrorMessage: input.postWorkspace.workspace.postErrorMessage,
     enterprisePostQueryFields: input.postWorkspace.workspace.queryFields,
     enterprisePostTableColumns: input.postWorkspace.workspace.tableColumns,
-    enterprisePostTableItems: input.postWorkspace.workspace.tableItems,
     postCountLabel: input.postWorkspace.workspace.countLabel,
     canUpdatePosts: input.postWorkspace.canUpdatePosts,
     postDetailLoading: input.postWorkspace.workspace.postDetailLoading,
@@ -281,6 +282,7 @@ export const createExampleShellBindingsOptions = (
   const menuWorkspaceOptions = {
     isMenuWorkspace: input.menuWorkspace.isMenuWorkspace,
     menuLoading: input.menuWorkspace.workspace.menuLoading,
+    menuWorkspaceState: input.menuWorkspace.workspace,
     menuExportLoading: input.menuWorkspace.menuExportLoading,
     canCreateMenus: input.menuWorkspace.canCreateMenus,
     canViewMenus: input.menuWorkspace.canViewMenus,
@@ -289,7 +291,6 @@ export const createExampleShellBindingsOptions = (
     menuErrorMessage: input.menuWorkspace.workspace.menuErrorMessage,
     enterpriseMenuQueryFields: input.menuWorkspace.workspace.queryFields,
     enterpriseMenuTableColumns: input.menuWorkspace.workspace.tableColumns,
-    enterpriseMenuTableItems: input.menuWorkspace.workspace.tableItems,
     menuCountLabel: input.menuWorkspace.workspace.countLabel,
     canUpdateMenus: input.menuWorkspace.canUpdateMenus,
     menuDetailLoading: input.menuWorkspace.workspace.menuDetailLoading,
@@ -319,6 +320,7 @@ export const createExampleShellBindingsOptions = (
       input.notificationWorkspace.isNotificationWorkspace,
     notificationLoading:
       input.notificationWorkspace.workspace.notificationLoading,
+    notificationWorkspaceState: input.notificationWorkspace.workspace,
     notificationExportLoading:
       input.notificationWorkspace.notificationExportLoading,
     canCreateNotifications: input.notificationWorkspace.canCreateNotifications,
@@ -329,31 +331,12 @@ export const createExampleShellBindingsOptions = (
       input.notificationWorkspace.notificationModuleReady,
     canEnterNotificationWorkspace:
       input.notificationWorkspace.canEnterNotificationWorkspace,
-    notificationErrorMessage:
-      input.notificationWorkspace.workspace.notificationErrorMessage,
     enterpriseNotificationQueryFields:
       input.notificationWorkspace.workspace.queryFields,
     enterpriseNotificationTableColumns:
       input.notificationWorkspace.workspace.tableColumns,
-    enterpriseNotificationTableItems:
-      input.notificationWorkspace.workspace.tableItems,
     notificationCountLabel: input.notificationWorkspace.workspace.countLabel,
     canUpdateNotifications: input.notificationWorkspace.canUpdateNotifications,
-    notificationDetailLoading:
-      input.notificationWorkspace.workspace.notificationDetailLoading,
-    notificationDetailErrorMessage:
-      input.notificationWorkspace.workspace.notificationDetailErrorMessage,
-    notificationPanelMode:
-      input.notificationWorkspace.workspace.notificationPanelMode,
-    notificationPanelTitle: input.notificationWorkspace.workspace.panelTitle,
-    notificationPanelDescription:
-      input.notificationWorkspace.workspace.panelDescription,
-    selectedNotification:
-      input.notificationWorkspace.workspace.selectedNotification,
-    enterpriseNotificationFormFields:
-      input.notificationWorkspace.workspace.formFields,
-    enterpriseNotificationFormValues:
-      input.notificationWorkspace.workspace.formValues,
     localizeNotificationStatus:
       input.notificationWorkspace.localizeNotificationStatus,
     localizeNotificationLevel:
@@ -427,24 +410,17 @@ export const createExampleShellBindingsOptions = (
   const userWorkspaceOptions = {
     isUserWorkspace: input.userWorkspace.isUserWorkspace,
     userLoading: input.userWorkspace.workspace.userLoading,
+    userWorkspaceState: input.userWorkspace.workspace,
     userExportLoading: input.userWorkspace.userExportLoading,
     canCreateUsers: input.userWorkspace.canCreateUsers,
     canViewUsers: input.userWorkspace.canViewUsers,
     userModuleReady: input.userWorkspace.userModuleReady,
     canEnterUserWorkspace: input.userWorkspace.canEnterUserWorkspace,
-    userErrorMessage: input.userWorkspace.workspace.userErrorMessage,
     enterpriseUserQueryFields: input.userWorkspace.workspace.queryFields,
     enterpriseUserTableColumns: input.userWorkspace.workspace.tableColumns,
-    enterpriseUserTableItems: input.userWorkspace.workspace.tableItems,
     userCountLabel: input.userWorkspace.workspace.countLabel,
     canUpdateUsers: input.userWorkspace.canUpdateUsers,
     canResetUserPasswords: input.userWorkspace.canResetUserPasswords,
-    userPanelMode: input.userWorkspace.workspace.userPanelMode,
-    userPanelTitle: input.userWorkspace.workspace.panelTitle,
-    userPanelDescription: input.userWorkspace.workspace.panelDescription,
-    selectedUser: input.userWorkspace.workspace.selectedUser,
-    enterpriseUserFormFields: input.userWorkspace.workspace.formFields,
-    enterpriseUserFormValues: input.userWorkspace.workspace.formValues,
     userPasswordInput: input.userWorkspace.workspace.userPasswordInput,
     handleUserSearch: input.userWorkspace.workspace.handleSearch,
     handleUserReset: input.userWorkspace.workspace.handleReset,
@@ -462,27 +438,17 @@ export const createExampleShellBindingsOptions = (
   const settingWorkspaceOptions = {
     isSettingWorkspace: input.settingWorkspace.isSettingWorkspace,
     settingLoading: input.settingWorkspace.workspace.settingLoading,
+    settingWorkspaceState: input.settingWorkspace.workspace,
     settingExportLoading: input.settingWorkspace.settingExportLoading,
     canCreateSettings: input.settingWorkspace.canCreateSettings,
     canViewSettings: input.settingWorkspace.canViewSettings,
     settingModuleReady: input.settingWorkspace.settingModuleReady,
     canEnterSettingWorkspace: input.settingWorkspace.canEnterSettingWorkspace,
-    settingErrorMessage: input.settingWorkspace.workspace.settingErrorMessage,
     enterpriseSettingQueryFields: input.settingWorkspace.workspace.queryFields,
     enterpriseSettingTableColumns:
       input.settingWorkspace.workspace.tableColumns,
-    enterpriseSettingTableItems: input.settingWorkspace.workspace.tableItems,
     settingCountLabel: input.settingWorkspace.workspace.countLabel,
     canUpdateSettings: input.settingWorkspace.canUpdateSettings,
-    settingDetailLoading: input.settingWorkspace.workspace.settingDetailLoading,
-    settingDetailErrorMessage:
-      input.settingWorkspace.workspace.settingDetailErrorMessage,
-    settingPanelMode: input.settingWorkspace.workspace.settingPanelMode,
-    settingPanelTitle: input.settingWorkspace.workspace.panelTitle,
-    settingPanelDescription: input.settingWorkspace.workspace.panelDescription,
-    selectedSetting: input.settingWorkspace.workspace.selectedSetting,
-    enterpriseSettingFormFields: input.settingWorkspace.workspace.formFields,
-    enterpriseSettingFormValues: input.settingWorkspace.workspace.formValues,
     handleSettingSearch: input.settingWorkspace.workspace.handleSearch,
     handleSettingReset: input.settingWorkspace.workspace.handleReset,
     handleSettingRowClick: input.settingWorkspace.workspace.handleRowClick,
@@ -497,26 +463,16 @@ export const createExampleShellBindingsOptions = (
   const tenantWorkspaceOptions = {
     isTenantWorkspace: input.tenantWorkspace.isTenantWorkspace,
     tenantLoading: input.tenantWorkspace.workspace.tenantLoading,
+    tenantWorkspaceState: input.tenantWorkspace.workspace,
     tenantExportLoading: input.tenantWorkspace.tenantExportLoading,
     canCreateTenants: input.tenantWorkspace.canCreateTenants,
     canViewTenants: input.tenantWorkspace.canViewTenants,
     tenantModuleReady: input.tenantWorkspace.tenantModuleReady,
     canEnterTenantWorkspace: input.tenantWorkspace.canEnterTenantWorkspace,
-    tenantErrorMessage: input.tenantWorkspace.workspace.tenantErrorMessage,
     enterpriseTenantQueryFields: input.tenantWorkspace.workspace.queryFields,
     enterpriseTenantTableColumns: input.tenantWorkspace.workspace.tableColumns,
-    enterpriseTenantTableItems: input.tenantWorkspace.workspace.tableItems,
     tenantCountLabel: input.tenantWorkspace.workspace.countLabel,
     canUpdateTenants: input.tenantWorkspace.canUpdateTenants,
-    tenantDetailLoading: input.tenantWorkspace.workspace.tenantDetailLoading,
-    tenantDetailErrorMessage:
-      input.tenantWorkspace.workspace.tenantDetailErrorMessage,
-    tenantPanelMode: input.tenantWorkspace.workspace.tenantPanelMode,
-    tenantPanelTitle: input.tenantWorkspace.workspace.panelTitle,
-    tenantPanelDescription: input.tenantWorkspace.workspace.panelDescription,
-    selectedTenant: input.tenantWorkspace.workspace.selectedTenant,
-    enterpriseTenantFormFields: input.tenantWorkspace.workspace.formFields,
-    enterpriseTenantFormValues: input.tenantWorkspace.workspace.formValues,
     handleTenantSearch: input.tenantWorkspace.workspace.handleSearch,
     handleTenantReset: input.tenantWorkspace.workspace.handleReset,
     handleTenantRowClick: input.tenantWorkspace.workspace.handleRowClick,

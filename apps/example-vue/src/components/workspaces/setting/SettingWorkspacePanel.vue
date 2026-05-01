@@ -5,8 +5,14 @@ import {
   type ElyFormField,
   type ElyFormValues,
 } from "@elysian/ui-enterprise-vue"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { SettingRecord } from "../../../lib/platform-api"
+import {
+  readInjectedValue,
+  resolveSettingWorkspacePanelState,
+} from "./setting-workspace-state"
 
 type SettingWorkspaceTranslation = (
   key: string,
@@ -20,22 +26,13 @@ interface SettingWorkspacePanelProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewSettings: boolean
-  loading: boolean
-  detailLoading: boolean
-  errorMessage: string
-  detailErrorMessage: string
-  panelMode: "detail" | "create" | "edit"
-  panelTitle: string
-  panelDescription: string
-  selectedSetting: SettingRecord | null
-  formFields: ElyFormField[]
-  formValues: ElyFormValues
   formCopy: ElyFormCopy
   canCreateSettings: boolean
   canUpdateSettings: boolean
+  workspaceStateInjected?: boolean
 }
 
-defineProps<SettingWorkspacePanelProps>()
+const props = defineProps<SettingWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", setting: SettingRecord): void
@@ -43,13 +40,73 @@ const emit = defineEmits<{
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedSettingWorkspaceState = computed(() =>
+  resolveSettingWorkspacePanelState(
+    injectedWorkspaceState.value,
+    Boolean(props.workspaceStateInjected),
+  ),
+)
+
+const resolvedLoading = readInjectedValue(
+  computed(() => resolvedSettingWorkspaceState.value?.settingLoading ?? null),
+  false,
+)
+const resolvedDetailLoading = readInjectedValue(
+  computed(
+    () => resolvedSettingWorkspaceState.value?.settingDetailLoading ?? null,
+  ),
+  false,
+)
+const resolvedErrorMessage = readInjectedValue(
+  computed(
+    () => resolvedSettingWorkspaceState.value?.settingErrorMessage ?? null,
+  ),
+  "",
+)
+const resolvedDetailErrorMessage = readInjectedValue(
+  computed(
+    () =>
+      resolvedSettingWorkspaceState.value?.settingDetailErrorMessage ?? null,
+  ),
+  "",
+)
+const resolvedPanelMode = readInjectedValue(
+  computed(() => resolvedSettingWorkspaceState.value?.settingPanelMode ?? null),
+  "detail" as "detail" | "create" | "edit",
+)
+const resolvedPanelTitle = readInjectedValue(
+  computed(() => resolvedSettingWorkspaceState.value?.panelTitle ?? null),
+  "",
+)
+const resolvedPanelDescription = readInjectedValue(
+  computed(() => resolvedSettingWorkspaceState.value?.panelDescription ?? null),
+  "",
+)
+const resolvedSelectedSetting = readInjectedValue(
+  computed(() => resolvedSettingWorkspaceState.value?.selectedSetting ?? null),
+  null as SettingRecord | null,
+)
+const resolvedFormFields = readInjectedValue(
+  computed(() => resolvedSettingWorkspaceState.value?.formFields ?? null),
+  [] as ElyFormField[],
+)
+const resolvedFormValues = readInjectedValue(
+  computed(() => resolvedSettingWorkspaceState.value?.formValues ?? null),
+  {} as ElyFormValues,
+)
 </script>
 
 <template>
   <section class="enterprise-card">
     <p class="enterprise-eyebrow">{{ t("app.setting.detailEyebrow") }}</p>
-    <h3 class="enterprise-heading">{{ panelTitle }}</h3>
-    <p class="enterprise-copy">{{ panelDescription }}</p>
+    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
+    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.settingModuleOffline") }}
@@ -66,29 +123,29 @@ const emit = defineEmits<{
       {{ t("app.message.settingNoListPermission") }}
     </div>
 
-    <div v-else-if="errorMessage" class="enterprise-inline-warning">
-      {{ errorMessage }}
+    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedErrorMessage }}
     </div>
 
     <div
-      v-else-if="detailLoading && selectedSetting"
+      v-else-if="resolvedDetailLoading && resolvedSelectedSetting"
       class="enterprise-inline-warning"
     >
       {{ t("app.setting.detailLoading") }}
     </div>
 
-    <div v-else-if="detailErrorMessage" class="enterprise-inline-warning">
-      {{ detailErrorMessage }}
+    <div v-else-if="resolvedDetailErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedDetailErrorMessage }}
     </div>
 
-    <template v-else-if="panelMode === 'detail' && selectedSetting">
+    <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedSetting">
       <div class="enterprise-button-row">
         <button
           v-if="canUpdateSettings"
           type="button"
           class="enterprise-button"
-          :disabled="loading || detailLoading"
-          @click="emit('start-edit', selectedSetting)"
+          :disabled="resolvedLoading || resolvedDetailLoading"
+          @click="emit('start-edit', resolvedSelectedSetting)"
         >
           {{ t("app.setting.action.edit") }}
         </button>
@@ -104,20 +161,22 @@ const emit = defineEmits<{
 
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
         readonly
-        :loading="loading || detailLoading"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
       />
     </template>
 
-    <template v-else-if="panelMode === 'create' || panelMode === 'edit'">
+    <template
+      v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
+    >
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
-        :loading="loading || detailLoading"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
         @submit="emit('submit-form', $event)"
         @cancel="emit('cancel-panel')"
@@ -129,71 +188,3 @@ const emit = defineEmits<{
     </div>
   </section>
 </template>
-
-<style scoped>
-.enterprise-card {
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.2rem;
-  color: #0f172a;
-}
-
-.enterprise-eyebrow,
-.enterprise-heading,
-.enterprise-copy,
-.enterprise-inline-warning {
-  margin: 0;
-}
-
-.enterprise-eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin-top: 0.7rem;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin-top: 0.75rem;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-inline-warning {
-  margin-top: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  background: rgba(255, 251, 235, 0.96);
-  padding: 0.85rem 0.95rem;
-  color: #92400e;
-}
-
-.enterprise-button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.enterprise-button {
-  border: 1px solid rgba(36, 87, 214, 0.18);
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2457d6, #173ea6);
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.65rem 1rem;
-}
-
-.enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-}
-</style>

@@ -47,6 +47,9 @@
 - 前端局部收口继续入口：优先沿 `M5 / M6A` 推进 `provide/inject`、共享样式收口与类型网关，不再继续扩写手写 CRUD 接线
 - generator 契约已完成：`buildWorkspaceRegistration` 已接入 `packages/frontend-vue`，13 个标准 CRUD 模块注册已从手写切换为 schema 驱动；generator artifact 已包含 kind / permissions / i18nKeys，可被前端注册中心直接消费
 - generator Phase 3 启动：当前优先把标准 CRUD main/panel 页面骨架回收到 generator 模板，新增标准模块不再手写 main/panel 大体结构
+- generator Phase 3 已推进首刀：公共 `WORKSPACE_STATE_KEY` / `FrontendWorkspaceStateContext` 已下沉到 `packages/frontend-vue`，标准 CRUD 生成模板已开始对齐 shell provide + workspace inject 契约，减少页面级状态 props 面
+- generator Phase 3 已进入真实消费：`apps/example-vue/src/modules/*` 已开始提交标准 CRUD surface 生成产物，shell main / secondary 已消费 generated component map，标准 CRUD 页面骨架不再只停留在模板/测试层
+- generator artifact 契约继续推进：frontend artifact 已补 `surfaceKind / panelComponentPath / workspaceComponentPath`，`packages/frontend-vue` 已提供 artifact -> workspace registration helper；`apps/example-vue` 的 `business/system` registry 已切到 app-local generated artifact 输入，开始脱离 schema 直连
 - persistence 性能治理入口：先按 `data-scope.ts` 与 `auth.ts` 的高风险查询处理，再进入分页/模糊搜索统一治理
 
 ### 2. Phase 2: Auth Foundation ✅ 归档
@@ -238,6 +241,7 @@
 ## 最近进展
 
 - generator → frontend 注册契约已完成：`ModuleFrontendSchema` 已扩展 `permissionActions` / `workspaceKind` / `moduleCode`，13 个 `ModuleSchema` 已补 `frontend` 元数据，`buildWorkspaceRegistration` 已接入 `packages/frontend-vue` 并替换 `system-registry` / `business-registry` 全部 schema 支撑的手写注册项；generator artifact 已包含 kind / permissions / i18nKeys，当前 470 测试全绿
+- generator → frontend surface 闭环已推进：`example-vue` 已新增标准 CRUD surface 生成/校验脚本，`src/modules/*` 生成产物已提交入库并纳入 `build/check`，全部标准 CRUD main/panel 已开始消费生成组件
 - generator 已从”只写入”扩到”可预览后再决定是否落盘”，当前可在 CLI 预览文件动作、输出 JSON 报告并生成 review-only SQL preview
 - 已补代码生成 / SQL 生成 / 安全能力的功能矩阵与缺口设计文档，明确当前状态应表述为“代码生成底座已可用、SQL 仍为 review-only preview、安全具备基础等价能力但未进入完整企业安全平台”；详见 [2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md](./plans/2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md)
 - `Track 1 / T1-2` 已落最小后端切片：`apps/server` 新增 `generator-session` 运行时模块，当前已支持生成 preview session 列表、详情、创建与 report 落盘，不提前进入 staging apply

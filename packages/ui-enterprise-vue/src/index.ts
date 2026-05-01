@@ -1,4 +1,5 @@
 import "tdesign-vue-next/es/style/index.css"
+import "./styles/workspace-base.css"
 import type { UiCrudPageDefinition, UiPresetManifest } from "@elysian/ui-core"
 import { computed } from "vue"
 import type {
@@ -7,6 +8,7 @@ import type {
   ElyFormEmits,
   ElyFormField,
   ElyFormProps,
+  ElyFormValues,
   ElyPreviewSkeletonProps,
   ElyQueryBarEmits,
   ElyQueryBarProps,
@@ -40,6 +42,7 @@ export type {
   ElyFormEmits,
   ElyFormField,
   ElyFormProps,
+  ElyFormValues,
   ElyPreviewSkeletonProps,
   ElyQueryBarEmits,
   ElyQueryBarProps,

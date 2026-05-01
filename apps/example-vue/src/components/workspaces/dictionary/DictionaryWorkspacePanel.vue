@@ -5,11 +5,17 @@ import {
   type ElyFormField,
   type ElyFormValues,
 } from "@elysian/ui-enterprise-vue"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type {
   DictionaryItemRecord,
   DictionaryTypeRecord,
 } from "../../../lib/platform-api"
+import {
+  readInjectedValue,
+  resolveDictionaryWorkspacePanelState,
+} from "./dictionary-workspace-state"
 
 type DictionaryWorkspaceTranslation = (
   key: string,
@@ -25,22 +31,12 @@ interface DictionaryWorkspacePanelProps {
   canViewDictionaries: boolean
   canCreateDictionaryTypes: boolean
   canUpdateDictionaryTypes: boolean
-  loading: boolean
-  detailLoading: boolean
-  errorMessage: string
-  detailErrorMessage: string
-  panelMode: "detail" | "create" | "edit"
-  panelTitle: string
-  panelDescription: string
-  selectedDictionaryType: DictionaryTypeRecord | null
-  selectedDictionaryTypeItems: DictionaryItemRecord[]
-  formFields: ElyFormField[]
-  formValues: ElyFormValues
   formCopy: ElyFormCopy
   localizeDictionaryStatus: (status: DictionaryItemRecord["status"]) => string
+  workspaceStateInjected?: boolean
 }
 
-defineProps<DictionaryWorkspacePanelProps>()
+const props = defineProps<DictionaryWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", record: DictionaryTypeRecord): void
@@ -48,13 +44,93 @@ const emit = defineEmits<{
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedDictionaryWorkspaceState = computed(() =>
+  resolveDictionaryWorkspacePanelState(
+    injectedWorkspaceState.value,
+    Boolean(props.workspaceStateInjected),
+  ),
+)
+
+const resolvedLoading = readInjectedValue(
+  computed(
+    () => resolvedDictionaryWorkspaceState.value?.dictionaryLoading ?? null,
+  ),
+  false,
+)
+const resolvedDetailLoading = readInjectedValue(
+  computed(
+    () =>
+      resolvedDictionaryWorkspaceState.value?.dictionaryDetailLoading ?? null,
+  ),
+  false,
+)
+const resolvedErrorMessage = readInjectedValue(
+  computed(
+    () =>
+      resolvedDictionaryWorkspaceState.value?.dictionaryErrorMessage ?? null,
+  ),
+  "",
+)
+const resolvedDetailErrorMessage = readInjectedValue(
+  computed(
+    () =>
+      resolvedDictionaryWorkspaceState.value?.dictionaryDetailErrorMessage ??
+      null,
+  ),
+  "",
+)
+const resolvedPanelMode = readInjectedValue(
+  computed(
+    () => resolvedDictionaryWorkspaceState.value?.dictionaryPanelMode ?? null,
+  ),
+  "detail" as "detail" | "create" | "edit",
+)
+const resolvedPanelTitle = readInjectedValue(
+  computed(() => resolvedDictionaryWorkspaceState.value?.panelTitle ?? null),
+  "",
+)
+const resolvedPanelDescription = readInjectedValue(
+  computed(
+    () => resolvedDictionaryWorkspaceState.value?.panelDescription ?? null,
+  ),
+  "",
+)
+const resolvedSelectedDictionaryType = readInjectedValue(
+  computed(
+    () =>
+      resolvedDictionaryWorkspaceState.value?.selectedDictionaryType ?? null,
+  ),
+  null as DictionaryTypeRecord | null,
+)
+const resolvedSelectedDictionaryTypeItems = readInjectedValue(
+  computed(
+    () =>
+      resolvedDictionaryWorkspaceState.value?.selectedDictionaryTypeItems ??
+      null,
+  ),
+  [] as DictionaryItemRecord[],
+)
+const resolvedFormFields = readInjectedValue(
+  computed(() => resolvedDictionaryWorkspaceState.value?.formFields ?? null),
+  [] as ElyFormField[],
+)
+const resolvedFormValues = readInjectedValue(
+  computed(() => resolvedDictionaryWorkspaceState.value?.formValues ?? null),
+  {} as ElyFormValues,
+)
 </script>
 
 <template>
   <section class="enterprise-card">
     <p class="enterprise-eyebrow">{{ t("app.dictionary.detailEyebrow") }}</p>
-    <h3 class="enterprise-heading">{{ panelTitle }}</h3>
-    <p class="enterprise-copy">{{ panelDescription }}</p>
+    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
+    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.dictionaryModuleOffline") }}
@@ -71,29 +147,33 @@ const emit = defineEmits<{
       {{ t("app.message.dictionaryNoListPermission") }}
     </div>
 
-    <div v-else-if="errorMessage" class="enterprise-inline-warning">
-      {{ errorMessage }}
+    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedErrorMessage }}
     </div>
 
     <div
-      v-else-if="detailLoading && selectedDictionaryType"
+      v-else-if="resolvedDetailLoading && resolvedSelectedDictionaryType"
       class="enterprise-inline-warning"
     >
       {{ t("app.dictionary.detailLoading") }}
     </div>
 
-    <div v-else-if="detailErrorMessage" class="enterprise-inline-warning">
-      {{ detailErrorMessage }}
+    <div v-else-if="resolvedDetailErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedDetailErrorMessage }}
     </div>
 
-    <template v-else-if="panelMode === 'detail' && selectedDictionaryType">
+    <template
+      v-else-if="
+        resolvedPanelMode === 'detail' && resolvedSelectedDictionaryType
+      "
+    >
       <div class="enterprise-button-row">
         <button
           v-if="canUpdateDictionaryTypes"
           type="button"
           class="enterprise-button"
-          :disabled="loading || detailLoading"
-          @click="emit('start-edit', selectedDictionaryType)"
+          :disabled="resolvedLoading || resolvedDetailLoading"
+          @click="emit('start-edit', resolvedSelectedDictionaryType)"
         >
           {{ t("app.dictionary.action.edit") }}
         </button>
@@ -109,22 +189,23 @@ const emit = defineEmits<{
 
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
         readonly
-        :loading="loading || detailLoading"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
       />
 
       <div class="enterprise-metadata mt-5">
         <div>
           <span>{{ t("app.dictionary.meta.itemCount") }}</span>
-          <strong>{{ selectedDictionaryTypeItems.length }}</strong>
+          <strong>{{ resolvedSelectedDictionaryTypeItems.length }}</strong>
         </div>
         <div>
           <span>{{ t("app.dictionary.meta.defaultCount") }}</span>
           <strong>{{
-            selectedDictionaryTypeItems.filter((item) => item.isDefault).length
+            resolvedSelectedDictionaryTypeItems.filter((item) => item.isDefault)
+              .length
           }}</strong>
         </div>
       </div>
@@ -134,14 +215,14 @@ const emit = defineEmits<{
           {{ t("app.dictionary.meta.items") }}
         </p>
         <div
-          v-if="selectedDictionaryTypeItems.length === 0"
+          v-if="resolvedSelectedDictionaryTypeItems.length === 0"
           class="enterprise-inline-warning mt-3"
         >
           {{ t("app.dictionary.meta.empty") }}
         </div>
         <div v-else class="mt-3 space-y-3">
           <div
-            v-for="item in selectedDictionaryTypeItems"
+            v-for="item in resolvedSelectedDictionaryTypeItems"
             :key="item.id"
             class="enterprise-metadata"
           >
@@ -170,12 +251,16 @@ const emit = defineEmits<{
       </div>
     </template>
 
-    <template v-else-if="panelMode === 'create' || panelMode === 'edit'">
+    <template
+      v-else-if="
+        resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'
+      "
+    >
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
-        :loading="loading || detailLoading"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
         @submit="emit('submit-form', $event)"
         @cancel="emit('cancel-panel')"
@@ -187,94 +272,3 @@ const emit = defineEmits<{
     </div>
   </section>
 </template>
-
-<style scoped>
-.enterprise-card {
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.2rem;
-  color: #0f172a;
-}
-
-.enterprise-eyebrow,
-.enterprise-subheading,
-.enterprise-heading,
-.enterprise-copy,
-.enterprise-inline-warning,
-.enterprise-metadata span {
-  margin: 0;
-}
-
-.enterprise-eyebrow,
-.enterprise-subheading {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin-top: 0.7rem;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin-top: 0.75rem;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-inline-warning {
-  margin-top: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  background: rgba(255, 251, 235, 0.96);
-  padding: 0.85rem 0.95rem;
-  color: #92400e;
-}
-
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  margin-top: 1rem;
-}
-
-.enterprise-metadata div {
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background: rgba(248, 250, 252, 0.58);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata strong {
-  display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
-}
-
-.enterprise-button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.enterprise-button {
-  border: 1px solid rgba(36, 87, 214, 0.18);
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2457d6, #173ea6);
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.65rem 1rem;
-}
-
-.enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-}
-</style>

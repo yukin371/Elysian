@@ -1,22 +1,35 @@
-import { buildWorkspaceRegistration } from "@elysian/frontend-vue"
+import { buildWorkspaceRegistrationFromArtifact } from "@elysian/frontend-vue"
+
 import {
-  customerModuleSchema,
-  fileModuleSchema,
-  notificationModuleSchema,
-  operationLogModuleSchema,
-  tenantModuleSchema,
-  workflowModuleSchema,
-} from "@elysian/schema"
+  customerFrontendModuleArtifact,
+  fileFrontendModuleArtifact,
+  notificationFrontendModuleArtifact,
+  operationLogFrontendModuleArtifact,
+  tenantFrontendModuleArtifact,
+  workflowDefinitionFrontendModuleArtifact,
+} from "./generated"
 
 import type { WorkspaceRegistration } from "./types"
 
 export const businessWorkspaceRegistrations = [
-  buildWorkspaceRegistration(customerModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(fileModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(notificationModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(operationLogModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(tenantModuleSchema) as WorkspaceRegistration,
-  buildWorkspaceRegistration(workflowModuleSchema) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    customerFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    fileFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    notificationFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    operationLogFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    tenantFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
+  buildWorkspaceRegistrationFromArtifact(
+    workflowDefinitionFrontendModuleArtifact,
+  ) as WorkspaceRegistration,
   {
     domain: "business",
     path: "/studio/generator-preview",

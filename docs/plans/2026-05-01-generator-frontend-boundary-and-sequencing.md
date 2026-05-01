@@ -124,11 +124,11 @@
 
 ### 第一顺序：先完成 example-vue 当前已经启动的本地收口 ✅ 已完成
 
-范围：
+当前状态：
 
-- `M5 / provide-inject`
-- `M5 / 共享样式下沉`
-- `M6A / 类型网关`
+- `M5 / provide-inject`：已完成标准 CRUD 主线收口
+- `M5 / 共享样式下沉`：已完成当前共享主线，基础 workspace 样式与 panel 元数据/字段/按钮/危险态 class 已进入 `ui-enterprise-vue`；文件模块只保留上传区与空态等本地语义样式
+- `M6A / 类型网关`：已完成，`platform-api` 标准 Record/Status 类型已收口到单一入口 `lib/platform-api/types.ts`
 
 原因：
 
@@ -138,8 +138,9 @@
 
 注意：
 
-- 这一阶段只能继续做“本地壳层减手写”
+- 这一阶段只允许继续做“本地壳层减手写”
 - 不应继续扩写更多手写 CRUD 特例
+- 当前第一顺序已完成归档，后续不再继续扩大 `apps/example-vue` 的手写标准 CRUD 收口范围
 
 ### 第二顺序：定义 generator 到前端注册层的正式静态契约 ✅ 已完成
 
@@ -159,7 +160,7 @@
 - artifact 形状：`packages/generator`
 - artifact 消费装配：`apps/example-vue`
 
-### 第三顺序：把标准 CRUD main/panel 页面骨架回收到 generator 模板 🚧 当前活跃
+### 第三顺序：把标准 CRUD main/panel 页面骨架回收到 generator 模板 🚧 持续收口
 
 最小目标：
 
@@ -177,6 +178,24 @@
 - `generator-preview`
 
 这些模块当前都不应被机械视为“标准 CRUD 模板”的验证对象。
+
+### 当前阶段进展（2026-05-02）
+
+已完成第一刀模板对齐：
+
+1. `packages/frontend-vue` 新增公共 `WORKSPACE_STATE_KEY` 与通用 `FrontendWorkspaceStateContext`
+2. `apps/example-vue` 改为复用公共注入契约，不再把 workspace state key 固定在示例应用私有 owner
+3. `packages/generator` 标准 CRUD `main/panel` 模板改为消费公共 workspace state 注入契约
+4. 生成出来的 `*-workspace.ts` 现在同时承载模块级 injected-state 类型与解析 helper，避免继续在标准 CRUD 页面里手写大批状态 props
+5. frontend artifact 现在补充了 `surfaceKind / pageComponentPath / panelComponentPath / workspaceComponentPath`，并在 `packages/frontend-vue` 提供基于 artifact 的注册 helper，后续前端可以逐步从“直接读 schema”切到“消费生成 artifact”
+6. `apps/example-vue` 已新增 workspace registry artifact 生成脚本，并让 `business/system` registry 改为消费 app-local generated artifact，形成第一条真实 artifact -> registration 接线
+7. `apps/example-vue` shell descriptor 现已基于 generated standard CRUD surface 清单做覆盖校验；若新增标准 CRUD artifact 但 main/panel resolver 未接线，将显式失败而不是静默回退到 customer
+8. `apps/example-vue` 已新增标准 CRUD surface 生成/校验脚本，生成产物提交到 `src/modules/*`；shell main / secondary 已消费 generated component map，标准 CRUD 页面骨架不再只停留在模板层
+
+当前仍未完成的部分：
+
+1. 当前只把标准 CRUD 的静态 surface 文件接进了示例应用，没有把 `apps/example-vue` 的壳层 provide/inject 运行时迁入 generator
+2. SQL 仍然保持 `review-only proposal` 边界，尚未进入正式 auto migration 生成
 
 ### 第四顺序：再补 Studio 化缺口
 

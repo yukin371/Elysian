@@ -2,23 +2,25 @@ import { buildVueNavigation } from "@elysian/frontend-vue"
 import type { UiNavigationNode } from "@elysian/ui-core"
 import { type Ref, computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
-import { resolveWorkspaceMenuKey } from "../lib/navigation-workspace"
 import type { AuthIdentityResponse } from "../lib/platform-api"
 import {
   listenWorkspaceRouteChange,
-  readCurrentWorkspaceRouteMenuKey,
   replaceCurrentWorkspaceRoute,
+  resolveExampleNavigationMenuKey,
+  resolveExampleNavigationSelectionState,
+  resolveExampleShellTabKey,
+  resolveExampleWorkspaceMenuSelection,
+  resolveExampleWorkspaceSelectionIntent,
+  resolveWorkspaceNavigationItemByKind,
 } from "../router/example-router"
 import {
-  resolveExampleWorkspaceModuleCode,
-  resolveExampleWorkspaceRoute,
-  translateWorkspaceRouteText,
+  resolveExampleWorkspaceDisplayText,
+  resolveExampleWorkspaceModuleStatus,
+  resolveExampleWorkspaceRouteState,
 } from "../router/example-workspace-routes"
 import {
   type AppTranslate,
   type ExampleShellTabKey,
-  findFirstMenuItem,
-  findNavigationItemById,
   flattenNavigation,
 } from "./app-shell-helpers"
 import { appendWorkspaceRegistryNavigation } from "./workspace-registry/navigation"
@@ -60,29 +62,19 @@ export const useExampleNavigation = ({
     () => flattenNavigation(enterpriseNavigation.value).length,
   )
 
-  const defaultNavigationItem = computed(
-    () =>
-      flattenNavigation(enterpriseNavigation.value).find(
-        (item) => item.path === "/customers",
-      ) ?? findFirstMenuItem(enterpriseNavigation.value),
+  const currentNavigationSelectionState = computed(() =>
+    resolveExampleNavigationSelectionState(
+      enterpriseNavigation.value,
+      currentMenuKey.value,
+    ),
   )
 
   const selectedNavigationItem = computed(
-    () =>
-      (currentMenuKey.value
-        ? findNavigationItemById(
-            enterpriseNavigation.value,
-            currentMenuKey.value,
-          )
-        : null) ?? defaultNavigationItem.value,
+    () => currentNavigationSelectionState.value.selectedNavigationItem,
   )
 
-  const readRouteMenuKey = (items: UiNavigationNode[]) => {
-    return readCurrentWorkspaceRouteMenuKey(items)
-  }
-
   const syncMenuKeyFromRoute = () => {
-    const routeMenuKey = readRouteMenuKey(enterpriseNavigation.value)
+    const routeMenuKey = currentNavigationSelectionState.value.selectedMenuKey
 
     if (!routeMenuKey) {
       return
@@ -95,16 +87,10 @@ export const useExampleNavigation = ({
   watch(
     enterpriseNavigation,
     (items) => {
-      const routeMenuKey = readRouteMenuKey(items)
-      const fallbackItem =
-        flattenNavigation(items).find((item) => item.path === "/customers") ??
-        findFirstMenuItem(items)
-      const currentItem = currentMenuKey.value
-        ? findNavigationItemById(items, currentMenuKey.value)
-        : null
-
-      currentMenuKey.value =
-        routeMenuKey ?? currentItem?.id ?? fallbackItem?.id ?? null
+      currentMenuKey.value = resolveExampleNavigationSelectionState(
+        items,
+        currentMenuKey.value,
+      ).selectedMenuKey
     },
     {
       immediate: true,
@@ -133,161 +119,124 @@ export const useExampleNavigation = ({
     cleanupWorkspaceRouteListener()
   })
 
-  const selectedWorkspaceRoute = computed(() =>
-    resolveExampleWorkspaceRoute(selectedNavigationItem.value?.path),
+  const currentWorkspaceRouteState = computed(() =>
+    resolveExampleWorkspaceRouteState(selectedNavigationItem.value?.path),
   )
   const currentWorkspaceKind = computed(
-    () => selectedWorkspaceRoute.value?.kind ?? "placeholder",
+    () => currentWorkspaceRouteState.value.kindState.currentWorkspaceKind,
   )
   const isCustomerWorkspace = computed(
-    () => currentWorkspaceKind.value === "customer",
+    () => currentWorkspaceRouteState.value.kindState.isCustomerWorkspace,
   )
   const isDictionaryWorkspace = computed(
-    () => currentWorkspaceKind.value === "dictionary",
+    () => currentWorkspaceRouteState.value.kindState.isDictionaryWorkspace,
   )
   const isDepartmentWorkspace = computed(
-    () => currentWorkspaceKind.value === "department",
+    () => currentWorkspaceRouteState.value.kindState.isDepartmentWorkspace,
   )
-  const isPostWorkspace = computed(() => currentWorkspaceKind.value === "post")
+  const isPostWorkspace = computed(
+    () => currentWorkspaceRouteState.value.kindState.isPostWorkspace,
+  )
   const isSessionWorkspace = computed(
-    () => currentWorkspaceKind.value === "session",
+    () => currentWorkspaceRouteState.value.kindState.isSessionWorkspace,
   )
-  const isMenuWorkspace = computed(() => currentWorkspaceKind.value === "menu")
+  const isMenuWorkspace = computed(
+    () => currentWorkspaceRouteState.value.kindState.isMenuWorkspace,
+  )
   const isNotificationWorkspace = computed(
-    () => currentWorkspaceKind.value === "notification",
+    () => currentWorkspaceRouteState.value.kindState.isNotificationWorkspace,
   )
   const isOperationLogWorkspace = computed(
-    () => currentWorkspaceKind.value === "operation-log",
+    () => currentWorkspaceRouteState.value.kindState.isOperationLogWorkspace,
   )
-  const isRoleWorkspace = computed(() => currentWorkspaceKind.value === "role")
+  const isRoleWorkspace = computed(
+    () => currentWorkspaceRouteState.value.kindState.isRoleWorkspace,
+  )
   const isSettingWorkspace = computed(
-    () => currentWorkspaceKind.value === "setting",
+    () => currentWorkspaceRouteState.value.kindState.isSettingWorkspace,
   )
   const isTenantWorkspace = computed(
-    () => currentWorkspaceKind.value === "tenant",
+    () => currentWorkspaceRouteState.value.kindState.isTenantWorkspace,
   )
-  const isUserWorkspace = computed(() => currentWorkspaceKind.value === "user")
+  const isUserWorkspace = computed(
+    () => currentWorkspaceRouteState.value.kindState.isUserWorkspace,
+  )
   const isWorkflowDefinitionsWorkspace = computed(
-    () => currentWorkspaceKind.value === "workflow-definitions",
+    () =>
+      currentWorkspaceRouteState.value.kindState.isWorkflowDefinitionsWorkspace,
   )
-  const isFileWorkspace = computed(() => currentWorkspaceKind.value === "file")
+  const isFileWorkspace = computed(
+    () => currentWorkspaceRouteState.value.kindState.isFileWorkspace,
+  )
   const isGeneratorPreviewWorkspace = computed(
-    () => currentWorkspaceKind.value === "generator-preview",
+    () =>
+      currentWorkspaceRouteState.value.kindState.isGeneratorPreviewWorkspace,
   )
 
-  const customerNavigationItem = computed(
-    () =>
-      flattenNavigation(enterpriseNavigation.value).find(
-        (item) => item.path === "/customers",
-      ) ?? null,
+  const customerNavigationItem = computed(() =>
+    resolveWorkspaceNavigationItemByKind(
+      enterpriseNavigation.value,
+      "customer",
+    ),
+  )
+
+  const currentWorkspaceModuleStatus = computed(() =>
+    resolveExampleWorkspaceModuleStatus({
+      routeState: currentWorkspaceRouteState.value,
+      registeredModuleCodes: registeredModuleCodes.value,
+      selectedNavigationPath: selectedNavigationItem.value?.path,
+      t,
+    }),
   )
 
   const currentNavigationPath = computed(
-    () =>
-      selectedNavigationItem.value?.path ?? t("app.placeholder.pathMissing"),
+    () => currentWorkspaceModuleStatus.value.currentNavigationPath,
   )
 
-  const currentModuleCode = computed(() =>
-    resolveExampleWorkspaceModuleCode(selectedNavigationItem.value?.path),
+  const currentModuleCode = computed(
+    () => currentWorkspaceRouteState.value.moduleCode,
   )
 
   const currentModuleCodeLabel = computed(
-    () => currentModuleCode.value ?? t("app.placeholder.fallbackModule"),
+    () => currentWorkspaceModuleStatus.value.currentModuleCodeLabel,
   )
 
   const currentModuleReady = computed(
-    () =>
-      currentModuleCode.value === "generator-preview" ||
-      (currentModuleCode.value !== null &&
-        registeredModuleCodes.value.includes(currentModuleCode.value)),
+    () => currentWorkspaceModuleStatus.value.currentModuleReady,
   )
 
-  const currentModuleStatusLabel = computed(() =>
-    currentModuleReady.value
-      ? t("app.placeholder.ready")
-      : t("app.placeholder.offline"),
+  const currentModuleStatusLabel = computed(
+    () => currentWorkspaceModuleStatus.value.currentModuleStatusLabel,
   )
 
-  const currentWorkspaceSectionTitle = computed(() =>
-    selectedWorkspaceRoute.value
-      ? translateWorkspaceRouteText(
-          selectedWorkspaceRoute.value,
-          "sectionTitleKey",
-          t,
-        )
-      : t("app.section.placeholderTitle", {
-          name:
-            selectedNavigationItem.value?.name ??
-            t("app.section.workspaceTitle"),
-        }),
+  const currentWorkspaceDisplayText = computed(() =>
+    resolveExampleWorkspaceDisplayText({
+      routeState: currentWorkspaceRouteState.value,
+      selectedNavigationItemName: selectedNavigationItem.value?.name,
+      isAuthenticated: Boolean(authIdentity.value),
+      isModuleReady: currentModuleReady.value,
+      t,
+    }),
   )
 
-  const currentWorkspaceSectionCopy = computed(() =>
-    selectedWorkspaceRoute.value
-      ? translateWorkspaceRouteText(
-          selectedWorkspaceRoute.value,
-          "sectionCopyKey",
-          t,
-        )
-      : currentModuleReady.value
-        ? t("app.section.placeholderCopyReady", {
-            name:
-              selectedNavigationItem.value?.name ??
-              t("app.section.workspaceTitle"),
-          })
-        : t("app.section.placeholderCopyOffline", {
-            name:
-              selectedNavigationItem.value?.name ??
-              t("app.section.workspaceTitle"),
-          }),
+  const currentWorkspaceSectionTitle = computed(
+    () => currentWorkspaceDisplayText.value.workspaceSectionTitle,
   )
 
-  const currentWorkspaceTitle = computed(() =>
-    !authIdentity.value
-      ? t("app.session.title.online")
-      : selectedWorkspaceRoute.value
-        ? translateWorkspaceRouteText(
-            selectedWorkspaceRoute.value,
-            "shellTitleKey",
-            t,
-          )
-        : (selectedNavigationItem.value?.name ?? t("app.runtime.title")),
+  const currentWorkspaceSectionCopy = computed(
+    () => currentWorkspaceDisplayText.value.workspaceSectionCopy,
   )
 
-  const placeholderWorkspaceCopy = computed(() =>
-    currentModuleReady.value
-      ? t("app.placeholder.descriptionReady", {
-          name:
-            selectedNavigationItem.value?.name ??
-            t("app.placeholder.fallbackModule"),
-        })
-      : t("app.placeholder.descriptionOffline", {
-          name:
-            selectedNavigationItem.value?.name ??
-            t("app.placeholder.fallbackModule"),
-        }),
+  const currentWorkspaceTitle = computed(
+    () => currentWorkspaceDisplayText.value.workspaceTitle,
   )
 
-  const currentWorkspaceDescription = computed(() =>
-    !authIdentity.value
-      ? t("app.session.loginRequiredCopy")
-      : selectedWorkspaceRoute.value
-        ? translateWorkspaceRouteText(
-            selectedWorkspaceRoute.value,
-            "shellDescriptionKey",
-            t,
-          )
-        : currentModuleReady.value
-          ? t("app.shell.placeholderDescriptionReady", {
-              name:
-                selectedNavigationItem.value?.name ??
-                t("app.placeholder.fallbackModule"),
-            })
-          : t("app.shell.placeholderDescriptionOffline", {
-              name:
-                selectedNavigationItem.value?.name ??
-                t("app.placeholder.fallbackModule"),
-            }),
+  const placeholderWorkspaceCopy = computed(
+    () => currentWorkspaceDisplayText.value.placeholderWorkspaceCopy,
+  )
+
+  const currentWorkspaceDescription = computed(
+    () => currentWorkspaceDisplayText.value.workspaceDescription,
   )
 
   const enterpriseSelectedMenuKey = computed(
@@ -303,8 +252,17 @@ export const useExampleNavigation = ({
       return
     }
 
-    currentMenuKey.value = customerNavigationItem.value.id
-    currentShellTabKey.value = "workspace"
+    const selectionIntent = resolveExampleWorkspaceSelectionIntent(
+      enterpriseNavigation.value,
+      customerNavigationItem.value.id,
+    )
+
+    if (!selectionIntent) {
+      return
+    }
+
+    currentMenuKey.value = selectionIntent.selectedMenuKey
+    currentShellTabKey.value = selectionIntent.selectedTabKey
   }
 
   const openCurrentWorkspaceTab = () => {
@@ -312,25 +270,27 @@ export const useExampleNavigation = ({
   }
 
   const selectShellMenu = (menuKey: string) => {
-    const nextMenuKey = resolveWorkspaceMenuKey(
+    const selectionIntent = resolveExampleWorkspaceSelectionIntent(
       enterpriseNavigation.value,
       menuKey,
     )
 
-    if (!nextMenuKey) {
+    if (!selectionIntent) {
       return
     }
 
-    currentMenuKey.value = nextMenuKey
-    currentShellTabKey.value = "workspace"
+    currentMenuKey.value = selectionIntent.selectedMenuKey
+    currentShellTabKey.value = selectionIntent.selectedTabKey
   }
 
   const selectShellTab = (tabKey: string) => {
-    if (tabKey !== "workspace" && tabKey !== "runtime") {
+    const nextTabKey = resolveExampleShellTabKey(tabKey)
+
+    if (!nextTabKey) {
       return
     }
 
-    currentShellTabKey.value = tabKey
+    currentShellTabKey.value = nextTabKey
   }
 
   return {

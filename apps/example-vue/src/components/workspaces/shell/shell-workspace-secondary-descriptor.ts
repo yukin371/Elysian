@@ -1,10 +1,10 @@
 import type { Component } from "vue"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
+import { generatedStandardCrudWorkspaceKinds } from "../../../app/workspace-registry/generated"
+import { generatedStandardCrudPanelComponents } from "../../../modules/generated"
 import AuthSessionWorkspacePanel from "../auth-session/AuthSessionWorkspacePanel.vue"
 import CustomerWorkspacePanel from "../customer/CustomerWorkspacePanel.vue"
-import DepartmentWorkspacePanel from "../department/DepartmentWorkspacePanel.vue"
-import DictionaryWorkspacePanel from "../dictionary/DictionaryWorkspacePanel.vue"
 import FileWorkspacePanel from "../file/FileWorkspacePanel.vue"
 import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspacePanel.vue"
 import type {
@@ -12,14 +12,7 @@ import type {
   GeneratorPreviewFileCard,
   GeneratorPreviewSqlPreview,
 } from "../generator/types"
-import MenuWorkspacePanel from "../menu/MenuWorkspacePanel.vue"
-import NotificationWorkspacePanel from "../notification/NotificationWorkspacePanel.vue"
 import OperationLogWorkspacePanel from "../operation-log/OperationLogWorkspacePanel.vue"
-import PostWorkspacePanel from "../post/PostWorkspacePanel.vue"
-import RoleWorkspacePanel from "../role/RoleWorkspacePanel.vue"
-import SettingWorkspacePanel from "../setting/SettingWorkspacePanel.vue"
-import TenantWorkspacePanel from "../tenant/TenantWorkspacePanel.vue"
-import UserWorkspacePanel from "../user/UserWorkspacePanel.vue"
 import WorkflowWorkspacePanel from "../workflow/WorkflowWorkspacePanel.vue"
 import ShellWorkspaceStatusPanel from "./ShellWorkspaceStatusPanel.vue"
 
@@ -39,6 +32,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewDictionaries: boolean
   canCreateDictionaryTypes: boolean
   canUpdateDictionaryTypes: boolean
+  dictionaryWorkspaceState: Record<string, unknown>
   dictionaryLoading: boolean
   dictionaryDetailLoading: boolean
   dictionaryErrorMessage: string
@@ -57,6 +51,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewDepartments: boolean
   canCreateDepartments: boolean
   canUpdateDepartments: boolean
+  departmentWorkspaceState: Record<string, unknown>
   departmentLoading: boolean
   departmentDetailLoading: boolean
   departmentErrorMessage: string
@@ -80,6 +75,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewPosts: boolean
   canCreatePosts: boolean
   canUpdatePosts: boolean
+  postWorkspaceState: Record<string, unknown>
   postLoading: boolean
   postDetailLoading: boolean
   postErrorMessage: string
@@ -95,6 +91,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewMenus: boolean
   canCreateMenus: boolean
   canUpdateMenus: boolean
+  menuWorkspaceState: Record<string, unknown>
   menuLoading: boolean
   menuDetailLoading: boolean
   menuErrorMessage: string
@@ -112,16 +109,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewNotifications: boolean
   canCreateNotifications: boolean
   canUpdateNotifications: boolean
-  notificationLoading: boolean
-  notificationDetailLoading: boolean
-  notificationErrorMessage: string
-  notificationDetailErrorMessage: string
-  notificationPanelMode: string
-  notificationPanelTitle: string
-  notificationPanelDescription: string
-  selectedNotification: Record<string, unknown> | null
-  enterpriseNotificationFormFields: ReadonlyArray<unknown>
-  enterpriseNotificationFormValues: Record<string, unknown>
+  notificationWorkspaceState: Record<string, unknown>
   localizeNotificationStatus: (status: string) => string
   localizeNotificationLevel: (level: string) => string
   operationLogModuleReady: boolean
@@ -142,6 +130,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewRoles: boolean
   canCreateRoles: boolean
   canUpdateRoles: boolean
+  roleWorkspaceState: Record<string, unknown>
   roleLoading: boolean
   roleDetailLoading: boolean
   roleErrorMessage: string
@@ -158,46 +147,21 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewSettings: boolean
   canCreateSettings: boolean
   canUpdateSettings: boolean
-  settingLoading: boolean
-  settingDetailLoading: boolean
-  settingErrorMessage: string
-  settingDetailErrorMessage: string
-  settingPanelMode: string
-  settingPanelTitle: string
-  settingPanelDescription: string
-  selectedSetting: Record<string, unknown> | null
-  enterpriseSettingFormFields: ReadonlyArray<unknown>
-  enterpriseSettingFormValues: Record<string, unknown>
+  settingWorkspaceState: Record<string, unknown>
   tenantModuleReady: boolean
   tenantIsSuperAdmin: boolean
   canEnterTenantWorkspace: boolean
   canViewTenants: boolean
   canCreateTenants: boolean
   canUpdateTenants: boolean
-  tenantLoading: boolean
-  tenantDetailLoading: boolean
-  tenantErrorMessage: string
-  tenantDetailErrorMessage: string
-  tenantPanelMode: string
-  tenantPanelTitle: string
-  tenantPanelDescription: string
-  selectedTenant: Record<string, unknown> | null
-  enterpriseTenantFormFields: ReadonlyArray<unknown>
-  enterpriseTenantFormValues: Record<string, unknown>
+  tenantWorkspaceState: Record<string, unknown>
   userModuleReady: boolean
   canEnterUserWorkspace: boolean
   canViewUsers: boolean
   canCreateUsers: boolean
   canUpdateUsers: boolean
   canResetUserPasswords: boolean
-  userLoading: boolean
-  userErrorMessage: string
-  userPanelMode: string
-  userPanelTitle: string
-  userPanelDescription: string
-  selectedUser: Record<string, unknown> | null
-  enterpriseUserFormFields: ReadonlyArray<unknown>
-  enterpriseUserFormValues: Record<string, unknown>
+  userWorkspaceState: Record<string, unknown>
   userPasswordInput: string
   workflowDetailLoading: boolean
   workflowDetailErrorMessage: string
@@ -402,9 +366,26 @@ const customerResolver: ShellWorkspaceSecondaryResolver = (props, emit) => ({
   },
 })
 
+export const shellWorkspaceSecondaryResolverKinds = [
+  "dictionary",
+  "department",
+  "session",
+  "post",
+  "menu",
+  "notification",
+  "operation-log",
+  "role",
+  "setting",
+  "tenant",
+  "user",
+  "workflow-definitions",
+  "file",
+  "generator-preview",
+] as const
+
 const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
   dictionary: (props, emit) => ({
-    component: DictionaryWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.dictionary,
     props: {
       t: props.t,
       moduleReady: props.dictionaryModuleReady,
@@ -414,19 +395,9 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canViewDictionaries: props.canViewDictionaries,
       canCreateDictionaryTypes: props.canCreateDictionaryTypes,
       canUpdateDictionaryTypes: props.canUpdateDictionaryTypes,
-      loading: props.dictionaryLoading,
-      detailLoading: props.dictionaryDetailLoading,
-      errorMessage: props.dictionaryErrorMessage,
-      detailErrorMessage: props.dictionaryDetailErrorMessage,
-      panelMode: props.dictionaryPanelMode,
-      panelTitle: props.dictionaryPanelTitle,
-      panelDescription: props.dictionaryPanelDescription,
-      selectedDictionaryType: props.selectedDictionaryType,
-      selectedDictionaryTypeItems: props.selectedDictionaryTypeItems,
-      formFields: props.enterpriseDictionaryFormFields,
-      formValues: props.enterpriseDictionaryFormValues,
       formCopy: props.enterpriseFormCopy,
       localizeDictionaryStatus: props.localizeDictionaryStatus,
+      workspaceStateInjected: true,
     },
     listeners: editPanelListeners(
       emit,
@@ -437,7 +408,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     ),
   }),
   department: (props, emit) => ({
-    component: DepartmentWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.department,
     props: {
       t: props.t,
       moduleReady: props.departmentModuleReady,
@@ -447,19 +418,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canViewDepartments: props.canViewDepartments,
       canCreateDepartments: props.canCreateDepartments,
       canUpdateDepartments: props.canUpdateDepartments,
-      loading: props.departmentLoading,
-      detailLoading: props.departmentDetailLoading,
-      errorMessage: props.departmentErrorMessage,
-      detailErrorMessage: props.departmentDetailErrorMessage,
-      panelMode: props.departmentPanelMode,
-      panelTitle: props.departmentPanelTitle,
-      panelDescription: props.departmentPanelDescription,
-      selectedDepartment: props.selectedDepartment,
-      selectedDepartmentDetail: props.selectedDepartmentDetail,
-      formFields: props.enterpriseDepartmentFormFields,
-      formValues: props.enterpriseDepartmentFormValues,
       formCopy: props.enterpriseFormCopy,
-      departmentParentLookup: props.departmentParentLookup,
+      workspaceStateInjected: true,
     },
     listeners: editPanelListeners(
       emit,
@@ -487,7 +447,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     },
   }),
   post: (props, emit) => ({
-    component: PostWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.post,
     props: {
       t: props.t,
       moduleReady: props.postModuleReady,
@@ -497,17 +457,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canViewPosts: props.canViewPosts,
       canCreatePosts: props.canCreatePosts,
       canUpdatePosts: props.canUpdatePosts,
-      loading: props.postLoading,
-      detailLoading: props.postDetailLoading,
-      errorMessage: props.postErrorMessage,
-      detailErrorMessage: props.postDetailErrorMessage,
-      panelMode: props.postPanelMode,
-      panelTitle: props.postPanelTitle,
-      panelDescription: props.postPanelDescription,
-      selectedPost: props.selectedPost,
-      formFields: props.enterprisePostFormFields,
-      formValues: props.enterprisePostFormValues,
       formCopy: props.enterpriseFormCopy,
+      workspaceStateInjected: true,
     },
     listeners: editPanelListeners(
       emit,
@@ -518,7 +469,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     ),
   }),
   menu: (props, emit) => ({
-    component: MenuWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.menu,
     props: {
       t: props.t,
       moduleReady: props.menuModuleReady,
@@ -528,19 +479,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canViewMenus: props.canViewMenus,
       canCreateMenus: props.canCreateMenus,
       canUpdateMenus: props.canUpdateMenus,
-      loading: props.menuLoading,
-      detailLoading: props.menuDetailLoading,
-      errorMessage: props.menuErrorMessage,
-      detailErrorMessage: props.menuDetailErrorMessage,
-      panelMode: props.menuPanelMode,
-      panelTitle: props.menuPanelTitle,
-      panelDescription: props.menuPanelDescription,
-      selectedMenu: props.selectedMenu,
-      selectedMenuDetail: props.selectedMenuDetail,
-      formFields: props.enterpriseMenuFormFields,
-      formValues: props.enterpriseMenuFormValues,
       formCopy: props.enterpriseFormCopy,
-      menuParentLookup: props.menuParentLookup,
+      workspaceStateInjected: true,
     },
     listeners: editPanelListeners(
       emit,
@@ -551,7 +491,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     ),
   }),
   notification: (props, emit) => ({
-    component: NotificationWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.notification,
     props: {
       t: props.t,
       locale: props.locale,
@@ -562,19 +502,10 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canViewNotifications: props.canViewNotifications,
       canCreateNotifications: props.canCreateNotifications,
       canUpdateNotifications: props.canUpdateNotifications,
-      loading: props.notificationLoading,
-      detailLoading: props.notificationDetailLoading,
-      errorMessage: props.notificationErrorMessage,
-      detailErrorMessage: props.notificationDetailErrorMessage,
-      panelMode: props.notificationPanelMode,
-      panelTitle: props.notificationPanelTitle,
-      panelDescription: props.notificationPanelDescription,
-      selectedNotification: props.selectedNotification,
-      formFields: props.enterpriseNotificationFormFields,
-      formValues: props.enterpriseNotificationFormValues,
       formCopy: props.enterpriseFormCopy,
       localizeNotificationStatus: props.localizeNotificationStatus,
       localizeNotificationLevel: props.localizeNotificationLevel,
+      workspaceStateInjected: true,
     },
     listeners: {
       "mark-read": () => emit("mark-selected-notification-as-read"),
@@ -607,7 +538,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     },
   }),
   role: (props, emit) => ({
-    component: RoleWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.role,
     props: {
       t: props.t,
       moduleReady: props.roleModuleReady,
@@ -617,18 +548,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canViewRoles: props.canViewRoles,
       canCreateRoles: props.canCreateRoles,
       canUpdateRoles: props.canUpdateRoles,
-      loading: props.roleLoading,
-      detailLoading: props.roleDetailLoading,
-      errorMessage: props.roleErrorMessage,
-      detailErrorMessage: props.roleDetailErrorMessage,
-      panelMode: props.rolePanelMode,
-      panelTitle: props.rolePanelTitle,
-      panelDescription: props.rolePanelDescription,
-      selectedRole: props.selectedRole,
-      selectedRoleDetail: props.selectedRoleDetail,
-      formFields: props.enterpriseRoleFormFields,
-      formValues: props.enterpriseRoleFormValues,
       formCopy: props.enterpriseFormCopy,
+      workspaceStateInjected: true,
     },
     listeners: editPanelListeners(
       emit,
@@ -639,7 +560,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     ),
   }),
   setting: (props, emit) => ({
-    component: SettingWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.setting,
     props: {
       t: props.t,
       moduleReady: props.settingModuleReady,
@@ -647,19 +568,10 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterSettingWorkspace,
       canViewSettings: props.canViewSettings,
-      loading: props.settingLoading,
-      detailLoading: props.settingDetailLoading,
-      errorMessage: props.settingErrorMessage,
-      detailErrorMessage: props.settingDetailErrorMessage,
-      panelMode: props.settingPanelMode,
-      panelTitle: props.settingPanelTitle,
-      panelDescription: props.settingPanelDescription,
-      selectedSetting: props.selectedSetting,
-      formFields: props.enterpriseSettingFormFields,
-      formValues: props.enterpriseSettingFormValues,
       formCopy: props.enterpriseFormCopy,
       canCreateSettings: props.canCreateSettings,
       canUpdateSettings: props.canUpdateSettings,
+      workspaceStateInjected: true,
     },
     listeners: editPanelListeners(
       emit,
@@ -670,7 +582,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     ),
   }),
   tenant: (props, emit) => ({
-    component: TenantWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.tenant,
     props: {
       t: props.t,
       moduleReady: props.tenantModuleReady,
@@ -681,17 +593,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canViewTenants: props.canViewTenants,
       canCreateTenants: props.canCreateTenants,
       canUpdateTenants: props.canUpdateTenants,
-      loading: props.tenantLoading,
-      detailLoading: props.tenantDetailLoading,
-      errorMessage: props.tenantErrorMessage,
-      detailErrorMessage: props.tenantDetailErrorMessage,
-      panelMode: props.tenantPanelMode,
-      panelTitle: props.tenantPanelTitle,
-      panelDescription: props.tenantPanelDescription,
-      selectedTenant: props.selectedTenant,
-      formFields: props.enterpriseTenantFormFields,
-      formValues: props.enterpriseTenantFormValues,
       formCopy: props.enterpriseFormCopy,
+      workspaceStateInjected: true,
     },
     listeners: {
       "start-edit": () => emit("start-tenant-edit"),
@@ -702,7 +605,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     },
   }),
   user: (props, emit) => ({
-    component: UserWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.user,
     props: {
       t: props.t,
       moduleReady: props.userModuleReady,
@@ -713,16 +616,9 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       canCreateUsers: props.canCreateUsers,
       canUpdateUsers: props.canUpdateUsers,
       canResetUserPasswords: props.canResetUserPasswords,
-      loading: props.userLoading,
-      errorMessage: props.userErrorMessage,
-      panelMode: props.userPanelMode,
-      panelTitle: props.userPanelTitle,
-      panelDescription: props.userPanelDescription,
-      selectedUser: props.selectedUser,
-      formFields: props.enterpriseUserFormFields,
-      formValues: props.enterpriseUserFormValues,
       formCopy: props.enterpriseFormCopy,
       passwordInput: props.userPasswordInput,
+      workspaceStateInjected: true,
     },
     listeners: {
       "start-edit": () => emit("start-user-edit"),
@@ -799,6 +695,23 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
   }),
 }
 
+const standardCrudWorkspaceKindSet = new Set<string>(
+  generatedStandardCrudWorkspaceKinds,
+)
+
+const assertShellWorkspaceSecondaryResolverCoverage = (
+  workspaceKind: string,
+) => {
+  if (
+    standardCrudWorkspaceKindSet.has(workspaceKind) &&
+    !(workspaceKind in workspaceResolvers)
+  ) {
+    throw new Error(
+      `Missing shell secondary resolver for generated standard CRUD workspace "${workspaceKind}"`,
+    )
+  }
+}
+
 export const resolveShellWorkspaceSecondaryDescriptor = (
   props: ShellWorkspaceSecondarySwitchProps,
   emit: ShellWorkspaceSecondarySwitchEmitFn,
@@ -806,6 +719,8 @@ export const resolveShellWorkspaceSecondaryDescriptor = (
   if (props.isRuntimeShellTab || props.currentWorkspaceKind === "placeholder") {
     return statusResolver(props, emit)
   }
+
+  assertShellWorkspaceSecondaryResolverCoverage(props.currentWorkspaceKind)
 
   return (workspaceResolvers[props.currentWorkspaceKind] ?? customerResolver)(
     props,

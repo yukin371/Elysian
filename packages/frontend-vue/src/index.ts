@@ -15,6 +15,7 @@ import {
   hasPermission,
 } from "@elysian/ui-core"
 import {
+  type ComputedRef,
   type InjectionKey,
   type Ref,
   computed,
@@ -151,6 +152,33 @@ export interface WorkspaceRegistrationLike {
   permissionPrefix: string
 }
 
+export interface FrontendModuleArtifactLike {
+  i18nKeys: WorkspaceRegistrationLike["i18nKeys"]
+  kind: string
+  moduleCode: string
+  permissions: Record<string, string>
+  permissionPrefix: string | null
+  routePath: string | null
+  workspaceDomain: WorkspaceRegistrationLike["domain"] | null
+}
+
+export interface FrontendWorkspaceState<TKind extends string = string> {
+  errorMessage: Ref<string>
+  kind: TKind
+  loading: Ref<boolean>
+}
+
+export interface FrontendWorkspaceStateContext<
+  TKind extends string = string,
+  TState = unknown,
+> extends FrontendWorkspaceState<TKind> {
+  state: TState
+}
+
+export const WORKSPACE_STATE_KEY: InjectionKey<
+  ComputedRef<FrontendWorkspaceStateContext | null>
+> = Symbol("elysian-workspace-state")
+
 const DEFAULT_PERMISSION_ACTIONS: ModulePermissionActions = {
   create: true,
   list: true,
@@ -161,7 +189,7 @@ const derivePermissions = (
   permissionPrefix: string,
   actions: ModulePermissionActions | undefined,
 ): Record<string, string> => {
-  const resolved = { ...DEFAULT_PERMISSION_ACTIONS, ...actions }
+  const resolved = actions ?? DEFAULT_PERMISSION_ACTIONS
   const permissions: Record<string, string> = {}
 
   if (resolved.list) permissions.list = `${permissionPrefix}:list`
@@ -200,6 +228,32 @@ export const buildWorkspaceRegistration = (
       frontend.permissionActions,
     ),
     i18nKeys: deriveI18nKeys(schema.name),
+  }
+}
+
+export const buildWorkspaceRegistrationFromArtifact = (
+  artifact: FrontendModuleArtifactLike,
+): WorkspaceRegistrationLike => {
+  if (!artifact.workspaceDomain) {
+    throw new Error("Frontend module artifact is missing workspaceDomain")
+  }
+
+  if (!artifact.routePath) {
+    throw new Error("Frontend module artifact is missing routePath")
+  }
+
+  if (!artifact.permissionPrefix) {
+    throw new Error("Frontend module artifact is missing permissionPrefix")
+  }
+
+  return {
+    domain: artifact.workspaceDomain,
+    path: artifact.routePath,
+    kind: artifact.kind,
+    moduleCode: artifact.moduleCode,
+    permissionPrefix: artifact.permissionPrefix,
+    permissions: artifact.permissions,
+    i18nKeys: artifact.i18nKeys,
   }
 }
 

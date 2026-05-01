@@ -4,8 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "bun run verify:workspace-registry-artifacts && bun run verify:standard-crud-surfaces && vite build",
+    "preview": "vite preview",
+    "generate:standard-crud-surfaces": "bun ./scripts/generate-standard-crud-surfaces.ts",
+    "generate:workspace-registry-artifacts": "bun ./scripts/generate-workspace-registry-artifacts.ts",
+    "verify:standard-crud-surfaces": "bun ./scripts/verify-standard-crud-surfaces.ts",
+    "verify:workspace-registry-artifacts": "bun test ./src/app/workspace-registry/generated-artifacts.test.ts ./src/components/workspaces/shell/shell-workspace-descriptor-coverage.test.ts"
   },
   "dependencies": {
     "@elysian/frontend-vue": "workspace:*",

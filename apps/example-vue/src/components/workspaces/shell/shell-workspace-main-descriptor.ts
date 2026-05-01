@@ -1,22 +1,15 @@
 import type { Component } from "vue"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
+import { generatedStandardCrudWorkspaceKinds } from "../../../app/workspace-registry/generated"
 import type { FileWorkspaceQuery } from "../../../lib/file-workspace"
+import { generatedStandardCrudMainComponents } from "../../../modules/generated"
 import AuthSessionWorkspaceMain from "../auth-session/AuthSessionWorkspaceMain.vue"
 import CustomerWorkspaceMain from "../customer/CustomerWorkspaceMain.vue"
-import DepartmentWorkspaceMain from "../department/DepartmentWorkspaceMain.vue"
-import DictionaryWorkspaceMain from "../dictionary/DictionaryWorkspaceMain.vue"
 import FileWorkspaceMain from "../file/FileWorkspaceMain.vue"
 import GeneratorPreviewWorkspaceMain from "../generator/GeneratorPreviewWorkspaceMain.vue"
 import type { GeneratorPreviewDiffSummary } from "../generator/types"
-import MenuWorkspaceMain from "../menu/MenuWorkspaceMain.vue"
-import NotificationWorkspaceMain from "../notification/NotificationWorkspaceMain.vue"
 import OperationLogWorkspaceMain from "../operation-log/OperationLogWorkspaceMain.vue"
-import PostWorkspaceMain from "../post/PostWorkspaceMain.vue"
-import RoleWorkspaceMain from "../role/RoleWorkspaceMain.vue"
-import SettingWorkspaceMain from "../setting/SettingWorkspaceMain.vue"
-import TenantWorkspaceMain from "../tenant/TenantWorkspaceMain.vue"
-import UserWorkspaceMain from "../user/UserWorkspaceMain.vue"
 import WorkflowWorkspaceMain from "../workflow/WorkflowWorkspaceMain.vue"
 import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 
@@ -85,6 +78,7 @@ export interface ShellWorkspaceMainSwitchProps {
   departmentModuleReady: boolean
   canEnterDepartmentWorkspace: boolean
   canViewDepartments: boolean
+  departmentWorkspaceState: Record<string, unknown>
   departmentLoading: boolean
   departmentErrorMessage: string
   enterpriseDepartmentQueryFields: ReadonlyArray<unknown>
@@ -103,29 +97,27 @@ export interface ShellWorkspaceMainSwitchProps {
   postModuleReady: boolean
   canEnterPostWorkspace: boolean
   canViewPosts: boolean
+  postWorkspaceState: Record<string, unknown>
   postLoading: boolean
   postErrorMessage: string
   enterprisePostQueryFields: ReadonlyArray<unknown>
   enterprisePostTableColumns: ReadonlyArray<unknown>
-  enterprisePostTableItems: ReadonlyArray<unknown>
   postCountLabel: string
   menuModuleReady: boolean
   canEnterMenuWorkspace: boolean
   canViewMenus: boolean
+  menuWorkspaceState: Record<string, unknown>
   menuLoading: boolean
   menuErrorMessage: string
   enterpriseMenuQueryFields: ReadonlyArray<unknown>
   enterpriseMenuTableColumns: ReadonlyArray<unknown>
-  enterpriseMenuTableItems: ReadonlyArray<unknown>
   menuCountLabel: string
   notificationModuleReady: boolean
   canEnterNotificationWorkspace: boolean
   canViewNotifications: boolean
-  notificationLoading: boolean
-  notificationErrorMessage: string
+  notificationWorkspaceState: Record<string, unknown>
   enterpriseNotificationQueryFields: ReadonlyArray<unknown>
   enterpriseNotificationTableColumns: ReadonlyArray<unknown>
-  enterpriseNotificationTableItems: ReadonlyArray<unknown>
   notificationCountLabel: string
   operationLogModuleReady: boolean
   canEnterOperationLogWorkspace: boolean
@@ -146,30 +138,24 @@ export interface ShellWorkspaceMainSwitchProps {
   settingModuleReady: boolean
   canEnterSettingWorkspace: boolean
   canViewSettings: boolean
-  settingLoading: boolean
-  settingErrorMessage: string
+  settingWorkspaceState: Record<string, unknown>
   enterpriseSettingQueryFields: ReadonlyArray<unknown>
   enterpriseSettingTableColumns: ReadonlyArray<unknown>
-  enterpriseSettingTableItems: ReadonlyArray<unknown>
   settingCountLabel: string
   tenantModuleReady: boolean
   tenantIsSuperAdmin: boolean
   canEnterTenantWorkspace: boolean
   canViewTenants: boolean
-  tenantLoading: boolean
-  tenantErrorMessage: string
+  tenantWorkspaceState: Record<string, unknown>
   enterpriseTenantQueryFields: ReadonlyArray<unknown>
   enterpriseTenantTableColumns: ReadonlyArray<unknown>
-  enterpriseTenantTableItems: ReadonlyArray<unknown>
   tenantCountLabel: string
   userModuleReady: boolean
   canEnterUserWorkspace: boolean
   canViewUsers: boolean
-  userLoading: boolean
-  userErrorMessage: string
+  userWorkspaceState: Record<string, unknown>
   enterpriseUserQueryFields: ReadonlyArray<unknown>
   enterpriseUserTableColumns: ReadonlyArray<unknown>
-  enterpriseUserTableItems: ReadonlyArray<unknown>
   userCountLabel: string
   customerModuleReady: boolean
   canEnterCustomerWorkspace: boolean
@@ -413,6 +399,23 @@ const customerResolver: ShellWorkspaceMainResolver = (props, emit) => ({
   },
 })
 
+export const shellWorkspaceMainResolverKinds = [
+  "workflow-definitions",
+  "file",
+  "generator-preview",
+  "dictionary",
+  "department",
+  "session",
+  "post",
+  "menu",
+  "notification",
+  "operation-log",
+  "role",
+  "setting",
+  "tenant",
+  "user",
+] as const
+
 const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
   "workflow-definitions": (props, emit) => ({
     component: WorkflowWorkspaceMain,
@@ -504,7 +507,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     },
   }),
   dictionary: (props, emit) => ({
-    component: DictionaryWorkspaceMain,
+    component: generatedStandardCrudMainComponents.dictionary,
     props: {
       t: props.t,
       moduleReady: props.dictionaryModuleReady,
@@ -529,7 +532,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   department: (props, emit) => ({
-    component: DepartmentWorkspaceMain,
+    component: generatedStandardCrudMainComponents.department,
     props: {
       t: props.t,
       moduleReady: props.departmentModuleReady,
@@ -537,16 +540,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterDepartmentWorkspace,
       canViewDepartments: props.canViewDepartments,
-      loading: props.departmentLoading,
-      errorMessage: props.departmentErrorMessage,
       queryFields: props.enterpriseDepartmentQueryFields,
       tableColumns: props.enterpriseDepartmentTableColumns,
-      items: props.enterpriseDepartmentTableItems,
       itemCountLabel: props.departmentCountLabel,
       emptyTitle: props.t("app.department.emptyTitle"),
       emptyDescription: props.t("app.department.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
@@ -582,7 +583,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   post: (props, emit) => ({
-    component: PostWorkspaceMain,
+    component: generatedStandardCrudMainComponents.post,
     props: {
       t: props.t,
       moduleReady: props.postModuleReady,
@@ -590,16 +591,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterPostWorkspace,
       canViewPosts: props.canViewPosts,
-      loading: props.postLoading,
-      errorMessage: props.postErrorMessage,
       queryFields: props.enterprisePostQueryFields,
       tableColumns: props.enterprisePostTableColumns,
-      items: props.enterprisePostTableItems,
       itemCountLabel: props.postCountLabel,
       emptyTitle: props.t("app.post.emptyTitle"),
       emptyDescription: props.t("app.post.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
@@ -609,7 +608,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   menu: (props, emit) => ({
-    component: MenuWorkspaceMain,
+    component: generatedStandardCrudMainComponents.menu,
     props: {
       t: props.t,
       moduleReady: props.menuModuleReady,
@@ -617,16 +616,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterMenuWorkspace,
       canViewMenus: props.canViewMenus,
-      loading: props.menuLoading,
-      errorMessage: props.menuErrorMessage,
       queryFields: props.enterpriseMenuQueryFields,
       tableColumns: props.enterpriseMenuTableColumns,
-      items: props.enterpriseMenuTableItems,
       itemCountLabel: props.menuCountLabel,
       emptyTitle: props.t("app.menu.emptyTitle"),
       emptyDescription: props.t("app.menu.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
@@ -636,7 +633,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   notification: (props, emit) => ({
-    component: NotificationWorkspaceMain,
+    component: generatedStandardCrudMainComponents.notification,
     props: {
       t: props.t,
       moduleReady: props.notificationModuleReady,
@@ -644,16 +641,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterNotificationWorkspace,
       canViewNotifications: props.canViewNotifications,
-      loading: props.notificationLoading,
-      errorMessage: props.notificationErrorMessage,
       queryFields: props.enterpriseNotificationQueryFields,
       tableColumns: props.enterpriseNotificationTableColumns,
-      items: props.enterpriseNotificationTableItems,
       itemCountLabel: props.notificationCountLabel,
       emptyTitle: props.t("app.notification.emptyTitle"),
       emptyDescription: props.t("app.notification.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
@@ -690,7 +685,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   role: (props, emit) => ({
-    component: RoleWorkspaceMain,
+    component: generatedStandardCrudMainComponents.role,
     props: {
       t: props.t,
       moduleReady: props.roleModuleReady,
@@ -715,7 +710,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   setting: (props, emit) => ({
-    component: SettingWorkspaceMain,
+    component: generatedStandardCrudMainComponents.setting,
     props: {
       t: props.t,
       moduleReady: props.settingModuleReady,
@@ -723,16 +718,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterSettingWorkspace,
       canViewSettings: props.canViewSettings,
-      loading: props.settingLoading,
-      errorMessage: props.settingErrorMessage,
       queryFields: props.enterpriseSettingQueryFields,
       tableColumns: props.enterpriseSettingTableColumns,
-      items: props.enterpriseSettingTableItems,
       itemCountLabel: props.settingCountLabel,
       emptyTitle: props.t("app.setting.emptyTitle"),
       emptyDescription: props.t("app.setting.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
@@ -742,7 +735,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   tenant: (props, emit) => ({
-    component: TenantWorkspaceMain,
+    component: generatedStandardCrudMainComponents.tenant,
     props: {
       t: props.t,
       moduleReady: props.tenantModuleReady,
@@ -751,16 +744,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isSuperAdmin: props.tenantIsSuperAdmin,
       canEnterWorkspace: props.canEnterTenantWorkspace,
       canViewTenants: props.canViewTenants,
-      loading: props.tenantLoading,
-      errorMessage: props.tenantErrorMessage,
       queryFields: props.enterpriseTenantQueryFields,
       tableColumns: props.enterpriseTenantTableColumns,
-      items: props.enterpriseTenantTableItems,
       itemCountLabel: props.tenantCountLabel,
       emptyTitle: props.t("app.tenant.emptyTitle"),
       emptyDescription: props.t("app.tenant.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
@@ -770,7 +761,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   user: (props, emit) => ({
-    component: UserWorkspaceMain,
+    component: generatedStandardCrudMainComponents.user,
     props: {
       t: props.t,
       moduleReady: props.userModuleReady,
@@ -778,16 +769,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       isAuthenticated: props.isAuthenticated,
       canEnterWorkspace: props.canEnterUserWorkspace,
       canViewUsers: props.canViewUsers,
-      loading: props.userLoading,
-      errorMessage: props.userErrorMessage,
       queryFields: props.enterpriseUserQueryFields,
       tableColumns: props.enterpriseUserTableColumns,
-      items: props.enterpriseUserTableItems,
       itemCountLabel: props.userCountLabel,
       emptyTitle: props.t("app.user.emptyTitle"),
       emptyDescription: props.t("app.user.emptyDescription"),
       currentQuerySummary: props.currentQuerySummary,
       copy: props.enterpriseCrudCopy,
+      workspaceStateInjected: true,
     },
     listeners: workspaceListListeners(
       emit,
@@ -799,6 +788,21 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
   placeholder: placeholderResolver,
 }
 
+const standardCrudWorkspaceKindSet = new Set<string>(
+  generatedStandardCrudWorkspaceKinds,
+)
+
+const assertShellWorkspaceMainResolverCoverage = (workspaceKind: string) => {
+  if (
+    standardCrudWorkspaceKindSet.has(workspaceKind) &&
+    !(workspaceKind in workspaceResolvers)
+  ) {
+    throw new Error(
+      `Missing shell main resolver for generated standard CRUD workspace "${workspaceKind}"`,
+    )
+  }
+}
+
 export const resolveShellWorkspaceMainDescriptor = (
   props: ShellWorkspaceMainSwitchProps,
   emit: ShellWorkspaceMainSwitchEmitFn,
@@ -806,6 +810,8 @@ export const resolveShellWorkspaceMainDescriptor = (
   if (props.enterpriseSelectedTabKey === "runtime") {
     return runtimeResolver(props, emit)
   }
+
+  assertShellWorkspaceMainResolverCoverage(props.currentWorkspaceKind)
 
   return (workspaceResolvers[props.currentWorkspaceKind] ?? customerResolver)(
     props,

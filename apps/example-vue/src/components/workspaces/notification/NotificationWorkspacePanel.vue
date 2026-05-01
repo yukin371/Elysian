@@ -5,8 +5,14 @@ import {
   type ElyFormField,
   type ElyFormValues,
 } from "@elysian/ui-enterprise-vue"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { NotificationRecord } from "../../../lib/platform-api"
+import {
+  readInjectedValue,
+  resolveNotificationWorkspacePanelState,
+} from "./notification-workspace-state"
 
 type NotificationWorkspaceTranslation = (
   key: string,
@@ -23,22 +29,13 @@ interface NotificationWorkspacePanelProps {
   canViewNotifications: boolean
   canCreateNotifications: boolean
   canUpdateNotifications: boolean
-  loading: boolean
-  detailLoading: boolean
-  errorMessage: string
-  detailErrorMessage: string
-  panelMode: "detail" | "create"
-  panelTitle: string
-  panelDescription: string
-  selectedNotification: NotificationRecord | null
-  formFields: ElyFormField[]
-  formValues: ElyFormValues
   formCopy: ElyFormCopy
   localizeNotificationStatus: (status: NotificationRecord["status"]) => string
   localizeNotificationLevel: (level: NotificationRecord["level"]) => string
+  workspaceStateInjected?: boolean
 }
 
-defineProps<NotificationWorkspacePanelProps>()
+const props = defineProps<NotificationWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "mark-read"): void
@@ -46,13 +43,88 @@ const emit = defineEmits<{
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedNotificationWorkspaceState = computed(() =>
+  resolveNotificationWorkspacePanelState(
+    injectedWorkspaceState.value,
+    Boolean(props.workspaceStateInjected),
+  ),
+)
+
+const resolvedLoading = readInjectedValue(
+  computed(
+    () => resolvedNotificationWorkspaceState.value?.notificationLoading ?? null,
+  ),
+  false,
+)
+const resolvedDetailLoading = readInjectedValue(
+  computed(
+    () =>
+      resolvedNotificationWorkspaceState.value?.notificationDetailLoading ??
+      null,
+  ),
+  false,
+)
+const resolvedErrorMessage = readInjectedValue(
+  computed(
+    () =>
+      resolvedNotificationWorkspaceState.value?.notificationErrorMessage ??
+      null,
+  ),
+  "",
+)
+const resolvedDetailErrorMessage = readInjectedValue(
+  computed(
+    () =>
+      resolvedNotificationWorkspaceState.value
+        ?.notificationDetailErrorMessage ?? null,
+  ),
+  "",
+)
+const resolvedPanelMode = readInjectedValue(
+  computed(
+    () =>
+      resolvedNotificationWorkspaceState.value?.notificationPanelMode ?? null,
+  ),
+  "detail" as "detail" | "create",
+)
+const resolvedPanelTitle = readInjectedValue(
+  computed(() => resolvedNotificationWorkspaceState.value?.panelTitle ?? null),
+  "",
+)
+const resolvedPanelDescription = readInjectedValue(
+  computed(
+    () => resolvedNotificationWorkspaceState.value?.panelDescription ?? null,
+  ),
+  "",
+)
+const resolvedSelectedNotification = readInjectedValue(
+  computed(
+    () =>
+      resolvedNotificationWorkspaceState.value?.selectedNotification ?? null,
+  ),
+  null as NotificationRecord | null,
+)
+const resolvedFormFields = readInjectedValue(
+  computed(() => resolvedNotificationWorkspaceState.value?.formFields ?? null),
+  [] as ElyFormField[],
+)
+const resolvedFormValues = readInjectedValue(
+  computed(() => resolvedNotificationWorkspaceState.value?.formValues ?? null),
+  {} as ElyFormValues,
+)
 </script>
 
 <template>
   <section class="enterprise-card">
     <p class="enterprise-eyebrow">{{ t("app.notification.detailEyebrow") }}</p>
-    <h3 class="enterprise-heading">{{ panelTitle }}</h3>
-    <p class="enterprise-copy">{{ panelDescription }}</p>
+    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
+    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.notificationModuleOffline") }}
@@ -69,28 +141,35 @@ const emit = defineEmits<{
       {{ t("app.message.notificationNoListPermission") }}
     </div>
 
-    <div v-else-if="errorMessage" class="enterprise-inline-warning">
-      {{ errorMessage }}
+    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedErrorMessage }}
     </div>
 
     <div
-      v-else-if="detailLoading && selectedNotification"
+      v-else-if="resolvedDetailLoading && resolvedSelectedNotification"
       class="enterprise-inline-warning"
     >
       {{ t("app.notification.detailLoading") }}
     </div>
 
-    <div v-else-if="detailErrorMessage" class="enterprise-inline-warning">
-      {{ detailErrorMessage }}
+    <div v-else-if="resolvedDetailErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedDetailErrorMessage }}
     </div>
 
-    <template v-else-if="panelMode === 'detail' && selectedNotification">
+    <template
+      v-else-if="
+        resolvedPanelMode === 'detail' && resolvedSelectedNotification
+      "
+    >
       <div class="enterprise-button-row">
         <button
-          v-if="canUpdateNotifications && selectedNotification.status === 'unread'"
+          v-if="
+            canUpdateNotifications &&
+            resolvedSelectedNotification.status === 'unread'
+          "
           type="button"
           class="enterprise-button"
-          :disabled="loading || detailLoading"
+          :disabled="resolvedLoading || resolvedDetailLoading"
           @click="emit('mark-read')"
         >
           {{ t("app.notification.action.markRead") }}
@@ -107,10 +186,10 @@ const emit = defineEmits<{
 
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
         readonly
-        :loading="loading || detailLoading"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
       />
 
@@ -118,32 +197,34 @@ const emit = defineEmits<{
         <div>
           <span>{{ t("app.notification.meta.status") }}</span>
           <strong>{{
-            localizeNotificationStatus(selectedNotification.status)
+            localizeNotificationStatus(resolvedSelectedNotification.status)
           }}</strong>
         </div>
         <div>
           <span>{{ t("app.notification.meta.level") }}</span>
           <strong>{{
-            localizeNotificationLevel(selectedNotification.level)
+            localizeNotificationLevel(resolvedSelectedNotification.level)
           }}</strong>
         </div>
         <div>
           <span>{{ t("app.notification.meta.readAt") }}</span>
           <strong>{{
-            selectedNotification.readAt
-              ? new Date(selectedNotification.readAt).toLocaleString(locale)
+            resolvedSelectedNotification.readAt
+              ? new Date(resolvedSelectedNotification.readAt).toLocaleString(
+                  locale,
+                )
               : t("app.notification.readAtEmpty")
           }}</strong>
         </div>
       </div>
     </template>
 
-    <template v-else-if="panelMode === 'create'">
+    <template v-else-if="resolvedPanelMode === 'create'">
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
-        :loading="loading || detailLoading"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
         @submit="emit('submit-form', $event)"
         @cancel="emit('cancel-panel')"
@@ -155,92 +236,3 @@ const emit = defineEmits<{
     </div>
   </section>
 </template>
-
-<style scoped>
-.enterprise-card {
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.2rem;
-  color: #0f172a;
-}
-
-.enterprise-eyebrow,
-.enterprise-heading,
-.enterprise-copy,
-.enterprise-inline-warning,
-.enterprise-metadata span {
-  margin: 0;
-}
-
-.enterprise-eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin-top: 0.7rem;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin-top: 0.75rem;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-inline-warning {
-  margin-top: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  background: rgba(255, 251, 235, 0.96);
-  padding: 0.85rem 0.95rem;
-  color: #92400e;
-}
-
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  margin-top: 1rem;
-}
-
-.enterprise-metadata div {
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background: rgba(248, 250, 252, 0.58);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata strong {
-  display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
-}
-
-.enterprise-button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.enterprise-button {
-  border: 1px solid rgba(36, 87, 214, 0.18);
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2457d6, #173ea6);
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.65rem 1rem;
-}
-
-.enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-}
-</style>

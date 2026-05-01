@@ -5,8 +5,14 @@ import {
   type ElyFormField,
   type ElyFormValues,
 } from "@elysian/ui-enterprise-vue"
+import { computed, inject } from "vue"
 
+import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
 import type { TenantRecord } from "../../../lib/platform-api"
+import {
+  readInjectedValue,
+  resolveTenantWorkspacePanelState,
+} from "./tenant-workspace-state"
 
 type TenantWorkspaceTranslation = (
   key: string,
@@ -23,20 +29,11 @@ interface TenantWorkspacePanelProps {
   canViewTenants: boolean
   canCreateTenants: boolean
   canUpdateTenants: boolean
-  loading: boolean
-  detailLoading: boolean
-  errorMessage: string
-  detailErrorMessage: string
-  panelMode: "detail" | "create" | "edit"
-  panelTitle: string
-  panelDescription: string
-  selectedTenant: TenantRecord | null
-  formFields: ElyFormField[]
-  formValues: ElyFormValues
   formCopy: ElyFormCopy
+  workspaceStateInjected?: boolean
 }
 
-defineProps<TenantWorkspacePanelProps>()
+const props = defineProps<TenantWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", tenant: TenantRecord): void
@@ -45,13 +42,72 @@ const emit = defineEmits<{
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
+
+const injectedWorkspaceState = inject(
+  WORKSPACE_STATE_KEY,
+  computed(() => null),
+)
+
+const resolvedTenantWorkspaceState = computed(() =>
+  resolveTenantWorkspacePanelState(
+    injectedWorkspaceState.value,
+    Boolean(props.workspaceStateInjected),
+  ),
+)
+
+const resolvedLoading = readInjectedValue(
+  computed(() => resolvedTenantWorkspaceState.value?.tenantLoading ?? null),
+  false,
+)
+const resolvedDetailLoading = readInjectedValue(
+  computed(
+    () => resolvedTenantWorkspaceState.value?.tenantDetailLoading ?? null,
+  ),
+  false,
+)
+const resolvedErrorMessage = readInjectedValue(
+  computed(
+    () => resolvedTenantWorkspaceState.value?.tenantErrorMessage ?? null,
+  ),
+  "",
+)
+const resolvedDetailErrorMessage = readInjectedValue(
+  computed(
+    () => resolvedTenantWorkspaceState.value?.tenantDetailErrorMessage ?? null,
+  ),
+  "",
+)
+const resolvedPanelMode = readInjectedValue(
+  computed(() => resolvedTenantWorkspaceState.value?.tenantPanelMode ?? null),
+  "detail" as "detail" | "create" | "edit",
+)
+const resolvedPanelTitle = readInjectedValue(
+  computed(() => resolvedTenantWorkspaceState.value?.panelTitle ?? null),
+  "",
+)
+const resolvedPanelDescription = readInjectedValue(
+  computed(() => resolvedTenantWorkspaceState.value?.panelDescription ?? null),
+  "",
+)
+const resolvedSelectedTenant = readInjectedValue(
+  computed(() => resolvedTenantWorkspaceState.value?.selectedTenant ?? null),
+  null as TenantRecord | null,
+)
+const resolvedFormFields = readInjectedValue(
+  computed(() => resolvedTenantWorkspaceState.value?.formFields ?? null),
+  [] as ElyFormField[],
+)
+const resolvedFormValues = readInjectedValue(
+  computed(() => resolvedTenantWorkspaceState.value?.formValues ?? null),
+  {} as ElyFormValues,
+)
 </script>
 
 <template>
   <section class="enterprise-card">
     <p class="enterprise-eyebrow">{{ t("app.tenant.detailEyebrow") }}</p>
-    <h3 class="enterprise-heading">{{ panelTitle }}</h3>
-    <p class="enterprise-copy">{{ panelDescription }}</p>
+    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
+    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.tenantModuleOffline") }}
@@ -75,29 +131,29 @@ const emit = defineEmits<{
       {{ t("app.message.tenantNoListPermission") }}
     </div>
 
-    <div v-else-if="errorMessage" class="enterprise-inline-warning">
-      {{ errorMessage }}
+    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedErrorMessage }}
     </div>
 
     <div
-      v-else-if="detailLoading && selectedTenant"
+      v-else-if="resolvedDetailLoading && resolvedSelectedTenant"
       class="enterprise-inline-warning"
     >
       {{ t("app.tenant.detailLoading") }}
     </div>
 
-    <div v-else-if="detailErrorMessage" class="enterprise-inline-warning">
-      {{ detailErrorMessage }}
+    <div v-else-if="resolvedDetailErrorMessage" class="enterprise-inline-warning">
+      {{ resolvedDetailErrorMessage }}
     </div>
 
-    <template v-else-if="panelMode === 'detail' && selectedTenant">
+    <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedTenant">
       <div class="enterprise-button-row">
         <button
           v-if="canUpdateTenants"
           type="button"
           class="enterprise-button"
-          :disabled="loading || detailLoading"
-          @click="emit('start-edit', selectedTenant)"
+          :disabled="resolvedLoading || resolvedDetailLoading"
+          @click="emit('start-edit', resolvedSelectedTenant)"
         >
           {{ t("app.tenant.action.edit") }}
         </button>
@@ -105,11 +161,11 @@ const emit = defineEmits<{
           v-if="canUpdateTenants"
           type="button"
           class="enterprise-button enterprise-button-ghost"
-          :disabled="loading || detailLoading"
+          :disabled="resolvedLoading || resolvedDetailLoading"
           @click="emit('toggle-status')"
         >
           {{
-            selectedTenant.status === "active"
+            resolvedSelectedTenant.status === "active"
               ? t("app.tenant.action.suspend")
               : t("app.tenant.action.activate")
           }}
@@ -126,20 +182,22 @@ const emit = defineEmits<{
 
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
         readonly
-        :loading="loading || detailLoading"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
       />
     </template>
 
-    <template v-else-if="panelMode === 'create' || panelMode === 'edit'">
+    <template
+      v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
+    >
       <ElyForm
         class="mt-5"
-        :fields="formFields"
-        :values="formValues"
-        :loading="loading || detailLoading"
+        :fields="resolvedFormFields"
+        :values="resolvedFormValues"
+        :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
         @submit="emit('submit-form', $event)"
         @cancel="emit('cancel-panel')"
@@ -151,73 +209,3 @@ const emit = defineEmits<{
     </div>
   </section>
 </template>
-
-<style scoped>
-.enterprise-card {
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.2rem;
-  color: #0f172a;
-}
-
-.enterprise-eyebrow,
-.enterprise-heading,
-.enterprise-copy,
-.enterprise-subheading,
-.enterprise-inline-warning,
-.enterprise-field span {
-  margin: 0;
-}
-
-.enterprise-eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-heading {
-  margin-top: 0.7rem;
-  font-size: 1.35rem;
-  color: #0f172a;
-}
-
-.enterprise-copy {
-  margin-top: 0.75rem;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-inline-warning {
-  margin-top: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(245, 158, 11, 0.16);
-  background: rgba(255, 251, 235, 0.96);
-  padding: 0.85rem 0.95rem;
-  color: #92400e;
-}
-
-.enterprise-button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.enterprise-button {
-  border: 1px solid rgba(36, 87, 214, 0.18);
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2457d6, #173ea6);
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.65rem 1rem;
-}
-
-.enterprise-button-ghost {
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-}
-</style>
