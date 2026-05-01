@@ -1,4 +1,4 @@
-import { postModuleSchema } from "@elysian/schema"
+import { deriveBodySchema, postModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
@@ -16,6 +16,18 @@ const postPermissions = {
   create: "system:post:create",
   update: "system:post:update",
 } as const
+
+const postCreateBodySchema = deriveBodySchema(postModuleSchema, {
+  mode: "create",
+  overrides: {
+    sort: t.Optional(t.Number()),
+    status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+  },
+})
+
+const postUpdateBodySchema = deriveBodySchema(postModuleSchema, {
+  mode: "update",
+})
 
 export const createPostModule = (
   repository: PostRepository,
@@ -94,15 +106,7 @@ export const createPostModule = (
           return service.create(body)
         },
         {
-          body: t.Object({
-            code: t.String({ minLength: 1 }),
-            name: t.String({ minLength: 1 }),
-            sort: t.Optional(t.Number()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            remark: t.Optional(t.String()),
-          }),
+          body: postCreateBodySchema,
           detail: {
             tags: ["post"],
             summary: "Create post",
@@ -120,15 +124,7 @@ export const createPostModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            code: t.Optional(t.String({ minLength: 1 })),
-            name: t.Optional(t.String({ minLength: 1 })),
-            sort: t.Optional(t.Number()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            remark: t.Optional(t.String()),
-          }),
+          body: postUpdateBodySchema,
           detail: {
             tags: ["post"],
             summary: "Update post",

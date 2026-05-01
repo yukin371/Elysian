@@ -2,6 +2,7 @@ import {
   type DataAccessContext,
   type DatabaseClient,
   type FileRow,
+  type PaginatedResult,
   buildDataAccessCondition,
   deleteFile,
   files,
@@ -16,7 +17,11 @@ export interface ListFilesInput {
   originalName?: string
   mimeType?: string
   uploaderUserId?: string
+  page?: number
+  pageSize?: number
 }
+
+export type ListFilesResult = PaginatedResult<FileRecord>
 
 export interface CreateFileInput {
   originalName: string
@@ -36,7 +41,7 @@ export interface FileRepository {
   list: (
     filter?: ListFilesInput,
     dataAccess?: DataAccessContext,
-  ) => Promise<FileRecord[]>
+  ) => Promise<ListFilesResult>
   getById: (
     id: string,
     dataAccess?: DataAccessContext,
@@ -54,7 +59,7 @@ export interface FileRepository {
 
 export const createFileRepository = (db: DatabaseClient): FileRepository => ({
   async list(filter, dataAccess) {
-    const rows = await listFiles(db, {
+    const result = await listFiles(db, {
       ...(filter ?? {}),
       accessCondition: dataAccess
         ? buildDataAccessCondition(dataAccess, {
@@ -63,7 +68,10 @@ export const createFileRepository = (db: DatabaseClient): FileRepository => ({
           })
         : undefined,
     })
-    return rows.map(mapPublicFileRow)
+    return {
+      ...result,
+      items: result.items.map(mapPublicFileRow),
+    }
   },
   async getById(id, dataAccess) {
     const row = await getFileById(db, id, {
@@ -120,8 +128,7 @@ export const createInMemoryFileRepository = (
   return {
     async list(filter, dataAccess) {
       const normalizedFilter = filter ?? {}
-
-      return [...items.values()]
+      const filteredItems = [...items.values()]
         .filter((item) =>
           dataAccess
             ? matchesDataAccess(dataAccess, {
@@ -152,7 +159,29 @@ export const createInMemoryFileRepository = (
             : true,
         )
         .sort(compareFiles)
-        .map(mapPublicStoredFile)
+      const page =
+        typeof normalizedFilter.page === "number" &&
+        Number.isFinite(normalizedFilter.page)
+          ? Math.max(1, Math.trunc(normalizedFilter.page))
+          : 1
+      const pageSize =
+        typeof normalizedFilter.pageSize === "number" &&
+        Number.isFinite(normalizedFilter.pageSize)
+          ? Math.min(100, Math.max(1, Math.trunc(normalizedFilter.pageSize)))
+          : 20
+      const total = filteredItems.length
+      const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+      const resolvedPage = Math.min(page, totalPages)
+
+      return {
+        items: filteredItems
+          .slice((resolvedPage - 1) * pageSize, resolvedPage * pageSize)
+          .map(mapPublicStoredFile),
+        total,
+        page: resolvedPage,
+        pageSize,
+        totalPages,
+      }
     },
     async getById(id, dataAccess) {
       const item = items.get(id)

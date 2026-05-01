@@ -31,10 +31,17 @@ const moduleFieldKeySet = new Set<keyof ModuleField>([
   "searchable",
   "options",
   "dictionaryTypeCode",
+  "validation",
 ])
 const moduleFieldOptionKeySet = new Set<keyof ModuleFieldOption>([
   "label",
   "value",
+])
+const moduleFieldValidationKeySet = new Set<keyof ModuleFieldValidation>([
+  "maxLength",
+  "maximum",
+  "minLength",
+  "minimum",
 ])
 
 const isRecord = (input: unknown): input is Record<string, unknown> =>
@@ -65,6 +72,13 @@ export interface ModuleFieldOption {
   value: string
 }
 
+export interface ModuleFieldValidation {
+  maxLength?: number
+  maximum?: number
+  minLength?: number
+  minimum?: number
+}
+
 export interface ModuleField {
   key: string
   label: string
@@ -73,6 +87,7 @@ export interface ModuleField {
   searchable?: boolean
   options?: ModuleFieldOption[]
   dictionaryTypeCode?: string
+  validation?: ModuleFieldValidation
 }
 
 export type ModuleFrontendWorkspaceDomain = "business" | "system"
@@ -342,6 +357,102 @@ export const validateModuleSchema = (
       })
     }
 
+    if ("validation" in field && field.validation !== undefined) {
+      if (!isRecord(field.validation)) {
+        issues.push({
+          path: `${fieldPath}.validation`,
+          message: "Field validation must be an object when provided.",
+        })
+      } else {
+        const minLength = field.validation.minLength
+        const maxLength = field.validation.maxLength
+        const minimum = field.validation.minimum
+        const maximum = field.validation.maximum
+
+        pushUnknownKeyIssues(
+          issues,
+          field.validation,
+          moduleFieldValidationKeySet,
+          `${fieldPath}.validation`,
+          "Field validation",
+        )
+
+        if (
+          "minLength" in field.validation &&
+          minLength !== undefined &&
+          (typeof minLength !== "number" ||
+            !Number.isInteger(minLength) ||
+            minLength < 0)
+        ) {
+          issues.push({
+            path: `${fieldPath}.validation.minLength`,
+            message:
+              "Field validation minLength must be a non-negative integer when provided.",
+          })
+        }
+
+        if (
+          "maxLength" in field.validation &&
+          maxLength !== undefined &&
+          (typeof maxLength !== "number" ||
+            !Number.isInteger(maxLength) ||
+            maxLength < 0)
+        ) {
+          issues.push({
+            path: `${fieldPath}.validation.maxLength`,
+            message:
+              "Field validation maxLength must be a non-negative integer when provided.",
+          })
+        }
+
+        if (
+          "minimum" in field.validation &&
+          minimum !== undefined &&
+          (typeof minimum !== "number" || !Number.isFinite(minimum))
+        ) {
+          issues.push({
+            path: `${fieldPath}.validation.minimum`,
+            message:
+              "Field validation minimum must be a finite number when provided.",
+          })
+        }
+
+        if (
+          "maximum" in field.validation &&
+          maximum !== undefined &&
+          (typeof maximum !== "number" || !Number.isFinite(maximum))
+        ) {
+          issues.push({
+            path: `${fieldPath}.validation.maximum`,
+            message:
+              "Field validation maximum must be a finite number when provided.",
+          })
+        }
+
+        if (
+          typeof minLength === "number" &&
+          typeof maxLength === "number" &&
+          minLength > maxLength
+        ) {
+          issues.push({
+            path: `${fieldPath}.validation`,
+            message: "Field validation minLength must not exceed maxLength.",
+          })
+        }
+
+        if (
+          typeof minimum === "number" &&
+          typeof maximum === "number" &&
+          minimum > maximum
+        ) {
+          issues.push({
+            path: `${fieldPath}.validation`,
+            message: "Field validation minimum must not exceed maximum.",
+          })
+        }
+      }
+    }
+
     if ("options" in field && field.options !== undefined) {
       if (!Array.isArray(field.options)) {
         issues.push({
@@ -440,13 +551,21 @@ export const isModuleSchema = (input: unknown): input is ModuleSchema =>
   validateModuleSchema(input).length === 0
 
 export {
+  deriveBodySchema,
+  type DeriveBodySchemaMode,
+  type DeriveBodySchemaOptions,
+} from "./elysia-bridge"
+
+export {
   customerModuleSchema,
   type CustomerRecord,
   type CustomerStatus,
 } from "./customer"
 export { fileModuleSchema, type FileRecord } from "./file"
 export {
+  dictionaryItemModuleSchema,
   dictionaryModuleSchema,
+  dictionaryTypeModuleSchema,
   type DictionaryItemRecord,
   type DictionaryStatus,
   type DictionaryTypeDetailRecord,

@@ -6,10 +6,11 @@
 
 ## Owns
 
-- `/system/notifications` 的列表、详情、当前筛选导出、创建、单条已读、批量已读。
+- `/system/notifications` 的列表、分页元数据、详情、当前筛选导出、创建、单条已读、批量已读。
 - 通知接收人、标题、内容的最小校验。
 - 基于 `dataAccess` 的部门/创建人可见性过滤。
 - 通知筛选字段 `recipientUserId / title / content / level / status` 的列表与导出一致性。
+- 通知列表 `page / pageSize` 的最小服务端分页语义。
 
 ## Must Not Own
 
@@ -42,3 +43,4 @@ flowchart LR
 - `service.ts` 已确认 `markAsRead` 会先读取当前记录；已读记录直接返回，不重复制造状态变化。
 - 批量已读只接收显式通知 ID 列表，不在通知模块内引入批处理平台或外部投递语义。
 - `repository.ts` 已确认列表、详情、标记已读都可挂接 `buildDataAccessCondition`。
+- `repository.ts` 已确认通知列表返回 `items + total + page + pageSize + totalPages`，且当前筛选导出继续复用同一筛选字段但不复用分页切片。

@@ -32,6 +32,7 @@ export const notificationModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "content",
@@ -39,6 +40,7 @@ export const notificationModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "level",

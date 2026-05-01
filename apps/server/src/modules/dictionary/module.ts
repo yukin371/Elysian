@@ -1,4 +1,9 @@
-import { dictionaryModuleSchema } from "@elysian/schema"
+import {
+  deriveBodySchema,
+  dictionaryItemModuleSchema,
+  dictionaryModuleSchema,
+  dictionaryTypeModuleSchema,
+} from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
@@ -20,6 +25,42 @@ const dictionaryPermissions = {
 const dictionaryItemFilterSchema = t.Object({
   typeId: t.Optional(t.String()),
 })
+
+const dictionaryTypeCreateBodySchema = deriveBodySchema(
+  dictionaryTypeModuleSchema,
+  {
+    mode: "create",
+    overrides: {
+      status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+    },
+  },
+)
+
+const dictionaryTypeUpdateBodySchema = deriveBodySchema(
+  dictionaryTypeModuleSchema,
+  {
+    mode: "update",
+  },
+)
+
+const dictionaryItemCreateBodySchema = deriveBodySchema(
+  dictionaryItemModuleSchema,
+  {
+    mode: "create",
+    overrides: {
+      isDefault: t.Optional(t.Boolean()),
+      sort: t.Optional(t.Number()),
+      status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+    },
+  },
+)
+
+const dictionaryItemUpdateBodySchema = deriveBodySchema(
+  dictionaryItemModuleSchema,
+  {
+    mode: "update",
+  },
+)
 
 export const createDictionaryModule = (
   repository: DictionaryRepository,
@@ -98,14 +139,7 @@ export const createDictionaryModule = (
           return service.createType(body)
         },
         {
-          body: t.Object({
-            code: t.String({ minLength: 1 }),
-            name: t.String({ minLength: 1 }),
-            description: t.Optional(t.String()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-          }),
+          body: dictionaryTypeCreateBodySchema,
           detail: {
             tags: ["dictionary"],
             summary: "Create dictionary type",
@@ -123,14 +157,7 @@ export const createDictionaryModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            code: t.Optional(t.String({ minLength: 1 })),
-            name: t.Optional(t.String({ minLength: 1 })),
-            description: t.Optional(t.String()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-          }),
+          body: dictionaryTypeUpdateBodySchema,
           detail: {
             tags: ["dictionary"],
             summary: "Update dictionary type",
@@ -196,16 +223,7 @@ export const createDictionaryModule = (
           return service.createItem(body)
         },
         {
-          body: t.Object({
-            typeId: t.String({ minLength: 1 }),
-            value: t.String({ minLength: 1 }),
-            label: t.String({ minLength: 1 }),
-            sort: t.Optional(t.Number()),
-            isDefault: t.Optional(t.Boolean()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-          }),
+          body: dictionaryItemCreateBodySchema,
           detail: {
             tags: ["dictionary"],
             summary: "Create dictionary item",
@@ -223,16 +241,7 @@ export const createDictionaryModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            typeId: t.Optional(t.String({ minLength: 1 })),
-            value: t.Optional(t.String({ minLength: 1 })),
-            label: t.Optional(t.String({ minLength: 1 })),
-            sort: t.Optional(t.Number()),
-            isDefault: t.Optional(t.Boolean()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-          }),
+          body: dictionaryItemUpdateBodySchema,
           detail: {
             tags: ["dictionary"],
             summary: "Update dictionary item",

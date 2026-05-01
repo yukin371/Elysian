@@ -23,6 +23,7 @@ export const settingModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "value",
@@ -30,6 +31,7 @@ export const settingModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "description",

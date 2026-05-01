@@ -4,27 +4,13 @@ import { t } from "elysia"
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
+import type { AuditLogEvent, AuditLogWriter } from "../shared/audit-log"
 import type { WorkflowRepository } from "./repository"
 import { createWorkflowService } from "./service"
 
-interface WorkflowAuditEvent {
-  tenantId: string
-  actorUserId: string
-  action: string
-  targetType: string
-  targetId: string
-  result: "success"
-  requestId: string | null
-  ip: string | null
-  userAgent: string | null
-  details: Record<string, unknown> | null
-}
-
-type WorkflowAuditLogWriter = (event: WorkflowAuditEvent) => Promise<unknown>
-
 export interface WorkflowModuleOptions {
   authGuard?: AuthGuard
-  auditLogWriter?: WorkflowAuditLogWriter
+  auditLogWriter?: AuditLogWriter
 }
 
 const workflowPermissions = {
@@ -483,7 +469,8 @@ const buildWorkflowAuditEvent = (
     targetId: string
     details?: Record<string, unknown> | null
   },
-): WorkflowAuditEvent => ({
+): AuditLogEvent => ({
+  category: "workflow",
   tenantId: identity.user.tenantId,
   actorUserId: identity.user.id,
   action: input.action,

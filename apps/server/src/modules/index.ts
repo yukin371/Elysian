@@ -1,4 +1,5 @@
 export {
+  createAuthAuditLogWriter,
   createAuthGuard,
   createAuthModule,
   createAuthRepository,
@@ -72,4 +73,7 @@ export { createUserModule } from "./user"
 export { createInMemoryUserRepository, createUserRepository } from "./user"
 export { registerModules } from "./module"
 export type { ServerModule, ServerModuleContext } from "./module"
+export { composeAuthModules } from "./compose-auth"
+export { composeBusinessModules } from "./compose-business"
+export { composeSystemModules } from "./compose-system"
 export { systemModule } from "./system"

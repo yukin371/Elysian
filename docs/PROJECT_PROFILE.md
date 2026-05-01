@@ -81,7 +81,9 @@
 - 13 个标准 CRUD `ModuleSchema` 已补 `frontend` 元数据，覆盖 `customer` / `file` / `notification` / `operation-log` / `tenant` / `workflow`（business）和 `dictionary` / `department` / `post` / `menu` / `role` / `setting` / `user`（system）。
 - `packages/frontend-vue` 已提供 `buildWorkspaceRegistration(schema)` 函数，可从 `ModuleSchema` 的 `frontend` 元数据推导出完整的 `WorkspaceRegistration`（domain / path / kind / moduleCode / permissionPrefix / permissions / i18nKeys），无需手写同构记录。
 - `apps/example-vue` 的 `system-registry.ts` 与 `business-registry.ts` 已从手写注册切换为 schema 驱动注册，13 个标准 CRUD 模块通过 `buildWorkspaceRegistration` 生成；`auth-registry`（session 无 schema）与 `generator-preview`（特殊 workspace）仍保持手写。
-- `packages/generator` 当前除 `schema/repository/service/routes/page` 外，还会额外生成 `*.frontend.ts` 静态前端注册 artifact，已包含 `kind`、`permissions` 与 `i18nKeys`，可直接被前端注册中心消费。
+- `packages/generator` 当前除 `schema/repository/service/routes/page` 外，还会额外生成 `*.frontend.ts` 静态前端注册 artifact，已包含 `kind`、`permissions`、`surfaceKind` 与页面装配路径；`apps/example-vue` 已开始通过 app-local generated artifact 输入构建 workspace registry，而不是只从 schema 直连注册。
+- `apps/example-vue` 当前已把 workspace registry artifact 校验收口进默认工程入口：`@elysian/example-vue` 的 `build` 与仓库根 `bun run check` 都会显式执行 `verify:workspace-registry-artifacts`，标准 CRUD shell descriptor 漏接线或 generated artifact 漂移不会再只依赖人工记忆发现。
+- `apps/example-vue` 当前已把标准 CRUD 前端 surface 落盘到 `src/modules/*`，并由 shell main / secondary 真实消费；`@elysian/example-vue` 的 `build` 与仓库根 `bun run check` 已显式执行 `verify:standard-crud-surfaces`，标准 CRUD 页面骨架与生成器模板漂移不会再静默积累。
 - `packages/persistence` 已新增 migration proposal 草案生成能力，可消费 `DatabaseChangePlan` 形状并输出 review-only SQL draft、Drizzle schema snippet 与风险说明；正式 `db:generate / db:migrate` 仍保持人工确认后进入。
 - `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
 - `packages/schema` 已把 `enum` 字段必须提供 `options` 或 `dictionaryTypeCode` 收紧为 runtime 硬约束，避免裸 enum 误过 `P5A` handoff。
@@ -215,6 +217,8 @@
 - `bun run typecheck`
 - `bun run test`
 - `bun run check`
+- `bun run example-vue:workspace-registry:verify`
+- `bun run example-vue:standard-crud-surfaces:verify`
 - `bun run e2e:tenant`（需配置 `DATABASE_URL`、`ACCESS_TOKEN_SECRET` 与本地 PostgreSQL）
 - `bun run e2e:tenant:full`（需配置 `DATABASE_URL`、`ACCESS_TOKEN_SECRET` 与本地 PostgreSQL）
 - `bun run e2e:tenant:stability:download`（需本机已安装并登录 `gh` CLI）
@@ -258,6 +262,10 @@
 - 启动 Vue 示例：`bun run dev:vue`
 - 启动 uniapp H5 骨架：`bun run dev:uniapp`
 - 构建 Vue 示例：`bun run build:vue`
+- 生成 example-vue workspace registry artifact：`bun run example-vue:workspace-registry:generate`
+- 校验 example-vue workspace registry artifact：`bun run example-vue:workspace-registry:verify`
+- 生成 example-vue 标准 CRUD surface：`bun run example-vue:standard-crud-surfaces:generate`
+- 校验 example-vue 标准 CRUD surface：`bun run example-vue:standard-crud-surfaces:verify`
 - 构建 uniapp H5 骨架：`bun run build:uniapp`
 - lint：`bun run lint`
 - 格式化：`bun run format`

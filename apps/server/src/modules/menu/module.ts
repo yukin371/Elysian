@@ -1,4 +1,4 @@
-import { menuModuleSchema } from "@elysian/schema"
+import { deriveBodySchema, menuModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
@@ -16,6 +16,41 @@ const menuPermissions = {
   create: "system:menu:update",
   update: "system:menu:update",
 } as const
+
+const menuTypeSchema = t.Union([
+  t.Literal("directory"),
+  t.Literal("menu"),
+  t.Literal("button"),
+])
+
+const menuCreateBodySchema = deriveBodySchema(menuModuleSchema, {
+  mode: "create",
+  overrides: {
+    component: t.Optional(t.Nullable(t.String())),
+    icon: t.Optional(t.Nullable(t.String())),
+    isVisible: t.Optional(t.Boolean()),
+    parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
+    path: t.Optional(t.Nullable(t.String())),
+    permissionCode: t.Optional(t.Nullable(t.String())),
+    roleIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+    sort: t.Optional(t.Number()),
+    status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+    type: menuTypeSchema,
+  },
+})
+
+const menuUpdateBodySchema = deriveBodySchema(menuModuleSchema, {
+  mode: "update",
+  overrides: {
+    component: t.Optional(t.Nullable(t.String())),
+    icon: t.Optional(t.Nullable(t.String())),
+    parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
+    path: t.Optional(t.Nullable(t.String())),
+    permissionCode: t.Optional(t.Nullable(t.String())),
+    roleIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+    type: t.Optional(menuTypeSchema),
+  },
+})
 
 export const createMenuModule = (
   repository: MenuRepository,
@@ -94,26 +129,7 @@ export const createMenuModule = (
           return service.create(body)
         },
         {
-          body: t.Object({
-            parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
-            type: t.Union([
-              t.Literal("directory"),
-              t.Literal("menu"),
-              t.Literal("button"),
-            ]),
-            code: t.String({ minLength: 1 }),
-            name: t.String({ minLength: 1 }),
-            path: t.Optional(t.Nullable(t.String())),
-            component: t.Optional(t.Nullable(t.String())),
-            icon: t.Optional(t.Nullable(t.String())),
-            sort: t.Optional(t.Number()),
-            isVisible: t.Optional(t.Boolean()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            permissionCode: t.Optional(t.Nullable(t.String())),
-            roleIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-          }),
+          body: menuCreateBodySchema,
           detail: {
             tags: ["menu"],
             summary: "Create menu",
@@ -131,28 +147,7 @@ export const createMenuModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
-            type: t.Optional(
-              t.Union([
-                t.Literal("directory"),
-                t.Literal("menu"),
-                t.Literal("button"),
-              ]),
-            ),
-            code: t.Optional(t.String({ minLength: 1 })),
-            name: t.Optional(t.String({ minLength: 1 })),
-            path: t.Optional(t.Nullable(t.String())),
-            component: t.Optional(t.Nullable(t.String())),
-            icon: t.Optional(t.Nullable(t.String())),
-            sort: t.Optional(t.Number()),
-            isVisible: t.Optional(t.Boolean()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            permissionCode: t.Optional(t.Nullable(t.String())),
-            roleIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-          }),
+          body: menuUpdateBodySchema,
           detail: {
             tags: ["menu"],
             summary: "Update menu",

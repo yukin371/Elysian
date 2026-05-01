@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from "drizzle-orm"
+import { and, asc, eq } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import type { RoleDataScopeValue } from "./role"
@@ -144,39 +144,40 @@ export const listDataScopesForUser = async (
       roleId: roles.id,
       dataScope: roles.dataScope,
       code: roles.code,
+      deptId: roleDepts.deptId,
     })
     .from(userRoles)
     .innerJoin(roles, eq(userRoles.roleId, roles.id))
+    .leftJoin(roleDepts, eq(roleDepts.roleId, roles.id))
     .where(and(eq(userRoles.userId, userId), eq(roles.status, "active")))
-    .orderBy(asc(roles.code))
+    .orderBy(asc(roles.code), asc(roleDepts.deptId))
 
-  const customScopeRoleIds = rows
-    .filter((row) => row.dataScope === 2)
-    .map((row) => row.roleId)
-  const customDeptRows =
-    customScopeRoleIds.length === 0
-      ? []
-      : await db
-          .select({
-            roleId: roleDepts.roleId,
-            deptId: roleDepts.deptId,
-          })
-          .from(roleDepts)
-          .where(inArray(roleDepts.roleId, customScopeRoleIds))
-          .orderBy(asc(roleDepts.roleId), asc(roleDepts.deptId))
+  const assignmentsByRole = new Map<
+    string,
+    {
+      scope: RoleDataScopeValue
+      customDeptIds: string[]
+    }
+  >()
 
-  const customDeptIdsByRole = new Map<string, string[]>()
-  for (const row of customDeptRows) {
-    const ids = customDeptIdsByRole.get(row.roleId) ?? []
-    ids.push(row.deptId)
-    customDeptIdsByRole.set(row.roleId, ids)
+  for (const row of rows) {
+    const assignment = assignmentsByRole.get(row.roleId) ?? {
+      scope: row.dataScope as RoleDataScopeValue,
+      customDeptIds: [],
+    }
+
+    if (row.dataScope === 2 && row.deptId) {
+      assignment.customDeptIds.push(row.deptId)
+    }
+
+    assignmentsByRole.set(row.roleId, assignment)
   }
 
-  return rows.map((row) => ({
-    scope: row.dataScope as RoleDataScopeValue,
+  return [...assignmentsByRole.values()].map((assignment) => ({
+    scope: assignment.scope,
     customDeptIds:
-      row.dataScope === 2
-        ? [...new Set(customDeptIdsByRole.get(row.roleId) ?? [])].sort()
+      assignment.scope === 2
+        ? [...new Set(assignment.customDeptIds)].sort()
         : undefined,
   }))
 }

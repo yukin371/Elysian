@@ -1,8 +1,11 @@
 import { describe, expect, it } from "bun:test"
+import { t } from "elysia"
 
 import {
   customerModuleSchema,
+  deriveBodySchema,
   isModuleSchema,
+  roleModuleSchema,
   validateModuleSchema,
   validateWorkflowDefinitionDraft,
 } from "./index"
@@ -198,6 +201,127 @@ describe("validateModuleSchema", () => {
       path: "fields[1].options[0].color",
       message: 'Field option does not allow unknown property "color".',
     })
+  })
+
+  it("accepts bounded field validation metadata", () => {
+    const issues = validateModuleSchema({
+      name: "supplier",
+      label: "Supplier",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        {
+          key: "code",
+          label: "Code",
+          kind: "string",
+          required: true,
+          validation: { minLength: 1, maxLength: 32 },
+        },
+        {
+          key: "sort",
+          label: "Sort",
+          kind: "number",
+          validation: { minimum: 0, maximum: 999 },
+        },
+      ],
+    })
+
+    expect(issues).toEqual([])
+  })
+
+  it("rejects malformed field validation metadata", () => {
+    const issues = validateModuleSchema({
+      name: "supplier",
+      label: "Supplier",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        {
+          key: "code",
+          label: "Code",
+          kind: "string",
+          required: true,
+          validation: { minLength: -1, pattern: ".*" },
+        },
+        {
+          key: "sort",
+          label: "Sort",
+          kind: "number",
+          validation: { minimum: 10, maximum: 1 },
+        },
+      ],
+    })
+
+    expect(issues).toContainEqual({
+      path: "fields[1].validation.pattern",
+      message: 'Field validation does not allow unknown property "pattern".',
+    })
+    expect(issues).toContainEqual({
+      path: "fields[1].validation.minLength",
+      message:
+        "Field validation minLength must be a non-negative integer when provided.",
+    })
+    expect(issues).toContainEqual({
+      path: "fields[2].validation",
+      message: "Field validation minimum must not exceed maximum.",
+    })
+  })
+})
+
+describe("deriveBodySchema", () => {
+  it("derives a create body with validation and overrides", () => {
+    const schema = deriveBodySchema(roleModuleSchema, {
+      mode: "create",
+      overrides: {
+        dataScope: t.Optional(
+          t.Union([
+            t.Literal(1),
+            t.Literal(2),
+            t.Literal(3),
+            t.Literal(4),
+            t.Literal(5),
+          ]),
+        ),
+        isSystem: t.Optional(t.Boolean()),
+        permissionCodes: t.Optional(t.Array(t.String({ minLength: 1 }))),
+        status: t.Optional(
+          t.Union([t.Literal("active"), t.Literal("disabled")]),
+        ),
+      },
+    }) as unknown as {
+      properties: Record<string, { minLength?: number }>
+      required?: string[]
+    }
+
+    expect(Object.keys(schema.properties)).toEqual([
+      "code",
+      "name",
+      "description",
+      "status",
+      "isSystem",
+      "dataScope",
+      "permissionCodes",
+    ])
+    expect(schema.required).toEqual(["code", "name"])
+    expect(schema.properties.code?.minLength).toBe(1)
+    expect(schema.properties.name?.minLength).toBe(1)
+  })
+
+  it("derives an update body with excluded datetime fields", () => {
+    const schema = deriveBodySchema(roleModuleSchema, {
+      mode: "update",
+    }) as unknown as {
+      properties: Record<string, unknown>
+      required?: string[]
+    }
+
+    expect(schema.required).toBeUndefined()
+    expect(Object.keys(schema.properties)).toEqual([
+      "code",
+      "name",
+      "description",
+      "status",
+      "isSystem",
+      "dataScope",
+    ])
   })
 })
 

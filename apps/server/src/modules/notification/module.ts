@@ -1,4 +1,4 @@
-import { notificationModuleSchema } from "@elysian/schema"
+import { deriveBodySchema, notificationModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard, AuthIdentity } from "../auth"
@@ -21,6 +21,8 @@ const notificationFilterSchema = t.Object({
   recipientUserId: t.Optional(t.String()),
   title: t.Optional(t.String()),
   content: t.Optional(t.String()),
+  page: t.Optional(t.Numeric()),
+  pageSize: t.Optional(t.Numeric()),
   level: t.Optional(
     t.Union([
       t.Literal("info"),
@@ -31,6 +33,24 @@ const notificationFilterSchema = t.Object({
   ),
   status: t.Optional(t.Union([t.Literal("unread"), t.Literal("read")])),
 })
+
+const notificationCreateBodySchema = deriveBodySchema(
+  notificationModuleSchema,
+  {
+    mode: "create",
+    exclude: ["createdByUserId", "readAt", "status"],
+    overrides: {
+      level: t.Optional(
+        t.Union([
+          t.Literal("info"),
+          t.Literal("success"),
+          t.Literal("warning"),
+          t.Literal("error"),
+        ]),
+      ),
+    },
+  },
+)
 
 export const createNotificationModule = (
   repository: NotificationRepository,
@@ -63,9 +83,7 @@ export const createNotificationModule = (
             notificationPermissions.list,
           )
 
-          return {
-            items: await service.list(query, identity?.dataAccess),
-          }
+          return service.list(query, identity?.dataAccess)
         },
         {
           query: notificationFilterSchema,
@@ -130,19 +148,7 @@ export const createNotificationModule = (
           })
         },
         {
-          body: t.Object({
-            recipientUserId: t.String({ minLength: 1 }),
-            title: t.String({ minLength: 1 }),
-            content: t.String({ minLength: 1 }),
-            level: t.Optional(
-              t.Union([
-                t.Literal("info"),
-                t.Literal("success"),
-                t.Literal("warning"),
-                t.Literal("error"),
-              ]),
-            ),
-          }),
+          body: notificationCreateBodySchema,
           detail: {
             tags: ["notification"],
             summary: "Create notification",

@@ -1,4 +1,4 @@
-import { tenantModuleSchema } from "@elysian/schema"
+import { deriveBodySchema, tenantModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
@@ -22,6 +22,20 @@ const tenantStatusSchema = t.Union([
   t.Literal("active"),
   t.Literal("suspended"),
 ])
+
+const tenantCreateBodySchema = deriveBodySchema(tenantModuleSchema, {
+  mode: "create",
+  overrides: {
+    status: t.Optional(tenantStatusSchema),
+  },
+})
+
+const tenantUpdateBodySchema = deriveBodySchema(tenantModuleSchema, {
+  mode: "update",
+  overrides: {
+    status: t.Optional(tenantStatusSchema),
+  },
+})
 
 export const createTenantModule = (
   repository: TenantRepository,
@@ -119,11 +133,7 @@ export const createTenantModule = (
           return service.create(body)
         },
         {
-          body: t.Object({
-            code: t.String({ minLength: 1 }),
-            name: t.String({ minLength: 1 }),
-            status: t.Optional(tenantStatusSchema),
-          }),
+          body: tenantCreateBodySchema,
           detail: {
             tags: ["tenant"],
             summary: "Create tenant",
@@ -145,11 +155,7 @@ export const createTenantModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            code: t.Optional(t.String({ minLength: 1 })),
-            name: t.Optional(t.String({ minLength: 1 })),
-            status: t.Optional(tenantStatusSchema),
-          }),
+          body: tenantUpdateBodySchema,
           detail: {
             tags: ["tenant"],
             summary: "Update tenant",

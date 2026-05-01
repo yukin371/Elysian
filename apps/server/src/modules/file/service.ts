@@ -4,6 +4,7 @@ import { AppError } from "../../errors"
 import type {
   FileRepository,
   ListFilesInput,
+  ListFilesResult,
   StoredFileRecord,
 } from "./repository"
 import type { FileStorage } from "./storage"
@@ -18,10 +19,12 @@ export const createFileService = (
   repository: FileRepository,
   storage: FileStorage,
 ) => ({
-  list: (filter?: ListFilesInput, dataAccess?: DataAccessContext) =>
-    repository.list(filter, dataAccess),
+  list: (
+    filter?: ListFilesInput,
+    dataAccess?: DataAccessContext,
+  ): Promise<ListFilesResult> => repository.list(filter, dataAccess),
   async exportCsv(filter?: ListFilesInput, dataAccess?: DataAccessContext) {
-    const items = await repository.list(filter, dataAccess)
+    const { items } = await repository.list(filter, dataAccess)
 
     return buildCsv(
       ["id", "originalName", "mimeType", "size", "uploaderUserId", "createdAt"],

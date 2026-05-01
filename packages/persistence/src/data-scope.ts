@@ -1,8 +1,6 @@
 import { type SQL, type SQLWrapper, eq, inArray, or, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
-import { departments } from "./schema"
-
 export type DataScopeValue = 1 | 2 | 3 | 4 | 5
 
 export interface DataScopeGrant {
@@ -131,26 +129,20 @@ const listDescendantDepartmentIds = async (
     return []
   }
 
-  const rows = await db
-    .select({
-      id: departments.id,
-      ancestors: departments.ancestors,
-    })
-    .from(departments)
+  const deptIdArray = sql.join(
+    normalizedDeptIds.map((deptId) => sql`${deptId}::uuid`),
+    sql`, `,
+  )
+  const result = (await db.execute(sql`
+    SELECT unnest(get_descendant_dept_ids(ARRAY[${deptIdArray}]::uuid[]))::text AS id
+  `)) as
+    | Array<{ id: string }>
+    | {
+        rows?: Array<{ id: string }>
+      }
 
-  return rows
-    .filter((row) => {
-      const ancestorIds = row.ancestors
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean)
-
-      return normalizedDeptIds.some(
-        (deptId) => row.id === deptId || ancestorIds.includes(deptId),
-      )
-    })
-    .map((row) => row.id)
-    .sort()
+  const rows = Array.isArray(result) ? result : (result.rows ?? [])
+  return normalizeIds(rows.map((row) => row.id))
 }
 
 const normalizeDataScopes = (values: DataScopeGrant[]) =>

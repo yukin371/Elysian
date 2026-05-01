@@ -170,7 +170,6 @@ describe("generator session module", () => {
         resolveOutputDir: () => outputDir,
         auditLogWriter: (event) =>
           fixture.repository.createAuditLog({
-            category: "generator",
             ...event,
           }),
       }),

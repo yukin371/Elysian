@@ -1,4 +1,5 @@
 export { createAuthGuard, type AuthGuard } from "./guard"
+export { createAuthAuditLogWriter } from "./audit-log-writer"
 export { createAuthModule, type AuthModuleOptions } from "./module"
 export { createPasswordHash, verifyPasswordHash } from "./password"
 export {

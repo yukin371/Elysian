@@ -24,6 +24,8 @@ const fileFilterSchema = t.Object({
   originalName: t.Optional(t.String()),
   mimeType: t.Optional(t.String()),
   uploaderUserId: t.Optional(t.String()),
+  page: t.Optional(t.Numeric()),
+  pageSize: t.Optional(t.Numeric()),
 })
 
 export const createFileModule = (
@@ -58,9 +60,7 @@ export const createFileModule = (
             filePermissions.list,
           )
 
-          return {
-            items: await service.list(query, identity?.dataAccess),
-          }
+          return service.list(query, identity?.dataAccess)
         },
         {
           query: fileFilterSchema,

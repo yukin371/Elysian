@@ -3,6 +3,7 @@ import { AppError } from "../../errors"
 import type {
   CreateNotificationInput,
   ListNotificationsInput,
+  ListNotificationsResult,
   NotificationRepository,
 } from "./repository"
 
@@ -21,13 +22,15 @@ export interface ListNotificationsPayload extends ListNotificationsInput {}
 export const createNotificationService = (
   repository: NotificationRepository,
 ) => ({
-  list: (filter?: ListNotificationsPayload, dataAccess?: DataAccessContext) =>
-    repository.list(filter, dataAccess),
+  list: (
+    filter?: ListNotificationsPayload,
+    dataAccess?: DataAccessContext,
+  ): Promise<ListNotificationsResult> => repository.list(filter, dataAccess),
   async exportCsv(
     filter?: ListNotificationsPayload,
     dataAccess?: DataAccessContext,
   ) {
-    const items = await repository.list(filter, dataAccess)
+    const { items } = await repository.list(filter, dataAccess)
 
     return buildCsv(
       [

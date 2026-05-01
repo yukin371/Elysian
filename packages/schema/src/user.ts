@@ -26,6 +26,7 @@ export const userModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "displayName",
@@ -33,6 +34,7 @@ export const userModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "email",

@@ -3,6 +3,7 @@ import { t } from "elysia"
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
+import type { AuditLogWriter } from "../shared/audit-log"
 import type {
   GeneratorPreviewSessionDetail,
   GeneratorPreviewSessionRecord,
@@ -13,26 +14,9 @@ import {
   createGeneratorSessionService,
 } from "./service"
 
-interface GeneratorSessionAuditEvent {
-  action: string
-  actorUserId: string
-  details: Record<string, unknown> | null
-  ip: string | null
-  requestId: string | null
-  result: "success"
-  targetId: string
-  targetType: "generator-session"
-  tenantId: string
-  userAgent: string | null
-}
-
-type GeneratorSessionAuditLogWriter = (
-  event: GeneratorSessionAuditEvent,
-) => Promise<unknown>
-
 export interface GeneratorSessionModuleOptions
   extends GeneratorSessionServiceOptions {
-  auditLogWriter?: GeneratorSessionAuditLogWriter
+  auditLogWriter?: AuditLogWriter
   authGuard?: AuthGuard
 }
 
@@ -66,6 +50,7 @@ export const createGeneratorSessionModule = (
 
       try {
         await options.auditLogWriter({
+          category: "generator",
           action: event.action,
           actorUserId: identity.user.id,
           details: event.details,

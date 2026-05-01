@@ -29,6 +29,7 @@ export const departmentModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "name",
@@ -36,6 +37,7 @@ export const departmentModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     { key: "sort", label: "Sort", kind: "number", required: true },
     {

@@ -1,6 +1,7 @@
 import {
   type DataAccessContext,
   type DatabaseClient,
+  type PaginatedResult,
   buildDataAccessCondition,
   getNotificationById,
   getUserById,
@@ -23,7 +24,11 @@ export interface ListNotificationsInput {
   content?: string
   level?: NotificationLevel
   status?: NotificationStatus
+  page?: number
+  pageSize?: number
 }
+
+export type ListNotificationsResult = PaginatedResult<NotificationRecord>
 
 export interface CreateNotificationInput {
   recipientUserId: string
@@ -38,7 +43,7 @@ export interface NotificationRepository {
   list: (
     filter?: ListNotificationsInput,
     dataAccess?: DataAccessContext,
-  ) => Promise<NotificationRecord[]>
+  ) => Promise<ListNotificationsResult>
   getById: (
     id: string,
     dataAccess?: DataAccessContext,
@@ -68,7 +73,7 @@ export const createNotificationRepository = (
   db: DatabaseClient,
 ): NotificationRepository => ({
   async list(filter = {}, dataAccess?: DataAccessContext) {
-    const rows = await listNotifications(db, {
+    const result = await listNotifications(db, {
       ...filter,
       accessCondition: dataAccess
         ? buildDataAccessCondition(dataAccess, {
@@ -77,7 +82,10 @@ export const createNotificationRepository = (
           })
         : undefined,
     })
-    return rows.map(mapNotificationRow)
+    return {
+      ...result,
+      items: result.items.map(mapNotificationRow),
+    }
   },
   async getById(id, dataAccess) {
     const row = await getNotificationById(
@@ -150,7 +158,7 @@ export const createInMemoryNotificationRepository = (
 
   return {
     async list(filter = {}, dataAccess?: DataAccessContext) {
-      return [...items.values()]
+      const filteredItems = [...items.values()]
         .filter((item) =>
           dataAccess
             ? matchesDataAccess(dataAccess, {
@@ -185,7 +193,27 @@ export const createInMemoryNotificationRepository = (
           filter.status === undefined ? true : item.status === filter.status,
         )
         .sort(compareNotifications)
-        .map(mapStoredNotificationToPublic)
+      const page =
+        typeof filter.page === "number" && Number.isFinite(filter.page)
+          ? Math.max(1, Math.trunc(filter.page))
+          : 1
+      const pageSize =
+        typeof filter.pageSize === "number" && Number.isFinite(filter.pageSize)
+          ? Math.min(100, Math.max(1, Math.trunc(filter.pageSize)))
+          : 20
+      const total = filteredItems.length
+      const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+      const resolvedPage = Math.min(page, totalPages)
+
+      return {
+        items: filteredItems
+          .slice((resolvedPage - 1) * pageSize, resolvedPage * pageSize)
+          .map(mapStoredNotificationToPublic),
+        total,
+        page: resolvedPage,
+        pageSize,
+        totalPages,
+      }
     },
     async getById(id, dataAccess) {
       const item = items.get(id)

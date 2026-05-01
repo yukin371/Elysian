@@ -1,4 +1,4 @@
-import { departmentModuleSchema } from "@elysian/schema"
+import { departmentModuleSchema, deriveBodySchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
@@ -16,6 +16,24 @@ const departmentPermissions = {
   create: "system:department:create",
   update: "system:department:update",
 } as const
+
+const departmentCreateBodySchema = deriveBodySchema(departmentModuleSchema, {
+  mode: "create",
+  overrides: {
+    parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
+    sort: t.Optional(t.Number()),
+    status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+    userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+  },
+})
+
+const departmentUpdateBodySchema = deriveBodySchema(departmentModuleSchema, {
+  mode: "update",
+  overrides: {
+    parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
+    userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+  },
+})
 
 export const createDepartmentModule = (
   repository: DepartmentRepository,
@@ -94,16 +112,7 @@ export const createDepartmentModule = (
           return service.create(body)
         },
         {
-          body: t.Object({
-            parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
-            code: t.String({ minLength: 1 }),
-            name: t.String({ minLength: 1 }),
-            sort: t.Optional(t.Number()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-          }),
+          body: departmentCreateBodySchema,
           detail: {
             tags: ["department"],
             summary: "Create department",
@@ -121,16 +130,7 @@ export const createDepartmentModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            parentId: t.Optional(t.Nullable(t.String({ minLength: 1 }))),
-            code: t.Optional(t.String({ minLength: 1 })),
-            name: t.Optional(t.String({ minLength: 1 })),
-            sort: t.Optional(t.Number()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-          }),
+          body: departmentUpdateBodySchema,
           detail: {
             tags: ["department"],
             summary: "Update department",

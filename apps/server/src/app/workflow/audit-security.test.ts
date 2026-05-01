@@ -48,7 +48,6 @@ describe("createServerApp workflow audit and security", () => {
         >[0],
       ) =>
         fixture.repository.createAuditLog({
-          category: "workflow",
           ...input,
         }),
     })

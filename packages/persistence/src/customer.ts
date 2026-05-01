@@ -1,6 +1,7 @@
 import { type SQL, and, asc, desc, eq, ilike, or, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
+import { buildPaginatedResult, normalizePagination } from "./query-utils"
 import { type CustomerRow, customers } from "./schema"
 import { DEFAULT_TENANT_ID } from "./tenant"
 
@@ -53,9 +54,7 @@ export const listCustomers = async (
     .where(whereCondition)
 
   const total = countRow?.total ?? 0
-  const totalPages =
-    total === 0 ? 1 : Math.max(1, Math.ceil(total / query.pageSize))
-  const page = Math.min(query.page, totalPages)
+  const pagination = buildPaginatedResult([], total, query)
   const orderByClause =
     query.sortBy === "name"
       ? query.sortOrder === "asc"
@@ -70,14 +69,11 @@ export const listCustomers = async (
     .where(whereCondition)
     .orderBy(orderByClause)
     .limit(query.pageSize)
-    .offset((page - 1) * query.pageSize)
+    .offset((pagination.page - 1) * query.pageSize)
 
   return {
+    ...pagination,
     items,
-    total,
-    page,
-    pageSize: query.pageSize,
-    totalPages,
   }
 }
 
@@ -162,14 +158,7 @@ const normalizeCustomerListQuery = (
 ): Required<Omit<CustomerPersistenceListQuery, "status">> & {
   status: CustomerRow["status"] | ""
 } => {
-  const page =
-    typeof query?.page === "number" && Number.isFinite(query.page)
-      ? Math.max(1, Math.trunc(query.page))
-      : 1
-  const pageSize =
-    typeof query?.pageSize === "number" && Number.isFinite(query.pageSize)
-      ? Math.min(100, Math.max(1, Math.trunc(query.pageSize)))
-      : DEFAULT_CUSTOMER_PAGE_SIZE
+  const pagination = normalizePagination(query, DEFAULT_CUSTOMER_PAGE_SIZE)
 
   return {
     q: query?.q?.trim() ?? "",
@@ -177,8 +166,8 @@ const normalizeCustomerListQuery = (
       query?.status === "active" || query?.status === "inactive"
         ? query.status
         : "",
-    page,
-    pageSize,
+    page: pagination.page,
+    pageSize: pagination.pageSize,
     sortBy: query?.sortBy === "name" ? "name" : "createdAt",
     sortOrder: query?.sortOrder === "asc" ? "asc" : "desc",
   }

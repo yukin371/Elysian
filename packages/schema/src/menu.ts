@@ -48,6 +48,7 @@ export const menuModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     {
       key: "name",
@@ -55,6 +56,7 @@ export const menuModuleSchema: ModuleSchema = {
       kind: "string",
       required: true,
       searchable: true,
+      validation: { minLength: 1 },
     },
     { key: "path", label: "Path", kind: "string", searchable: true },
     { key: "component", label: "Component", kind: "string", searchable: true },

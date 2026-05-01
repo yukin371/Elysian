@@ -2,6 +2,10 @@
   "name": "@elysian/schema",
   "private": true,
   "type": "module",
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.41",
+    "elysia": "^1.4.16"
+  },
   "exports": {
     ".": "./src/index.ts"
   }

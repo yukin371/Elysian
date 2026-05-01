@@ -98,6 +98,10 @@
     },
     "packages/schema": {
       "name": "@elysian/schema",
+      "dependencies": {
+        "@sinclair/typebox": "^0.34.41",
+        "elysia": "^1.4.16",
+      },
     },
     "packages/ui-core": {
       "name": "@elysian/ui-core",

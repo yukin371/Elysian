@@ -1,6 +1,12 @@
-import { type SQL, and, desc, eq, ilike, inArray } from "drizzle-orm"
+import { type SQL, and, desc, eq, ilike, inArray, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
+import {
+  type PaginatedResult,
+  type PaginationQuery,
+  buildPaginatedResult,
+  normalizePagination,
+} from "./query-utils"
 import { type NotificationRow, notifications } from "./schema"
 import { DEFAULT_TENANT_ID } from "./tenant"
 
@@ -23,13 +29,28 @@ export interface ListNotificationsPersistenceFilter {
   content?: string
   level?: "info" | "success" | "warning" | "error"
   status?: "unread" | "read"
+  page?: number
+  pageSize?: number
   accessCondition?: SQL<unknown>
 }
+
+export interface NotificationPersistenceListQuery extends PaginationQuery {
+  recipientUserId?: string
+  title?: string
+  content?: string
+  level?: "info" | "success" | "warning" | "error"
+  status?: "unread" | "read"
+}
+
+export type NotificationPersistenceListResult = PaginatedResult<NotificationRow>
+
+const DEFAULT_NOTIFICATION_PAGE_SIZE = 20
 
 export const listNotifications = async (
   db: DatabaseClient,
   filter: ListNotificationsPersistenceFilter = {},
-): Promise<NotificationRow[]> => {
+): Promise<NotificationPersistenceListResult> => {
+  const pagination = normalizePagination(filter, DEFAULT_NOTIFICATION_PAGE_SIZE)
   const conditions = [
     filter.recipientUserId
       ? eq(notifications.recipientUserId, filter.recipientUserId)
@@ -45,18 +66,28 @@ export const listNotifications = async (
     filter.accessCondition,
   ].filter(Boolean)
 
-  if (conditions.length === 0) {
-    return db
-      .select()
-      .from(notifications)
-      .orderBy(desc(notifications.createdAt), desc(notifications.id))
-  }
+  const whereCondition = conditions.length > 0 ? and(...conditions) : undefined
+  const [countRow] = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(notifications)
+    .where(whereCondition)
 
-  return db
+  const total = countRow?.total ?? 0
+  const paginated = buildPaginatedResult([], total, pagination)
+  const items = await db
     .select()
     .from(notifications)
-    .where(and(...conditions))
+    .where(whereCondition)
     .orderBy(desc(notifications.createdAt), desc(notifications.id))
+    .limit(pagination.pageSize)
+    .offset((paginated.page - 1) * pagination.pageSize)
+
+  return {
+    ...paginated,
+    items,
+  }
 }
 
 export const getNotificationById = async (
