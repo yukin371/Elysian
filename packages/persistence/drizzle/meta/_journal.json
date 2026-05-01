@@ -134,6 +134,13 @@
       "when": 1778198400000,
       "tag": "0018_auth_login_lockout",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1778284800000,
+      "tag": "0019_dept_descendant_function",
+      "breakpoints": true
     }
   ]
 }

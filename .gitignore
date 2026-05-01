@@ -20,6 +20,8 @@ node_modules/
 dist/
 build/
 generated/
+!apps/example-vue/src/app/workspace-registry/generated/
+!apps/example-vue/src/app/workspace-registry/generated/*.ts
 .turbo/
 .cache/
 coverage/

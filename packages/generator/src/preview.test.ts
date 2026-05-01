@@ -4,7 +4,7 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
 import type { ModuleSchema } from "@elysian/schema"
-import { customerModuleSchema } from "@elysian/schema"
+import { customerModuleSchema, postModuleSchema } from "@elysian/schema"
 
 import { buildGenerationPreviewReport, previewModuleFiles } from "./preview"
 import { renderModuleSqlPreview } from "./sql-preview"
@@ -43,6 +43,35 @@ describe("previewModuleFiles", () => {
     expect(preview).toHaveLength(6)
     expect(preview.every((item) => item.plannedAction === "create")).toBe(true)
     expect(preview.every((item) => item.currentContents === null)).toBe(true)
+  })
+
+  it("returns 8 create actions for standard CRUD vue schemas", async () => {
+    const directory = await mkdtemp(
+      join(tmpdir(), "elysian-generator-preview-"),
+    )
+    const preview = await previewModuleFiles(postModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+    })
+    const pagePreview = preview.find(
+      (item) => item.path === "modules/post/post.page.vue",
+    )
+    const panelPreview = preview.find(
+      (item) => item.path === "modules/post/post-panel.vue",
+    )
+    const workspacePreview = preview.find(
+      (item) => item.path === "modules/post/post-workspace.ts",
+    )
+
+    expect(preview).toHaveLength(8)
+    expect(pagePreview?.contents).toContain("workspaceStateInjected?: boolean")
+    expect(pagePreview?.contents).toContain("readInjectedValue")
+    expect(pagePreview?.contents).not.toContain("items: PostRecord[]")
+    expect(panelPreview?.contents).toContain("resolvePostWorkspacePanelState")
+    expect(panelPreview?.contents).not.toContain("formFields: ElyFormField[]")
+    expect(workspacePreview?.contents).toContain(
+      "export interface PostWorkspacePanelInjectedState",
+    )
   })
 
   it("returns overwrite actions for managed files with overwrite-generated-only", async () => {
@@ -117,6 +146,28 @@ describe("buildGenerationPreviewReport", () => {
     expect(report.sqlPreview.contents).toContain(
       "-- status options: open, closed",
     )
+  })
+
+  it("keeps standard CRUD preview report aligned with inject-based workspace templates", async () => {
+    const directory = await mkdtemp(
+      join(tmpdir(), "elysian-generator-preview-"),
+    )
+    const report = await buildGenerationPreviewReport(postModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+      conflictStrategy: "fail",
+    })
+
+    const workspaceFile = report.files.find(
+      (item) => item.path === "modules/post/post-workspace.ts",
+    )
+
+    expect(report.files).toHaveLength(8)
+    expect(workspaceFile?.contents).toContain(
+      'import type { FrontendWorkspaceStateContext } from "@elysian/frontend-vue"',
+    )
+    expect(workspaceFile?.contents).toContain("readInjectedValue")
+    expect(report.sqlPreview.contents).toContain("CREATE TABLE post (")
   })
 })
 

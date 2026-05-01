@@ -16,6 +16,7 @@
 - 标准模块的文件计划与模块边界约定
 - 标准 CRUD 模块的 Main / Panel / Workspace 模板骨架
 - `customer` 模块的首批 server / page 模板渲染入口
+- `example-vue/src/modules/*` 所消费的标准 CRUD 前端 surface 生成产物
 
 ## Must Not Own
 
@@ -34,6 +35,7 @@
 - 生成结果必须支持二次维护
 - 再生成必须可预测，不能静默破坏手工代码
 - 模板输出必须和当前架构 owner 保持一致，不能把 persistence / server / frontend 边界重新搅乱
+- 标准 CRUD 前端 surface 产物必须可被 `apps/example-vue` 直接提交、校验并消费，不能只停留在预览态
 
 ## 常见坑
 

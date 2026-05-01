@@ -1,6 +1,11 @@
 import type { ModuleField, ModuleSchema } from "@elysian/schema"
 
 import { toCamelCase, toPascalCase } from "./naming"
+import { isStandardCrudSchema } from "./standard-crud"
+import {
+  renderPagePanelPath,
+  renderWorkspaceTemplatePath,
+} from "./vue-enterprise-crud-templates"
 
 export type FrontendTarget = "vue" | "react"
 
@@ -421,6 +426,9 @@ export const renderPagePath = (
 export const renderFrontendArtifactPath = (schema: ModuleSchema) =>
   `modules/${schema.name}/${schema.name}.frontend.ts`
 
+export const renderFrontendArtifactName = (schema: ModuleSchema) =>
+  `${toCamelCase(schema.name)}FrontendModuleArtifact`
+
 const deriveArtifactPermissions = (
   schema: ModuleSchema,
 ): Record<string, string> => {
@@ -452,8 +460,10 @@ export const renderFrontendArtifactTemplate = (
   schema: ModuleSchema,
   frontendTarget: FrontendTarget,
 ) => {
-  const artifactName = `${toCamelCase(schema.name)}FrontendModuleArtifact`
+  const artifactName = renderFrontendArtifactName(schema)
   const pageComponentPath = renderPagePath(schema, frontendTarget)
+  const standardCrudSurface =
+    frontendTarget === "vue" && isStandardCrudSchema(schema)
   const primaryFieldKey = getPrimaryDisplayField(schema)?.key ?? "id"
   const searchableFieldKeys = schema.fields
     .filter((field) => field.searchable === true)
@@ -474,12 +484,15 @@ export const renderFrontendArtifactTemplate = (
   }
   kind: string
   moduleCode: string
+  panelComponentPath: string | null
   pageComponentPath: string
   permissionPrefix: string | null
   permissions: Record<string, string>
   primaryFieldKey: string
   routePath: string | null
   searchableFieldKeys: string[]
+  surfaceKind: "page-only" | "standard-crud-enterprise"
+  workspaceComponentPath: string | null
   workspaceDomain: "business" | "system" | null
 }
 
@@ -489,7 +502,16 @@ export const ${artifactName}: GeneratedFrontendModuleArtifact = {
   workspaceDomain: ${JSON.stringify(schema.frontend?.workspaceDomain ?? null)},
   routePath: ${JSON.stringify(schema.frontend?.routePath ?? null)},
   permissionPrefix: ${JSON.stringify(schema.frontend?.permissionPrefix ?? null)},
+  surfaceKind: ${JSON.stringify(
+    standardCrudSurface ? "standard-crud-enterprise" : "page-only",
+  )},
   pageComponentPath: ${JSON.stringify(pageComponentPath)},
+  panelComponentPath: ${JSON.stringify(
+    standardCrudSurface ? renderPagePanelPath(schema) : null,
+  )},
+  workspaceComponentPath: ${JSON.stringify(
+    standardCrudSurface ? renderWorkspaceTemplatePath(schema) : null,
+  )},
   primaryFieldKey: ${JSON.stringify(primaryFieldKey)},
   fieldKeys: ${JSON.stringify(
     schema.fields.map((field) => field.key),
@@ -503,6 +525,21 @@ export const ${artifactName}: GeneratedFrontendModuleArtifact = {
 }
 `
 }
+
+export interface RenderedFrontendArtifactModule {
+  artifactName: string
+  contents: string
+  path: string
+}
+
+export const renderFrontendArtifactModule = (
+  schema: ModuleSchema,
+  frontendTarget: FrontendTarget,
+): RenderedFrontendArtifactModule => ({
+  artifactName: renderFrontendArtifactName(schema),
+  path: renderFrontendArtifactPath(schema),
+  contents: renderFrontendArtifactTemplate(schema, frontendTarget),
+})
 
 export const getTemplateReason = (
   path: string,

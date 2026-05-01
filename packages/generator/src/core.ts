@@ -4,6 +4,7 @@ import {
   DEFAULT_MERGE_STRATEGY,
   type MergeStrategy,
 } from "./shared-conventions"
+import { isStandardCrudSchema } from "./standard-crud"
 import {
   type FrontendTarget,
   type RenderModuleTemplatesOptions,
@@ -24,20 +25,6 @@ import {
   renderVueWorkspaceComposableTemplate,
   renderWorkspaceTemplatePath,
 } from "./vue-enterprise-crud-templates"
-
-const NON_STANDARD_CRUD_NAMES = new Set([
-  "customer",
-  "operation-log",
-  "workflow",
-  "workflow-definition",
-  "file",
-  "auth-session",
-  "generator-preview",
-])
-
-export const isStandardCrudSchema = (schema: ModuleSchema): boolean =>
-  !NON_STANDARD_CRUD_NAMES.has(schema.name) &&
-  schema.frontend?.workspaceDomain != null
 
 export interface GeneratedFilePlan {
   path: string

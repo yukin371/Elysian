@@ -3,9 +3,13 @@ import { describe, expect, it } from "bun:test"
 import type { ModuleSchema } from "@elysian/schema"
 import {
   customerModuleSchema,
+  dictionaryModuleSchema,
+  notificationModuleSchema,
   postModuleSchema,
   productModuleSchema,
   roleModuleSchema,
+  tenantModuleSchema,
+  userModuleSchema,
 } from "@elysian/schema"
 
 import { planModuleFiles, renderModuleFiles } from "./index"
@@ -88,6 +92,8 @@ describe("renderModuleFiles", () => {
     expect(frontendFile?.contents).toContain('moduleCode: "customer"')
     expect(frontendFile?.contents).toContain('workspaceDomain: "business"')
     expect(frontendFile?.contents).toContain('kind: "customer"')
+    expect(frontendFile?.contents).toContain('surfaceKind: "page-only"')
+    expect(frontendFile?.contents).toContain("panelComponentPath: null")
     expect(frontendFile?.contents).toContain('"list": "customer:customer:list"')
     expect(frontendFile?.contents).toContain(
       '"sectionTitle": "app.customer.sectionTitle"',
@@ -218,14 +224,34 @@ describe("enterprise CRUD templates", () => {
   it("renders enterprise Main.vue with ElyCrudWorkspace for standard CRUD", () => {
     const files = renderModuleFiles(postModuleSchema)
     const mainFile = files.find((f) => f.path === "modules/post/post.page.vue")
+    const frontendFile = files.find(
+      (f) => f.path === "modules/post/post.frontend.ts",
+    )
 
     expect(mainFile?.contents).toContain("ElyCrudWorkspace")
     expect(mainFile?.contents).toContain("PostRecord")
     expect(mainFile?.contents).toContain('from "./post.schema"')
-    expect(mainFile?.contents).toContain("PostWorkspaceMainProps")
+    expect(mainFile?.contents).toContain('from "./post-workspace"')
+    expect(mainFile?.contents).toContain("WORKSPACE_STATE_KEY")
+    expect(mainFile?.contents).toContain("readInjectedValue")
+    expect(mainFile?.contents).toContain("workspaceStateInjected?: boolean")
+    expect(mainFile?.contents).toContain("resolvePostWorkspaceMainState")
+    expect(mainFile?.contents).toContain("resolvedPostWorkspaceState")
     expect(mainFile?.contents).toContain('t("app.message.postModuleOffline")')
     expect(mainFile?.contents).toContain("enterprise-toolbar-pill")
+    expect(mainFile?.contents).not.toContain("loading: boolean")
+    expect(mainFile?.contents).not.toContain("items: PostRecord[]")
+    expect(mainFile?.contents).not.toContain("errorMessage: string")
     expect(mainFile?.contents).not.toContain("<ul>")
+    expect(frontendFile?.contents).toContain(
+      'surfaceKind: "standard-crud-enterprise"',
+    )
+    expect(frontendFile?.contents).toContain(
+      'panelComponentPath: "modules/post/post-panel.vue"',
+    )
+    expect(frontendFile?.contents).toContain(
+      'workspaceComponentPath: "modules/post/post-workspace.ts"',
+    )
   })
 
   it("renders enterprise Panel.vue with ElyForm for standard CRUD", () => {
@@ -237,8 +263,15 @@ describe("enterprise CRUD templates", () => {
     expect(panelFile?.contents).toContain("ElyForm")
     expect(panelFile?.contents).toContain("PostRecord")
     expect(panelFile?.contents).toContain('from "./post.schema"')
-    expect(panelFile?.contents).toContain("PostWorkspacePanelProps")
-    expect(panelFile?.contents).toContain("panelMode")
+    expect(panelFile?.contents).toContain('from "./post-workspace"')
+    expect(panelFile?.contents).toContain("WORKSPACE_STATE_KEY")
+    expect(panelFile?.contents).toContain("workspaceStateInjected?: boolean")
+    expect(panelFile?.contents).toContain("readInjectedValue")
+    expect(panelFile?.contents).toContain("resolvedPanelMode")
+    expect(panelFile?.contents).not.toContain("panelMode: ")
+    expect(panelFile?.contents).not.toContain("selectedPost: PostRecord | null")
+    expect(panelFile?.contents).not.toContain("formFields: ElyFormField[]")
+    expect(panelFile?.contents).not.toContain("formValues: ElyFormValues")
     expect(panelFile?.contents).toContain("start-edit")
     expect(panelFile?.contents).toContain("open-create")
     expect(panelFile?.contents).toContain("submit-form")
@@ -254,10 +287,22 @@ describe("enterprise CRUD templates", () => {
     expect(workspaceFile?.contents).toContain("const normalizeText =")
     expect(workspaceFile?.contents).toContain("const normalizeOptionalText =")
     expect(workspaceFile?.contents).toContain("const normalizeNumber =")
+    expect(workspaceFile?.contents).toContain(
+      'import type { FrontendWorkspaceStateContext } from "@elysian/frontend-vue"',
+    )
     expect(workspaceFile?.contents).toContain('from "./post.schema"')
+    expect(workspaceFile?.contents).toContain(
+      "export interface PostWorkspaceMainInjectedState",
+    )
+    expect(workspaceFile?.contents).toContain(
+      "export interface PostWorkspacePanelInjectedState",
+    )
     expect(workspaceFile?.contents).toContain("createDefaultPostDraft")
     expect(workspaceFile?.contents).toContain("filterPostRecords")
     expect(workspaceFile?.contents).toContain("resolvePostSelection")
+    expect(workspaceFile?.contents).toContain("resolvePostWorkspaceMainState")
+    expect(workspaceFile?.contents).toContain("resolvePostWorkspacePanelState")
+    expect(workspaceFile?.contents).toContain("readInjectedValue")
     expect(workspaceFile?.contents).toContain("normalizePostPayload")
     expect(workspaceFile?.contents).toContain("toPostEditDraft")
     expect(workspaceFile?.contents).toContain("PostRecord")
@@ -279,6 +324,62 @@ describe("enterprise CRUD templates", () => {
     )
     expect(workspaceFile?.contents).toContain(
       "normalizeNumber(values.dataScope, 0)",
+    )
+  })
+
+  it("uses dictionary-specific permission prop names in generated vue surfaces", () => {
+    const files = renderModuleFiles(dictionaryModuleSchema)
+    const mainFile = files.find(
+      (f) => f.path === "modules/dictionary/dictionary.page.vue",
+    )
+    const panelFile = files.find(
+      (f) => f.path === "modules/dictionary/dictionary-panel.vue",
+    )
+
+    expect(mainFile?.contents).toContain("canViewDictionaries")
+    expect(panelFile?.contents).toContain("canCreateDictionaryTypes")
+    expect(panelFile?.contents).toContain("canUpdateDictionaryTypes")
+    expect(panelFile?.contents).toContain("selectedDictionaryTypeItems")
+    expect(panelFile?.contents).toContain("localizeDictionaryStatus")
+  })
+
+  it("renders notification panel with mark-read action instead of edit action", () => {
+    const files = renderModuleFiles(notificationModuleSchema)
+    const panelFile = files.find(
+      (f) => f.path === "modules/notification/notification-panel.vue",
+    )
+
+    expect(panelFile?.contents).toContain(`(e: "mark-read"): void`)
+    expect(panelFile?.contents).toContain(`emit('mark-read')`)
+    expect(panelFile?.contents).not.toContain(
+      `emit('start-edit', resolvedSelectedNotification)`,
+    )
+  })
+
+  it("renders tenant and user panels with their extra runtime actions", () => {
+    const tenantFiles = renderModuleFiles(tenantModuleSchema)
+    const tenantPanel = tenantFiles.find(
+      (f) => f.path === "modules/tenant/tenant-panel.vue",
+    )
+    const userFiles = renderModuleFiles(userModuleSchema)
+    const userPanel = userFiles.find(
+      (f) => f.path === "modules/user/user-panel.vue",
+    )
+    const userWorkspace = userFiles.find(
+      (f) => f.path === "modules/user/user-workspace.ts",
+    )
+
+    expect(tenantPanel?.contents).toContain("isSuperAdmin: boolean")
+    expect(tenantPanel?.contents).toContain(`(e: "toggle-status"): void`)
+    expect(tenantPanel?.contents).toContain(`emit('toggle-status')`)
+    expect(userPanel?.contents).toContain("canResetUserPasswords: boolean")
+    expect(userPanel?.contents).toContain("passwordInput: string")
+    expect(userPanel?.contents).toContain(
+      `(e: "start-password-reset", user: UserRecord): void`,
+    )
+    expect(userPanel?.contents).toContain(`(e: "submit-password-reset"): void`)
+    expect(userWorkspace?.contents).toContain(
+      `userPanelMode: { value: "detail" | "create" | "edit" | "reset" }`,
     )
   })
 

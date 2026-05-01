@@ -15,6 +15,11 @@ export {
   type RenderedModuleFile,
   type RenderModuleTemplatesOptions,
 } from "./core"
+export { isStandardCrudSchema } from "./standard-crud"
+export {
+  renderFrontendArtifactModule,
+  type RenderedFrontendArtifactModule,
+} from "./templates"
 export {
   getRegisteredSchema,
   listRegisteredSchemaNames,

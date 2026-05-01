@@ -10,7 +10,7 @@ import {
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
-import { customerModuleSchema } from "@elysian/schema"
+import { customerModuleSchema, postModuleSchema } from "@elysian/schema"
 
 import { buildGenerationPreviewReport } from "./preview"
 import {
@@ -68,6 +68,48 @@ describe("writeModuleFiles", () => {
     expect(schemaFile).toContain("customerModuleSchema")
     expect(manifestFile).toContain('"schemaName": "customer"')
     expect(manifestFile).toContain('"targetPreset": "custom"')
+  })
+
+  it("writes 8 standard CRUD files with inject-aligned workspace artifacts", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "elysian-generator-"))
+    const results = await writeModuleFiles(postModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+    })
+
+    const pageFile = await readFile(
+      join(directory, "modules/post/post.page.vue"),
+      "utf8",
+    )
+    const panelFile = await readFile(
+      join(directory, "modules/post/post-panel.vue"),
+      "utf8",
+    )
+    const workspaceFile = await readFile(
+      join(directory, "modules/post/post-workspace.ts"),
+      "utf8",
+    )
+
+    expect(results).toHaveLength(8)
+    expect(results.every((item) => item.written)).toBe(true)
+    expect(pageFile).toContain(
+      'import { WORKSPACE_STATE_KEY } from "@elysian/frontend-vue"',
+    )
+    expect(pageFile).toContain("readInjectedValue")
+    expect(pageFile).toContain("workspaceStateInjected?: boolean")
+    expect(pageFile).toContain("resolvePostWorkspaceMainState")
+    expect(pageFile).not.toContain("items: PostRecord[]")
+    expect(panelFile).toContain("readInjectedValue")
+    expect(panelFile).toContain("resolvePostWorkspacePanelState")
+    expect(panelFile).not.toContain("formFields: ElyFormField[]")
+    expect(workspaceFile).toContain(
+      "export interface PostWorkspaceMainInjectedState",
+    )
+    expect(workspaceFile).toContain(
+      "export interface PostWorkspacePanelInjectedState",
+    )
+    expect(workspaceFile).toContain("resolvePostWorkspaceMainState")
+    expect(workspaceFile).toContain("readInjectedValue")
   })
 
   it("does not overwrite existing files by default", async () => {
