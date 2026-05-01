@@ -122,7 +122,7 @@
 
 ## 当前推荐顺序
 
-### 第一顺序：先完成 example-vue 当前已经启动的本地收口
+### 第一顺序：先完成 example-vue 当前已经启动的本地收口 ✅ 已完成
 
 范围：
 
@@ -141,7 +141,7 @@
 - 这一阶段只能继续做“本地壳层减手写”
 - 不应继续扩写更多手写 CRUD 特例
 
-### 第二顺序：定义 generator 到前端注册层的正式静态契约
+### 第二顺序：定义 generator 到前端注册层的正式静态契约 ✅ 已完成
 
 最小目标：
 
@@ -159,7 +159,7 @@
 - artifact 形状：`packages/generator`
 - artifact 消费装配：`apps/example-vue`
 
-### 第三顺序：把标准 CRUD main/panel 页面骨架回收到 generator 模板
+### 第三顺序：把标准 CRUD main/panel 页面骨架回收到 generator 模板 🚧 当前活跃
 
 最小目标：
 

@@ -1,7 +1,12 @@
 import { describe, expect, it } from "bun:test"
 
 import type { ModuleSchema } from "@elysian/schema"
-import { customerModuleSchema, productModuleSchema } from "@elysian/schema"
+import {
+  customerModuleSchema,
+  postModuleSchema,
+  productModuleSchema,
+  roleModuleSchema,
+} from "@elysian/schema"
 
 import { planModuleFiles, renderModuleFiles } from "./index"
 
@@ -168,5 +173,122 @@ describe("renderModuleFiles", () => {
     expect(pageFile?.contents).toContain("item.title")
     expect(pageFile?.contents).not.toContain("item.name")
     expect(frontendFile?.contents).toContain('primaryFieldKey: "title"')
+  })
+})
+
+describe("enterprise CRUD templates", () => {
+  it("plans 8 files for standard CRUD schemas with vue target", () => {
+    const plans = planModuleFiles(postModuleSchema)
+
+    expect(plans).toHaveLength(8)
+    expect(plans.map((p) => p.path)).toEqual([
+      "modules/post/post.schema.ts",
+      "modules/post/post.repository.ts",
+      "modules/post/post.service.ts",
+      "modules/post/post.routes.ts",
+      "modules/post/post.frontend.ts",
+      "modules/post/post.page.vue",
+      "modules/post/post-panel.vue",
+      "modules/post/post-workspace.ts",
+    ])
+  })
+
+  it("keeps 6 files for excluded schemas (customer)", () => {
+    const plans = planModuleFiles(customerModuleSchema)
+
+    expect(plans).toHaveLength(6)
+    expect(plans[5]?.path).toBe("modules/customer/customer.page.vue")
+    expect(plans[5]?.reason).toContain("management page")
+  })
+
+  it("keeps 6 files for schemas without frontend metadata", () => {
+    const plans = planModuleFiles(ticketModuleSchema)
+
+    expect(plans).toHaveLength(6)
+  })
+
+  it("keeps 6 files for react frontend target even on standard CRUD schemas", () => {
+    const plans = planModuleFiles(postModuleSchema, {
+      frontendTarget: "react",
+    })
+
+    expect(plans).toHaveLength(6)
+  })
+
+  it("renders enterprise Main.vue with ElyCrudWorkspace for standard CRUD", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const mainFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    expect(mainFile?.contents).toContain("ElyCrudWorkspace")
+    expect(mainFile?.contents).toContain("PostRecord")
+    expect(mainFile?.contents).toContain('from "./post.schema"')
+    expect(mainFile?.contents).toContain("PostWorkspaceMainProps")
+    expect(mainFile?.contents).toContain('t("app.message.postModuleOffline")')
+    expect(mainFile?.contents).toContain("enterprise-toolbar-pill")
+    expect(mainFile?.contents).not.toContain("<ul>")
+  })
+
+  it("renders enterprise Panel.vue with ElyForm for standard CRUD", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const panelFile = files.find(
+      (f) => f.path === "modules/post/post-panel.vue",
+    )
+
+    expect(panelFile?.contents).toContain("ElyForm")
+    expect(panelFile?.contents).toContain("PostRecord")
+    expect(panelFile?.contents).toContain('from "./post.schema"')
+    expect(panelFile?.contents).toContain("PostWorkspacePanelProps")
+    expect(panelFile?.contents).toContain("panelMode")
+    expect(panelFile?.contents).toContain("start-edit")
+    expect(panelFile?.contents).toContain("open-create")
+    expect(panelFile?.contents).toContain("submit-form")
+    expect(panelFile?.contents).toContain("cancel-panel")
+  })
+
+  it("renders workspace composable with generated helpers", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const workspaceFile = files.find(
+      (f) => f.path === "modules/post/post-workspace.ts",
+    )
+
+    expect(workspaceFile?.contents).toContain("const normalizeText =")
+    expect(workspaceFile?.contents).toContain("const normalizeOptionalText =")
+    expect(workspaceFile?.contents).toContain("const normalizeNumber =")
+    expect(workspaceFile?.contents).toContain('from "./post.schema"')
+    expect(workspaceFile?.contents).toContain("createDefaultPostDraft")
+    expect(workspaceFile?.contents).toContain("filterPostRecords")
+    expect(workspaceFile?.contents).toContain("resolvePostSelection")
+    expect(workspaceFile?.contents).toContain("normalizePostPayload")
+    expect(workspaceFile?.contents).toContain("toPostEditDraft")
+    expect(workspaceFile?.contents).toContain("PostRecord")
+    expect(workspaceFile?.contents).toContain("normalizeNumber(values.sort, 0)")
+  })
+
+  it("normalizes optional text fields and numeric payloads for role workspace", () => {
+    const files = renderModuleFiles(roleModuleSchema)
+    const workspaceFile = files.find(
+      (f) => f.path === "modules/role/role-workspace.ts",
+    )
+
+    expect(workspaceFile?.contents).toContain("normalizeOptionalText")
+    expect(workspaceFile?.contents).toContain("normalizeNumber")
+    expect(workspaceFile?.contents).toContain('from "./role.schema"')
+    expect(workspaceFile?.contents).toContain('String(item.description ?? "")')
+    expect(workspaceFile?.contents).toContain(
+      "normalizeOptionalText(values.description)",
+    )
+    expect(workspaceFile?.contents).toContain(
+      "normalizeNumber(values.dataScope, 0)",
+    )
+  })
+
+  it("keeps simple list page for customer (excluded from enterprise template)", () => {
+    const files = renderModuleFiles(customerModuleSchema)
+    const pageFile = files.find(
+      (f) => f.path === "modules/customer/customer.page.vue",
+    )
+
+    expect(pageFile?.contents).toContain("customerItems")
+    expect(pageFile?.contents).not.toContain("ElyCrudWorkspace")
   })
 })

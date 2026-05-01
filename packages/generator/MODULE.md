@@ -14,6 +14,7 @@
 - 文件覆盖策略
 - 生成日志与元数据
 - 标准模块的文件计划与模块边界约定
+- 标准 CRUD 模块的 Main / Panel / Workspace 模板骨架
 - `customer` 模块的首批 server / page 模板渲染入口
 
 ## Must Not Own

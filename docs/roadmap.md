@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-01`
+更新时间：`2026-05-01`（Phase 2 契约归档，Phase 3 CRUD 模板回收启动）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -45,7 +45,8 @@
 - 第二优先级：在不改变 owner 的前提下，继续把通知、操作日志、租户与数据权限体验向后台常用形态收口
 - 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心
 - 前端局部收口继续入口：优先沿 `M5 / M6A` 推进 `provide/inject`、共享样式收口与类型网关，不再继续扩写手写 CRUD 接线
-- generator 次级推进入口：在完成本地前端收口后，优先消费 `*.frontend.ts` 静态注册产物，逐步替换标准 CRUD 模块的手写注册
+- generator 契约已完成：`buildWorkspaceRegistration` 已接入 `packages/frontend-vue`，13 个标准 CRUD 模块注册已从手写切换为 schema 驱动；generator artifact 已包含 kind / permissions / i18nKeys，可被前端注册中心直接消费
+- generator Phase 3 启动：当前优先把标准 CRUD main/panel 页面骨架回收到 generator 模板，新增标准模块不再手写 main/panel 大体结构
 - persistence 性能治理入口：先按 `data-scope.ts` 与 `auth.ts` 的高风险查询处理，再进入分页/模糊搜索统一治理
 
 ### 2. Phase 2: Auth Foundation ✅ 归档
@@ -236,7 +237,8 @@
 
 ## 最近进展
 
-- generator 已从“只写入”扩到“可预览后再决定是否落盘”，当前可在 CLI 预览文件动作、输出 JSON 报告并生成 review-only SQL preview
+- generator → frontend 注册契约已完成：`ModuleFrontendSchema` 已扩展 `permissionActions` / `workspaceKind` / `moduleCode`，13 个 `ModuleSchema` 已补 `frontend` 元数据，`buildWorkspaceRegistration` 已接入 `packages/frontend-vue` 并替换 `system-registry` / `business-registry` 全部 schema 支撑的手写注册项；generator artifact 已包含 kind / permissions / i18nKeys，当前 470 测试全绿
+- generator 已从”只写入”扩到”可预览后再决定是否落盘”，当前可在 CLI 预览文件动作、输出 JSON 报告并生成 review-only SQL preview
 - 已补代码生成 / SQL 生成 / 安全能力的功能矩阵与缺口设计文档，明确当前状态应表述为“代码生成底座已可用、SQL 仍为 review-only preview、安全具备基础等价能力但未进入完整企业安全平台”；详见 [2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md](./plans/2026-04-27-codegen-sql-security-feature-matrix-and-gap-design.md)
 - `Track 1 / T1-2` 已落最小后端切片：`apps/server` 新增 `generator-session` 运行时模块，当前已支持生成 preview session 列表、详情、创建与 report 落盘，不提前进入 staging apply
 - `Track 1 / T1-3` 已落最小后端切片：当前可对 preview session 执行 staging apply，apply 前会重验目标文件是否漂移，成功后写入 manifest 并保留最小 apply evidence
@@ -333,7 +335,8 @@
 
 ## 下一步
 
-1. 继续按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
-2. 在既有导出稳定后，判断 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / files` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
-3. `generator / SQL / workflow` 维持次级推进：优先做必要收口（如会话设备化、diff/evidence 强化），不抢占若依基础功能对齐的第一优先级。
-4. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。
+1. 进入 generator Phase 3：把标准 CRUD main/panel 页面骨架回收到 generator 模板，新增标准 CRUD 模块不再手写 main/panel 大体结构，只保留少量本地扩展槽位。
+2. 继续按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
+3. 在既有导出稳定后，判断 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / files` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
+4. `generator / SQL / workflow` 维持次级推进：优先做必要收口（如会话设备化、diff/evidence 强化），不抢占若依基础功能对齐的第一优先级。
+5. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。

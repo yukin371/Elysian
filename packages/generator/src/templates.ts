@@ -504,7 +504,10 @@ export const ${artifactName}: GeneratedFrontendModuleArtifact = {
 `
 }
 
-export const getTemplateReason = (path: string) => {
+export const getTemplateReason = (
+  path: string,
+  options?: { enterprise?: boolean },
+) => {
   if (path.endsWith(".schema.ts")) {
     return "Persist the module schema alongside generated module artifacts."
   }
@@ -523,6 +526,18 @@ export const getTemplateReason = (path: string) => {
 
   if (path.endsWith(".frontend.ts")) {
     return "Emit a static frontend registration artifact for generated module integration."
+  }
+
+  if (path.endsWith("-panel.vue")) {
+    return "Emit the enterprise CRUD workspace detail/form panel for the module."
+  }
+
+  if (path.endsWith("-workspace.ts")) {
+    return "Emit the workspace composable wiring for the module's CRUD state machine."
+  }
+
+  if (options?.enterprise) {
+    return "Emit the enterprise CRUD workspace main view for the module."
   }
 
   return "Provide a generated management page implementation for the selected frontend target."

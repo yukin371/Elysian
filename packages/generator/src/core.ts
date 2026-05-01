@@ -17,6 +17,27 @@ import {
   renderSchemaTemplate,
   renderServiceTemplate,
 } from "./templates"
+import {
+  renderPagePanelPath,
+  renderVueEnterpriseMainTemplate,
+  renderVueEnterprisePanelTemplate,
+  renderVueWorkspaceComposableTemplate,
+  renderWorkspaceTemplatePath,
+} from "./vue-enterprise-crud-templates"
+
+const NON_STANDARD_CRUD_NAMES = new Set([
+  "customer",
+  "operation-log",
+  "workflow",
+  "workflow-definition",
+  "file",
+  "auth-session",
+  "generator-preview",
+])
+
+export const isStandardCrudSchema = (schema: ModuleSchema): boolean =>
+  !NON_STANDARD_CRUD_NAMES.has(schema.name) &&
+  schema.frontend?.workspaceDomain != null
 
 export interface GeneratedFilePlan {
   path: string
@@ -43,8 +64,9 @@ export const planModuleFiles = (
   const frontendTarget = getFrontendTarget(options)
   const basePath = `modules/${schema.name}`
   const pagePath = renderPagePath(schema, frontendTarget)
+  const standardCrud = isStandardCrudSchema(schema) && frontendTarget === "vue"
 
-  return [
+  const baseFiles: GeneratedFilePlan[] = [
     {
       path: `${basePath}/${schema.name}.schema.ts`,
       reason: getTemplateReason(`${basePath}/${schema.name}.schema.ts`),
@@ -70,6 +92,34 @@ export const planModuleFiles = (
       reason: getTemplateReason(renderFrontendArtifactPath(schema)),
       mergeStrategy: DEFAULT_MERGE_STRATEGY,
     },
+  ]
+
+  if (standardCrud) {
+    const panelPath = renderPagePanelPath(schema)
+    const workspacePath = renderWorkspaceTemplatePath(schema)
+
+    return [
+      ...baseFiles,
+      {
+        path: pagePath,
+        reason: getTemplateReason(pagePath, { enterprise: true }),
+        mergeStrategy: DEFAULT_MERGE_STRATEGY,
+      },
+      {
+        path: panelPath,
+        reason: getTemplateReason(panelPath),
+        mergeStrategy: DEFAULT_MERGE_STRATEGY,
+      },
+      {
+        path: workspacePath,
+        reason: getTemplateReason(workspacePath),
+        mergeStrategy: DEFAULT_MERGE_STRATEGY,
+      },
+    ]
+  }
+
+  return [
+    ...baseFiles,
     {
       path: pagePath,
       reason: getTemplateReason(pagePath),
@@ -132,6 +182,30 @@ const renderTemplateForPath = (
 
   if (path.endsWith(".frontend.ts")) {
     return renderFrontendArtifactTemplate(schema, frontendTarget)
+  }
+
+  if (
+    path.endsWith("-panel.vue") &&
+    isStandardCrudSchema(schema) &&
+    frontendTarget === "vue"
+  ) {
+    return renderVueEnterprisePanelTemplate(schema)
+  }
+
+  if (
+    path.endsWith("-workspace.ts") &&
+    isStandardCrudSchema(schema) &&
+    frontendTarget === "vue"
+  ) {
+    return renderVueWorkspaceComposableTemplate(schema)
+  }
+
+  if (
+    path.endsWith(".page.vue") &&
+    isStandardCrudSchema(schema) &&
+    frontendTarget === "vue"
+  ) {
+    return renderVueEnterpriseMainTemplate(schema)
   }
 
   return renderPageTemplate(schema, frontendTarget)
