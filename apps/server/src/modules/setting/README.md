@@ -7,6 +7,7 @@
 ## Owns
 
 - `/system/settings` 的列表、详情、创建、更新。
+- 配置列表 `page / pageSize` 的最小服务端分页语义。
 - `key/value` 的必填和唯一性校验。
 - 配置描述文本的最小规范化。
 
@@ -36,5 +37,6 @@ flowchart LR
 ## Validation
 
 - `service.ts` 已确认 `key/value` 都会先 trim，再做非空和唯一性校验。
+- `repository.ts` 已确认配置列表返回 `items + total + page + pageSize + totalPages`，当前导出继续复用同一 owner 但不复用分页切片。
 - `repository.ts` 已确认存在 `getByKeyWithTenantFallback(key, tenantId)` 能力，但它仍属于 persistence 桥接，不等于公开 API 能力。
 - 当前模块路由仅覆盖 CRUD，没有把 runtime `config` owner 混进系统配置模块。

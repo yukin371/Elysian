@@ -175,6 +175,10 @@ describe("auth operation log query surface", () => {
     expect(loginLogsResponse.status).toBe(200)
     const loginLogsBody = (await loginLogsResponse.json()) as {
       items: OperationLogRecord[]
+      total: number
+      page: number
+      pageSize: number
+      totalPages: number
     }
 
     expect(
@@ -188,6 +192,12 @@ describe("auth operation log query surface", () => {
       ["login", "success", "login", null],
       ["login", "failure", "login", "invalid_password"],
     ])
+    expect(loginLogsBody).toMatchObject({
+      total: 2,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
 
     const failedLoginResponse = await queryApp.handle(
       new Request(
@@ -202,9 +212,19 @@ describe("auth operation log query surface", () => {
     expect(failedLoginResponse.status).toBe(200)
     const failedLoginBody = (await failedLoginResponse.json()) as {
       items: OperationLogRecord[]
+      total: number
+      page: number
+      pageSize: number
+      totalPages: number
     }
 
     expect(failedLoginBody.items).toHaveLength(1)
+    expect(failedLoginBody).toMatchObject({
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
     expect(failedLoginBody.items[0]).toMatchObject({
       action: "login",
       authEventType: "login",

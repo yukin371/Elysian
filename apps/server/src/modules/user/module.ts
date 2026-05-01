@@ -1,4 +1,4 @@
-import { userModuleSchema } from "@elysian/schema"
+import { deriveBodySchema, userModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
@@ -10,6 +10,11 @@ export interface UserModuleOptions {
   authGuard?: AuthGuard
 }
 
+const userListQuerySchema = t.Object({
+  page: t.Optional(t.Numeric()),
+  pageSize: t.Optional(t.Numeric()),
+})
+
 const userPermissions = {
   list: "system:user:list",
   get: "system:user:list",
@@ -17,6 +22,21 @@ const userPermissions = {
   update: "system:user:update",
   resetPassword: "system:user:reset-password",
 } as const
+
+const userCreateBodySchema = deriveBodySchema(userModuleSchema, {
+  mode: "create",
+  exclude: ["lastLoginAt"],
+  overrides: {
+    isSuperAdmin: t.Optional(t.Boolean()),
+    password: t.String({ minLength: 1 }),
+    status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+  },
+})
+
+const userUpdateBodySchema = deriveBodySchema(userModuleSchema, {
+  mode: "update",
+  exclude: ["lastLoginAt"],
+})
 
 export const createUserModule = (
   repository: UserRepository,
@@ -40,14 +60,13 @@ export const createUserModule = (
     return app
       .get(
         "/system/users",
-        async ({ request }) => {
+        async ({ query, request }) => {
           await authorize(request.headers, userPermissions.list)
 
-          return {
-            items: await service.list(),
-          }
+          return service.list(query)
         },
         {
+          query: userListQuerySchema,
           detail: {
             tags: ["user"],
             summary: "List users",
@@ -95,17 +114,7 @@ export const createUserModule = (
           return service.create(body)
         },
         {
-          body: t.Object({
-            username: t.String({ minLength: 1 }),
-            displayName: t.String({ minLength: 1 }),
-            email: t.Optional(t.String({ minLength: 1 })),
-            phone: t.Optional(t.String({ minLength: 1 })),
-            password: t.String({ minLength: 1 }),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            isSuperAdmin: t.Optional(t.Boolean()),
-          }),
+          body: userCreateBodySchema,
           detail: {
             tags: ["user"],
             summary: "Create user",
@@ -123,16 +132,7 @@ export const createUserModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            username: t.Optional(t.String({ minLength: 1 })),
-            displayName: t.Optional(t.String({ minLength: 1 })),
-            email: t.Optional(t.String({ minLength: 1 })),
-            phone: t.Optional(t.String({ minLength: 1 })),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            isSuperAdmin: t.Optional(t.Boolean()),
-          }),
+          body: userUpdateBodySchema,
           detail: {
             tags: ["user"],
             summary: "Update user",

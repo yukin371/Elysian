@@ -2,6 +2,7 @@ import { AppError } from "../../errors"
 import { createPasswordHash } from "../auth"
 import type {
   CreateUserInput,
+  ListUsersInput,
   UpdateUserInput,
   UserRepository,
 } from "./repository"
@@ -16,9 +17,9 @@ export interface CreateUserPayload
 export interface UpdateUserPayload extends UpdateUserInput {}
 
 export const createUserService = (repository: UserRepository) => ({
-  list: () => repository.list(),
+  list: (input?: ListUsersInput) => repository.list(input),
   async exportCsv() {
-    const items = await repository.list()
+    const { items } = await repository.list()
 
     return buildCsv(
       [

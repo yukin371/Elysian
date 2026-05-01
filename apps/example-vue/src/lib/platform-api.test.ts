@@ -13,8 +13,11 @@ import {
   exportRolesCsv,
   exportTenantsCsv,
   fetchPlatform,
+  fetchRoles,
+  fetchSettings,
   fetchSystemModules,
   fetchTenants,
+  fetchUsers,
   fetchWorkflowDefinitionById,
   fetchWorkflowDefinitions,
   markNotificationsAsRead,
@@ -600,6 +603,48 @@ describe("platform api operation log exports", () => {
   })
 })
 
+describe("platform api user requests", () => {
+  test("fetches users with pagination query and bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("user-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return Response.json({
+        items: [],
+        total: 0,
+        page: 2,
+        pageSize: 10,
+        totalPages: 1,
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(fetchUsers({ page: 2, pageSize: 10 })).resolves.toEqual({
+        items: [],
+        total: 0,
+        page: 2,
+        pageSize: 10,
+        totalPages: 1,
+      })
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/users?page=2&pageSize=10",
+          authorization: "Bearer user-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
 describe("platform api role exports", () => {
   test("exports roles with bearer token", async () => {
     const originalFetch = globalThis.fetch
@@ -625,6 +670,90 @@ describe("platform api role exports", () => {
         {
           url: "http://localhost:3000/system/roles/export",
           authorization: "Bearer role-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api role requests", () => {
+  test("fetches roles with pagination query and bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("role-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return Response.json({
+        items: [],
+        total: 0,
+        page: 2,
+        pageSize: 10,
+        totalPages: 1,
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(fetchRoles({ page: 2, pageSize: 10 })).resolves.toEqual({
+        items: [],
+        total: 0,
+        page: 2,
+        pageSize: 10,
+        totalPages: 1,
+      })
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/roles?page=2&pageSize=10",
+          authorization: "Bearer role-token",
+        },
+      ])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("platform api setting requests", () => {
+  test("fetches settings with pagination query and bearer token", async () => {
+    const originalFetch = globalThis.fetch
+    const fetchCalls: Array<{ url: string; authorization: string | null }> = []
+
+    setAccessToken("setting-token")
+    globalThis.fetch = (async (input, init) => {
+      const headers = new Headers(init?.headers)
+      fetchCalls.push({
+        url: String(input),
+        authorization: headers.get("authorization"),
+      })
+
+      return Response.json({
+        items: [],
+        total: 0,
+        page: 2,
+        pageSize: 10,
+        totalPages: 1,
+      })
+    }) as typeof fetch
+
+    try {
+      await expect(fetchSettings({ page: 2, pageSize: 10 })).resolves.toEqual({
+        items: [],
+        total: 0,
+        page: 2,
+        pageSize: 10,
+        totalPages: 1,
+      })
+      expect(fetchCalls).toEqual([
+        {
+          url: "http://localhost:3000/system/settings?page=2&pageSize=10",
+          authorization: "Bearer setting-token",
         },
       ])
     } finally {

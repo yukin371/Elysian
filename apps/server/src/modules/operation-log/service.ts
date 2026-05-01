@@ -26,7 +26,7 @@ export const createOperationLogService = (
     return item
   },
   async exportCsv(filter?: ListOperationLogsPayload) {
-    const items = await repository.list(filter)
+    const { items } = await repository.list(filter)
     const header = [
       "id",
       "category",

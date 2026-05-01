@@ -1,6 +1,12 @@
 import { and, desc, eq, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
+import {
+  type PaginatedResult,
+  type PaginationQuery,
+  buildPaginatedResult,
+  normalizePagination,
+} from "./query-utils"
 import type { AuditLogRow } from "./schema"
 import { auditLogs } from "./schema"
 import { DEFAULT_TENANT_ID } from "./tenant"
@@ -23,13 +29,19 @@ export interface CreateAuditLogPersistenceInput {
   tenantId?: string
 }
 
-export interface ListAuditLogsPersistenceFilter {
+export interface ListAuditLogsPersistenceFilter extends PaginationQuery {
   category?: string
   action?: string
   actorUserId?: string
   result?: AuditLogResult
   detailsReason?: string
 }
+
+export type AuditLogPersistenceListQuery = ListAuditLogsPersistenceFilter
+
+export type AuditLogPersistenceListResult = PaginatedResult<AuditLogRow>
+
+const DEFAULT_AUDIT_LOG_PAGE_SIZE = 20
 
 export const insertAuditLog = async (
   db: DatabaseClient,
@@ -92,7 +104,8 @@ export const getAuditLogById = async (
 export const listAuditLogsByFilter = async (
   db: DatabaseClient,
   filter: ListAuditLogsPersistenceFilter = {},
-): Promise<AuditLogRow[]> => {
+): Promise<AuditLogPersistenceListResult> => {
+  const pagination = normalizePagination(filter, DEFAULT_AUDIT_LOG_PAGE_SIZE)
   const conditions = [
     filter.category ? eq(auditLogs.category, filter.category) : undefined,
     filter.action ? eq(auditLogs.action, filter.action) : undefined,
@@ -104,17 +117,26 @@ export const listAuditLogsByFilter = async (
       ? sql`${auditLogs.details} ->> 'reason' = ${filter.detailsReason}`
       : undefined,
   ].filter(Boolean)
+  const whereCondition = conditions.length > 0 ? and(...conditions) : undefined
+  const [countRow] = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(auditLogs)
+    .where(whereCondition)
 
-  if (conditions.length === 0) {
-    return db
-      .select()
-      .from(auditLogs)
-      .orderBy(desc(auditLogs.createdAt), desc(auditLogs.id))
-  }
-
-  return db
+  const total = countRow?.total ?? 0
+  const paginated = buildPaginatedResult([], total, pagination)
+  const items = await db
     .select()
     .from(auditLogs)
-    .where(and(...conditions))
+    .where(whereCondition)
     .orderBy(desc(auditLogs.createdAt), desc(auditLogs.id))
+    .limit(pagination.pageSize)
+    .offset((paginated.page - 1) * pagination.pageSize)
+
+  return {
+    ...paginated,
+    items,
+  }
 }

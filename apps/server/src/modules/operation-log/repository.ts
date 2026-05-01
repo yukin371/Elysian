@@ -1,4 +1,5 @@
 import {
+  type AuditLogPersistenceListResult,
   type AuditLogResult,
   type AuditLogRow,
   type DatabaseClient,
@@ -14,10 +15,20 @@ export interface ListOperationLogsInput {
   authFailureReason?: string
   actorUserId?: string
   result?: OperationLogResult
+  page?: number
+  pageSize?: number
+}
+
+export interface OperationLogListResult {
+  items: OperationLogRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
 }
 
 export interface OperationLogRepository {
-  list: (filter?: ListOperationLogsInput) => Promise<OperationLogRecord[]>
+  list: (filter?: ListOperationLogsInput) => Promise<OperationLogListResult>
   getById: (id: string) => Promise<OperationLogRecord | null>
 }
 
@@ -33,7 +44,7 @@ export const createOperationLogRepository = (
   db: DatabaseClient,
 ): OperationLogRepository => ({
   async list(filter = {}) {
-    const rows = await listAuditLogsByFilter(db, {
+    const payload = await listAuditLogsByFilter(db, {
       category:
         filter.category ??
         (filter.authEventType || filter.authFailureReason ? "auth" : undefined),
@@ -41,25 +52,35 @@ export const createOperationLogRepository = (
       actorUserId: filter.actorUserId,
       result: filter.result as AuditLogResult | undefined,
       detailsReason: filter.authFailureReason,
+      page: filter.page,
+      pageSize: filter.pageSize,
     })
 
-    return rows
-      .map(mapAuditLogRow)
-      .filter((item) =>
-        filter.authEventType === undefined
-          ? true
-          : item.authEventType === filter.authEventType,
-      )
-      .filter((item) =>
-        filter.authFailureReason === undefined
-          ? true
-          : item.authFailureReason === filter.authFailureReason,
-      )
+    return mapAuditLogListResult(payload, filter)
   },
   async getById(id) {
     const row = await getAuditLogById(db, id)
     return row ? mapAuditLogRow(row) : null
   },
+})
+
+const mapAuditLogListResult = (
+  payload: AuditLogPersistenceListResult,
+  filter: ListOperationLogsInput,
+): OperationLogListResult => ({
+  ...payload,
+  items: payload.items
+    .map(mapAuditLogRow)
+    .filter((item) =>
+      filter.authEventType === undefined
+        ? true
+        : item.authEventType === filter.authEventType,
+    )
+    .filter((item) =>
+      filter.authFailureReason === undefined
+        ? true
+        : item.authFailureReason === filter.authFailureReason,
+    ),
 })
 
 export const createInMemoryOperationLogRepository = (
@@ -74,7 +95,15 @@ export const createInMemoryOperationLogRepository = (
 
   return {
     async list(filter = {}) {
-      return [...items.values()]
+      const page =
+        typeof filter.page === "number" && Number.isFinite(filter.page)
+          ? Math.max(1, Math.trunc(filter.page))
+          : 1
+      const pageSize =
+        typeof filter.pageSize === "number" && Number.isFinite(filter.pageSize)
+          ? Math.min(100, Math.max(1, Math.trunc(filter.pageSize)))
+          : 20
+      const filteredItems = [...items.values()]
         .filter((item) =>
           filter.category === undefined
             ? true
@@ -102,6 +131,20 @@ export const createInMemoryOperationLogRepository = (
           filter.result === undefined ? true : item.result === filter.result,
         )
         .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+      const total = filteredItems.length
+      const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+      const resolvedPage = Math.min(page, totalPages)
+
+      return {
+        items: filteredItems.slice(
+          (resolvedPage - 1) * pageSize,
+          resolvedPage * pageSize,
+        ),
+        total,
+        page: resolvedPage,
+        pageSize,
+        totalPages,
+      }
     },
     async getById(id) {
       return items.get(id) ?? null

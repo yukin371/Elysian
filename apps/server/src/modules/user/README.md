@@ -5,6 +5,7 @@
 ## Owns
 
 - `/system/users` 的列表、详情、创建、更新、重置密码。
+- 用户列表 `page / pageSize` 的最小服务端分页语义。
 - 用户名、显示名、密码的最小校验。
 - 用户名唯一性检查。
 
@@ -34,5 +35,6 @@ flowchart LR
 ## Validation
 
 - `service.ts` 已确认创建时 `username/displayName/password` 都必须是非空 trim 后值。
+- `repository.ts` 已确认用户列表返回 `items + total + page + pageSize + totalPages`，当前导出继续复用同一 owner 但不复用分页切片。
 - `service.ts` 已确认重置密码只负责重算 hash 并调用 repository，不重做登录/session 逻辑。
 - `service.ts` 已确认用户名冲突会返回 `USER_USERNAME_CONFLICT`。

@@ -1,4 +1,4 @@
-import { settingModuleSchema } from "@elysian/schema"
+import { deriveBodySchema, settingModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
@@ -10,12 +10,28 @@ export interface SettingModuleOptions {
   authGuard?: AuthGuard
 }
 
+const settingListQuerySchema = t.Object({
+  page: t.Optional(t.Numeric()),
+  pageSize: t.Optional(t.Numeric()),
+})
+
 const settingPermissions = {
   list: "system:setting:list",
   get: "system:setting:list",
   create: "system:setting:create",
   update: "system:setting:update",
 } as const
+
+const settingCreateBodySchema = deriveBodySchema(settingModuleSchema, {
+  mode: "create",
+  overrides: {
+    status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+  },
+})
+
+const settingUpdateBodySchema = deriveBodySchema(settingModuleSchema, {
+  mode: "update",
+})
 
 export const createSettingModule = (
   repository: SettingRepository,
@@ -39,14 +55,13 @@ export const createSettingModule = (
     return app
       .get(
         "/system/settings",
-        async ({ request }) => {
+        async ({ query, request }) => {
           await authorize(request.headers, settingPermissions.list)
 
-          return {
-            items: await service.list(),
-          }
+          return service.list(query)
         },
         {
+          query: settingListQuerySchema,
           detail: {
             tags: ["setting"],
             summary: "List settings",
@@ -94,14 +109,7 @@ export const createSettingModule = (
           return service.create(body)
         },
         {
-          body: t.Object({
-            key: t.String({ minLength: 1 }),
-            value: t.String({ minLength: 1 }),
-            description: t.Optional(t.String()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-          }),
+          body: settingCreateBodySchema,
           detail: {
             tags: ["setting"],
             summary: "Create setting",
@@ -119,14 +127,7 @@ export const createSettingModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            key: t.Optional(t.String({ minLength: 1 })),
-            value: t.Optional(t.String({ minLength: 1 })),
-            description: t.Optional(t.String()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-          }),
+          body: settingUpdateBodySchema,
           detail: {
             tags: ["setting"],
             summary: "Update setting",

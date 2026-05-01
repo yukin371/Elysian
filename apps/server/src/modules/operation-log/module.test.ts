@@ -92,6 +92,10 @@ describe("operation log module", () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({
       items: [createOperationLogSeedRecords()[1]],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
   })
 

@@ -5,6 +5,7 @@
 ## Owns
 
 - `/system/roles` 的列表、详情、创建、更新。
+- 角色列表 `page / pageSize` 的最小服务端分页语义。
 - 角色 `code/name` 校验、系统角色不可变约束。
 - `permissionCodes / userIds / deptIds / dataScope` 的最小引用检查。
 
@@ -38,4 +39,5 @@ flowchart LR
 - `service.ts` 已确认 `dataScope` 只接受 `1..5` 的既有范围。
 - `service.ts` 已确认系统角色不能改 `code`、`status`，也不能取消 `isSystem`。
 - `service.ts` 已确认权限码、用户 ID、部门 ID 都必须先存在。
+- `repository.ts` 已确认角色列表返回 `items + total + page + pageSize + totalPages`，当前导出继续复用同一 owner 但不复用分页切片。
 - `repository.ts` 已确认关联替换仍在 persistence owner 内完成，而不是在模块层手写 SQL 逻辑。

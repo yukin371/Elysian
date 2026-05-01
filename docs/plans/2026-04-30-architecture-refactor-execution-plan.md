@@ -5,11 +5,25 @@
 > - [后端架构痛点与改进方案](./2026-04-30-backend-query-pain-points.md)
 > - [前端 Vue 架构痛点与改进方案](./2026-04-30-frontend-vue-pain-points.md)
 
-> 状态更新：`2026-05-01`
+> 状态更新：`2026-05-02`
 > - 前端脊柱搭建第一阶段已按修订后边界完成，归档见 [2026-05-01-frontend-arch-spine-closeout.md](./2026-05-01-frontend-arch-spine-closeout.md)
 > - 本文档继续保留为后续未完成里程碑的执行计划，不再把已收口的前端脊柱任务当作当前活动项
 > - 关于”前端本地收口”和”generator 应接管的标准 CRUD 产物”之间的边界与顺序，见 [2026-05-01-generator-frontend-boundary-and-sequencing.md](./2026-05-01-generator-frontend-boundary-and-sequencing.md)
 > - generator → frontend 注册契约已完成：`buildWorkspaceRegistration` 已替换 13 个标准 CRUD 模块的手写注册，generator artifact 已包含 kind/permissions/i18nKeys；当前进入 Phase 3（标准 CRUD 页面骨架回收到 generator 模板）
+> 状态补记：`2026-05-02`
+> - `5A / provide-inject` 已在当前标准 CRUD shell 上完成：`customer / department / dictionary / menu / notification / post / role / setting / tenant / user` 均已收口到 injected-state 契约，shell descriptor 旧 props 透传已显著收缩
+> - `5B / 共享样式下沉` 已完成当前共享主线：`ui-enterprise-vue` 已承接 workspace 基础样式、panel 元数据/字段/按钮/危险态等通用 class，标准 CRUD panel 主线已移除本地同构 `<style>`；`file` 面板剩余上传区与空态等样式现已明确留在模块本地，`customer / auth-session / workflow / generator-preview / operation-log` 继续仅保留各自非标准语义样式
+> - `6A / 前端类型网关` 已完成当前短期目标：`platform-api` 标准 Record/Status 类型已统一收敛到 `lib/platform-api/types.ts`，子模块不再各自直连 `@elysian/schema`
+> - generator Phase 3 已补真实消费链：`example-vue` 已新增标准 CRUD surface 生成/校验脚本，`src/modules/*` 生成产物已提交入库并纳入 `build/check`；shell main / secondary 已消费 generated component map，标准 CRUD main/panel 已不再依赖示例应用本地手写实现
+> - `3B / AuditLogWriter 显式注入` 与 `3C / compose-* 分桶组装` 已完成当前第一轮收口：`generator-session`、`workflow` 已改用共享 `AuditLogWriter` 契约，`apps/server/src/index.ts` 已切到 `compose-auth.ts`、`compose-system.ts`、`compose-business.ts` 组装并通过 `bun run check` / `bun run test`
+> - `2B / listDataScopesForUser` 已完成当前收口：`packages/persistence/src/auth.ts` 已从“两次查询 + Map 拼装”收敛为单次 `user_roles -> roles -> role_depts` 查询，`bun run check` 与相关 auth/data-scope 定向测试已通过
+> - `2A / 部门后代查询` 已完成当前收口：已新增 `0019_dept_descendant_function.sql` 与 `get_descendant_dept_ids` 函数，`data-scope.ts` 不再通过全表加载 `departments` 做内存过滤，相关权限测试与 `bun run check` 已通过
+> - `2C / 分页工具` 已完成第三刀：`packages/persistence/src/query-utils.ts` 已提供 `normalizePagination` / `buildPaginatedResult`，当前 `customer.ts`、`notification.ts` 与 `file.ts` 已切换消费；其余 repository 仅在后续真正引入分页契约时继续收口
+> - `2C / 分页工具` 已完成第六刀：`packages/persistence/src/role.ts`、`packages/persistence/src/setting.ts` 及对应模块已切换到统一分页契约；当前 `customer / notification / file / operation-log / user / role / setting` 已进入共享分页主线
+> - `6B-1 / auth service mock 单测` 已完成：新增 `apps/server/src/modules/auth/service.test.ts`，覆盖 login / refresh rotation / logout 核心路径，并通过 `bun run check`
+> - `6B-2 / workflow service mock 单测` 已完成：新增 `apps/server/src/modules/workflow/service.test.ts`，覆盖 `start / claim / complete / cancel` 核心状态流，并通过 `bun run check`
+> - `3D / service 层单元测试补位` 已完成当前批次收口：新增 `role / customer / notification / file` 四组 mock service tests，并已在 `2026-05-02` 通过定向 `bun test` 与仓库级 `bun run check`
+> - `3C-5 / compose smoke 独立复验` 已完成：在本地 PostgreSQL 环境下通过 `bun run e2e:smoke:full`，compose 分桶组装已补独立冒烟出口验证
 
 ---
 
@@ -89,30 +103,30 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 2A-1 编写递归 CTE 迁移 SQL | `drizzle/0019_dept_descendant_function.sql` | SQL 函数 `get_descendant_dept_ids` 可执行 |
-| 2A-2 重构 `data-scope.ts`，调用 SQL 函数替代内存过滤 | `packages/persistence/src/data-scope.ts` | 消除 `listDescendantDepartmentIds` 中的全表查询 |
-| 2A-3 验证数据范围权限测试 | `bun run test` | 现有权限相关测试全绿 |
+| 2A-1 编写递归 CTE 迁移 SQL | `drizzle/0019_dept_descendant_function.sql` | 已完成：`get_descendant_dept_ids` 函数可迁移 |
+| 2A-2 重构 `data-scope.ts`，调用 SQL 函数替代内存过滤 | `packages/persistence/src/data-scope.ts` | 已完成：消除 `listDescendantDepartmentIds` 中的全表查询 |
+| 2A-3 验证数据范围权限测试 | `bun run test` | 已完成：相关权限测试全绿 |
 | 2A-4 性能对比（可选） | 测试报告 | 验证 CTE 比内存过滤更快 |
 
 ### 任务组 2B：多查询合并（后端痛点 2）
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 2B-1 重构 `listDataScopesForUser` 为单条 SQL | `packages/persistence/src/auth.ts` | 用子查询合并两次查询 + Map 拼装 |
-| 2B-2 验证认证/权限测试 | `bun run test` | 现有 auth 相关测试全绿 |
+| 2B-1 重构 `listDataScopesForUser` 为单条 SQL | `packages/persistence/src/auth.ts` | 已完成：收敛为单次 join 查询并在内存内按 role 聚合 |
+| 2B-2 验证认证/权限测试 | `bun run test` | 已完成：auth/data-scope 定向测试通过，`bun run check` 全绿 |
 
 ### 任务组 2C：分页工具收敛（后端痛点 3）
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 2C-1 创建通用分页工具 | `packages/persistence/src/query-utils.ts` | `normalizePagination` + `buildPaginatedResult` |
-| 2C-2 重构 customer repository 使用工具函数 | `packages/persistence/src/customer.ts` | 消除 `normalizeCustomerListQuery` |
-| 2C-3 重构 dictionary repository | `packages/persistence/src/dictionary.ts` | 同上 |
-| 2C-4 重构 notification repository | `packages/persistence/src/notification.ts` | 同上 |
-| 2C-5 逐个重构其余 repository（menu, role, setting, tenant, user, operation-log, department, file, post） | 各 repository 文件 | 所有 repository 统一使用分页工具 |
+| 2C-1 创建通用分页工具 | `packages/persistence/src/query-utils.ts` | 已完成：补齐 `normalizePagination` + `buildPaginatedResult` |
+| 2C-2 重构 customer repository 使用工具函数 | `packages/persistence/src/customer.ts` | 已完成：customer 已切换消费分页工具 |
+| 2C-3 重构 dictionary repository | `packages/persistence/src/dictionary.ts` | 当前未推进：该模块仍是全量类型/条目列表契约，未在本轮强行改为服务端分页 |
+| 2C-4 重构 notification repository | `packages/persistence/src/notification.ts` | 已完成：通知列表已切到统一分页工具，并补齐 in-memory / server API 一致性 |
+| 2C-5 逐个重构其余 repository（menu, role, setting, tenant, user, operation-log, department, file, post） | 各 repository 文件 | 当前 `file`、`operation-log`、`user`、`role` 与 `setting` 已完成；其余 repository 仅在真实进入服务端分页契约时继续推进 |
 | 2C-6 验证全部测试绿 | `bun run test` | 无回归 |
 
-**检查点 CP2**：部门后代查询走 CTE + 多查询合并 + 所有 repository 统一使用分页工具 + 全部测试绿
+**检查点 CP2**：`2A/2B` 已完成；`2C` 已完成基础工具与 `customer / notification / file / operation-log / user / role / setting` 收口，当前剩余项集中在其余 repository 是否真正需要进入服务端分页契约的持续收口
 
 ---
 
@@ -124,43 +138,43 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 3A-1 ModuleField 新增 `validation` 字段 | `packages/schema/src/index.ts` | 类型定义 + 校验逻辑更新 |
-| 3A-2 创建 `deriveBodySchema` 工具函数 | `packages/schema/src/elysia-bridge.ts` | 支持 create/update 模式，覆盖基础类型推导 |
-| 3A-3 重构 role module 使用推导 | `modules/role/module.ts` | 替换手写 `t.Object` 为 `deriveBodySchema` |
-| 3A-4 重构 department module | `modules/department/module.ts` | 同上 |
-| 3A-5 重构 dictionary module | `modules/dictionary/module.ts` | 同上 |
-| 3A-6 重构 menu / notification / setting / post / tenant / user / file module | 各 module 文件 | 同上 |
-| 3A-7 验证全部测试绿 | `bun run test` | 无回归 |
+| 3A-1 ModuleField 新增 `validation` 字段 | `packages/schema/src/index.ts` | 已完成：类型定义、allowlist 与 runtime 校验已补齐 |
+| 3A-2 创建 `deriveBodySchema` 工具函数 | `packages/schema/src/elysia-bridge.ts` | 已完成第一刀：支持 `create/update`、基础类型推导、`exclude/overrides` |
+| 3A-3 重构 role module 使用推导 | `modules/role/module.ts` | 已完成：`role` create/update body 已切到 `deriveBodySchema`，特殊字段继续本地 override |
+| 3A-4 重构 department module | `modules/department/module.ts` | 已完成：`department` create/update body 已切到 `deriveBodySchema`，`parentId/sort/status/userIds` 保留本地 override |
+| 3A-5 重构 dictionary module | `modules/dictionary/module.ts` | 已完成：`type/item` 两套 body 已切到 schema owner + `deriveBodySchema`，不再保留 server 侧第二份手写主干 |
+| 3A-6 重构 menu / notification / setting / post / tenant / user / file module | 各 module 文件 | 已完成当前主线：`menu / notification / setting / post / tenant / user` 已切到 `deriveBodySchema`；`file` 保持 multipart/upload 与动作型接口显式 body |
+| 3A-7 验证全部测试绿 | `bun run test` | 已完成当前首刀复验：`packages/schema/src/index.test.ts` 与 `bun run check` 通过 |
 
 ### 任务组 3B：显式接口注入（后端痛点 6）
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 3B-1 定义 `AuditLogWriter` 接口 | `apps/server/src/modules/shared/audit-log.ts` | 接口 + `AuditLogEvent` 类型 |
-| 3B-2 auth 模块导出 `createAuthAuditLogWriter` | `modules/auth/index.ts` | 返回 `AuditLogWriter` 实现 |
-| 3B-3 generator-session 和 workflow 模块改用 `AuditLogWriter` | 两个 module 文件 | 参数类型从匿名闭包改为接口 |
-| 3B-4 `index.ts` 改为显式注入 | `apps/server/src/index.ts` | 闭包替换为 `createAuthAuditLogWriter` 调用 |
-| 3B-5 验证全部测试绿 | `bun run test` | 无回归 |
+| 3B-1 定义 `AuditLogWriter` 接口 | `apps/server/src/modules/shared/audit-log.ts` | 已完成：补齐 `AuditLogWriter` 与 `AuditLogEvent` 契约 |
+| 3B-2 auth 模块导出 `createAuthAuditLogWriter` | `modules/auth/index.ts` | 已完成：返回 `AuditLogWriter` 实现 |
+| 3B-3 generator-session 和 workflow 模块改用 `AuditLogWriter` | 两个 module 文件 | 已完成：参数类型从匿名闭包改为接口 |
+| 3B-4 `index.ts` 改为显式注入 | `apps/server/src/index.ts` | 已完成：通过 compose/auth writer 显式注入 |
+| 3B-5 验证全部测试绿 | `bun run test` | 已完成：当前测试全绿 |
 
 ### 任务组 3C：分桶组装（后端痛点 7）
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 3C-1 创建 `compose-auth.ts` | `apps/server/src/modules/compose-auth.ts` | auth + user + role + post 组装 |
-| 3C-2 创建 `compose-system.ts` | `apps/server/src/modules/compose-system.ts` | dictionary + menu + department + setting 组装 |
-| 3C-3 创建 `compose-business.ts` | `apps/server/src/modules/compose-business.ts` | customer + file + notification + workflow + generator + operation-log + tenant 组装 |
-| 3C-4 重构 `index.ts` 使用 compose 文件 | `apps/server/src/index.ts` | 从 197 行降到 ~30 行 |
-| 3C-5 验证全部测试绿 + smoke 测试 | `bun run test && bun run e2e:smoke` | 无回归 |
+| 3C-1 创建 `compose-auth.ts` | `apps/server/src/modules/compose-auth.ts` | 已完成：auth + user + role + post 组装 |
+| 3C-2 创建 `compose-system.ts` | `apps/server/src/modules/compose-system.ts` | 已完成：dictionary + menu + department + setting 组装 |
+| 3C-3 创建 `compose-business.ts` | `apps/server/src/modules/compose-business.ts` | 已完成：customer + file + notification + workflow + generator + operation-log + tenant 组装 |
+| 3C-4 重构 `index.ts` 使用 compose 文件 | `apps/server/src/index.ts` | 已完成：入口已切到 compose 组装 |
+| 3C-5 验证全部测试绿 + smoke 测试 | `bun run test && bun run e2e:smoke` | 已完成：`bun run check`、`bun run test` 与本地 PostgreSQL 环境下的 `bun run e2e:smoke:full` 均通过 |
 
 ### 任务组 3D：service 层单元测试补位（后端痛点 8）
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 3D-1 为 role service 补充 mock 单元测试 | `modules/role/service.test.ts` | 覆盖 getById null、create 校验等边界 |
-| 3D-2 为 customer service 补充 mock 单元测试 | `modules/customer/service.test.ts` | 同上 |
-| 3D-3 逐模块补充（可在后续迭代中持续） | 各 service.test.ts | 每次新增模块时同步补 |
+| 3D-1 为 role service 补充 mock 单元测试 | `modules/role/service.test.ts` | 已完成：覆盖 trim、关系校验、system role 不可变边界 |
+| 3D-2 为 customer service 补充 mock 单元测试 | `modules/customer/service.test.ts` | 已完成：覆盖 trim、blank name、not-found remove 边界 |
+| 3D-3 逐模块补充（可在后续迭代中持续） | 各 service.test.ts | 已完成当前一批：`notification / file / tenant` 已有 service tests，当前 `role / customer / notification / file / auth / workflow / tenant` 已形成首轮补位覆盖；后续仅按新增模块继续补位 |
 
-**检查点 CP3**：deriveBodySchema 覆盖所有手写模块 + AuditLogWriter 显式注入 + index.ts 分桶 + 至少 2 个 service 有单元测试 + 全部测试绿
+**检查点 CP3**：`3A/3B/3C/3D` 已完成当前收口并通过 `bun run check`、`bun run test` 与本地 PostgreSQL 环境下的 `bun run e2e:smoke:full`；`file` 因 multipart/upload 与动作型接口继续保留显式 body
 
 ---
 
@@ -214,7 +228,7 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 ---
 
-## 里程碑 5：前端体验升级 🚧 当前主线
+## 里程碑 5：前端体验升级 🚧 当前剩余项
 
 **目标**：解决前端痛点 4 + 5，消除 props 爆炸，样式收敛
 
@@ -222,11 +236,11 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 5A-1 在 shell 层实现 workspace state 的 provide | shell binding 层 | 路由匹配 → factory → provide |
-| 5A-2 重构 CustomerWorkspaceMain 使用 inject | `components/workspaces/customer/CustomerWorkspaceMain.vue` | props 从 20+ 降到渲染配置类 |
-| 5A-3 逐个重构其余 workspace 组件 | 各 Main/Panel 组件 | 统一使用 inject |
-| 5A-4 删除中间层的 props 透传代码 | shell workspace descriptors | 消除 props 转发 |
-| 5A-5 验证全部 workspace 功能正常 | 手动验证 | 无回归 |
+| 5A-1 在 shell 层实现 workspace state 的 provide | shell binding 层 | 已完成；路由匹配 → factory → provide 已进入当前 shell 主线 |
+| 5A-2 重构 CustomerWorkspaceMain 使用 inject | `components/workspaces/customer/CustomerWorkspaceMain.vue` | 已完成；props 已降到渲染配置类 |
+| 5A-3 逐个重构其余 workspace 组件 | 各 Main/Panel 组件 | 已完成标准 CRUD 范围：`department / dictionary / menu / notification / post / role / setting / tenant / user` |
+| 5A-4 删除中间层的 props 透传代码 | shell workspace descriptors | 已完成当前标准 CRUD descriptor 收口；特殊 workspace 仍按边界保留独立 props |
+| 5A-5 验证全部 workspace 功能正常 | 手动验证 | 已由 `bun run check`、`bun run build:vue`、workspace/provider/test coverage 持续覆盖 |
 
 ### 任务组 5B：样式下沉（前端痛点 5）
 
@@ -234,14 +248,14 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 |------|------|---------|
 | 5B-1 创建 `workspace-base.css` | `packages/ui-enterprise-vue/src/styles/workspace-base.css` | 消息提示、栅格布局、圆角统一到 DESIGN.md 规范 |
 | 5B-2 创建 `workspace-crud.css` | `packages/ui-enterprise-vue/src/styles/workspace-crud.css` | 表格、表单、分页样式 |
-| 5B-3 逐个 workspace 组件替换重复样式 | 各组件 `<style>` 块 | 使用共享 class，消除 scoped 重复 |
+| 5B-3 逐个 workspace 组件替换重复样式 | 各组件 `<style>` 块 | 标准 CRUD panel 主线已完成；剩余只保留非标准面板和文件上传区等模块私有语义样式 |
 | 5B-4 验证视觉效果无回归 | 手动验证 | 圆角/间距/颜色符合 DESIGN.md |
 
-**检查点 CP5**：workspace 组件不再通过 props 接收 loading/pagination 等状态 + 共享样式文件覆盖所有重复样式 + 视觉规范回归通过
+**检查点 CP5**：`5A` 已完成；`5B` 的共享样式主线已闭合，后续只继续维护非标准面板与模块私有语义样式的一致性回归
 
 ---
 
-## 里程碑 6：类型自动化 + 后端测试补位 🚧 当前候选后续项
+## 里程碑 6：类型自动化 + 后端测试补位 🚧 当前活跃后续项
 
 **目标**：解决前端痛点 2 中期方案 + 后端痛点 8 持续补位
 
@@ -249,17 +263,17 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 6A-1 创建类型网关 `lib/platform-api/types.ts` | types.ts | 从 `@elysian/schema` re-export 所有 Record 类型 |
-| 6A-2 逐个替换 platform-api 子模块的类型定义 | 各子模块 | 改为从 `./types` 导入 |
-| 6A-3 验证前端类型检查通过 | `bun run typecheck` | 无类型错误 |
+| 6A-1 创建类型网关 `lib/platform-api/types.ts` | types.ts | 已完成：以 schema 为单一来源 re-export 标准 Record/Status 类型 |
+| 6A-2 逐个替换 platform-api 子模块的类型定义 | 各子模块 | 已完成：标准 Record/Status 类型统一改为从 `./types` 导入 |
+| 6A-3 验证前端类型检查通过 | `bun run typecheck` | 已由当前阶段 `bun run check` / `bun run build:vue` 持续覆盖，类型网关主线无回归 |
 
 ### 任务组 6B：后端 service 单元测试持续补位（后端痛点 8）
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 6B-1 为 auth service 补充 mock 单元测试 | `modules/auth/service.test.ts` | 登录/刷新/登出核心路径 |
-| 6B-2 为 workflow service 补充 mock 单元测试 | `modules/workflow/service.test.ts` | 状态机转换核心路径 |
-| 6B-3 为 file / notification / tenant service 补充 | 各 service.test.ts | 逐步覆盖 |
+| 6B-1 为 auth service 补充 mock 单元测试 | `modules/auth/service.test.ts` | 已完成：覆盖登录/刷新/登出核心路径 |
+| 6B-2 为 workflow service 补充 mock 单元测试 | `modules/workflow/service.test.ts` | 已完成：覆盖状态机转换核心路径 |
+| 6B-3 为 file / notification / tenant service 补充 | 各 service.test.ts | 已完成当前范围：`file / notification / tenant` 均已补位 |
 
 ### 任务组 6C：OpenAPI 自动生成准备（前端痛点 2 中期，视 API 稳定度决定是否在本里程碑执行）
 

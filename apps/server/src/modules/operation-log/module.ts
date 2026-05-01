@@ -30,6 +30,8 @@ const operationLogFilterSchema = t.Object({
   authFailureReason: t.Optional(t.String()),
   actorUserId: t.Optional(t.String()),
   result: t.Optional(t.Union([t.Literal("success"), t.Literal("failure")])),
+  page: t.Optional(t.Numeric()),
+  pageSize: t.Optional(t.Numeric()),
 })
 
 export const createOperationLogModule = (
@@ -57,9 +59,7 @@ export const createOperationLogModule = (
         async ({ query, request }) => {
           await authorize(request.headers, operationLogPermissions.list)
 
-          return {
-            items: await service.list(query),
-          }
+          return service.list(query)
         },
         {
           query: operationLogFilterSchema,

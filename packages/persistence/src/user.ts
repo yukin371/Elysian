@@ -1,6 +1,12 @@
-import { and, desc, eq, inArray } from "drizzle-orm"
+import { and, desc, eq, inArray, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
+import {
+  type PaginatedResult,
+  type PaginationQuery,
+  buildPaginatedResult,
+  normalizePagination,
+} from "./query-utils"
 import type { UserRow } from "./schema"
 import { users } from "./schema"
 import { DEFAULT_TENANT_ID } from "./tenant"
@@ -25,6 +31,12 @@ export interface UpdateUserPersistenceInput {
   status?: "active" | "disabled"
   isSuperAdmin?: boolean
 }
+
+export interface UserPersistenceListQuery extends PaginationQuery {}
+
+export type UserPersistenceListResult = PaginatedResult<UserRow>
+
+const DEFAULT_USER_PAGE_SIZE = 20
 
 export const getUserByUsername = async (
   db: DatabaseClient,
@@ -67,8 +79,30 @@ export const updateUserLastLoginAt = async (
     .where(eq(users.id, userId))
 }
 
-export const listUsers = async (db: DatabaseClient): Promise<UserRow[]> =>
-  db.select().from(users).orderBy(desc(users.createdAt), desc(users.id))
+export const listUsers = async (
+  db: DatabaseClient,
+  query: UserPersistenceListQuery = {},
+): Promise<UserPersistenceListResult> => {
+  const pagination = normalizePagination(query, DEFAULT_USER_PAGE_SIZE)
+  const [countRow] = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(users)
+  const total = countRow?.total ?? 0
+  const paginated = buildPaginatedResult([], total, pagination)
+  const items = await db
+    .select()
+    .from(users)
+    .orderBy(desc(users.createdAt), desc(users.id))
+    .limit(pagination.pageSize)
+    .offset((paginated.page - 1) * pagination.pageSize)
+
+  return {
+    ...paginated,
+    items,
+  }
+}
 
 export const insertUser = async (
   db: DatabaseClient,

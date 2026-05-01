@@ -1,5 +1,6 @@
 import {
   type DatabaseClient,
+  type RolePersistenceListResult,
   type RoleRow,
   getRoleByCode,
   getRoleById,
@@ -47,8 +48,21 @@ export interface UpdateRoleInput {
   deptIds?: string[]
 }
 
+export interface ListRolesInput {
+  page?: number
+  pageSize?: number
+}
+
+export interface RoleListResult {
+  items: RoleRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 export interface RoleRepository {
-  list: () => Promise<RoleRecord[]>
+  list: (input?: ListRolesInput) => Promise<RoleListResult>
   getById: (id: string) => Promise<RoleDetailRecord | null>
   getByCode: (code: string) => Promise<RoleDetailRecord | null>
   create: (input: CreateRoleInput) => Promise<RoleDetailRecord>
@@ -69,9 +83,9 @@ export interface InMemoryRoleRepositorySeed {
 }
 
 export const createRoleRepository = (db: DatabaseClient): RoleRepository => ({
-  async list() {
-    const rows = await listRoles(db)
-    return rows.map(mapRoleRow)
+  async list(input = {}) {
+    const payload = await listRoles(db, input)
+    return mapRoleListResult(payload)
   },
   async getById(id) {
     const row = await getRoleById(db, id)
@@ -146,10 +160,31 @@ export const createInMemoryRoleRepository = (
   const availableDepartmentIds = new Set(seed.availableDepartmentIds ?? [])
 
   return {
-    async list() {
-      return [...roles.values()]
-        .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
-        .map(mapStoredRoleToRoleRecord)
+    async list(input = {}) {
+      const page =
+        typeof input.page === "number" && Number.isFinite(input.page)
+          ? Math.max(1, Math.trunc(input.page))
+          : 1
+      const pageSize =
+        typeof input.pageSize === "number" && Number.isFinite(input.pageSize)
+          ? Math.min(100, Math.max(1, Math.trunc(input.pageSize)))
+          : 20
+      const sortedRoles = [...roles.values()].sort((left, right) =>
+        right.createdAt.localeCompare(left.createdAt),
+      )
+      const total = sortedRoles.length
+      const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+      const resolvedPage = Math.min(page, totalPages)
+
+      return {
+        items: sortedRoles
+          .slice((resolvedPage - 1) * pageSize, resolvedPage * pageSize)
+          .map(mapStoredRoleToRoleRecord),
+        total,
+        page: resolvedPage,
+        pageSize,
+        totalPages,
+      }
     },
     async getById(id) {
       const role = roles.get(id)
@@ -234,6 +269,13 @@ export const createInMemoryRoleRepository = (
 }
 
 interface StoredRoleRecord extends RoleDetailRecord {}
+
+const mapRoleListResult = (
+  payload: RolePersistenceListResult,
+): RoleListResult => ({
+  ...payload,
+  items: payload.items.map(mapRoleRow),
+})
 
 const buildRoleDetailRecord = async (
   db: DatabaseClient,

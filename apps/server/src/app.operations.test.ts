@@ -308,6 +308,10 @@ describe("createServerApp", () => {
     expect(listResponse.status).toBe(200)
     expect(await listResponse.json()).toEqual({
       items: operationLogSeedRecords.map(withDerivedAuthFields),
+      total: operationLogSeedRecords.length,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
 
     const filteredResponse = await app.handle(
@@ -324,6 +328,33 @@ describe("createServerApp", () => {
     expect(filteredResponse.status).toBe(200)
     expect(await filteredResponse.json()).toEqual({
       items: [withDerivedAuthFields(filteredOperationLog)],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+
+    const pagedOperationLog = operationLogSeedRecords[1]
+
+    if (!pagedOperationLog) {
+      throw new Error("expected a second operation log for pagination")
+    }
+
+    const pagedResponse = await app.handle(
+      new Request("http://localhost/system/operation-logs?page=2&pageSize=1", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(pagedResponse.status).toBe(200)
+    expect(await pagedResponse.json()).toEqual({
+      items: [withDerivedAuthFields(pagedOperationLog)],
+      total: operationLogSeedRecords.length,
+      page: 2,
+      pageSize: 1,
+      totalPages: operationLogSeedRecords.length,
     })
 
     const getResponse = await app.handle(
@@ -465,6 +496,36 @@ describe("createServerApp", () => {
           createdAt: "2026-04-21T03:00:00.000Z",
         },
       ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+
+    const pagedResponse = await app.handle(
+      new Request("http://localhost/system/files?page=2&pageSize=1", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(pagedResponse.status).toBe(200)
+    expect(await pagedResponse.json()).toEqual({
+      items: [
+        {
+          id: "file_1",
+          originalName: "platform-guide.txt",
+          mimeType: "text/plain",
+          size: 20,
+          uploaderUserId: "user_admin_1",
+          createdAt: "2026-04-21T03:00:00.000Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 1,
+      totalPages: 1,
     })
 
     const filteredResponse = await app.handle(
@@ -490,6 +551,10 @@ describe("createServerApp", () => {
           createdAt: "2026-04-21T03:00:00.000Z",
         },
       ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
 
     const exportResponse = await app.handle(
@@ -775,6 +840,10 @@ describe("createServerApp", () => {
           createdAt: "2026-04-21T03:00:00.000Z",
         },
       ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
   })
 
@@ -815,6 +884,27 @@ describe("createServerApp", () => {
         createNotificationSeedRecords()[1],
         createNotificationSeedRecords()[0],
       ],
+      total: 2,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+
+    const pagedResponse = await app.handle(
+      new Request("http://localhost/system/notifications?page=2&pageSize=1", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(pagedResponse.status).toBe(200)
+    expect(await pagedResponse.json()).toEqual({
+      items: [createNotificationSeedRecords()[0]],
+      total: 2,
+      page: 2,
+      pageSize: 1,
+      totalPages: 2,
     })
 
     const filteredResponse = await app.handle(
@@ -831,6 +921,10 @@ describe("createServerApp", () => {
     expect(filteredResponse.status).toBe(200)
     expect(await filteredResponse.json()).toEqual({
       items: [createNotificationSeedRecords()[0]],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
 
     const exportResponse = await app.handle(
@@ -1032,6 +1126,10 @@ describe("createServerApp", () => {
           createdAt: "2026-04-21T04:00:00.000Z",
         },
       ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
     })
 
     const createResponse = await app.handle(
@@ -1073,11 +1171,19 @@ describe("createServerApp", () => {
     expect(listAfterCreateResponse.status).toBe(200)
     const listAfterCreateBody = (await listAfterCreateResponse.json()) as {
       items: Array<{ id: string }>
+      total: number
+      page: number
+      pageSize: number
+      totalPages: number
     }
     expect(listAfterCreateBody.items.map((item) => item.id)).toEqual([
       createdNotification.id,
       "notification_visible_ops_1",
     ])
+    expect(listAfterCreateBody.total).toBe(2)
+    expect(listAfterCreateBody.page).toBe(1)
+    expect(listAfterCreateBody.pageSize).toBe(20)
+    expect(listAfterCreateBody.totalPages).toBe(1)
   })
 
   it("rejects invalid notification recipients", async () => {

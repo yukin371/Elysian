@@ -103,6 +103,40 @@ describe("createServerApp system access", () => {
           updatedAt: "2026-04-20T00:00:00.000Z",
         },
       ],
+      total: 2,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+
+    const pagedResponse = await app.handle(
+      new Request("http://localhost/system/users?page=2&pageSize=1", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(pagedResponse.status).toBe(200)
+    expect(await pagedResponse.json()).toEqual({
+      items: [
+        {
+          id: "user_ops_1",
+          username: "operator",
+          displayName: "Operator",
+          email: "operator@example.com",
+          phone: "13900000000",
+          status: "active",
+          isSuperAdmin: false,
+          lastLoginAt: null,
+          createdAt: "2026-04-20T00:00:00.000Z",
+          updatedAt: "2026-04-20T00:00:00.000Z",
+        },
+      ],
+      total: 2,
+      page: 2,
+      pageSize: 1,
+      totalPages: 2,
     })
 
     const getResponse = await app.handle(
@@ -427,6 +461,39 @@ describe("createServerApp system access", () => {
           updatedAt: "2026-04-20T00:00:00.000Z",
         },
       ],
+      total: 2,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+
+    const pagedResponse = await app.handle(
+      new Request("http://localhost/system/roles?page=2&pageSize=1", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(pagedResponse.status).toBe(200)
+    expect(await pagedResponse.json()).toEqual({
+      items: [
+        {
+          id: "role_operator_1",
+          code: "operator",
+          name: "Operator",
+          description: "Operator role",
+          status: "active",
+          isSystem: false,
+          dataScope: 1,
+          createdAt: "2026-04-20T00:00:00.000Z",
+          updatedAt: "2026-04-20T00:00:00.000Z",
+        },
+      ],
+      total: 2,
+      page: 2,
+      pageSize: 1,
+      totalPages: 2,
     })
 
     const getResponse = await app.handle(

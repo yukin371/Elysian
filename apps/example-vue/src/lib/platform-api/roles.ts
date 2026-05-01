@@ -1,25 +1,18 @@
 import { requestBlob, requestJson } from "./core"
-
-export interface RoleRecord {
-  id: string
-  code: string
-  name: string
-  description?: string
-  status: "active" | "disabled"
-  isSystem: boolean
-  dataScope: 1 | 2 | 3 | 4 | 5
-  createdAt: string
-  updatedAt: string
-}
-
-export interface RoleDetailRecord extends RoleRecord {
-  permissionCodes: string[]
-  userIds: string[]
-  deptIds: string[]
-}
+import type { RoleDetailRecord, RoleRecord } from "./types"
+export type { RoleDetailRecord, RoleRecord } from "./types"
 
 export interface RolesResponse {
   items: RoleRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+export interface RoleListQuery {
+  page?: number
+  pageSize?: number
 }
 
 export interface CreateRoleRequest {
@@ -40,10 +33,26 @@ export interface UpdateRoleRequest {
   dataScope?: RoleRecord["dataScope"]
 }
 
-export const fetchRoles = async (): Promise<RolesResponse> =>
-  requestJson<RolesResponse>("/system/roles", {
-    auth: true,
-  })
+export const fetchRoles = async (
+  query: RoleListQuery = {},
+): Promise<RolesResponse> => {
+  const search = new URLSearchParams()
+
+  if (typeof query.page === "number" && Number.isFinite(query.page)) {
+    search.set("page", String(Math.trunc(query.page)))
+  }
+
+  if (typeof query.pageSize === "number" && Number.isFinite(query.pageSize)) {
+    search.set("pageSize", String(Math.trunc(query.pageSize)))
+  }
+
+  return requestJson<RolesResponse>(
+    `/system/roles${search.size > 0 ? `?${search.toString()}` : ""}`,
+    {
+      auth: true,
+    },
+  )
+}
 
 export const exportRolesCsv = async (): Promise<Blob> =>
   requestBlob("/system/roles/export", {

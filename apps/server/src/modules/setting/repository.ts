@@ -1,6 +1,7 @@
 import {
   DEFAULT_TENANT_ID,
   type DatabaseClient,
+  type SettingPersistenceListResult,
   type SettingRow,
   getSettingById,
   getSettingByKey,
@@ -25,8 +26,21 @@ export interface UpdateSettingInput {
   status?: SettingStatus
 }
 
+export interface ListSettingsInput {
+  page?: number
+  pageSize?: number
+}
+
+export interface SettingListResult {
+  items: SettingRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 export interface SettingRepository {
-  list: () => Promise<SettingRecord[]>
+  list: (input?: ListSettingsInput) => Promise<SettingListResult>
   getById: (id: string) => Promise<SettingRecord | null>
   getByKey: (key: string) => Promise<SettingRecord | null>
   getByKeyWithTenantFallback: (
@@ -43,9 +57,9 @@ export interface SettingRepository {
 export const createSettingRepository = (
   db: DatabaseClient,
 ): SettingRepository => ({
-  async list() {
-    const rows = await listSettings(db)
-    return rows.map(mapSettingRow)
+  async list(input = {}) {
+    const payload = await listSettings(db, input)
+    return mapSettingListResult(payload)
   },
   async getById(id) {
     const row = await getSettingById(db, id)
@@ -87,10 +101,31 @@ export const createInMemorySettingRepository = (
   const items = new Map(seed.map((item) => [item.id, toStoredSetting(item)]))
 
   return {
-    async list() {
-      return [...items.values()]
-        .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
-        .map(stripTenantId)
+    async list(input = {}) {
+      const page =
+        typeof input.page === "number" && Number.isFinite(input.page)
+          ? Math.max(1, Math.trunc(input.page))
+          : 1
+      const pageSize =
+        typeof input.pageSize === "number" && Number.isFinite(input.pageSize)
+          ? Math.min(100, Math.max(1, Math.trunc(input.pageSize)))
+          : 20
+      const sortedItems = [...items.values()].sort((left, right) =>
+        right.createdAt.localeCompare(left.createdAt),
+      )
+      const total = sortedItems.length
+      const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+      const resolvedPage = Math.min(page, totalPages)
+
+      return {
+        items: sortedItems
+          .slice((resolvedPage - 1) * pageSize, resolvedPage * pageSize)
+          .map(stripTenantId),
+        total,
+        page: resolvedPage,
+        pageSize,
+        totalPages,
+      }
     },
     async getById(id) {
       const item = items.get(id)
@@ -166,6 +201,13 @@ export const createInMemorySettingRepository = (
 interface StoredSettingRecord extends SettingRecord {
   tenantId?: string
 }
+
+const mapSettingListResult = (
+  payload: SettingPersistenceListResult,
+): SettingListResult => ({
+  ...payload,
+  items: payload.items.map(mapSettingRow),
+})
 
 const mapSettingRow = (row: SettingRow): SettingRecord => ({
   id: row.id,

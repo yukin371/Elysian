@@ -2,6 +2,7 @@ import type { RoleDataScope } from "@elysian/schema"
 import { AppError } from "../../errors"
 import type {
   CreateRoleInput,
+  ListRolesInput,
   RoleRepository,
   UpdateRoleInput,
 } from "./repository"
@@ -15,9 +16,9 @@ export interface CreateRolePayload
 export interface UpdateRolePayload extends UpdateRoleInput {}
 
 export const createRoleService = (repository: RoleRepository) => ({
-  list: () => repository.list(),
+  list: (input?: ListRolesInput) => repository.list(input),
   async exportCsv() {
-    const items = await repository.list()
+    const { items } = await repository.list()
 
     return buildCsv(
       [

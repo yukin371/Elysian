@@ -1,17 +1,18 @@
 import { requestBlob, requestJson } from "./core"
-
-export interface SettingRecord {
-  id: string
-  key: string
-  value: string
-  description?: string
-  status: "active" | "disabled"
-  createdAt: string
-  updatedAt: string
-}
+import type { SettingRecord } from "./types"
+export type { SettingRecord } from "./types"
 
 export interface SettingsResponse {
   items: SettingRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+export interface SettingListQuery {
+  page?: number
+  pageSize?: number
 }
 
 export interface CreateSettingRequest {
@@ -28,10 +29,26 @@ export interface UpdateSettingRequest {
   status?: SettingRecord["status"]
 }
 
-export const fetchSettings = async (): Promise<SettingsResponse> =>
-  requestJson<SettingsResponse>("/system/settings", {
-    auth: true,
-  })
+export const fetchSettings = async (
+  query: SettingListQuery = {},
+): Promise<SettingsResponse> => {
+  const search = new URLSearchParams()
+
+  if (typeof query.page === "number" && Number.isFinite(query.page)) {
+    search.set("page", String(Math.trunc(query.page)))
+  }
+
+  if (typeof query.pageSize === "number" && Number.isFinite(query.pageSize)) {
+    search.set("pageSize", String(Math.trunc(query.pageSize)))
+  }
+
+  return requestJson<SettingsResponse>(
+    `/system/settings${search.size > 0 ? `?${search.toString()}` : ""}`,
+    {
+      auth: true,
+    },
+  )
+}
 
 export const exportSettingsCsv = async (): Promise<Blob> =>
   requestBlob("/system/settings/export", {

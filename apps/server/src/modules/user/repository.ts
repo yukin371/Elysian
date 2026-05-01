@@ -1,5 +1,6 @@
 import {
   type DatabaseClient,
+  type UserPersistenceListResult,
   type UserRow,
   getUserById,
   getUserByUsername,
@@ -29,8 +30,21 @@ export interface UpdateUserInput {
   isSuperAdmin?: boolean
 }
 
+export interface ListUsersInput {
+  page?: number
+  pageSize?: number
+}
+
+export interface UserListResult {
+  items: UserRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 export interface UserRepository {
-  list: () => Promise<UserRecord[]>
+  list: (input?: ListUsersInput) => Promise<UserListResult>
   getById: (id: string) => Promise<UserRecord | null>
   getByUsername: (username: string) => Promise<UserRecord | null>
   create: (input: CreateUserInput) => Promise<UserRecord>
@@ -43,9 +57,9 @@ interface StoredUserRecord extends UserRecord {
 }
 
 export const createUserRepository = (db: DatabaseClient): UserRepository => ({
-  async list() {
-    const rows = await listUsers(db)
-    return rows.map(mapUserRow)
+  async list(input = {}) {
+    const payload = await listUsers(db, input)
+    return mapUserListResult(payload)
   },
   async getById(id) {
     const row = await getUserById(db, id)
@@ -100,10 +114,31 @@ export const createInMemoryUserRepository = (
   )
 
   return {
-    async list() {
-      return [...items.values()]
-        .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
-        .map(stripPasswordHash)
+    async list(input = {}) {
+      const page =
+        typeof input.page === "number" && Number.isFinite(input.page)
+          ? Math.max(1, Math.trunc(input.page))
+          : 1
+      const pageSize =
+        typeof input.pageSize === "number" && Number.isFinite(input.pageSize)
+          ? Math.min(100, Math.max(1, Math.trunc(input.pageSize)))
+          : 20
+      const sortedItems = [...items.values()].sort((left, right) =>
+        right.createdAt.localeCompare(left.createdAt),
+      )
+      const total = sortedItems.length
+      const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+      const resolvedPage = Math.min(page, totalPages)
+
+      return {
+        items: sortedItems
+          .slice((resolvedPage - 1) * pageSize, resolvedPage * pageSize)
+          .map(stripPasswordHash),
+        total,
+        page: resolvedPage,
+        pageSize,
+        totalPages,
+      }
     },
     async getById(id) {
       const user = items.get(id)
@@ -167,6 +202,13 @@ export const createInMemoryUserRepository = (
     },
   }
 }
+
+const mapUserListResult = (
+  payload: UserPersistenceListResult,
+): UserListResult => ({
+  ...payload,
+  items: payload.items.map(mapUserRow),
+})
 
 const mapUserRow = (row: UserRow): UserRecord => ({
   id: row.id,

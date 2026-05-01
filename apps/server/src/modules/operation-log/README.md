@@ -8,6 +8,7 @@
 
 - `/system/operation-logs` 的列表、详情、CSV 导出。
 - 按 `category/action/actorUserId/result` 过滤，并通过轻量 `authEventType/authFailureReason` 参数显式查询 auth 安全事件。
+- 操作日志列表 `page / pageSize` 的最小服务端分页语义。
 - CSV 序列化与转义。
 
 ## Must Not Own
@@ -34,5 +35,6 @@ flowchart LR
 ## Validation
 
 - `module.ts` 已确认导出接口单独使用 `system:operation-log:export` 权限点。
+- `repository.ts` 已确认操作日志列表返回 `items + total + page + pageSize + totalPages`，当前筛选导出继续复用同一筛选字段但不复用分页切片。
 - `service.ts` 已确认 CSV 只导出既有字段，不引入新的日志 schema。
 - `service.ts` 已确认包含逗号、双引号、换行的字段都会做 CSV 转义。

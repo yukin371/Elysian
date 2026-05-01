@@ -1,6 +1,12 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm"
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
+import {
+  type PaginatedResult,
+  type PaginationQuery,
+  buildPaginatedResult,
+  normalizePagination,
+} from "./query-utils"
 import type { RoleRow } from "./schema"
 import { roles, userRoles } from "./schema"
 import { DEFAULT_TENANT_ID } from "./tenant"
@@ -27,6 +33,12 @@ export interface UpdateRolePersistenceInput {
   dataScope?: RoleDataScopeValue
 }
 
+export interface RolePersistenceListQuery extends PaginationQuery {}
+
+export type RolePersistenceListResult = PaginatedResult<RoleRow>
+
+const DEFAULT_ROLE_PAGE_SIZE = 20
+
 export const listRoleCodesForUser = async (
   db: DatabaseClient,
   userId: string,
@@ -43,8 +55,30 @@ export const listRoleCodesForUser = async (
   return [...new Set(rows.map((row) => row.code))]
 }
 
-export const listRoles = async (db: DatabaseClient): Promise<RoleRow[]> =>
-  db.select().from(roles).orderBy(desc(roles.createdAt), asc(roles.code))
+export const listRoles = async (
+  db: DatabaseClient,
+  query: RolePersistenceListQuery = {},
+): Promise<RolePersistenceListResult> => {
+  const pagination = normalizePagination(query, DEFAULT_ROLE_PAGE_SIZE)
+  const [countRow] = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(roles)
+  const total = countRow?.total ?? 0
+  const paginated = buildPaginatedResult([], total, pagination)
+  const items = await db
+    .select()
+    .from(roles)
+    .orderBy(desc(roles.createdAt), asc(roles.code))
+    .limit(pagination.pageSize)
+    .offset((paginated.page - 1) * pagination.pageSize)
+
+  return {
+    ...paginated,
+    items,
+  }
+}
 
 export const listExistingRoleIds = async (
   db: DatabaseClient,

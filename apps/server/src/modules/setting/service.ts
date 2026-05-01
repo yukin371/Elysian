@@ -1,6 +1,7 @@
 import { AppError } from "../../errors"
 import type {
   CreateSettingInput,
+  ListSettingsInput,
   SettingRepository,
   UpdateSettingInput,
 } from "./repository"
@@ -14,9 +15,9 @@ export interface CreateSettingPayload
 export interface UpdateSettingPayload extends UpdateSettingInput {}
 
 export const createSettingService = (repository: SettingRepository) => ({
-  list: () => repository.list(),
+  list: (input?: ListSettingsInput) => repository.list(input),
   async exportCsv() {
-    const items = await repository.list()
+    const { items } = await repository.list()
 
     return buildCsv(
       ["id", "key", "value", "description", "status", "createdAt", "updatedAt"],

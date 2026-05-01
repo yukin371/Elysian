@@ -1,4 +1,4 @@
-import { roleModuleSchema } from "@elysian/schema"
+import { deriveBodySchema, roleModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
@@ -18,12 +18,39 @@ export interface RoleModuleOptions {
   authGuard?: AuthGuard
 }
 
+const roleListQuerySchema = t.Object({
+  page: t.Optional(t.Numeric()),
+  pageSize: t.Optional(t.Numeric()),
+})
+
 const rolePermissions = {
   list: "system:role:list",
   get: "system:role:list",
   create: "system:role:create",
   update: "system:role:update",
 } as const
+
+const roleCreateBodySchema = deriveBodySchema(roleModuleSchema, {
+  mode: "create",
+  overrides: {
+    dataScope: t.Optional(roleDataScopeSchema),
+    deptIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+    isSystem: t.Optional(t.Boolean()),
+    permissionCodes: t.Optional(t.Array(t.String({ minLength: 1 }))),
+    status: t.Optional(t.Union([t.Literal("active"), t.Literal("disabled")])),
+    userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+  },
+})
+
+const roleUpdateBodySchema = deriveBodySchema(roleModuleSchema, {
+  mode: "update",
+  overrides: {
+    dataScope: t.Optional(roleDataScopeSchema),
+    deptIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+    permissionCodes: t.Optional(t.Array(t.String({ minLength: 1 }))),
+    userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
+  },
+})
 
 export const createRoleModule = (
   repository: RoleRepository,
@@ -47,14 +74,13 @@ export const createRoleModule = (
     return app
       .get(
         "/system/roles",
-        async ({ request }) => {
+        async ({ query, request }) => {
           await authorize(request.headers, rolePermissions.list)
 
-          return {
-            items: await service.list(),
-          }
+          return service.list(query)
         },
         {
+          query: roleListQuerySchema,
           detail: {
             tags: ["role"],
             summary: "List roles",
@@ -102,19 +128,7 @@ export const createRoleModule = (
           return service.create(body)
         },
         {
-          body: t.Object({
-            code: t.String({ minLength: 1 }),
-            name: t.String({ minLength: 1 }),
-            description: t.Optional(t.String()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            isSystem: t.Optional(t.Boolean()),
-            dataScope: t.Optional(roleDataScopeSchema),
-            permissionCodes: t.Optional(t.Array(t.String({ minLength: 1 }))),
-            userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-            deptIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-          }),
+          body: roleCreateBodySchema,
           detail: {
             tags: ["role"],
             summary: "Create role",
@@ -132,19 +146,7 @@ export const createRoleModule = (
           params: t.Object({
             id: t.String(),
           }),
-          body: t.Object({
-            code: t.Optional(t.String({ minLength: 1 })),
-            name: t.Optional(t.String({ minLength: 1 })),
-            description: t.Optional(t.String()),
-            status: t.Optional(
-              t.Union([t.Literal("active"), t.Literal("disabled")]),
-            ),
-            isSystem: t.Optional(t.Boolean()),
-            dataScope: t.Optional(roleDataScopeSchema),
-            permissionCodes: t.Optional(t.Array(t.String({ minLength: 1 }))),
-            userIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-            deptIds: t.Optional(t.Array(t.String({ minLength: 1 }))),
-          }),
+          body: roleUpdateBodySchema,
           detail: {
             tags: ["role"],
             summary: "Update role",

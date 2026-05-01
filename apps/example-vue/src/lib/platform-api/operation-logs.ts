@@ -1,4 +1,6 @@
 import { requestBlob, requestJson } from "./core"
+import type { OperationLogRecord } from "./types"
+export type { OperationLogRecord } from "./types"
 
 const operationLogAuthEventTypes = [
   "login",
@@ -15,25 +17,12 @@ const isOperationLogAuthEventType = (
     value as NonNullable<OperationLogRecord["authEventType"]>,
   )
 
-export interface OperationLogRecord {
-  id: string
-  category: string
-  action: string
-  authEventType: "login" | "logout" | "refresh" | "session_revoke" | null
-  authFailureReason: string | null
-  actorUserId: string | null
-  targetType: string | null
-  targetId: string | null
-  result: "success" | "failure"
-  requestId: string | null
-  ip: string | null
-  userAgent: string | null
-  details: Record<string, unknown> | null
-  createdAt: string
-}
-
 export interface OperationLogsResponse {
   items: OperationLogRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
 }
 
 export interface OperationLogListQuery {
@@ -43,6 +32,8 @@ export interface OperationLogListQuery {
   authFailureReason?: string
   actorUserId?: string
   result?: OperationLogRecord["result"]
+  page?: number
+  pageSize?: number
 }
 
 const buildOperationLogSearch = (query: OperationLogListQuery = {}) => {
@@ -70,6 +61,14 @@ const buildOperationLogSearch = (query: OperationLogListQuery = {}) => {
 
   if (query.result) {
     search.set("result", query.result)
+  }
+
+  if (typeof query.page === "number" && Number.isFinite(query.page)) {
+    search.set("page", String(Math.trunc(query.page)))
+  }
+
+  if (typeof query.pageSize === "number" && Number.isFinite(query.pageSize)) {
+    search.set("pageSize", String(Math.trunc(query.pageSize)))
   }
 
   return search

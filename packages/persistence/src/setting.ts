@@ -1,6 +1,12 @@
-import { and, asc, desc, eq, or } from "drizzle-orm"
+import { and, asc, desc, eq, or, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
+import {
+  type PaginatedResult,
+  type PaginationQuery,
+  buildPaginatedResult,
+  normalizePagination,
+} from "./query-utils"
 import { type SettingRow, systemSettings } from "./schema"
 import { DEFAULT_TENANT_ID } from "./tenant"
 
@@ -20,11 +26,36 @@ export interface UpdateSettingPersistenceInput {
   status?: "active" | "disabled"
 }
 
-export const listSettings = async (db: DatabaseClient): Promise<SettingRow[]> =>
-  db
+export interface SettingPersistenceListQuery extends PaginationQuery {}
+
+export type SettingPersistenceListResult = PaginatedResult<SettingRow>
+
+const DEFAULT_SETTING_PAGE_SIZE = 20
+
+export const listSettings = async (
+  db: DatabaseClient,
+  query: SettingPersistenceListQuery = {},
+): Promise<SettingPersistenceListResult> => {
+  const pagination = normalizePagination(query, DEFAULT_SETTING_PAGE_SIZE)
+  const [countRow] = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(systemSettings)
+  const total = countRow?.total ?? 0
+  const paginated = buildPaginatedResult([], total, pagination)
+  const items = await db
     .select()
     .from(systemSettings)
     .orderBy(desc(systemSettings.createdAt), asc(systemSettings.key))
+    .limit(pagination.pageSize)
+    .offset((paginated.page - 1) * pagination.pageSize)
+
+  return {
+    ...paginated,
+    items,
+  }
+}
 
 export const getSettingById = async (
   db: DatabaseClient,

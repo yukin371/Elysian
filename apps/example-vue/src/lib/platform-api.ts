@@ -134,6 +134,7 @@ export type {
   UpdateDictionaryTypeRequest,
 } from "./platform-api/dictionaries"
 export type { FileRecord, FilesResponse } from "./platform-api/files"
+export type { FileListResponse } from "./platform-api/files"
 export type {
   CreateMenuRequest,
   MenuDetailRecord,
@@ -144,6 +145,7 @@ export type {
 export type {
   CreateNotificationRequest,
   NotificationListQuery,
+  NotificationListResponse,
   NotificationRecord,
   NotificationsResponse,
 } from "./platform-api/notifications"
@@ -164,6 +166,7 @@ export type {
 } from "./platform-api/posts"
 export type {
   CreateRoleRequest,
+  RoleListQuery,
   RoleDetailRecord,
   RoleRecord,
   RolesResponse,
@@ -171,6 +174,7 @@ export type {
 } from "./platform-api/roles"
 export type {
   CreateSettingRequest,
+  SettingListQuery,
   SettingRecord,
   SettingsResponse,
   UpdateSettingRequest,
@@ -183,6 +187,7 @@ export type {
 } from "./platform-api/tenants"
 export type {
   CreateUserRequest,
+  UserListQuery,
   UpdateUserRequest,
   UserRecord,
   UsersResponse,

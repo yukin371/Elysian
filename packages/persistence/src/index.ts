@@ -10,6 +10,13 @@ export {
   type MigrationProposalRiskCode,
 } from "./migration-proposal"
 export {
+  buildPaginatedResult,
+  normalizePagination,
+  type NormalizedPagination,
+  type PaginatedResult,
+  type PaginationQuery,
+} from "./query-utils"
+export {
   buildDataAccessCondition,
   matchesDataAccess,
   resolveDataAccessContext,
@@ -55,12 +62,16 @@ export {
   getSettingWithTenantFallback,
   insertSetting,
   listSettings,
+  type SettingPersistenceListQuery,
+  type SettingPersistenceListResult,
   type UpdateSettingPersistenceInput,
   updateSetting,
 } from "./setting"
 export {
   type CreateFilePersistenceInput,
   deleteFile,
+  type FilePersistenceListQuery,
+  type FilePersistenceListResult,
   getFileById,
   insertFile,
   listFiles,
@@ -70,6 +81,8 @@ export {
   getNotificationById,
   insertNotification,
   listNotifications,
+  type NotificationPersistenceListQuery,
+  type NotificationPersistenceListResult,
   type ListNotificationsPersistenceFilter,
   markNotificationAsRead,
   markNotificationsAsRead,
@@ -129,6 +142,8 @@ export {
   updateUserLoginFailureState,
 } from "./auth"
 export {
+  type AuditLogPersistenceListQuery,
+  type AuditLogPersistenceListResult,
   type AuditLogResult,
   type CreateAuditLogPersistenceInput,
   getAuditLogById,
@@ -172,6 +187,8 @@ export {
   listExistingRoleIds,
   listRoleCodesForUser,
   listRoles,
+  type RolePersistenceListQuery,
+  type RolePersistenceListResult,
   listUserIdsForRole,
   replaceRoleUserIds,
   type RoleDataScopeValue,
@@ -194,6 +211,8 @@ export {
   insertUser,
   listExistingUserIds,
   listUsers,
+  type UserPersistenceListQuery,
+  type UserPersistenceListResult,
   type UpdateUserPersistenceInput,
   updateUser,
   updateUserLastLoginAt,

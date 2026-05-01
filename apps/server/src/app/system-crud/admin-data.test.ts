@@ -562,6 +562,37 @@ describe("createServerApp system admin data", () => {
           updatedAt: "2026-04-20T00:00:00.000Z",
         },
       ],
+      total: 2,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+
+    const pagedResponse = await app.handle(
+      new Request("http://localhost/system/settings?page=2&pageSize=1", {
+        headers: {
+          authorization: `Bearer ${loginBody.accessToken}`,
+        },
+      }),
+    )
+
+    expect(pagedResponse.status).toBe(200)
+    expect(await pagedResponse.json()).toEqual({
+      items: [
+        {
+          id: "setting_support_email_1",
+          key: "platform.support_email",
+          value: "support@example.com",
+          description: "Support contact email",
+          status: "active",
+          createdAt: "2026-04-20T00:00:00.000Z",
+          updatedAt: "2026-04-20T00:00:00.000Z",
+        },
+      ],
+      total: 2,
+      page: 2,
+      pageSize: 1,
+      totalPages: 2,
     })
 
     const getResponse = await app.handle(
