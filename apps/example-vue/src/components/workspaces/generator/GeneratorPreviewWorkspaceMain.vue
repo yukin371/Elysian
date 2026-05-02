@@ -105,6 +105,20 @@ const operationHint = computed<{
     }
   }
 
+  if (isRejectConfirming.value) {
+    return {
+      key: "app.generatorPreview.message.confirmReject",
+      tone: "warning",
+    }
+  }
+
+  if (isApplyConfirming.value) {
+    return {
+      key: "app.generatorPreview.message.confirmApply",
+      tone: "warning",
+    }
+  }
+
   if (props.sessionStatus === "pending_review") {
     return {
       key: "app.generatorPreview.message.pendingReview",
@@ -292,6 +306,7 @@ const handleReviewPreview = (decision: "approve" | "reject") => {
   }
 
   if (decision === "reject" && !isRejectConfirming.value) {
+    isApplyConfirming.value = false
     isRejectConfirming.value = true
     return
   }
@@ -308,6 +323,7 @@ const handleApplyPreview = () => {
   }
 
   if (!isApplyConfirming.value) {
+    isRejectConfirming.value = false
     isApplyConfirming.value = true
     return
   }
@@ -340,6 +356,7 @@ watch(
     props.reviewLoading,
     props.selectedRecentSessionId,
     props.selectedSchemaName,
+    props.selectedConflictStrategy,
     props.selectedFrontendTarget,
     props.reviewEvidence?.comment ?? null,
   ],

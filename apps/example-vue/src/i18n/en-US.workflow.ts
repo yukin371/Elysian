@@ -148,6 +148,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "A preview session is being generated. Actions will be available after refresh finishes.",
   "app.generatorPreview.message.operationBusy":
     "A review or apply operation is already running. Wait for it to finish.",
+  "app.generatorPreview.message.confirmReject":
+    "Click confirm reject again to close this session, or cancel to continue reviewing.",
+  "app.generatorPreview.message.confirmApply":
+    "Click confirm apply again to write to staging after reviewing file diffs and the SQL draft.",
   "app.generatorPreview.message.operationApplied":
     "This preview session has already been applied to staging. It does not need to be applied again.",
   "app.generatorPreview.message.operationApplyUnavailable":
