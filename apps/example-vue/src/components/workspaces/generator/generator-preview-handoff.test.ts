@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 
 import {
+  copyGeneratorPreviewText,
   copyGeneratorPreviewSuggestedCommands,
   joinGeneratorPreviewSuggestedCommands,
 } from "./generator-preview-handoff"
@@ -21,6 +22,10 @@ describe("generator preview handoff helpers", () => {
     ).resolves.toBe(false)
   })
 
+  test("returns false when copied text is empty", async () => {
+    await expect(copyGeneratorPreviewText("   ")).resolves.toBe(false)
+  })
+
   test("copies suggested commands into clipboard", async () => {
     const writes: string[] = []
 
@@ -36,5 +41,19 @@ describe("generator preview handoff helpers", () => {
     ).resolves.toBe(true)
 
     expect(writes).toEqual(["bun run db:generate\nbun run db:migrate"])
+  })
+
+  test("copies arbitrary generator preview text into clipboard", async () => {
+    const writes: string[] = []
+
+    await expect(
+      copyGeneratorPreviewText("create table customers (...);", {
+        writeText: async (value) => {
+          writes.push(value)
+        },
+      }),
+    ).resolves.toBe(true)
+
+    expect(writes).toEqual(["create table customers (...);"])
   })
 })

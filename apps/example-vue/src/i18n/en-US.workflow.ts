@@ -181,6 +181,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.copyCommands": "Copy commands",
   "app.generatorPreview.action.copyCommandsDone": "Copied",
   "app.generatorPreview.action.copyCommandsFailed": "Copy failed",
+  "app.generatorPreview.action.copySnippet": "Copy snippet",
+  "app.generatorPreview.action.copySnippetDone": "Copied",
+  "app.generatorPreview.action.copySnippetFailed": "Copy failed",
   "app.generatorPreview.reviewCommentLabel": "Review comment",
   "app.generatorPreview.reviewCommentPlaceholder":
     "Optional: explain why this preview is approved or rejected",

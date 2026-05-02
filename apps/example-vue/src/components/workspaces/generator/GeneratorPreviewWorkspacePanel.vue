@@ -14,9 +14,16 @@ import type {
   GeneratorPreviewTranslation,
 } from "./types"
 import {
+  copyGeneratorPreviewText,
   copyGeneratorPreviewSuggestedCommands,
   joinGeneratorPreviewSuggestedCommands,
 } from "./generator-preview-handoff"
+
+type CopyFeedbackKey =
+  | "commands"
+  | "sqlDraft"
+  | "drizzleImport"
+  | "drizzleSchema"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -33,8 +40,15 @@ interface GeneratorPreviewWorkspacePanelProps {
 }
 
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
-const copyCommandsFeedback = ref<"idle" | "copied" | "failed">("idle")
-let copyCommandsFeedbackTimer: ReturnType<typeof setTimeout> | null = null
+const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>({
+  commands: "idle",
+  drizzleImport: "idle",
+  drizzleSchema: "idle",
+  sqlDraft: "idle",
+})
+const copyFeedbackTimers: Partial<
+  Record<CopyFeedbackKey, ReturnType<typeof setTimeout>>
+> = {}
 
 const selectedSourceLineCount = computed(
   () => props.selectedFile?.lineCount ?? 0,
@@ -156,34 +170,71 @@ const suggestedCommandsText = computed(() =>
     : "",
 )
 
-const copyCommandsLabel = computed(() => {
-  if (copyCommandsFeedback.value === "copied") {
-    return props.t("app.generatorPreview.action.copyCommandsDone")
+const resolveCopyLabel = (
+  key: CopyFeedbackKey,
+  idleLabelKey:
+    | "app.generatorPreview.action.copyCommands"
+    | "app.generatorPreview.action.copySnippet",
+) => {
+  if (copyFeedback.value[key] === "copied") {
+    return props.t(
+      idleLabelKey === "app.generatorPreview.action.copyCommands"
+        ? "app.generatorPreview.action.copyCommandsDone"
+        : "app.generatorPreview.action.copySnippetDone",
+    )
   }
 
-  if (copyCommandsFeedback.value === "failed") {
-    return props.t("app.generatorPreview.action.copyCommandsFailed")
+  if (copyFeedback.value[key] === "failed") {
+    return props.t(
+      idleLabelKey === "app.generatorPreview.action.copyCommands"
+        ? "app.generatorPreview.action.copyCommandsFailed"
+        : "app.generatorPreview.action.copySnippetFailed",
+    )
   }
 
-  return props.t("app.generatorPreview.action.copyCommands")
-})
+  return props.t(idleLabelKey)
+}
 
-const scheduleCopyCommandsFeedbackReset = () => {
-  if (copyCommandsFeedbackTimer !== null) {
-    globalThis.clearTimeout(copyCommandsFeedbackTimer)
+const scheduleCopyFeedbackReset = (key: CopyFeedbackKey) => {
+  const currentTimer = copyFeedbackTimers[key]
+
+  if (currentTimer !== undefined) {
+    globalThis.clearTimeout(currentTimer)
   }
 
-  copyCommandsFeedbackTimer = globalThis.setTimeout(() => {
-    copyCommandsFeedback.value = "idle"
-    copyCommandsFeedbackTimer = null
+  copyFeedbackTimers[key] = globalThis.setTimeout(() => {
+    copyFeedback.value[key] = "idle"
+    delete copyFeedbackTimers[key]
   }, 2000)
 }
 
 const copySuggestedCommands = async () => {
   const commands = props.sqlProposalHandoff?.suggestedCommands ?? []
   const copied = await copyGeneratorPreviewSuggestedCommands(commands)
-  copyCommandsFeedback.value = copied ? "copied" : "failed"
-  scheduleCopyCommandsFeedbackReset()
+  copyFeedback.value.commands = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("commands")
+}
+
+const copySqlDraft = async () => {
+  const copied = await copyGeneratorPreviewText(props.sqlProposal?.sqlDraft ?? "")
+  copyFeedback.value.sqlDraft = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("sqlDraft")
+}
+
+const copyDrizzleImportSnippet = async () => {
+  const copied = await copyGeneratorPreviewText(
+    props.sqlProposal?.drizzleImportSnippet ?? "",
+  )
+  copyFeedback.value.drizzleImport = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("drizzleImport")
+}
+
+const copyDrizzleSchemaSnippet = async () => {
+  const copied = await copyGeneratorPreviewText(
+    props.sqlProposal?.drizzleSchemaSnippet ?? "",
+  )
+  copyFeedback.value.drizzleSchema = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("drizzleSchema")
 }
 
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
@@ -202,8 +253,10 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 }
 
 onBeforeUnmount(() => {
-  if (copyCommandsFeedbackTimer !== null) {
-    globalThis.clearTimeout(copyCommandsFeedbackTimer)
+  for (const timer of Object.values(copyFeedbackTimers)) {
+    if (timer !== undefined) {
+      globalThis.clearTimeout(timer)
+    }
   }
 })
 
@@ -463,15 +516,60 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <section class="panel-section">
-            <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlDraftTitle") }}</p>
+            <div class="generator-code-toolbar">
+              <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlDraftTitle") }}</p>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="sqlProposal.sqlDraft.trim().length === 0"
+                @click="copySqlDraft"
+              >
+                {{
+                  resolveCopyLabel(
+                    "sqlDraft",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <pre class="generator-code-block"><code>{{ sqlProposal.sqlDraft }}</code></pre>
           </section>
           <section class="panel-section">
-            <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleImportTitle") }}</p>
+            <div class="generator-code-toolbar">
+              <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleImportTitle") }}</p>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="sqlProposal.drizzleImportSnippet.trim().length === 0"
+                @click="copyDrizzleImportSnippet"
+              >
+                {{
+                  resolveCopyLabel(
+                    "drizzleImport",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <pre class="generator-code-block"><code>{{ sqlProposal.drizzleImportSnippet }}</code></pre>
           </section>
           <section class="panel-section">
-            <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleSchemaTitle") }}</p>
+            <div class="generator-code-toolbar">
+              <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleSchemaTitle") }}</p>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="sqlProposal.drizzleSchemaSnippet.trim().length === 0"
+                @click="copyDrizzleSchemaSnippet"
+              >
+                {{
+                  resolveCopyLabel(
+                    "drizzleSchema",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <pre class="generator-code-block"><code>{{ sqlProposal.drizzleSchemaSnippet }}</code></pre>
           </section>
         </div>
@@ -486,7 +584,12 @@ onBeforeUnmount(() => {
             :disabled="sqlProposalHandoff.suggestedCommands.length === 0"
             @click="copySuggestedCommands"
           >
-            {{ copyCommandsLabel }}
+            {{
+              resolveCopyLabel(
+                "commands",
+                "app.generatorPreview.action.copyCommands",
+              )
+            }}
           </button>
         </div>
         <div class="generator-handoff-grid">
@@ -641,6 +744,7 @@ onBeforeUnmount(() => {
   gap: 0.75rem;
 }
 
+.generator-code-toolbar,
 .generator-handoff-toolbar {
   align-items: center;
   display: flex;

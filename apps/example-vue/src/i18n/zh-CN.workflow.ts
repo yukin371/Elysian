@@ -169,6 +169,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.copyCommands": "复制命令",
   "app.generatorPreview.action.copyCommandsDone": "已复制",
   "app.generatorPreview.action.copyCommandsFailed": "复制失败",
+  "app.generatorPreview.action.copySnippet": "复制片段",
+  "app.generatorPreview.action.copySnippetDone": "已复制",
+  "app.generatorPreview.action.copySnippetFailed": "复制失败",
   "app.generatorPreview.reviewCommentLabel": "审核备注",
   "app.generatorPreview.reviewCommentPlaceholder":
     "可选：补充本次通过或拒绝的原因",
