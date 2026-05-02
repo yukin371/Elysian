@@ -58,6 +58,21 @@ export const useExampleQuerySummary = (
     return authEventType
   }
 
+  const localizeOperationLogAuthFailureReason = (
+    authFailureReason: string,
+  ) => {
+    if (
+      authFailureReason === "invalid_password" ||
+      authFailureReason === "account_locked"
+    ) {
+      return options.t(
+        `app.operationLog.authFailureReason.${authFailureReason}`,
+      )
+    }
+
+    return authFailureReason
+  }
+
   const currentQuerySummary = computed(() => {
     if (options.isDictionaryWorkspace.value) {
       const fragments: string[] = []
@@ -428,7 +443,9 @@ export const useExampleQuerySummary = (
         options.operationLogQueryValues.value.authFailureReason.trim()
       ) {
         fragments.push(
-          `${options.t("app.operationLog.field.authFailureReason")}: ${options.operationLogQueryValues.value.authFailureReason.trim()}`,
+          `${options.t("app.operationLog.field.authFailureReason")}: ${localizeOperationLogAuthFailureReason(
+            options.operationLogQueryValues.value.authFailureReason.trim(),
+          )}`,
         )
       }
 
