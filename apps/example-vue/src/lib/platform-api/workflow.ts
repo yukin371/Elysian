@@ -72,6 +72,46 @@ export interface GeneratorPreviewSqlPreview {
   contents: string
 }
 
+export type GeneratorPreviewSqlProposalRiskCode =
+  | "canonical-owner-mismatch"
+  | "dictionary-review-required"
+  | "enum-review-required"
+  | "review-required"
+
+export interface GeneratorPreviewSqlProposalRisk {
+  code: GeneratorPreviewSqlProposalRiskCode
+  message: string
+  severity: "warning"
+}
+
+export interface GeneratorPreviewSqlProposal {
+  canonicalMigrationOwner: "packages/persistence"
+  dialect: "postgresql"
+  drizzleImportSnippet: string
+  drizzleSchemaSnippet: string
+  operationCount: number
+  risks: GeneratorPreviewSqlProposalRisk[]
+  sourceSchemaName: string
+  sqlDraft: string
+  tableName: string
+}
+
+export interface GeneratorPreviewSqlProposalHandoff {
+  proposalStatus: "ready" | "unsupported"
+  reviewMode: "manual"
+  canonicalMigrationOwner: "packages/persistence"
+  targetPaths: {
+    drizzleDir: string
+    schemaDir: string
+    schemaIndexFile: string
+    persistenceIndexFile: string
+  }
+  steps: string[]
+  suggestedCommands: string[]
+  unsupportedReason: string | null
+  sourceSchemaName: string
+}
+
 export interface GeneratorPreviewReport {
   conflictStrategy: GeneratorPreviewConflictStrategy
   databaseChangePlan: {
@@ -125,6 +165,8 @@ export interface GeneratorPreviewSessionDetail
   extends GeneratorPreviewSessionRecord {
   diffSummary: GeneratorPreviewDiffSummary
   report: GeneratorPreviewReport
+  sqlProposal: GeneratorPreviewSqlProposal | null
+  sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
 }
 
 export interface GeneratorPreviewSessionsResponse {
@@ -142,6 +184,8 @@ export interface CreateGeneratorPreviewSessionResponse {
   session: GeneratorPreviewSessionRecord
   diff: GeneratorPreviewDiffSummary
   report: GeneratorPreviewReport
+  sqlProposal: GeneratorPreviewSqlProposal | null
+  sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
 }
 
 export interface ReviewGeneratorPreviewSessionRequest {
@@ -152,6 +196,8 @@ export interface ReviewGeneratorPreviewSessionRequest {
 export interface ReviewGeneratorPreviewSessionResponse {
   session: GeneratorPreviewSessionRecord
   diff: GeneratorPreviewDiffSummary
+  sqlProposal: GeneratorPreviewSqlProposal | null
+  sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
 }
 
 export interface AppliedGeneratorPreviewFile {
@@ -165,6 +211,8 @@ export interface AppliedGeneratorPreviewFile {
 export interface ApplyGeneratorPreviewSessionResponse {
   session: GeneratorPreviewSessionRecord
   diff: GeneratorPreviewDiffSummary
+  sqlProposal: GeneratorPreviewSqlProposal | null
+  sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   apply: {
     files: AppliedGeneratorPreviewFile[]
     evidence: GeneratorPreviewApplyEvidence | null

@@ -8,6 +8,7 @@
 
 - `/studio/generator/sessions` 的列表、详情、preview 创建、review、staging apply。
 - preview report 的落盘、session 元数据持久化、review/apply evidence 回传。
+- review-only SQL proposal 与正式 migration 人工接入规范回传。
 - blocking conflict / stale report / review required / rejected / apply conflict 的运行时错误语义。
 - generator 审计的 best-effort 写入。
 
@@ -61,4 +62,5 @@ flowchart TD
 - `service.ts` 已确认 review 只允许在 `status=pending_review` 时执行，通过后进入 `ready`，拒绝后进入 `rejected`。
 - `service.ts` 已确认 apply 前必须满足 `status=ready` 且无 blocking conflicts；`pending_review` 会返回 `GENERATOR_SESSION_REVIEW_REQUIRED`，`rejected` 会返回 `GENERATOR_SESSION_REJECTED`。
 - `service.ts` 已确认 stale report 与 apply conflict 会分流成 `GENERATOR_SESSION_STALE` / `GENERATOR_SESSION_APPLY_CONFLICT`。
+- `module.ts` 已确认通过 `@elysian/persistence` 的 proposal builder 返回 review-only SQL draft、Drizzle schema snippet、风险标签与人工 handoff 指引；proposal 构建失败不会阻断 preview session 本身。
 - `repository.ts` 已确认持久化 session 需要 `tenantId`，详情读取依赖落盘的 preview report。

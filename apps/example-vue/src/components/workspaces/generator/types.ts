@@ -8,6 +8,8 @@ import type {
   GeneratorPreviewDiffSummary,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSessionRecord,
+  GeneratorPreviewSqlProposal,
+  GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewSqlPreview,
 } from "../../../lib/platform-api"
 
@@ -29,5 +31,7 @@ export type {
   GeneratorPreviewFileDiffStats,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSqlPreview,
+  GeneratorPreviewSqlProposal,
+  GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewSessionRecord,
 }

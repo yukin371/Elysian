@@ -368,6 +368,10 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.selectedPreviewFile,
       generatorPreviewSqlPreview:
         input.workspaces.generatorPreviewWorkspace.sqlPreview,
+      generatorPreviewSqlProposal:
+        input.workspaces.generatorPreviewWorkspace.sqlProposal,
+      generatorPreviewSqlProposalHandoff:
+        input.workspaces.generatorPreviewWorkspace.sqlProposalHandoff,
       resetGeneratorPreviewFilters:
         input.workspaces.generatorPreviewWorkspace.resetFilters,
       refreshGeneratorPreview:

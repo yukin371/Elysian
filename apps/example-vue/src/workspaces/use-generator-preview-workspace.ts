@@ -9,6 +9,8 @@ import {
   type GeneratorPreviewDiffSummary,
   type GeneratorPreviewReport,
   type GeneratorPreviewSessionRecord,
+  type GeneratorPreviewSqlProposal,
+  type GeneratorPreviewSqlProposalHandoff,
   applyGeneratorPreviewSession,
   createGeneratorPreviewSession,
   reviewGeneratorPreviewSession,
@@ -38,6 +40,9 @@ export const useGeneratorPreviewWorkspace = (
   const currentSession = ref<GeneratorPreviewSessionRecord | null>(null)
   const currentDiffSummary = ref<GeneratorPreviewDiffSummary | null>(null)
   const currentReport = ref<GeneratorPreviewReport | null>(null)
+  const currentSqlProposal = ref<GeneratorPreviewSqlProposal | null>(null)
+  const currentSqlProposalHandoff =
+    ref<GeneratorPreviewSqlProposalHandoff | null>(null)
   let latestPreviewRequestId = 0
 
   const schemaOptions = computed(() =>
@@ -119,6 +124,8 @@ export const useGeneratorPreviewWorkspace = (
     currentSession.value = null
     currentDiffSummary.value = null
     currentReport.value = null
+    currentSqlProposal.value = null
+    currentSqlProposalHandoff.value = null
   }
 
   const canPreservePreviewState = () =>
@@ -156,6 +163,8 @@ export const useGeneratorPreviewWorkspace = (
       currentSession.value = response.session
       currentDiffSummary.value = response.diff
       currentReport.value = response.report
+      currentSqlProposal.value = response.sqlProposal
+      currentSqlProposalHandoff.value = response.sqlProposalHandoff
     } catch (error) {
       if (requestId !== latestPreviewRequestId) {
         return
@@ -187,6 +196,8 @@ export const useGeneratorPreviewWorkspace = (
       const response = await applyGeneratorPreviewSession(sessionId)
       currentSession.value = response.session
       currentDiffSummary.value = response.diff
+      currentSqlProposal.value = response.sqlProposal
+      currentSqlProposalHandoff.value = response.sqlProposalHandoff
     } catch (error) {
       onRecoverableAuthError(error)
       errorMessage.value =
@@ -216,6 +227,8 @@ export const useGeneratorPreviewWorkspace = (
       })
       currentSession.value = response.session
       currentDiffSummary.value = response.diff
+      currentSqlProposal.value = response.sqlProposal
+      currentSqlProposalHandoff.value = response.sqlProposalHandoff
     } catch (error) {
       onRecoverableAuthError(error)
       errorMessage.value =
@@ -260,6 +273,8 @@ export const useGeneratorPreviewWorkspace = (
     canRejectPreview,
     currentDiffSummary,
     currentSession,
+    currentSqlProposal,
+    currentSqlProposalHandoff,
     errorMessage,
     filterSummary,
     filteredPreviewFiles,
@@ -275,6 +290,8 @@ export const useGeneratorPreviewWorkspace = (
     selectedPreviewFile,
     selectedSchema,
     selectedSchemaName,
+    sqlProposal: currentSqlProposal,
+    sqlProposalHandoff: currentSqlProposalHandoff,
     sqlPreview,
   }
 }

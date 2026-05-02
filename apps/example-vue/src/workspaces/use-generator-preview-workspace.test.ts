@@ -54,6 +54,42 @@ const createReport = (): GeneratorPreviewReport => ({
   targetPreset: "staging",
 })
 
+const createSqlProposal = () => ({
+  canonicalMigrationOwner: "packages/persistence" as const,
+  dialect: "postgresql" as const,
+  drizzleImportSnippet:
+    'import { pgTable, text, uuid } from "drizzle-orm/pg-core"',
+  drizzleSchemaSnippet:
+    'export const customers = pgTable("customers", { id: uuid("id").primaryKey() })',
+  operationCount: 1,
+  risks: [
+    {
+      code: "review-required" as const,
+      message: "Review manually.",
+      severity: "warning" as const,
+    },
+  ],
+  sourceSchemaName: "customer",
+  sqlDraft: "create table customers (...);",
+  tableName: "customers",
+})
+
+const createSqlProposalHandoff = () => ({
+  canonicalMigrationOwner: "packages/persistence" as const,
+  proposalStatus: "ready" as const,
+  reviewMode: "manual" as const,
+  sourceSchemaName: "customer",
+  suggestedCommands: ["bun run db:generate", "bun run db:migrate"],
+  steps: ["Review draft", "Update schema", "Run migration"],
+  targetPaths: {
+    drizzleDir: "packages/persistence/drizzle",
+    persistenceIndexFile: "packages/persistence/src/index.ts",
+    schemaDir: "packages/persistence/src/schema",
+    schemaIndexFile: "packages/persistence/src/schema/index.ts",
+  },
+  unsupportedReason: null,
+})
+
 const createSession = (
   overrides?: Partial<GeneratorPreviewSessionRecord>,
 ): GeneratorPreviewSessionRecord => ({
@@ -188,6 +224,8 @@ describe("useGeneratorPreviewWorkspace", () => {
               diff: createDiffSummary(),
               report: createReport(),
               session: createSession(),
+              sqlProposal: createSqlProposal(),
+              sqlProposalHandoff: createSqlProposalHandoff(),
             }),
             {
               headers: { "content-type": "application/json" },
@@ -225,6 +263,8 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
     expect(workspace.filteredPreviewFiles.value).toHaveLength(1)
     expect(workspace.sqlPreview.value?.tableName).toBe("customers")
+    expect(workspace.sqlProposal.value?.tableName).toBe("customers")
+    expect(workspace.sqlProposalHandoff.value?.proposalStatus).toBe("ready")
     expect(workspace.selectedFilePath.value).toBe("generated/customer.ts")
 
     await workspace.refreshPreview()
@@ -235,6 +275,7 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
     expect(workspace.filteredPreviewFiles.value).toHaveLength(1)
     expect(workspace.sqlPreview.value?.tableName).toBe("customers")
+    expect(workspace.sqlProposal.value?.tableName).toBe("customers")
     expect(workspace.selectedFilePath.value).toBe("generated/customer.ts")
   })
 
@@ -258,6 +299,8 @@ describe("useGeneratorPreviewWorkspace", () => {
               diff: createDiffSummary(),
               report: createReport(),
               session: createSession(),
+              sqlProposal: createSqlProposal(),
+              sqlProposalHandoff: createSqlProposalHandoff(),
             }),
             {
               headers: { "content-type": "application/json" },
@@ -300,6 +343,8 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentDiffSummary.value).toBeNull()
     expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
     expect(workspace.sqlPreview.value).toBeNull()
+    expect(workspace.sqlProposal.value).toBeNull()
+    expect(workspace.sqlProposalHandoff.value).toBeNull()
     expect(workspace.selectedFilePath.value).toBeNull()
   })
 
@@ -377,6 +422,8 @@ describe("useGeneratorPreviewWorkspace", () => {
               reviewedByUsername: "admin",
               status: "ready",
             }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
           }),
           {
             headers: { "content-type": "application/json" },
@@ -475,6 +522,8 @@ describe("useGeneratorPreviewWorkspace", () => {
             diff: createDiffSummary(),
             report: createReport(),
             session: createSession(),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
           }),
           {
             headers: { "content-type": "application/json" },

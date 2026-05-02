@@ -8,6 +8,8 @@ import type {
   GeneratorPreviewFileCard,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSessionRecord,
+  GeneratorPreviewSqlProposal,
+  GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
@@ -18,6 +20,8 @@ interface GeneratorPreviewWorkspacePanelProps {
   selectedFrontendTarget: "vue" | "react"
   selectedFile: GeneratorPreviewFileCard | null
   sqlPreview: GeneratorPreviewSqlPreview | null
+  sqlProposal: GeneratorPreviewSqlProposal | null
+  sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff | null
   session: GeneratorPreviewSessionRecord | null
   diffSummary: GeneratorPreviewDiffSummary | null
   reviewEvidence: GeneratorPreviewReviewEvidence | null
@@ -86,6 +90,7 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 
   return " "
 }
+
 </script>
 
 <template>
@@ -241,6 +246,93 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
           </div>
         </div>
       </section>
+
+      <section v-if="sqlProposalHandoff" class="panel-section">
+        <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalTitle") }}</p>
+        <div class="enterprise-metadata">
+          <div>
+            <span>{{ t("app.generatorPreview.meta.proposalStatus") }}</span>
+            <strong>
+              {{
+                t(
+                  sqlProposalHandoff.proposalStatus === "ready"
+                    ? "app.generatorPreview.sqlProposal.status.ready"
+                    : "app.generatorPreview.sqlProposal.status.unsupported",
+                )
+              }}
+            </strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.canonicalOwner") }}</span>
+            <strong>{{ sqlProposalHandoff.canonicalMigrationOwner }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.reviewMode") }}</span>
+            <strong>{{ sqlProposalHandoff.reviewMode }}</strong>
+          </div>
+        </div>
+        <div
+          v-if="sqlProposalHandoff.unsupportedReason"
+          class="enterprise-message enterprise-message-warning"
+        >
+          {{ sqlProposalHandoff.unsupportedReason }}
+        </div>
+        <div v-else-if="sqlProposal" class="enterprise-panel-stack">
+          <div v-if="sqlProposal.risks.length > 0" class="generator-risk-list">
+            <div
+              v-for="risk in sqlProposal.risks"
+              :key="risk.code"
+              class="generator-risk-card"
+            >
+              <strong>{{ risk.code }}</strong>
+              <p>{{ risk.message }}</p>
+            </div>
+          </div>
+          <section class="panel-section">
+            <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlDraftTitle") }}</p>
+            <pre class="generator-code-block"><code>{{ sqlProposal.sqlDraft }}</code></pre>
+          </section>
+          <section class="panel-section">
+            <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleImportTitle") }}</p>
+            <pre class="generator-code-block"><code>{{ sqlProposal.drizzleImportSnippet }}</code></pre>
+          </section>
+          <section class="panel-section">
+            <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleSchemaTitle") }}</p>
+            <pre class="generator-code-block"><code>{{ sqlProposal.drizzleSchemaSnippet }}</code></pre>
+          </section>
+        </div>
+      </section>
+
+      <section v-if="sqlProposalHandoff" class="panel-section">
+        <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlHandoffTitle") }}</p>
+        <div class="generator-handoff-grid">
+          <article>
+            <strong>{{ t("app.generatorPreview.meta.schemaDir") }}</strong>
+            <span>{{ sqlProposalHandoff.targetPaths.schemaDir }}</span>
+          </article>
+          <article>
+            <strong>{{ t("app.generatorPreview.meta.drizzleDir") }}</strong>
+            <span>{{ sqlProposalHandoff.targetPaths.drizzleDir }}</span>
+          </article>
+          <article>
+            <strong>{{ t("app.generatorPreview.meta.schemaIndexFile") }}</strong>
+            <span>{{ sqlProposalHandoff.targetPaths.schemaIndexFile }}</span>
+          </article>
+          <article>
+            <strong>{{ t("app.generatorPreview.meta.persistenceIndexFile") }}</strong>
+            <span>{{ sqlProposalHandoff.targetPaths.persistenceIndexFile }}</span>
+          </article>
+        </div>
+        <ol class="generator-handoff-steps">
+          <li
+            v-for="step in sqlProposalHandoff.steps"
+            :key="step"
+          >
+            {{ step }}
+          </li>
+        </ol>
+        <pre class="generator-code-block"><code>{{ sqlProposalHandoff.suggestedCommands.join("\n") }}</code></pre>
+      </section>
     </div>
 
     <div v-if="selectedFile" class="enterprise-panel-stack">
@@ -357,5 +449,42 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   font-size: 0.8rem;
   line-height: 1.7;
   white-space: pre;
+}
+
+.generator-risk-list,
+.generator-handoff-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.generator-risk-card,
+.generator-handoff-grid article {
+  display: grid;
+  gap: 0.35rem;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(248, 250, 252, 0.72);
+  padding: 0.85rem 0.95rem;
+}
+
+.generator-risk-card p,
+.generator-handoff-steps {
+  margin: 0;
+}
+
+.generator-risk-card strong {
+  color: #9a3412;
+}
+
+.generator-risk-card p,
+.generator-handoff-grid span,
+.generator-handoff-steps {
+  color: #475569;
+}
+
+.generator-handoff-steps {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.2rem;
 }
 </style>

@@ -224,6 +224,8 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "selectedGeneratorPreviewSchema"
     | "selectedGeneratorPreviewFile"
     | "generatorPreviewSqlPreview"
+    | "generatorPreviewSqlProposal"
+    | "generatorPreviewSqlProposalHandoff"
     | "resetGeneratorPreviewFilters"
     | "refreshGeneratorPreview"
     | "reviewGeneratorPreview"

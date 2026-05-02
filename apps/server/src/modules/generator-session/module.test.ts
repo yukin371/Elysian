@@ -235,6 +235,23 @@ describe("generator session module", () => {
           tableName: string
         }
       }
+      sqlProposal: {
+        canonicalMigrationOwner: string
+        risks: Array<{
+          code: string
+        }>
+        tableName: string
+      }
+      sqlProposalHandoff: {
+        canonicalMigrationOwner: string
+        proposalStatus: string
+        reviewMode: string
+        suggestedCommands: string[]
+        targetPaths: {
+          drizzleDir: string
+          schemaDir: string
+        }
+      }
     }
 
     expect(createBody.session.schemaName).toBe("customer")
@@ -260,6 +277,25 @@ describe("generator session module", () => {
       "customer",
     )
     expect(createBody.report.sqlPreview.tableName).toBe("customer")
+    expect(createBody.sqlProposal).toMatchObject({
+      canonicalMigrationOwner: "packages/persistence",
+      tableName: "customer",
+    })
+    expect(createBody.sqlProposal.risks.map((risk) => risk.code)).toContain(
+      "review-required",
+    )
+    expect(createBody.sqlProposalHandoff).toMatchObject({
+      canonicalMigrationOwner: "packages/persistence",
+      proposalStatus: "ready",
+      reviewMode: "manual",
+      targetPaths: {
+        drizzleDir: "packages/persistence/drizzle",
+        schemaDir: "packages/persistence/src/schema",
+      },
+    })
+    expect(createBody.sqlProposalHandoff.suggestedCommands).toContain(
+      "bun run db:generate",
+    )
 
     const reportContents = await readFile(createBody.session.reportPath, "utf8")
     expect(reportContents).toContain('"schemaName": "customer"')
@@ -305,6 +341,12 @@ describe("generator session module", () => {
         reviewedByUserId: string
         status: string
       }
+      sqlProposal: {
+        tableName: string
+      }
+      sqlProposalHandoff: {
+        proposalStatus: string
+      }
     }
     expect(reviewBody.session.id).toBe(createBody.session.id)
     expect(reviewBody.session.status).toBe("ready")
@@ -323,6 +365,8 @@ describe("generator session module", () => {
       reviewBody.session.reviewedAt,
     )
     expect(reviewBody.diff.totalFileCount).toBe(6)
+    expect(reviewBody.sqlProposal.tableName).toBe("customer")
+    expect(reviewBody.sqlProposalHandoff.proposalStatus).toBe("ready")
 
     const applyResponse = await app.handle(
       new Request(
@@ -385,6 +429,12 @@ describe("generator session module", () => {
         files: Array<{ written: boolean }>
         manifestPath: string
       }
+      sqlProposal: {
+        tableName: string
+      }
+      sqlProposalHandoff: {
+        proposalStatus: string
+      }
     }
     expect(applyBody.session.id).toBe(createBody.session.id)
     expect(applyBody.session.status).toBe("applied")
@@ -416,6 +466,8 @@ describe("generator session module", () => {
     expect(applyBody.apply.evidence.appliedAt).toBe(applyBody.session.appliedAt)
     expect(applyBody.session.applyEvidence).toEqual(applyBody.apply.evidence)
     expect(applyBody.apply.files.every((file) => file.written)).toBe(true)
+    expect(applyBody.sqlProposal.tableName).toBe("customer")
+    expect(applyBody.sqlProposalHandoff.proposalStatus).toBe("ready")
 
     const manifestContents = await readFile(
       applyBody.apply.manifestPath,
@@ -486,6 +538,15 @@ describe("generator session module", () => {
         comment: string
         decision: string
       }
+      sqlProposal: {
+        tableName: string
+      }
+      sqlProposalHandoff: {
+        proposalStatus: string
+        targetPaths: {
+          persistenceIndexFile: string
+        }
+      }
     }
     expect(detailBody).toMatchObject({
       id: createBody.session.id,
@@ -503,6 +564,13 @@ describe("generator session module", () => {
       actorUserId: createBody.session.actorUserId,
       comment: "Looks good for staging",
       decision: "approve",
+    })
+    expect(detailBody.sqlProposal.tableName).toBe("customer")
+    expect(detailBody.sqlProposalHandoff).toMatchObject({
+      proposalStatus: "ready",
+      targetPaths: {
+        persistenceIndexFile: "packages/persistence/src/index.ts",
+      },
     })
 
     const auditLog = (await fixture.repository.listAuditLogs()).find(

@@ -10,6 +10,8 @@ import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspa
 import type {
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
+  GeneratorPreviewSqlProposal,
+  GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewSqlPreview,
 } from "../generator/types"
 import OperationLogWorkspacePanel from "../operation-log/OperationLogWorkspacePanel.vue"
@@ -187,6 +189,8 @@ export interface ShellWorkspaceSecondarySwitchProps {
   selectedGeneratorPreviewFrontendTarget: string
   selectedGeneratorPreviewFile: GeneratorPreviewFileCard | null
   generatorPreviewSqlPreview: GeneratorPreviewSqlPreview | null
+  generatorPreviewSqlProposal: GeneratorPreviewSqlProposal | null
+  generatorPreviewSqlProposalHandoff: GeneratorPreviewSqlProposalHandoff | null
   generatorPreviewSession: Record<string, unknown> | null
   generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null
   generatorPreviewReviewEvidence: unknown
@@ -689,6 +693,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       selectedFrontendTarget: props.selectedGeneratorPreviewFrontendTarget,
       selectedFile: props.selectedGeneratorPreviewFile,
       sqlPreview: props.generatorPreviewSqlPreview,
+      sqlProposal: props.generatorPreviewSqlProposal,
+      sqlProposalHandoff: props.generatorPreviewSqlProposalHandoff,
       session: props.generatorPreviewSession,
       diffSummary: props.generatorPreviewDiffSummary,
       reviewEvidence: props.generatorPreviewReviewEvidence,

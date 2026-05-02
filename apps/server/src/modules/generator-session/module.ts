@@ -1,4 +1,7 @@
 import { t } from "elysia"
+import {
+  buildMigrationProposalFromChangePlan,
+} from "@elysian/persistence"
 
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
@@ -176,6 +179,8 @@ export const createGeneratorSessionModule = (
             session: toSessionResponse(session),
             diff: buildDiffSummary(session.report),
             report: session.report,
+            sqlProposal: buildSqlProposal(session),
+            sqlProposalHandoff: buildSqlProposalHandoff(session),
           }
         },
         {
@@ -220,6 +225,8 @@ export const createGeneratorSessionModule = (
           return {
             session: toSessionResponse(session),
             diff: buildDiffSummary(session.report),
+            sqlProposal: buildSqlProposal(session),
+            sqlProposalHandoff: buildSqlProposalHandoff(session),
           }
         },
         {
@@ -268,6 +275,8 @@ export const createGeneratorSessionModule = (
           return {
             session: toSessionResponse(session),
             diff: buildDiffSummary(session.report),
+            sqlProposal: buildSqlProposal(session),
+            sqlProposalHandoff: buildSqlProposalHandoff(session),
             apply: {
               files: session.applyResult.files,
               evidence: buildApplyEvidence(session),
@@ -327,6 +336,8 @@ const toSessionDetailResponse = (session: GeneratorPreviewSessionDetail) => ({
   ...toSessionResponse(session),
   diffSummary: buildDiffSummary(session.report),
   report: session.report,
+  sqlProposal: buildSqlProposal(session),
+  sqlProposalHandoff: buildSqlProposalHandoff(session),
 })
 
 const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
@@ -397,6 +408,47 @@ const buildDiffSummary = (report: GeneratorPreviewSessionDetail["report"]) => {
       skip: skipCount,
       block: blockCount,
     },
+  }
+}
+
+const buildSqlProposal = (session: GeneratorPreviewSessionDetail) => {
+  try {
+    return buildMigrationProposalFromChangePlan(session.report.databaseChangePlan)
+  } catch {
+    return null
+  }
+}
+
+const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
+  const sqlProposal = buildSqlProposal(session)
+
+  return {
+    proposalStatus: sqlProposal === null ? "unsupported" : "ready",
+    reviewMode: "manual",
+    canonicalMigrationOwner: "packages/persistence",
+    targetPaths: {
+      drizzleDir: "packages/persistence/drizzle",
+      schemaDir: "packages/persistence/src/schema",
+      schemaIndexFile: "packages/persistence/src/schema/index.ts",
+      persistenceIndexFile: "packages/persistence/src/index.ts",
+    },
+    steps: [
+      "Review the SQL draft, Drizzle snippet, and proposal risks before changing persistence files.",
+      "Apply the chosen table shape under packages/persistence/src/schema and export it from the schema indexes if needed.",
+      "Enter the formal Drizzle migration flow manually under packages/persistence/drizzle instead of treating this preview as an executed migration.",
+      "Review the committed SQL/journal changes before running migrations against a target database.",
+      "Run migration and verification commands before treating the schema change as accepted.",
+    ],
+    suggestedCommands: [
+      "bun run db:generate",
+      "bun run db:migrate",
+      "bun test packages/persistence/src/migration-proposal.test.ts",
+    ],
+    unsupportedReason:
+      sqlProposal === null
+        ? "The current database change plan cannot be converted into a review-only migration proposal automatically."
+        : null,
+    sourceSchemaName: session.schemaName,
   }
 }
 

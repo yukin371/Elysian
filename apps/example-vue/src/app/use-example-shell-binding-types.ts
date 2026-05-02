@@ -5,6 +5,8 @@ import type { GeneratorPreviewFileCard } from "../lib/generator-preview-workspac
 import type {
   AuthIdentityResponse,
   GeneratorPreviewDiffSummary,
+  GeneratorPreviewSqlProposal,
+  GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewSqlPreview,
   PlatformResponse,
 } from "../lib/platform-api"
@@ -326,6 +328,8 @@ export interface UseExampleShellBindingsOptions {
   selectedGeneratorPreviewSchema: ValueSource<{ name?: string } | null>
   selectedGeneratorPreviewFile: ValueSource<GeneratorPreviewFileCard | null>
   generatorPreviewSqlPreview: ValueSource<GeneratorPreviewSqlPreview | null>
+  generatorPreviewSqlProposal: ValueSource<GeneratorPreviewSqlProposal | null>
+  generatorPreviewSqlProposalHandoff: ValueSource<GeneratorPreviewSqlProposalHandoff | null>
   enterpriseFormMode: ValueSource<string>
   enterprisePanelTitle: ValueSource<string>
   enterprisePanelDescription: ValueSource<string>
