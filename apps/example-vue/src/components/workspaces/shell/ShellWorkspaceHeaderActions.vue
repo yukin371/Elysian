@@ -306,7 +306,9 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="notificationExportLoading"
-      :disabled="notificationExportLoading || !canViewNotifications"
+      :disabled="
+        notificationLoading || notificationExportLoading || !canViewNotifications
+      "
       @click="$emit('export-notifications')"
     >
       {{ t("app.action.exportNotifications") }}
@@ -457,7 +459,9 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="fileExportLoading"
-      :disabled="fileExportLoading || !canViewFiles"
+      :disabled="
+        fileLoading || fileActionLoading || fileExportLoading || !canViewFiles
+      "
       @click="$emit('export-files')"
     >
       {{ t("app.action.exportFiles") }}
