@@ -56,6 +56,35 @@ const sessionStatusLabel = computed(() =>
     : "-",
 )
 
+const sessionActorLabel = computed(() => {
+  if (!props.session) {
+    return "-"
+  }
+
+  return (
+    props.session.actorDisplayName ??
+    props.session.actorUsername ??
+    props.session.actorUserId ??
+    "-"
+  )
+})
+
+const sessionSourceTypeLabel = computed(() =>
+  props.session?.sourceType === "registered-schema"
+    ? props.t("app.generatorPreview.sourceType.registeredSchema")
+    : "-",
+)
+
+const sessionConflictStrategyLabel = computed(() => {
+  if (!props.session) {
+    return "-"
+  }
+
+  return props.t(
+    `app.generatorPreview.conflictStrategy.${props.session.conflictStrategy}`,
+  )
+})
+
 const selectedChangeLabel = computed(() =>
   props.selectedFile
     ? props.t(
@@ -149,12 +178,32 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
             <strong>{{ session.id }}</strong>
           </div>
           <div>
+            <span>{{ t("app.generatorPreview.meta.createdAt") }}</span>
+            <strong>{{ session.createdAt }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+            <strong>{{ sessionActorLabel }}</strong>
+          </div>
+          <div>
             <span>{{ t("app.generatorPreview.meta.reportPath") }}</span>
             <strong>{{ session.reportPath }}</strong>
           </div>
           <div>
             <span>{{ t("app.generatorPreview.meta.outputDir") }}</span>
             <strong>{{ session.outputDir }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.sourceType") }}</span>
+            <strong>{{ sessionSourceTypeLabel }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.sourceValue") }}</span>
+            <strong>{{ session.sourceValue }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.conflictStrategy") }}</span>
+            <strong>{{ sessionConflictStrategyLabel }}</strong>
           </div>
         </div>
       </section>
