@@ -247,4 +247,50 @@ describe("useNotificationWorkspace", () => {
     expect(workspace.notificationErrorMessage.value).toContain("status 401")
     expect(workspace.selectedNotification.value?.status).toBe("unread")
   })
+
+  test("ignores row switches while notification mutation is loading", async () => {
+    const first = createNotificationRecord({ id: "notice-1", title: "Alpha" })
+    const second = createNotificationRecord({ id: "notice-2", title: "Beta" })
+    const requests: string[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+      requests.push(`${method} ${url}`)
+
+      if (url.endsWith("/system/notifications/notice-1") && method === "GET") {
+        return new Response(JSON.stringify(first), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/system/notifications/notice-2") && method === "GET") {
+        return new Response(JSON.stringify(second), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(JSON.stringify({ items: [first, second] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+
+    await workspace.reloadNotifications()
+    expect(workspace.selectedNotification.value?.id).toBe("notice-1")
+
+    workspace.notificationLoading.value = true
+    await workspace.handleRowClick({ id: "notice-2" })
+
+    expect(workspace.selectedNotification.value?.id).toBe("notice-1")
+    expect(
+      requests.filter((request) =>
+        request.endsWith("/system/notifications/notice-2"),
+      ),
+    ).toHaveLength(0)
+  })
 })

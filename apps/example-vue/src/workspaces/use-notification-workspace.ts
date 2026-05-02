@@ -477,6 +477,10 @@ export const useNotificationWorkspace = (
   }
 
   const handleRowClick = async (row: Record<string, unknown>) => {
+    if (notificationLoading.value || notificationDetailLoading.value) {
+      return
+    }
+
     const rowId = String(row.id ?? "")
     const notification = filteredNotificationItems.value.find(
       (item) => item.id === rowId,
