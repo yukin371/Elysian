@@ -24,6 +24,7 @@ const createSession = (
 
 const createWorkspace = (overrides?: {
   onCurrentSessionRevoked?: () => Promise<void>
+  onRecoverableAuthError?: (error: unknown) => void
 }) =>
   useAuthSessionWorkspace({
     canEnterWorkspace: computed(() => true),
@@ -31,7 +32,7 @@ const createWorkspace = (overrides?: {
     locale: ref("zh-CN"),
     onCurrentSessionRevoked:
       overrides?.onCurrentSessionRevoked ?? (async () => {}),
-    onRecoverableAuthError: () => {},
+    onRecoverableAuthError: overrides?.onRecoverableAuthError ?? (() => {}),
     t: (key) => key,
   })
 
@@ -217,5 +218,102 @@ describe("useAuthSessionWorkspace", () => {
     expect(workspace.selectedSession?.value?.id).toBe("session-current")
     expect(workspace.filteredSessionItems.value).toEqual([])
     expect(workspace.sessionErrorMessage.value).toBe("")
+  })
+
+  test("reports recoverable auth errors when loading sessions fails", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (
+      input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/auth/sessions") && method === "GET") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as unknown as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadSessions()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.sessionErrorMessage.value).toContain("status 401")
+    expect(workspace.filteredSessionItems.value).toEqual([])
+  })
+
+  test("reports recoverable auth errors when revoking a session fails", async () => {
+    const current = createSession({
+      id: "session-current",
+      isCurrent: true,
+    })
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (
+      input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/auth/sessions") && method === "GET") {
+        return new Response(JSON.stringify({ items: [current] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/auth/sessions/session-current") &&
+        method === "DELETE"
+      ) {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as unknown as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadSessions()
+    workspace.handleRowClick({ id: "session-current" })
+    await workspace.revokeSelectedSession()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.sessionErrorMessage.value).toContain("status 401")
+    expect(workspace.sessionActionLoading.value).toBe(false)
+    expect(workspace.selectedSession.value?.id).toBe("session-current")
   })
 })
