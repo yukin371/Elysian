@@ -36,6 +36,7 @@ type CopyFeedbackKey =
   | "sessionId"
   | "manifestPath"
   | "requestId"
+  | "reviewComment"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -63,6 +64,7 @@ const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>(
   persistenceIndexFile: "idle",
   manifestPath: "idle",
   requestId: "idle",
+  reviewComment: "idle",
   schemaDir: "idle",
   schemaIndexFile: "idle",
   sessionId: "idle",
@@ -326,6 +328,12 @@ const copyRequestId = async () => {
   scheduleCopyFeedbackReset("requestId")
 }
 
+const copyReviewComment = async () => {
+  const copied = await copyGeneratorPreviewText(props.reviewEvidence?.comment ?? "")
+  copyFeedback.value.reviewComment = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("reviewComment")
+}
+
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
   `generator-diff-line generator-diff-line-${line.kind}`
 
@@ -580,7 +588,22 @@ onBeforeUnmount(() => {
             </strong>
           </div>
           <div>
-            <span>{{ t("app.generatorPreview.meta.reviewComment") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.reviewComment") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="(reviewEvidence.comment ?? '').trim().length === 0"
+                @click="copyReviewComment"
+              >
+                {{
+                  resolveCopyLabel(
+                    "reviewComment",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ reviewEvidence.comment ?? "-" }}</strong>
           </div>
         </div>
