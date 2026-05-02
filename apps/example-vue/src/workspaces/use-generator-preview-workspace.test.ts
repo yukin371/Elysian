@@ -1278,6 +1278,70 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.selectedFilePath.value).toBeNull()
   })
 
+  test("clears current preview when conflict strategy changes before refresh fails", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        if (previewRequestCount === 1) {
+          return new Response(
+            JSON.stringify({
+              diff: createDiffSummary(),
+              report: createReport(),
+              session: createSession(),
+              sqlProposal: createSqlProposal(),
+              sqlProposalHandoff: createSqlProposalHandoff(),
+            }),
+            {
+              headers: { "content-type": "application/json" },
+              status: 200,
+            },
+          )
+        }
+
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await waitForAsyncWork()
+
+    workspace.selectedConflictStrategy.value = "overwrite"
+    await waitForAsyncWork()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
+  })
+
   test("reports recoverable auth errors when apply fails", async () => {
     const recoverableErrors: unknown[] = []
 

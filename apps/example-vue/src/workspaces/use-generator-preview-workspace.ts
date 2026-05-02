@@ -360,8 +360,10 @@ export const useGeneratorPreviewWorkspace = (
   const canPreservePreviewState = () =>
     currentSession.value?.schemaName === selectedSchemaName.value &&
     currentSession.value?.frontendTarget === selectedFrontendTarget.value &&
+    currentSession.value?.conflictStrategy === selectedConflictStrategy.value &&
     currentReport.value?.schemaName === selectedSchemaName.value &&
-    currentReport.value?.frontendTarget === selectedFrontendTarget.value
+    currentReport.value?.frontendTarget === selectedFrontendTarget.value &&
+    currentReport.value?.conflictStrategy === selectedConflictStrategy.value
 
   const findMatchingRecentSession = (sessions: GeneratorPreviewSessionRecord[]) =>
     prioritizeRecentSessions(sessions).find(isSessionMatchingSelection) ?? null
