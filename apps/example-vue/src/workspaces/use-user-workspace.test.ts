@@ -218,4 +218,58 @@ describe("useUserWorkspace", () => {
     expect(workspace.userPanelMode.value).toBe("reset")
     expect(workspace.userErrorMessage.value).toContain("status 401")
   })
+
+  test("returns to detail mode when selecting another user during password reset", async () => {
+    const firstUser = createUserRecord()
+    const secondUser = createUserRecord({
+      displayName: "Editor User",
+      email: "editor@example.com",
+      id: "user-2",
+      isSuperAdmin: false,
+      phone: "13900000000",
+      username: "editor",
+    })
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/system/users") && method === "GET") {
+        return new Response(JSON.stringify({ items: [firstUser, secondUser] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/system/users/user-1") && method === "GET") {
+        return new Response(JSON.stringify(firstUser), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/system/users/user-2") && method === "GET") {
+        return new Response(JSON.stringify(secondUser), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+
+    await workspace.reloadUsers()
+    workspace.startPasswordReset(firstUser)
+    workspace.userPasswordInput.value = resetSecret
+
+    await workspace.handleRowClick({ id: "user-2" })
+
+    expect(workspace.userPanelMode.value).toBe("detail")
+    expect(workspace.userPasswordInput.value).toBe("")
+    expect(workspace.selectedUserId.value).toBe("user-2")
+    expect(workspace.selectedUser.value?.id).toBe("user-2")
+    expect(workspace.panelTitle.value).toBe("Editor User")
+  })
 })

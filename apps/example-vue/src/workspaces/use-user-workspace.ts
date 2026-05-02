@@ -497,6 +497,8 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
       return
     }
 
+    resetPanelActive.value = false
+    userPasswordInput.value = ""
     await userWorkspace.selectRecord(user)
   }
 
