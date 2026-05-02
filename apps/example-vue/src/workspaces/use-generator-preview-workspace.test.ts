@@ -1439,6 +1439,19 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.canApplyPreview.value).toBe(false)
   })
 
+  test("does not apply while preview review is in progress", async () => {
+    const { workspace } = createWorkspace()
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.reviewLoading.value = true
+
+    expect(workspace.canApplyPreview.value).toBe(false)
+
+    await workspace.applyPreview()
+
+    expect(workspace.applyLoading.value).toBe(false)
+  })
+
   test("does not refresh preview context while apply is in progress", async () => {
     let previewRequestCount = 0
 

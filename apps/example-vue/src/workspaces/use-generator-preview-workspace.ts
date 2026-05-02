@@ -320,6 +320,7 @@ export const useGeneratorPreviewWorkspace = (
       currentSession.value.status === "ready" &&
       !currentSession.value.hasBlockingConflicts &&
       !loading.value &&
+      !reviewLoading.value &&
       !applyLoading.value,
   )
 
