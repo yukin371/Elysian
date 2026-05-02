@@ -13,6 +13,7 @@ const createWorkspace = (options?: {
   canUpdate?: boolean
   canView?: boolean
   createError?: unknown
+  getListError?: () => unknown
   initialItems?: TestRecord[]
   listError?: unknown
   onRecoverableAuthError?: (error: unknown) => void
@@ -49,8 +50,10 @@ const createWorkspace = (options?: {
       return record
     },
     fetchList: async () => {
-      if (options?.listError) {
-        throw options.listError
+      const listError = options?.getListError?.() ?? options?.listError
+
+      if (listError) {
+        throw listError
       }
 
       return { items: listItems.value }
@@ -235,5 +238,45 @@ describe("createCrudWorkspace", () => {
       status: "active",
     })
     expect(workspace.errorMessage.value).toBe("list unauthorized")
+  })
+
+  test("preserves cached context when reload fails", async () => {
+    const recoverableErrors: unknown[] = []
+    const listError = new Error("list unavailable")
+    let failReload = false
+    const { workspace } = createWorkspace({
+      getListError: () => (failReload ? listError : undefined),
+      initialItems: [
+        { id: "one", name: "One" },
+        { id: "two", name: "Two" },
+      ],
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    workspace.selectedId.value = "two"
+    await workspace.reloadRecords()
+    workspace.handleSearch({
+      keyword: "beta",
+      status: "active",
+    })
+    failReload = true
+
+    await workspace.reloadRecords()
+
+    expect(recoverableErrors).toEqual([listError])
+    expect(workspace.items.value).toEqual([
+      { id: "one", name: "One" },
+      { id: "two", name: "Two" },
+    ])
+    expect(workspace.selectedId.value).toBe("two")
+    expect(workspace.selectedRecord.value).toEqual({ id: "two", name: "Two" })
+    expect(workspace.panelMode.value).toBe("detail")
+    expect(workspace.queryValues.value).toEqual({
+      keyword: "beta",
+      status: "active",
+    })
+    expect(workspace.errorMessage.value).toBe("list unavailable")
   })
 })

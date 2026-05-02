@@ -158,10 +158,7 @@ export const createCrudWorkspace = <
         await selectRecord(nextRecord)
       }
     } catch (error) {
-      const preservedQuery = { ...queryValues.value }
       options.onRecoverableAuthError(error)
-      clearWorkspace()
-      queryValues.value = preservedQuery
       errorMessage.value =
         error instanceof Error
           ? error.message
