@@ -341,4 +341,84 @@ describe("useDictionaryWorkspace", () => {
     ).toEqual(["dictionary-item-1", "dictionary-item-2"])
     expect(workspace.dictionaryDetailErrorMessage.value).toBe("detail failed")
   })
+
+  test("preserves cached dictionary items when item reload fails", async () => {
+    const first = createDictionaryTypeRecord()
+    const firstItems = [
+      createDictionaryItemRecord(),
+      createDictionaryItemRecord({
+        id: "dictionary-item-2",
+        isDefault: false,
+        label: "Disabled",
+        value: "disabled",
+      }),
+    ]
+    let failItemReload = false
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith("/system/dictionaries/items")) {
+        if (failItemReload) {
+          return new Response(
+            JSON.stringify({
+              error: { message: "item reload failed" },
+            }),
+            {
+              headers: { "content-type": "application/json" },
+              status: 500,
+            },
+          )
+        }
+
+        return new Response(JSON.stringify({ items: firstItems }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/system/dictionaries/types/dictionary-type-1") &&
+        (init?.method ?? "GET") === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: { message: "detail failed" },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response(JSON.stringify({ items: [first] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+
+    await workspace.reloadDictionaries()
+
+    expect(
+      workspace.selectedDictionaryTypeItems.value.map(
+        (item: DictionaryItemRecord) => item.id,
+      ),
+    ).toEqual(["dictionary-item-1", "dictionary-item-2"])
+
+    failItemReload = true
+
+    await workspace.reloadDictionaries()
+
+    expect(workspace.dictionaryErrorMessage.value).toBe("item reload failed")
+    expect(workspace.selectedDictionaryType.value?.id).toBe("dictionary-type-1")
+    expect(workspace.selectedDictionaryTypeDetail.value).toBeNull()
+    expect(
+      workspace.selectedDictionaryTypeItems.value.map(
+        (item: DictionaryItemRecord) => item.id,
+      ),
+    ).toEqual(["dictionary-item-1", "dictionary-item-2"])
+  })
 })

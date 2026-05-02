@@ -355,7 +355,6 @@ export const useDictionaryWorkspace = (
       dictionaryItems.value = itemPayload.items
     } catch (error) {
       options.onRecoverableAuthError(error)
-      dictionaryItems.value = []
       dictionaryErrorMessage.value =
         error instanceof Error
           ? error.message
