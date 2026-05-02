@@ -5,7 +5,8 @@
 - 本目录负责 `apps/example-vue` 的本地前端路由边界。
 - 当前只承接示例应用内的轻量 route owner：
   - 未登录 / 已登录布局判断
-  - workspace hash 路径读取、监听与替换
+  - `vue-router` hash history 装配与测试环境 memory history fallback
+  - workspace 路径读取、监听与替换
   - workspace 路由注册表与路径元数据，路径清单由 `workspaceRegistry` 自动导出
   - 基于路由注册表的默认 workspace、kind -> route/path 查找
   - 导航树路径 / menu key 到 workspace 选中态的解析与 fallback
@@ -16,15 +17,16 @@
 
 ## 当前边界
 
-- 不引入平台级路由框架 owner。
-- 不引入 `vue-router`；当前 canonical model 仍是 `hash / registry`。
+- 不引入平台级路由框架 owner；`vue-router` 只作为 `apps/example-vue` 本地路由实现细节。
+- 当前 canonical model 是 `vue-router hash history / workspaceRegistry`，测试环境允许 memory history fallback。
 - 不拥有真实后端菜单、权限、会话或 workspace 状态。
 - 不直接渲染页面组件；页面渲染仍由 `App.vue` 装配和 `components/workspaces/*` 承担。
 - `use-example-navigation.ts` 只应消费本目录暴露的路由派生结果，不应继续回退到手写 route/path/kind 分支。
+- `App.vue` 与 shell 装配层不直接注册 route records；新增 workspace 路由仍应从 `workspaceRegistry` 派生。
 
 ## 后续方向
 
 - 若后续继续做“自动路由收口”，优先继续扩展本目录，而不是把 route fallback 写回 `use-example-navigation.ts`。
-- 若后续正式引入 `vue-router` 或文件自动路由，也必须从本目录演进，不能跳过现有 `hash / registry` owner 直接扩散到 `App.vue`。
+- 若后续引入文件自动路由或更完整的 route meta，也必须从本目录演进，不能跳过现有 `vue-router / registry` owner 直接扩散到 `App.vue`。
 - 自动路由注册应消费既有菜单 / workspace route registry / workspace descriptor，不应在 `App.vue` 或 app composable 继续新增路径分支。
 - 新 workspace 只允许在 `workspaceRegistry` 补路径与元数据，不允许再手工复制一组独立路由常量。
