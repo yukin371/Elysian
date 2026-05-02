@@ -138,7 +138,7 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="roleExportLoading"
-      :disabled="roleExportLoading || !canViewRoles"
+      :disabled="roleLoading || roleExportLoading || !canViewRoles"
       @click="$emit('export-roles')"
     >
       {{ t("app.action.exportRoles") }}
@@ -184,7 +184,9 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="dictionaryTypeExportLoading"
-      :disabled="dictionaryTypeExportLoading || !canViewDictionaries"
+      :disabled="
+        dictionaryLoading || dictionaryTypeExportLoading || !canViewDictionaries
+      "
       @click="$emit('export-dictionary-types')"
     >
       {{ t("app.action.exportDictionaryTypes") }}
@@ -194,7 +196,9 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="dictionaryItemsExportLoading"
-      :disabled="dictionaryItemsExportLoading || !canViewDictionaries"
+      :disabled="
+        dictionaryLoading || dictionaryItemsExportLoading || !canViewDictionaries
+      "
       @click="$emit('export-dictionary-items')"
     >
       {{ t("app.action.exportDictionaryItems") }}
@@ -222,7 +226,7 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="departmentExportLoading"
-      :disabled="departmentExportLoading || !canViewDepartments"
+      :disabled="departmentLoading || departmentExportLoading || !canViewDepartments"
       @click="$emit('export-departments')"
     >
       {{ t("app.action.exportDepartments") }}
@@ -250,7 +254,7 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="postExportLoading"
-      :disabled="postExportLoading || !canViewPosts"
+      :disabled="postLoading || postExportLoading || !canViewPosts"
       @click="$emit('export-posts')"
     >
       {{ t("app.action.exportPosts") }}
@@ -278,7 +282,7 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="menuExportLoading"
-      :disabled="menuExportLoading || !canViewMenus"
+      :disabled="menuLoading || menuExportLoading || !canViewMenus"
       @click="$emit('export-menus')"
     >
       {{ t("app.action.exportMenus") }}
@@ -384,7 +388,7 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="settingExportLoading"
-      :disabled="settingExportLoading || !canViewSettings"
+      :disabled="settingLoading || settingExportLoading || !canViewSettings"
       @click="$emit('export-settings')"
     >
       {{ t("app.action.exportSettings") }}
@@ -412,7 +416,7 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="tenantExportLoading"
-      :disabled="tenantExportLoading || !canViewTenants"
+      :disabled="tenantLoading || tenantExportLoading || !canViewTenants"
       @click="$emit('export-tenants')"
     >
       {{ t("app.action.exportTenants") }}
@@ -431,7 +435,7 @@ defineEmits<{
       theme="default"
       variant="outline"
       :loading="userExportLoading"
-      :disabled="userExportLoading || !canViewUsers"
+      :disabled="userLoading || userExportLoading || !canViewUsers"
       @click="$emit('export-users')"
     >
       {{ t("app.action.exportUsers") }}
