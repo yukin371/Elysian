@@ -592,8 +592,15 @@ describe("useGeneratorPreviewWorkspace", () => {
               }),
               createSession({
                 conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:30:00.000Z",
+                id: "preview-session-match-pending",
+                schemaName: "customer",
+                status: "pending_review",
+              }),
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
                 createdAt: "2026-05-02T14:00:00.000Z",
-                id: "preview-session-match",
+                id: "preview-session-match-ready",
                 schemaName: "customer",
                 status: "ready",
               }),
@@ -607,7 +614,27 @@ describe("useGeneratorPreviewWorkspace", () => {
       }
 
       if (
-        url.endsWith("/studio/generator/sessions/preview-session-match") &&
+        url.endsWith("/studio/generator/sessions/preview-session-match-pending") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              createdAt: "2026-05-02T14:30:00.000Z",
+              id: "preview-session-match-pending",
+              status: "pending_review",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-match-ready") &&
         method === "GET"
       ) {
         return new Response(
@@ -615,7 +642,7 @@ describe("useGeneratorPreviewWorkspace", () => {
             createSessionDetail({
               conflictStrategy: "overwrite-generated-only",
               createdAt: "2026-05-02T14:00:00.000Z",
-              id: "preview-session-match",
+              id: "preview-session-match-ready",
               status: "ready",
             }),
           ),
@@ -636,9 +663,12 @@ describe("useGeneratorPreviewWorkspace", () => {
     await waitForAsyncWork()
 
     expect(workspace.recentSessionOptions.value[0]?.value).toBe(
-      "preview-session-match",
+      "preview-session-match-pending",
     )
     expect(workspace.recentSessionOptions.value[1]?.value).toBe(
+      "preview-session-match-ready",
+    )
+    expect(workspace.recentSessionOptions.value[2]?.value).toBe(
       "preview-session-other",
     )
   })

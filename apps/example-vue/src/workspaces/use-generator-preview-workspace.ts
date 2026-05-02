@@ -36,6 +36,16 @@ type GeneratorPreviewStoredSelection = {
   sessionId: string | null
 }
 
+const generatorPreviewSessionStatusPriority: Record<
+  GeneratorPreviewSessionRecord["status"],
+  number
+> = {
+  pending_review: 0,
+  ready: 1,
+  rejected: 2,
+  applied: 3,
+}
+
 const createGeneratorPreviewSelectionCacheKey = (
   schemaName: string,
   frontendTarget: FrontendTarget,
@@ -196,23 +206,45 @@ export const useGeneratorPreviewWorkspace = (
   const prioritizeRecentSessions = (
     sessions: GeneratorPreviewSessionRecord[],
   ) => {
-    const matchingSelection: GeneratorPreviewSessionRecord[] = []
-    const otherSessions: GeneratorPreviewSessionRecord[] = []
+    const matchingSelection: Array<{
+      index: number
+      session: GeneratorPreviewSessionRecord
+    }> = []
+    const otherSessions: Array<{
+      index: number
+      session: GeneratorPreviewSessionRecord
+    }> = []
 
-    for (const session of sessions) {
+    for (const [index, session] of sessions.entries()) {
       if (
         session.schemaName === selectedSchemaName.value &&
         session.frontendTarget === selectedFrontendTarget.value &&
         session.conflictStrategy === selectedConflictStrategy.value
       ) {
-        matchingSelection.push(session)
+        matchingSelection.push({ index, session })
         continue
       }
 
-      otherSessions.push(session)
+      otherSessions.push({ index, session })
     }
 
-    return [...matchingSelection, ...otherSessions]
+    const sortByReviewPriority = (
+      left: { index: number; session: GeneratorPreviewSessionRecord },
+      right: { index: number; session: GeneratorPreviewSessionRecord },
+    ) => {
+      const statusPriorityDelta =
+        generatorPreviewSessionStatusPriority[left.session.status] -
+        generatorPreviewSessionStatusPriority[right.session.status]
+
+      if (statusPriorityDelta !== 0) {
+        return statusPriorityDelta
+      }
+
+      return left.index - right.index
+    }
+
+    return [...matchingSelection.sort(sortByReviewPriority), ...otherSessions]
+      .map(({ session }) => session)
   }
 
   const recentSessionOptions = computed(() =>
