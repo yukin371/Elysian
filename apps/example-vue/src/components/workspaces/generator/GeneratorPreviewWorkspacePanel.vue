@@ -13,6 +13,7 @@ import type {
   GeneratorPreviewTranslation,
 } from "./types"
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
+import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import {
@@ -336,118 +337,23 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
     />
 
     <div v-if="session" class="enterprise-panel-stack">
-      <section class="panel-section">
-        <div class="generator-code-toolbar">
-          <p class="enterprise-subheading">{{ t("app.generatorPreview.sessionTitle") }}</p>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="session.reportPath.trim().length === 0"
-            @click="copySessionReportPath"
-          >
-            {{
-              resolveCopyLabel(
-                "reportPath",
-                "app.generatorPreview.action.copySnippet",
-              )
-            }}
-          </button>
-        </div>
-        <div class="enterprise-metadata">
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.sessionId") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="session.id.trim().length === 0"
-                @click="copySessionId"
-              >
-                {{
-                  resolveCopyLabel(
-                    "sessionId",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ session.id }}</strong>
-          </div>
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.createdAt") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="session.createdAt.trim().length === 0"
-                @click="copyCreatedAt"
-              >
-                {{
-                  resolveCopyLabel(
-                    "createdAt",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ session.createdAt }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.actor") }}</span>
-            <strong>{{ sessionActorLabel }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.reportPath") }}</span>
-            <strong>{{ session.reportPath }}</strong>
-          </div>
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.outputDir") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="session.outputDir.trim().length === 0"
-                @click="copyOutputDir"
-              >
-                {{
-                  resolveCopyLabel(
-                    "outputDir",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ session.outputDir }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.sourceType") }}</span>
-            <strong>{{ sessionSourceTypeLabel }}</strong>
-          </div>
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.sourceValue") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="session.sourceValue.trim().length === 0"
-                @click="copySourceValue"
-              >
-                {{
-                  resolveCopyLabel(
-                    "sourceValue",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ session.sourceValue }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.conflictStrategy") }}</span>
-            <strong>{{ sessionConflictStrategyLabel }}</strong>
-          </div>
-        </div>
-      </section>
+      <GeneratorPreviewWorkspaceSessionPanel
+        :t="t"
+        :session="session"
+        :session-actor-label="sessionActorLabel"
+        :session-source-type-label="sessionSourceTypeLabel"
+        :session-conflict-strategy-label="sessionConflictStrategyLabel"
+        :report-path-copy-label="resolveSnippetCopyLabel('reportPath')"
+        :session-id-copy-label="resolveSnippetCopyLabel('sessionId')"
+        :created-at-copy-label="resolveSnippetCopyLabel('createdAt')"
+        :output-dir-copy-label="resolveSnippetCopyLabel('outputDir')"
+        :source-value-copy-label="resolveSnippetCopyLabel('sourceValue')"
+        @copy-report-path="copySessionReportPath"
+        @copy-session-id="copySessionId"
+        @copy-created-at="copyCreatedAt"
+        @copy-output-dir="copyOutputDir"
+        @copy-source-value="copySourceValue"
+      />
 
       <section v-if="diffSummary" class="panel-section">
         <p class="enterprise-subheading">{{ t("app.generatorPreview.diffTitle") }}</p>
