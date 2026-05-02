@@ -33,6 +33,7 @@ type GeneratorPreviewStoredSelection = {
   conflictStrategy: GeneratorPreviewConflictStrategy
   frontendTarget: FrontendTarget
   schemaName: string
+  sessionId: string | null
 }
 
 const createGeneratorPreviewSelectionCacheKey = (
@@ -83,6 +84,7 @@ const loadStoredGeneratorPreviewSelection = (
       conflictStrategy: parsed.conflictStrategy,
       frontendTarget: parsed.frontendTarget,
       schemaName: parsed.schemaName,
+      sessionId: typeof parsed.sessionId === "string" ? parsed.sessionId : null,
     }
   } catch {
     return null
@@ -384,6 +386,38 @@ export const useGeneratorPreviewWorkspace = (
     }
   }
 
+  const restoreStoredSession = async () => {
+    const storedSessionId = storedSelection?.sessionId
+
+    if (!storedSessionId) {
+      return false
+    }
+
+    loading.value = true
+    errorMessage.value = ""
+
+    try {
+      const session =
+        sessionDetailCache.get(storedSessionId) ??
+        (await fetchGeneratorPreviewSession(storedSessionId))
+
+      if (
+        session.schemaName !== selectedSchemaName.value ||
+        session.frontendTarget !== selectedFrontendTarget.value ||
+        session.conflictStrategy !== selectedConflictStrategy.value
+      ) {
+        return false
+      }
+
+      applySessionDetail(session)
+      return true
+    } catch {
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
   const restoreCachedMatchingSession = () => {
     const cachedSession = selectionSessionCache.get(getCurrentSelectionCacheKey())
 
@@ -396,6 +430,10 @@ export const useGeneratorPreviewWorkspace = (
   }
 
   const restoreLatestMatchingSession = async () => {
+    if (await restoreStoredSession()) {
+      return true
+    }
+
     if (restoreCachedMatchingSession()) {
       return true
     }
@@ -631,6 +669,9 @@ export const useGeneratorPreviewWorkspace = (
         conflictStrategy,
         frontendTarget,
         schemaName,
+        sessionId: currentSelectionMatchesSession()
+          ? currentSession.value?.id ?? null
+          : null,
       })
     },
     { immediate: true },
