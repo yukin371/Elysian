@@ -36,6 +36,14 @@ type GeneratorPreviewStoredSelection = {
   sessionId: string | null
 }
 
+const resolveGeneratorPreviewSelectionStorage = () => {
+  try {
+    return globalThis.localStorage
+  } catch {
+    return undefined
+  }
+}
+
 const generatorPreviewSessionStatusPriority: Record<
   GeneratorPreviewSessionRecord["status"],
   number
@@ -66,7 +74,7 @@ const isFrontendTarget = (value: unknown): value is FrontendTarget =>
 const loadStoredGeneratorPreviewSelection = (
   availableSchemaNames: readonly string[],
 ): GeneratorPreviewStoredSelection | null => {
-  const storage = globalThis.localStorage
+  const storage = resolveGeneratorPreviewSelectionStorage()
 
   if (!storage) {
     return null
@@ -104,7 +112,7 @@ const loadStoredGeneratorPreviewSelection = (
 const persistGeneratorPreviewSelection = (
   selection: GeneratorPreviewStoredSelection,
 ) => {
-  const storage = globalThis.localStorage
+  const storage = resolveGeneratorPreviewSelectionStorage()
 
   if (!storage) {
     return

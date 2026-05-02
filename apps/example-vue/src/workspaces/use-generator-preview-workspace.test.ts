@@ -1260,6 +1260,22 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.selectedFrontendTarget.value).toBe("react")
   })
 
+  test("does not throw when generator preview selection storage is blocked", async () => {
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      get: () => {
+        throw new Error("storage blocked")
+      },
+    })
+
+    const { workspace } = createWorkspace()
+    workspace.selectedFrontendTarget.value = "react"
+
+    await waitForAsyncWork()
+
+    expect(workspace.selectedFrontendTarget.value).toBe("react")
+  })
+
   test("clears query when generator selection context changes", async () => {
     const { workspace } = createWorkspace()
 
