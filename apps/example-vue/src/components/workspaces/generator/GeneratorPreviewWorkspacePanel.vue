@@ -33,6 +33,9 @@ type CopyFeedbackKey =
   | "drizzleDir"
   | "schemaIndexFile"
   | "persistenceIndexFile"
+  | "sessionId"
+  | "manifestPath"
+  | "requestId"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -58,8 +61,11 @@ const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>(
   generatedSource: "idle",
   reportPath: "idle",
   persistenceIndexFile: "idle",
+  manifestPath: "idle",
+  requestId: "idle",
   schemaDir: "idle",
   schemaIndexFile: "idle",
+  sessionId: "idle",
   sqlDraft: "idle",
   sqlPreview: "idle",
   drizzleDir: "idle",
@@ -300,6 +306,26 @@ const copyHandoffTargetPath = async (
   scheduleCopyFeedbackReset(key)
 }
 
+const copySessionId = async () => {
+  const copied = await copyGeneratorPreviewText(props.session?.id ?? "")
+  copyFeedback.value.sessionId = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("sessionId")
+}
+
+const copyManifestPath = async () => {
+  const copied = await copyGeneratorPreviewText(props.applyEvidence?.manifestPath ?? "")
+  copyFeedback.value.manifestPath = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("manifestPath")
+}
+
+const copyRequestId = async () => {
+  const copied = await copyGeneratorPreviewText(
+    props.applyEvidence?.requestId ?? "",
+  )
+  copyFeedback.value.requestId = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("requestId")
+}
+
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
   `generator-diff-line generator-diff-line-${line.kind}`
 
@@ -437,7 +463,22 @@ onBeforeUnmount(() => {
         </div>
         <div class="enterprise-metadata">
           <div>
-            <span>{{ t("app.generatorPreview.meta.sessionId") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.sessionId") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="session.id.trim().length === 0"
+                @click="copySessionId"
+              >
+                {{
+                  resolveCopyLabel(
+                    "sessionId",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ session.id }}</strong>
           </div>
           <div>
@@ -557,11 +598,41 @@ onBeforeUnmount(() => {
             <strong>{{ resolveEvidenceActorLabel(applyEvidence) }}</strong>
           </div>
           <div>
-            <span>{{ t("app.generatorPreview.meta.manifestPath") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.manifestPath") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="(applyEvidence.manifestPath ?? '').trim().length === 0"
+                @click="copyManifestPath"
+              >
+                {{
+                  resolveCopyLabel(
+                    "manifestPath",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ applyEvidence.manifestPath ?? "-" }}</strong>
           </div>
           <div>
-            <span>{{ t("app.generatorPreview.meta.requestId") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.requestId") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="(applyEvidence.requestId ?? '').trim().length === 0"
+                @click="copyRequestId"
+              >
+                {{
+                  resolveCopyLabel(
+                    "requestId",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ applyEvidence.requestId ?? "-" }}</strong>
           </div>
         </div>
@@ -968,7 +1039,8 @@ onBeforeUnmount(() => {
 
 .generator-code-toolbar,
 .generator-handoff-toolbar,
-.generator-handoff-card-header {
+.generator-handoff-card-header,
+.generator-metadata-label {
   align-items: center;
   display: flex;
   gap: 0.75rem;
