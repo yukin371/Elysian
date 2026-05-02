@@ -162,8 +162,10 @@ export const useExampleSessionOrchestration = (
     try {
       await logout()
     } catch (error) {
-      options.authErrorMessage.value =
-        error instanceof Error ? error.message : options.t("app.error.signOut")
+      if (!isRecoverableAuthError(error)) {
+        options.authErrorMessage.value =
+          error instanceof Error ? error.message : options.t("app.error.signOut")
+      }
     } finally {
       options.authIdentity.value = null
       clearAccessToken()
