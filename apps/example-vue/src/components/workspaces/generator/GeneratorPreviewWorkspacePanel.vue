@@ -15,6 +15,7 @@ import type {
 import GeneratorPreviewWorkspaceDiffSummaryPanel from "./GeneratorPreviewWorkspaceDiffSummaryPanel.vue"
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
 import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
+import GeneratorPreviewWorkspaceReviewPanel from "./GeneratorPreviewWorkspaceReviewPanel.vue"
 import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
@@ -111,6 +112,20 @@ const sessionConflictStrategyLabel = computed(() => {
     `app.generatorPreview.conflictStrategy.${props.session.conflictStrategy}`,
   )
 })
+
+const reviewActorLabel = computed(() =>
+  resolveEvidenceActorLabel(props.reviewEvidence),
+)
+
+const reviewDecisionLabel = computed(() =>
+  props.reviewEvidence
+    ? props.t(
+        props.reviewEvidence.decision === "approve"
+          ? "app.generatorPreview.action.approve"
+          : "app.generatorPreview.action.reject",
+      )
+    : "-",
+)
 
 const selectedChangeLabel = computed(() =>
   props.selectedFile
@@ -454,65 +469,17 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         @copy-unchanged-lines="copyDiffUnchangedLines"
       />
 
-      <section v-if="reviewEvidence" class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.reviewTitle") }}</p>
-        <div class="enterprise-metadata">
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.reviewedAt") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="(reviewEvidence.reviewedAt ?? '').trim().length === 0"
-                @click="copyReviewedAt"
-              >
-                {{
-                  resolveCopyLabel(
-                    "reviewedAt",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ reviewEvidence.reviewedAt ?? "-" }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.actor") }}</span>
-            <strong>{{ resolveEvidenceActorLabel(reviewEvidence) }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.reviewDecision") }}</span>
-            <strong>
-              {{
-                t(
-                  reviewEvidence.decision === "approve"
-                    ? "app.generatorPreview.action.approve"
-                    : "app.generatorPreview.action.reject",
-                )
-              }}
-            </strong>
-          </div>
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.reviewComment") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="(reviewEvidence.comment ?? '').trim().length === 0"
-                @click="copyReviewComment"
-              >
-                {{
-                  resolveCopyLabel(
-                    "reviewComment",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ reviewEvidence.comment ?? "-" }}</strong>
-          </div>
-        </div>
-      </section>
+      <GeneratorPreviewWorkspaceReviewPanel
+        v-if="reviewEvidence"
+        :t="t"
+        :review-evidence="reviewEvidence"
+        :review-actor-label="reviewActorLabel"
+        :review-decision-label="reviewDecisionLabel"
+        :reviewed-at-copy-label="resolveSnippetCopyLabel('reviewedAt')"
+        :review-comment-copy-label="resolveSnippetCopyLabel('reviewComment')"
+        @copy-reviewed-at="copyReviewedAt"
+        @copy-review-comment="copyReviewComment"
+      />
 
       <section v-if="applyEvidence" class="panel-section">
         <p class="enterprise-subheading">{{ t("app.generatorPreview.applyTitle") }}</p>
