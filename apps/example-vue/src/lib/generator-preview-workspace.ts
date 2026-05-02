@@ -220,5 +220,11 @@ export const resolveGeneratorPreviewSelection = (
     return selectedPath
   }
 
-  return files[0]?.path ?? null
+  const prioritizedFallback =
+    files.find((file) => file.plannedAction === "block") ??
+    files.find((file) => file.plannedAction === "overwrite") ??
+    files.find((file) => file.plannedAction === "create") ??
+    files[0]
+
+  return prioritizedFallback?.path ?? null
 }

@@ -59,6 +59,76 @@ describe("generator-preview-workspace", () => {
     expect(resolveGeneratorPreviewSelection([], "missing")).toBeNull()
   })
 
+  it("prioritizes blocking files when choosing a fallback selection", () => {
+    const conflictFiles = [
+      toGeneratorPreviewFileCard({
+        absolutePath: "E:/generated/modules/customer/customer.schema.ts",
+        path: "modules/customer/customer.schema.ts",
+        reason: "Persist the module schema alongside generated module artifacts.",
+        plannedAction: "create",
+        plannedReason: "File does not exist yet.",
+        exists: false,
+        hasChanges: true,
+        mergeStrategy: "replace-whole-file",
+        contents: "export const customerModuleSchema = {}",
+        currentContents: null,
+        isManaged: null,
+      }),
+      toGeneratorPreviewFileCard({
+        absolutePath: "E:/generated/modules/customer/customer.page.vue",
+        path: "modules/customer/customer.page.vue",
+        reason: "File drift blocks safe apply.",
+        plannedAction: "block",
+        plannedReason: "File has unmanaged local edits.",
+        exists: true,
+        hasChanges: true,
+        mergeStrategy: "replace-whole-file",
+        contents: "<template><div>customer page</div></template>",
+        currentContents: "<template><div>customized page</div></template>",
+        isManaged: false,
+      }),
+    ]
+
+    expect(resolveGeneratorPreviewSelection(conflictFiles, null)).toBe(
+      "modules/customer/customer.page.vue",
+    )
+  })
+
+  it("prioritizes overwrite files ahead of new creates when no conflict exists", () => {
+    const overwriteFiles = [
+      toGeneratorPreviewFileCard({
+        absolutePath: "E:/generated/modules/customer/customer.schema.ts",
+        path: "modules/customer/customer.schema.ts",
+        reason: "Persist the module schema alongside generated module artifacts.",
+        plannedAction: "create",
+        plannedReason: "File does not exist yet.",
+        exists: false,
+        hasChanges: true,
+        mergeStrategy: "replace-whole-file",
+        contents: "export const customerModuleSchema = {}",
+        currentContents: null,
+        isManaged: null,
+      }),
+      toGeneratorPreviewFileCard({
+        absolutePath: "E:/generated/modules/customer/customer.page.vue",
+        path: "modules/customer/customer.page.vue",
+        reason: "Update generated management page implementation.",
+        plannedAction: "overwrite",
+        plannedReason: "Managed file can be regenerated safely.",
+        exists: true,
+        hasChanges: true,
+        mergeStrategy: "replace-whole-file",
+        contents: "<template><div>next page</div></template>",
+        currentContents: "<template><div>current page</div></template>",
+        isManaged: true,
+      }),
+    ]
+
+    expect(resolveGeneratorPreviewSelection(overwriteFiles, null)).toBe(
+      "modules/customer/customer.page.vue",
+    )
+  })
+
   it("derives line-level diff stats for changed files", () => {
     const changedFile = toGeneratorPreviewFileCard({
       absolutePath: "E:/generated/modules/customer/customer.page.vue",
