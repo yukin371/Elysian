@@ -1046,6 +1046,24 @@ describe("useGeneratorPreviewWorkspace", () => {
     })
   })
 
+  test("clears query when generator selection context changes", async () => {
+    const { workspace } = createWorkspace()
+
+    workspace.previewQuery.value = "generated/customer"
+    workspace.selectedConflictStrategy.value = "overwrite"
+
+    await waitForAsyncWork()
+
+    expect(workspace.previewQuery.value).toBe("")
+
+    workspace.previewQuery.value = "generated/customer"
+    workspace.selectedFrontendTarget.value = "react"
+
+    await waitForAsyncWork()
+
+    expect(workspace.previewQuery.value).toBe("")
+  })
+
   test("sends selected conflict strategy when refreshing preview", async () => {
     let submittedConflictStrategy: GeneratorPreviewConflictStrategy | undefined
 

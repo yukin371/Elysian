@@ -708,9 +708,12 @@ export const useGeneratorPreviewWorkspace = (
     { immediate: true },
   )
 
-  watch(selectedSchemaName, () => {
-    resetFilters()
-  })
+  watch(
+    [selectedSchemaName, selectedFrontendTarget, selectedConflictStrategy],
+    () => {
+      resetFilters()
+    },
+  )
 
   watch(
     [
