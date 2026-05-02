@@ -370,10 +370,21 @@ const handleDirectoryToggle = (menuKey: string) => {
 }
 
 .ely-nav :deep(.t-menu__item:hover),
-.ely-nav :deep(.t-submenu__title:hover),
+.ely-nav :deep(.t-submenu__title:hover) {
+  background: rgba(36, 87, 214, 0.05);
+}
+
+.ely-nav :deep(.t-menu__item.t-is-opened:not(.t-menu__item--plain)),
+.ely-nav :deep(.t-menu__item.t-is-active:not(.t-menu__item--plain)),
 .ely-nav :deep(.t-is-opened > .t-submenu__title),
-.ely-nav :deep(.t-is-active) {
-  background: rgba(36, 87, 214, 0.07);
+.ely-nav :deep(.t-submenu__title.t-is-active) {
+  background: rgba(36, 87, 214, 0.06);
+}
+
+.ely-nav :deep(.t-menu__item.t-is-active.t-menu__item--plain),
+.ely-nav :deep(.t-submenu__item.t-is-active) {
+  background: rgba(36, 87, 214, 0.12);
+  box-shadow: inset 3px 0 0 var(--elysian-ely-accent);
 }
 
 .ely-nav :deep(.t-menu__content) {
