@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, onBeforeUnmount, ref } from "vue"
 
 import type {
   GeneratorPreviewApplyEvidence,
@@ -13,6 +13,10 @@ import type {
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
+import {
+  copyGeneratorPreviewSuggestedCommands,
+  joinGeneratorPreviewSuggestedCommands,
+} from "./generator-preview-handoff"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -29,6 +33,8 @@ interface GeneratorPreviewWorkspacePanelProps {
 }
 
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
+const copyCommandsFeedback = ref<"idle" | "copied" | "failed">("idle")
+let copyCommandsFeedbackTimer: ReturnType<typeof setTimeout> | null = null
 
 const selectedSourceLineCount = computed(
   () => props.selectedFile?.lineCount ?? 0,
@@ -142,6 +148,44 @@ const selectedDiffStats = computed(
     },
 )
 
+const suggestedCommandsText = computed(() =>
+  props.sqlProposalHandoff
+    ? joinGeneratorPreviewSuggestedCommands(
+        props.sqlProposalHandoff.suggestedCommands,
+      )
+    : "",
+)
+
+const copyCommandsLabel = computed(() => {
+  if (copyCommandsFeedback.value === "copied") {
+    return props.t("app.generatorPreview.action.copyCommandsDone")
+  }
+
+  if (copyCommandsFeedback.value === "failed") {
+    return props.t("app.generatorPreview.action.copyCommandsFailed")
+  }
+
+  return props.t("app.generatorPreview.action.copyCommands")
+})
+
+const scheduleCopyCommandsFeedbackReset = () => {
+  if (copyCommandsFeedbackTimer !== null) {
+    globalThis.clearTimeout(copyCommandsFeedbackTimer)
+  }
+
+  copyCommandsFeedbackTimer = globalThis.setTimeout(() => {
+    copyCommandsFeedback.value = "idle"
+    copyCommandsFeedbackTimer = null
+  }, 2000)
+}
+
+const copySuggestedCommands = async () => {
+  const commands = props.sqlProposalHandoff?.suggestedCommands ?? []
+  const copied = await copyGeneratorPreviewSuggestedCommands(commands)
+  copyCommandsFeedback.value = copied ? "copied" : "failed"
+  scheduleCopyCommandsFeedbackReset()
+}
+
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
   `generator-diff-line generator-diff-line-${line.kind}`
 
@@ -156,6 +200,12 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 
   return " "
 }
+
+onBeforeUnmount(() => {
+  if (copyCommandsFeedbackTimer !== null) {
+    globalThis.clearTimeout(copyCommandsFeedbackTimer)
+  }
+})
 
 </script>
 
@@ -428,7 +478,17 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
       </section>
 
       <section v-if="sqlProposalHandoff" class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlHandoffTitle") }}</p>
+        <div class="generator-handoff-toolbar">
+          <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlHandoffTitle") }}</p>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="sqlProposalHandoff.suggestedCommands.length === 0"
+            @click="copySuggestedCommands"
+          >
+            {{ copyCommandsLabel }}
+          </button>
+        </div>
         <div class="generator-handoff-grid">
           <article>
             <strong>{{ t("app.generatorPreview.meta.schemaDir") }}</strong>
@@ -455,7 +515,7 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
             {{ step }}
           </li>
         </ol>
-        <pre class="generator-code-block"><code>{{ sqlProposalHandoff.suggestedCommands.join("\n") }}</code></pre>
+        <pre class="generator-code-block"><code>{{ suggestedCommandsText }}</code></pre>
       </section>
     </div>
 
@@ -579,6 +639,13 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 .generator-handoff-grid {
   display: grid;
   gap: 0.75rem;
+}
+
+.generator-handoff-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
 }
 
 .generator-risk-card,
