@@ -519,11 +519,17 @@ export const useExampleWorkspaceSync = (
     (items) => {
       if (items.length === 0) {
         options.selectedUserId.value = null
-        if (
-          options.userPanelMode.value === "detail" &&
-          options.canCreateUsers.value
-        ) {
-          options.userPanelMode.value = "create"
+        if (options.userPanelMode.value === "reset") {
+          options.userPanelMode.value = options.canCreateUsers.value
+            ? "create"
+            : "detail"
+          return
+        }
+
+        if (options.userPanelMode.value === "detail") {
+          if (options.canCreateUsers.value) {
+            options.userPanelMode.value = "create"
+          }
         }
         return
       }
@@ -533,7 +539,10 @@ export const useExampleWorkspaceSync = (
         !items.some((item) => item.id === options.selectedUserId.value)
       ) {
         options.selectedUserId.value = items[0]?.id ?? null
-        if (options.userPanelMode.value === "detail") {
+        if (
+          options.userPanelMode.value === "detail" ||
+          options.userPanelMode.value === "reset"
+        ) {
           options.userPanelMode.value = "detail"
         }
       }
