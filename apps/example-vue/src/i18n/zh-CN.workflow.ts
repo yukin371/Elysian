@@ -133,6 +133,16 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.blockedAction": "查看该文件差异",
   "app.generatorPreview.message.pendingReview":
     "当前 preview session 需要先审核通过，才能执行 staging apply。",
+  "app.generatorPreview.message.operationNoSession":
+    "请先刷新生成 preview session，再执行审核或 staging apply。",
+  "app.generatorPreview.message.operationLoading":
+    "正在生成 preview session，当前操作会在刷新完成后可用。",
+  "app.generatorPreview.message.operationBusy":
+    "当前已有审核或 apply 操作在执行，请等待操作完成。",
+  "app.generatorPreview.message.operationApplied":
+    "当前 preview session 已完成 staging apply，无需重复应用。",
+  "app.generatorPreview.message.operationApplyUnavailable":
+    "当前 preview session 暂不可应用，请确认已审核通过且没有阻塞冲突。",
   "app.generatorPreview.message.reviewApproved":
     "本次预览已完成审核通过，审核时间：{value}。",
   "app.generatorPreview.message.reviewRejected":

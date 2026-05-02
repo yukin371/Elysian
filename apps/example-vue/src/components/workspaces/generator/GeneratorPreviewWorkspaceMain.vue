@@ -79,6 +79,75 @@ const blockedFiles = computed(() =>
   props.files.filter((file) => file.plannedAction === "block"),
 )
 
+const operationHint = computed<{
+  key: string
+  tone: "info" | "warning" | "success"
+} | null>(() => {
+  if (props.loading) {
+    return {
+      key: "app.generatorPreview.message.operationLoading",
+      tone: "info",
+    }
+  }
+
+  if (props.reviewLoading || props.applyLoading) {
+    return {
+      key: "app.generatorPreview.message.operationBusy",
+      tone: "info",
+    }
+  }
+
+  if (!props.sessionStatus) {
+    return {
+      key: "app.generatorPreview.message.operationNoSession",
+      tone: "info",
+    }
+  }
+
+  if (props.sessionStatus === "pending_review") {
+    return {
+      key: "app.generatorPreview.message.pendingReview",
+      tone: "info",
+    }
+  }
+
+  if (props.sessionStatus === "rejected") {
+    return {
+      key: "app.generatorPreview.message.rejected",
+      tone: "warning",
+    }
+  }
+
+  if (props.sessionStatus === "applied") {
+    return {
+      key: "app.generatorPreview.message.operationApplied",
+      tone: "success",
+    }
+  }
+
+  if (props.hasBlockingConflicts) {
+    return {
+      key: "app.generatorPreview.message.blockingConflicts",
+      tone: "warning",
+    }
+  }
+
+  if (props.sessionStatus === "ready" && !props.canApply) {
+    return {
+      key: "app.generatorPreview.message.operationApplyUnavailable",
+      tone: "info",
+    }
+  }
+
+  return null
+})
+
+const operationHintClass = computed(() =>
+  operationHint.value
+    ? `enterprise-message enterprise-message-${operationHint.value.tone}`
+    : "",
+)
+
 const resolveEvidenceActorLabel = (
   evidence:
     | GeneratorPreviewReviewEvidence
@@ -379,28 +448,10 @@ watch(
       </div>
 
       <div
-        v-else-if="sessionStatus === 'pending_review'"
-        class="enterprise-message enterprise-message-info"
+        v-else-if="operationHint"
+        :class="operationHintClass"
       >
-        {{ t("app.generatorPreview.message.pendingReview") }}
-      </div>
-
-      <div
-        v-else-if="sessionStatus === 'rejected'"
-        class="enterprise-message enterprise-message-warning"
-      >
-        {{
-          t("app.generatorPreview.message.rejected", {
-            value: reviewEvidence?.reviewedAt ?? "-",
-          })
-        }}
-      </div>
-
-      <div
-        v-else-if="hasBlockingConflicts"
-        class="enterprise-message enterprise-message-warning"
-      >
-        {{ t("app.generatorPreview.message.blockingConflicts") }}
+        {{ t(operationHint.key) }}
       </div>
 
       <section

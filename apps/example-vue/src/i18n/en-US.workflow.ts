@@ -142,6 +142,16 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.blockedAction": "Open this file diff",
   "app.generatorPreview.message.pendingReview":
     "This preview session must be approved before it can be applied to staging.",
+  "app.generatorPreview.message.operationNoSession":
+    "Refresh a preview session before reviewing or applying to staging.",
+  "app.generatorPreview.message.operationLoading":
+    "A preview session is being generated. Actions will be available after refresh finishes.",
+  "app.generatorPreview.message.operationBusy":
+    "A review or apply operation is already running. Wait for it to finish.",
+  "app.generatorPreview.message.operationApplied":
+    "This preview session has already been applied to staging. It does not need to be applied again.",
+  "app.generatorPreview.message.operationApplyUnavailable":
+    "This preview session cannot be applied yet. Confirm it is approved and has no blocking conflicts.",
   "app.generatorPreview.message.reviewApproved":
     "This preview passed review at {value}.",
   "app.generatorPreview.message.reviewRejected":
