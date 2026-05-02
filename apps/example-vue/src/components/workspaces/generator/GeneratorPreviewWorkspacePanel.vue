@@ -95,6 +95,32 @@ const selectedChangeLabel = computed(() =>
     : "-",
 )
 
+const selectedExistsLabel = computed(() =>
+  props.selectedFile
+    ? props.t(
+        props.selectedFile.exists
+          ? "app.generatorPreview.meta.changedYes"
+          : "app.generatorPreview.meta.changedNo",
+      )
+    : "-",
+)
+
+const selectedManagedLabel = computed(() => {
+  if (
+    !props.selectedFile ||
+    props.selectedFile.isManaged === undefined ||
+    props.selectedFile.isManaged === null
+  ) {
+    return "-"
+  }
+
+  return props.t(
+    props.selectedFile.isManaged
+      ? "app.generatorPreview.meta.changedYes"
+      : "app.generatorPreview.meta.changedNo",
+  )
+})
+
 const selectedDiffStats = computed(
   () =>
     props.selectedFile?.diffStats ?? {
@@ -168,6 +194,36 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
         <strong>{{ selectedChangeLabel }}</strong>
       </div>
     </div>
+
+    <section v-if="selectedFile" class="panel-section mt-5">
+      <p class="enterprise-subheading">
+        {{ t("app.generatorPreview.fileDecisionTitle") }}
+      </p>
+      <div class="enterprise-metadata">
+        <div>
+          <span>{{ t("app.generatorPreview.meta.absolutePath") }}</span>
+          <strong>{{ selectedFile.absolutePath }}</strong>
+        </div>
+        <div>
+          <span>{{ t("app.generatorPreview.meta.exists") }}</span>
+          <strong>{{ selectedExistsLabel }}</strong>
+        </div>
+        <div>
+          <span>{{ t("app.generatorPreview.meta.managed") }}</span>
+          <strong>{{ selectedManagedLabel }}</strong>
+        </div>
+      </div>
+      <div class="generator-explanation-grid">
+        <article>
+          <strong>{{ t("app.generatorPreview.meta.templateReason") }}</strong>
+          <p>{{ selectedFile.reason }}</p>
+        </article>
+        <article>
+          <strong>{{ t("app.generatorPreview.meta.plannedReason") }}</strong>
+          <p>{{ selectedFile.plannedReason }}</p>
+        </article>
+      </div>
+    </section>
 
     <div v-if="session" class="enterprise-panel-stack">
       <section class="panel-section">
@@ -507,7 +563,8 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 }
 
 .generator-risk-card,
-.generator-handoff-grid article {
+.generator-handoff-grid article,
+.generator-explanation-grid article {
   display: grid;
   gap: 0.35rem;
   border-radius: 6px;
@@ -517,7 +574,8 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 }
 
 .generator-risk-card p,
-.generator-handoff-steps {
+.generator-handoff-steps,
+.generator-explanation-grid p {
   margin: 0;
 }
 
@@ -527,8 +585,14 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 
 .generator-risk-card p,
 .generator-handoff-grid span,
-.generator-handoff-steps {
+.generator-handoff-steps,
+.generator-explanation-grid p {
   color: #475569;
+}
+
+.generator-explanation-grid {
+  display: grid;
+  gap: 0.75rem;
 }
 
 .generator-handoff-steps {

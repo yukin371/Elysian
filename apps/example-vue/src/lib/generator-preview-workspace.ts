@@ -8,6 +8,7 @@ export interface GeneratorPreviewFileCard
     | "currentContents"
     | "exists"
     | "hasChanges"
+    | "isManaged"
     | "mergeStrategy"
     | "path"
     | "plannedAction"
