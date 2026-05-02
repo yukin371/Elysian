@@ -270,6 +270,12 @@ const handleRecentSessionChange = (
   }
 }
 
+const handleRefreshPreview = () => {
+  isApplyConfirming.value = false
+  isRejectConfirming.value = false
+  emit("refresh-preview")
+}
+
 const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionStatus"]) => {
   if (status === "applied") {
     return props.t("app.generatorPreview.status.applied")
@@ -352,6 +358,7 @@ watch(
     props.sessionStatus,
     props.canApply,
     props.canReject,
+    props.loading,
     props.applyLoading,
     props.reviewLoading,
     props.selectedRecentSessionId,
@@ -360,17 +367,19 @@ watch(
     props.selectedFrontendTarget,
     props.reviewEvidence?.comment ?? null,
   ],
-  ([status, canApply, canReject, applyLoading, reviewLoading, sessionId]) => {
+  (
+    [status, canApply, canReject, loading, applyLoading, reviewLoading, sessionId],
+  ) => {
     const resolvedSessionId =
       typeof sessionId === "string" && sessionId.trim().length > 0
         ? sessionId.trim()
         : null
 
-    if (!canApply || applyLoading || status !== "ready") {
+    if (!canApply || loading || applyLoading || status !== "ready") {
       isApplyConfirming.value = false
     }
 
-    if (!canReject || reviewLoading || status !== "pending_review") {
+    if (!canReject || loading || reviewLoading || status !== "pending_review") {
       isRejectConfirming.value = false
     }
 
@@ -476,7 +485,7 @@ watch(
             type="button"
             class="enterprise-button enterprise-button-ghost"
             :disabled="loading || reviewLoading || applyLoading"
-            @click="emit('refresh-preview')"
+            @click="handleRefreshPreview"
           >
             {{
               loading
