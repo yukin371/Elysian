@@ -9,7 +9,7 @@ import {
 } from "tdesign-vue-next/es/layout"
 import { Menu as TMenu } from "tdesign-vue-next/es/menu"
 import { Space as TSpace } from "tdesign-vue-next/es/space"
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 
 import {
   type ElyShellEmits,
@@ -41,20 +41,67 @@ const selectedTabKey = computed(
   () => props.selectedTabKey ?? props.tabs?.[0]?.key ?? null,
 )
 
-const expandedMenuValues = computed(() => {
-  const values: string[] = []
-  const visit = (items: ElyShellProps["navigation"]) => {
-    for (const item of items) {
-      if (item.children.length > 0 || item.type === "directory") {
-        values.push(item.id)
-        visit(item.children)
+const userExpandedMenuValues = ref<string[]>([])
+
+const resolveExpandedAncestorValues = (
+  items: ElyShellProps["navigation"],
+  targetMenuKey: string | null | undefined,
+  trail: string[] = [],
+): string[] => {
+  if (!targetMenuKey) {
+    return []
+  }
+
+  for (const item of items) {
+    const nextTrail =
+      item.children.length > 0 || item.type === "directory"
+        ? [...trail, item.id]
+        : trail
+
+    if (item.id === targetMenuKey) {
+      return trail
+    }
+
+    if (item.children.length > 0) {
+      const nested = resolveExpandedAncestorValues(
+        item.children,
+        targetMenuKey,
+        nextTrail,
+      )
+
+      if (nested.length > 0) {
+        return nested
       }
     }
   }
 
-  visit(props.navigation)
-  return values
-})
+  return []
+}
+
+const selectedMenuAncestors = computed(() =>
+  resolveExpandedAncestorValues(props.navigation, props.selectedMenuKey),
+)
+
+const expandedMenuValues = computed(() =>
+  Array.from(
+    new Set([
+      ...userExpandedMenuValues.value,
+      ...selectedMenuAncestors.value,
+    ]),
+  ),
+)
+
+watch(
+  selectedMenuAncestors,
+  (ancestors) => {
+    userExpandedMenuValues.value = Array.from(
+      new Set([...userExpandedMenuValues.value, ...ancestors]),
+    )
+  },
+  {
+    immediate: true,
+  },
+)
 
 const resolvedCopy = computed(() =>
   resolveElyShellCopy({
@@ -72,6 +119,10 @@ const handleMenuChange = (value: string | number) => {
 
 const handleTabSelect = (key: string) => {
   emit("tab-select", key)
+}
+
+const handleMenuExpand = (value: Array<string | number>) => {
+  userExpandedMenuValues.value = value.map((item) => String(item))
 }
 </script>
 
@@ -98,6 +149,7 @@ const handleTabSelect = (key: string) => {
           expand-type="normal"
           :value="selectedMenuValue"
           :expanded="expandedMenuValues"
+          @expand="handleMenuExpand"
           @change="handleMenuChange"
         >
           <ElyNavNodes :items="navigation" />

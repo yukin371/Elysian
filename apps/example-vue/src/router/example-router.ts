@@ -213,15 +213,19 @@ export const resolveExampleNavigationMenuKey = (
   items: UiNavigationNode[],
   currentMenuKey: string | null,
 ) => {
+  const currentItem = currentMenuKey
+    ? findNavigationItemById(items, currentMenuKey)
+    : null
+
+  if (currentItem?.id) {
+    return currentItem.id
+  }
+
   const routeMenuKey = readCurrentWorkspaceRouteMenuKey(items)
 
   if (routeMenuKey) {
     return routeMenuKey
   }
-
-  const currentItem = currentMenuKey
-    ? findNavigationItemById(items, currentMenuKey)
-    : null
 
   return (
     currentItem?.id ?? resolveDefaultWorkspaceNavigationItem(items)?.id ?? null

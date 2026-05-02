@@ -188,14 +188,15 @@ describe("example app router", () => {
     ).toBeNull()
   })
 
-  test("resolves the selected menu key with route-first precedence", () => {
+  test("resolves the selected menu key with explicit selection precedence", () => {
     const items = createNavigationItems()
     const { mockWindow } = createMockWindow("#/system/files")
     testGlobal.window = mockWindow
 
     expect(resolveExampleNavigationMenuKey(items, "customer-list")).toBe(
-      "system-files",
+      "customer-list",
     )
+    expect(resolveExampleNavigationMenuKey(items, null)).toBe("system-files")
 
     mockWindow.location.hash = "#/"
 
@@ -224,9 +225,9 @@ describe("example app router", () => {
     expect(
       resolveExampleNavigationSelectionState(items, "customer-list"),
     ).toMatchObject({
-      selectedMenuKey: "system-files",
+      selectedMenuKey: "customer-list",
       selectedNavigationItem: {
-        id: "system-files",
+        id: "customer-list",
       },
     })
 
