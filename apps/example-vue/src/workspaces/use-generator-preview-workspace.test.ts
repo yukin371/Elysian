@@ -700,6 +700,12 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.recentSessionOptions.value[2]?.value).toBe(
       "preview-session-other",
     )
+    expect(workspace.recentSessionOptions.value[0]?.label).toContain(
+      "app.generatorPreview.conflictStrategy.overwrite-generated-only",
+    )
+    expect(workspace.recentSessionOptions.value[2]?.label).toContain(
+      "app.generatorPreview.conflictStrategy.fail",
+    )
   })
 
   test("updates recent sessions locally after preview review and apply", async () => {

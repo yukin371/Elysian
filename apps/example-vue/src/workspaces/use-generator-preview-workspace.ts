@@ -203,6 +203,10 @@ export const useGeneratorPreviewWorkspace = (
     return t("app.generatorPreview.status.pendingReview")
   }
 
+  const localizeConflictStrategy = (
+    strategy: GeneratorPreviewConflictStrategy,
+  ) => t(`app.generatorPreview.conflictStrategy.${strategy}`)
+
   const isSessionMatchingSelection = (
     session: GeneratorPreviewSessionRecord,
   ) =>
@@ -254,8 +258,14 @@ export const useGeneratorPreviewWorkspace = (
     prioritizeRecentSessions(recentSessions.value)
       .slice(0, 8)
       .map((session) => ({
-      label: `${session.schemaName} · ${session.frontendTarget} · ${localizeSessionStatus(session.status)} · ${session.createdAt}`,
-      value: session.id,
+        label: [
+          session.schemaName,
+          session.frontendTarget,
+          localizeConflictStrategy(session.conflictStrategy),
+          localizeSessionStatus(session.status),
+          session.createdAt,
+        ].join(" · "),
+        value: session.id,
       })),
   )
 
