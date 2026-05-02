@@ -323,7 +323,11 @@ defineEmits<{
       "
       @click="$emit('mark-visible-notifications-read')"
     >
-      {{ t("app.action.markVisibleNotificationsRead") }}
+      {{
+        t("app.action.markVisibleNotificationsRead", {
+          count: visibleUnreadNotificationCount,
+        })
+      }}
     </ShellHeaderActionButton>
     <ShellHeaderActionButton
       v-if="isNotificationWorkspace"

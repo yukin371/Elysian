@@ -263,7 +263,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.platform.status.bootstrap": "初始化中",
   "app.action.newNotification": "新建通知",
   "app.action.exportNotifications": "导出通知",
-  "app.action.markVisibleNotificationsRead": "当前筛选全部已读",
+  "app.action.markVisibleNotificationsRead": "当前筛选全部已读（{count}）",
   "app.action.exportOperationLogs": "导出日志",
   "app.fallback.system": "系统管理",
   "app.fallback.users": "用户管理",
