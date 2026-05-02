@@ -198,6 +198,12 @@ const suggestedCommandsText = computed(() =>
     : "",
 )
 
+const sqlHandoffStepsText = computed(() =>
+  props.sqlProposalHandoff
+    ? props.sqlProposalHandoff.steps.join("\n")
+    : "",
+)
+
 const copyPanelValue = async (
   key: GeneratorPreviewCopyFeedbackKey,
   value: string | null | undefined,
@@ -211,6 +217,9 @@ const copySuggestedCommands = async () => {
     props.sqlProposalHandoff?.suggestedCommands ?? [],
   )
 }
+
+const copySqlHandoffSteps = async () =>
+  copyPanelValue("steps", sqlHandoffStepsText.value)
 
 const copySqlDraft = async () =>
   copyPanelValue("sqlDraft", props.sqlProposal?.sqlDraft)
@@ -591,6 +600,7 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :persistence-index-file-copy-label="
           resolveSnippetCopyLabel('persistenceIndexFile')
         "
+        :steps-copy-label="resolveSnippetCopyLabel('steps')"
         @copy-suggested-commands="copySuggestedCommands"
         @copy-schema-dir="
           (path) => copyHandoffTargetPath('schemaDir', path)
@@ -604,6 +614,7 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         @copy-persistence-index-file="
           (path) => copyHandoffTargetPath('persistenceIndexFile', path)
         "
+        @copy-steps="copySqlHandoffSteps"
       />
     </div>
 

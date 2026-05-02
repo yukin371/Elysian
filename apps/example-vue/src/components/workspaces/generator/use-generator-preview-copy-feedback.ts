@@ -37,6 +37,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "schemaDir"
   | "schemaIndexFile"
   | "sessionId"
+  | "steps"
   | "sourceValue"
   | "sourceType"
   | "status"
@@ -99,6 +100,7 @@ const createInitialCopyFeedback = (): Record<
   schemaDir: "idle",
   schemaIndexFile: "idle",
   sessionId: "idle",
+  steps: "idle",
   sourceValue: "idle",
   sourceType: "idle",
   status: "idle",

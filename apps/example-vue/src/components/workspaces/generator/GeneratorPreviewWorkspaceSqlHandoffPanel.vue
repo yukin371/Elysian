@@ -13,6 +13,7 @@ interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   drizzleDirCopyLabel: string
   schemaIndexFileCopyLabel: string
   persistenceIndexFileCopyLabel: string
+  stepsCopyLabel: string
 }
 
 defineProps<GeneratorPreviewWorkspaceSqlHandoffPanelProps>()
@@ -23,6 +24,7 @@ const emit = defineEmits<{
   (event: "copy-drizzle-dir", path: string): void
   (event: "copy-schema-index-file", path: string): void
   (event: "copy-persistence-index-file", path: string): void
+  (event: "copy-steps"): void
 }>()
 </script>
 
@@ -111,15 +113,30 @@ const emit = defineEmits<{
         <span>{{ sqlProposalHandoff.targetPaths.persistenceIndexFile }}</span>
       </article>
     </div>
-    <ol class="generator-handoff-steps">
-      <li
-        v-for="step in sqlProposalHandoff.steps"
-        :key="step"
-      >
-        {{ step }}
-      </li>
-    </ol>
-    <pre class="generator-code-block"><code>{{ suggestedCommandsText }}</code></pre>
+    <section class="generator-handoff-step-block">
+      <div class="generator-handoff-card-header">
+        <strong>{{ t("app.generatorPreview.sqlHandoffTitle") }}</strong>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="sqlProposalHandoff.steps.length === 0"
+          @click="emit('copy-steps')"
+        >
+          {{ stepsCopyLabel }}
+        </button>
+      </div>
+      <ol class="generator-handoff-steps">
+        <li
+          v-for="step in sqlProposalHandoff.steps"
+          :key="step"
+        >
+          {{ step }}
+        </li>
+      </ol>
+    </section>
+    <pre
+      class="generator-code-block"
+    ><code>{{ suggestedCommandsText }}</code></pre>
   </section>
 </template>
 
@@ -160,6 +177,7 @@ const emit = defineEmits<{
   justify-content: space-between;
 }
 
+.generator-handoff-step-block,
 .generator-handoff-grid article {
   display: grid;
   gap: 0.35rem;
