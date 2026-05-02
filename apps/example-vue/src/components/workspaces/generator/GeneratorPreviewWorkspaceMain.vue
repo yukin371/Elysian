@@ -66,6 +66,7 @@ const emit = defineEmits<{
 }>()
 
 const reviewComment = ref("")
+const isApplyConfirming = ref(false)
 const resolveCurrentReviewDraftSessionId = () =>
   props.selectedRecentSessionId.trim() || null
 
@@ -160,6 +161,23 @@ const handleReviewPreview = (decision: "approve" | "reject") => {
   })
 }
 
+const handleApplyPreview = () => {
+  if (!props.canApply || props.applyLoading) {
+    return
+  }
+
+  if (!isApplyConfirming.value) {
+    isApplyConfirming.value = true
+    return
+  }
+
+  emit("apply-preview")
+}
+
+const cancelApplyConfirmation = () => {
+  isApplyConfirming.value = false
+}
+
 const handleFileSelection = (path: string) => {
   if (!shouldSelectGeneratorPreviewFile(props.selectedFilePath, path)) {
     return
@@ -171,16 +189,22 @@ const handleFileSelection = (path: string) => {
 watch(
   () => [
     props.sessionStatus,
+    props.canApply,
+    props.applyLoading,
     props.selectedRecentSessionId,
     props.selectedSchemaName,
     props.selectedFrontendTarget,
     props.reviewEvidence?.comment ?? null,
   ],
-  ([status, sessionId]) => {
+  ([status, canApply, applyLoading, sessionId]) => {
     const resolvedSessionId =
       typeof sessionId === "string" && sessionId.trim().length > 0
         ? sessionId.trim()
         : null
+
+    if (!canApply || applyLoading || status !== "ready") {
+      isApplyConfirming.value = false
+    }
 
     if (status === "pending_review") {
       reviewComment.value = resolvedSessionId
@@ -306,15 +330,26 @@ watch(
             {{ t("app.generatorPreview.action.approve") }}
           </button>
           <button
+            v-if="isApplyConfirming"
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="applyLoading"
+            @click="cancelApplyConfirmation"
+          >
+            {{ t("app.generatorPreview.action.cancelApplyConfirm") }}
+          </button>
+          <button
             type="button"
             class="enterprise-button"
             :disabled="!canApply"
-            @click="emit('apply-preview')"
+            @click="handleApplyPreview"
           >
             {{
               applyLoading
                 ? t("app.generatorPreview.action.applying")
-                : t("app.generatorPreview.action.apply")
+                : isApplyConfirming
+                  ? t("app.generatorPreview.action.confirmApply")
+                  : t("app.generatorPreview.action.apply")
             }}
           </button>
         </div>

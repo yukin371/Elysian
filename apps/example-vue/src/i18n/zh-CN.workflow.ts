@@ -166,6 +166,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.approve": "审核通过",
   "app.generatorPreview.action.reject": "拒绝",
   "app.generatorPreview.action.apply": "应用到 staging",
+  "app.generatorPreview.action.confirmApply": "确认应用到 staging",
+  "app.generatorPreview.action.cancelApplyConfirm": "取消确认",
   "app.generatorPreview.action.applying": "应用中",
   "app.generatorPreview.action.copyCommands": "复制命令",
   "app.generatorPreview.action.copyCommandsDone": "已复制",
