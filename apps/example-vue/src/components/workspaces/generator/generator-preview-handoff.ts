@@ -13,8 +13,12 @@ export const copyGeneratorPreviewText = async (
     return false
   }
 
-  await clipboard.writeText(value)
-  return true
+  try {
+    await clipboard.writeText(value)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export const copyGeneratorPreviewSuggestedCommands = async (

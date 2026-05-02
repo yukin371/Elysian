@@ -37,6 +37,16 @@ describe("generator preview handoff helpers", () => {
     await expect(copyGeneratorPreviewText("   ")).resolves.toBe(false)
   })
 
+  test("returns false when clipboard write fails", async () => {
+    await expect(
+      copyGeneratorPreviewText("create table customers (...);", {
+        writeText: async () => {
+          throw new Error("clipboard denied")
+        },
+      }),
+    ).resolves.toBe(false)
+  })
+
   test("copies suggested commands into clipboard", async () => {
     const writes: string[] = []
 
