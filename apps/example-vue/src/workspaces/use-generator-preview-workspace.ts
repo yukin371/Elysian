@@ -618,6 +618,11 @@ export const useGeneratorPreviewWorkspace = (
     try {
       const response = await applyGeneratorPreviewSession(sessionId)
 
+      if (response.session.id !== sessionId) {
+        errorMessage.value = "Generator apply response does not match current session"
+        return
+      }
+
       if (currentReport.value) {
         applySessionDetail(
           buildSessionDetail(
@@ -668,6 +673,11 @@ export const useGeneratorPreviewWorkspace = (
         comment: comment?.trim() ? comment.trim() : undefined,
         decision,
       })
+
+      if (response.session.id !== sessionId) {
+        errorMessage.value = "Generator review response does not match current session"
+        return
+      }
 
       if (currentReport.value) {
         applySessionDetail(

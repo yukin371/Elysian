@@ -1634,6 +1634,48 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
   })
 
+  test("does not apply mismatched apply response session", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            session: createSession({
+              id: "preview-session-other",
+              status: "applied",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.applyPreview()
+
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentSession.value?.status).toBe("ready")
+    expect(workspace.errorMessage.value).toBe(
+      "Generator apply response does not match current session",
+    )
+  })
+
   test("approves pending preview sessions before apply", async () => {
     let submittedComment: string | undefined
 
@@ -1697,6 +1739,48 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(submittedComment).toBe("ready for staging")
     expect(workspace.canApplyPreview.value).toBe(true)
     expect(workspace.canApprovePreview.value).toBe(false)
+  })
+
+  test("does not apply mismatched review response session", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            session: createSession({
+              id: "preview-session-other",
+              status: "ready",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.reviewPreview("approve")
+
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentSession.value?.status).toBe("pending_review")
+    expect(workspace.errorMessage.value).toBe(
+      "Generator review response does not match current session",
+    )
   })
 
   test("reports recoverable auth errors when review fails", async () => {
