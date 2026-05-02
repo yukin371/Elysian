@@ -453,6 +453,7 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
       customerFormMode.value = "detail"
       await reloadCustomers()
     } catch (error) {
+      options.onRecoverableAuthError(error)
       customerErrorMessage.value =
         error instanceof Error
           ? error.message
@@ -515,6 +516,7 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
       customerFormMode.value = "detail"
       await reloadCustomers()
     } catch (error) {
+      options.onRecoverableAuthError(error)
       customerErrorMessage.value =
         error instanceof Error
           ? error.message
@@ -562,6 +564,7 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
       deleteConfirmId.value = null
       await reloadCustomers()
     } catch (error) {
+      options.onRecoverableAuthError(error)
       customerErrorMessage.value =
         error instanceof Error
           ? error.message

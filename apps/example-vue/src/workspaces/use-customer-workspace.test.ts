@@ -17,7 +17,9 @@ const createCustomerRecord = (
   updatedAt: "2026-05-01T10:00:00.000Z",
 })
 
-const createWorkspace = () =>
+const createWorkspace = (options?: {
+  onRecoverableAuthError?: (error: unknown) => void
+}) =>
   useCustomerWorkspace({
     canCreate: computed(() => true),
     canDelete: computed(() => true),
@@ -28,7 +30,7 @@ const createWorkspace = () =>
     localizeActionLabel: (_actionKey, fallback) => fallback,
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeStatus: (status) => status,
-    onRecoverableAuthError: () => {},
+    onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
     page: {
       formFields: computed(() => []),
       queryFields: computed(() => [
@@ -177,5 +179,137 @@ describe("useCustomerWorkspace", () => {
     expect(workspace.deleteConfirmId.value).toBeNull()
     expect(workspace.customerItems.value).toEqual([beta])
     expect(workspace.selectedCustomerId.value).toBe("cust-beta")
+  })
+
+  test("reports recoverable auth errors when customer create fails", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/customers") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    workspace.openCreatePanel()
+    await workspace.handleFormSubmit({ name: "Alpha", status: "active" })
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.customerErrorMessage.value).toContain("status 401")
+    expect(workspace.customerFormMode.value).toBe("create")
+  })
+
+  test("reports recoverable auth errors when customer edit fails", async () => {
+    const alpha = createCustomerRecord({ id: "cust-alpha", name: "Alpha" })
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.includes("/customers") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [alpha],
+            page: 1,
+            pageSize: 20,
+            total: 1,
+            totalPages: 1,
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (url.endsWith("/customers/cust-alpha") && method === "PUT") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadCustomers()
+    workspace.startEdit(alpha)
+    await workspace.handleFormSubmit({
+      name: "Alpha Updated",
+      status: "active",
+    })
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.customerErrorMessage.value).toContain("status 401")
+    expect(workspace.customerFormMode.value).toBe("edit")
+  })
+
+  test("reports recoverable auth errors when customer delete fails", async () => {
+    const alpha = createCustomerRecord({ id: "cust-alpha", name: "Alpha" })
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.includes("/customers") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [alpha],
+            page: 1,
+            pageSize: 20,
+            total: 1,
+            totalPages: 1,
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (url.endsWith("/customers/cust-alpha") && method === "DELETE") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadCustomers()
+    workspace.requestDelete(alpha)
+    await workspace.confirmDelete()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.customerErrorMessage.value).toContain("status 401")
+    expect(workspace.deleteConfirmId.value).toBe("cust-alpha")
   })
 })
