@@ -47,6 +47,41 @@ describe("generator-preview-workspace", () => {
     expect(filterGeneratorPreviewFiles(previewFiles, "")).toHaveLength(2)
   })
 
+  it("prioritizes blocking and overwrite files in the filtered list", () => {
+    const prioritizedFiles = filterGeneratorPreviewFiles(
+      [
+        {
+          ...previewFiles[0]!,
+          path: "modules/customer/customer.skip.ts",
+          plannedAction: "skip",
+        },
+        {
+          ...previewFiles[1]!,
+          path: "modules/customer/customer.create.ts",
+          plannedAction: "create",
+        },
+        {
+          ...previewFiles[0]!,
+          path: "modules/customer/customer.block.ts",
+          plannedAction: "block",
+        },
+        {
+          ...previewFiles[1]!,
+          path: "modules/customer/customer.overwrite.ts",
+          plannedAction: "overwrite",
+        },
+      ],
+      "",
+    )
+
+    expect(prioritizedFiles.map((file) => file.path)).toEqual([
+      "modules/customer/customer.block.ts",
+      "modules/customer/customer.overwrite.ts",
+      "modules/customer/customer.create.ts",
+      "modules/customer/customer.skip.ts",
+    ])
+  })
+
   it("resolves a stable selected file path", () => {
     expect(
       resolveGeneratorPreviewSelection(

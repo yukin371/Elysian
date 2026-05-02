@@ -39,6 +39,16 @@ const normalizeQuery = (value: string) => value.trim().toLowerCase()
 
 const splitLines = (value: string) => value.split(/\r?\n/)
 
+const generatorPreviewActionPriority: Record<
+  GeneratorPreviewFileCard["plannedAction"],
+  number
+> = {
+  block: 0,
+  overwrite: 1,
+  create: 2,
+  skip: 3,
+}
+
 const buildLcsMatrix = (left: string[], right: string[]) => {
   const matrix = Array.from({ length: left.length + 1 }, () =>
     Array.from<number>({ length: right.length + 1 }).fill(0),
@@ -189,23 +199,37 @@ export const filterGeneratorPreviewFiles = (
 ) => {
   const normalizedQuery = normalizeQuery(query)
 
-  if (!normalizedQuery) {
-    return files
-  }
+  return files
+    .map((file, index) => ({ file, index }))
+    .filter(({ file }) => {
+      if (!normalizedQuery) {
+        return true
+      }
 
-  return files.filter((file) => {
-    const haystacks = [
-      file.absolutePath,
-      file.path,
-      file.reason,
-      file.plannedAction,
-      file.plannedReason,
-      file.mergeStrategy,
-      file.contents,
-    ].map((value) => value.toLowerCase())
+      const haystacks = [
+        file.absolutePath,
+        file.path,
+        file.reason,
+        file.plannedAction,
+        file.plannedReason,
+        file.mergeStrategy,
+        file.contents,
+      ].map((value) => value.toLowerCase())
 
-    return haystacks.some((value) => value.includes(normalizedQuery))
-  })
+      return haystacks.some((value) => value.includes(normalizedQuery))
+    })
+    .sort((left, right) => {
+      const priorityDelta =
+        generatorPreviewActionPriority[left.file.plannedAction] -
+        generatorPreviewActionPriority[right.file.plannedAction]
+
+      if (priorityDelta !== 0) {
+        return priorityDelta
+      }
+
+      return left.index - right.index
+    })
+    .map(({ file }) => file)
 }
 
 export const resolveGeneratorPreviewSelection = (
