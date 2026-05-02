@@ -429,6 +429,11 @@ export const useGeneratorPreviewWorkspace = (
   }
 
   const applySessionDetail = (session: GeneratorPreviewSessionDetail) => {
+    if (!isSessionDetailConsistent(session)) {
+      errorMessage.value = "Generator session detail does not match its report"
+      return false
+    }
+
     cacheSessionDetail(session)
     upsertRecentSession(session)
     selectedSchemaName.value = session.schemaName
@@ -441,6 +446,7 @@ export const useGeneratorPreviewWorkspace = (
     currentSqlProposalHandoff.value = session.sqlProposalHandoff
     selectedRecentSessionId.value = session.id
     persistCurrentSelection()
+    return true
   }
 
   const loadRecentSessions = async () => {
@@ -711,11 +717,6 @@ export const useGeneratorPreviewWorkspace = (
       const session =
         sessionDetailCache.get(sessionId) ??
         (await fetchGeneratorPreviewSession(sessionId))
-
-      if (!isSessionDetailConsistent(session)) {
-        errorMessage.value = "Generator session detail does not match its report"
-        return
-      }
 
       applySessionDetail(session)
     } catch (error) {

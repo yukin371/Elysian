@@ -1299,7 +1299,9 @@ describe("useGeneratorPreviewWorkspace", () => {
         return new Response(
           JSON.stringify({
             diff: createDiffSummary(),
-            report: createReport(),
+            report: createReport({
+              conflictStrategy: submittedConflictStrategy ?? "fail",
+            }),
             session: createSession({
               conflictStrategy: submittedConflictStrategy ?? "fail",
             }),
@@ -1325,6 +1327,56 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(submittedConflictStrategy).toBe("overwrite-generated-only")
     expect(workspace.currentSession.value?.conflictStrategy).toBe(
       "overwrite-generated-only",
+    )
+  })
+
+  test("does not apply inconsistent preview response", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(JSON.stringify({ items: [] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport({ frontendTarget: "react" }),
+            session: createSession({
+              frontendTarget: "vue",
+              id: "preview-session-inconsistent-response",
+              status: "pending_review",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+    expect(workspace.errorMessage.value).toBe(
+      "Generator session detail does not match its report",
     )
   })
 
