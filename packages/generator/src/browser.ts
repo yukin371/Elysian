@@ -17,6 +17,7 @@ export {
 } from "./core"
 export {
   getRegisteredSchema,
+  listRegisteredSchemas,
   listRegisteredSchemaNames,
   type RegisteredSchemaName,
 } from "./schemas"

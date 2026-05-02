@@ -3,7 +3,7 @@ import { type Ref, computed, ref, watch } from "vue"
 import {
   type FrontendTarget,
   getRegisteredSchema,
-  listRegisteredSchemaNames,
+  listRegisteredSchemas,
 } from "../lib/generator-preview-browser"
 import {
   type GeneratorPreviewDiffSummary,
@@ -23,7 +23,8 @@ export const useGeneratorPreviewWorkspace = (
   t: (key: string, params?: Record<string, unknown>) => string,
   enabled: Readonly<Ref<boolean>>,
 ) => {
-  const availableSchemaNames = listRegisteredSchemaNames()
+  const availableSchemas = listRegisteredSchemas()
+  const availableSchemaNames = availableSchemas.map((schema) => schema.name)
   const selectedSchemaName = ref(availableSchemaNames[0] ?? "")
   const selectedFrontendTarget = ref<FrontendTarget>("vue")
   const previewQuery = ref("")
@@ -37,22 +38,10 @@ export const useGeneratorPreviewWorkspace = (
   let latestPreviewRequestId = 0
 
   const schemaOptions = computed(() =>
-    availableSchemaNames
-      .map((name) => {
-        const schema = getRegisteredSchema(name)
-
-        if (!schema) {
-          return null
-        }
-
-        return {
-          label: `${schema.label} (${schema.name})`,
-          value: schema.name,
-        }
-      })
-      .filter(
-        (item): item is { label: string; value: string } => item !== null,
-      ),
+    availableSchemas.map((schema) => ({
+      label: `${schema.label} (${schema.name})`,
+      value: schema.name,
+    })),
   )
 
   const selectedSchema = computed(() =>

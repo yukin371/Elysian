@@ -22,6 +22,7 @@ export {
 } from "./templates"
 export {
   getRegisteredSchema,
+  listRegisteredSchemas,
   listRegisteredSchemaNames,
   type RegisteredSchemaName,
 } from "./schemas"

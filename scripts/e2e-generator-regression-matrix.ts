@@ -13,7 +13,7 @@ import {
   type FrontendTarget,
   type WriteConflictStrategy,
   getRegisteredSchema,
-  listRegisteredSchemaNames,
+  listRegisteredSchemas,
   writeModuleFiles,
 } from "@elysian/generator"
 import {
@@ -308,7 +308,7 @@ const run = async (): Promise<{
   failedCount: number
   results: MatrixCaseResult[]
 }> => {
-  const schemaNames = listRegisteredSchemaNames()
+  const schemaNames = listRegisteredSchemas().map((schema) => schema.name)
   const frontendTargets: FrontendTarget[] = ["vue", "react"]
   const results: MatrixCaseResult[] = []
 
