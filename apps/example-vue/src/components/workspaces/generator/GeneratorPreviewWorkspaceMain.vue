@@ -277,6 +277,12 @@ const handleReviewCommentInput = (value: string | number) => {
 }
 
 const handleReviewPreview = (decision: "approve" | "reject") => {
+  const canReview = decision === "approve" ? props.canApprove : props.canReject
+
+  if (!canReview || props.reviewLoading || props.applyLoading) {
+    return
+  }
+
   if (decision === "reject" && !isRejectConfirming.value) {
     isRejectConfirming.value = true
     return
