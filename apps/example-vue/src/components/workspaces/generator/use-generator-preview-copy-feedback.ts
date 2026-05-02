@@ -8,6 +8,7 @@ import {
 
 export type GeneratorPreviewCopyFeedbackKey =
   | "absolutePath"
+  | "actor"
   | "appliedAt"
   | "commands"
   | "createdAt"
@@ -34,11 +35,13 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "schemaIndexFile"
   | "sessionId"
   | "sourceValue"
+  | "sourceType"
   | "status"
   | "templateReason"
   | "fileAction"
   | "sqlDraft"
   | "plannedReason"
+  | "conflictStrategy"
   | "sqlPreview"
 
 type GeneratorPreviewCopyFeedbackStatus = "idle" | "copied" | "failed"
@@ -52,6 +55,7 @@ const createInitialCopyFeedback = (): Record<
   GeneratorPreviewCopyFeedbackStatus
 > => ({
   absolutePath: "idle",
+  actor: "idle",
   appliedAt: "idle",
   commands: "idle",
   createdAt: "idle",
@@ -78,11 +82,13 @@ const createInitialCopyFeedback = (): Record<
   schemaIndexFile: "idle",
   sessionId: "idle",
   sourceValue: "idle",
+  sourceType: "idle",
   status: "idle",
   templateReason: "idle",
   fileAction: "idle",
   sqlDraft: "idle",
   plannedReason: "idle",
+  conflictStrategy: "idle",
   sqlPreview: "idle",
 })
 

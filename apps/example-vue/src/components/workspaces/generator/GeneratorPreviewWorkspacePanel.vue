@@ -248,6 +248,15 @@ const copySourceValue = async () =>
 const copyCreatedAt = async () =>
   copyPanelValue("createdAt", props.session?.createdAt)
 
+const copySessionActor = async () =>
+  copyPanelValue("actor", sessionActorLabel.value)
+
+const copySessionSourceType = async () =>
+  copyPanelValue("sourceType", sessionSourceTypeLabel.value)
+
+const copySessionConflictStrategy = async () =>
+  copyPanelValue("conflictStrategy", sessionConflictStrategyLabel.value)
+
 const copyReviewedAt = async () =>
   copyPanelValue("reviewedAt", props.reviewEvidence?.reviewedAt)
 
@@ -346,13 +355,21 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :report-path-copy-label="resolveSnippetCopyLabel('reportPath')"
         :session-id-copy-label="resolveSnippetCopyLabel('sessionId')"
         :created-at-copy-label="resolveSnippetCopyLabel('createdAt')"
+        :actor-copy-label="resolveSnippetCopyLabel('actor')"
         :output-dir-copy-label="resolveSnippetCopyLabel('outputDir')"
+        :source-type-copy-label="resolveSnippetCopyLabel('sourceType')"
         :source-value-copy-label="resolveSnippetCopyLabel('sourceValue')"
+        :conflict-strategy-copy-label="
+          resolveSnippetCopyLabel('conflictStrategy')
+        "
         @copy-report-path="copySessionReportPath"
         @copy-session-id="copySessionId"
         @copy-created-at="copyCreatedAt"
+        @copy-actor="copySessionActor"
         @copy-output-dir="copyOutputDir"
+        @copy-source-type="copySessionSourceType"
         @copy-source-value="copySourceValue"
+        @copy-conflict-strategy="copySessionConflictStrategy"
       />
 
       <section v-if="diffSummary" class="panel-section">

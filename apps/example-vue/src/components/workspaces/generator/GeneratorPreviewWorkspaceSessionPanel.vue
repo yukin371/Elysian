@@ -10,8 +10,11 @@ interface GeneratorPreviewWorkspaceSessionPanelProps {
   reportPathCopyLabel: string
   sessionIdCopyLabel: string
   createdAtCopyLabel: string
+  actorCopyLabel: string
   outputDirCopyLabel: string
+  sourceTypeCopyLabel: string
   sourceValueCopyLabel: string
+  conflictStrategyCopyLabel: string
 }
 
 defineProps<GeneratorPreviewWorkspaceSessionPanelProps>()
@@ -20,8 +23,11 @@ const emit = defineEmits<{
   (event: "copy-report-path"): void
   (event: "copy-session-id"): void
   (event: "copy-created-at"): void
+  (event: "copy-actor"): void
   (event: "copy-output-dir"): void
+  (event: "copy-source-type"): void
   (event: "copy-source-value"): void
+  (event: "copy-conflict-strategy"): void
 }>()
 </script>
 
@@ -68,7 +74,17 @@ const emit = defineEmits<{
         <strong>{{ session.createdAt }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="sessionActorLabel.trim().length === 0 || sessionActorLabel === '-'"
+            @click="emit('copy-actor')"
+          >
+            {{ actorCopyLabel }}
+          </button>
+        </div>
         <strong>{{ sessionActorLabel }}</strong>
       </div>
       <div>
@@ -90,7 +106,20 @@ const emit = defineEmits<{
         <strong>{{ session.outputDir }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.sourceType") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.sourceType") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="
+              sessionSourceTypeLabel.trim().length === 0 ||
+              sessionSourceTypeLabel === '-'
+            "
+            @click="emit('copy-source-type')"
+          >
+            {{ sourceTypeCopyLabel }}
+          </button>
+        </div>
         <strong>{{ sessionSourceTypeLabel }}</strong>
       </div>
       <div>
@@ -108,7 +137,20 @@ const emit = defineEmits<{
         <strong>{{ session.sourceValue }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.conflictStrategy") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.conflictStrategy") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="
+              sessionConflictStrategyLabel.trim().length === 0 ||
+              sessionConflictStrategyLabel === '-'
+            "
+            @click="emit('copy-conflict-strategy')"
+          >
+            {{ conflictStrategyCopyLabel }}
+          </button>
+        </div>
         <strong>{{ sessionConflictStrategyLabel }}</strong>
       </div>
     </div>
