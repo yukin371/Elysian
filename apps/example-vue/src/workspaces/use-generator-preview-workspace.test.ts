@@ -394,6 +394,8 @@ describe("useGeneratorPreviewWorkspace", () => {
   })
 
   test("approves pending preview sessions before apply", async () => {
+    let submittedComment: string | undefined
+
     globalThis.fetch = (async (input, init) => {
       const url = String(input)
       const method = init?.method ?? "GET"
@@ -402,6 +404,8 @@ describe("useGeneratorPreviewWorkspace", () => {
         url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
         method === "POST"
       ) {
+        submittedComment = JSON.parse(String(init?.body ?? "{}")).comment
+
         return new Response(
           JSON.stringify({
             diff: createDiffSummary(),
@@ -443,12 +447,13 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.canApprovePreview.value).toBe(true)
     expect(workspace.canRejectPreview.value).toBe(true)
 
-    await workspace.reviewPreview("approve")
+    await workspace.reviewPreview("approve", "ready for staging")
 
     expect(workspace.currentSession.value?.status).toBe("ready")
     expect(workspace.currentSession.value?.reviewEvidence?.decision).toBe(
       "approve",
     )
+    expect(submittedComment).toBe("ready for staging")
     expect(workspace.canApplyPreview.value).toBe(true)
     expect(workspace.canApprovePreview.value).toBe(false)
   })

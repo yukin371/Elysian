@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { ref, watch } from "vue"
+
 import { Input as TInput } from "tdesign-vue-next/es/input"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
+import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 
 import type {
   GeneratorPreviewApplyEvidence,
@@ -43,9 +46,14 @@ const emit = defineEmits<{
   (e: "select-file", value: string): void
   (e: "reset-filters"): void
   (e: "refresh-preview"): void
-  (e: "review-preview", value: "approve" | "reject"): void
+  (
+    e: "review-preview",
+    value: { decision: "approve" | "reject"; comment?: string },
+  ): void
   (e: "apply-preview"): void
 }>()
+
+const reviewComment = ref("")
 
 const frontendOptions = [
   { label: "Vue", value: "vue" },
@@ -87,6 +95,34 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
 
   return props.t("app.generatorPreview.status.pendingReview")
 }
+
+const handleReviewCommentInput = (value: string | number) => {
+  reviewComment.value = String(value)
+}
+
+const handleReviewPreview = (decision: "approve" | "reject") => {
+  emit("review-preview", {
+    comment: reviewComment.value,
+    decision,
+  })
+}
+
+watch(
+  () => [
+    props.sessionStatus,
+    props.selectedSchemaName,
+    props.selectedFrontendTarget,
+  ],
+  ([status]) => {
+    if (status === "pending_review") {
+      reviewComment.value = ""
+      return
+    }
+
+    reviewComment.value = props.reviewEvidence?.comment ?? ""
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -157,7 +193,7 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
             type="button"
             class="enterprise-button enterprise-button-ghost"
             :disabled="!canReject"
-            @click="emit('review-preview', 'reject')"
+            @click="handleReviewPreview('reject')"
           >
             {{ t("app.generatorPreview.action.reject") }}
           </button>
@@ -165,7 +201,7 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
             type="button"
             class="enterprise-button enterprise-button-ghost"
             :disabled="!canApprove"
-            @click="emit('review-preview', 'approve')"
+            @click="handleReviewPreview('approve')"
           >
             {{ t("app.generatorPreview.action.approve") }}
           </button>
@@ -215,6 +251,20 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
       >
         {{ t("app.generatorPreview.message.blockingConflicts") }}
       </div>
+
+      <label
+        v-if="canApprove || canReject"
+        class="enterprise-field generator-review-comment"
+      >
+        <span>{{ t("app.generatorPreview.reviewCommentLabel") }}</span>
+        <TTextarea
+          :model-value="reviewComment"
+          :maxlength="240"
+          :autosize="{ minRows: 2, maxRows: 4 }"
+          :placeholder="t('app.generatorPreview.reviewCommentPlaceholder')"
+          @update:model-value="handleReviewCommentInput"
+        />
+      </label>
 
       <div
         v-if="diffSummary"
@@ -348,6 +398,11 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+}
+
+.generator-review-comment {
+  display: grid;
+  gap: 0.5rem;
 }
 
 .generator-file-list {

@@ -207,7 +207,10 @@ export const useGeneratorPreviewWorkspace = (
     }
   }
 
-  const reviewPreview = async (decision: "approve" | "reject") => {
+  const reviewPreview = async (
+    decision: "approve" | "reject",
+    comment?: string,
+  ) => {
     const sessionId = currentSession.value?.id
     const canReview =
       decision === "approve"
@@ -223,6 +226,7 @@ export const useGeneratorPreviewWorkspace = (
 
     try {
       const response = await reviewGeneratorPreviewSession(sessionId, {
+        comment: comment?.trim() ? comment.trim() : undefined,
         decision,
       })
       currentSession.value = response.session

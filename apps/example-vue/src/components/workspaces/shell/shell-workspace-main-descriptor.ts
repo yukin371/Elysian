@@ -200,7 +200,10 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "select-generator-file", filePath: string): void
   (event: "reset-generator-filters"): void
   (event: "refresh-generator-preview"): void
-  (event: "review-generator-preview", decision: "approve" | "reject"): void
+  (
+    event: "review-generator-preview",
+    input: { decision: "approve" | "reject"; comment?: string },
+  ): void
   (event: "apply-generator-preview"): void
   (event: "dictionary-search", payload: unknown): void
   (event: "dictionary-reset"): void
@@ -512,8 +515,11 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
         emit("select-generator-file", filePath as string),
       "reset-filters": () => emit("reset-generator-filters"),
       "refresh-preview": () => emit("refresh-generator-preview"),
-      "review-preview": (decision: unknown) =>
-        emit("review-generator-preview", decision as "approve" | "reject"),
+      "review-preview": (input: unknown) =>
+        emit("review-generator-preview", input as {
+          decision: "approve" | "reject"
+          comment?: string
+        }),
       "apply-preview": () => emit("apply-generator-preview"),
     },
   }),

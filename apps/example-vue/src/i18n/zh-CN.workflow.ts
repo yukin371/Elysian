@@ -160,6 +160,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.reject": "拒绝",
   "app.generatorPreview.action.apply": "应用到 staging",
   "app.generatorPreview.action.applying": "应用中",
+  "app.generatorPreview.reviewCommentLabel": "审核备注",
+  "app.generatorPreview.reviewCommentPlaceholder":
+    "可选：补充本次通过或拒绝的原因",
   "app.generatorPreview.status.pendingReview": "待审核",
   "app.generatorPreview.status.ready": "待应用",
   "app.generatorPreview.status.rejected": "已拒绝",

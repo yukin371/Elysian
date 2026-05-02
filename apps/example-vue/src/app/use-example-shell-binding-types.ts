@@ -347,7 +347,10 @@ export interface UseExampleShellBindingsOptions {
   openFileUploadPanel: () => void
   resetGeneratorPreviewFilters: () => void
   refreshGeneratorPreview: () => void
-  reviewGeneratorPreview: (decision: "approve" | "reject") => void
+  reviewGeneratorPreview: (input: {
+    decision: "approve" | "reject"
+    comment?: string
+  }) => void
   applyGeneratorPreview: () => void
   handleDictionarySearch: (payload: unknown) => void
   handleDictionaryReset: () => void
