@@ -26,6 +26,78 @@ import {
   toGeneratorPreviewFileCard,
 } from "../lib/generator-preview-workspace"
 
+const GENERATOR_PREVIEW_SELECTION_STORAGE_KEY =
+  "elysian.example-vue.generator-preview.selection"
+
+type GeneratorPreviewStoredSelection = {
+  conflictStrategy: GeneratorPreviewConflictStrategy
+  frontendTarget: FrontendTarget
+  schemaName: string
+}
+
+const isGeneratorPreviewConflictStrategy = (
+  value: unknown,
+): value is GeneratorPreviewConflictStrategy =>
+  value === "skip" ||
+  value === "overwrite" ||
+  value === "overwrite-generated-only" ||
+  value === "fail"
+
+const isFrontendTarget = (value: unknown): value is FrontendTarget =>
+  value === "vue" || value === "react"
+
+const loadStoredGeneratorPreviewSelection = (
+  availableSchemaNames: readonly string[],
+): GeneratorPreviewStoredSelection | null => {
+  const storage = globalThis.localStorage
+
+  if (!storage) {
+    return null
+  }
+
+  try {
+    const raw = storage.getItem(GENERATOR_PREVIEW_SELECTION_STORAGE_KEY)
+
+    if (!raw) {
+      return null
+    }
+
+    const parsed = JSON.parse(raw) as Partial<GeneratorPreviewStoredSelection>
+
+    if (
+      typeof parsed.schemaName !== "string" ||
+      !availableSchemaNames.includes(parsed.schemaName) ||
+      !isFrontendTarget(parsed.frontendTarget) ||
+      !isGeneratorPreviewConflictStrategy(parsed.conflictStrategy)
+    ) {
+      return null
+    }
+
+    return {
+      conflictStrategy: parsed.conflictStrategy,
+      frontendTarget: parsed.frontendTarget,
+      schemaName: parsed.schemaName,
+    }
+  } catch {
+    return null
+  }
+}
+
+const persistGeneratorPreviewSelection = (
+  selection: GeneratorPreviewStoredSelection,
+) => {
+  const storage = globalThis.localStorage
+
+  if (!storage) {
+    return
+  }
+
+  storage.setItem(
+    GENERATOR_PREVIEW_SELECTION_STORAGE_KEY,
+    JSON.stringify(selection),
+  )
+}
+
 export const useGeneratorPreviewWorkspace = (
   t: (key: string, params?: Record<string, unknown>) => string,
   enabled: Readonly<Ref<boolean>>,
@@ -33,8 +105,14 @@ export const useGeneratorPreviewWorkspace = (
 ) => {
   const availableSchemas = listRegisteredSchemas()
   const availableSchemaNames = availableSchemas.map((schema) => schema.name)
-  const selectedSchemaName = ref(availableSchemaNames[0] ?? "")
-  const selectedFrontendTarget = ref<FrontendTarget>("vue")
+  const storedSelection =
+    loadStoredGeneratorPreviewSelection(availableSchemaNames)
+  const selectedSchemaName = ref(
+    storedSelection?.schemaName ?? availableSchemaNames[0] ?? "",
+  )
+  const selectedFrontendTarget = ref<FrontendTarget>(
+    storedSelection?.frontendTarget ?? "vue",
+  )
   const previewQuery = ref("")
   const selectedFilePath = ref<string | null>(null)
   const loading = ref(false)
@@ -49,8 +127,9 @@ export const useGeneratorPreviewWorkspace = (
     ref<GeneratorPreviewSqlProposalHandoff | null>(null)
   const recentSessions = ref<GeneratorPreviewSessionRecord[]>([])
   const selectedRecentSessionId = ref("")
-  const selectedConflictStrategy =
-    ref<GeneratorPreviewConflictStrategy>("fail")
+  const selectedConflictStrategy = ref<GeneratorPreviewConflictStrategy>(
+    storedSelection?.conflictStrategy ?? "fail",
+  )
   let latestPreviewRequestId = 0
 
   const schemaOptions = computed(() =>
@@ -404,6 +483,26 @@ export const useGeneratorPreviewWorkspace = (
   watch(selectedSchemaName, () => {
     resetFilters()
   })
+
+  watch(
+    [
+      selectedSchemaName,
+      selectedFrontendTarget,
+      selectedConflictStrategy,
+    ],
+    ([schemaName, frontendTarget, conflictStrategy]) => {
+      if (!schemaName) {
+        return
+      }
+
+      persistGeneratorPreviewSelection({
+        conflictStrategy,
+        frontendTarget,
+        schemaName,
+      })
+    },
+    { immediate: true },
+  )
 
   watch(
     [

@@ -12,6 +12,28 @@ import type {
 import { useGeneratorPreviewWorkspace } from "./use-generator-preview-workspace"
 
 const originalFetch = globalThis.fetch
+const originalLocalStorage = globalThis.localStorage
+
+const createLocalStorage = () => {
+  const entries = new Map<string, string>()
+
+  return {
+    clear: () => {
+      entries.clear()
+    },
+    getItem: (key: string) => entries.get(key) ?? null,
+    key: (index: number) => Array.from(entries.keys())[index] ?? null,
+    removeItem: (key: string) => {
+      entries.delete(key)
+    },
+    setItem: (key: string, value: string) => {
+      entries.set(key, value)
+    },
+    get length() {
+      return entries.size
+    },
+  } satisfies Storage
+}
 
 const createDiffSummary = (): GeneratorPreviewDiffSummary => ({
   actionCounts: {
@@ -168,11 +190,21 @@ const waitForAsyncWork = () =>
 describe("useGeneratorPreviewWorkspace", () => {
   beforeEach(() => {
     setAccessToken("test-token")
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: createLocalStorage(),
+      writable: true,
+    })
   })
 
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: originalLocalStorage,
+      writable: true,
+    })
   })
 
   test("reports recoverable auth errors when preview refresh fails", async () => {
@@ -346,6 +378,113 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(previewRequestCount).toBe(0)
     expect(workspace.currentSession.value?.id).toBe("preview-session-3")
     expect(workspace.selectedRecentSessionId.value).toBe("preview-session-3")
+  })
+
+  test("restores persisted selection before loading matching session", async () => {
+    let previewRequestCount = 0
+
+    globalThis.localStorage.setItem(
+      "elysian.example-vue.generator-preview.selection",
+      JSON.stringify({
+        conflictStrategy: "overwrite-generated-only",
+        frontendTarget: "react",
+        schemaName: "customer",
+      }),
+    )
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:30:00.000Z",
+                frontendTarget: "react",
+                id: "preview-session-4",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-4") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              createdAt: "2026-05-02T14:30:00.000Z",
+              frontendTarget: "react",
+              id: "preview-session-4",
+              report: {
+                ...createReport(),
+                frontendTarget: "react",
+              },
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.selectedSchemaName.value).toBe("customer")
+    expect(workspace.selectedFrontendTarget.value).toBe("react")
+    expect(workspace.selectedConflictStrategy.value).toBe(
+      "overwrite-generated-only",
+    )
+    expect(workspace.currentSession.value?.id).toBe("preview-session-4")
+  })
+
+  test("persists latest generator preview selection locally", async () => {
+    const { workspace } = createWorkspace()
+
+    workspace.selectedFrontendTarget.value = "react"
+    workspace.selectedConflictStrategy.value = "overwrite"
+
+    await waitForAsyncWork()
+
+    expect(
+      JSON.parse(
+        globalThis.localStorage.getItem(
+          "elysian.example-vue.generator-preview.selection",
+        ) ?? "{}",
+      ),
+    ).toEqual({
+      conflictStrategy: "overwrite",
+      frontendTarget: "react",
+      schemaName: "customer",
+    })
   })
 
   test("sends selected conflict strategy when refreshing preview", async () => {
