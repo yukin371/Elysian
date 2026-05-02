@@ -344,6 +344,24 @@ const copyDiffUnchangedLines = async () =>
     String(selectedDiffStats.value.unchangedLineCount),
   )
 
+const copyProposalStatus = async () =>
+  copyPanelValue("proposalStatus", sqlProposalStatusLabel.value)
+
+const copyCanonicalOwner = async () =>
+  copyPanelValue(
+    "canonicalOwner",
+    props.sqlProposalHandoff?.canonicalMigrationOwner,
+  )
+
+const copyReviewMode = async () =>
+  copyPanelValue("reviewMode", props.sqlProposalHandoff?.reviewMode)
+
+const copyUnsupportedReason = async () =>
+  copyPanelValue(
+    "unsupportedReason",
+    props.sqlProposalHandoff?.unsupportedReason,
+  )
+
 const copyReviewedAt = async () =>
   copyPanelValue("reviewedAt", props.reviewEvidence?.reviewedAt)
 
@@ -533,9 +551,21 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :sql-proposal="sqlProposal"
         :sql-proposal-handoff="sqlProposalHandoff"
         :proposal-status-label="sqlProposalStatusLabel"
+        :proposal-status-copy-label="
+          resolveSnippetCopyLabel('proposalStatus')
+        "
+        :canonical-owner-copy-label="resolveSnippetCopyLabel('canonicalOwner')"
+        :review-mode-copy-label="resolveSnippetCopyLabel('reviewMode')"
+        :unsupported-reason-copy-label="
+          resolveSnippetCopyLabel('unsupportedReason')
+        "
         :sql-draft-copy-label="resolveSnippetCopyLabel('sqlDraft')"
         :drizzle-import-copy-label="resolveSnippetCopyLabel('drizzleImport')"
         :drizzle-schema-copy-label="resolveSnippetCopyLabel('drizzleSchema')"
+        @copy-proposal-status="copyProposalStatus"
+        @copy-canonical-owner="copyCanonicalOwner"
+        @copy-review-mode="copyReviewMode"
+        @copy-unsupported-reason="copyUnsupportedReason"
         @copy-sql-draft="copySqlDraft"
         @copy-drizzle-import="copyDrizzleImportSnippet"
         @copy-drizzle-schema="copyDrizzleSchemaSnippet"

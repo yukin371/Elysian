@@ -10,6 +10,10 @@ interface GeneratorPreviewWorkspaceSqlProposalPanelProps {
   sqlProposal: GeneratorPreviewSqlProposal | null
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   proposalStatusLabel: string
+  proposalStatusCopyLabel: string
+  canonicalOwnerCopyLabel: string
+  reviewModeCopyLabel: string
+  unsupportedReasonCopyLabel: string
   sqlDraftCopyLabel: string
   drizzleImportCopyLabel: string
   drizzleSchemaCopyLabel: string
@@ -18,6 +22,10 @@ interface GeneratorPreviewWorkspaceSqlProposalPanelProps {
 defineProps<GeneratorPreviewWorkspaceSqlProposalPanelProps>()
 
 const emit = defineEmits<{
+  (event: "copy-proposal-status"): void
+  (event: "copy-canonical-owner"): void
+  (event: "copy-review-mode"): void
+  (event: "copy-unsupported-reason"): void
   (event: "copy-sql-draft"): void
   (event: "copy-drizzle-import"): void
   (event: "copy-drizzle-schema"): void
@@ -29,15 +37,47 @@ const emit = defineEmits<{
     <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalTitle") }}</p>
     <div class="enterprise-metadata">
       <div>
-        <span>{{ t("app.generatorPreview.meta.proposalStatus") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.proposalStatus") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="proposalStatusLabel.trim().length === 0 || proposalStatusLabel === '-'"
+            @click="emit('copy-proposal-status')"
+          >
+            {{ proposalStatusCopyLabel }}
+          </button>
+        </div>
         <strong>{{ proposalStatusLabel }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.canonicalOwner") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.canonicalOwner") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="
+              sqlProposalHandoff.canonicalMigrationOwner.trim().length === 0
+            "
+            @click="emit('copy-canonical-owner')"
+          >
+            {{ canonicalOwnerCopyLabel }}
+          </button>
+        </div>
         <strong>{{ sqlProposalHandoff.canonicalMigrationOwner }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.reviewMode") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.reviewMode") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="sqlProposalHandoff.reviewMode.trim().length === 0"
+            @click="emit('copy-review-mode')"
+          >
+            {{ reviewModeCopyLabel }}
+          </button>
+        </div>
         <strong>{{ sqlProposalHandoff.reviewMode }}</strong>
       </div>
     </div>
@@ -45,6 +85,13 @@ const emit = defineEmits<{
       v-if="sqlProposalHandoff.unsupportedReason"
       class="enterprise-message enterprise-message-warning"
     >
+      <button
+        type="button"
+        class="enterprise-button enterprise-button-ghost"
+        @click="emit('copy-unsupported-reason')"
+      >
+        {{ unsupportedReasonCopyLabel }}
+      </button>
       {{ sqlProposalHandoff.unsupportedReason }}
     </div>
     <div v-else-if="sqlProposal" class="enterprise-panel-stack">
@@ -113,6 +160,13 @@ const emit = defineEmits<{
 }
 
 .generator-code-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.generator-metadata-label {
   align-items: center;
   display: flex;
   gap: 0.75rem;
