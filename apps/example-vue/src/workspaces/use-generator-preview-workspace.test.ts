@@ -105,6 +105,11 @@ const createWorkspace = (options?: {
   return { enabled, workspace }
 }
 
+const waitForAsyncWork = () =>
+  new Promise((resolve) => {
+    globalThis.setTimeout(resolve, 0)
+  })
+
 describe("useGeneratorPreviewWorkspace", () => {
   beforeEach(() => {
     setAccessToken("test-token")
@@ -149,14 +154,147 @@ describe("useGeneratorPreviewWorkspace", () => {
       },
     })
 
-    await new Promise((resolve) => {
-      globalThis.setTimeout(resolve, 0)
-    })
+    await waitForAsyncWork()
 
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.errorMessage.value).toContain("status 401")
     expect(workspace.currentSession.value).toBeNull()
     expect(workspace.currentDiffSummary.value).toBeNull()
+  })
+
+  test("preserves current preview when same-context refresh fails", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        if (previewRequestCount === 1) {
+          return new Response(
+            JSON.stringify({
+              diff: createDiffSummary(),
+              report: createReport(),
+              session: createSession(),
+            }),
+            {
+              headers: { "content-type": "application/json" },
+              status: 200,
+            },
+          )
+        }
+
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await waitForAsyncWork()
+
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(1)
+    expect(workspace.sqlPreview.value?.tableName).toBe("customers")
+    expect(workspace.selectedFilePath.value).toBe("generated/customer.ts")
+
+    await workspace.refreshPreview()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(1)
+    expect(workspace.sqlPreview.value?.tableName).toBe("customers")
+    expect(workspace.selectedFilePath.value).toBe("generated/customer.ts")
+  })
+
+  test("clears current preview when context changes before refresh fails", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        if (previewRequestCount === 1) {
+          return new Response(
+            JSON.stringify({
+              diff: createDiffSummary(),
+              report: createReport(),
+              session: createSession(),
+            }),
+            {
+              headers: { "content-type": "application/json" },
+              status: 200,
+            },
+          )
+        }
+
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await waitForAsyncWork()
+
+    workspace.selectedFrontendTarget.value = "react"
+    await waitForAsyncWork()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
+    expect(workspace.sqlPreview.value).toBeNull()
+    expect(workspace.selectedFilePath.value).toBeNull()
   })
 
   test("reports recoverable auth errors when apply fails", async () => {

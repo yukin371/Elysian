@@ -108,6 +108,12 @@ export const useGeneratorPreviewWorkspace = (
     currentReport.value = null
   }
 
+  const canPreservePreviewState = () =>
+    currentSession.value?.schemaName === selectedSchemaName.value &&
+    currentSession.value?.frontendTarget === selectedFrontendTarget.value &&
+    currentReport.value?.schemaName === selectedSchemaName.value &&
+    currentReport.value?.frontendTarget === selectedFrontendTarget.value
+
   const refreshPreview = async () => {
     if (!enabled.value || !selectedSchemaName.value) {
       return
@@ -137,7 +143,9 @@ export const useGeneratorPreviewWorkspace = (
         return
       }
 
-      resetPreviewState()
+      if (!canPreservePreviewState()) {
+        resetPreviewState()
+      }
       onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error ? error.message : "Generator preview failed"
