@@ -421,4 +421,71 @@ describe("useDictionaryWorkspace", () => {
       ),
     ).toEqual(["dictionary-item-1", "dictionary-item-2"])
   })
+
+  test("keeps cached dictionary items after opening the create panel", async () => {
+    const first = createDictionaryTypeRecord()
+    const firstItems = [
+      createDictionaryItemRecord(),
+      createDictionaryItemRecord({
+        id: "dictionary-item-2",
+        isDefault: false,
+        label: "Disabled",
+        value: "disabled",
+      }),
+    ]
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith("/system/dictionaries/items")) {
+        return new Response(JSON.stringify({ items: firstItems }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/system/dictionaries/types/dictionary-type-1") &&
+        (init?.method ?? "GET") === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: { message: "detail failed" },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response(JSON.stringify({ items: [first] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+
+    await workspace.reloadDictionaries()
+
+    expect(
+      workspace.selectedDictionaryTypeItems.value.map(
+        (item: DictionaryItemRecord) => item.id,
+      ),
+    ).toEqual(["dictionary-item-1", "dictionary-item-2"])
+
+    workspace.openCreatePanel()
+
+    expect(workspace.selectedDictionaryTypeItems.value).toEqual([])
+
+    await workspace.selectDictionaryType(first)
+
+    expect(workspace.selectedDictionaryTypeDetail.value).toBeNull()
+    expect(
+      workspace.selectedDictionaryTypeItems.value.map(
+        (item: DictionaryItemRecord) => item.id,
+      ),
+    ).toEqual(["dictionary-item-1", "dictionary-item-2"])
+  })
 })

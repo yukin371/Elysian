@@ -365,10 +365,7 @@ export const useDictionaryWorkspace = (
   const cancelPanel = dictionaryWorkspace.cancelPanel
   const handleReset = dictionaryWorkspace.handleReset
   const handleSearch = dictionaryWorkspace.handleSearch
-  const openCreatePanel = () => {
-    dictionaryItems.value = []
-    dictionaryWorkspace.openCreatePanel()
-  }
+  const openCreatePanel = dictionaryWorkspace.openCreatePanel
   const resetQuery = dictionaryWorkspace.resetQuery
   const selectDictionaryType = dictionaryWorkspace.selectRecord
   const startEdit = dictionaryWorkspace.startEdit
