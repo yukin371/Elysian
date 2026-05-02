@@ -82,4 +82,58 @@ describe("useFileWorkspace", () => {
       uploaderUserId: " user-9 ",
     })
   })
+
+  test("preserves cached file context when reloading files fails", async () => {
+    const first = createFileRecord()
+    const recoverableErrors: unknown[] = []
+    let failReload = false
+
+    globalThis.fetch = (async (input) => {
+      const url = String(input)
+
+      if (url.endsWith("/system/files/file-1")) {
+        return new Response(JSON.stringify(first), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.includes("/system/files?originalName=report") && failReload) {
+        return new Response(JSON.stringify({ message: "unavailable" }), {
+          headers: { "content-type": "application/json" },
+          status: 503,
+        })
+      }
+
+      return new Response(JSON.stringify({ items: [first] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadFiles()
+    workspace.openDeletePanel()
+    workspace.updateQuery({
+      originalName: "  report ",
+    })
+    failReload = true
+
+    await workspace.reloadFiles()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.fileErrorMessage.value).toContain("status 503")
+    expect(workspace.filePanelMode.value).toBe("delete")
+    expect(workspace.fileItems.value).toEqual([first])
+    expect(workspace.selectedFileId.value).toBe("file-1")
+    expect(workspace.selectedFile.value?.id).toBe("file-1")
+    expect(workspace.fileQuery.value).toEqual({
+      originalName: "  report ",
+    })
+  })
 })
