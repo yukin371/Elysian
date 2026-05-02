@@ -389,10 +389,7 @@ export const useOperationLogWorkspace = (
         await selectOperationLog(nextItem)
       }
     } catch (error) {
-      const preservedQuery = { ...operationLogQueryValues.value }
       options.onRecoverableAuthError(error)
-      clearWorkspace()
-      operationLogQueryValues.value = preservedQuery
       operationLogErrorMessage.value =
         error instanceof Error
           ? error.message

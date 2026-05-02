@@ -180,4 +180,87 @@ describe("useOperationLogWorkspace", () => {
       result: "failure",
     })
   })
+
+  test("preserves cached operation log context when reloading fails", async () => {
+    const loginFailed = createOperationLogRecord({
+      id: "login-failed",
+      authFailureReason: "invalid_password",
+    })
+    const loginSucceeded = createOperationLogRecord({
+      id: "login-succeeded",
+      authFailureReason: null,
+      result: "success",
+    })
+    const recoverableErrors: unknown[] = []
+    let failReload = false
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/system/operation-logs/login-failed")) {
+        return new Response(JSON.stringify(loginFailed), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.includes("/system/operation-logs") && method === "GET") {
+        if (failReload) {
+          return new Response(JSON.stringify({ message: "unavailable" }), {
+            headers: { "content-type": "application/json" },
+            status: 503,
+          })
+        }
+
+        return new Response(
+          JSON.stringify({
+            items: [loginFailed, loginSucceeded],
+            total: 2,
+            page: 1,
+            pageSize: 20,
+            totalPages: 1,
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadOperationLogs()
+    await workspace.handleSearch({
+      action: " login ",
+      authEventType: "login",
+      authFailureReason: "invalid_password",
+      result: "failure",
+    })
+    failReload = true
+
+    await workspace.reloadOperationLogs()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.operationLogErrorMessage.value).toContain("status 503")
+    expect(workspace.selectedOperationLogId.value).toBe("login-failed")
+    expect(workspace.selectedOperationLog.value?.id).toBe("login-failed")
+    expect(workspace.tableItems.value).toHaveLength(1)
+    expect(workspace.detailValues.value.authFailureReason).toBe(
+      "app.operationLog.authFailureReason.invalid_password",
+    )
+    expect(workspace.operationLogQueryValues.value).toEqual({
+      action: " login ",
+      authEventType: "login",
+      authFailureReason: "invalid_password",
+      result: "failure",
+    })
+  })
 })
