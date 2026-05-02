@@ -64,6 +64,17 @@ const blockedFiles = computed(() =>
   props.files.filter((file) => file.plannedAction === "block"),
 )
 
+const resolveEvidenceActorLabel = (
+  evidence:
+    | GeneratorPreviewReviewEvidence
+    | GeneratorPreviewApplyEvidence
+    | null,
+) =>
+  evidence?.actorDisplayName ??
+  evidence?.actorUsername ??
+  evidence?.actorUserId ??
+  "-"
+
 const handleQueryInput = (value: string | number) => {
   emit("update:query", String(value))
 }
@@ -349,6 +360,58 @@ watch(
         }}
       </div>
 
+      <p
+        v-if="
+          reviewEvidence &&
+          (resolveEvidenceActorLabel(reviewEvidence) !== '-' ||
+            Boolean(reviewEvidence.comment))
+        "
+        class="generator-status-note"
+      >
+        <span v-if="resolveEvidenceActorLabel(reviewEvidence) !== '-'">
+          {{ t("app.generatorPreview.meta.actor") }}:
+          {{ resolveEvidenceActorLabel(reviewEvidence) }}
+        </span>
+        <span
+          v-if="
+            resolveEvidenceActorLabel(reviewEvidence) !== '-' &&
+            reviewEvidence.comment
+          "
+        >
+          ·
+        </span>
+        <span v-if="reviewEvidence.comment">
+          {{ t("app.generatorPreview.meta.reviewComment") }}:
+          {{ reviewEvidence.comment }}
+        </span>
+      </p>
+
+      <p
+        v-if="
+          applyEvidence &&
+          (resolveEvidenceActorLabel(applyEvidence) !== '-' ||
+            Boolean(applyEvidence.requestId))
+        "
+        class="generator-status-note"
+      >
+        <span v-if="resolveEvidenceActorLabel(applyEvidence) !== '-'">
+          {{ t("app.generatorPreview.meta.actor") }}:
+          {{ resolveEvidenceActorLabel(applyEvidence) }}
+        </span>
+        <span
+          v-if="
+            resolveEvidenceActorLabel(applyEvidence) !== '-' &&
+            applyEvidence.requestId
+          "
+        >
+          ·
+        </span>
+        <span v-if="applyEvidence.requestId">
+          {{ t("app.generatorPreview.meta.requestId") }}:
+          {{ applyEvidence.requestId }}
+        </span>
+      </p>
+
       <div
         v-if="loading"
         class="enterprise-message enterprise-message-info"
@@ -433,6 +496,12 @@ watch(
 .generator-review-comment {
   display: grid;
   gap: 0.5rem;
+}
+
+.generator-status-note {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
 }
 
 .generator-blocked-section,
