@@ -24,6 +24,8 @@ type CopyFeedbackKey =
   | "sqlDraft"
   | "drizzleImport"
   | "drizzleSchema"
+  | "absolutePath"
+  | "reportPath"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -41,9 +43,11 @@ interface GeneratorPreviewWorkspacePanelProps {
 
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
 const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>({
+  absolutePath: "idle",
   commands: "idle",
   drizzleImport: "idle",
   drizzleSchema: "idle",
+  reportPath: "idle",
   sqlDraft: "idle",
 })
 const copyFeedbackTimers: Partial<
@@ -237,6 +241,18 @@ const copyDrizzleSchemaSnippet = async () => {
   scheduleCopyFeedbackReset("drizzleSchema")
 }
 
+const copySelectedAbsolutePath = async () => {
+  const copied = await copyGeneratorPreviewText(props.selectedFile?.absolutePath ?? "")
+  copyFeedback.value.absolutePath = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("absolutePath")
+}
+
+const copySessionReportPath = async () => {
+  const copied = await copyGeneratorPreviewText(props.session?.reportPath ?? "")
+  copyFeedback.value.reportPath = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("reportPath")
+}
+
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
   `generator-diff-line generator-diff-line-${line.kind}`
 
@@ -310,9 +326,24 @@ onBeforeUnmount(() => {
     </div>
 
     <section v-if="selectedFile" class="panel-section mt-5">
-      <p class="enterprise-subheading">
-        {{ t("app.generatorPreview.fileDecisionTitle") }}
-      </p>
+      <div class="generator-code-toolbar">
+        <p class="enterprise-subheading">
+          {{ t("app.generatorPreview.fileDecisionTitle") }}
+        </p>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="selectedFile.absolutePath.trim().length === 0"
+          @click="copySelectedAbsolutePath"
+        >
+          {{
+            resolveCopyLabel(
+              "absolutePath",
+              "app.generatorPreview.action.copySnippet",
+            )
+          }}
+        </button>
+      </div>
       <div class="enterprise-metadata">
         <div>
           <span>{{ t("app.generatorPreview.meta.absolutePath") }}</span>
@@ -341,7 +372,22 @@ onBeforeUnmount(() => {
 
     <div v-if="session" class="enterprise-panel-stack">
       <section class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sessionTitle") }}</p>
+        <div class="generator-code-toolbar">
+          <p class="enterprise-subheading">{{ t("app.generatorPreview.sessionTitle") }}</p>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="session.reportPath.trim().length === 0"
+            @click="copySessionReportPath"
+          >
+            {{
+              resolveCopyLabel(
+                "reportPath",
+                "app.generatorPreview.action.copySnippet",
+              )
+            }}
+          </button>
+        </div>
         <div class="enterprise-metadata">
           <div>
             <span>{{ t("app.generatorPreview.meta.sessionId") }}</span>
