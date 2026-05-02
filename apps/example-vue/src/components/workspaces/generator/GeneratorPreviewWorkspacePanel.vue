@@ -18,6 +18,7 @@ import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorksp
 import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
 import GeneratorPreviewWorkspaceReviewPanel from "./GeneratorPreviewWorkspaceReviewPanel.vue"
 import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
+import GeneratorPreviewWorkspaceSqlProposalPanel from "./GeneratorPreviewWorkspaceSqlProposalPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import {
@@ -130,6 +131,16 @@ const reviewDecisionLabel = computed(() =>
 
 const applyActorLabel = computed(() =>
   resolveEvidenceActorLabel(props.applyEvidence),
+)
+
+const sqlProposalStatusLabel = computed(() =>
+  props.sqlProposalHandoff
+    ? props.t(
+        props.sqlProposalHandoff.proposalStatus === "ready"
+          ? "app.generatorPreview.sqlProposal.status.ready"
+          : "app.generatorPreview.sqlProposal.status.unsupported",
+      )
+    : "-",
 )
 
 const selectedChangeLabel = computed(() =>
@@ -516,106 +527,19 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         @copy-request-id="copyRequestId"
       />
 
-      <section v-if="sqlProposalHandoff" class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalTitle") }}</p>
-        <div class="enterprise-metadata">
-          <div>
-            <span>{{ t("app.generatorPreview.meta.proposalStatus") }}</span>
-            <strong>
-              {{
-                t(
-                  sqlProposalHandoff.proposalStatus === "ready"
-                    ? "app.generatorPreview.sqlProposal.status.ready"
-                    : "app.generatorPreview.sqlProposal.status.unsupported",
-                )
-              }}
-            </strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.canonicalOwner") }}</span>
-            <strong>{{ sqlProposalHandoff.canonicalMigrationOwner }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.reviewMode") }}</span>
-            <strong>{{ sqlProposalHandoff.reviewMode }}</strong>
-          </div>
-        </div>
-        <div
-          v-if="sqlProposalHandoff.unsupportedReason"
-          class="enterprise-message enterprise-message-warning"
-        >
-          {{ sqlProposalHandoff.unsupportedReason }}
-        </div>
-        <div v-else-if="sqlProposal" class="enterprise-panel-stack">
-          <div v-if="sqlProposal.risks.length > 0" class="generator-risk-list">
-            <div
-              v-for="risk in sqlProposal.risks"
-              :key="risk.code"
-              class="generator-risk-card"
-            >
-              <strong>{{ risk.code }}</strong>
-              <p>{{ risk.message }}</p>
-            </div>
-          </div>
-          <section class="panel-section">
-            <div class="generator-code-toolbar">
-              <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlDraftTitle") }}</p>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="sqlProposal.sqlDraft.trim().length === 0"
-                @click="copySqlDraft"
-              >
-                {{
-                  resolveCopyLabel(
-                    "sqlDraft",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <pre class="generator-code-block"><code>{{ sqlProposal.sqlDraft }}</code></pre>
-          </section>
-          <section class="panel-section">
-            <div class="generator-code-toolbar">
-              <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleImportTitle") }}</p>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="sqlProposal.drizzleImportSnippet.trim().length === 0"
-                @click="copyDrizzleImportSnippet"
-              >
-                {{
-                  resolveCopyLabel(
-                    "drizzleImport",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <pre class="generator-code-block"><code>{{ sqlProposal.drizzleImportSnippet }}</code></pre>
-          </section>
-          <section class="panel-section">
-            <div class="generator-code-toolbar">
-              <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleSchemaTitle") }}</p>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="sqlProposal.drizzleSchemaSnippet.trim().length === 0"
-                @click="copyDrizzleSchemaSnippet"
-              >
-                {{
-                  resolveCopyLabel(
-                    "drizzleSchema",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <pre class="generator-code-block"><code>{{ sqlProposal.drizzleSchemaSnippet }}</code></pre>
-          </section>
-        </div>
-      </section>
+      <GeneratorPreviewWorkspaceSqlProposalPanel
+        v-if="sqlProposalHandoff"
+        :t="t"
+        :sql-proposal="sqlProposal"
+        :sql-proposal-handoff="sqlProposalHandoff"
+        :proposal-status-label="sqlProposalStatusLabel"
+        :sql-draft-copy-label="resolveSnippetCopyLabel('sqlDraft')"
+        :drizzle-import-copy-label="resolveSnippetCopyLabel('drizzleImport')"
+        :drizzle-schema-copy-label="resolveSnippetCopyLabel('drizzleSchema')"
+        @copy-sql-draft="copySqlDraft"
+        @copy-drizzle-import="copyDrizzleImportSnippet"
+        @copy-drizzle-schema="copyDrizzleSchemaSnippet"
+      />
 
       <section v-if="sqlProposalHandoff" class="panel-section">
         <div class="generator-handoff-toolbar">
@@ -806,7 +730,6 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
   white-space: pre;
 }
 
-.generator-risk-list,
 .generator-handoff-grid {
   display: grid;
   gap: 0.75rem;
@@ -822,7 +745,6 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
   justify-content: space-between;
 }
 
-.generator-risk-card,
 .generator-handoff-grid article {
   display: grid;
   gap: 0.35rem;
@@ -832,16 +754,10 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
   padding: 0.85rem 0.95rem;
 }
 
-.generator-risk-card p,
 .generator-handoff-steps {
   margin: 0;
 }
 
-.generator-risk-card strong {
-  color: #9a3412;
-}
-
-.generator-risk-card p,
 .generator-handoff-grid span,
 .generator-handoff-steps {
   color: #475569;
