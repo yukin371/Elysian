@@ -256,6 +256,12 @@ const copyReviewComment = async () => {
   await copyPanelValue("reviewComment", props.reviewEvidence?.comment)
 }
 
+const copyReviewActor = async () =>
+  copyPanelValue("reviewActor", reviewActorLabel.value)
+
+const copyReviewDecision = async () =>
+  copyPanelValue("reviewDecision", reviewDecisionLabel.value)
+
 const copyOutputDir = async () =>
   copyPanelValue("outputDir", props.session?.outputDir)
 
@@ -476,8 +482,14 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :review-actor-label="reviewActorLabel"
         :review-decision-label="reviewDecisionLabel"
         :reviewed-at-copy-label="resolveSnippetCopyLabel('reviewedAt')"
+        :review-actor-copy-label="resolveSnippetCopyLabel('reviewActor')"
+        :review-decision-copy-label="
+          resolveSnippetCopyLabel('reviewDecision')
+        "
         :review-comment-copy-label="resolveSnippetCopyLabel('reviewComment')"
         @copy-reviewed-at="copyReviewedAt"
+        @copy-review-actor="copyReviewActor"
+        @copy-review-decision="copyReviewDecision"
         @copy-review-comment="copyReviewComment"
       />
 

@@ -29,6 +29,8 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "reportPath"
   | "requestId"
   | "reviewComment"
+  | "reviewDecision"
+  | "reviewActor"
   | "reviewedAt"
   | "schemaName"
   | "schemaDir"
@@ -84,6 +86,8 @@ const createInitialCopyFeedback = (): Record<
   reportPath: "idle",
   requestId: "idle",
   reviewComment: "idle",
+  reviewDecision: "idle",
+  reviewActor: "idle",
   reviewedAt: "idle",
   schemaName: "idle",
   schemaDir: "idle",

@@ -10,6 +10,8 @@ interface GeneratorPreviewWorkspaceReviewPanelProps {
   reviewActorLabel: string
   reviewDecisionLabel: string
   reviewedAtCopyLabel: string
+  reviewActorCopyLabel: string
+  reviewDecisionCopyLabel: string
   reviewCommentCopyLabel: string
 }
 
@@ -17,6 +19,8 @@ defineProps<GeneratorPreviewWorkspaceReviewPanelProps>()
 
 const emit = defineEmits<{
   (event: "copy-reviewed-at"): void
+  (event: "copy-review-actor"): void
+  (event: "copy-review-decision"): void
   (event: "copy-review-comment"): void
 }>()
 </script>
@@ -40,11 +44,34 @@ const emit = defineEmits<{
         <strong>{{ reviewEvidence.reviewedAt ?? "-" }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="reviewActorLabel.trim().length === 0 || reviewActorLabel === '-'"
+            @click="emit('copy-review-actor')"
+          >
+            {{ reviewActorCopyLabel }}
+          </button>
+        </div>
         <strong>{{ reviewActorLabel }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.reviewDecision") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.reviewDecision") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="
+              reviewDecisionLabel.trim().length === 0 ||
+              reviewDecisionLabel === '-'
+            "
+            @click="emit('copy-review-decision')"
+          >
+            {{ reviewDecisionCopyLabel }}
+          </button>
+        </div>
         <strong>{{ reviewDecisionLabel }}</strong>
       </div>
       <div>
