@@ -12,6 +12,7 @@ import type {
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
+import GeneratorPreviewWorkspaceDiffSummaryPanel from "./GeneratorPreviewWorkspaceDiffSummaryPanel.vue"
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
 import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
@@ -372,31 +373,11 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         @copy-conflict-strategy="copySessionConflictStrategy"
       />
 
-      <section v-if="diffSummary" class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.diffTitle") }}</p>
-        <div class="enterprise-metadata">
-          <div>
-            <span>{{ t("app.generatorPreview.summary.changed") }}</span>
-            <strong>{{ diffSummary.changedFileCount }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.summary.create") }}</span>
-            <strong>{{ diffSummary.actionCounts.create }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.summary.overwrite") }}</span>
-            <strong>{{ diffSummary.actionCounts.overwrite }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.summary.skip") }}</span>
-            <strong>{{ diffSummary.actionCounts.skip }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.summary.block") }}</span>
-            <strong>{{ diffSummary.actionCounts.block }}</strong>
-          </div>
-        </div>
-      </section>
+      <GeneratorPreviewWorkspaceDiffSummaryPanel
+        v-if="diffSummary"
+        :t="t"
+        :diff-summary="diffSummary"
+      />
 
       <section v-if="selectedFile" class="panel-section">
         <p class="enterprise-subheading">{{ t("app.generatorPreview.fileDiffTitle") }}</p>
