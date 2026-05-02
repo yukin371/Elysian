@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue"
+import { computed, onBeforeUnmount } from "vue"
 
 import type {
   GeneratorPreviewApplyEvidence,
@@ -14,31 +14,9 @@ import type {
   GeneratorPreviewTranslation,
 } from "./types"
 import {
-  copyGeneratorPreviewText,
-  copyGeneratorPreviewSuggestedCommands,
   joinGeneratorPreviewSuggestedCommands,
 } from "./generator-preview-handoff"
-
-type CopyFeedbackKey =
-  | "commands"
-  | "sqlDraft"
-  | "drizzleImport"
-  | "drizzleSchema"
-  | "absolutePath"
-  | "reportPath"
-  | "generatedSource"
-  | "currentSource"
-  | "sqlPreview"
-  | "schemaDir"
-  | "drizzleDir"
-  | "schemaIndexFile"
-  | "persistenceIndexFile"
-  | "sessionId"
-  | "manifestPath"
-  | "requestId"
-  | "reviewComment"
-  | "outputDir"
-  | "sourceValue"
+import { useGeneratorPreviewCopyFeedback } from "./use-generator-preview-copy-feedback"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -55,30 +33,12 @@ interface GeneratorPreviewWorkspacePanelProps {
 }
 
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
-const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>({
-  absolutePath: "idle",
-  commands: "idle",
-  currentSource: "idle",
-  drizzleImport: "idle",
-  drizzleSchema: "idle",
-  generatedSource: "idle",
-  reportPath: "idle",
-  persistenceIndexFile: "idle",
-  manifestPath: "idle",
-  outputDir: "idle",
-  requestId: "idle",
-  reviewComment: "idle",
-  schemaDir: "idle",
-  schemaIndexFile: "idle",
-  sessionId: "idle",
-  sourceValue: "idle",
-  sqlDraft: "idle",
-  sqlPreview: "idle",
-  drizzleDir: "idle",
-})
-const copyFeedbackTimers: Partial<
-  Record<CopyFeedbackKey, ReturnType<typeof setTimeout>>
-> = {}
+const {
+  copySuggestedCommandsByKey,
+  copyTextByKey,
+  disposeCopyFeedbackTimers,
+  resolveCopyLabel,
+} = useGeneratorPreviewCopyFeedback(props.t)
 
 const selectedSourceLineCount = computed(
   () => props.selectedFile?.lineCount ?? 0,
@@ -200,103 +160,51 @@ const suggestedCommandsText = computed(() =>
     : "",
 )
 
-const resolveCopyLabel = (
-  key: CopyFeedbackKey,
-  idleLabelKey:
-    | "app.generatorPreview.action.copyCommands"
-    | "app.generatorPreview.action.copySnippet",
-) => {
-  if (copyFeedback.value[key] === "copied") {
-    return props.t(
-      idleLabelKey === "app.generatorPreview.action.copyCommands"
-        ? "app.generatorPreview.action.copyCommandsDone"
-        : "app.generatorPreview.action.copySnippetDone",
-    )
-  }
-
-  if (copyFeedback.value[key] === "failed") {
-    return props.t(
-      idleLabelKey === "app.generatorPreview.action.copyCommands"
-        ? "app.generatorPreview.action.copyCommandsFailed"
-        : "app.generatorPreview.action.copySnippetFailed",
-    )
-  }
-
-  return props.t(idleLabelKey)
-}
-
-const scheduleCopyFeedbackReset = (key: CopyFeedbackKey) => {
-  const currentTimer = copyFeedbackTimers[key]
-
-  if (currentTimer !== undefined) {
-    globalThis.clearTimeout(currentTimer)
-  }
-
-  copyFeedbackTimers[key] = globalThis.setTimeout(() => {
-    copyFeedback.value[key] = "idle"
-    delete copyFeedbackTimers[key]
-  }, 2000)
-}
-
 const copySuggestedCommands = async () => {
-  const commands = props.sqlProposalHandoff?.suggestedCommands ?? []
-  const copied = await copyGeneratorPreviewSuggestedCommands(commands)
-  copyFeedback.value.commands = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("commands")
+  await copySuggestedCommandsByKey(
+    props.sqlProposalHandoff?.suggestedCommands ?? [],
+  )
 }
 
 const copySqlDraft = async () => {
-  const copied = await copyGeneratorPreviewText(props.sqlProposal?.sqlDraft ?? "")
-  copyFeedback.value.sqlDraft = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("sqlDraft")
+  await copyTextByKey("sqlDraft", props.sqlProposal?.sqlDraft ?? "")
 }
 
 const copyDrizzleImportSnippet = async () => {
-  const copied = await copyGeneratorPreviewText(
+  await copyTextByKey(
+    "drizzleImport",
     props.sqlProposal?.drizzleImportSnippet ?? "",
   )
-  copyFeedback.value.drizzleImport = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("drizzleImport")
 }
 
 const copyDrizzleSchemaSnippet = async () => {
-  const copied = await copyGeneratorPreviewText(
+  await copyTextByKey(
+    "drizzleSchema",
     props.sqlProposal?.drizzleSchemaSnippet ?? "",
   )
-  copyFeedback.value.drizzleSchema = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("drizzleSchema")
 }
 
 const copySelectedAbsolutePath = async () => {
-  const copied = await copyGeneratorPreviewText(props.selectedFile?.absolutePath ?? "")
-  copyFeedback.value.absolutePath = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("absolutePath")
+  await copyTextByKey("absolutePath", props.selectedFile?.absolutePath ?? "")
 }
 
 const copySessionReportPath = async () => {
-  const copied = await copyGeneratorPreviewText(props.session?.reportPath ?? "")
-  copyFeedback.value.reportPath = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("reportPath")
+  await copyTextByKey("reportPath", props.session?.reportPath ?? "")
 }
 
 const copyGeneratedSource = async () => {
-  const copied = await copyGeneratorPreviewText(props.selectedFile?.contents ?? "")
-  copyFeedback.value.generatedSource = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("generatedSource")
+  await copyTextByKey("generatedSource", props.selectedFile?.contents ?? "")
 }
 
 const copyCurrentSource = async () => {
-  const copied = await copyGeneratorPreviewText(
+  await copyTextByKey(
+    "currentSource",
     props.selectedFile?.currentContents ?? "",
   )
-  copyFeedback.value.currentSource = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("currentSource")
 }
 
 const copySqlPreview = async () => {
-  const copied = await copyGeneratorPreviewText(props.sqlPreview?.contents ?? "")
-  copyFeedback.value.sqlPreview = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("sqlPreview")
+  await copyTextByKey("sqlPreview", props.sqlPreview?.contents ?? "")
 }
 
 const copyHandoffTargetPath = async (
@@ -307,47 +215,34 @@ const copyHandoffTargetPath = async (
     | "persistenceIndexFile",
   path: string,
 ) => {
-  const copied = await copyGeneratorPreviewText(path)
-  copyFeedback.value[key] = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset(key)
+  await copyTextByKey(key, path)
 }
 
 const copySessionId = async () => {
-  const copied = await copyGeneratorPreviewText(props.session?.id ?? "")
-  copyFeedback.value.sessionId = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("sessionId")
+  await copyTextByKey("sessionId", props.session?.id ?? "")
 }
 
 const copyManifestPath = async () => {
-  const copied = await copyGeneratorPreviewText(props.applyEvidence?.manifestPath ?? "")
-  copyFeedback.value.manifestPath = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("manifestPath")
+  await copyTextByKey("manifestPath", props.applyEvidence?.manifestPath ?? "")
 }
 
 const copyRequestId = async () => {
-  const copied = await copyGeneratorPreviewText(
+  await copyTextByKey(
+    "requestId",
     props.applyEvidence?.requestId ?? "",
   )
-  copyFeedback.value.requestId = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("requestId")
 }
 
 const copyReviewComment = async () => {
-  const copied = await copyGeneratorPreviewText(props.reviewEvidence?.comment ?? "")
-  copyFeedback.value.reviewComment = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("reviewComment")
+  await copyTextByKey("reviewComment", props.reviewEvidence?.comment ?? "")
 }
 
 const copyOutputDir = async () => {
-  const copied = await copyGeneratorPreviewText(props.session?.outputDir ?? "")
-  copyFeedback.value.outputDir = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("outputDir")
+  await copyTextByKey("outputDir", props.session?.outputDir ?? "")
 }
 
 const copySourceValue = async () => {
-  const copied = await copyGeneratorPreviewText(props.session?.sourceValue ?? "")
-  copyFeedback.value.sourceValue = copied ? "copied" : "failed"
-  scheduleCopyFeedbackReset("sourceValue")
+  await copyTextByKey("sourceValue", props.session?.sourceValue ?? "")
 }
 
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
@@ -365,13 +260,7 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   return " "
 }
 
-onBeforeUnmount(() => {
-  for (const timer of Object.values(copyFeedbackTimers)) {
-    if (timer !== undefined) {
-      globalThis.clearTimeout(timer)
-    }
-  }
-})
+onBeforeUnmount(disposeCopyFeedbackTimers)
 
 </script>
 
