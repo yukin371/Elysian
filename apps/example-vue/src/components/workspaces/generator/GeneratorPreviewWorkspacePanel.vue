@@ -18,6 +18,7 @@ import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorksp
 import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
 import GeneratorPreviewWorkspaceReviewPanel from "./GeneratorPreviewWorkspaceReviewPanel.vue"
 import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
+import GeneratorPreviewWorkspaceSqlHandoffPanel from "./GeneratorPreviewWorkspaceSqlHandoffPanel.vue"
 import GeneratorPreviewWorkspaceSqlProposalPanel from "./GeneratorPreviewWorkspaceSqlProposalPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
@@ -571,135 +572,39 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         @copy-drizzle-schema="copyDrizzleSchemaSnippet"
       />
 
-      <section v-if="sqlProposalHandoff" class="panel-section">
-        <div class="generator-handoff-toolbar">
-          <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlHandoffTitle") }}</p>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="sqlProposalHandoff.suggestedCommands.length === 0"
-            @click="copySuggestedCommands"
-          >
-            {{
-              resolveCopyLabel(
-                "commands",
-                "app.generatorPreview.action.copyCommands",
-              )
-            }}
-          </button>
-        </div>
-        <div class="generator-handoff-grid">
-          <article>
-            <div class="generator-handoff-card-header">
-              <strong>{{ t("app.generatorPreview.meta.schemaDir") }}</strong>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="sqlProposalHandoff.targetPaths.schemaDir.trim().length === 0"
-                @click="
-                  copyHandoffTargetPath(
-                    'schemaDir',
-                    sqlProposalHandoff.targetPaths.schemaDir,
-                  )
-                "
-              >
-                {{
-                  resolveCopyLabel(
-                    'schemaDir',
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <span>{{ sqlProposalHandoff.targetPaths.schemaDir }}</span>
-          </article>
-          <article>
-            <div class="generator-handoff-card-header">
-              <strong>{{ t("app.generatorPreview.meta.drizzleDir") }}</strong>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="sqlProposalHandoff.targetPaths.drizzleDir.trim().length === 0"
-                @click="
-                  copyHandoffTargetPath(
-                    'drizzleDir',
-                    sqlProposalHandoff.targetPaths.drizzleDir,
-                  )
-                "
-              >
-                {{
-                  resolveCopyLabel(
-                    'drizzleDir',
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <span>{{ sqlProposalHandoff.targetPaths.drizzleDir }}</span>
-          </article>
-          <article>
-            <div class="generator-handoff-card-header">
-              <strong>{{ t("app.generatorPreview.meta.schemaIndexFile") }}</strong>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="
-                  sqlProposalHandoff.targetPaths.schemaIndexFile.trim().length === 0
-                "
-                @click="
-                  copyHandoffTargetPath(
-                    'schemaIndexFile',
-                    sqlProposalHandoff.targetPaths.schemaIndexFile,
-                  )
-                "
-              >
-                {{
-                  resolveCopyLabel(
-                    'schemaIndexFile',
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <span>{{ sqlProposalHandoff.targetPaths.schemaIndexFile }}</span>
-          </article>
-          <article>
-            <div class="generator-handoff-card-header">
-              <strong>{{ t("app.generatorPreview.meta.persistenceIndexFile") }}</strong>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="
-                  sqlProposalHandoff.targetPaths.persistenceIndexFile.trim().length === 0
-                "
-                @click="
-                  copyHandoffTargetPath(
-                    'persistenceIndexFile',
-                    sqlProposalHandoff.targetPaths.persistenceIndexFile,
-                  )
-                "
-              >
-                {{
-                  resolveCopyLabel(
-                    'persistenceIndexFile',
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <span>{{ sqlProposalHandoff.targetPaths.persistenceIndexFile }}</span>
-          </article>
-        </div>
-        <ol class="generator-handoff-steps">
-          <li
-            v-for="step in sqlProposalHandoff.steps"
-            :key="step"
-          >
-            {{ step }}
-          </li>
-        </ol>
-        <pre class="generator-code-block"><code>{{ suggestedCommandsText }}</code></pre>
-      </section>
+      <GeneratorPreviewWorkspaceSqlHandoffPanel
+        v-if="sqlProposalHandoff"
+        :t="t"
+        :sql-proposal-handoff="sqlProposalHandoff"
+        :suggested-commands-text="suggestedCommandsText"
+        :commands-copy-label="
+          resolveCopyLabel(
+            'commands',
+            'app.generatorPreview.action.copyCommands',
+          )
+        "
+        :schema-dir-copy-label="resolveSnippetCopyLabel('schemaDir')"
+        :drizzle-dir-copy-label="resolveSnippetCopyLabel('drizzleDir')"
+        :schema-index-file-copy-label="
+          resolveSnippetCopyLabel('schemaIndexFile')
+        "
+        :persistence-index-file-copy-label="
+          resolveSnippetCopyLabel('persistenceIndexFile')
+        "
+        @copy-suggested-commands="copySuggestedCommands"
+        @copy-schema-dir="
+          (path) => copyHandoffTargetPath('schemaDir', path)
+        "
+        @copy-drizzle-dir="
+          (path) => copyHandoffTargetPath('drizzleDir', path)
+        "
+        @copy-schema-index-file="
+          (path) => copyHandoffTargetPath('schemaIndexFile', path)
+        "
+        @copy-persistence-index-file="
+          (path) => copyHandoffTargetPath('persistenceIndexFile', path)
+        "
+      />
     </div>
 
     <GeneratorPreviewWorkspaceSourcePanel
@@ -744,30 +649,7 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.generator-code-block {
-  overflow: auto;
-  margin: 0;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: #0f172a;
-  padding: 1rem;
-  color: #dbeafe;
-  font-family:
-    "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
-    monospace;
-  font-size: 0.8rem;
-  line-height: 1.7;
-  white-space: pre;
-}
-
-.generator-handoff-grid {
-  display: grid;
-  gap: 0.75rem;
-}
-
 .generator-code-toolbar,
-.generator-handoff-toolbar,
-.generator-handoff-card-header,
 .generator-metadata-label {
   align-items: center;
   display: flex;
@@ -775,27 +657,4 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
   justify-content: space-between;
 }
 
-.generator-handoff-grid article {
-  display: grid;
-  gap: 0.35rem;
-  border-radius: 6px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(248, 250, 252, 0.72);
-  padding: 0.85rem 0.95rem;
-}
-
-.generator-handoff-steps {
-  margin: 0;
-}
-
-.generator-handoff-grid span,
-.generator-handoff-steps {
-  color: #475569;
-}
-
-.generator-handoff-steps {
-  display: grid;
-  gap: 0.5rem;
-  padding-left: 1.2rem;
-}
 </style>
