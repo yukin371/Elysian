@@ -6,6 +6,7 @@ import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
+  GeneratorPreviewReviewEvidence,
   GeneratorPreviewSchemaOption,
   GeneratorPreviewTranslation,
 } from "./types"
@@ -13,7 +14,8 @@ import type {
 interface GeneratorPreviewWorkspaceMainProps {
   t: GeneratorPreviewTranslation
   loading: boolean
-  actionLoading: boolean
+  reviewLoading: boolean
+  applyLoading: boolean
   errorMessage: string
   schemaOptions: GeneratorPreviewSchemaOption[]
   selectedSchemaName: string
@@ -22,9 +24,12 @@ interface GeneratorPreviewWorkspaceMainProps {
   filterSummary: string
   files: GeneratorPreviewFileCard[]
   selectedFilePath: string | null
+  canApprove: boolean
+  canReject: boolean
   canApply: boolean
   diffSummary: GeneratorPreviewDiffSummary | null
-  sessionStatus: "ready" | "applied" | null
+  sessionStatus: "pending_review" | "ready" | "rejected" | "applied" | null
+  reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
   hasBlockingConflicts: boolean
 }
@@ -38,6 +43,7 @@ const emit = defineEmits<{
   (e: "select-file", value: string): void
   (e: "reset-filters"): void
   (e: "refresh-preview"): void
+  (e: "review-preview", value: "approve" | "reject"): void
   (e: "apply-preview"): void
 }>()
 
@@ -65,6 +71,22 @@ const handleFrontendChange = (
     emit("update:selected-frontend-target", value)
   }
 }
+
+const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionStatus"]) => {
+  if (status === "applied") {
+    return props.t("app.generatorPreview.status.applied")
+  }
+
+  if (status === "ready") {
+    return props.t("app.generatorPreview.status.ready")
+  }
+
+  if (status === "rejected") {
+    return props.t("app.generatorPreview.status.rejected")
+  }
+
+  return props.t("app.generatorPreview.status.pendingReview")
+}
 </script>
 
 <template>
@@ -76,7 +98,7 @@ const handleFrontendChange = (
           <TSelect
             :model-value="selectedSchemaName"
             :options="schemaOptions"
-            :disabled="loading || actionLoading"
+            :disabled="loading || reviewLoading || applyLoading"
             @update:model-value="handleSchemaChange"
           />
         </label>
@@ -86,7 +108,7 @@ const handleFrontendChange = (
           <TSelect
             :model-value="selectedFrontendTarget"
             :options="frontendOptions"
-            :disabled="loading || actionLoading"
+            :disabled="loading || reviewLoading || applyLoading"
             @update:model-value="handleFrontendChange"
           />
         </label>
@@ -106,13 +128,7 @@ const handleFrontendChange = (
         <div class="generator-toolbar-meta">
           <span class="enterprise-toolbar-pill">{{ filterSummary }}</span>
           <span v-if="sessionStatus" class="enterprise-toolbar-pill">
-            {{
-              t(
-                sessionStatus === "applied"
-                  ? "app.generatorPreview.status.applied"
-                  : "app.generatorPreview.status.ready",
-              )
-            }}
+            {{ resolveStatusLabel(sessionStatus) }}
           </span>
         </div>
 
@@ -128,7 +144,7 @@ const handleFrontendChange = (
           <button
             type="button"
             class="enterprise-button enterprise-button-ghost"
-            :disabled="loading || actionLoading"
+            :disabled="loading || reviewLoading || applyLoading"
             @click="emit('refresh-preview')"
           >
             {{
@@ -139,12 +155,28 @@ const handleFrontendChange = (
           </button>
           <button
             type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="!canReject"
+            @click="emit('review-preview', 'reject')"
+          >
+            {{ t("app.generatorPreview.action.reject") }}
+          </button>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="!canApprove"
+            @click="emit('review-preview', 'approve')"
+          >
+            {{ t("app.generatorPreview.action.approve") }}
+          </button>
+          <button
+            type="button"
             class="enterprise-button"
             :disabled="!canApply"
             @click="emit('apply-preview')"
           >
             {{
-              actionLoading
+              applyLoading
                 ? t("app.generatorPreview.action.applying")
                 : t("app.generatorPreview.action.apply")
             }}
@@ -157,6 +189,24 @@ const handleFrontendChange = (
         class="enterprise-message enterprise-message-danger"
       >
         {{ errorMessage }}
+      </div>
+
+      <div
+        v-else-if="sessionStatus === 'pending_review'"
+        class="enterprise-message enterprise-message-info"
+      >
+        {{ t("app.generatorPreview.message.pendingReview") }}
+      </div>
+
+      <div
+        v-else-if="sessionStatus === 'rejected'"
+        class="enterprise-message enterprise-message-warning"
+      >
+        {{
+          t("app.generatorPreview.message.rejected", {
+            value: reviewEvidence?.reviewedAt ?? "-",
+          })
+        }}
       </div>
 
       <div
@@ -190,6 +240,22 @@ const handleFrontendChange = (
           <small>{{ t("app.generatorPreview.summary.block") }}</small>
           <strong>{{ diffSummary.actionCounts.block }}</strong>
         </article>
+      </div>
+
+      <div
+        v-if="reviewEvidence"
+        class="enterprise-message enterprise-message-info"
+      >
+        {{
+          t(
+            reviewEvidence.decision === "approve"
+              ? "app.generatorPreview.message.reviewApproved"
+              : "app.generatorPreview.message.reviewRejected",
+            {
+              value: reviewEvidence.reviewedAt ?? "-",
+            },
+          )
+        }}
       </div>
 
       <div

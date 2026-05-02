@@ -76,11 +76,17 @@ const createSession = (
   outputDir: "generated",
   previewFileCount: 1,
   reportPath: "generated/reports/preview-session-1.preview.json",
+  reviewComment: null,
+  reviewedAt: null,
+  reviewedByDisplayName: null,
+  reviewedByUserId: null,
+  reviewedByUsername: null,
+  reviewEvidence: null,
   schemaName: "customer",
   skippedFileCount: null,
   sourceType: "registered-schema",
   sourceValue: "customer",
-  status: "ready",
+  status: "pending_review",
   targetPreset: "staging",
   tenantId: null,
   ...overrides,
@@ -330,7 +336,7 @@ describe("useGeneratorPreviewWorkspace", () => {
       },
     })
 
-    workspace.currentSession.value = createSession()
+    workspace.currentSession.value = createSession({ status: "ready" })
     workspace.currentDiffSummary.value = createDiffSummary()
     workspace.selectedFilePath.value = createReport().files[0]?.path ?? null
 
@@ -340,6 +346,115 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.errorMessage.value).toContain("status 401")
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
+  })
+
+  test("approves pending preview sessions before apply", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            session: createSession({
+              reviewEvidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                comment: null,
+                decision: "approve",
+                reportPath: "generated/reports/preview-session-1.preview.json",
+                reviewedAt: "2026-05-02T12:05:00.000Z",
+                sessionId: "preview-session-1",
+              },
+              reviewedAt: "2026-05-02T12:05:00.000Z",
+              reviewedByDisplayName: "Admin",
+              reviewedByUserId: "user-1",
+              reviewedByUsername: "admin",
+              status: "ready",
+            }),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace()
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    expect(workspace.canApplyPreview.value).toBe(false)
+    expect(workspace.canApprovePreview.value).toBe(true)
+    expect(workspace.canRejectPreview.value).toBe(true)
+
+    await workspace.reviewPreview("approve")
+
+    expect(workspace.currentSession.value?.status).toBe("ready")
+    expect(workspace.currentSession.value?.reviewEvidence?.decision).toBe(
+      "approve",
+    )
+    expect(workspace.canApplyPreview.value).toBe(true)
+    expect(workspace.canApprovePreview.value).toBe(false)
+  })
+
+  test("reports recoverable auth errors when review fails", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
+        method === "POST"
+      ) {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.reviewPreview("approve")
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.status).toBe("pending_review")
+  })
+
+  test("does not apply pending review preview sessions", async () => {
+    const { workspace } = createWorkspace()
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    expect(workspace.canApplyPreview.value).toBe(false)
   })
 
   test("does not refresh preview context while apply is in progress", async () => {

@@ -11,6 +11,7 @@ import {
   type GeneratorPreviewSessionRecord,
   applyGeneratorPreviewSession,
   createGeneratorPreviewSession,
+  reviewGeneratorPreviewSession,
 } from "../lib/platform-api"
 
 import {
@@ -31,6 +32,7 @@ export const useGeneratorPreviewWorkspace = (
   const previewQuery = ref("")
   const selectedFilePath = ref<string | null>(null)
   const loading = ref(false)
+  const reviewLoading = ref(false)
   const applyLoading = ref(false)
   const errorMessage = ref("")
   const currentSession = ref<GeneratorPreviewSessionRecord | null>(null)
@@ -98,6 +100,17 @@ export const useGeneratorPreviewWorkspace = (
       !applyLoading.value,
   )
 
+  const canApprovePreview = computed(
+    () =>
+      currentSession.value !== null &&
+      currentSession.value.status === "pending_review" &&
+      !loading.value &&
+      !reviewLoading.value &&
+      !applyLoading.value,
+  )
+
+  const canRejectPreview = computed(() => canApprovePreview.value)
+
   const resetFilters = () => {
     previewQuery.value = ""
   }
@@ -115,7 +128,12 @@ export const useGeneratorPreviewWorkspace = (
     currentReport.value?.frontendTarget === selectedFrontendTarget.value
 
   const refreshPreview = async () => {
-    if (applyLoading.value || !enabled.value || !selectedSchemaName.value) {
+    if (
+      applyLoading.value ||
+      reviewLoading.value ||
+      !enabled.value ||
+      !selectedSchemaName.value
+    ) {
       return
     }
 
@@ -178,6 +196,35 @@ export const useGeneratorPreviewWorkspace = (
     }
   }
 
+  const reviewPreview = async (decision: "approve" | "reject") => {
+    const sessionId = currentSession.value?.id
+    const canReview =
+      decision === "approve"
+        ? canApprovePreview.value
+        : canRejectPreview.value
+
+    if (!sessionId || !canReview) {
+      return
+    }
+
+    reviewLoading.value = true
+    errorMessage.value = ""
+
+    try {
+      const response = await reviewGeneratorPreviewSession(sessionId, {
+        decision,
+      })
+      currentSession.value = response.session
+      currentDiffSummary.value = response.diff
+    } catch (error) {
+      onRecoverableAuthError(error)
+      errorMessage.value =
+        error instanceof Error ? error.message : "Generator review failed"
+    } finally {
+      reviewLoading.value = false
+    }
+  }
+
   watch(
     filteredPreviewFiles,
     (files) => {
@@ -209,6 +256,8 @@ export const useGeneratorPreviewWorkspace = (
     applyLoading,
     applyPreview,
     canApplyPreview,
+    canApprovePreview,
+    canRejectPreview,
     currentDiffSummary,
     currentSession,
     errorMessage,
@@ -218,6 +267,8 @@ export const useGeneratorPreviewWorkspace = (
     previewQuery,
     refreshPreview,
     resetFilters,
+    reviewLoading,
+    reviewPreview,
     schemaOptions,
     selectedFilePath,
     selectedFrontendTarget,

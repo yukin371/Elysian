@@ -206,6 +206,7 @@ export interface CreateExampleShellBindingsOptionsInput {
   }
   generatorPreviewWorkspace: BindingSegment<
     | "generatorPreviewLoading"
+    | "generatorPreviewReviewLoading"
     | "generatorPreviewApplyLoading"
     | "generatorPreviewErrorMessage"
     | "generatorPreviewSchemaOptions"
@@ -215,6 +216,8 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "generatorPreviewFilterSummary"
     | "generatorPreviewFiles"
     | "selectedGeneratorPreviewFilePath"
+    | "canApproveGeneratorPreview"
+    | "canRejectGeneratorPreview"
     | "canApplyGeneratorPreview"
     | "generatorPreviewDiffSummary"
     | "generatorPreviewSession"
@@ -223,6 +226,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "generatorPreviewSqlPreview"
     | "resetGeneratorPreviewFilters"
     | "refreshGeneratorPreview"
+    | "reviewGeneratorPreview"
     | "applyGeneratorPreview"
   >
 }

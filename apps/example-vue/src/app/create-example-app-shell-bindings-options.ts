@@ -332,6 +332,8 @@ export const createExampleAppShellBindingsOptions = (
     generatorPreviewWorkspace: {
       generatorPreviewLoading:
         input.workspaces.generatorPreviewWorkspace.loading,
+      generatorPreviewReviewLoading:
+        input.workspaces.generatorPreviewWorkspace.reviewLoading,
       generatorPreviewApplyLoading:
         input.workspaces.generatorPreviewWorkspace.applyLoading,
       generatorPreviewErrorMessage:
@@ -350,6 +352,10 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.filteredPreviewFiles,
       selectedGeneratorPreviewFilePath:
         input.workspaces.generatorPreviewWorkspace.selectedFilePath,
+      canApproveGeneratorPreview:
+        input.workspaces.generatorPreviewWorkspace.canApprovePreview,
+      canRejectGeneratorPreview:
+        input.workspaces.generatorPreviewWorkspace.canRejectPreview,
       canApplyGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.canApplyPreview,
       generatorPreviewDiffSummary:
@@ -366,6 +372,8 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.resetFilters,
       refreshGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.refreshPreview,
+      reviewGeneratorPreview:
+        input.workspaces.generatorPreviewWorkspace.reviewPreview,
       applyGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.applyPreview,
     },

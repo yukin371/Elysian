@@ -141,6 +141,7 @@ export interface UseExampleShellBindingsOptions {
   visibleFileCount: ValueSource<number>
   selectedFileId: ValueSource<string | null>
   generatorPreviewLoading: ValueSource<boolean>
+  generatorPreviewReviewLoading: ValueSource<boolean>
   generatorPreviewApplyLoading: ValueSource<boolean>
   generatorPreviewErrorMessage: ValueSource<string>
   generatorPreviewSchemaOptions: ValueSource<unknown[]>
@@ -150,6 +151,8 @@ export interface UseExampleShellBindingsOptions {
   generatorPreviewFilterSummary: ValueSource<string>
   generatorPreviewFiles: ValueSource<unknown[]>
   selectedGeneratorPreviewFilePath: Ref<string | null>
+  canApproveGeneratorPreview: ValueSource<boolean>
+  canRejectGeneratorPreview: ValueSource<boolean>
   canApplyGeneratorPreview: ValueSource<boolean>
   generatorPreviewDiffSummary: ValueSource<GeneratorPreviewDiffSummary | null>
   generatorPreviewSession: ValueSource<Record<string, unknown> | null>
@@ -340,6 +343,7 @@ export interface UseExampleShellBindingsOptions {
   openFileUploadPanel: () => void
   resetGeneratorPreviewFilters: () => void
   refreshGeneratorPreview: () => void
+  reviewGeneratorPreview: (decision: "approve" | "reject") => void
   applyGeneratorPreview: () => void
   handleDictionarySearch: (payload: unknown) => void
   handleDictionaryReset: () => void

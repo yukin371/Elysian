@@ -26,6 +26,11 @@ export interface CreateGeneratorPreviewSessionPersistenceInput {
   outputDir: string
   previewFileCount: number
   reportPath: string
+  reviewComment?: string | null
+  reviewedAt?: Date | null
+  reviewedByDisplayName?: string | null
+  reviewedByUserId?: string | null
+  reviewedByUsername?: string | null
   schemaName: string
   skippedFileCount?: number | null
   sourceType: string
@@ -43,6 +48,15 @@ export interface MarkGeneratorPreviewSessionAppliedPersistenceInput {
   applyManifestPath: string | null
   applyRequestId: string | null
   skippedFileCount: number
+}
+
+export interface MarkGeneratorPreviewSessionReviewedPersistenceInput {
+  reviewComment: string | null
+  reviewedAt: Date
+  reviewedByDisplayName: string | null
+  reviewedByUserId: string | null
+  reviewedByUsername: string | null
+  status: "ready" | "rejected"
 }
 
 export async function insertGeneratorPreviewSession(
@@ -71,11 +85,16 @@ export async function insertGeneratorPreviewSession(
       outputDir: input.outputDir,
       previewFileCount: input.previewFileCount,
       reportPath: input.reportPath,
+      reviewComment: input.reviewComment ?? null,
+      reviewedAt: input.reviewedAt ?? null,
+      reviewedByDisplayName: input.reviewedByDisplayName ?? null,
+      reviewedByUserId: input.reviewedByUserId ?? null,
+      reviewedByUsername: input.reviewedByUsername ?? null,
       schemaName: input.schemaName,
       skippedFileCount: input.skippedFileCount ?? null,
       sourceType: input.sourceType,
       sourceValue: input.sourceValue,
-      status: input.status ?? "ready",
+      status: input.status ?? "pending_review",
       targetPreset: input.targetPreset,
       updatedAt: input.createdAt,
     })
@@ -129,6 +148,28 @@ export async function markGeneratorPreviewSessionApplied(
       skippedFileCount: input.skippedFileCount,
       status: "applied",
       updatedAt: input.appliedAt,
+    })
+    .where(eq(generatorPreviewSessions.id, id))
+    .returning()
+
+  return row ?? null
+}
+
+export async function markGeneratorPreviewSessionReviewed(
+  db: DatabaseClient,
+  id: string,
+  input: MarkGeneratorPreviewSessionReviewedPersistenceInput,
+) {
+  const [row] = await db
+    .update(generatorPreviewSessions)
+    .set({
+      reviewComment: input.reviewComment,
+      reviewedAt: input.reviewedAt,
+      reviewedByDisplayName: input.reviewedByDisplayName,
+      reviewedByUserId: input.reviewedByUserId,
+      reviewedByUsername: input.reviewedByUsername,
+      status: input.status,
+      updatedAt: input.reviewedAt,
     })
     .where(eq(generatorPreviewSessions.id, id))
     .returning()

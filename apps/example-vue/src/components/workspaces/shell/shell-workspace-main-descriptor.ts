@@ -16,6 +16,7 @@ import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 interface GeneratorPreviewSessionSummary {
   status?: string | null
   applyEvidence?: unknown
+  reviewEvidence?: unknown
   hasBlockingConflicts?: boolean
 }
 
@@ -56,6 +57,7 @@ export interface ShellWorkspaceMainSwitchProps {
   fileTableItems: ReadonlyArray<unknown>
   selectedFileId: string | null
   generatorPreviewLoading: boolean
+  generatorPreviewReviewLoading: boolean
   generatorPreviewApplyLoading: boolean
   generatorPreviewErrorMessage: string
   generatorPreviewSchemaOptions: ReadonlyArray<unknown>
@@ -65,6 +67,8 @@ export interface ShellWorkspaceMainSwitchProps {
   generatorPreviewFilterSummary: string
   generatorPreviewFiles: ReadonlyArray<unknown>
   selectedGeneratorPreviewFilePath: string | null
+  canApproveGeneratorPreview: boolean
+  canRejectGeneratorPreview: boolean
   canApplyGeneratorPreview: boolean
   generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null
   generatorPreviewSession: GeneratorPreviewSessionSummary | null
@@ -196,6 +200,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "select-generator-file", filePath: string): void
   (event: "reset-generator-filters"): void
   (event: "refresh-generator-preview"): void
+  (event: "review-generator-preview", decision: "approve" | "reject"): void
   (event: "apply-generator-preview"): void
   (event: "dictionary-search", payload: unknown): void
   (event: "dictionary-reset"): void
@@ -476,7 +481,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     props: {
       t: props.t,
       loading: props.generatorPreviewLoading,
-      actionLoading: props.generatorPreviewApplyLoading,
+      reviewLoading: props.generatorPreviewReviewLoading,
+      applyLoading: props.generatorPreviewApplyLoading,
       errorMessage: props.generatorPreviewErrorMessage,
       schemaOptions: props.generatorPreviewSchemaOptions,
       selectedSchemaName: props.selectedGeneratorPreviewSchemaName,
@@ -485,9 +491,12 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       filterSummary: props.generatorPreviewFilterSummary,
       files: props.generatorPreviewFiles,
       selectedFilePath: props.selectedGeneratorPreviewFilePath,
+      canApprove: props.canApproveGeneratorPreview,
+      canReject: props.canRejectGeneratorPreview,
       canApply: props.canApplyGeneratorPreview,
       diffSummary: props.generatorPreviewDiffSummary,
       sessionStatus: props.generatorPreviewSession?.status ?? null,
+      reviewEvidence: props.generatorPreviewSession?.reviewEvidence ?? null,
       applyEvidence: props.generatorPreviewSession?.applyEvidence ?? null,
       hasBlockingConflicts:
         props.generatorPreviewSession?.hasBlockingConflicts ?? false,
@@ -503,6 +512,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
         emit("select-generator-file", filePath as string),
       "reset-filters": () => emit("reset-generator-filters"),
       "refresh-preview": () => emit("refresh-generator-preview"),
+      "review-preview": (decision: unknown) =>
+        emit("review-generator-preview", decision as "approve" | "reject"),
       "apply-preview": () => emit("apply-generator-preview"),
     },
   }),

@@ -5,6 +5,7 @@ import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
+  GeneratorPreviewReviewEvidence,
   GeneratorPreviewSessionRecord,
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
@@ -18,6 +19,7 @@ interface GeneratorPreviewWorkspacePanelProps {
   sqlPreview: GeneratorPreviewSqlPreview | null
   session: GeneratorPreviewSessionRecord | null
   diffSummary: GeneratorPreviewDiffSummary | null
+  reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
 }
 
@@ -40,7 +42,11 @@ const sessionStatusLabel = computed(() =>
     ? props.t(
         props.session.status === "applied"
           ? "app.generatorPreview.status.applied"
-          : "app.generatorPreview.status.ready",
+          : props.session.status === "ready"
+            ? "app.generatorPreview.status.ready"
+            : props.session.status === "rejected"
+              ? "app.generatorPreview.status.rejected"
+              : "app.generatorPreview.status.pendingReview",
       )
     : "-",
 )
@@ -144,6 +150,32 @@ const selectedChangeLabel = computed(() =>
           <div>
             <span>{{ t("app.generatorPreview.summary.block") }}</span>
             <strong>{{ diffSummary.actionCounts.block }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section v-if="reviewEvidence" class="panel-section">
+        <p class="enterprise-subheading">{{ t("app.generatorPreview.reviewTitle") }}</p>
+        <div class="enterprise-metadata">
+          <div>
+            <span>{{ t("app.generatorPreview.meta.reviewedAt") }}</span>
+            <strong>{{ reviewEvidence.reviewedAt ?? "-" }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.reviewDecision") }}</span>
+            <strong>
+              {{
+                t(
+                  reviewEvidence.decision === "approve"
+                    ? "app.generatorPreview.action.approve"
+                    : "app.generatorPreview.action.reject",
+                )
+              }}
+            </strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.reviewComment") }}</span>
+            <strong>{{ reviewEvidence.comment ?? "-" }}</strong>
           </div>
         </div>
       </section>

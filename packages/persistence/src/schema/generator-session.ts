@@ -33,11 +33,16 @@ export const generatorPreviewSessions = pgTable("generator_preview_sessions", {
   outputDir: text("output_dir").notNull(),
   previewFileCount: integer("preview_file_count").notNull(),
   reportPath: text("report_path").notNull(),
+  reviewComment: text("review_comment"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  reviewedByDisplayName: text("reviewed_by_display_name"),
+  reviewedByUserId: uuid("reviewed_by_user_id"),
+  reviewedByUsername: text("reviewed_by_username"),
   schemaName: text("schema_name").notNull(),
   skippedFileCount: integer("skipped_file_count"),
   sourceType: text("source_type").notNull(),
   sourceValue: text("source_value").notNull(),
-  status: text("status").notNull().default("ready"),
+  status: text("status").notNull().default("pending_review"),
   targetPreset: text("target_preset").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

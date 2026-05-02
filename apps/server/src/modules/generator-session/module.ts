@@ -27,6 +27,10 @@ const conflictStrategySchema = t.Union([
   t.Literal("overwrite-generated-only"),
   t.Literal("fail"),
 ])
+const reviewDecisionSchema = t.Union([
+  t.Literal("approve"),
+  t.Literal("reject"),
+])
 
 export const createGeneratorSessionModule = (
   repository: GeneratorSessionRepository,
@@ -188,6 +192,51 @@ export const createGeneratorSessionModule = (
         },
       )
       .post(
+        "/studio/generator/sessions/:id/review",
+        async ({ body, params, request }) => {
+          const identity = (await authorize(request.headers)) ?? null
+          const session = await service.reviewPreviewSession({
+            actor: identity,
+            comment: body.comment,
+            decision: body.decision,
+            id: params.id,
+          })
+
+          if (identity) {
+            await recordAuditBestEffort(request.headers, identity, {
+              action:
+                body.decision === "approve" ? "review_approve" : "review_reject",
+              details: {
+                schemaName: session.schemaName,
+                frontendTarget: session.frontendTarget,
+                targetPreset: session.targetPreset,
+                reviewComment: session.reviewComment,
+                reviewStatus: session.status,
+              },
+              sessionId: session.id,
+            })
+          }
+
+          return {
+            session: toSessionResponse(session),
+            diff: buildDiffSummary(session.report),
+          }
+        },
+        {
+          params: t.Object({
+            id: t.String({ minLength: 1 }),
+          }),
+          body: t.Object({
+            decision: reviewDecisionSchema,
+            comment: t.Optional(t.String()),
+          }),
+          detail: {
+            tags: ["generator"],
+            summary: "Review a generator preview session",
+          },
+        },
+      )
+      .post(
         "/studio/generator/sessions/:id/apply",
         async ({ params, request }) => {
           const identity = (await authorize(request.headers)) ?? null
@@ -259,6 +308,12 @@ const toSessionResponse = (session: GeneratorPreviewSessionRecord) => ({
   outputDir: session.outputDir,
   previewFileCount: session.previewFileCount,
   reportPath: session.reportPath,
+  reviewComment: session.reviewComment,
+  reviewedAt: session.reviewedAt,
+  reviewedByDisplayName: session.reviewedByDisplayName,
+  reviewedByUserId: session.reviewedByUserId,
+  reviewedByUsername: session.reviewedByUsername,
+  reviewEvidence: buildReviewEvidence(session),
   schemaName: session.schemaName,
   skippedFileCount: session.skippedFileCount,
   sourceType: session.sourceType,
@@ -293,6 +348,27 @@ const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
     actorUserId: session.appliedByUserId,
     actorUsername: session.appliedByUsername,
     requestId: session.applyRequestId,
+  }
+}
+
+const buildReviewEvidence = (session: GeneratorPreviewSessionRecord) => {
+  if (
+    session.reviewedAt === null &&
+    session.reviewedByUserId === null &&
+    session.reviewComment === null
+  ) {
+    return null
+  }
+
+  return {
+    sessionId: session.id,
+    reportPath: session.reportPath,
+    reviewedAt: session.reviewedAt,
+    actorDisplayName: session.reviewedByDisplayName,
+    actorUserId: session.reviewedByUserId,
+    actorUsername: session.reviewedByUsername,
+    comment: session.reviewComment,
+    decision: session.status === "rejected" ? "reject" : "approve",
   }
 }
 

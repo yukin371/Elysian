@@ -8,10 +8,15 @@ import {
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
   markGeneratorPreviewSessionApplied,
+  markGeneratorPreviewSessionReviewed,
 } from "@elysian/persistence"
 
 export type GeneratorPreviewSessionSourceType = "registered-schema"
-export type GeneratorPreviewSessionStatus = "ready" | "applied"
+export type GeneratorPreviewSessionStatus =
+  | "pending_review"
+  | "ready"
+  | "rejected"
+  | "applied"
 
 export interface GeneratorPreviewSessionRecord {
   id: string
@@ -32,6 +37,11 @@ export interface GeneratorPreviewSessionRecord {
   outputDir: string
   previewFileCount: number
   reportPath: string
+  reviewComment: string | null
+  reviewedAt: string | null
+  reviewedByDisplayName: string | null
+  reviewedByUserId: string | null
+  reviewedByUsername: string | null
   schemaName: string
   skippedFileCount: number | null
   sourceType: GeneratorPreviewSessionSourceType
@@ -66,6 +76,11 @@ export interface CreateGeneratorPreviewSessionInput {
   previewFileCount: number
   report: GenerationPreviewReport
   reportPath: string
+  reviewComment?: string | null
+  reviewedAt?: string | null
+  reviewedByDisplayName?: string | null
+  reviewedByUserId?: string | null
+  reviewedByUsername?: string | null
   schemaName: string
   skippedFileCount?: number | null
   sourceType: GeneratorPreviewSessionSourceType
@@ -86,6 +101,15 @@ export interface MarkPreviewSessionAppliedInput {
   skippedFileCount: number
 }
 
+export interface MarkPreviewSessionReviewedInput {
+  reviewComment: string | null
+  reviewedAt: string
+  reviewedByDisplayName: string | null
+  reviewedByUserId: string | null
+  reviewedByUsername: string | null
+  status: "ready" | "rejected"
+}
+
 export interface GeneratorSessionRepository {
   createPreviewSession: (
     input: CreateGeneratorPreviewSessionInput,
@@ -97,6 +121,10 @@ export interface GeneratorSessionRepository {
   markPreviewSessionApplied: (
     id: string,
     input: MarkPreviewSessionAppliedInput,
+  ) => Promise<GeneratorPreviewSessionDetail | null>
+  markPreviewSessionReviewed: (
+    id: string,
+    input: MarkPreviewSessionReviewedInput,
   ) => Promise<GeneratorPreviewSessionDetail | null>
 }
 
@@ -130,11 +158,16 @@ export const createGeneratorSessionRepository = (
       outputDir: input.outputDir,
       previewFileCount: input.previewFileCount,
       reportPath: input.reportPath,
+      reviewComment: input.reviewComment ?? null,
+      reviewedAt: toOptionalDate(input.reviewedAt),
+      reviewedByDisplayName: input.reviewedByDisplayName ?? null,
+      reviewedByUserId: input.reviewedByUserId ?? null,
+      reviewedByUsername: input.reviewedByUsername ?? null,
       schemaName: input.schemaName,
       skippedFileCount: input.skippedFileCount ?? null,
       sourceType: input.sourceType,
       sourceValue: input.sourceValue,
-      status: input.status ?? "ready",
+      status: input.status ?? "pending_review",
       targetPreset: input.targetPreset,
     })
 
@@ -169,6 +202,18 @@ export const createGeneratorSessionRepository = (
 
     return row ? mapPreviewSessionDetailRow(row) : null
   },
+  async markPreviewSessionReviewed(id, input) {
+    const row = await markGeneratorPreviewSessionReviewed(db, id, {
+      reviewComment: input.reviewComment,
+      reviewedAt: new Date(input.reviewedAt),
+      reviewedByDisplayName: input.reviewedByDisplayName,
+      reviewedByUserId: input.reviewedByUserId,
+      reviewedByUsername: input.reviewedByUsername,
+      status: input.status,
+    })
+
+    return row ? mapPreviewSessionDetailRow(row) : null
+  },
 })
 
 export const createInMemoryGeneratorSessionRepository =
@@ -197,11 +242,16 @@ export const createInMemoryGeneratorSessionRepository =
           previewFileCount: input.previewFileCount,
           report: input.report,
           reportPath: input.reportPath,
+          reviewComment: input.reviewComment ?? null,
+          reviewedAt: input.reviewedAt ?? null,
+          reviewedByDisplayName: input.reviewedByDisplayName ?? null,
+          reviewedByUserId: input.reviewedByUserId ?? null,
+          reviewedByUsername: input.reviewedByUsername ?? null,
           schemaName: input.schemaName,
           skippedFileCount: input.skippedFileCount ?? null,
           sourceType: input.sourceType,
           sourceValue: input.sourceValue,
-          status: input.status ?? "ready",
+          status: input.status ?? "pending_review",
           targetPreset: input.targetPreset,
           tenantId: input.tenantId ?? null,
         }
@@ -239,6 +289,25 @@ export const createInMemoryGeneratorSessionRepository =
         sessions.set(id, updated)
         return updated
       },
+      async markPreviewSessionReviewed(id, input) {
+        const current = sessions.get(id)
+        if (!current) {
+          return null
+        }
+
+        const updated: GeneratorPreviewSessionDetail = {
+          ...current,
+          reviewComment: input.reviewComment,
+          reviewedAt: input.reviewedAt,
+          reviewedByDisplayName: input.reviewedByDisplayName,
+          reviewedByUserId: input.reviewedByUserId,
+          reviewedByUsername: input.reviewedByUsername,
+          status: input.status,
+        }
+
+        sessions.set(id, updated)
+        return updated
+      },
     }
   }
 
@@ -263,6 +332,11 @@ const toPreviewSessionRecord = (
   outputDir: session.outputDir,
   previewFileCount: session.previewFileCount,
   reportPath: session.reportPath,
+  reviewComment: session.reviewComment,
+  reviewedAt: session.reviewedAt,
+  reviewedByDisplayName: session.reviewedByDisplayName,
+  reviewedByUserId: session.reviewedByUserId,
+  reviewedByUsername: session.reviewedByUsername,
   schemaName: session.schemaName,
   skippedFileCount: session.skippedFileCount,
   sourceType: session.sourceType,
@@ -295,6 +369,11 @@ const mapPreviewSessionRow = (
   outputDir: row.outputDir,
   previewFileCount: row.previewFileCount,
   reportPath: row.reportPath,
+  reviewComment: row.reviewComment,
+  reviewedAt: row.reviewedAt?.toISOString() ?? null,
+  reviewedByDisplayName: row.reviewedByDisplayName,
+  reviewedByUserId: row.reviewedByUserId,
+  reviewedByUsername: row.reviewedByUsername,
   schemaName: row.schemaName,
   skippedFileCount: row.skippedFileCount,
   sourceType: row.sourceType as GeneratorPreviewSessionSourceType,

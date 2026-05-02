@@ -136,6 +136,14 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "This workspace is driven by server preview sessions, so the file plan, conflict status, and apply evidence all come from backend preview reports.",
   "app.generatorPreview.message.blockingConflicts":
     "This preview contains blocking conflicts. Resolve them before running a staging apply.",
+  "app.generatorPreview.message.pendingReview":
+    "This preview session must be approved before it can be applied to staging.",
+  "app.generatorPreview.message.reviewApproved":
+    "This preview passed review at {value}.",
+  "app.generatorPreview.message.reviewRejected":
+    "This preview was rejected at {value}.",
+  "app.generatorPreview.message.rejected":
+    "This preview session has been rejected. Generate a new preview before continuing.",
   "app.generatorPreview.message.applied":
     "This preview has already been applied to staging at {value}.",
   "app.generatorPreview.filter.schemaLabel": "Module schema",
@@ -158,9 +166,13 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.loading": "Generating the latest preview session.",
   "app.generatorPreview.action.refresh": "Refresh preview",
   "app.generatorPreview.action.refreshing": "Refreshing",
+  "app.generatorPreview.action.approve": "Approve",
+  "app.generatorPreview.action.reject": "Reject",
   "app.generatorPreview.action.apply": "Apply to staging",
   "app.generatorPreview.action.applying": "Applying",
+  "app.generatorPreview.status.pendingReview": "Pending review",
   "app.generatorPreview.status.ready": "Ready",
+  "app.generatorPreview.status.rejected": "Rejected",
   "app.generatorPreview.status.applied": "Applied",
   "app.generatorPreview.summary.changed": "Changed files",
   "app.generatorPreview.summary.create": "Create",
@@ -173,6 +185,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.actionLabel.block": "Block",
   "app.generatorPreview.sessionTitle": "Preview session",
   "app.generatorPreview.diffTitle": "Diff summary",
+  "app.generatorPreview.reviewTitle": "Review evidence",
   "app.generatorPreview.applyTitle": "Apply evidence",
   "app.generatorPreview.sourceTitle": "Generated source",
   "app.generatorPreview.currentSourceTitle": "Current target contents",
@@ -189,6 +202,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.sessionId": "Session ID",
   "app.generatorPreview.meta.reportPath": "Preview report path",
   "app.generatorPreview.meta.outputDir": "Output directory",
+  "app.generatorPreview.meta.reviewedAt": "Reviewed at",
+  "app.generatorPreview.meta.reviewDecision": "Review decision",
+  "app.generatorPreview.meta.reviewComment": "Review comment",
   "app.generatorPreview.meta.appliedAt": "Applied at",
   "app.generatorPreview.meta.manifestPath": "Manifest path",
   "app.generatorPreview.meta.requestId": "Request ID",

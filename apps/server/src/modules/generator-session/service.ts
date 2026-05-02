@@ -35,6 +35,13 @@ interface ApplyGeneratorPreviewSessionInput {
   requestId: string | null
 }
 
+interface ReviewGeneratorPreviewSessionInput {
+  actor: AuthIdentity | null
+  comment?: string
+  decision: "approve" | "reject"
+  id: string
+}
+
 export interface GeneratorSessionServiceOptions {
   now?: () => Date
   reportRootDir?: string
@@ -112,6 +119,32 @@ export const createGeneratorSessionService = (
       }
 
       if (session.status !== "ready") {
+        if (session.status === "pending_review") {
+          throw new AppError({
+            code: "GENERATOR_SESSION_REVIEW_REQUIRED",
+            message: "Generator session must be approved before apply",
+            status: 409,
+            expose: true,
+            details: {
+              id: session.id,
+              status: session.status,
+            },
+          })
+        }
+
+        if (session.status === "rejected") {
+          throw new AppError({
+            code: "GENERATOR_SESSION_REJECTED",
+            message: "Generator session has been rejected",
+            status: 409,
+            expose: true,
+            details: {
+              id: session.id,
+              status: session.status,
+            },
+          })
+        }
+
         throw new AppError({
           code: "GENERATOR_SESSION_NOT_READY",
           message: "Generator session is not ready for apply",
@@ -238,11 +271,68 @@ export const createGeneratorSessionService = (
         schemaName: schema.name,
         sourceType: "registered-schema",
         sourceValue: schema.name,
+        status: "pending_review",
         targetPreset,
         tenantId: input.actor?.user.tenantId ?? null,
       })
     },
     getPreviewSessionById: (id: string) => repository.getPreviewSessionById(id),
     listPreviewSessions: () => repository.listPreviewSessions(),
+    async reviewPreviewSession(
+      input: ReviewGeneratorPreviewSessionInput,
+    ): Promise<GeneratorPreviewSessionDetail> {
+      const session = await repository.getPreviewSessionById(input.id)
+      if (!session) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_NOT_FOUND",
+          message: "Generator session not found",
+          status: 404,
+          expose: true,
+          details: {
+            id: input.id,
+          },
+        })
+      }
+
+      if (session.status !== "pending_review") {
+        throw new AppError({
+          code: "GENERATOR_SESSION_REVIEW_NOT_PENDING",
+          message: "Generator session is not pending review",
+          status: 409,
+          expose: true,
+          details: {
+            id: session.id,
+            status: session.status,
+          },
+        })
+      }
+
+      const reviewedAt = now().toISOString()
+      const reviewedSession = await repository.markPreviewSessionReviewed(
+        session.id,
+        {
+          reviewComment: input.comment?.trim() || null,
+          reviewedAt,
+          reviewedByDisplayName: input.actor?.user.displayName ?? null,
+          reviewedByUserId: input.actor?.user.id ?? null,
+          reviewedByUsername: input.actor?.user.username ?? null,
+          status: input.decision === "approve" ? "ready" : "rejected",
+        },
+      )
+
+      if (!reviewedSession) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_NOT_FOUND",
+          message: "Generator session not found",
+          status: 404,
+          expose: true,
+          details: {
+            id: session.id,
+          },
+        })
+      }
+
+      return reviewedSession
+    },
   }
 }

@@ -1,14 +1,14 @@
 # generator-session
 
-`generator-session` 负责把 generator preview/apply 过程包装成可查询的后端 session 运行时。
+`generator-session` 负责把 generator preview/review/apply 过程包装成可查询的后端 session 运行时。
 
 > 当前简化边界：只支持已注册 schema、`staging` 目标目录和 `vue/react` 前端目标；它是“生成预览与应用记录中心”，不是通用低代码 studio 编排平台。
 
 ## Owns
 
-- `/studio/generator/sessions` 的列表、详情、preview 创建、staging apply。
-- preview report 的落盘、session 元数据持久化、apply evidence 回传。
-- blocking conflict / stale report / apply conflict 的运行时错误语义。
+- `/studio/generator/sessions` 的列表、详情、preview 创建、review、staging apply。
+- preview report 的落盘、session 元数据持久化、review/apply evidence 回传。
+- blocking conflict / stale report / review required / rejected / apply conflict 的运行时错误语义。
 - generator 审计的 best-effort 写入。
 
 ## Must Not Own
@@ -37,6 +37,15 @@ flowchart LR
 
 ```mermaid
 flowchart TD
+  Review[POST /sessions/:id/review] --> Load[load session + report]
+  Load --> Guard{status=pending_review?}
+  Guard -->|yes| Mark[markPreviewSessionReviewed]
+  Mark --> Audit[best-effort audit]
+  Guard -->|no| Conflict[409 AppError]
+```
+
+```mermaid
+flowchart TD
   Apply[POST /sessions/:id/apply] --> Load[load session + report]
   Load --> Guard{status=ready\nand no blocking conflicts?}
   Guard -->|yes| Run[@elysian/generator\napply preview report]
@@ -48,6 +57,8 @@ flowchart TD
 ## Validation
 
 - `service.ts` 已确认 preview 前必须在 generator registry 中找到 schema，否则返回 `GENERATOR_SCHEMA_NOT_FOUND`。
-- `service.ts` 已确认 apply 前必须满足 `status=ready` 且无 blocking conflicts。
+- `service.ts` 已确认新建 preview session 默认进入 `pending_review`。
+- `service.ts` 已确认 review 只允许在 `status=pending_review` 时执行，通过后进入 `ready`，拒绝后进入 `rejected`。
+- `service.ts` 已确认 apply 前必须满足 `status=ready` 且无 blocking conflicts；`pending_review` 会返回 `GENERATOR_SESSION_REVIEW_REQUIRED`，`rejected` 会返回 `GENERATOR_SESSION_REJECTED`。
 - `service.ts` 已确认 stale report 与 apply conflict 会分流成 `GENERATOR_SESSION_STALE` / `GENERATOR_SESSION_APPLY_CONFLICT`。
 - `repository.ts` 已确认持久化 session 需要 `tenantId`，详情读取依赖落盘的 preview report。

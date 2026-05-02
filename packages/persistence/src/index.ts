@@ -93,7 +93,9 @@ export {
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
   markGeneratorPreviewSessionApplied,
+  markGeneratorPreviewSessionReviewed,
   type MarkGeneratorPreviewSessionAppliedPersistenceInput,
+  type MarkGeneratorPreviewSessionReviewedPersistenceInput,
 } from "./generator-session"
 export {
   cancelWorkflowInstanceTodoTasks,

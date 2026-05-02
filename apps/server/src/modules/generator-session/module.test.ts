@@ -219,8 +219,10 @@ describe("generator session module", () => {
         actorUsername: string
         previewFileCount: number
         reportPath: string
+        reviewEvidence: null
         schemaName: string
         sourceType: string
+        status: string
       }
       report: {
         databaseChangePlan: {
@@ -240,6 +242,8 @@ describe("generator session module", () => {
     expect(createBody.session.actorUsername).toBe("admin")
     expect(createBody.session.previewFileCount).toBe(6)
     expect(createBody.session.applyEvidence).toBeNull()
+    expect(createBody.session.reviewEvidence).toBeNull()
+    expect(createBody.session.status).toBe("pending_review")
     expect(createBody.diff).toEqual({
       totalFileCount: 6,
       changedFileCount: 6,
@@ -260,6 +264,65 @@ describe("generator session module", () => {
     const reportContents = await readFile(createBody.session.reportPath, "utf8")
     expect(reportContents).toContain('"schemaName": "customer"')
     expect(reportContents).toContain('"databaseChangePlan"')
+
+    const reviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+              "user-agent": "generator-session-test-agent",
+              "x-request-id": "req-generator-session-review-1",
+            }),
+          },
+          body: JSON.stringify({
+            decision: "approve",
+            comment: "Looks good for staging",
+          }),
+        },
+      ),
+    )
+    expect(reviewResponse.status).toBe(200)
+
+    const reviewBody = (await reviewResponse.json()) as {
+      diff: {
+        totalFileCount: number
+      }
+      session: {
+        id: string
+        reviewComment: string
+        reviewEvidence: {
+          actorUserId: string
+          comment: string
+          decision: string
+          reviewedAt: string
+          reportPath: string
+          sessionId: string
+        }
+        reviewedAt: string
+        reviewedByUserId: string
+        status: string
+      }
+    }
+    expect(reviewBody.session.id).toBe(createBody.session.id)
+    expect(reviewBody.session.status).toBe("ready")
+    expect(reviewBody.session.reviewComment).toBe("Looks good for staging")
+    expect(reviewBody.session.reviewedByUserId).toBe(
+      createBody.session.actorUserId,
+    )
+    expect(reviewBody.session.reviewEvidence).toMatchObject({
+      sessionId: createBody.session.id,
+      reportPath: createBody.session.reportPath,
+      actorUserId: createBody.session.actorUserId,
+      comment: "Looks good for staging",
+      decision: "approve",
+    })
+    expect(reviewBody.session.reviewEvidence.reviewedAt).toBe(
+      reviewBody.session.reviewedAt,
+    )
+    expect(reviewBody.diff.totalFileCount).toBe(6)
 
     const applyResponse = await app.handle(
       new Request(
@@ -302,6 +365,11 @@ describe("generator session module", () => {
         applyManifestPath: string
         applyRequestId: string
         id: string
+        reviewEvidence: {
+          actorUserId: string
+          comment: string
+          decision: string
+        }
         skippedFileCount: number
         status: string
       }
@@ -332,6 +400,11 @@ describe("generator session module", () => {
     expect(applyBody.session.applyManifestPath).toBe(
       applyBody.apply.manifestPath,
     )
+    expect(applyBody.session.reviewEvidence).toMatchObject({
+      actorUserId: createBody.session.actorUserId,
+      comment: "Looks good for staging",
+      decision: "approve",
+    })
     expect(applyBody.diff).toEqual(createBody.diff)
     expect(applyBody.apply.evidence).toMatchObject({
       sessionId: createBody.session.id,
@@ -363,6 +436,10 @@ describe("generator session module", () => {
           requestId: string
         }
         id: string
+        reviewEvidence: {
+          comment: string
+          decision: string
+        }
         schemaName: string
       }>
     }
@@ -374,6 +451,10 @@ describe("generator session module", () => {
     expect(listBody.items[0]?.applyEvidence.requestId).toBe(
       "req-generator-session-apply-1",
     )
+    expect(listBody.items[0]?.reviewEvidence).toMatchObject({
+      comment: "Looks good for staging",
+      decision: "approve",
+    })
 
     const detailResponse = await app.handle(
       new Request(
@@ -400,6 +481,11 @@ describe("generator session module", () => {
       report: {
         schemaName: string
       }
+      reviewEvidence: {
+        actorUserId: string
+        comment: string
+        decision: string
+      }
     }
     expect(detailBody).toMatchObject({
       id: createBody.session.id,
@@ -412,6 +498,11 @@ describe("generator session module", () => {
     expect(detailBody.applyEvidence).toMatchObject({
       actorUserId: createBody.session.actorUserId,
       requestId: "req-generator-session-apply-1",
+    })
+    expect(detailBody.reviewEvidence).toMatchObject({
+      actorUserId: createBody.session.actorUserId,
+      comment: "Looks good for staging",
+      decision: "approve",
     })
 
     const auditLog = (await fixture.repository.listAuditLogs()).find(
@@ -438,6 +529,20 @@ describe("generator session module", () => {
       targetType: "generator-session",
       targetId: createBody.session.id,
       requestId: "req-generator-session-apply-1",
+      userAgent: "generator-session-test-agent",
+      result: "success",
+    })
+
+    const reviewAuditLog = (await fixture.repository.listAuditLogs()).find(
+      (entry) => entry.action === "review_approve",
+    )
+    expect(reviewAuditLog).toMatchObject({
+      category: "generator",
+      action: "review_approve",
+      actorUserId: createBody.session.actorUserId,
+      targetType: "generator-session",
+      targetId: createBody.session.id,
+      requestId: "req-generator-session-review-1",
       userAgent: "generator-session-test-agent",
       result: "success",
     })
@@ -490,6 +595,24 @@ describe("generator session module", () => {
     await mkdir(dirname(driftedPath), { recursive: true })
     await writeFile(driftedPath, "export const drifted = true\n", "utf8")
 
+    const reviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            decision: "approve",
+          }),
+        },
+      ),
+    )
+    expect(reviewResponse.status).toBe(200)
+
     const applyResponse = await app.handle(
       new Request(
         `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
@@ -507,6 +630,87 @@ describe("generator session module", () => {
       }
     }
     expect(errorBody.error.code).toBe("GENERATOR_SESSION_STALE")
+  })
+
+  it("blocks apply for rejected generator preview sessions", async () => {
+    const fixture = await createAuthFixture()
+    const repository = createInMemoryGeneratorSessionRepository()
+    const outputDir = await mkdtemp(
+      join(tmpdir(), "elysian-generator-session-output-"),
+    )
+    const reportRootDir = await mkdtemp(
+      join(tmpdir(), "elysian-generator-session-report-"),
+    )
+    const app = createTestApp([
+      fixture.authModule,
+      createGeneratorSessionModule(repository, {
+        authGuard: fixture.authGuard,
+        reportRootDir,
+        resolveOutputDir: () => outputDir,
+      }),
+    ])
+    const accessToken = await loginAsAdmin(app)
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "customer",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          targetPreset: "staging",
+        }),
+      }),
+    )
+    expect(createResponse.status).toBe(201)
+
+    const createBody = (await createResponse.json()) as {
+      session: {
+        id: string
+      }
+    }
+
+    const reviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            decision: "reject",
+            comment: "Conflict needs manual follow-up",
+          }),
+        },
+      ),
+    )
+    expect(reviewResponse.status).toBe(200)
+
+    const applyResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken),
+        },
+      ),
+    )
+
+    expect(applyResponse.status).toBe(409)
+    const errorBody = (await applyResponse.json()) as {
+      error: {
+        code: string
+      }
+    }
+    expect(errorBody.error.code).toBe("GENERATOR_SESSION_REJECTED")
   })
 
   it("requires authentication for generator preview sessions when auth guard is configured", async () => {

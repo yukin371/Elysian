@@ -2,6 +2,7 @@ import type { GeneratorPreviewFileCard } from "../../../lib/generator-preview-wo
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
+  GeneratorPreviewReviewEvidence,
   GeneratorPreviewSessionRecord,
   GeneratorPreviewSqlPreview,
 } from "../../../lib/platform-api"
@@ -20,6 +21,7 @@ export type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
+  GeneratorPreviewReviewEvidence,
   GeneratorPreviewSqlPreview,
   GeneratorPreviewSessionRecord,
 }

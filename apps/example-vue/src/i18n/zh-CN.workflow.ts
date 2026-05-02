@@ -128,6 +128,14 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "当前工作区由 server preview session 驱动；你看到的是后端返回的预览报告、冲突状态与 apply 证据。",
   "app.generatorPreview.message.blockingConflicts":
     "当前预览包含阻塞冲突，需先处理冲突后才能执行 staging apply。",
+  "app.generatorPreview.message.pendingReview":
+    "当前 preview session 需要先审核通过，才能执行 staging apply。",
+  "app.generatorPreview.message.reviewApproved":
+    "本次预览已完成审核通过，审核时间：{value}。",
+  "app.generatorPreview.message.reviewRejected":
+    "本次预览已被审核拒绝，审核时间：{value}。",
+  "app.generatorPreview.message.rejected":
+    "当前 preview session 已被拒绝，请重新生成新的预览后再继续。",
   "app.generatorPreview.message.applied":
     "本次预览已完成 staging apply，应用时间：{value}。",
   "app.generatorPreview.filter.schemaLabel": "模块 Schema",
@@ -148,9 +156,13 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.loading": "正在生成最新 preview session，请稍候。",
   "app.generatorPreview.action.refresh": "刷新预览",
   "app.generatorPreview.action.refreshing": "刷新中",
+  "app.generatorPreview.action.approve": "审核通过",
+  "app.generatorPreview.action.reject": "拒绝",
   "app.generatorPreview.action.apply": "应用到 staging",
   "app.generatorPreview.action.applying": "应用中",
+  "app.generatorPreview.status.pendingReview": "待审核",
   "app.generatorPreview.status.ready": "待应用",
+  "app.generatorPreview.status.rejected": "已拒绝",
   "app.generatorPreview.status.applied": "已应用",
   "app.generatorPreview.summary.changed": "变更文件",
   "app.generatorPreview.summary.create": "新增",
@@ -163,6 +175,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.actionLabel.block": "阻塞",
   "app.generatorPreview.sessionTitle": "预览会话",
   "app.generatorPreview.diffTitle": "差异摘要",
+  "app.generatorPreview.reviewTitle": "审核证据",
   "app.generatorPreview.applyTitle": "Apply 证据",
   "app.generatorPreview.sourceTitle": "生成源码",
   "app.generatorPreview.currentSourceTitle": "目标目录当前内容",
@@ -179,6 +192,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.sessionId": "Session ID",
   "app.generatorPreview.meta.reportPath": "预览报告路径",
   "app.generatorPreview.meta.outputDir": "输出目录",
+  "app.generatorPreview.meta.reviewedAt": "审核时间",
+  "app.generatorPreview.meta.reviewDecision": "审核结果",
+  "app.generatorPreview.meta.reviewComment": "审核备注",
   "app.generatorPreview.meta.appliedAt": "应用时间",
   "app.generatorPreview.meta.manifestPath": "Manifest 路径",
   "app.generatorPreview.meta.requestId": "请求 ID",

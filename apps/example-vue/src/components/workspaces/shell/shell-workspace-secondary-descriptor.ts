@@ -189,6 +189,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   generatorPreviewSqlPreview: GeneratorPreviewSqlPreview | null
   generatorPreviewSession: Record<string, unknown> | null
   generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null
+  generatorPreviewReviewEvidence: unknown
   generatorPreviewApplyEvidence: unknown
   customerModuleReady: boolean
   canCreateCustomers: boolean
@@ -690,6 +691,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       sqlPreview: props.generatorPreviewSqlPreview,
       session: props.generatorPreviewSession,
       diffSummary: props.generatorPreviewDiffSummary,
+      reviewEvidence: props.generatorPreviewReviewEvidence,
       applyEvidence: props.generatorPreviewApplyEvidence,
     },
   }),

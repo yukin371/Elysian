@@ -42,6 +42,17 @@ export interface GeneratorPreviewApplyEvidence {
   requestId: string | null
 }
 
+export interface GeneratorPreviewReviewEvidence {
+  sessionId: string
+  reportPath: string
+  reviewedAt: string | null
+  actorDisplayName: string | null
+  actorUserId: string | null
+  actorUsername: string | null
+  comment: string | null
+  decision: "approve" | "reject"
+}
+
 export interface GeneratorPreviewReportFile {
   absolutePath: string
   contents: string
@@ -95,11 +106,17 @@ export interface GeneratorPreviewSessionRecord {
   outputDir: string
   previewFileCount: number
   reportPath: string
+  reviewComment: string | null
+  reviewedAt: string | null
+  reviewedByDisplayName: string | null
+  reviewedByUserId: string | null
+  reviewedByUsername: string | null
+  reviewEvidence: GeneratorPreviewReviewEvidence | null
   schemaName: string
   skippedFileCount: number | null
   sourceType: "registered-schema"
   sourceValue: string
-  status: "ready" | "applied"
+  status: "pending_review" | "ready" | "rejected" | "applied"
   targetPreset: "staging"
   tenantId: string | null
 }
@@ -125,6 +142,16 @@ export interface CreateGeneratorPreviewSessionResponse {
   session: GeneratorPreviewSessionRecord
   diff: GeneratorPreviewDiffSummary
   report: GeneratorPreviewReport
+}
+
+export interface ReviewGeneratorPreviewSessionRequest {
+  decision: "approve" | "reject"
+  comment?: string
+}
+
+export interface ReviewGeneratorPreviewSessionResponse {
+  session: GeneratorPreviewSessionRecord
+  diff: GeneratorPreviewDiffSummary
 }
 
 export interface AppliedGeneratorPreviewFile {
@@ -191,6 +218,19 @@ export const applyGeneratorPreviewSession = async (
     `/studio/generator/sessions/${encodeURIComponent(id)}/apply`,
     {
       method: "POST",
+      auth: true,
+    },
+  )
+
+export const reviewGeneratorPreviewSession = async (
+  id: string,
+  input: ReviewGeneratorPreviewSessionRequest,
+): Promise<ReviewGeneratorPreviewSessionResponse> =>
+  requestJson<ReviewGeneratorPreviewSessionResponse>(
+    `/studio/generator/sessions/${encodeURIComponent(id)}/review`,
+    {
+      method: "POST",
+      body: input,
       auth: true,
     },
   )

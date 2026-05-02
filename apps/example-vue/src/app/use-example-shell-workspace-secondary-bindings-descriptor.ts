@@ -429,6 +429,8 @@ export const createExampleShellWorkspaceSecondaryBindings = ({
     generatorPreviewSqlPreview: read(generatorPreviewSqlPreview),
     generatorPreviewSession: read(generatorPreviewSession),
     generatorPreviewDiffSummary: read(generatorPreviewDiffSummary),
+    generatorPreviewReviewEvidence:
+      read(generatorPreviewSession)?.reviewEvidence ?? null,
     generatorPreviewApplyEvidence:
       read(generatorPreviewSession)?.applyEvidence ?? null,
     customerModuleReady: read(customerModuleReady),

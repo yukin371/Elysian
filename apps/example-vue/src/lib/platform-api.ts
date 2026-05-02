@@ -104,6 +104,7 @@ export {
   fetchWorkflowDefinitionById,
   fetchWorkflowDefinitions,
   listGeneratorPreviewSessions,
+  reviewGeneratorPreviewSession,
 } from "./platform-api/workflow"
 
 export type {
@@ -203,9 +204,12 @@ export type {
   GeneratorPreviewPlannedAction,
   GeneratorPreviewReport,
   GeneratorPreviewReportFile,
+  GeneratorPreviewReviewEvidence,
   GeneratorPreviewSessionDetail,
   GeneratorPreviewSessionRecord,
   GeneratorPreviewSessionsResponse,
   GeneratorPreviewSqlPreview,
+  ReviewGeneratorPreviewSessionRequest,
+  ReviewGeneratorPreviewSessionResponse,
   WorkflowDefinitionsResponse,
 } from "./platform-api/workflow"
