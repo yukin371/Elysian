@@ -273,6 +273,80 @@ describe("useAuthSessionWorkspace", () => {
     )
   })
 
+  test("preserves cached session context when reloading sessions fails", async () => {
+    const current = createSession({
+      id: "session-current",
+      ip: "10.0.0.10",
+      isCurrent: true,
+    })
+    const rotated = createSession({
+      id: "session-rotated",
+      ip: "10.0.0.20",
+      replacedBySessionId: "session-current",
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15",
+    })
+    const recoverableErrors: unknown[] = []
+    let failReload = false
+
+    globalThis.fetch = (async (
+      input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/auth/sessions") && method === "GET") {
+        if (failReload) {
+          return new Response(JSON.stringify({ message: "unavailable" }), {
+            headers: { "content-type": "application/json" },
+            status: 503,
+          })
+        }
+
+        return new Response(JSON.stringify({ items: [current, rotated] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as unknown as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadSessions()
+    workspace.handleSearch({
+      keyword: "  safari  ",
+      scope: "history",
+      state: "rotated",
+    })
+    workspace.handleRowClick({ id: "session-rotated" })
+    failReload = true
+
+    await workspace.reloadSessions()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.sessionErrorMessage.value).toContain("status 503")
+    expect(workspace.selectedSessionId.value).toBe("session-rotated")
+    expect(workspace.selectedSession.value?.id).toBe("session-rotated")
+    expect(workspace.countLabel.value).toBe(
+      "app.onlineSession.countLabel",
+    )
+    expect(workspace.filteredSessionItems.value.map((item) => item.id)).toEqual(
+      ["session-rotated"],
+    )
+    expect(workspace.sessionQueryValues.value).toEqual({
+      keyword: "  safari  ",
+      scope: "history",
+      state: "rotated",
+    })
+  })
+
   test("reports recoverable auth errors when revoking a session fails", async () => {
     const current = createSession({
       id: "session-current",
