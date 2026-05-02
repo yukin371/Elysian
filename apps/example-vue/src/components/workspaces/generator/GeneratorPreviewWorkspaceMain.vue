@@ -474,7 +474,7 @@ watch(
           <button
             type="button"
             class="enterprise-button enterprise-button-ghost"
-            :disabled="!canApprove"
+            :disabled="!canApprove || isRejectConfirming"
             @click="handleReviewPreview('approve')"
           >
             {{ t("app.generatorPreview.action.approve") }}
