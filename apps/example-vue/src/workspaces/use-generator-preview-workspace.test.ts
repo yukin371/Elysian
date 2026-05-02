@@ -380,6 +380,149 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.selectedRecentSessionId.value).toBe("preview-session-3")
   })
 
+  test("reuses cached matching session when switching back to a previous selection", async () => {
+    let listRequestCount = 0
+    let detailRequestCount = 0
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        listRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:00:00.000Z",
+                id: "preview-session-3",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-3") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              createdAt: "2026-05-02T14:00:00.000Z",
+              id: "preview-session-3",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession({
+              conflictStrategy: "fail",
+              id: `preview-session-fail-${previewRequestCount}`,
+              status: "pending_review",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(listRequestCount).toBe(1)
+    expect(detailRequestCount).toBe(1)
+
+    workspace.selectedConflictStrategy.value = "fail"
+    await waitForAsyncWork()
+
+    expect(previewRequestCount).toBe(1)
+    expect(listRequestCount).toBe(3)
+
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    await waitForAsyncWork()
+
+    expect(workspace.currentSession.value?.id).toBe("preview-session-3")
+    expect(listRequestCount).toBe(3)
+    expect(detailRequestCount).toBe(1)
+  })
+
+  test("reuses cached session detail when restoring the same session twice", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-2") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              id: "preview-session-2",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace()
+
+    await workspace.restorePreviewSession("preview-session-2")
+    await workspace.restorePreviewSession("preview-session-2")
+
+    expect(detailRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-2")
+  })
+
   test("restores persisted selection before loading matching session", async () => {
     let previewRequestCount = 0
 

@@ -35,6 +35,12 @@ type GeneratorPreviewStoredSelection = {
   schemaName: string
 }
 
+const createGeneratorPreviewSelectionCacheKey = (
+  schemaName: string,
+  frontendTarget: FrontendTarget,
+  conflictStrategy: GeneratorPreviewConflictStrategy,
+) => `${schemaName}::${frontendTarget}::${conflictStrategy}`
+
 const isGeneratorPreviewConflictStrategy = (
   value: unknown,
 ): value is GeneratorPreviewConflictStrategy =>
@@ -130,6 +136,11 @@ export const useGeneratorPreviewWorkspace = (
   const selectedConflictStrategy = ref<GeneratorPreviewConflictStrategy>(
     storedSelection?.conflictStrategy ?? "fail",
   )
+  const sessionDetailCache = new Map<string, GeneratorPreviewSessionDetail>()
+  const selectionSessionCache = new Map<
+    string,
+    GeneratorPreviewSessionDetail
+  >()
   let latestPreviewRequestId = 0
 
   const schemaOptions = computed(() =>
@@ -286,7 +297,49 @@ export const useGeneratorPreviewWorkspace = (
         session.conflictStrategy === selectedConflictStrategy.value,
     ) ?? null
 
+  const getCurrentSelectionCacheKey = () =>
+    createGeneratorPreviewSelectionCacheKey(
+      selectedSchemaName.value,
+      selectedFrontendTarget.value,
+      selectedConflictStrategy.value,
+    )
+
+  const cacheSessionDetail = (session: GeneratorPreviewSessionDetail) => {
+    sessionDetailCache.set(session.id, session)
+    selectionSessionCache.set(
+      createGeneratorPreviewSelectionCacheKey(
+        session.schemaName,
+        session.frontendTarget,
+        session.conflictStrategy,
+      ),
+      session,
+    )
+  }
+
+  const buildSessionDetail = (
+    session: GeneratorPreviewSessionRecord,
+    diffSummary: GeneratorPreviewDiffSummary,
+    report: GeneratorPreviewReport,
+    sqlProposal: GeneratorPreviewSqlProposal | null,
+    sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff | null,
+  ): GeneratorPreviewSessionDetail => ({
+    ...session,
+    diffSummary,
+    report,
+    sqlProposal,
+    sqlProposalHandoff,
+  })
+
+  const upsertRecentSession = (session: GeneratorPreviewSessionRecord) => {
+    recentSessions.value = [
+      session,
+      ...recentSessions.value.filter((item) => item.id !== session.id),
+    ]
+  }
+
   const applySessionDetail = (session: GeneratorPreviewSessionDetail) => {
+    cacheSessionDetail(session)
+    upsertRecentSession(session)
     selectedSchemaName.value = session.schemaName
     selectedFrontendTarget.value = session.frontendTarget
     selectedConflictStrategy.value = session.conflictStrategy
@@ -307,7 +360,22 @@ export const useGeneratorPreviewWorkspace = (
     }
   }
 
+  const restoreCachedMatchingSession = () => {
+    const cachedSession = selectionSessionCache.get(getCurrentSelectionCacheKey())
+
+    if (!cachedSession) {
+      return false
+    }
+
+    applySessionDetail(cachedSession)
+    return true
+  }
+
   const restoreLatestMatchingSession = async () => {
+    if (restoreCachedMatchingSession()) {
+      return true
+    }
+
     try {
       const response = await listGeneratorPreviewSessions()
       recentSessions.value = response.items
@@ -322,7 +390,9 @@ export const useGeneratorPreviewWorkspace = (
       errorMessage.value = ""
 
       try {
-        const session = await fetchGeneratorPreviewSession(matchedSession.id)
+        const session =
+          sessionDetailCache.get(matchedSession.id) ??
+          (await fetchGeneratorPreviewSession(matchedSession.id))
         applySessionDetail(session)
         return true
       } finally {
@@ -361,12 +431,15 @@ export const useGeneratorPreviewWorkspace = (
         return
       }
 
-      currentSession.value = response.session
-      currentDiffSummary.value = response.diff
-      currentReport.value = response.report
-      currentSqlProposal.value = response.sqlProposal
-      currentSqlProposalHandoff.value = response.sqlProposalHandoff
-      selectedRecentSessionId.value = response.session.id
+      applySessionDetail(
+        buildSessionDetail(
+          response.session,
+          response.diff,
+          response.report,
+          response.sqlProposal,
+          response.sqlProposalHandoff,
+        ),
+      )
       void loadRecentSessions()
     } catch (error) {
       if (requestId !== latestPreviewRequestId) {
@@ -397,11 +470,25 @@ export const useGeneratorPreviewWorkspace = (
 
     try {
       const response = await applyGeneratorPreviewSession(sessionId)
-      currentSession.value = response.session
-      currentDiffSummary.value = response.diff
-      currentSqlProposal.value = response.sqlProposal
-      currentSqlProposalHandoff.value = response.sqlProposalHandoff
-      selectedRecentSessionId.value = response.session.id
+
+      if (currentReport.value) {
+        applySessionDetail(
+          buildSessionDetail(
+            response.session,
+            response.diff,
+            currentReport.value,
+            response.sqlProposal,
+            response.sqlProposalHandoff,
+          ),
+        )
+      } else {
+        currentSession.value = response.session
+        currentDiffSummary.value = response.diff
+        currentSqlProposal.value = response.sqlProposal
+        currentSqlProposalHandoff.value = response.sqlProposalHandoff
+        selectedRecentSessionId.value = response.session.id
+      }
+
       void loadRecentSessions()
     } catch (error) {
       onRecoverableAuthError(error)
@@ -434,11 +521,25 @@ export const useGeneratorPreviewWorkspace = (
         comment: comment?.trim() ? comment.trim() : undefined,
         decision,
       })
-      currentSession.value = response.session
-      currentDiffSummary.value = response.diff
-      currentSqlProposal.value = response.sqlProposal
-      currentSqlProposalHandoff.value = response.sqlProposalHandoff
-      selectedRecentSessionId.value = response.session.id
+
+      if (currentReport.value) {
+        applySessionDetail(
+          buildSessionDetail(
+            response.session,
+            response.diff,
+            currentReport.value,
+            response.sqlProposal,
+            response.sqlProposalHandoff,
+          ),
+        )
+      } else {
+        currentSession.value = response.session
+        currentDiffSummary.value = response.diff
+        currentSqlProposal.value = response.sqlProposal
+        currentSqlProposalHandoff.value = response.sqlProposalHandoff
+        selectedRecentSessionId.value = response.session.id
+      }
+
       void loadRecentSessions()
     } catch (error) {
       onRecoverableAuthError(error)
@@ -458,7 +559,9 @@ export const useGeneratorPreviewWorkspace = (
     errorMessage.value = ""
 
     try {
-      const session = await fetchGeneratorPreviewSession(sessionId)
+      const session =
+        sessionDetailCache.get(sessionId) ??
+        (await fetchGeneratorPreviewSession(sessionId))
       applySessionDetail(session)
     } catch (error) {
       onRecoverableAuthError(error)
