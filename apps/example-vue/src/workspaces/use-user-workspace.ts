@@ -479,6 +479,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
       basePanelMode.value = "detail"
       await reloadUsers()
     } catch (error) {
+      options.onRecoverableAuthError(error)
       userErrorMessage.value =
         error instanceof Error
           ? error.message

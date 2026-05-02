@@ -22,7 +22,9 @@ const createUserRecord = (overrides?: Partial<UserRecord>): UserRecord => ({
   ...overrides,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (options?: {
+  onRecoverableAuthError?: (error: unknown) => void
+}) =>
   useUserWorkspace({
     canCreate: computed(() => true),
     canResetPassword: computed(() => true),
@@ -33,7 +35,7 @@ const createWorkspace = () =>
     localizeBoolean: (value) => (value ? "yes" : "no"),
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeStatus: (status) => status,
-    onRecoverableAuthError: () => {},
+    onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
     page: {
       formFields: computed(() => []),
       queryFields: computed(() => []),
@@ -163,5 +165,57 @@ describe("useUserWorkspace", () => {
         request.endsWith("/system/users/user-1/reset-password"),
       ),
     ).toBe(false)
+  })
+
+  test("reports recoverable auth errors when password reset fails", async () => {
+    const user = createUserRecord()
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/system/users") && method === "GET") {
+        return new Response(JSON.stringify({ items: [user] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/system/users/user-1") && method === "GET") {
+        return new Response(JSON.stringify(user), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/system/users/user-1/reset-password") &&
+        method === "POST"
+      ) {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadUsers()
+    workspace.startPasswordReset(user)
+    workspace.userPasswordInput.value = resetSecret
+
+    await workspace.submitPasswordReset()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.userPanelMode.value).toBe("reset")
+    expect(workspace.userErrorMessage.value).toContain("status 401")
   })
 })
