@@ -323,6 +323,7 @@ defineEmits<{
       variant="outline"
       :disabled="
         notificationLoading ||
+        notificationExportLoading ||
         !canViewNotifications ||
         !canUpdateNotifications ||
         visibleUnreadNotificationCount === 0
@@ -478,6 +479,7 @@ defineEmits<{
       :disabled="
         fileLoading ||
         fileActionLoading ||
+        fileExportLoading ||
         !canViewFiles ||
         !canDeleteFiles ||
         !hasActiveFileFilters ||
