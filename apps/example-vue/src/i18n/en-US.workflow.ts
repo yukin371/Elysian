@@ -187,6 +187,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.refreshing": "Refreshing",
   "app.generatorPreview.action.approve": "Approve",
   "app.generatorPreview.action.reject": "Reject",
+  "app.generatorPreview.action.confirmReject": "Confirm reject",
+  "app.generatorPreview.action.cancelRejectConfirm": "Cancel reject",
   "app.generatorPreview.action.apply": "Apply to staging",
   "app.generatorPreview.action.confirmApply": "Confirm staging apply",
   "app.generatorPreview.action.cancelApplyConfirm": "Cancel confirm",

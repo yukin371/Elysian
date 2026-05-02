@@ -175,6 +175,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.refreshing": "刷新中",
   "app.generatorPreview.action.approve": "审核通过",
   "app.generatorPreview.action.reject": "拒绝",
+  "app.generatorPreview.action.confirmReject": "确认拒绝",
+  "app.generatorPreview.action.cancelRejectConfirm": "取消拒绝",
   "app.generatorPreview.action.apply": "应用到 staging",
   "app.generatorPreview.action.confirmApply": "确认应用到 staging",
   "app.generatorPreview.action.cancelApplyConfirm": "取消确认",

@@ -67,6 +67,7 @@ const emit = defineEmits<{
 
 const reviewComment = ref("")
 const isApplyConfirming = ref(false)
+const isRejectConfirming = ref(false)
 const resolveCurrentReviewDraftSessionId = () =>
   props.selectedRecentSessionId.trim() || null
 
@@ -276,6 +277,11 @@ const handleReviewCommentInput = (value: string | number) => {
 }
 
 const handleReviewPreview = (decision: "approve" | "reject") => {
+  if (decision === "reject" && !isRejectConfirming.value) {
+    isRejectConfirming.value = true
+    return
+  }
+
   emit("review-preview", {
     comment: reviewComment.value,
     decision,
@@ -299,6 +305,10 @@ const cancelApplyConfirmation = () => {
   isApplyConfirming.value = false
 }
 
+const cancelRejectConfirmation = () => {
+  isRejectConfirming.value = false
+}
+
 const handleFileSelection = (path: string) => {
   if (!shouldSelectGeneratorPreviewFile(props.selectedFilePath, path)) {
     return
@@ -311,13 +321,15 @@ watch(
   () => [
     props.sessionStatus,
     props.canApply,
+    props.canReject,
     props.applyLoading,
+    props.reviewLoading,
     props.selectedRecentSessionId,
     props.selectedSchemaName,
     props.selectedFrontendTarget,
     props.reviewEvidence?.comment ?? null,
   ],
-  ([status, canApply, applyLoading, sessionId]) => {
+  ([status, canApply, canReject, applyLoading, reviewLoading, sessionId]) => {
     const resolvedSessionId =
       typeof sessionId === "string" && sessionId.trim().length > 0
         ? sessionId.trim()
@@ -325,6 +337,10 @@ watch(
 
     if (!canApply || applyLoading || status !== "ready") {
       isApplyConfirming.value = false
+    }
+
+    if (!canReject || reviewLoading || status !== "pending_review") {
+      isRejectConfirming.value = false
     }
 
     if (status === "pending_review") {
@@ -443,7 +459,11 @@ watch(
             :disabled="!canReject"
             @click="handleReviewPreview('reject')"
           >
-            {{ t("app.generatorPreview.action.reject") }}
+            {{
+              isRejectConfirming
+                ? t("app.generatorPreview.action.confirmReject")
+                : t("app.generatorPreview.action.reject")
+            }}
           </button>
           <button
             type="button"
@@ -452,6 +472,15 @@ watch(
             @click="handleReviewPreview('approve')"
           >
             {{ t("app.generatorPreview.action.approve") }}
+          </button>
+          <button
+            v-if="isRejectConfirming"
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="reviewLoading"
+            @click="cancelRejectConfirmation"
+          >
+            {{ t("app.generatorPreview.action.cancelRejectConfirm") }}
           </button>
           <button
             v-if="isApplyConfirming"
