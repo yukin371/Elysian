@@ -259,6 +259,7 @@ export const createCrudWorkspace = <
       resetPanelInputs()
       await reloadRecords()
     } catch (error) {
+      options.onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error
           ? error.message
