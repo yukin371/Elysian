@@ -69,6 +69,17 @@ const sessionActorLabel = computed(() => {
   )
 })
 
+const resolveEvidenceActorLabel = (
+  evidence:
+    | GeneratorPreviewReviewEvidence
+    | GeneratorPreviewApplyEvidence
+    | null,
+) =>
+  evidence?.actorDisplayName ??
+  evidence?.actorUsername ??
+  evidence?.actorUserId ??
+  "-"
+
 const sessionSourceTypeLabel = computed(() =>
   props.session?.sourceType === "registered-schema"
     ? props.t("app.generatorPreview.sourceType.registeredSchema")
@@ -316,6 +327,10 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
             <strong>{{ reviewEvidence.reviewedAt ?? "-" }}</strong>
           </div>
           <div>
+            <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+            <strong>{{ resolveEvidenceActorLabel(reviewEvidence) }}</strong>
+          </div>
+          <div>
             <span>{{ t("app.generatorPreview.meta.reviewDecision") }}</span>
             <strong>
               {{
@@ -340,6 +355,10 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
           <div>
             <span>{{ t("app.generatorPreview.meta.appliedAt") }}</span>
             <strong>{{ applyEvidence.appliedAt ?? "-" }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+            <strong>{{ resolveEvidenceActorLabel(applyEvidence) }}</strong>
           </div>
           <div>
             <span>{{ t("app.generatorPreview.meta.manifestPath") }}</span>
