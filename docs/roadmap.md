@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-01`（Phase 2 契约归档，Phase 3 CRUD 模板回收启动）
+更新时间：`2026-05-03`（标准 CRUD 页面模板收口，主线切回若依基础功能对齐）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -44,12 +44,13 @@
 - 第二优先级：C 端界面扩展方向先固定为 `uniapp`，但当前只保留设计储备，不提前进入实现
 - 第二优先级：在不改变 owner 的前提下，继续把通知、操作日志、租户与数据权限体验向后台常用形态收口
 - 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心
-- 前端局部收口继续入口：优先沿 `M5 / M6A` 推进 `provide/inject`、共享样式收口与类型网关，不再继续扩写手写 CRUD 接线
+- 前端本地收口当前结论：`M5 / provide-inject`、共享样式下沉与 `M6A / 类型网关` 已完成当前主线收口；后续不再继续扩大 `apps/example-vue` 的手写标准 CRUD 治理面
 - generator 契约已完成：`buildWorkspaceRegistration` 已接入 `packages/frontend-vue`，13 个标准 CRUD 模块注册已从手写切换为 schema 驱动；generator artifact 已包含 kind / permissions / i18nKeys，可被前端注册中心直接消费
-- generator Phase 3 启动：当前优先把标准 CRUD main/panel 页面骨架回收到 generator 模板，新增标准模块不再手写 main/panel 大体结构
+- generator Phase 3 当前结论：标准 CRUD `main/panel` 页面骨架、workspace state 注入 helper 与 generated surface 已回收到 generator 模板并接入 `apps/example-vue` 真实消费；新增标准 CRUD 模块不应再回退为手写 main/panel 大体结构
 - generator Phase 3 已推进首刀：公共 `WORKSPACE_STATE_KEY` / `FrontendWorkspaceStateContext` 已下沉到 `packages/frontend-vue`，标准 CRUD 生成模板已开始对齐 shell provide + workspace inject 契约，减少页面级状态 props 面
 - generator Phase 3 已进入真实消费：`apps/example-vue/src/modules/*` 已开始提交标准 CRUD surface 生成产物，shell main / secondary 已消费 generated component map，标准 CRUD 页面骨架不再只停留在模板/测试层
 - generator artifact 契约继续推进：frontend artifact 已补 `surfaceKind / panelComponentPath / workspaceComponentPath`，`packages/frontend-vue` 已提供 artifact -> workspace registration helper；`apps/example-vue` 的 `business/system` registry 已切到 app-local generated artifact 输入，开始脱离 schema 直连
+- 下一方向：主线从“继续手写收口前端脊柱”切回“若依基础功能对齐剩余项”，优先打磨 `tenants / operation-logs / notifications / files` 的后台日常交互闭环，并明确 `WP-6` 导入链路是否进入当前主线
 - persistence 性能治理入口：先按 `data-scope.ts` 与 `auth.ts` 的高风险查询处理，再进入分页/模糊搜索统一治理
 
 ### 2. Phase 2: Auth Foundation ✅ 归档
@@ -339,8 +340,8 @@
 
 ## 下一步
 
-1. 进入 generator Phase 3：把标准 CRUD main/panel 页面骨架回收到 generator 模板，新增标准 CRUD 模块不再手写 main/panel 大体结构，只保留少量本地扩展槽位。
-2. 继续按若依基础功能矩阵收口 `apps/example-vue` 与 `apps/server` 的现有系统模块，优先补真实路由切换、列表/详情、创建/编辑、状态动作与权限动作闭环。
-3. 在既有导出稳定后，判断 `users / roles / menus / departments / posts / dictionaries / settings / tenants / notifications / files` 的导入链路是否值得进入当前主线，并补必要的批量治理体验。
-4. `generator / SQL / workflow` 维持次级推进：优先做必要收口（如会话设备化、diff/evidence 强化），不抢占若依基础功能对齐的第一优先级。
-5. 在前端企业工作区完成更高覆盖率前，不扩大到通知中心联动、调度器、脚本节点、前端设计器或第二套消息中心模型。
+1. 第一顺序：继续按若依基础功能矩阵打磨现有工作区闭环，优先处理 `tenants / operation-logs / notifications / files` 的后台日常交互收口，目标是把“能打开”推进到“日常可用”，而不是继续新增新模块或新 shared 抽象。
+2. 第二顺序：对 `WP-6` 导入链路做边界判断，只回答“哪些模块值得进入当前主线、最小入口是什么、哪些仍应暂缓”；在未完成这一步前，不把统一导入 DSL、模板体系或批量治理平台写成已实现方向。
+3. 第三顺序：`generator / frontend` 只做必要延伸，不再回到 example-vue 手写标准 CRUD；若后续继续推进，范围限定为 generator 产物与前端 artifact 的增量收口，而不是重开一轮本地前端脊柱重构。
+4. 第四顺序：`generator / SQL / workflow` 继续维持次级轨道，优先补会话设备化、diff/evidence 强化、SQL proposal 到人工接入规范等必要收口，不抢占若依基础能力对齐主线。
+5. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、第二套消息中心模型，以及任何新的前端 shared owner。
