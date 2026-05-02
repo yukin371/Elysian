@@ -154,6 +154,14 @@ const nextOperationKey = computed(() => {
     return "app.generatorPreview.next.refreshing"
   }
 
+  if (isRejectConfirming.value) {
+    return "app.generatorPreview.next.confirmReject"
+  }
+
+  if (isApplyConfirming.value) {
+    return "app.generatorPreview.next.confirmApply"
+  }
+
   if (props.reviewLoading) {
     return "app.generatorPreview.next.reviewing"
   }
