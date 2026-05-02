@@ -186,11 +186,26 @@ export const useGeneratorPreviewWorkspace = (
     selectedRecentSessionId.value = ""
   }
 
+  const currentSelectionMatchesSession = () =>
+    currentSession.value?.schemaName === selectedSchemaName.value &&
+    currentSession.value?.frontendTarget === selectedFrontendTarget.value &&
+    currentSession.value?.conflictStrategy === selectedConflictStrategy.value &&
+    currentReport.value?.schemaName === selectedSchemaName.value &&
+    currentReport.value?.frontendTarget === selectedFrontendTarget.value
+
   const canPreservePreviewState = () =>
     currentSession.value?.schemaName === selectedSchemaName.value &&
     currentSession.value?.frontendTarget === selectedFrontendTarget.value &&
     currentReport.value?.schemaName === selectedSchemaName.value &&
     currentReport.value?.frontendTarget === selectedFrontendTarget.value
+
+  const findMatchingRecentSession = (sessions: GeneratorPreviewSessionRecord[]) =>
+    sessions.find(
+      (session) =>
+        session.schemaName === selectedSchemaName.value &&
+        session.frontendTarget === selectedFrontendTarget.value &&
+        session.conflictStrategy === selectedConflictStrategy.value,
+    ) ?? null
 
   const applySessionDetail = (session: GeneratorPreviewSessionDetail) => {
     selectedSchemaName.value = session.schemaName
@@ -210,6 +225,33 @@ export const useGeneratorPreviewWorkspace = (
       recentSessions.value = response.items
     } catch {
       recentSessions.value = []
+    }
+  }
+
+  const restoreLatestMatchingSession = async () => {
+    try {
+      const response = await listGeneratorPreviewSessions()
+      recentSessions.value = response.items
+
+      const matchedSession = findMatchingRecentSession(response.items)
+
+      if (!matchedSession) {
+        return false
+      }
+
+      loading.value = true
+      errorMessage.value = ""
+
+      try {
+        const session = await fetchGeneratorPreviewSession(matchedSession.id)
+        applySessionDetail(session)
+        return true
+      } finally {
+        loading.value = false
+      }
+    } catch {
+      recentSessions.value = []
+      return false
     }
   }
 
@@ -364,13 +406,25 @@ export const useGeneratorPreviewWorkspace = (
   })
 
   watch(
-    [selectedSchemaName, selectedFrontendTarget, enabled],
-    ([, , nextEnabled]) => {
+    [
+      selectedSchemaName,
+      selectedFrontendTarget,
+      selectedConflictStrategy,
+      enabled,
+    ],
+    async ([, , , nextEnabled]) => {
       if (!nextEnabled) {
         return
       }
 
-      void loadRecentSessions()
+      if (currentSelectionMatchesSession()) {
+        return
+      }
+
+      if (await restoreLatestMatchingSession()) {
+        return
+      }
+
       void refreshPreview()
     },
     { immediate: true },
