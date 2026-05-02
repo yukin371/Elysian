@@ -13,6 +13,11 @@ import type {
   GeneratorPreviewSchemaOption,
   GeneratorPreviewTranslation,
 } from "./types"
+import {
+  clearGeneratorPreviewReviewDraft,
+  loadGeneratorPreviewReviewDraft,
+  persistGeneratorPreviewReviewDraft,
+} from "./generator-preview-review-draft"
 
 interface GeneratorPreviewWorkspaceMainProps {
   t: GeneratorPreviewTranslation
@@ -60,6 +65,8 @@ const emit = defineEmits<{
 }>()
 
 const reviewComment = ref("")
+const resolveCurrentReviewDraftSessionId = () =>
+  props.selectedRecentSessionId.trim() || null
 
 const frontendOptions = [
   { label: "Vue", value: "vue" },
@@ -135,6 +142,14 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
 
 const handleReviewCommentInput = (value: string | number) => {
   reviewComment.value = String(value)
+
+  const sessionId = resolveCurrentReviewDraftSessionId()
+
+  if (!sessionId || props.sessionStatus !== "pending_review") {
+    return
+  }
+
+  persistGeneratorPreviewReviewDraft(sessionId, reviewComment.value)
 }
 
 const handleReviewPreview = (decision: "approve" | "reject") => {
@@ -147,13 +162,28 @@ const handleReviewPreview = (decision: "approve" | "reject") => {
 watch(
   () => [
     props.sessionStatus,
+    props.selectedRecentSessionId,
     props.selectedSchemaName,
     props.selectedFrontendTarget,
+    props.reviewEvidence?.comment ?? null,
   ],
-  ([status]) => {
+  ([status, sessionId]) => {
+    const resolvedSessionId =
+      typeof sessionId === "string" && sessionId.trim().length > 0
+        ? sessionId.trim()
+        : null
+
     if (status === "pending_review") {
-      reviewComment.value = ""
+      reviewComment.value = resolvedSessionId
+        ? loadGeneratorPreviewReviewDraft(resolvedSessionId) ??
+          props.reviewEvidence?.comment ??
+          ""
+        : props.reviewEvidence?.comment ?? ""
       return
+    }
+
+    if (resolvedSessionId) {
+      clearGeneratorPreviewReviewDraft(resolvedSessionId)
     }
 
     reviewComment.value = props.reviewEvidence?.comment ?? ""
