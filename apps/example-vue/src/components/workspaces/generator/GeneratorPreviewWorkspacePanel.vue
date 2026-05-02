@@ -12,6 +12,7 @@ import type {
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
+import GeneratorPreviewWorkspaceApplyPanel from "./GeneratorPreviewWorkspaceApplyPanel.vue"
 import GeneratorPreviewWorkspaceDiffSummaryPanel from "./GeneratorPreviewWorkspaceDiffSummaryPanel.vue"
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
 import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
@@ -125,6 +126,10 @@ const reviewDecisionLabel = computed(() =>
           : "app.generatorPreview.action.reject",
       )
     : "-",
+)
+
+const applyActorLabel = computed(() =>
+  resolveEvidenceActorLabel(props.applyEvidence),
 )
 
 const selectedChangeLabel = computed(() =>
@@ -493,72 +498,18 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         @copy-review-comment="copyReviewComment"
       />
 
-      <section v-if="applyEvidence" class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.applyTitle") }}</p>
-        <div class="enterprise-metadata">
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.appliedAt") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="(applyEvidence.appliedAt ?? '').trim().length === 0"
-                @click="copyAppliedAt"
-              >
-                {{
-                  resolveCopyLabel(
-                    "appliedAt",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ applyEvidence.appliedAt ?? "-" }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.actor") }}</span>
-            <strong>{{ resolveEvidenceActorLabel(applyEvidence) }}</strong>
-          </div>
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.manifestPath") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="(applyEvidence.manifestPath ?? '').trim().length === 0"
-                @click="copyManifestPath"
-              >
-                {{
-                  resolveCopyLabel(
-                    "manifestPath",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ applyEvidence.manifestPath ?? "-" }}</strong>
-          </div>
-          <div>
-            <div class="generator-metadata-label">
-              <span>{{ t("app.generatorPreview.meta.requestId") }}</span>
-              <button
-                type="button"
-                class="enterprise-button enterprise-button-ghost"
-                :disabled="(applyEvidence.requestId ?? '').trim().length === 0"
-                @click="copyRequestId"
-              >
-                {{
-                  resolveCopyLabel(
-                    "requestId",
-                    "app.generatorPreview.action.copySnippet",
-                  )
-                }}
-              </button>
-            </div>
-            <strong>{{ applyEvidence.requestId ?? "-" }}</strong>
-          </div>
-        </div>
-      </section>
+      <GeneratorPreviewWorkspaceApplyPanel
+        v-if="applyEvidence"
+        :t="t"
+        :apply-evidence="applyEvidence"
+        :apply-actor-label="applyActorLabel"
+        :applied-at-copy-label="resolveSnippetCopyLabel('appliedAt')"
+        :manifest-path-copy-label="resolveSnippetCopyLabel('manifestPath')"
+        :request-id-copy-label="resolveSnippetCopyLabel('requestId')"
+        @copy-applied-at="copyAppliedAt"
+        @copy-manifest-path="copyManifestPath"
+        @copy-request-id="copyRequestId"
+      />
 
       <section v-if="sqlProposalHandoff" class="panel-section">
         <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalTitle") }}</p>
