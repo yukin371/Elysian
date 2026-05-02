@@ -214,6 +214,7 @@ export const filterGeneratorPreviewFiles = (
         file.plannedReason,
         file.mergeStrategy,
         file.contents,
+        file.currentContents ?? "",
       ].map((value) => value.toLowerCase())
 
       return haystacks.some((value) => value.includes(normalizedQuery))

@@ -47,6 +47,28 @@ describe("generator-preview-workspace", () => {
     expect(filterGeneratorPreviewFiles(previewFiles, "")).toHaveLength(2)
   })
 
+  it("filters preview files by current target contents", () => {
+    const files = [
+      toGeneratorPreviewFileCard({
+        absolutePath: "E:/generated/modules/customer/customer.page.vue",
+        path: "modules/customer/customer.page.vue",
+        reason: "Provide a generated management page implementation.",
+        plannedAction: "overwrite",
+        plannedReason: "Generated file can be updated.",
+        exists: true,
+        hasChanges: true,
+        mergeStrategy: "replace-whole-file",
+        contents: "<template><div>next customer page</div></template>",
+        currentContents: "<template><div>legacy customer page</div></template>",
+        isManaged: true,
+      }),
+    ]
+
+    expect(filterGeneratorPreviewFiles(files, "legacy customer")).toHaveLength(
+      1,
+    )
+  })
+
   it("prioritizes blocking and overwrite files in the filtered list", () => {
     const prioritizedFiles = filterGeneratorPreviewFiles(
       [
