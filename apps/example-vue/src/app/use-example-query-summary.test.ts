@@ -70,4 +70,18 @@ describe("useExampleQuerySummary", () => {
       "app.operationLog.field.authFailureReason: custom_reason",
     )
   })
+
+  test("localizes user-disabled operation-log auth failure reasons in the query summary", () => {
+    const options = createOptions()
+    options.isOperationLogWorkspace = computed(() => true)
+    options.operationLogQueryValues = ref({
+      authFailureReason: "user_disabled",
+    })
+
+    const summary = useExampleQuerySummary(options)
+
+    expect(summary.currentQuerySummary.value).toBe(
+      "app.operationLog.field.authFailureReason: app.operationLog.authFailureReason.user_disabled",
+    )
+  })
 })

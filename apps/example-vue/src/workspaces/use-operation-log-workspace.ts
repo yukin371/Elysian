@@ -64,6 +64,10 @@ export const useOperationLogWorkspace = (
       return options.t("app.operationLog.authFailureReason.account_locked")
     }
 
+    if (authFailureReason === "user_disabled") {
+      return options.t("app.operationLog.authFailureReason.user_disabled")
+    }
+
     return authFailureReason
   }
 

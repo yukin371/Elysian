@@ -63,7 +63,8 @@ export const useExampleQuerySummary = (
   ) => {
     if (
       authFailureReason === "invalid_password" ||
-      authFailureReason === "account_locked"
+      authFailureReason === "account_locked" ||
+      authFailureReason === "user_disabled"
     ) {
       return options.t(
         `app.operationLog.authFailureReason.${authFailureReason}`,
