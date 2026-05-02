@@ -148,6 +148,42 @@ const operationHintClass = computed(() =>
     : "",
 )
 
+const nextOperationKey = computed(() => {
+  if (props.loading) {
+    return "app.generatorPreview.next.refreshing"
+  }
+
+  if (props.reviewLoading) {
+    return "app.generatorPreview.next.reviewing"
+  }
+
+  if (props.applyLoading) {
+    return "app.generatorPreview.next.applying"
+  }
+
+  if (!props.sessionStatus || props.sessionStatus === "rejected") {
+    return "app.generatorPreview.next.refresh"
+  }
+
+  if (props.sessionStatus === "pending_review") {
+    return "app.generatorPreview.next.review"
+  }
+
+  if (props.sessionStatus === "applied") {
+    return "app.generatorPreview.next.done"
+  }
+
+  if (props.hasBlockingConflicts) {
+    return "app.generatorPreview.next.resolveConflicts"
+  }
+
+  if (props.sessionStatus === "ready" && props.canApply) {
+    return "app.generatorPreview.next.apply"
+  }
+
+  return "app.generatorPreview.next.wait"
+})
+
 const resolveEvidenceActorLabel = (
   evidence:
     | GeneratorPreviewReviewEvidence
@@ -374,6 +410,9 @@ watch(
           <span class="enterprise-toolbar-pill">{{ filterSummary }}</span>
           <span v-if="sessionStatus" class="enterprise-toolbar-pill">
             {{ resolveStatusLabel(sessionStatus) }}
+          </span>
+          <span class="enterprise-toolbar-pill generator-next-action-pill">
+            {{ t(nextOperationKey) }}
           </span>
         </div>
 
@@ -686,6 +725,12 @@ watch(
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+}
+
+.generator-next-action-pill {
+  border-color: rgba(36, 87, 214, 0.18);
+  background: rgba(239, 246, 255, 0.72);
+  color: #1d4ed8;
 }
 
 .generator-review-comment {
