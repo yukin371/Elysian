@@ -274,6 +274,18 @@ const copySelectedFileAction = async () =>
 const copySelectedChanged = async () =>
   copyPanelValue("changed", selectedChangeLabel.value)
 
+const copySelectedExists = async () =>
+  copyPanelValue("exists", selectedExistsLabel.value)
+
+const copySelectedManaged = async () =>
+  copyPanelValue("managed", selectedManagedLabel.value)
+
+const copyTemplateReason = async () =>
+  copyPanelValue("templateReason", props.selectedFile?.reason)
+
+const copyPlannedReason = async () =>
+  copyPanelValue("plannedReason", props.selectedFile?.plannedReason)
+
 onBeforeUnmount(disposeCopyFeedbackTimers)
 
 </script>
@@ -312,7 +324,15 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
       :selected-exists-label="selectedExistsLabel"
       :selected-managed-label="selectedManagedLabel"
       :absolute-path-copy-label="resolveSnippetCopyLabel('absolutePath')"
+      :exists-copy-label="resolveSnippetCopyLabel('exists')"
+      :managed-copy-label="resolveSnippetCopyLabel('managed')"
+      :template-reason-copy-label="resolveSnippetCopyLabel('templateReason')"
+      :planned-reason-copy-label="resolveSnippetCopyLabel('plannedReason')"
       @copy-absolute-path="copySelectedAbsolutePath"
+      @copy-exists="copySelectedExists"
+      @copy-managed="copySelectedManaged"
+      @copy-template-reason="copyTemplateReason"
+      @copy-planned-reason="copyPlannedReason"
     />
 
     <div v-if="session" class="enterprise-panel-stack">

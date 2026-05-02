@@ -7,12 +7,20 @@ interface GeneratorPreviewWorkspaceFileDecisionPanelProps {
   selectedExistsLabel: string
   selectedManagedLabel: string
   absolutePathCopyLabel: string
+  existsCopyLabel: string
+  managedCopyLabel: string
+  templateReasonCopyLabel: string
+  plannedReasonCopyLabel: string
 }
 
 defineProps<GeneratorPreviewWorkspaceFileDecisionPanelProps>()
 
 const emit = defineEmits<{
   (event: "copy-absolute-path"): void
+  (event: "copy-exists"): void
+  (event: "copy-managed"): void
+  (event: "copy-template-reason"): void
+  (event: "copy-planned-reason"): void
 }>()
 </script>
 
@@ -37,21 +45,59 @@ const emit = defineEmits<{
         <strong>{{ selectedFile.absolutePath }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.exists") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.exists") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            @click="emit('copy-exists')"
+          >
+            {{ existsCopyLabel }}
+          </button>
+        </div>
         <strong>{{ selectedExistsLabel }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.managed") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.managed") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            @click="emit('copy-managed')"
+          >
+            {{ managedCopyLabel }}
+          </button>
+        </div>
         <strong>{{ selectedManagedLabel }}</strong>
       </div>
     </div>
     <div class="generator-explanation-grid">
       <article>
-        <strong>{{ t("app.generatorPreview.meta.templateReason") }}</strong>
+        <div class="generator-metadata-label">
+          <strong>{{ t("app.generatorPreview.meta.templateReason") }}</strong>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="selectedFile.reason.trim().length === 0"
+            @click="emit('copy-template-reason')"
+          >
+            {{ templateReasonCopyLabel }}
+          </button>
+        </div>
         <p>{{ selectedFile.reason }}</p>
       </article>
       <article>
-        <strong>{{ t("app.generatorPreview.meta.plannedReason") }}</strong>
+        <div class="generator-metadata-label">
+          <strong>{{ t("app.generatorPreview.meta.plannedReason") }}</strong>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="selectedFile.plannedReason.trim().length === 0"
+            @click="emit('copy-planned-reason')"
+          >
+            {{ plannedReasonCopyLabel }}
+          </button>
+        </div>
         <p>{{ selectedFile.plannedReason }}</p>
       </article>
     </div>
@@ -66,7 +112,8 @@ const emit = defineEmits<{
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.generator-code-toolbar {
+.generator-code-toolbar,
+.generator-metadata-label {
   align-items: center;
   display: flex;
   gap: 0.75rem;

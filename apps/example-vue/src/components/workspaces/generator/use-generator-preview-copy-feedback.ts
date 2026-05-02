@@ -13,6 +13,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "createdAt"
   | "currentSource"
   | "changed"
+  | "exists"
   | "frontendTarget"
   | "drizzleDir"
   | "drizzleImport"
@@ -20,6 +21,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "generatedSource"
   | "lineCount"
   | "manifestPath"
+  | "managed"
   | "mergeStrategy"
   | "outputDir"
   | "persistenceIndexFile"
@@ -33,8 +35,10 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "sessionId"
   | "sourceValue"
   | "status"
+  | "templateReason"
   | "fileAction"
   | "sqlDraft"
+  | "plannedReason"
   | "sqlPreview"
 
 type GeneratorPreviewCopyFeedbackStatus = "idle" | "copied" | "failed"
@@ -53,6 +57,7 @@ const createInitialCopyFeedback = (): Record<
   createdAt: "idle",
   currentSource: "idle",
   changed: "idle",
+  exists: "idle",
   frontendTarget: "idle",
   drizzleDir: "idle",
   drizzleImport: "idle",
@@ -60,6 +65,7 @@ const createInitialCopyFeedback = (): Record<
   generatedSource: "idle",
   lineCount: "idle",
   manifestPath: "idle",
+  managed: "idle",
   mergeStrategy: "idle",
   outputDir: "idle",
   persistenceIndexFile: "idle",
@@ -73,8 +79,10 @@ const createInitialCopyFeedback = (): Record<
   sessionId: "idle",
   sourceValue: "idle",
   status: "idle",
+  templateReason: "idle",
   fileAction: "idle",
   sqlDraft: "idle",
+  plannedReason: "idle",
   sqlPreview: "idle",
 })
 
