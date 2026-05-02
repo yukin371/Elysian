@@ -167,6 +167,9 @@ const copyPanelValue = async (
   value: string | null | undefined,
 ) => copyTextByKey(key, value ?? "")
 
+const resolveSnippetCopyLabel = (key: GeneratorPreviewCopyFeedbackKey) =>
+  resolveCopyLabel(key, "app.generatorPreview.action.copySnippet")
+
 const copySuggestedCommands = async () => {
   await copySuggestedCommandsByKey(
     props.sqlProposalHandoff?.suggestedCommands ?? [],
@@ -258,6 +261,18 @@ const copySelectedFrontendTarget = async () =>
 const copySessionStatus = async () =>
   copyPanelValue("status", sessionStatusLabel.value)
 
+const copySelectedLineCount = async () =>
+  copyPanelValue("lineCount", String(selectedSourceLineCount.value))
+
+const copySelectedMergeStrategy = async () =>
+  copyPanelValue("mergeStrategy", props.selectedFile?.mergeStrategy)
+
+const copySelectedFileAction = async () =>
+  copyPanelValue("fileAction", selectedActionLabel.value)
+
+const copySelectedChanged = async () =>
+  copyPanelValue("changed", selectedChangeLabel.value)
+
 onBeforeUnmount(disposeCopyFeedbackTimers)
 
 </script>
@@ -273,27 +288,20 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
       :selected-source-line-count="selectedSourceLineCount"
       :selected-action-label="selectedActionLabel"
       :selected-change-label="selectedChangeLabel"
-      :schema-name-copy-label="
-        resolveCopyLabel(
-          'schemaName',
-          'app.generatorPreview.action.copySnippet',
-        )
-      "
-      :frontend-target-copy-label="
-        resolveCopyLabel(
-          'frontendTarget',
-          'app.generatorPreview.action.copySnippet',
-        )
-      "
-      :status-copy-label="
-        resolveCopyLabel(
-          'status',
-          'app.generatorPreview.action.copySnippet',
-        )
-      "
+      :schema-name-copy-label="resolveSnippetCopyLabel('schemaName')"
+      :frontend-target-copy-label="resolveSnippetCopyLabel('frontendTarget')"
+      :status-copy-label="resolveSnippetCopyLabel('status')"
+      :line-count-copy-label="resolveSnippetCopyLabel('lineCount')"
+      :merge-strategy-copy-label="resolveSnippetCopyLabel('mergeStrategy')"
+      :file-action-copy-label="resolveSnippetCopyLabel('fileAction')"
+      :changed-copy-label="resolveSnippetCopyLabel('changed')"
       @copy-schema-name="copySelectedSchemaName"
       @copy-frontend-target="copySelectedFrontendTarget"
       @copy-status="copySessionStatus"
+      @copy-line-count="copySelectedLineCount"
+      @copy-merge-strategy="copySelectedMergeStrategy"
+      @copy-file-action="copySelectedFileAction"
+      @copy-changed="copySelectedChanged"
     />
 
     <section v-if="selectedFile" class="panel-section mt-5">

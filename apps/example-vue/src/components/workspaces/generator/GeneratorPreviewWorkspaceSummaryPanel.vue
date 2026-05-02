@@ -13,6 +13,10 @@ interface GeneratorPreviewWorkspaceSummaryPanelProps {
   schemaNameCopyLabel: string
   frontendTargetCopyLabel: string
   statusCopyLabel: string
+  lineCountCopyLabel: string
+  mergeStrategyCopyLabel: string
+  fileActionCopyLabel: string
+  changedCopyLabel: string
 }
 
 defineProps<GeneratorPreviewWorkspaceSummaryPanelProps>()
@@ -21,6 +25,10 @@ const emit = defineEmits<{
   (event: "copy-schema-name"): void
   (event: "copy-frontend-target"): void
   (event: "copy-status"): void
+  (event: "copy-line-count"): void
+  (event: "copy-merge-strategy"): void
+  (event: "copy-file-action"): void
+  (event: "copy-changed"): void
 }>()
 </script>
 
@@ -74,7 +82,9 @@ const emit = defineEmits<{
         <button
           type="button"
           class="enterprise-button enterprise-button-ghost"
-          :disabled="sessionStatusLabel.trim().length === 0"
+          :disabled="
+            sessionStatusLabel.trim().length === 0 || sessionStatusLabel === '-'
+          "
           @click="emit('copy-status')"
         >
           {{ statusCopyLabel }}
@@ -83,19 +93,67 @@ const emit = defineEmits<{
       <strong>{{ sessionStatusLabel }}</strong>
     </div>
     <div>
-      <span>{{ t("app.generatorPreview.meta.lines") }}</span>
+      <div class="generator-metadata-label">
+        <span>{{ t("app.generatorPreview.meta.lines") }}</span>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="selectedSourceLineCount <= 0"
+          @click="emit('copy-line-count')"
+        >
+          {{ lineCountCopyLabel }}
+        </button>
+      </div>
       <strong>{{ selectedSourceLineCount }}</strong>
     </div>
     <div>
-      <span>{{ t("app.generatorPreview.meta.mergeStrategy") }}</span>
+      <div class="generator-metadata-label">
+        <span>{{ t("app.generatorPreview.meta.mergeStrategy") }}</span>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="!selectedFile?.mergeStrategy"
+          @click="emit('copy-merge-strategy')"
+        >
+          {{ mergeStrategyCopyLabel }}
+        </button>
+      </div>
       <strong>{{ selectedFile?.mergeStrategy ?? "-" }}</strong>
     </div>
     <div>
-      <span>{{ t("app.generatorPreview.meta.fileAction") }}</span>
+      <div class="generator-metadata-label">
+        <span>{{ t("app.generatorPreview.meta.fileAction") }}</span>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="
+            !selectedFile ||
+            selectedActionLabel.trim().length === 0 ||
+            selectedActionLabel === '-'
+          "
+          @click="emit('copy-file-action')"
+        >
+          {{ fileActionCopyLabel }}
+        </button>
+      </div>
       <strong>{{ selectedActionLabel }}</strong>
     </div>
     <div>
-      <span>{{ t("app.generatorPreview.meta.changed") }}</span>
+      <div class="generator-metadata-label">
+        <span>{{ t("app.generatorPreview.meta.changed") }}</span>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="
+            !selectedFile ||
+            selectedChangeLabel.trim().length === 0 ||
+            selectedChangeLabel === '-'
+          "
+          @click="emit('copy-changed')"
+        >
+          {{ changedCopyLabel }}
+        </button>
+      </div>
       <strong>{{ selectedChangeLabel }}</strong>
     </div>
   </div>
