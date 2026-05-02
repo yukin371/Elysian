@@ -26,6 +26,9 @@ type CopyFeedbackKey =
   | "drizzleSchema"
   | "absolutePath"
   | "reportPath"
+  | "generatedSource"
+  | "currentSource"
+  | "sqlPreview"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -45,10 +48,13 @@ const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
 const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>({
   absolutePath: "idle",
   commands: "idle",
+  currentSource: "idle",
   drizzleImport: "idle",
   drizzleSchema: "idle",
+  generatedSource: "idle",
   reportPath: "idle",
   sqlDraft: "idle",
+  sqlPreview: "idle",
 })
 const copyFeedbackTimers: Partial<
   Record<CopyFeedbackKey, ReturnType<typeof setTimeout>>
@@ -251,6 +257,26 @@ const copySessionReportPath = async () => {
   const copied = await copyGeneratorPreviewText(props.session?.reportPath ?? "")
   copyFeedback.value.reportPath = copied ? "copied" : "failed"
   scheduleCopyFeedbackReset("reportPath")
+}
+
+const copyGeneratedSource = async () => {
+  const copied = await copyGeneratorPreviewText(props.selectedFile?.contents ?? "")
+  copyFeedback.value.generatedSource = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("generatedSource")
+}
+
+const copyCurrentSource = async () => {
+  const copied = await copyGeneratorPreviewText(
+    props.selectedFile?.currentContents ?? "",
+  )
+  copyFeedback.value.currentSource = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("currentSource")
+}
+
+const copySqlPreview = async () => {
+  const copied = await copyGeneratorPreviewText(props.sqlPreview?.contents ?? "")
+  copyFeedback.value.sqlPreview = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("sqlPreview")
 }
 
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
@@ -692,7 +718,22 @@ onBeforeUnmount(() => {
       </section>
 
       <section class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sourceTitle") }}</p>
+        <div class="generator-code-toolbar">
+          <p class="enterprise-subheading">{{ t("app.generatorPreview.sourceTitle") }}</p>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="selectedFile.contents.trim().length === 0"
+            @click="copyGeneratedSource"
+          >
+            {{
+              resolveCopyLabel(
+                "generatedSource",
+                "app.generatorPreview.action.copySnippet",
+              )
+            }}
+          </button>
+        </div>
         <pre class="generator-code-block"><code>{{ selectedFile.contents }}</code></pre>
       </section>
 
@@ -700,12 +741,42 @@ onBeforeUnmount(() => {
         v-if="selectedFile.currentContents !== null"
         class="panel-section"
       >
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.currentSourceTitle") }}</p>
+        <div class="generator-code-toolbar">
+          <p class="enterprise-subheading">{{ t("app.generatorPreview.currentSourceTitle") }}</p>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="selectedFile.currentContents.trim().length === 0"
+            @click="copyCurrentSource"
+          >
+            {{
+              resolveCopyLabel(
+                "currentSource",
+                "app.generatorPreview.action.copySnippet",
+              )
+            }}
+          </button>
+        </div>
         <pre class="generator-code-block"><code>{{ selectedFile.currentContents }}</code></pre>
       </section>
 
       <section class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlTitle") }}</p>
+        <div class="generator-code-toolbar">
+          <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlTitle") }}</p>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="(sqlPreview?.contents ?? '').trim().length === 0"
+            @click="copySqlPreview"
+          >
+            {{
+              resolveCopyLabel(
+                "sqlPreview",
+                "app.generatorPreview.action.copySnippet",
+              )
+            }}
+          </button>
+        </div>
         <pre class="generator-code-block"><code>{{ sqlPreview?.contents ?? "" }}</code></pre>
       </section>
     </div>
