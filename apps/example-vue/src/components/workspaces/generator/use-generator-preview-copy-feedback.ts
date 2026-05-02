@@ -45,8 +45,11 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "diffBlockCount"
   | "diffChangedCount"
   | "diffCreateCount"
+  | "diffAddedLines"
   | "diffOverwriteCount"
+  | "diffRemovedLines"
   | "diffSkipCount"
+  | "diffUnchangedLines"
   | "sqlPreview"
 
 type GeneratorPreviewCopyFeedbackStatus = "idle" | "copied" | "failed"
@@ -97,8 +100,11 @@ const createInitialCopyFeedback = (): Record<
   diffBlockCount: "idle",
   diffChangedCount: "idle",
   diffCreateCount: "idle",
+  diffAddedLines: "idle",
   diffOverwriteCount: "idle",
+  diffRemovedLines: "idle",
   diffSkipCount: "idle",
+  diffUnchangedLines: "idle",
   sqlPreview: "idle",
 })
 

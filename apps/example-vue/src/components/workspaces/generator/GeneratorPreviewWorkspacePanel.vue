@@ -289,6 +289,24 @@ const copyDiffBlockCount = async () =>
     String(props.diffSummary?.actionCounts.block ?? 0),
   )
 
+const copyDiffAddedLines = async () =>
+  copyPanelValue(
+    "diffAddedLines",
+    String(selectedDiffStats.value.addedLineCount),
+  )
+
+const copyDiffRemovedLines = async () =>
+  copyPanelValue(
+    "diffRemovedLines",
+    String(selectedDiffStats.value.removedLineCount),
+  )
+
+const copyDiffUnchangedLines = async () =>
+  copyPanelValue(
+    "diffUnchangedLines",
+    String(selectedDiffStats.value.unchangedLineCount),
+  )
+
 const copyReviewedAt = async () =>
   copyPanelValue("reviewedAt", props.reviewEvidence?.reviewedAt)
 
@@ -426,6 +444,14 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         v-if="selectedFile"
         :t="t"
         :selected-diff-stats="selectedDiffStats"
+        :added-lines-copy-label="resolveSnippetCopyLabel('diffAddedLines')"
+        :removed-lines-copy-label="resolveSnippetCopyLabel('diffRemovedLines')"
+        :unchanged-lines-copy-label="
+          resolveSnippetCopyLabel('diffUnchangedLines')
+        "
+        @copy-added-lines="copyDiffAddedLines"
+        @copy-removed-lines="copyDiffRemovedLines"
+        @copy-unchanged-lines="copyDiffUnchangedLines"
       />
 
       <section v-if="reviewEvidence" class="panel-section">
