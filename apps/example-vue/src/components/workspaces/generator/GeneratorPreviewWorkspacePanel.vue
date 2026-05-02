@@ -12,11 +12,13 @@ import type {
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
+import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import {
   joinGeneratorPreviewSuggestedCommands,
 } from "./generator-preview-handoff"
 import { useGeneratorPreviewCopyFeedback } from "./use-generator-preview-copy-feedback"
+import type { GeneratorPreviewCopyFeedbackKey } from "./use-generator-preview-copy-feedback"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -160,52 +162,52 @@ const suggestedCommandsText = computed(() =>
     : "",
 )
 
+const copyPanelValue = async (
+  key: GeneratorPreviewCopyFeedbackKey,
+  value: string | null | undefined,
+) => copyTextByKey(key, value ?? "")
+
 const copySuggestedCommands = async () => {
   await copySuggestedCommandsByKey(
     props.sqlProposalHandoff?.suggestedCommands ?? [],
   )
 }
 
-const copySqlDraft = async () => {
-  await copyTextByKey("sqlDraft", props.sqlProposal?.sqlDraft ?? "")
-}
+const copySqlDraft = async () =>
+  copyPanelValue("sqlDraft", props.sqlProposal?.sqlDraft)
 
 const copyDrizzleImportSnippet = async () => {
-  await copyTextByKey(
+  await copyPanelValue(
     "drizzleImport",
-    props.sqlProposal?.drizzleImportSnippet ?? "",
+    props.sqlProposal?.drizzleImportSnippet,
   )
 }
 
 const copyDrizzleSchemaSnippet = async () => {
-  await copyTextByKey(
+  await copyPanelValue(
     "drizzleSchema",
-    props.sqlProposal?.drizzleSchemaSnippet ?? "",
+    props.sqlProposal?.drizzleSchemaSnippet,
   )
 }
 
-const copySelectedAbsolutePath = async () => {
-  await copyTextByKey("absolutePath", props.selectedFile?.absolutePath ?? "")
-}
+const copySelectedAbsolutePath = async () =>
+  copyPanelValue("absolutePath", props.selectedFile?.absolutePath)
 
-const copySessionReportPath = async () => {
-  await copyTextByKey("reportPath", props.session?.reportPath ?? "")
-}
+const copySessionReportPath = async () =>
+  copyPanelValue("reportPath", props.session?.reportPath)
 
-const copyGeneratedSource = async () => {
-  await copyTextByKey("generatedSource", props.selectedFile?.contents ?? "")
-}
+const copyGeneratedSource = async () =>
+  copyPanelValue("generatedSource", props.selectedFile?.contents)
 
 const copyCurrentSource = async () => {
-  await copyTextByKey(
+  await copyPanelValue(
     "currentSource",
-    props.selectedFile?.currentContents ?? "",
+    props.selectedFile?.currentContents,
   )
 }
 
-const copySqlPreview = async () => {
-  await copyTextByKey("sqlPreview", props.sqlPreview?.contents ?? "")
-}
+const copySqlPreview = async () =>
+  copyPanelValue("sqlPreview", props.sqlPreview?.contents)
 
 const copyHandoffTargetPath = async (
   key:
@@ -215,40 +217,46 @@ const copyHandoffTargetPath = async (
     | "persistenceIndexFile",
   path: string,
 ) => {
-  await copyTextByKey(key, path)
+  await copyPanelValue(key, path)
 }
 
 const copySessionId = async () =>
-  copyTextByKey("sessionId", props.session?.id ?? "")
+  copyPanelValue("sessionId", props.session?.id)
 
 const copyManifestPath = async () => {
-  await copyTextByKey("manifestPath", props.applyEvidence?.manifestPath ?? "")
+  await copyPanelValue("manifestPath", props.applyEvidence?.manifestPath)
 }
 
 const copyRequestId = async () =>
-  copyTextByKey("requestId", props.applyEvidence?.requestId ?? "")
+  copyPanelValue("requestId", props.applyEvidence?.requestId)
 
 const copyReviewComment = async () => {
-  await copyTextByKey("reviewComment", props.reviewEvidence?.comment ?? "")
+  await copyPanelValue("reviewComment", props.reviewEvidence?.comment)
 }
 
 const copyOutputDir = async () =>
-  copyTextByKey("outputDir", props.session?.outputDir ?? "")
+  copyPanelValue("outputDir", props.session?.outputDir)
 
 const copySourceValue = async () =>
-  copyTextByKey("sourceValue", props.session?.sourceValue ?? "")
+  copyPanelValue("sourceValue", props.session?.sourceValue)
 
 const copyCreatedAt = async () =>
-  copyTextByKey("createdAt", props.session?.createdAt ?? "")
+  copyPanelValue("createdAt", props.session?.createdAt)
 
 const copyReviewedAt = async () =>
-  copyTextByKey("reviewedAt", props.reviewEvidence?.reviewedAt ?? "")
+  copyPanelValue("reviewedAt", props.reviewEvidence?.reviewedAt)
 
 const copyAppliedAt = async () =>
-  copyTextByKey("appliedAt", props.applyEvidence?.appliedAt ?? "")
+  copyPanelValue("appliedAt", props.applyEvidence?.appliedAt)
 
 const copySelectedSchemaName = async () =>
-  copyTextByKey("schemaName", props.selectedSchemaName)
+  copyPanelValue("schemaName", props.selectedSchemaName)
+
+const copySelectedFrontendTarget = async () =>
+  copyPanelValue("frontendTarget", props.selectedFrontendTarget)
+
+const copySessionStatus = async () =>
+  copyPanelValue("status", sessionStatusLabel.value)
 
 onBeforeUnmount(disposeCopyFeedbackTimers)
 
@@ -256,65 +264,37 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.generatorPreview.detailEyebrow") }}</p>
-    <h3 class="enterprise-heading">
-      {{
-        selectedFile?.path ?? t("app.generatorPreview.detailEmptyTitle")
-      }}
-    </h3>
-    <p class="enterprise-copy">
-      {{
-        selectedFile
-          ? t("app.generatorPreview.detailDescription")
-          : t("app.generatorPreview.detailEmptyDescription")
-      }}
-    </p>
-
-    <div class="enterprise-metadata mt-5">
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.schemaName") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="selectedSchemaName.trim().length === 0"
-            @click="copySelectedSchemaName"
-          >
-            {{
-              resolveCopyLabel(
-                "schemaName",
-                "app.generatorPreview.action.copySnippet",
-              )
-            }}
-          </button>
-        </div>
-        <strong>{{ selectedSchemaName }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.generatorPreview.meta.frontendTarget") }}</span>
-        <strong>{{ selectedFrontendTarget }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.generatorPreview.meta.status") }}</span>
-        <strong>{{ sessionStatusLabel }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.generatorPreview.meta.lines") }}</span>
-        <strong>{{ selectedSourceLineCount }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.generatorPreview.meta.mergeStrategy") }}</span>
-        <strong>{{ selectedFile?.mergeStrategy ?? "-" }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.generatorPreview.meta.fileAction") }}</span>
-        <strong>{{ selectedActionLabel }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.generatorPreview.meta.changed") }}</span>
-        <strong>{{ selectedChangeLabel }}</strong>
-      </div>
-    </div>
+    <GeneratorPreviewWorkspaceSummaryPanel
+      :t="t"
+      :selected-file="selectedFile"
+      :selected-schema-name="selectedSchemaName"
+      :selected-frontend-target="selectedFrontendTarget"
+      :session-status-label="sessionStatusLabel"
+      :selected-source-line-count="selectedSourceLineCount"
+      :selected-action-label="selectedActionLabel"
+      :selected-change-label="selectedChangeLabel"
+      :schema-name-copy-label="
+        resolveCopyLabel(
+          'schemaName',
+          'app.generatorPreview.action.copySnippet',
+        )
+      "
+      :frontend-target-copy-label="
+        resolveCopyLabel(
+          'frontendTarget',
+          'app.generatorPreview.action.copySnippet',
+        )
+      "
+      :status-copy-label="
+        resolveCopyLabel(
+          'status',
+          'app.generatorPreview.action.copySnippet',
+        )
+      "
+      @copy-schema-name="copySelectedSchemaName"
+      @copy-frontend-target="copySelectedFrontendTarget"
+      @copy-status="copySessionStatus"
+    />
 
     <section v-if="selectedFile" class="panel-section mt-5">
       <div class="generator-code-toolbar">

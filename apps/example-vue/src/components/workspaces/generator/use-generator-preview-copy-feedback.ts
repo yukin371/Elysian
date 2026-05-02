@@ -12,6 +12,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "commands"
   | "createdAt"
   | "currentSource"
+  | "frontendTarget"
   | "drizzleDir"
   | "drizzleImport"
   | "drizzleSchema"
@@ -28,6 +29,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "schemaIndexFile"
   | "sessionId"
   | "sourceValue"
+  | "status"
   | "sqlDraft"
   | "sqlPreview"
 
@@ -46,6 +48,7 @@ const createInitialCopyFeedback = (): Record<
   commands: "idle",
   createdAt: "idle",
   currentSource: "idle",
+  frontendTarget: "idle",
   drizzleDir: "idle",
   drizzleImport: "idle",
   drizzleSchema: "idle",
@@ -62,6 +65,7 @@ const createInitialCopyFeedback = (): Record<
   schemaIndexFile: "idle",
   sessionId: "idle",
   sourceValue: "idle",
+  status: "idle",
   sqlDraft: "idle",
   sqlPreview: "idle",
 })
