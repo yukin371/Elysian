@@ -523,6 +523,75 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentSession.value?.id).toBe("preview-session-2")
   })
 
+  test("prioritizes matching recent sessions in session options", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "fail",
+                createdAt: "2026-05-02T15:00:00.000Z",
+                id: "preview-session-other",
+                schemaName: "customer",
+                status: "ready",
+              }),
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:00:00.000Z",
+                id: "preview-session-match",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-match") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              createdAt: "2026-05-02T14:00:00.000Z",
+              id: "preview-session-match",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(workspace.recentSessionOptions.value[0]?.value).toBe(
+      "preview-session-match",
+    )
+    expect(workspace.recentSessionOptions.value[1]?.value).toBe(
+      "preview-session-other",
+    )
+  })
+
   test("restores persisted selection before loading matching session", async () => {
     let previewRequestCount = 0
 

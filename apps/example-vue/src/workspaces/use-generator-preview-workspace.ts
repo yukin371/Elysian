@@ -191,11 +191,35 @@ export const useGeneratorPreviewWorkspace = (
     return t("app.generatorPreview.status.pendingReview")
   }
 
+  const prioritizeRecentSessions = (
+    sessions: GeneratorPreviewSessionRecord[],
+  ) => {
+    const matchingSelection: GeneratorPreviewSessionRecord[] = []
+    const otherSessions: GeneratorPreviewSessionRecord[] = []
+
+    for (const session of sessions) {
+      if (
+        session.schemaName === selectedSchemaName.value &&
+        session.frontendTarget === selectedFrontendTarget.value &&
+        session.conflictStrategy === selectedConflictStrategy.value
+      ) {
+        matchingSelection.push(session)
+        continue
+      }
+
+      otherSessions.push(session)
+    }
+
+    return [...matchingSelection, ...otherSessions]
+  }
+
   const recentSessionOptions = computed(() =>
-    recentSessions.value.slice(0, 8).map((session) => ({
+    prioritizeRecentSessions(recentSessions.value)
+      .slice(0, 8)
+      .map((session) => ({
       label: `${session.schemaName} · ${session.frontendTarget} · ${localizeSessionStatus(session.status)} · ${session.createdAt}`,
       value: session.id,
-    })),
+      })),
   )
 
   const conflictStrategyOptions = computed(() => [
