@@ -1,4 +1,8 @@
-import type { GeneratorPreviewFileCard } from "../../../lib/generator-preview-workspace"
+import type {
+  GeneratorPreviewDiffLine,
+  GeneratorPreviewFileCard,
+  GeneratorPreviewFileDiffStats,
+} from "../../../lib/generator-preview-workspace"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
@@ -18,9 +22,11 @@ export interface GeneratorPreviewSchemaOption {
 }
 
 export type {
+  GeneratorPreviewDiffLine,
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
+  GeneratorPreviewFileDiffStats,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSqlPreview,
   GeneratorPreviewSessionRecord,

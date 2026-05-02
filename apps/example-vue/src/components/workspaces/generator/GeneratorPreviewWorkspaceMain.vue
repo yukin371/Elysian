@@ -304,6 +304,12 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
               {{ t(`app.generatorPreview.actionLabel.${file.plannedAction}`) }}
             </span>
             <span>{{ file.mergeStrategy }}</span>
+            <span class="generator-file-card-diff generator-file-card-diff-added">
+              +{{ file.diffStats.addedLineCount }}
+            </span>
+            <span class="generator-file-card-diff generator-file-card-diff-removed">
+              -{{ file.diffStats.removedLineCount }}
+            </span>
             <span>{{ file.charCount }} chars</span>
           </div>
         </button>
@@ -434,6 +440,19 @@ const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionS
   background: rgba(248, 250, 252, 0.8);
   padding: 0.2rem 0.55rem;
   color: #334155;
+}
+
+.generator-file-card-diff {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.generator-file-card-diff-added {
+  color: #15803d;
+}
+
+.generator-file-card-diff-removed {
+  color: #b91c1c;
 }
 
 @media (max-width: 900px) {

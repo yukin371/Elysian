@@ -58,4 +58,72 @@ describe("generator-preview-workspace", () => {
     )
     expect(resolveGeneratorPreviewSelection([], "missing")).toBeNull()
   })
+
+  it("derives line-level diff stats for changed files", () => {
+    const changedFile = toGeneratorPreviewFileCard({
+      absolutePath: "E:/generated/modules/customer/customer.page.vue",
+      path: "modules/customer/customer.page.vue",
+      reason: "Provide a generated management page implementation.",
+      plannedAction: "overwrite",
+      plannedReason: "File would be replaced.",
+      exists: true,
+      hasChanges: true,
+      mergeStrategy: "replace-whole-file",
+      contents: ["<template>", "<div>next</div>", "</template>"].join("\n"),
+      currentContents: ["<template>", "<div>current</div>", "</template>"].join(
+        "\n",
+      ),
+      isManaged: true,
+    })
+
+    expect(changedFile.diffStats).toEqual({
+      addedLineCount: 1,
+      changedLineCount: 2,
+      removedLineCount: 1,
+      unchangedLineCount: 2,
+    })
+    expect(changedFile.diffLines).toEqual([
+      {
+        kind: "unchanged",
+        oldLineNumber: 1,
+        newLineNumber: 1,
+        value: "<template>",
+      },
+      {
+        kind: "removed",
+        oldLineNumber: 2,
+        newLineNumber: null,
+        value: "<div>current</div>",
+      },
+      {
+        kind: "added",
+        oldLineNumber: null,
+        newLineNumber: 2,
+        value: "<div>next</div>",
+      },
+      {
+        kind: "unchanged",
+        oldLineNumber: 3,
+        newLineNumber: 3,
+        value: "</template>",
+      },
+    ])
+  })
+
+  it("treats new files as fully added in line-level diff stats", () => {
+    expect(previewFiles[0]?.diffStats).toEqual({
+      addedLineCount: 1,
+      changedLineCount: 1,
+      removedLineCount: 0,
+      unchangedLineCount: 0,
+    })
+    expect(previewFiles[0]?.diffLines).toEqual([
+      {
+        kind: "added",
+        oldLineNumber: null,
+        newLineNumber: 1,
+        value: "export const customerModuleSchema = {}",
+      },
+    ])
+  })
 })
