@@ -1452,6 +1452,47 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.applyLoading.value).toBe(false)
   })
 
+  test("does not start another preview refresh while loading", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession(),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+    })
+
+    workspace.loading.value = true
+    await workspace.refreshPreview()
+
+    expect(previewRequestCount).toBe(0)
+  })
+
   test("does not refresh preview context while apply is in progress", async () => {
     let previewRequestCount = 0
 

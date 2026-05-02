@@ -525,6 +525,7 @@ export const useGeneratorPreviewWorkspace = (
 
   const refreshPreview = async () => {
     if (
+      loading.value ||
       applyLoading.value ||
       reviewLoading.value ||
       !enabled.value ||
