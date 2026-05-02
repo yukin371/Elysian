@@ -19,7 +19,12 @@ const createTenantRecord = (
   ...overrides,
 })
 
-const createWorkspace = (canUpdate = true) =>
+const createWorkspace = (
+  canUpdate = true,
+  options?: {
+    onRecoverableAuthError?: (error: unknown) => void
+  },
+) =>
   useTenantWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => canUpdate),
@@ -28,7 +33,7 @@ const createWorkspace = (canUpdate = true) =>
     locale: ref("zh-CN"),
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeStatus: (status) => status,
-    onRecoverableAuthError: () => {},
+    onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
     page: {
       formFields: computed(() => []),
       queryFields: computed(() => []),
@@ -148,6 +153,52 @@ describe("useTenantWorkspace", () => {
         request.endsWith("/system/tenants/tenant-1/status"),
       ),
     ).toBe(false)
+    expect(workspace.selectedTenant.value?.status).toBe("active")
+  })
+
+  test("reports recoverable auth errors when toggling tenant status fails", async () => {
+    const tenant = createTenantRecord()
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/system/tenants/tenant-1/status") && method === "PUT") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/system/tenants/tenant-1") && method === "GET") {
+        return new Response(JSON.stringify(tenant), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/system/tenants") && method === "GET") {
+        return new Response(JSON.stringify({ items: [tenant] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace(true, {
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadTenants()
+    await workspace.toggleSelectedStatus()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.tenantErrorMessage.value).toContain("status 401")
     expect(workspace.selectedTenant.value?.status).toBe("active")
   })
 })

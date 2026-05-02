@@ -10,6 +10,7 @@
   - `moduleFieldKinds`
   - `validateModuleSchema`
   - `isModuleSchema`
+  - `registeredModuleSchemas`
   - 多个已注册模块 schema 与记录类型
   - workflow 条件表达式解析与 definition draft 校验
 - 当前消费者：`apps/server`、`packages/generator`、`packages/frontend-vue`、`apps/example-vue`
@@ -47,6 +48,7 @@ export const moduleSchemaVersion
 export const moduleFieldKinds
 export const validateModuleSchema
 export const isModuleSchema
+export const registeredModuleSchemas
 export type ModuleSchema
 export type ModuleField
 export type ModuleFieldOption

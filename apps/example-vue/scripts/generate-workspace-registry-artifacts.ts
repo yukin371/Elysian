@@ -7,39 +7,13 @@ import {
   isStandardCrudSchema,
   renderFrontendArtifactModule,
 } from "@elysian/generator"
-import {
-  customerModuleSchema,
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  fileModuleSchema,
-  menuModuleSchema,
-  notificationModuleSchema,
-  operationLogModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  tenantModuleSchema,
-  userModuleSchema,
-  workflowModuleSchema,
-} from "@elysian/schema"
+import { registeredModuleSchemas } from "@elysian/schema"
 
 const frontendTarget: FrontendTarget = "vue"
 
-const moduleSchemas = [
-  customerModuleSchema,
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  fileModuleSchema,
-  menuModuleSchema,
-  notificationModuleSchema,
-  operationLogModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  tenantModuleSchema,
-  userModuleSchema,
-  workflowModuleSchema,
-]
+const moduleSchemas = registeredModuleSchemas.filter(
+  (schema) => schema.frontend !== undefined,
+)
 
 const scriptDirectory = fileURLToPath(new URL(".", import.meta.url))
 const outputDirectory = join(

@@ -3,31 +3,14 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { renderModuleFiles } from "@elysian/generator"
-import {
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  menuModuleSchema,
-  notificationModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  tenantModuleSchema,
-  userModuleSchema,
-} from "@elysian/schema"
+import { registeredModuleSchemas } from "@elysian/schema"
+import { isStandardCrudSchema } from "@elysian/generator"
 
 const frontendTarget = "vue" as const
 
-const moduleSchemas = [
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  menuModuleSchema,
-  notificationModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  tenantModuleSchema,
-  userModuleSchema,
-]
+const moduleSchemas = registeredModuleSchemas.filter((schema) =>
+  isStandardCrudSchema(schema),
+)
 
 const scriptDirectory = fileURLToPath(new URL(".", import.meta.url))
 const srcDirectory = join(scriptDirectory, "../src")

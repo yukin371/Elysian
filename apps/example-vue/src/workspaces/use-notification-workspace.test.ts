@@ -21,7 +21,9 @@ const createNotificationRecord = (
   title: overrides.title ?? `Title ${overrides.id}`,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (options?: {
+  onRecoverableAuthError?: (error: unknown) => void
+}) =>
   useNotificationWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
@@ -31,7 +33,7 @@ const createWorkspace = () =>
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeLevel: (level) => level,
     localizeStatus: (status) => status,
-    onRecoverableAuthError: () => {},
+    onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
     page: {
       formFields: computed(() => []),
       queryFields: computed(() => [
@@ -199,5 +201,50 @@ describe("useNotificationWorkspace", () => {
     ).toBe(true)
     expect(workspace.visibleUnreadNotificationCount.value).toBe(0)
     expect(workspace.notificationItems.value[0]?.status).toBe("read")
+  })
+
+  test("reports recoverable auth errors when marking the selected notification as read fails", async () => {
+    const unread = createNotificationRecord({
+      id: "notice-1",
+      status: "unread",
+    })
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/system/notifications/notice-1/read") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/system/notifications/notice-1") && method === "GET") {
+        return new Response(JSON.stringify(unread), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(JSON.stringify({ items: [unread] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadNotifications()
+    await workspace.markSelectedAsRead()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.notificationErrorMessage.value).toContain("status 401")
+    expect(workspace.selectedNotification.value?.status).toBe("unread")
   })
 })

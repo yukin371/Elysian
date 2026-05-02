@@ -1,5 +1,20 @@
 export const moduleSchemaVersion = 1
 
+import { customerModuleSchema } from "./customer"
+import { departmentModuleSchema } from "./department"
+import { dictionaryModuleSchema } from "./dictionary"
+import { fileModuleSchema } from "./file"
+import { menuModuleSchema } from "./menu"
+import { notificationModuleSchema } from "./notification"
+import { operationLogModuleSchema } from "./operation-log"
+import { postModuleSchema } from "./post"
+import { productModuleSchema } from "./product"
+import { roleModuleSchema } from "./role"
+import { settingModuleSchema } from "./setting"
+import { tenantModuleSchema } from "./tenant"
+import { userModuleSchema } from "./user"
+import { workflowModuleSchema } from "./workflow"
+
 export const moduleFieldKinds = [
   "id",
   "string",
@@ -650,6 +665,23 @@ export {
   type UserRecord,
   type UserStatus,
 } from "./user"
+
+export const registeredModuleSchemas = [
+  customerModuleSchema,
+  departmentModuleSchema,
+  dictionaryModuleSchema,
+  fileModuleSchema,
+  menuModuleSchema,
+  notificationModuleSchema,
+  operationLogModuleSchema,
+  postModuleSchema,
+  productModuleSchema,
+  roleModuleSchema,
+  settingModuleSchema,
+  tenantModuleSchema,
+  userModuleSchema,
+  workflowModuleSchema,
+] as const satisfies readonly ModuleSchema[]
 
 export const sampleModuleSchema: ModuleSchema = {
   name: "sample",

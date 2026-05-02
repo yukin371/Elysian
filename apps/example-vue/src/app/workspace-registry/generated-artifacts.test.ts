@@ -7,107 +7,24 @@ import {
 } from "@elysian/frontend-vue"
 import { renderFrontendArtifactModule } from "@elysian/generator"
 import { isStandardCrudSchema } from "@elysian/generator"
-import {
-  customerModuleSchema,
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  fileModuleSchema,
-  menuModuleSchema,
-  notificationModuleSchema,
-  operationLogModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  tenantModuleSchema,
-  userModuleSchema,
-  workflowModuleSchema,
-} from "@elysian/schema"
+import { registeredModuleSchemas } from "@elysian/schema"
 
 import {
-  customerFrontendModuleArtifact,
-  departmentFrontendModuleArtifact,
-  dictionaryFrontendModuleArtifact,
-  fileFrontendModuleArtifact,
+  generatedFrontendModuleArtifacts,
   generatedStandardCrudFrontendModuleArtifacts,
   generatedStandardCrudWorkspaceKinds,
-  menuFrontendModuleArtifact,
-  notificationFrontendModuleArtifact,
-  operationLogFrontendModuleArtifact,
-  postFrontendModuleArtifact,
-  roleFrontendModuleArtifact,
-  settingFrontendModuleArtifact,
-  tenantFrontendModuleArtifact,
-  userFrontendModuleArtifact,
-  workflowDefinitionFrontendModuleArtifact,
 } from "./generated"
 
-const artifactFixtures = [
-  {
-    schema: customerModuleSchema,
-    artifact: customerFrontendModuleArtifact,
-    exportName: "customerFrontendModuleArtifact",
-  },
-  {
-    schema: departmentModuleSchema,
-    artifact: departmentFrontendModuleArtifact,
-    exportName: "departmentFrontendModuleArtifact",
-  },
-  {
-    schema: dictionaryModuleSchema,
-    artifact: dictionaryFrontendModuleArtifact,
-    exportName: "dictionaryFrontendModuleArtifact",
-  },
-  {
-    schema: fileModuleSchema,
-    artifact: fileFrontendModuleArtifact,
-    exportName: "fileFrontendModuleArtifact",
-  },
-  {
-    schema: menuModuleSchema,
-    artifact: menuFrontendModuleArtifact,
-    exportName: "menuFrontendModuleArtifact",
-  },
-  {
-    schema: notificationModuleSchema,
-    artifact: notificationFrontendModuleArtifact,
-    exportName: "notificationFrontendModuleArtifact",
-  },
-  {
-    schema: operationLogModuleSchema,
-    artifact: operationLogFrontendModuleArtifact,
-    exportName: "operationLogFrontendModuleArtifact",
-  },
-  {
-    schema: postModuleSchema,
-    artifact: postFrontendModuleArtifact,
-    exportName: "postFrontendModuleArtifact",
-  },
-  {
-    schema: roleModuleSchema,
-    artifact: roleFrontendModuleArtifact,
-    exportName: "roleFrontendModuleArtifact",
-  },
-  {
-    schema: settingModuleSchema,
-    artifact: settingFrontendModuleArtifact,
-    exportName: "settingFrontendModuleArtifact",
-  },
-  {
-    schema: tenantModuleSchema,
-    artifact: tenantFrontendModuleArtifact,
-    exportName: "tenantFrontendModuleArtifact",
-  },
-  {
-    schema: userModuleSchema,
-    artifact: userFrontendModuleArtifact,
-    exportName: "userFrontendModuleArtifact",
-  },
-  {
-    schema: workflowModuleSchema,
-    artifact: workflowDefinitionFrontendModuleArtifact,
-    exportName: "workflowDefinitionFrontendModuleArtifact",
-  },
-] as const
+const frontendModuleSchemas = registeredModuleSchemas.filter(
+  (schema) => schema.frontend !== undefined,
+)
+
+const resolveSchemaModuleCode = (schema: (typeof frontendModuleSchemas)[number]) =>
+  schema.frontend?.moduleCode ?? schema.name
+
+const artifactByModuleCode = new Map(
+  generatedFrontendModuleArtifacts.map((artifact) => [artifact.moduleCode, artifact]),
+)
 
 const generatedArtifactPath = (schemaName: string) =>
   fileURLToPath(
@@ -120,69 +37,77 @@ const generatedIndexPath = fileURLToPath(
 
 describe("workspace registry generated artifacts", () => {
   test("keep generated registrations aligned with source schemas", () => {
-    for (const fixture of artifactFixtures) {
-      expect(buildWorkspaceRegistrationFromArtifact(fixture.artifact)).toEqual(
-        buildWorkspaceRegistration(fixture.schema),
+    expect(generatedFrontendModuleArtifacts).toHaveLength(
+      frontendModuleSchemas.length,
+    )
+
+    for (const schema of frontendModuleSchemas) {
+      const artifact = artifactByModuleCode.get(resolveSchemaModuleCode(schema))
+
+      expect(artifact).toBeDefined()
+      expect(buildWorkspaceRegistrationFromArtifact(artifact!)).toEqual(
+        buildWorkspaceRegistration(schema),
       )
     }
   })
 
   test("keep generated frontend surface metadata aligned with CRUD boundaries", () => {
-    for (const fixture of artifactFixtures) {
-      const standardCrud = isStandardCrudSchema(fixture.schema)
-      const expectedPagePath = `modules/${fixture.schema.name}/${fixture.schema.name}.page.vue`
+    for (const schema of frontendModuleSchemas) {
+      const artifact = artifactByModuleCode.get(resolveSchemaModuleCode(schema))
+      const standardCrud = isStandardCrudSchema(schema)
+      const expectedPagePath = `modules/${schema.name}/${schema.name}.page.vue`
 
-      expect(fixture.artifact.pageComponentPath).toBe(expectedPagePath)
-      expect(fixture.artifact.fieldKeys).toEqual(
-        fixture.schema.fields.map((field) => field.key),
+      expect(artifact).toBeDefined()
+      expect(artifact!.pageComponentPath).toBe(expectedPagePath)
+      expect(artifact!.fieldKeys).toEqual(
+        schema.fields.map((field) => field.key),
       )
-      expect(fixture.artifact.searchableFieldKeys).toEqual(
-        fixture.schema.fields
+      expect(artifact!.searchableFieldKeys).toEqual(
+        schema.fields
           .filter((field) => field.searchable === true)
           .map((field) => field.key),
       )
 
       if (standardCrud) {
-        expect(fixture.artifact.surfaceKind).toBe("standard-crud-enterprise")
-        expect(fixture.artifact.panelComponentPath).toBe(
-          `modules/${fixture.schema.name}/${fixture.schema.name}-panel.vue`,
+        expect(artifact!.surfaceKind).toBe("standard-crud-enterprise")
+        expect(artifact!.panelComponentPath).toBe(
+          `modules/${schema.name}/${schema.name}-panel.vue`,
         )
-        expect(fixture.artifact.workspaceComponentPath).toBe(
-          `modules/${fixture.schema.name}/${fixture.schema.name}-workspace.ts`,
+        expect(artifact!.workspaceComponentPath).toBe(
+          `modules/${schema.name}/${schema.name}-workspace.ts`,
         )
       } else {
-        expect(fixture.artifact.surfaceKind).toBe("page-only")
-        expect(fixture.artifact.panelComponentPath).toBeNull()
-        expect(fixture.artifact.workspaceComponentPath).toBeNull()
+        expect(artifact!.surfaceKind).toBe("page-only")
+        expect(artifact!.panelComponentPath).toBeNull()
+        expect(artifact!.workspaceComponentPath).toBeNull()
       }
     }
   })
 
   test("keep committed generated files in sync with the current generator output", async () => {
-    for (const fixture of artifactFixtures) {
+    for (const schema of frontendModuleSchemas) {
       const generatedFile = await readFile(
-        generatedArtifactPath(fixture.schema.name),
+        generatedArtifactPath(schema.name),
         "utf8",
       )
-      const renderedFile = renderFrontendArtifactModule(
-        fixture.schema,
-        "vue",
-      ).contents
+      const renderedFile = renderFrontendArtifactModule(schema, "vue").contents
 
       expect(generatedFile).toContain(renderedFile)
     }
 
     const generatedIndex = await readFile(generatedIndexPath, "utf8")
 
-    for (const fixture of artifactFixtures) {
-      expect(generatedIndex).toContain(`export { ${fixture.exportName} }`)
+    for (const schema of frontendModuleSchemas) {
+      expect(generatedIndex).toContain(
+        `export { ${renderFrontendArtifactModule(schema, "vue").artifactName} }`,
+      )
     }
 
-    const expectedStandardCrudArtifacts = artifactFixtures
-      .filter((fixture) => isStandardCrudSchema(fixture.schema))
-      .map((fixture) => fixture.artifact)
+    const expectedStandardCrudArtifacts = frontendModuleSchemas
+      .filter((schema) => isStandardCrudSchema(schema))
+      .map((schema) => artifactByModuleCode.get(resolveSchemaModuleCode(schema)))
     const expectedStandardCrudWorkspaceKinds =
-      expectedStandardCrudArtifacts.map((artifact) => artifact.kind)
+      expectedStandardCrudArtifacts.map((artifact) => artifact?.kind)
 
     expect([...generatedStandardCrudFrontendModuleArtifacts]).toEqual(
       expectedStandardCrudArtifacts,

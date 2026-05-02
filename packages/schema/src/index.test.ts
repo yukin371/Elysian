@@ -5,6 +5,7 @@ import {
   customerModuleSchema,
   deriveBodySchema,
   isModuleSchema,
+  registeredModuleSchemas,
   roleModuleSchema,
   validateModuleSchema,
   validateWorkflowDefinitionDraft,
@@ -321,6 +322,27 @@ describe("deriveBodySchema", () => {
       "status",
       "isSystem",
       "dataScope",
+    ])
+  })
+})
+
+describe("registeredModuleSchemas", () => {
+  it("exports the registered schema registry without sample fixtures", () => {
+    expect(registeredModuleSchemas.map((schema) => schema.name)).toEqual([
+      "customer",
+      "department",
+      "dictionary",
+      "file",
+      "menu",
+      "notification",
+      "operation-log",
+      "post",
+      "product",
+      "role",
+      "setting",
+      "tenant",
+      "user",
+      "workflow-definition",
     ])
   })
 })

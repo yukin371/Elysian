@@ -424,6 +424,7 @@ export const useNotificationWorkspace = (
       notificationDetail.value = updated
       await reloadNotifications()
     } catch (error) {
+      options.onRecoverableAuthError(error)
       notificationErrorMessage.value =
         error instanceof Error
           ? error.message

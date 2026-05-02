@@ -1,45 +1,43 @@
 import { buildVueCustomCrudPage } from "@elysian/frontend-vue"
-import {
-  customerModuleSchema,
-  departmentModuleSchema,
-  dictionaryModuleSchema,
-  menuModuleSchema,
-  notificationModuleSchema,
-  operationLogModuleSchema,
-  postModuleSchema,
-  roleModuleSchema,
-  settingModuleSchema,
-  tenantModuleSchema,
-  userModuleSchema,
-} from "@elysian/schema"
+import { registeredModuleSchemas } from "@elysian/schema"
 
-export const customerPageDefinition =
-  buildVueCustomCrudPage(customerModuleSchema)
-
-export const dictionaryPageDefinition = buildVueCustomCrudPage(
-  dictionaryModuleSchema,
+const frontendPageDefinitionsBySchemaName = Object.fromEntries(
+  registeredModuleSchemas
+    .filter((schema) => schema.frontend !== undefined)
+    .map((schema) => [schema.name, buildVueCustomCrudPage(schema)]),
 )
 
-export const departmentPageDefinition = buildVueCustomCrudPage(
-  departmentModuleSchema,
-)
+const requirePageDefinition = (schemaName: string) => {
+  const definition = frontendPageDefinitionsBySchemaName[schemaName]
 
-export const menuPageDefinition = buildVueCustomCrudPage(menuModuleSchema)
+  if (!definition) {
+    throw new Error(
+      `Missing frontend page definition for registered schema "${schemaName}"`,
+    )
+  }
 
-export const notificationPageDefinition = buildVueCustomCrudPage(
-  notificationModuleSchema,
-)
+  return definition
+}
 
-export const operationLogPageDefinition = buildVueCustomCrudPage(
-  operationLogModuleSchema,
-)
+export const customerPageDefinition = requirePageDefinition("customer")
 
-export const postPageDefinition = buildVueCustomCrudPage(postModuleSchema)
+export const dictionaryPageDefinition = requirePageDefinition("dictionary")
 
-export const rolePageDefinition = buildVueCustomCrudPage(roleModuleSchema)
+export const departmentPageDefinition = requirePageDefinition("department")
 
-export const settingPageDefinition = buildVueCustomCrudPage(settingModuleSchema)
+export const menuPageDefinition = requirePageDefinition("menu")
 
-export const tenantPageDefinition = buildVueCustomCrudPage(tenantModuleSchema)
+export const notificationPageDefinition = requirePageDefinition("notification")
 
-export const userPageDefinition = buildVueCustomCrudPage(userModuleSchema)
+export const operationLogPageDefinition =
+  requirePageDefinition("operation-log")
+
+export const postPageDefinition = requirePageDefinition("post")
+
+export const rolePageDefinition = requirePageDefinition("role")
+
+export const settingPageDefinition = requirePageDefinition("setting")
+
+export const tenantPageDefinition = requirePageDefinition("tenant")
+
+export const userPageDefinition = requirePageDefinition("user")

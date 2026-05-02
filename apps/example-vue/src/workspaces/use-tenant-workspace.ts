@@ -315,6 +315,7 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
       tenantDetail.value = updated
       await reloadTenants()
     } catch (error) {
+      options.onRecoverableAuthError(error)
       tenantErrorMessage.value =
         error instanceof Error
           ? error.message
