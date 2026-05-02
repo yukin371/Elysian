@@ -652,6 +652,54 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentSession.value?.id).toBe("preview-session-2")
   })
 
+  test("clears stale preview when restored session detail is inconsistent", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-broken") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              frontendTarget: "vue",
+              id: "preview-session-broken",
+              report: createReport({ frontendTarget: "react" }),
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace()
+    workspace.currentSession.value = createSession({
+      id: "preview-session-current",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.selectedRecentSessionId.value = "preview-session-current"
+
+    await workspace.restorePreviewSession("preview-session-broken")
+
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
+    expect(workspace.sqlPreview.value).toBeNull()
+    expect(workspace.selectedRecentSessionId.value).toBe("")
+    expect(workspace.errorMessage.value).toBe(
+      "Generator session detail does not match its report",
+    )
+  })
+
   test("does not restore the current session again when already selected", async () => {
     let detailRequestCount = 0
 

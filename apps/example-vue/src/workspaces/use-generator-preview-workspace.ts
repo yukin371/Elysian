@@ -739,7 +739,9 @@ export const useGeneratorPreviewWorkspace = (
         sessionDetailCache.get(sessionId) ??
         (await fetchGeneratorPreviewSession(sessionId))
 
-      applySessionDetail(session)
+      if (!applySessionDetail(session)) {
+        resetPreviewState()
+      }
     } catch (error) {
       onRecoverableAuthError(error)
       errorMessage.value =
