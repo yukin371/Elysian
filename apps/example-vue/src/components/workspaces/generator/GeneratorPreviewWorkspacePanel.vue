@@ -3,7 +3,6 @@ import { computed, onBeforeUnmount } from "vue"
 
 import type {
   GeneratorPreviewApplyEvidence,
-  GeneratorPreviewDiffLine,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
   GeneratorPreviewReviewEvidence,
@@ -13,6 +12,7 @@ import type {
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
+import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import {
   joinGeneratorPreviewSuggestedCommands,
 } from "./generator-preview-handoff"
@@ -243,21 +243,6 @@ const copyOutputDir = async () => {
 
 const copySourceValue = async () => {
   await copyTextByKey("sourceValue", props.session?.sourceValue ?? "")
-}
-
-const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
-  `generator-diff-line generator-diff-line-${line.kind}`
-
-const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
-  if (line.kind === "added") {
-    return "+"
-  }
-
-  if (line.kind === "removed") {
-    return "-"
-  }
-
-  return " "
 }
 
 onBeforeUnmount(disposeCopyFeedbackTimers)
@@ -828,92 +813,33 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
       </section>
     </div>
 
-    <div v-if="selectedFile" class="enterprise-panel-stack">
-      <section class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.lineDiffTitle") }}</p>
-        <div class="generator-diff-block">
-          <div
-            v-for="(line, index) in selectedFile.diffLines"
-            :key="`${selectedFile.path}:${index}:${line.kind}`"
-            :class="resolveDiffLineClass(line)"
-          >
-            <span class="generator-diff-line-number">
-              {{ line.oldLineNumber ?? "" }}
-            </span>
-            <span class="generator-diff-line-number">
-              {{ line.newLineNumber ?? "" }}
-            </span>
-            <span class="generator-diff-line-prefix">
-              {{ resolveDiffLinePrefix(line) }}
-            </span>
-            <code class="generator-diff-line-value">{{ line.value }}</code>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel-section">
-        <div class="generator-code-toolbar">
-          <p class="enterprise-subheading">{{ t("app.generatorPreview.sourceTitle") }}</p>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="selectedFile.contents.trim().length === 0"
-            @click="copyGeneratedSource"
-          >
-            {{
-              resolveCopyLabel(
-                "generatedSource",
-                "app.generatorPreview.action.copySnippet",
-              )
-            }}
-          </button>
-        </div>
-        <pre class="generator-code-block"><code>{{ selectedFile.contents }}</code></pre>
-      </section>
-
-      <section
-        v-if="selectedFile.currentContents !== null"
-        class="panel-section"
-      >
-        <div class="generator-code-toolbar">
-          <p class="enterprise-subheading">{{ t("app.generatorPreview.currentSourceTitle") }}</p>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="selectedFile.currentContents.trim().length === 0"
-            @click="copyCurrentSource"
-          >
-            {{
-              resolveCopyLabel(
-                "currentSource",
-                "app.generatorPreview.action.copySnippet",
-              )
-            }}
-          </button>
-        </div>
-        <pre class="generator-code-block"><code>{{ selectedFile.currentContents }}</code></pre>
-      </section>
-
-      <section class="panel-section">
-        <div class="generator-code-toolbar">
-          <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlTitle") }}</p>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="(sqlPreview?.contents ?? '').trim().length === 0"
-            @click="copySqlPreview"
-          >
-            {{
-              resolveCopyLabel(
-                "sqlPreview",
-                "app.generatorPreview.action.copySnippet",
-              )
-            }}
-          </button>
-        </div>
-        <pre class="generator-code-block"><code>{{ sqlPreview?.contents ?? "" }}</code></pre>
-      </section>
-    </div>
+    <GeneratorPreviewWorkspaceSourcePanel
+      v-if="selectedFile"
+      :t="t"
+      :selected-file="selectedFile"
+      :sql-preview="sqlPreview"
+      :generated-source-copy-label="
+        resolveCopyLabel(
+          'generatedSource',
+          'app.generatorPreview.action.copySnippet',
+        )
+      "
+      :current-source-copy-label="
+        resolveCopyLabel(
+          'currentSource',
+          'app.generatorPreview.action.copySnippet',
+        )
+      "
+      :sql-preview-copy-label="
+        resolveCopyLabel(
+          'sqlPreview',
+          'app.generatorPreview.action.copySnippet',
+        )
+      "
+      @copy-generated-source="copyGeneratedSource"
+      @copy-current-source="copyCurrentSource"
+      @copy-sql-preview="copySqlPreview"
+    />
 
     <div v-else class="enterprise-inline-warning mt-5">
       {{ t("app.generatorPreview.detailEmptyDescription") }}
@@ -927,50 +853,6 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
   gap: 0.75rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
-}
-
-.generator-diff-block {
-  overflow: auto;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: #0b1120;
-}
-
-.generator-diff-line {
-  display: grid;
-  grid-template-columns: 56px 56px 20px minmax(0, 1fr);
-  align-items: start;
-  gap: 0.75rem;
-  padding: 0.35rem 0.75rem;
-  font-family:
-    "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
-    monospace;
-  font-size: 0.78rem;
-  line-height: 1.7;
-}
-
-.generator-diff-line-added {
-  background: rgba(21, 128, 61, 0.16);
-}
-
-.generator-diff-line-removed {
-  background: rgba(185, 28, 28, 0.14);
-}
-
-.generator-diff-line-unchanged {
-  color: rgba(226, 232, 240, 0.72);
-}
-
-.generator-diff-line-number,
-.generator-diff-line-prefix {
-  color: rgba(148, 163, 184, 0.9);
-  font-variant-numeric: tabular-nums;
-}
-
-.generator-diff-line-value {
-  color: #dbeafe;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 
 .generator-code-block {
