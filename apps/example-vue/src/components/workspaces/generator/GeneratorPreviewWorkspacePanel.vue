@@ -12,6 +12,7 @@ import type {
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
+import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import {
@@ -304,50 +305,15 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
       @copy-changed="copySelectedChanged"
     />
 
-    <section v-if="selectedFile" class="panel-section mt-5">
-      <div class="generator-code-toolbar">
-        <p class="enterprise-subheading">
-          {{ t("app.generatorPreview.fileDecisionTitle") }}
-        </p>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="selectedFile.absolutePath.trim().length === 0"
-          @click="copySelectedAbsolutePath"
-        >
-          {{
-            resolveCopyLabel(
-              "absolutePath",
-              "app.generatorPreview.action.copySnippet",
-            )
-          }}
-        </button>
-      </div>
-      <div class="enterprise-metadata">
-        <div>
-          <span>{{ t("app.generatorPreview.meta.absolutePath") }}</span>
-          <strong>{{ selectedFile.absolutePath }}</strong>
-        </div>
-        <div>
-          <span>{{ t("app.generatorPreview.meta.exists") }}</span>
-          <strong>{{ selectedExistsLabel }}</strong>
-        </div>
-        <div>
-          <span>{{ t("app.generatorPreview.meta.managed") }}</span>
-          <strong>{{ selectedManagedLabel }}</strong>
-        </div>
-      </div>
-      <div class="generator-explanation-grid">
-        <article>
-          <strong>{{ t("app.generatorPreview.meta.templateReason") }}</strong>
-          <p>{{ selectedFile.reason }}</p>
-        </article>
-        <article>
-          <strong>{{ t("app.generatorPreview.meta.plannedReason") }}</strong>
-          <p>{{ selectedFile.plannedReason }}</p>
-        </article>
-      </div>
-    </section>
+    <GeneratorPreviewWorkspaceFileDecisionPanel
+      v-if="selectedFile"
+      :t="t"
+      :selected-file="selectedFile"
+      :selected-exists-label="selectedExistsLabel"
+      :selected-managed-label="selectedManagedLabel"
+      :absolute-path-copy-label="resolveSnippetCopyLabel('absolutePath')"
+      @copy-absolute-path="copySelectedAbsolutePath"
+    />
 
     <div v-if="session" class="enterprise-panel-stack">
       <section class="panel-section">
@@ -941,8 +907,7 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
 }
 
 .generator-risk-card,
-.generator-handoff-grid article,
-.generator-explanation-grid article {
+.generator-handoff-grid article {
   display: grid;
   gap: 0.35rem;
   border-radius: 6px;
@@ -952,8 +917,7 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
 }
 
 .generator-risk-card p,
-.generator-handoff-steps,
-.generator-explanation-grid p {
+.generator-handoff-steps {
   margin: 0;
 }
 
@@ -963,14 +927,8 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
 
 .generator-risk-card p,
 .generator-handoff-grid span,
-.generator-handoff-steps,
-.generator-explanation-grid p {
+.generator-handoff-steps {
   color: #475569;
-}
-
-.generator-explanation-grid {
-  display: grid;
-  gap: 0.75rem;
 }
 
 .generator-handoff-steps {
