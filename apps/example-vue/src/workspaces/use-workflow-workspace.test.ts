@@ -104,12 +104,19 @@ describe("useWorkflowWorkspace", () => {
       },
     })
 
+    workspace.workflowQuery.value = " expense "
+    workspace.setWorkflowStatusFilter("active")
     await workspace.reloadWorkflowDefinitions()
 
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.workflowErrorMessage.value).toContain("status 401")
     expect(workspace.workflowDefinitions.value).toEqual([])
     expect(workspace.selectedWorkflowDefinition.value).toBeNull()
+    expect(workspace.workflowQuery.value).toBe(" expense ")
+    expect(workspace.workflowStatusFilter.value).toBe("active")
+    expect(workspace.workflowFilterSummary.value).toBe(
+      "app.workflow.filter.querySummary:value=expense / app.workflow.filter.statusSummary:value=status:active",
+    )
   })
 
   test("reports recoverable auth errors when loading workflow definition detail fails", async () => {
