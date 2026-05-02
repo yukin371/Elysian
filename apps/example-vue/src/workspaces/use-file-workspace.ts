@@ -295,7 +295,9 @@ export const useFileWorkspace = (options: UseFileWorkspaceOptions) => {
 
       await selectFile(nextFile)
     } catch (error) {
+      const preservedQuery = { ...fileQuery.value }
       clearWorkspace()
+      fileQuery.value = preservedQuery
       options.onRecoverableAuthError(error)
       fileErrorMessage.value =
         error instanceof Error
