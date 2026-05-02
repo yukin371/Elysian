@@ -91,13 +91,19 @@ const resolveEvidenceActorLabel = (
   "-"
 
 const handleQueryInput = (value: string | number) => {
-  emit("update:query", String(value))
+  const nextValue = String(value)
+
+  if (nextValue === props.query) {
+    return
+  }
+
+  emit("update:query", nextValue)
 }
 
 const handleSchemaChange = (
   value: string | number | Array<string | number>,
 ) => {
-  if (typeof value === "string") {
+  if (typeof value === "string" && value !== props.selectedSchemaName) {
     emit("update:selected-schema-name", value)
   }
 }
@@ -105,7 +111,10 @@ const handleSchemaChange = (
 const handleConflictStrategyChange = (
   value: string | number | Array<string | number>,
 ) => {
-  if (typeof value === "string") {
+  if (
+    typeof value === "string" &&
+    value !== props.selectedConflictStrategy
+  ) {
     emit("update:selected-conflict-strategy", value)
   }
 }
@@ -113,7 +122,10 @@ const handleConflictStrategyChange = (
 const handleFrontendChange = (
   value: string | number | Array<string | number>,
 ) => {
-  if (value === "vue" || value === "react") {
+  if (
+    (value === "vue" || value === "react") &&
+    value !== props.selectedFrontendTarget
+  ) {
     emit("update:selected-frontend-target", value)
   }
 }
@@ -121,7 +133,11 @@ const handleFrontendChange = (
 const handleRecentSessionChange = (
   value: string | number | Array<string | number>,
 ) => {
-  if (typeof value === "string" && value.length > 0) {
+  if (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value !== props.selectedRecentSessionId
+  ) {
     emit("restore-session", value)
   }
 }
