@@ -712,6 +712,10 @@ export const useGeneratorPreviewWorkspace = (
     [selectedSchemaName, selectedFrontendTarget, selectedConflictStrategy],
     () => {
       resetFilters()
+
+      if (!currentSelectionMatchesSession()) {
+        selectedRecentSessionId.value = ""
+      }
     },
   )
 

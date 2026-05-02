@@ -1064,6 +1064,22 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.previewQuery.value).toBe("")
   })
 
+  test("clears selected recent session while generator context is changing", async () => {
+    const { workspace } = createWorkspace()
+
+    workspace.currentSession.value = createSession({
+      id: "preview-session-current",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.selectedRecentSessionId.value = "preview-session-current"
+
+    workspace.selectedConflictStrategy.value = "overwrite"
+
+    await waitForAsyncWork()
+
+    expect(workspace.selectedRecentSessionId.value).toBe("")
+  })
+
   test("sends selected conflict strategy when refreshing preview", async () => {
     let submittedConflictStrategy: GeneratorPreviewConflictStrategy | undefined
 
