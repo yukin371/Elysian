@@ -192,12 +192,7 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
         await selectWorkflowDefinition(nextDefinition)
       }
     } catch (error) {
-      const preservedQuery = workflowQuery.value
-      const preservedStatusFilter = workflowStatusFilter.value
       options.onRecoverableAuthError(error)
-      clearWorkflowDefinitions()
-      workflowQuery.value = preservedQuery
-      workflowStatusFilter.value = preservedStatusFilter
       workflowErrorMessage.value =
         error instanceof Error
           ? error.message

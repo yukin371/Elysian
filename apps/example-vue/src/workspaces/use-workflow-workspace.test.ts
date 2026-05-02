@@ -162,4 +162,74 @@ describe("useWorkflowWorkspace", () => {
     )
     expect(workspace.workflowDetailLoading.value).toBe(false)
   })
+
+  test("preserves cached workflow context when reloading definitions fails", async () => {
+    const primary = createWorkflowDefinition()
+    const archived = createWorkflowDefinition({
+      id: "workflow-definition-2",
+      key: "expense-approval",
+      name: "Expense Approval v1",
+      status: "disabled",
+      version: 1,
+    })
+    const recoverableErrors: unknown[] = []
+    let failReload = false
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/workflow/definitions/workflow-definition-1") &&
+        method === "GET"
+      ) {
+        return new Response(JSON.stringify(primary), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/workflow/definitions") && method === "GET") {
+        if (failReload) {
+          return new Response(JSON.stringify({ message: "unavailable" }), {
+            headers: { "content-type": "application/json" },
+            status: 503,
+          })
+        }
+
+        return new Response(JSON.stringify({ items: [primary, archived] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.reloadWorkflowDefinitions()
+    workspace.workflowQuery.value = " expense "
+    workspace.setWorkflowStatusFilter("active")
+    failReload = true
+
+    await workspace.reloadWorkflowDefinitions()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.workflowErrorMessage.value).toContain("status 503")
+    expect(workspace.workflowDefinitions.value).toEqual([primary, archived])
+    expect(workspace.selectedWorkflowDefinitionId.value).toBe(
+      "workflow-definition-1",
+    )
+    expect(workspace.selectedWorkflowDefinition.value?.id).toBe(
+      "workflow-definition-1",
+    )
+    expect(workspace.workflowDefinitionDetailCards.value).toHaveLength(3)
+    expect(workspace.workflowQuery.value).toBe(" expense ")
+    expect(workspace.workflowStatusFilter.value).toBe("active")
+  })
 })
