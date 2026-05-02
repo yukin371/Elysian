@@ -474,13 +474,13 @@ describe("useGeneratorPreviewWorkspace", () => {
     await waitForAsyncWork()
 
     expect(previewRequestCount).toBe(1)
-    expect(listRequestCount).toBe(3)
+    expect(listRequestCount).toBe(2)
 
     workspace.selectedConflictStrategy.value = "overwrite-generated-only"
     await waitForAsyncWork()
 
     expect(workspace.currentSession.value?.id).toBe("preview-session-3")
-    expect(listRequestCount).toBe(3)
+    expect(listRequestCount).toBe(2)
     expect(detailRequestCount).toBe(1)
   })
 
@@ -589,6 +589,161 @@ describe("useGeneratorPreviewWorkspace", () => {
     )
     expect(workspace.recentSessionOptions.value[1]?.value).toBe(
       "preview-session-other",
+    )
+  })
+
+  test("updates recent sessions locally after preview review and apply", async () => {
+    let listRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        listRequestCount += 1
+
+        return new Response(JSON.stringify({ items: [] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession({
+              id: "preview-session-created",
+              status: "pending_review",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-created/review") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            session: createSession({
+              id: "preview-session-created",
+              reviewEvidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                comment: "ready for staging",
+                decision: "approve",
+                reportPath: "generated/reports/preview-session-created.preview.json",
+                reviewedAt: "2026-05-02T16:05:00.000Z",
+                sessionId: "preview-session-created",
+              },
+              reviewedAt: "2026-05-02T16:05:00.000Z",
+              reviewedByDisplayName: "Admin",
+              reviewedByUserId: "user-1",
+              reviewedByUsername: "admin",
+              status: "ready",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-created/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            apply: {
+              evidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                appliedAt: "2026-05-02T16:10:00.000Z",
+                manifestPath: "generated/manifests/preview-session-created.json",
+                reportPath: "generated/reports/preview-session-created.preview.json",
+                requestId: "req-apply-preview-session-created",
+                sessionId: "preview-session-created",
+              },
+              files: [],
+              manifestPath: "generated/manifests/preview-session-created.json",
+            },
+            diff: createDiffSummary(),
+            session: createSession({
+              appliedAt: "2026-05-02T16:10:00.000Z",
+              appliedByDisplayName: "Admin",
+              appliedByUserId: "user-1",
+              appliedByUsername: "admin",
+              applyEvidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                appliedAt: "2026-05-02T16:10:00.000Z",
+                manifestPath: "generated/manifests/preview-session-created.json",
+                reportPath: "generated/reports/preview-session-created.preview.json",
+                requestId: "req-apply-preview-session-created",
+                sessionId: "preview-session-created",
+              },
+              applyManifestPath:
+                "generated/manifests/preview-session-created.json",
+              applyRequestId: "req-apply-preview-session-created",
+              id: "preview-session-created",
+              status: "applied",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(listRequestCount).toBe(1)
+    expect(workspace.recentSessionOptions.value[0]?.value).toBe(
+      "preview-session-created",
+    )
+
+    await workspace.reviewPreview("approve", "ready for staging")
+
+    expect(listRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.status).toBe("ready")
+    expect(workspace.recentSessionOptions.value[0]?.value).toBe(
+      "preview-session-created",
+    )
+
+    await workspace.applyPreview()
+
+    expect(listRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.status).toBe("applied")
+    expect(workspace.recentSessionOptions.value[0]?.value).toBe(
+      "preview-session-created",
     )
   })
 

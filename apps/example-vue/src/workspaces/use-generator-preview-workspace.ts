@@ -464,7 +464,6 @@ export const useGeneratorPreviewWorkspace = (
           response.sqlProposalHandoff,
         ),
       )
-      void loadRecentSessions()
     } catch (error) {
       if (requestId !== latestPreviewRequestId) {
         return
@@ -506,14 +505,13 @@ export const useGeneratorPreviewWorkspace = (
           ),
         )
       } else {
+        upsertRecentSession(response.session)
         currentSession.value = response.session
         currentDiffSummary.value = response.diff
         currentSqlProposal.value = response.sqlProposal
         currentSqlProposalHandoff.value = response.sqlProposalHandoff
         selectedRecentSessionId.value = response.session.id
       }
-
-      void loadRecentSessions()
     } catch (error) {
       onRecoverableAuthError(error)
       errorMessage.value =
@@ -557,14 +555,13 @@ export const useGeneratorPreviewWorkspace = (
           ),
         )
       } else {
+        upsertRecentSession(response.session)
         currentSession.value = response.session
         currentDiffSummary.value = response.diff
         currentSqlProposal.value = response.sqlProposal
         currentSqlProposalHandoff.value = response.sqlProposalHandoff
         selectedRecentSessionId.value = response.session.id
       }
-
-      void loadRecentSessions()
     } catch (error) {
       onRecoverableAuthError(error)
       errorMessage.value =
