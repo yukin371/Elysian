@@ -523,6 +523,57 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentSession.value?.id).toBe("preview-session-2")
   })
 
+  test("does not restore the current session again when already selected", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession({
+              id: "preview-session-2",
+              status: "ready",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-2") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    await workspace.restorePreviewSession("preview-session-2")
+
+    expect(detailRequestCount).toBe(0)
+    expect(workspace.errorMessage.value).toBe("")
+    expect(workspace.currentSession.value?.id).toBe("preview-session-2")
+  })
+
   test("prioritizes matching recent sessions in session options", async () => {
     globalThis.fetch = (async (input, init) => {
       const url = String(input)

@@ -576,6 +576,14 @@ export const useGeneratorPreviewWorkspace = (
       return
     }
 
+    if (
+      currentSession.value?.id === sessionId &&
+      currentReport.value !== null &&
+      selectedRecentSessionId.value === sessionId
+    ) {
+      return
+    }
+
     loading.value = true
     errorMessage.value = ""
 
