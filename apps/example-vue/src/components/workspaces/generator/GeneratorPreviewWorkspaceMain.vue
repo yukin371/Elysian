@@ -266,6 +266,8 @@ const handleRecentSessionChange = (
     value.length > 0 &&
     value !== props.selectedRecentSessionId
   ) {
+    isApplyConfirming.value = false
+    isRejectConfirming.value = false
     emit("restore-session", value)
   }
 }
