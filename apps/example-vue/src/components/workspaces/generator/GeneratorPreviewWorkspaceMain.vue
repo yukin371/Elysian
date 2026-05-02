@@ -311,6 +311,10 @@ const handleReviewPreview = (decision: "approve" | "reject") => {
     return
   }
 
+  if (decision === "approve" && isRejectConfirming.value) {
+    return
+  }
+
   if (decision === "reject" && !isRejectConfirming.value) {
     isApplyConfirming.value = false
     isRejectConfirming.value = true
