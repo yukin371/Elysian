@@ -14,6 +14,7 @@ const createWorkspace = (options?: {
   canView?: boolean
   createError?: unknown
   initialItems?: TestRecord[]
+  listError?: unknown
   onRecoverableAuthError?: (error: unknown) => void
   updateError?: unknown
 }) => {
@@ -47,7 +48,13 @@ const createWorkspace = (options?: {
 
       return record
     },
-    fetchList: async () => ({ items: listItems.value }),
+    fetchList: async () => {
+      if (options?.listError) {
+        throw options.listError
+      }
+
+      return { items: listItems.value }
+    },
     getCreateErrorMessage: () => "create failed",
     getLoadDetailErrorMessage: () => "detail failed",
     getLoadListErrorMessage: () => "list failed",
@@ -203,5 +210,30 @@ describe("createCrudWorkspace", () => {
     expect(updateWorkspaceResult.workspace.errorMessage.value).toBe(
       "update unauthorized",
     )
+  })
+
+  test("preserves query values when reload fails", async () => {
+    const recoverableErrors: unknown[] = []
+    const listError = new Error("list unauthorized")
+    const { workspace } = createWorkspace({
+      listError,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    workspace.handleSearch({
+      keyword: "alpha",
+      status: "active",
+    })
+    await workspace.reloadRecords()
+
+    expect(recoverableErrors).toEqual([listError])
+    expect(workspace.items.value).toEqual([])
+    expect(workspace.queryValues.value).toEqual({
+      keyword: "alpha",
+      status: "active",
+    })
+    expect(workspace.errorMessage.value).toBe("list unauthorized")
   })
 })
