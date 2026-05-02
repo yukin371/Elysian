@@ -23,6 +23,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "requestId"
   | "reviewComment"
   | "reviewedAt"
+  | "schemaName"
   | "schemaDir"
   | "schemaIndexFile"
   | "sessionId"
@@ -56,6 +57,7 @@ const createInitialCopyFeedback = (): Record<
   requestId: "idle",
   reviewComment: "idle",
   reviewedAt: "idle",
+  schemaName: "idle",
   schemaDir: "idle",
   schemaIndexFile: "idle",
   sessionId: "idle",

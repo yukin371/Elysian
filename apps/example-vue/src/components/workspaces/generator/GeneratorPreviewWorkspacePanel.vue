@@ -218,44 +218,37 @@ const copyHandoffTargetPath = async (
   await copyTextByKey(key, path)
 }
 
-const copySessionId = async () => {
-  await copyTextByKey("sessionId", props.session?.id ?? "")
-}
+const copySessionId = async () =>
+  copyTextByKey("sessionId", props.session?.id ?? "")
 
 const copyManifestPath = async () => {
   await copyTextByKey("manifestPath", props.applyEvidence?.manifestPath ?? "")
 }
 
-const copyRequestId = async () => {
-  await copyTextByKey(
-    "requestId",
-    props.applyEvidence?.requestId ?? "",
-  )
-}
+const copyRequestId = async () =>
+  copyTextByKey("requestId", props.applyEvidence?.requestId ?? "")
 
 const copyReviewComment = async () => {
   await copyTextByKey("reviewComment", props.reviewEvidence?.comment ?? "")
 }
 
-const copyOutputDir = async () => {
-  await copyTextByKey("outputDir", props.session?.outputDir ?? "")
-}
+const copyOutputDir = async () =>
+  copyTextByKey("outputDir", props.session?.outputDir ?? "")
 
-const copySourceValue = async () => {
-  await copyTextByKey("sourceValue", props.session?.sourceValue ?? "")
-}
+const copySourceValue = async () =>
+  copyTextByKey("sourceValue", props.session?.sourceValue ?? "")
 
-const copyCreatedAt = async () => {
-  await copyTextByKey("createdAt", props.session?.createdAt ?? "")
-}
+const copyCreatedAt = async () =>
+  copyTextByKey("createdAt", props.session?.createdAt ?? "")
 
-const copyReviewedAt = async () => {
-  await copyTextByKey("reviewedAt", props.reviewEvidence?.reviewedAt ?? "")
-}
+const copyReviewedAt = async () =>
+  copyTextByKey("reviewedAt", props.reviewEvidence?.reviewedAt ?? "")
 
-const copyAppliedAt = async () => {
-  await copyTextByKey("appliedAt", props.applyEvidence?.appliedAt ?? "")
-}
+const copyAppliedAt = async () =>
+  copyTextByKey("appliedAt", props.applyEvidence?.appliedAt ?? "")
+
+const copySelectedSchemaName = async () =>
+  copyTextByKey("schemaName", props.selectedSchemaName)
 
 onBeforeUnmount(disposeCopyFeedbackTimers)
 
@@ -279,7 +272,22 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
 
     <div class="enterprise-metadata mt-5">
       <div>
-        <span>{{ t("app.generatorPreview.meta.schemaName") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.schemaName") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="selectedSchemaName.trim().length === 0"
+            @click="copySelectedSchemaName"
+          >
+            {{
+              resolveCopyLabel(
+                "schemaName",
+                "app.generatorPreview.action.copySnippet",
+              )
+            }}
+          </button>
+        </div>
         <strong>{{ selectedSchemaName }}</strong>
       </div>
       <div>
