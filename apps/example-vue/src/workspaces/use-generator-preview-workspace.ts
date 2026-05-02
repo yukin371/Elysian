@@ -115,7 +115,7 @@ export const useGeneratorPreviewWorkspace = (
     currentReport.value?.frontendTarget === selectedFrontendTarget.value
 
   const refreshPreview = async () => {
-    if (!enabled.value || !selectedSchemaName.value) {
+    if (applyLoading.value || !enabled.value || !selectedSchemaName.value) {
       return
     }
 

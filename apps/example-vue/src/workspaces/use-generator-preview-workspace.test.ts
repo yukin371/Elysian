@@ -341,4 +341,49 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
   })
+
+  test("does not refresh preview context while apply is in progress", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+    })
+
+    await waitForAsyncWork()
+    expect(previewRequestCount).toBe(1)
+
+    workspace.applyLoading.value = true
+    workspace.selectedFrontendTarget.value = "react"
+    await waitForAsyncWork()
+
+    expect(previewRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.frontendTarget).toBe("vue")
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+  })
 })

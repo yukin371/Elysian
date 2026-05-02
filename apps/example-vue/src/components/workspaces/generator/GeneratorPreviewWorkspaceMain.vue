@@ -76,6 +76,7 @@ const handleFrontendChange = (
           <TSelect
             :model-value="selectedSchemaName"
             :options="schemaOptions"
+            :disabled="loading || actionLoading"
             @update:model-value="handleSchemaChange"
           />
         </label>
@@ -85,6 +86,7 @@ const handleFrontendChange = (
           <TSelect
             :model-value="selectedFrontendTarget"
             :options="frontendOptions"
+            :disabled="loading || actionLoading"
             @update:model-value="handleFrontendChange"
           />
         </label>
