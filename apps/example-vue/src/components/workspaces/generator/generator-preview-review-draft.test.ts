@@ -67,4 +67,24 @@ describe("generator preview review draft storage", () => {
 
     expect(loadGeneratorPreviewReviewDraft("preview-session-1")).toBeNull()
   })
+
+  test("does not throw when draft storage write fails", () => {
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: {
+        ...createLocalStorage(),
+        setItem: () => {
+          throw new Error("quota exceeded")
+        },
+      },
+      writable: true,
+    })
+
+    expect(() => {
+      persistGeneratorPreviewReviewDraft(
+        "preview-session-1",
+        "ready for staging",
+      )
+    }).not.toThrow()
+  })
 })

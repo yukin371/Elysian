@@ -38,15 +38,19 @@ const persistGeneratorPreviewReviewDrafts = (
     return
   }
 
-  if (Object.keys(drafts).length === 0) {
-    storage.removeItem(GENERATOR_PREVIEW_REVIEW_DRAFTS_STORAGE_KEY)
-    return
-  }
+  try {
+    if (Object.keys(drafts).length === 0) {
+      storage.removeItem(GENERATOR_PREVIEW_REVIEW_DRAFTS_STORAGE_KEY)
+      return
+    }
 
-  storage.setItem(
-    GENERATOR_PREVIEW_REVIEW_DRAFTS_STORAGE_KEY,
-    JSON.stringify(drafts),
-  )
+    storage.setItem(
+      GENERATOR_PREVIEW_REVIEW_DRAFTS_STORAGE_KEY,
+      JSON.stringify(drafts),
+    )
+  } catch {
+    // Draft storage is best-effort; review actions must not depend on it.
+  }
 }
 
 export const loadGeneratorPreviewReviewDraft = (sessionId: string) =>
