@@ -10,6 +10,10 @@ defineOptions({
   name: "ElyNavNodes",
 })
 
+const emit = defineEmits<{
+  "directory-toggle": [menuKey: string]
+}>()
+
 const props = defineProps<{
   items: UiNavigationNode[]
 }>()
@@ -26,12 +30,18 @@ const visibleItems = computed(() =>
       :value="item.id"
     >
       <template #title>
-        <div class="ely-nav-title">
+        <div
+          class="ely-nav-title"
+          @click.stop="emit('directory-toggle', item.id)"
+        >
           <span>{{ item.name }}</span>
           <small>{{ item.code }}</small>
         </div>
       </template>
-      <ElyNavNodes :items="item.children" />
+      <ElyNavNodes
+        :items="item.children"
+        @directory-toggle="emit('directory-toggle', $event)"
+      />
     </TSubmenu>
 
     <TMenuItem v-else :value="item.id">

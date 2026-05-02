@@ -2,6 +2,10 @@ import { describe, expect, it } from "bun:test"
 import type { UiCrudPageDefinition } from "@elysian/ui-core"
 import { computed, ref } from "vue"
 
+import {
+  isElyShellMenuSelectable,
+  toggleElyShellExpandedMenuValue,
+} from "./components/ely-shell-navigation"
 import { resolveElyShellCopy, useElyCrudPage } from "./index"
 
 const definition: UiCrudPageDefinition = {
@@ -189,5 +193,52 @@ describe("ui-enterprise-vue adapters", () => {
       presetEyebrow: "企业预设",
       fallbackWorkspace: "工作区内容待接入。",
     })
+  })
+
+  it("treats directory nodes as expand-only shell entries", () => {
+    const navigation = [
+      {
+        id: "system-root",
+        parentId: null,
+        type: "directory" as const,
+        code: "system-root",
+        name: "系统管理",
+        path: null,
+        component: null,
+        icon: null,
+        sort: 1,
+        isVisible: true,
+        status: "active" as const,
+        permissionCode: null,
+        depth: 0,
+        children: [
+          {
+            id: "system-users",
+            parentId: "system-root",
+            type: "menu" as const,
+            code: "system:user:list",
+            name: "用户管理",
+            path: "/system/users",
+            component: null,
+            icon: null,
+            sort: 1,
+            isVisible: true,
+            status: "active" as const,
+            permissionCode: null,
+            depth: 1,
+            children: [],
+          },
+        ],
+      },
+    ]
+
+    expect(isElyShellMenuSelectable(navigation, "system-root")).toBe(false)
+    expect(isElyShellMenuSelectable(navigation, "system-users")).toBe(true)
+    expect(toggleElyShellExpandedMenuValue(["system-root"], "system-root")).toEqual(
+      [],
+    )
+    expect(toggleElyShellExpandedMenuValue([], "system-root")).toEqual([
+      "system-root",
+    ])
   })
 })

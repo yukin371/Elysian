@@ -16,6 +16,10 @@ import {
   type ElyShellProps,
   resolveElyShellCopy,
 } from "../contracts"
+import {
+  isElyShellMenuSelectable,
+  toggleElyShellExpandedMenuValue,
+} from "./ely-shell-navigation"
 import ElyNavNodes from "./ElyNavNodes.vue"
 import ElyShellTabs from "./ElyShellTabs.vue"
 
@@ -82,14 +86,7 @@ const selectedMenuAncestors = computed(() =>
   resolveExpandedAncestorValues(props.navigation, props.selectedMenuKey),
 )
 
-const expandedMenuValues = computed(() =>
-  Array.from(
-    new Set([
-      ...userExpandedMenuValues.value,
-      ...selectedMenuAncestors.value,
-    ]),
-  ),
-)
+const expandedMenuValues = computed(() => userExpandedMenuValues.value)
 
 watch(
   selectedMenuAncestors,
@@ -114,7 +111,13 @@ const resolvedCopy = computed(() =>
 )
 
 const handleMenuChange = (value: string | number) => {
-  emit("menu-select", String(value))
+  const nextValue = String(value)
+
+  if (!isElyShellMenuSelectable(props.navigation, nextValue)) {
+    return
+  }
+
+  emit("menu-select", nextValue)
 }
 
 const handleTabSelect = (key: string) => {
@@ -123,6 +126,13 @@ const handleTabSelect = (key: string) => {
 
 const handleMenuExpand = (value: Array<string | number>) => {
   userExpandedMenuValues.value = value.map((item) => String(item))
+}
+
+const handleDirectoryToggle = (menuKey: string) => {
+  userExpandedMenuValues.value = toggleElyShellExpandedMenuValue(
+    userExpandedMenuValues.value,
+    menuKey,
+  )
 }
 </script>
 
@@ -152,7 +162,10 @@ const handleMenuExpand = (value: Array<string | number>) => {
           @expand="handleMenuExpand"
           @change="handleMenuChange"
         >
-          <ElyNavNodes :items="navigation" />
+          <ElyNavNodes
+            :items="navigation"
+            @directory-toggle="handleDirectoryToggle"
+          />
         </TMenu>
 
         <div class="ely-sidebar-foot">
