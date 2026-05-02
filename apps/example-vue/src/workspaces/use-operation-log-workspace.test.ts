@@ -23,7 +23,9 @@ const createOperationLogRecord = (
   createdAt: overrides.createdAt ?? "2026-05-02T08:00:00.000Z",
 })
 
-const createWorkspace = () =>
+const createWorkspace = (options?: {
+  onRecoverableAuthError?: (error: unknown) => void
+}) =>
   useOperationLogWorkspace({
     currentShellTabKey: ref("overview"),
     page: {
@@ -39,7 +41,7 @@ const createWorkspace = () =>
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeResult: (result) => `result:${result}`,
     canView: computed(() => true),
-    onRecoverableAuthError: () => {},
+    onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
   })
 
 describe("useOperationLogWorkspace", () => {
@@ -129,5 +131,53 @@ describe("useOperationLogWorkspace", () => {
     expect(workspace.detailValues.value.authFailureReason).toBe(
       "app.operationLog.authFailureReason.user_disabled",
     )
+  })
+
+  test("preserves query values when reloading operation logs fails", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.includes("/system/operation-logs") && method === "GET") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await workspace.handleSearch({
+      action: " login ",
+      authEventType: "login",
+      authFailureReason: "invalid_password",
+      result: "failure",
+    })
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.operationLogErrorMessage.value).toContain("status 401")
+    expect(workspace.filteredOperationLogItems.value).toEqual([])
+    expect(workspace.operationLogQueryValues.value).toEqual({
+      action: " login ",
+      authEventType: "login",
+      authFailureReason: "invalid_password",
+      result: "failure",
+    })
   })
 })
