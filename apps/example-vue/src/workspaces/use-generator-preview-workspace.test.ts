@@ -283,6 +283,10 @@ describe("useGeneratorPreviewWorkspace", () => {
               createdAt: "2026-05-02T13:00:00.000Z",
               frontendTarget: "react",
               id: "preview-session-2",
+              report: {
+                ...createReport(),
+                frontendTarget: "react",
+              },
               schemaName: "customer",
               status: "ready",
             }),
@@ -407,6 +411,90 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.selectedRecentSessionId.value).toBe(
       "preview-session-pending",
     )
+  })
+
+  test("skips stale matching session detail before creating a new preview", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "fail",
+                frontendTarget: "vue",
+                id: "preview-session-stale",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-stale") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              frontendTarget: "react",
+              id: "preview-session-stale",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession({
+              id: "preview-session-new",
+              status: "pending_review",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(previewRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-new")
+    expect(workspace.selectedRecentSessionId.value).toBe("preview-session-new")
+    expect(workspace.selectedFrontendTarget.value).toBe("vue")
   })
 
   test("reuses cached matching session when switching back to a previous selection", async () => {

@@ -516,6 +516,11 @@ export const useGeneratorPreviewWorkspace = (
         const session =
           sessionDetailCache.get(matchedSession.id) ??
           (await fetchGeneratorPreviewSession(matchedSession.id))
+
+        if (!isSessionMatchingSelection(session)) {
+          return false
+        }
+
         applySessionDetail(session)
         return true
       } finally {
