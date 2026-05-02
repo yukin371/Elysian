@@ -479,9 +479,38 @@ export const useExampleWorkspaceSync = (
     async (items) => {
       if (
         !options.isTenantWorkspace.value ||
-        options.tenantLoading.value ||
-        options.tenantPanelMode.value !== "detail"
+        options.tenantLoading.value
       ) {
+        return
+      }
+
+      if (options.tenantPanelMode.value === "edit") {
+        if (items.length === 0) {
+          options.selectedTenantId.value = null
+          options.tenantDetail.value = null
+          options.tenantPanelMode.value = options.canCreateTenants.value
+            ? "create"
+            : "detail"
+          return
+        }
+
+        if (
+          !options.selectedTenantId.value ||
+          !items.some((item) => item.id === options.selectedTenantId.value)
+        ) {
+          const firstItem = items[0]
+
+          if (!firstItem) {
+            return
+          }
+
+          await options.selectTenant(firstItem)
+        }
+
+        return
+      }
+
+      if (options.tenantPanelMode.value !== "detail") {
         return
       }
 

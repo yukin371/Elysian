@@ -61,6 +61,72 @@ const createWorkspaceSyncOptions = (overrides: Record<string, unknown>) =>
   })
 
 describe("useExampleWorkspaceSync", () => {
+  test("exits tenant edit mode when sync reselects another visible tenant", async () => {
+    const filteredTenantItems = ref<ItemWithId[]>([
+      { id: "tenant-1" },
+      { id: "tenant-2" },
+    ])
+    const selectedTenantId = ref<string | null>("tenant-1")
+    const tenantPanelMode = ref("edit")
+    const tenantDetail = ref<ItemWithId | null>({ id: "tenant-1" })
+
+    useExampleWorkspaceSync(
+      createWorkspaceSyncOptions({
+        customerItems: ref<ItemWithId[]>([]),
+        enterpriseFormMode: ref("detail"),
+        selectedCustomerId: ref<string | null>(null),
+        canCreateCustomers: computed(() => false),
+        isTenantWorkspace: computed(() => true),
+        filteredTenantItems: computed(() => filteredTenantItems.value),
+        selectedTenantId,
+        tenantDetail,
+        tenantPanelMode,
+        canCreateTenants: computed(() => true),
+        selectTenant: async (tenant: ItemWithId) => {
+          selectedTenantId.value = tenant.id
+          tenantDetail.value = tenant
+          tenantPanelMode.value = "detail"
+        },
+      }),
+    )
+
+    filteredTenantItems.value = [{ id: "tenant-2" }]
+    await nextTick()
+
+    expect(selectedTenantId.value).toBe("tenant-2")
+    expect(tenantDetail.value?.id).toBe("tenant-2")
+    expect(tenantPanelMode.value).toBe("detail")
+  })
+
+  test("exits tenant edit mode when sync clears the visible tenant list", async () => {
+    const filteredTenantItems = ref<ItemWithId[]>([{ id: "tenant-1" }])
+    const selectedTenantId = ref<string | null>("tenant-1")
+    const tenantPanelMode = ref("edit")
+    const tenantDetail = ref<ItemWithId | null>({ id: "tenant-1" })
+
+    useExampleWorkspaceSync(
+      createWorkspaceSyncOptions({
+        customerItems: ref<ItemWithId[]>([]),
+        enterpriseFormMode: ref("detail"),
+        selectedCustomerId: ref<string | null>(null),
+        canCreateCustomers: computed(() => false),
+        isTenantWorkspace: computed(() => true),
+        filteredTenantItems: computed(() => filteredTenantItems.value),
+        selectedTenantId,
+        tenantDetail,
+        tenantPanelMode,
+        canCreateTenants: computed(() => true),
+      }),
+    )
+
+    filteredTenantItems.value = []
+    await nextTick()
+
+    expect(selectedTenantId.value).toBeNull()
+    expect(tenantDetail.value).toBeNull()
+    expect(tenantPanelMode.value).toBe("create")
+  })
+
   test("exits user reset mode when sync reselects another visible user", async () => {
     const filteredUserItems = ref<ItemWithId[]>([
       { id: "user-1" },
