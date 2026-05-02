@@ -29,6 +29,10 @@ type CopyFeedbackKey =
   | "generatedSource"
   | "currentSource"
   | "sqlPreview"
+  | "schemaDir"
+  | "drizzleDir"
+  | "schemaIndexFile"
+  | "persistenceIndexFile"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -53,8 +57,12 @@ const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>(
   drizzleSchema: "idle",
   generatedSource: "idle",
   reportPath: "idle",
+  persistenceIndexFile: "idle",
+  schemaDir: "idle",
+  schemaIndexFile: "idle",
   sqlDraft: "idle",
   sqlPreview: "idle",
+  drizzleDir: "idle",
 })
 const copyFeedbackTimers: Partial<
   Record<CopyFeedbackKey, ReturnType<typeof setTimeout>>
@@ -277,6 +285,19 @@ const copySqlPreview = async () => {
   const copied = await copyGeneratorPreviewText(props.sqlPreview?.contents ?? "")
   copyFeedback.value.sqlPreview = copied ? "copied" : "failed"
   scheduleCopyFeedbackReset("sqlPreview")
+}
+
+const copyHandoffTargetPath = async (
+  key:
+    | "schemaDir"
+    | "drizzleDir"
+    | "schemaIndexFile"
+    | "persistenceIndexFile",
+  path: string,
+) => {
+  const copied = await copyGeneratorPreviewText(path)
+  copyFeedback.value[key] = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset(key)
 }
 
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
@@ -666,19 +687,103 @@ onBeforeUnmount(() => {
         </div>
         <div class="generator-handoff-grid">
           <article>
-            <strong>{{ t("app.generatorPreview.meta.schemaDir") }}</strong>
+            <div class="generator-handoff-card-header">
+              <strong>{{ t("app.generatorPreview.meta.schemaDir") }}</strong>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="sqlProposalHandoff.targetPaths.schemaDir.trim().length === 0"
+                @click="
+                  copyHandoffTargetPath(
+                    'schemaDir',
+                    sqlProposalHandoff.targetPaths.schemaDir,
+                  )
+                "
+              >
+                {{
+                  resolveCopyLabel(
+                    'schemaDir',
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <span>{{ sqlProposalHandoff.targetPaths.schemaDir }}</span>
           </article>
           <article>
-            <strong>{{ t("app.generatorPreview.meta.drizzleDir") }}</strong>
+            <div class="generator-handoff-card-header">
+              <strong>{{ t("app.generatorPreview.meta.drizzleDir") }}</strong>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="sqlProposalHandoff.targetPaths.drizzleDir.trim().length === 0"
+                @click="
+                  copyHandoffTargetPath(
+                    'drizzleDir',
+                    sqlProposalHandoff.targetPaths.drizzleDir,
+                  )
+                "
+              >
+                {{
+                  resolveCopyLabel(
+                    'drizzleDir',
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <span>{{ sqlProposalHandoff.targetPaths.drizzleDir }}</span>
           </article>
           <article>
-            <strong>{{ t("app.generatorPreview.meta.schemaIndexFile") }}</strong>
+            <div class="generator-handoff-card-header">
+              <strong>{{ t("app.generatorPreview.meta.schemaIndexFile") }}</strong>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="
+                  sqlProposalHandoff.targetPaths.schemaIndexFile.trim().length === 0
+                "
+                @click="
+                  copyHandoffTargetPath(
+                    'schemaIndexFile',
+                    sqlProposalHandoff.targetPaths.schemaIndexFile,
+                  )
+                "
+              >
+                {{
+                  resolveCopyLabel(
+                    'schemaIndexFile',
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <span>{{ sqlProposalHandoff.targetPaths.schemaIndexFile }}</span>
           </article>
           <article>
-            <strong>{{ t("app.generatorPreview.meta.persistenceIndexFile") }}</strong>
+            <div class="generator-handoff-card-header">
+              <strong>{{ t("app.generatorPreview.meta.persistenceIndexFile") }}</strong>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="
+                  sqlProposalHandoff.targetPaths.persistenceIndexFile.trim().length === 0
+                "
+                @click="
+                  copyHandoffTargetPath(
+                    'persistenceIndexFile',
+                    sqlProposalHandoff.targetPaths.persistenceIndexFile,
+                  )
+                "
+              >
+                {{
+                  resolveCopyLabel(
+                    'persistenceIndexFile',
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <span>{{ sqlProposalHandoff.targetPaths.persistenceIndexFile }}</span>
           </article>
         </div>
@@ -862,7 +967,8 @@ onBeforeUnmount(() => {
 }
 
 .generator-code-toolbar,
-.generator-handoff-toolbar {
+.generator-handoff-toolbar,
+.generator-handoff-card-header {
   align-items: center;
   display: flex;
   gap: 0.75rem;
