@@ -139,6 +139,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.blockedTitle": "Blocking conflicts",
   "app.generatorPreview.blockedCount":
     "{count} files cannot be applied directly right now",
+  "app.generatorPreview.blockedAction": "Open this file diff",
   "app.generatorPreview.message.pendingReview":
     "This preview session must be approved before it can be applied to staging.",
   "app.generatorPreview.message.reviewApproved":

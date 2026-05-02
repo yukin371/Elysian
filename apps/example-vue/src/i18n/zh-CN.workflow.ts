@@ -130,6 +130,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "当前预览包含阻塞冲突，需先处理冲突后才能执行 staging apply。",
   "app.generatorPreview.blockedTitle": "阻塞冲突明细",
   "app.generatorPreview.blockedCount": "{count} 个文件当前无法直接应用",
+  "app.generatorPreview.blockedAction": "查看该文件差异",
   "app.generatorPreview.message.pendingReview":
     "当前 preview session 需要先审核通过，才能执行 staging apply。",
   "app.generatorPreview.message.reviewApproved":
