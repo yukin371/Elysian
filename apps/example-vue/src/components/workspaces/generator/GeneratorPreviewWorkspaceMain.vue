@@ -18,6 +18,7 @@ import {
   loadGeneratorPreviewReviewDraft,
   persistGeneratorPreviewReviewDraft,
 } from "./generator-preview-review-draft"
+import { shouldSelectGeneratorPreviewFile } from "../../../lib/generator-preview-workspace"
 
 interface GeneratorPreviewWorkspaceMainProps {
   t: GeneratorPreviewTranslation
@@ -157,6 +158,14 @@ const handleReviewPreview = (decision: "approve" | "reject") => {
     comment: reviewComment.value,
     decision,
   })
+}
+
+const handleFileSelection = (path: string) => {
+  if (!shouldSelectGeneratorPreviewFile(props.selectedFilePath, path)) {
+    return
+  }
+
+  emit("select-file", path)
 }
 
 watch(
@@ -511,7 +520,7 @@ watch(
           :class="
             selectedFilePath === file.path ? 'generator-file-card-active' : ''
           "
-          @click="emit('select-file', file.path)"
+          @click="handleFileSelection(file.path)"
         >
           <div class="generator-file-card-header">
             <strong>{{ file.path }}</strong>

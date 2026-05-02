@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test"
 import {
   filterGeneratorPreviewFiles,
   resolveGeneratorPreviewSelection,
+  shouldSelectGeneratorPreviewFile,
   toGeneratorPreviewFileCard,
 } from "./generator-preview-workspace"
 
@@ -127,6 +128,22 @@ describe("generator-preview-workspace", () => {
     expect(resolveGeneratorPreviewSelection(overwriteFiles, null)).toBe(
       "modules/customer/customer.page.vue",
     )
+  })
+
+  it("skips redundant file selection emits for the current file", () => {
+    expect(
+      shouldSelectGeneratorPreviewFile(
+        "modules/customer/customer.page.vue",
+        "modules/customer/customer.page.vue",
+      ),
+    ).toBeFalse()
+    expect(
+      shouldSelectGeneratorPreviewFile(
+        "modules/customer/customer.schema.ts",
+        "modules/customer/customer.page.vue",
+      ),
+    ).toBeTrue()
+    expect(shouldSelectGeneratorPreviewFile(null, "")).toBeFalse()
   })
 
   it("derives line-level diff stats for changed files", () => {

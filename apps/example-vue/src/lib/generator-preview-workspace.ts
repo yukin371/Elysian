@@ -228,3 +228,10 @@ export const resolveGeneratorPreviewSelection = (
 
   return prioritizedFallback?.path ?? null
 }
+
+export const shouldSelectGeneratorPreviewFile = (
+  selectedPath: string | null,
+  nextPath: string,
+) => {
+  return nextPath.trim().length > 0 && selectedPath !== nextPath
+}
