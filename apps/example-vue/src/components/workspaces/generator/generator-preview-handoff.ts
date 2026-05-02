@@ -1,5 +1,8 @@
 export const joinGeneratorPreviewSuggestedCommands = (commands: string[]) =>
-  commands.join("\n")
+  commands
+    .map((command) => command.trim())
+    .filter((command) => command.length > 0)
+    .join("\n")
 
 export const copyGeneratorPreviewText = async (
   value: string,

@@ -16,6 +16,17 @@ describe("generator preview handoff helpers", () => {
     ).toBe("bun run db:generate\nbun run db:migrate")
   })
 
+  test("omits blank suggested commands before display and copy", () => {
+    expect(
+      joinGeneratorPreviewSuggestedCommands([
+        " bun run db:generate ",
+        "   ",
+        "",
+        "bun run db:migrate",
+      ]),
+    ).toBe("bun run db:generate\nbun run db:migrate")
+  })
+
   test("returns false when clipboard is unavailable", async () => {
     await expect(
       copyGeneratorPreviewSuggestedCommands(["bun run db:generate"], undefined),
