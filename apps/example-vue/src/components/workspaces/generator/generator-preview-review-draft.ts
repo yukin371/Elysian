@@ -3,8 +3,16 @@ const GENERATOR_PREVIEW_REVIEW_DRAFTS_STORAGE_KEY =
 
 type GeneratorPreviewReviewDrafts = Record<string, string>
 
+const resolveGeneratorPreviewReviewDraftStorage = () => {
+  try {
+    return globalThis.localStorage
+  } catch {
+    return undefined
+  }
+}
+
 const loadGeneratorPreviewReviewDrafts = (): GeneratorPreviewReviewDrafts => {
-  const storage = globalThis.localStorage
+  const storage = resolveGeneratorPreviewReviewDraftStorage()
 
   if (!storage) {
     return {}
@@ -32,7 +40,7 @@ const loadGeneratorPreviewReviewDrafts = (): GeneratorPreviewReviewDrafts => {
 const persistGeneratorPreviewReviewDrafts = (
   drafts: GeneratorPreviewReviewDrafts,
 ) => {
-  const storage = globalThis.localStorage
+  const storage = resolveGeneratorPreviewReviewDraftStorage()
 
   if (!storage) {
     return

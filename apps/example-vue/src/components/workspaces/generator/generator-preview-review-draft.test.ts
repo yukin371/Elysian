@@ -87,4 +87,22 @@ describe("generator preview review draft storage", () => {
       )
     }).not.toThrow()
   })
+
+  test("does not throw when draft storage is blocked", () => {
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      get: () => {
+        throw new Error("storage blocked")
+      },
+    })
+
+    expect(loadGeneratorPreviewReviewDraft("preview-session-1")).toBeNull()
+    expect(() => {
+      persistGeneratorPreviewReviewDraft(
+        "preview-session-1",
+        "ready for staging",
+      )
+    }).not.toThrow()
+    expect(() => clearGeneratorPreviewReviewDraft("preview-session-1")).not.toThrow()
+  })
 })
