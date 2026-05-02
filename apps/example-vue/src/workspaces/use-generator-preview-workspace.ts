@@ -214,6 +214,11 @@ export const useGeneratorPreviewWorkspace = (
     session.frontendTarget === selectedFrontendTarget.value &&
     session.conflictStrategy === selectedConflictStrategy.value
 
+  const isSessionDetailConsistent = (session: GeneratorPreviewSessionDetail) =>
+    session.report.schemaName === session.schemaName &&
+    session.report.frontendTarget === session.frontendTarget &&
+    session.report.conflictStrategy === session.conflictStrategy
+
   const prioritizeRecentSessions = (
     sessions: GeneratorPreviewSessionRecord[],
   ) => {
@@ -465,7 +470,8 @@ export const useGeneratorPreviewWorkspace = (
       if (
         session.schemaName !== selectedSchemaName.value ||
         session.frontendTarget !== selectedFrontendTarget.value ||
-        session.conflictStrategy !== selectedConflictStrategy.value
+        session.conflictStrategy !== selectedConflictStrategy.value ||
+        !isSessionDetailConsistent(session)
       ) {
         return false
       }
@@ -483,6 +489,10 @@ export const useGeneratorPreviewWorkspace = (
     const cachedSession = selectionSessionCache.get(getCurrentSelectionCacheKey())
 
     if (!cachedSession) {
+      return false
+    }
+
+    if (!isSessionDetailConsistent(cachedSession)) {
       return false
     }
 
@@ -517,7 +527,10 @@ export const useGeneratorPreviewWorkspace = (
           sessionDetailCache.get(matchedSession.id) ??
           (await fetchGeneratorPreviewSession(matchedSession.id))
 
-        if (!isSessionMatchingSelection(session)) {
+        if (
+          !isSessionMatchingSelection(session) ||
+          !isSessionDetailConsistent(session)
+        ) {
           return false
         }
 
@@ -698,6 +711,12 @@ export const useGeneratorPreviewWorkspace = (
       const session =
         sessionDetailCache.get(sessionId) ??
         (await fetchGeneratorPreviewSession(sessionId))
+
+      if (!isSessionDetailConsistent(session)) {
+        errorMessage.value = "Generator session detail does not match its report"
+        return
+      }
+
       applySessionDetail(session)
     } catch (error) {
       onRecoverableAuthError(error)

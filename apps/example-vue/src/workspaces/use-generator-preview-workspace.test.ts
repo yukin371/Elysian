@@ -47,8 +47,10 @@ const createDiffSummary = (): GeneratorPreviewDiffSummary => ({
   unchangedFileCount: 0,
 })
 
-const createReport = (): GeneratorPreviewReport => ({
-  conflictStrategy: "fail",
+const createReport = (
+  overrides?: Partial<GeneratorPreviewReport>,
+): GeneratorPreviewReport => ({
+  conflictStrategy: overrides?.conflictStrategy ?? "fail",
   databaseChangePlan: {
     operations: [],
   },
@@ -67,10 +69,10 @@ const createReport = (): GeneratorPreviewReport => ({
       reason: "new file",
     },
   ],
-  frontendTarget: "vue",
+  frontendTarget: overrides?.frontendTarget ?? "vue",
   generatedAt: "2026-05-02T12:00:00.000Z",
   outputDir: "generated",
-  schemaName: "customer",
+  schemaName: overrides?.schemaName ?? "customer",
   sqlPreview: {
     contents: "create table customers (...);",
     tableName: "customers",
@@ -154,14 +156,27 @@ const createSession = (
 
 const createSessionDetail = (
   overrides?: Partial<GeneratorPreviewSessionDetail>,
-): GeneratorPreviewSessionDetail => ({
-  ...createSession(),
-  diffSummary: createDiffSummary(),
-  report: createReport(),
-  sqlProposal: createSqlProposal(),
-  sqlProposalHandoff: createSqlProposalHandoff(),
-  ...overrides,
-})
+): GeneratorPreviewSessionDetail => {
+  const session = {
+    ...createSession(),
+    ...overrides,
+  }
+
+  return {
+    ...session,
+    diffSummary: overrides?.diffSummary ?? createDiffSummary(),
+    report:
+      overrides?.report ??
+      createReport({
+        conflictStrategy: session.conflictStrategy,
+        frontendTarget: session.frontendTarget,
+        schemaName: session.schemaName,
+      }),
+    sqlProposal: overrides?.sqlProposal ?? createSqlProposal(),
+    sqlProposalHandoff:
+      overrides?.sqlProposalHandoff ?? createSqlProposalHandoff(),
+  }
+}
 
 const createWorkspace = (options?: {
   enabled?: boolean
@@ -283,10 +298,7 @@ describe("useGeneratorPreviewWorkspace", () => {
               createdAt: "2026-05-02T13:00:00.000Z",
               frontendTarget: "react",
               id: "preview-session-2",
-              report: {
-                ...createReport(),
-                frontendTarget: "react",
-              },
+              report: createReport({ frontendTarget: "react" }),
               schemaName: "customer",
               status: "ready",
             }),
@@ -1000,10 +1012,10 @@ describe("useGeneratorPreviewWorkspace", () => {
               createdAt: "2026-05-02T14:30:00.000Z",
               frontendTarget: "react",
               id: "preview-session-4",
-              report: {
-                ...createReport(),
+              report: createReport({
+                conflictStrategy: "overwrite-generated-only",
                 frontendTarget: "react",
-              },
+              }),
               status: "ready",
             }),
           ),
@@ -1036,6 +1048,100 @@ describe("useGeneratorPreviewWorkspace", () => {
       "overwrite-generated-only",
     )
     expect(workspace.currentSession.value?.id).toBe("preview-session-4")
+  })
+
+  test("skips inconsistent persisted session detail before refreshing preview", async () => {
+    let listRequestCount = 0
+    let previewRequestCount = 0
+
+    globalThis.localStorage.setItem(
+      "elysian.example-vue.generator-preview.selection",
+      JSON.stringify({
+        conflictStrategy: "overwrite-generated-only",
+        frontendTarget: "react",
+        schemaName: "customer",
+        sessionId: "preview-session-inconsistent",
+      }),
+    )
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-inconsistent") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              frontendTarget: "react",
+              id: "preview-session-inconsistent",
+              report: createReport({
+                conflictStrategy: "overwrite-generated-only",
+                frontendTarget: "vue",
+              }),
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        listRequestCount += 1
+
+        return new Response(JSON.stringify({ items: [] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport({
+              conflictStrategy: "overwrite-generated-only",
+              frontendTarget: "react",
+            }),
+            session: createSession({
+              conflictStrategy: "overwrite-generated-only",
+              frontendTarget: "react",
+              id: "preview-session-fresh",
+              status: "pending_review",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(listRequestCount).toBe(1)
+    expect(previewRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-fresh")
+    expect(workspace.selectedFrontendTarget.value).toBe("react")
   })
 
   test("restores persisted session before loading recent sessions", async () => {
@@ -1073,10 +1179,10 @@ describe("useGeneratorPreviewWorkspace", () => {
               createdAt: "2026-05-02T14:30:00.000Z",
               frontendTarget: "react",
               id: "preview-session-4",
-              report: {
-                ...createReport(),
+              report: createReport({
+                conflictStrategy: "overwrite-generated-only",
                 frontendTarget: "react",
-              },
+              }),
               status: "ready",
             }),
           ),
