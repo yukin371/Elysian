@@ -43,6 +43,47 @@ const createWorkspace = () =>
   })
 
 describe("useOperationLogWorkspace", () => {
+  test("exposes known auth failure reasons as localized query select options", () => {
+    const workspace = useOperationLogWorkspace({
+      currentShellTabKey: ref("overview"),
+      page: {
+        tableColumns: computed(() => []),
+        queryFields: computed(() => [
+          { key: "authFailureReason", kind: "text" as const },
+        ]),
+      },
+      locale: ref("zh-CN"),
+      t: (key) => key,
+      localizeFieldLabel: (fieldKey) => fieldKey,
+      localizeResult: (result) => `result:${result}`,
+      canView: computed(() => true),
+      onRecoverableAuthError: () => {},
+    })
+
+    expect(workspace.queryFields.value).toEqual([
+      {
+        key: "authFailureReason",
+        kind: "select",
+        label: "authFailureReason",
+        options: [
+          {
+            label: "app.operationLog.authFailureReason.invalid_password",
+            value: "invalid_password",
+          },
+          {
+            label: "app.operationLog.authFailureReason.account_locked",
+            value: "account_locked",
+          },
+          {
+            label: "app.operationLog.authFailureReason.user_disabled",
+            value: "user_disabled",
+          },
+        ],
+        placeholder: "app.operationLog.query.authFailureReasonPlaceholder",
+      },
+    ])
+  })
+
   test("localizes user-disabled auth failure reasons in table items and detail values", async () => {
     const log = createOperationLogRecord({
       id: "login-disabled",

@@ -32,6 +32,12 @@ const operationLogAuthEventTypeOptions = [
   "session_revoke",
 ] as const
 
+const operationLogAuthFailureReasonOptions = [
+  "invalid_password",
+  "account_locked",
+  "user_disabled",
+] as const
+
 interface OperationLogPageContract {
   tableColumns: ComputedRef<OperationLogPageColumn[]>
   queryFields: ComputedRef<ElyQueryField[]>
@@ -169,8 +175,16 @@ export const useOperationLogWorkspace = (
                   label: localizeAuthEventType(value),
                   value,
                 }))
+              : field.key === "authFailureReason"
+                ? operationLogAuthFailureReasonOptions.map((value) => ({
+                    label: localizeAuthFailureReason(value),
+                    value,
+                  }))
               : field.options,
-        kind: field.key === "authEventType" ? "select" : field.kind,
+        kind:
+          field.key === "authEventType" || field.key === "authFailureReason"
+            ? "select"
+            : field.kind,
         placeholder:
           field.key === "category"
             ? options.t("app.operationLog.query.categoryPlaceholder")
