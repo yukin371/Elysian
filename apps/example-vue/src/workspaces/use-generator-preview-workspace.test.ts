@@ -1380,6 +1380,74 @@ describe("useGeneratorPreviewWorkspace", () => {
     )
   })
 
+  test("clears stale preview when refreshed response is inconsistent", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        if (previewRequestCount === 1) {
+          return new Response(
+            JSON.stringify({
+              diff: createDiffSummary(),
+              report: createReport(),
+              session: createSession(),
+              sqlProposal: createSqlProposal(),
+              sqlProposalHandoff: createSqlProposalHandoff(),
+            }),
+            {
+              headers: { "content-type": "application/json" },
+              status: 200,
+            },
+          )
+        }
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport({ frontendTarget: "react" }),
+            session: createSession({
+              frontendTarget: "vue",
+              id: "preview-session-inconsistent-refresh",
+              status: "pending_review",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+
+    await waitForAsyncWork()
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+
+    await workspace.refreshPreview()
+
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
+    expect(workspace.sqlPreview.value).toBeNull()
+    expect(workspace.selectedRecentSessionId.value).toBe("")
+    expect(workspace.errorMessage.value).toBe(
+      "Generator session detail does not match its report",
+    )
+  })
+
   test("preserves current preview when same-context refresh fails", async () => {
     const recoverableErrors: unknown[] = []
     let previewRequestCount = 0

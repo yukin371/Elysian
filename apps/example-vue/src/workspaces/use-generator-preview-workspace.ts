@@ -482,8 +482,7 @@ export const useGeneratorPreviewWorkspace = (
         return false
       }
 
-      applySessionDetail(session)
-      return true
+      return applySessionDetail(session)
     } catch {
       return false
     } finally {
@@ -502,8 +501,7 @@ export const useGeneratorPreviewWorkspace = (
       return false
     }
 
-    applySessionDetail(cachedSession)
-    return true
+    return applySessionDetail(cachedSession)
   }
 
   const restoreLatestMatchingSession = async () => {
@@ -540,8 +538,7 @@ export const useGeneratorPreviewWorkspace = (
           return false
         }
 
-        applySessionDetail(session)
-        return true
+        return applySessionDetail(session)
       } finally {
         loading.value = false
       }
@@ -579,7 +576,7 @@ export const useGeneratorPreviewWorkspace = (
         return
       }
 
-      applySessionDetail(
+      if (!applySessionDetail(
         buildSessionDetail(
           response.session,
           response.diff,
@@ -587,7 +584,9 @@ export const useGeneratorPreviewWorkspace = (
           response.sqlProposal,
           response.sqlProposalHandoff,
         ),
-      )
+      )) {
+        resetPreviewState()
+      }
     } catch (error) {
       if (requestId !== latestPreviewRequestId) {
         return
