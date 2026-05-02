@@ -203,6 +203,13 @@ export const useGeneratorPreviewWorkspace = (
     return t("app.generatorPreview.status.pendingReview")
   }
 
+  const isSessionMatchingSelection = (
+    session: GeneratorPreviewSessionRecord,
+  ) =>
+    session.schemaName === selectedSchemaName.value &&
+    session.frontendTarget === selectedFrontendTarget.value &&
+    session.conflictStrategy === selectedConflictStrategy.value
+
   const prioritizeRecentSessions = (
     sessions: GeneratorPreviewSessionRecord[],
   ) => {
@@ -216,11 +223,7 @@ export const useGeneratorPreviewWorkspace = (
     }> = []
 
     for (const [index, session] of sessions.entries()) {
-      if (
-        session.schemaName === selectedSchemaName.value &&
-        session.frontendTarget === selectedFrontendTarget.value &&
-        session.conflictStrategy === selectedConflictStrategy.value
-      ) {
+      if (isSessionMatchingSelection(session)) {
         matchingSelection.push({ index, session })
         continue
       }
@@ -348,12 +351,7 @@ export const useGeneratorPreviewWorkspace = (
     currentReport.value?.frontendTarget === selectedFrontendTarget.value
 
   const findMatchingRecentSession = (sessions: GeneratorPreviewSessionRecord[]) =>
-    sessions.find(
-      (session) =>
-        session.schemaName === selectedSchemaName.value &&
-        session.frontendTarget === selectedFrontendTarget.value &&
-        session.conflictStrategy === selectedConflictStrategy.value,
-    ) ?? null
+    prioritizeRecentSessions(sessions).find(isSessionMatchingSelection) ?? null
 
   const getCurrentSelectionCacheKey = () =>
     createGeneratorPreviewSelectionCacheKey(

@@ -325,8 +325,15 @@ describe("useGeneratorPreviewWorkspace", () => {
             items: [
               createSession({
                 conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:30:00.000Z",
+                id: "preview-session-pending",
+                schemaName: "customer",
+                status: "pending_review",
+              }),
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
                 createdAt: "2026-05-02T14:00:00.000Z",
-                id: "preview-session-3",
+                id: "preview-session-ready",
                 schemaName: "customer",
                 status: "ready",
               }),
@@ -340,7 +347,27 @@ describe("useGeneratorPreviewWorkspace", () => {
       }
 
       if (
-        url.endsWith("/studio/generator/sessions/preview-session-3") &&
+        url.endsWith("/studio/generator/sessions/preview-session-pending") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              createdAt: "2026-05-02T14:30:00.000Z",
+              id: "preview-session-pending",
+              status: "pending_review",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-ready") &&
         method === "GET"
       ) {
         return new Response(
@@ -348,7 +375,7 @@ describe("useGeneratorPreviewWorkspace", () => {
             createSessionDetail({
               conflictStrategy: "overwrite-generated-only",
               createdAt: "2026-05-02T14:00:00.000Z",
-              id: "preview-session-3",
+              id: "preview-session-ready",
               status: "ready",
             }),
           ),
@@ -376,8 +403,10 @@ describe("useGeneratorPreviewWorkspace", () => {
     await waitForAsyncWork()
 
     expect(previewRequestCount).toBe(0)
-    expect(workspace.currentSession.value?.id).toBe("preview-session-3")
-    expect(workspace.selectedRecentSessionId.value).toBe("preview-session-3")
+    expect(workspace.currentSession.value?.id).toBe("preview-session-pending")
+    expect(workspace.selectedRecentSessionId.value).toBe(
+      "preview-session-pending",
+    )
   })
 
   test("reuses cached matching session when switching back to a previous selection", async () => {
