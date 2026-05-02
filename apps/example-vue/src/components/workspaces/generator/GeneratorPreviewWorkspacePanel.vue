@@ -37,6 +37,8 @@ type CopyFeedbackKey =
   | "manifestPath"
   | "requestId"
   | "reviewComment"
+  | "outputDir"
+  | "sourceValue"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -63,11 +65,13 @@ const copyFeedback = ref<Record<CopyFeedbackKey, "idle" | "copied" | "failed">>(
   reportPath: "idle",
   persistenceIndexFile: "idle",
   manifestPath: "idle",
+  outputDir: "idle",
   requestId: "idle",
   reviewComment: "idle",
   schemaDir: "idle",
   schemaIndexFile: "idle",
   sessionId: "idle",
+  sourceValue: "idle",
   sqlDraft: "idle",
   sqlPreview: "idle",
   drizzleDir: "idle",
@@ -334,6 +338,18 @@ const copyReviewComment = async () => {
   scheduleCopyFeedbackReset("reviewComment")
 }
 
+const copyOutputDir = async () => {
+  const copied = await copyGeneratorPreviewText(props.session?.outputDir ?? "")
+  copyFeedback.value.outputDir = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("outputDir")
+}
+
+const copySourceValue = async () => {
+  const copied = await copyGeneratorPreviewText(props.session?.sourceValue ?? "")
+  copyFeedback.value.sourceValue = copied ? "copied" : "failed"
+  scheduleCopyFeedbackReset("sourceValue")
+}
+
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
   `generator-diff-line generator-diff-line-${line.kind}`
 
@@ -502,7 +518,22 @@ onBeforeUnmount(() => {
             <strong>{{ session.reportPath }}</strong>
           </div>
           <div>
-            <span>{{ t("app.generatorPreview.meta.outputDir") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.outputDir") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="session.outputDir.trim().length === 0"
+                @click="copyOutputDir"
+              >
+                {{
+                  resolveCopyLabel(
+                    "outputDir",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ session.outputDir }}</strong>
           </div>
           <div>
@@ -510,7 +541,22 @@ onBeforeUnmount(() => {
             <strong>{{ sessionSourceTypeLabel }}</strong>
           </div>
           <div>
-            <span>{{ t("app.generatorPreview.meta.sourceValue") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.sourceValue") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="session.sourceValue.trim().length === 0"
+                @click="copySourceValue"
+              >
+                {{
+                  resolveCopyLabel(
+                    "sourceValue",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ session.sourceValue }}</strong>
           </div>
           <div>
