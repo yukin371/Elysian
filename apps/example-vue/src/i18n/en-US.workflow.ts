@@ -136,6 +136,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "This workspace is driven by server preview sessions, so the file plan, conflict status, and apply evidence all come from backend preview reports.",
   "app.generatorPreview.message.blockingConflicts":
     "This preview contains blocking conflicts. Resolve them before running a staging apply.",
+  "app.generatorPreview.blockedTitle": "Blocking conflicts",
+  "app.generatorPreview.blockedCount":
+    "{count} files cannot be applied directly right now",
   "app.generatorPreview.message.pendingReview":
     "This preview session must be approved before it can be applied to staging.",
   "app.generatorPreview.message.reviewApproved":

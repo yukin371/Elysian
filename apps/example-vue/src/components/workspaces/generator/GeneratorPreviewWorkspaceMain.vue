@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 
 import { Input as TInput } from "tdesign-vue-next/es/input"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
@@ -59,6 +59,10 @@ const frontendOptions = [
   { label: "Vue", value: "vue" },
   { label: "React", value: "react" },
 ] as const
+
+const blockedFiles = computed(() =>
+  props.files.filter((file) => file.plannedAction === "block"),
+)
 
 const handleQueryInput = (value: string | number) => {
   emit("update:query", String(value))
@@ -252,6 +256,32 @@ watch(
         {{ t("app.generatorPreview.message.blockingConflicts") }}
       </div>
 
+      <section
+        v-if="blockedFiles.length > 0"
+        class="generator-blocked-section"
+      >
+        <div class="generator-blocked-header">
+          <strong>{{ t("app.generatorPreview.blockedTitle") }}</strong>
+          <span>
+            {{
+              t("app.generatorPreview.blockedCount", {
+                count: blockedFiles.length,
+              })
+            }}
+          </span>
+        </div>
+        <div class="generator-blocked-list">
+          <article
+            v-for="file in blockedFiles"
+            :key="file.path"
+            class="generator-blocked-card"
+          >
+            <strong>{{ file.path }}</strong>
+            <p>{{ file.plannedReason }}</p>
+          </article>
+        </div>
+      </section>
+
       <label
         v-if="canApprove || canReject"
         class="enterprise-field generator-review-comment"
@@ -403,6 +433,35 @@ watch(
 .generator-review-comment {
   display: grid;
   gap: 0.5rem;
+}
+
+.generator-blocked-section,
+.generator-blocked-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.generator-blocked-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  color: #9a3412;
+}
+
+.generator-blocked-card {
+  display: grid;
+  gap: 0.35rem;
+  border-radius: 6px;
+  border: 1px solid rgba(154, 52, 18, 0.18);
+  background: rgba(255, 247, 237, 0.9);
+  padding: 0.85rem 0.95rem;
+}
+
+.generator-blocked-card p {
+  margin: 0;
+  color: #7c2d12;
 }
 
 .generator-file-list {
