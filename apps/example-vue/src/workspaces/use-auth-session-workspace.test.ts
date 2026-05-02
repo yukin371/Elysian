@@ -253,11 +253,24 @@ describe("useAuthSessionWorkspace", () => {
       },
     })
 
+    workspace.handleSearch({
+      keyword: " safari ",
+      scope: "history",
+      state: "rotated",
+    })
     await workspace.reloadSessions()
 
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.sessionErrorMessage.value).toContain("status 401")
     expect(workspace.filteredSessionItems.value).toEqual([])
+    expect(workspace.sessionQueryValues.value).toEqual({
+      keyword: " safari ",
+      scope: "history",
+      state: "rotated",
+    })
+    expect(workspace.currentQuerySummary.value).toBe(
+      "app.onlineSession.field.keyword: safari / app.onlineSession.field.state: app.onlineSession.state.rotated / app.onlineSession.field.scope: app.onlineSession.scope.history",
+    )
   })
 
   test("reports recoverable auth errors when revoking a session fails", async () => {

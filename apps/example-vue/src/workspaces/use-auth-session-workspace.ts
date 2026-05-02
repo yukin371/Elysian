@@ -241,8 +241,10 @@ export const useAuthSessionWorkspace = (
         selectedSessionId.value,
       )
     } catch (error) {
+      const preservedQuery = { ...sessionQueryValues.value }
       options.onRecoverableAuthError(error)
       clearWorkspace()
+      sessionQueryValues.value = preservedQuery
       sessionErrorMessage.value =
         error instanceof Error
           ? error.message
