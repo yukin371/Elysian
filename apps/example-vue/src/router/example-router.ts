@@ -15,6 +15,7 @@ import {
   resolveExampleWorkspacePathByKind,
   resolveExampleWorkspaceRoute,
 } from "./example-workspace-routes"
+import { exampleAppRouter } from "./app-router"
 
 export type ExampleAppLayout = "auth" | "admin"
 
@@ -41,6 +42,8 @@ interface ExampleBrowserWindow {
 
 const getBrowserWindow = () =>
   (globalThis as { window?: ExampleBrowserWindow }).window ?? null
+
+const canUseVueRouter = () => typeof document !== "undefined"
 
 const findNavigationItemById = (
   items: UiNavigationNode[],
@@ -116,16 +119,14 @@ export const useExampleAppLayout = ({
   )
 
 export const readCurrentWorkspaceRouteMenuKey = (items: UiNavigationNode[]) => {
-  const browserWindow = getBrowserWindow()
-
-  if (!browserWindow) {
-    return null
-  }
-
-  return resolveWorkspaceMenuKeyByPath(items, browserWindow.location.hash)
+  return resolveWorkspaceMenuKeyByPath(items, readCurrentWorkspaceRoutePath())
 }
 
 export const readCurrentWorkspaceRoutePath = () => {
+  if (canUseVueRouter()) {
+    return normalizeWorkspaceRoutePath(exampleAppRouter.currentRoute.value.fullPath)
+  }
+
   const browserWindow = getBrowserWindow()
 
   if (!browserWindow) {
@@ -230,13 +231,28 @@ export const resolveExampleNavigationMenuKey = (
 export const replaceCurrentWorkspaceRoute = (
   path: string | null | undefined,
 ) => {
+  const nextPath = normalizeWorkspaceRoutePath(path)
+
+  if (!nextPath) {
+    return
+  }
+
+  if (canUseVueRouter()) {
+    if (exampleAppRouter.currentRoute.value.path === nextPath) {
+      return
+    }
+
+    void exampleAppRouter.replace(nextPath)
+    return
+  }
+
   const browserWindow = getBrowserWindow()
 
   if (!browserWindow) {
     return
   }
 
-  const nextHash = toWorkspaceRouteHash(path)
+  const nextHash = toWorkspaceRouteHash(nextPath)
 
   if (!nextHash || browserWindow.location.hash === nextHash) {
     return
@@ -246,6 +262,12 @@ export const replaceCurrentWorkspaceRoute = (
 }
 
 export const listenWorkspaceRouteChange = (listener: () => void) => {
+  if (canUseVueRouter()) {
+    return exampleAppRouter.afterEach(() => {
+      listener()
+    })
+  }
+
   const browserWindow = getBrowserWindow()
 
   if (!browserWindow) {

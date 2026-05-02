@@ -39,6 +39,7 @@
         "@fontsource/newsreader": "^5.2.10",
         "tdesign-vue-next": "^1.19.1",
         "vue": "^3.5.18",
+        "vue-router": "^4.4.4",
       },
       "devDependencies": {
         "@tailwindcss/vite": "^4.1.12",
