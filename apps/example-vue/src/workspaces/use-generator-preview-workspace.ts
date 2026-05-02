@@ -22,6 +22,7 @@ import {
 export const useGeneratorPreviewWorkspace = (
   t: (key: string, params?: Record<string, unknown>) => string,
   enabled: Readonly<Ref<boolean>>,
+  onRecoverableAuthError: (error: unknown) => void,
 ) => {
   const availableSchemas = listRegisteredSchemas()
   const availableSchemaNames = availableSchemas.map((schema) => schema.name)
@@ -137,6 +138,7 @@ export const useGeneratorPreviewWorkspace = (
       }
 
       resetPreviewState()
+      onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error ? error.message : "Generator preview failed"
     } finally {
@@ -160,6 +162,7 @@ export const useGeneratorPreviewWorkspace = (
       currentSession.value = response.session
       currentDiffSummary.value = response.diff
     } catch (error) {
+      onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error ? error.message : "Generator apply failed"
     } finally {

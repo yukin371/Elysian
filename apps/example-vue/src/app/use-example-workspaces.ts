@@ -314,6 +314,7 @@ export const useExampleWorkspaces = ({
   const generatorPreviewWorkspace = useGeneratorPreviewWorkspace(
     t,
     exampleNavigation.isGeneratorPreviewWorkspace,
+    onRecoverableAuthError,
   )
 
   return {
