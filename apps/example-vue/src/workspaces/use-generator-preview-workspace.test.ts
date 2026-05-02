@@ -1306,6 +1306,7 @@ describe("useGeneratorPreviewWorkspace", () => {
     }) as typeof fetch
 
     const { workspace } = createWorkspace({
+      enabled: true,
       onRecoverableAuthError: (error) => {
         recoverableErrors.push(error)
       },
@@ -1369,7 +1370,7 @@ describe("useGeneratorPreviewWorkspace", () => {
       return new Response("not found", { status: 404 })
     }) as typeof fetch
 
-    const { workspace } = createWorkspace()
+    const { workspace } = createWorkspace({ enabled: true })
     workspace.currentSession.value = createSession()
     workspace.currentDiffSummary.value = createDiffSummary()
 
@@ -1416,6 +1417,7 @@ describe("useGeneratorPreviewWorkspace", () => {
     }) as typeof fetch
 
     const { workspace } = createWorkspace({
+      enabled: true,
       onRecoverableAuthError: (error) => {
         recoverableErrors.push(error)
       },
@@ -1439,8 +1441,21 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.canApplyPreview.value).toBe(false)
   })
 
-  test("does not apply while preview review is in progress", async () => {
+  test("does not expose review or apply actions while workspace is disabled", async () => {
     const { workspace } = createWorkspace()
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    expect(workspace.canApplyPreview.value).toBe(false)
+
+    workspace.currentSession.value = createSession()
+
+    expect(workspace.canApprovePreview.value).toBe(false)
+    expect(workspace.canRejectPreview.value).toBe(false)
+  })
+
+  test("does not apply while preview review is in progress", async () => {
+    const { workspace } = createWorkspace({ enabled: true })
     workspace.currentSession.value = createSession({ status: "ready" })
     workspace.currentDiffSummary.value = createDiffSummary()
     workspace.reviewLoading.value = true

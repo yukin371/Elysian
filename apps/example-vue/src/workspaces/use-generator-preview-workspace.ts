@@ -319,6 +319,7 @@ export const useGeneratorPreviewWorkspace = (
       currentSession.value !== null &&
       currentSession.value.status === "ready" &&
       !currentSession.value.hasBlockingConflicts &&
+      enabled.value &&
       !loading.value &&
       !reviewLoading.value &&
       !applyLoading.value,
@@ -328,6 +329,7 @@ export const useGeneratorPreviewWorkspace = (
     () =>
       currentSession.value !== null &&
       currentSession.value.status === "pending_review" &&
+      enabled.value &&
       !loading.value &&
       !reviewLoading.value &&
       !applyLoading.value,
