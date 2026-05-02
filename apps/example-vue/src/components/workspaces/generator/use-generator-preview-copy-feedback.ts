@@ -10,6 +10,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "absolutePath"
   | "actor"
   | "appliedAt"
+  | "applyActor"
   | "commands"
   | "createdAt"
   | "currentSource"
@@ -67,6 +68,7 @@ const createInitialCopyFeedback = (): Record<
   absolutePath: "idle",
   actor: "idle",
   appliedAt: "idle",
+  applyActor: "idle",
   commands: "idle",
   createdAt: "idle",
   currentSource: "idle",

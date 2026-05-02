@@ -339,6 +339,9 @@ const copyReviewedAt = async () =>
 const copyAppliedAt = async () =>
   copyPanelValue("appliedAt", props.applyEvidence?.appliedAt)
 
+const copyApplyActor = async () =>
+  copyPanelValue("applyActor", applyActorLabel.value)
+
 const copySelectedSchemaName = async () =>
   copyPanelValue("schemaName", props.selectedSchemaName)
 
@@ -504,9 +507,11 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :apply-evidence="applyEvidence"
         :apply-actor-label="applyActorLabel"
         :applied-at-copy-label="resolveSnippetCopyLabel('appliedAt')"
+        :apply-actor-copy-label="resolveSnippetCopyLabel('applyActor')"
         :manifest-path-copy-label="resolveSnippetCopyLabel('manifestPath')"
         :request-id-copy-label="resolveSnippetCopyLabel('requestId')"
         @copy-applied-at="copyAppliedAt"
+        @copy-apply-actor="copyApplyActor"
         @copy-manifest-path="copyManifestPath"
         @copy-request-id="copyRequestId"
       />

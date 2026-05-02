@@ -9,6 +9,7 @@ interface GeneratorPreviewWorkspaceApplyPanelProps {
   applyEvidence: GeneratorPreviewApplyEvidence
   applyActorLabel: string
   appliedAtCopyLabel: string
+  applyActorCopyLabel: string
   manifestPathCopyLabel: string
   requestIdCopyLabel: string
 }
@@ -17,6 +18,7 @@ defineProps<GeneratorPreviewWorkspaceApplyPanelProps>()
 
 const emit = defineEmits<{
   (event: "copy-applied-at"): void
+  (event: "copy-apply-actor"): void
   (event: "copy-manifest-path"): void
   (event: "copy-request-id"): void
 }>()
@@ -41,7 +43,17 @@ const emit = defineEmits<{
         <strong>{{ applyEvidence.appliedAt ?? "-" }}</strong>
       </div>
       <div>
-        <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+        <div class="generator-metadata-label">
+          <span>{{ t("app.generatorPreview.meta.actor") }}</span>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="applyActorLabel.trim().length === 0 || applyActorLabel === '-'"
+            @click="emit('copy-apply-actor')"
+          >
+            {{ applyActorCopyLabel }}
+          </button>
+        </div>
         <strong>{{ applyActorLabel }}</strong>
       </div>
       <div>
