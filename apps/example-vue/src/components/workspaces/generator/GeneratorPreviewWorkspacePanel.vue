@@ -14,6 +14,7 @@ import type {
 } from "./types"
 import GeneratorPreviewWorkspaceDiffSummaryPanel from "./GeneratorPreviewWorkspaceDiffSummaryPanel.vue"
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
+import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
 import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
@@ -421,23 +422,11 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         @copy-block-count="copyDiffBlockCount"
       />
 
-      <section v-if="selectedFile" class="panel-section">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.fileDiffTitle") }}</p>
-        <div class="enterprise-metadata">
-          <div>
-            <span>{{ t("app.generatorPreview.meta.addedLines") }}</span>
-            <strong>{{ selectedDiffStats.addedLineCount }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.removedLines") }}</span>
-            <strong>{{ selectedDiffStats.removedLineCount }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.generatorPreview.meta.unchangedLines") }}</span>
-            <strong>{{ selectedDiffStats.unchangedLineCount }}</strong>
-          </div>
-        </div>
-      </section>
+      <GeneratorPreviewWorkspaceFileDiffPanel
+        v-if="selectedFile"
+        :t="t"
+        :selected-diff-stats="selectedDiffStats"
+      />
 
       <section v-if="reviewEvidence" class="panel-section">
         <p class="enterprise-subheading">{{ t("app.generatorPreview.reviewTitle") }}</p>
