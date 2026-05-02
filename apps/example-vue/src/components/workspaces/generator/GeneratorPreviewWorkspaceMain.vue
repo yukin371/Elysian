@@ -287,7 +287,7 @@ const handleReviewCommentInput = (value: string | number) => {
 const handleReviewPreview = (decision: "approve" | "reject") => {
   const canReview = decision === "approve" ? props.canApprove : props.canReject
 
-  if (!canReview || props.reviewLoading || props.applyLoading) {
+  if (!canReview || props.loading || props.reviewLoading || props.applyLoading) {
     return
   }
 
@@ -303,7 +303,7 @@ const handleReviewPreview = (decision: "approve" | "reject") => {
 }
 
 const handleApplyPreview = () => {
-  if (!props.canApply || props.applyLoading) {
+  if (!props.canApply || props.loading || props.reviewLoading || props.applyLoading) {
     return
   }
 
