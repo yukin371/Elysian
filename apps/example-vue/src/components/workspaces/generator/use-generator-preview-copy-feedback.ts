@@ -42,6 +42,11 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "sqlDraft"
   | "plannedReason"
   | "conflictStrategy"
+  | "diffBlockCount"
+  | "diffChangedCount"
+  | "diffCreateCount"
+  | "diffOverwriteCount"
+  | "diffSkipCount"
   | "sqlPreview"
 
 type GeneratorPreviewCopyFeedbackStatus = "idle" | "copied" | "failed"
@@ -89,6 +94,11 @@ const createInitialCopyFeedback = (): Record<
   sqlDraft: "idle",
   plannedReason: "idle",
   conflictStrategy: "idle",
+  diffBlockCount: "idle",
+  diffChangedCount: "idle",
+  diffCreateCount: "idle",
+  diffOverwriteCount: "idle",
+  diffSkipCount: "idle",
   sqlPreview: "idle",
 })
 

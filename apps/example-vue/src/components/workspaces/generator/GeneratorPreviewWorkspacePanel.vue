@@ -258,6 +258,36 @@ const copySessionSourceType = async () =>
 const copySessionConflictStrategy = async () =>
   copyPanelValue("conflictStrategy", sessionConflictStrategyLabel.value)
 
+const copyDiffChangedCount = async () =>
+  copyPanelValue(
+    "diffChangedCount",
+    String(props.diffSummary?.changedFileCount ?? 0),
+  )
+
+const copyDiffCreateCount = async () =>
+  copyPanelValue(
+    "diffCreateCount",
+    String(props.diffSummary?.actionCounts.create ?? 0),
+  )
+
+const copyDiffOverwriteCount = async () =>
+  copyPanelValue(
+    "diffOverwriteCount",
+    String(props.diffSummary?.actionCounts.overwrite ?? 0),
+  )
+
+const copyDiffSkipCount = async () =>
+  copyPanelValue(
+    "diffSkipCount",
+    String(props.diffSummary?.actionCounts.skip ?? 0),
+  )
+
+const copyDiffBlockCount = async () =>
+  copyPanelValue(
+    "diffBlockCount",
+    String(props.diffSummary?.actionCounts.block ?? 0),
+  )
+
 const copyReviewedAt = async () =>
   copyPanelValue("reviewedAt", props.reviewEvidence?.reviewedAt)
 
@@ -377,6 +407,18 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         v-if="diffSummary"
         :t="t"
         :diff-summary="diffSummary"
+        :changed-count-copy-label="resolveSnippetCopyLabel('diffChangedCount')"
+        :create-count-copy-label="resolveSnippetCopyLabel('diffCreateCount')"
+        :overwrite-count-copy-label="
+          resolveSnippetCopyLabel('diffOverwriteCount')
+        "
+        :skip-count-copy-label="resolveSnippetCopyLabel('diffSkipCount')"
+        :block-count-copy-label="resolveSnippetCopyLabel('diffBlockCount')"
+        @copy-changed-count="copyDiffChangedCount"
+        @copy-create-count="copyDiffCreateCount"
+        @copy-overwrite-count="copyDiffOverwriteCount"
+        @copy-skip-count="copyDiffSkipCount"
+        @copy-block-count="copyDiffBlockCount"
       />
 
       <section v-if="selectedFile" class="panel-section">
