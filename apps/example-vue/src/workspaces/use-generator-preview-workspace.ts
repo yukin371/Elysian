@@ -110,10 +110,14 @@ const persistGeneratorPreviewSelection = (
     return
   }
 
-  storage.setItem(
-    GENERATOR_PREVIEW_SELECTION_STORAGE_KEY,
-    JSON.stringify(selection),
-  )
+  try {
+    storage.setItem(
+      GENERATOR_PREVIEW_SELECTION_STORAGE_KEY,
+      JSON.stringify(selection),
+    )
+  } catch {
+    // Selection persistence is best-effort; workspace state remains in memory.
+  }
 }
 
 export const useGeneratorPreviewWorkspace = (

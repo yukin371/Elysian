@@ -1240,6 +1240,26 @@ describe("useGeneratorPreviewWorkspace", () => {
     })
   })
 
+  test("does not throw when generator preview selection storage fails", async () => {
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: {
+        ...createLocalStorage(),
+        setItem: () => {
+          throw new Error("quota exceeded")
+        },
+      },
+      writable: true,
+    })
+
+    const { workspace } = createWorkspace()
+    workspace.selectedFrontendTarget.value = "react"
+
+    await waitForAsyncWork()
+
+    expect(workspace.selectedFrontendTarget.value).toBe("react")
+  })
+
   test("clears query when generator selection context changes", async () => {
     const { workspace } = createWorkspace()
 
