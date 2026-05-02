@@ -21,6 +21,8 @@ interface GeneratorPreviewWorkspaceMainProps {
   applyLoading: boolean
   errorMessage: string
   schemaOptions: GeneratorPreviewSchemaOption[]
+  conflictStrategyOptions: Array<{ label: string; value: string }>
+  selectedConflictStrategy: string
   recentSessionOptions: Array<{ label: string; value: string }>
   selectedRecentSessionId: string
   selectedSchemaName: string
@@ -43,6 +45,7 @@ const props = defineProps<GeneratorPreviewWorkspaceMainProps>()
 
 const emit = defineEmits<{
   (e: "update:selected-schema-name", value: string): void
+  (e: "update:selected-conflict-strategy", value: string): void
   (e: "update:selected-frontend-target", value: "vue" | "react"): void
   (e: "update:query", value: string): void
   (e: "restore-session", value: string): void
@@ -87,6 +90,14 @@ const handleSchemaChange = (
 ) => {
   if (typeof value === "string") {
     emit("update:selected-schema-name", value)
+  }
+}
+
+const handleConflictStrategyChange = (
+  value: string | number | Array<string | number>,
+) => {
+  if (typeof value === "string") {
+    emit("update:selected-conflict-strategy", value)
   }
 }
 
@@ -162,6 +173,16 @@ watch(
             :options="schemaOptions"
             :disabled="loading || reviewLoading || applyLoading"
             @update:model-value="handleSchemaChange"
+          />
+        </label>
+
+        <label class="enterprise-field">
+          <span>{{ t("app.generatorPreview.filter.conflictLabel") }}</span>
+          <TSelect
+            :model-value="selectedConflictStrategy"
+            :options="conflictStrategyOptions"
+            :disabled="loading || reviewLoading || applyLoading"
+            @update:model-value="handleConflictStrategyChange"
           />
         </label>
 

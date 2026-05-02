@@ -340,8 +340,12 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.errorMessage,
       generatorPreviewSchemaOptions:
         input.workspaces.generatorPreviewWorkspace.schemaOptions,
+      generatorPreviewConflictStrategyOptions:
+        input.workspaces.generatorPreviewWorkspace.conflictStrategyOptions,
       generatorPreviewRecentSessionOptions:
         input.workspaces.generatorPreviewWorkspace.recentSessionOptions,
+      selectedGeneratorPreviewConflictStrategy:
+        input.workspaces.generatorPreviewWorkspace.selectedConflictStrategy,
       selectedGeneratorPreviewRecentSessionId:
         input.workspaces.generatorPreviewWorkspace.selectedRecentSessionId,
       selectedGeneratorPreviewSchemaName:

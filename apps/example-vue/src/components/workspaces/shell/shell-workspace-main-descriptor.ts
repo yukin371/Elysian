@@ -61,7 +61,9 @@ export interface ShellWorkspaceMainSwitchProps {
   generatorPreviewApplyLoading: boolean
   generatorPreviewErrorMessage: string
   generatorPreviewSchemaOptions: ReadonlyArray<unknown>
+  generatorPreviewConflictStrategyOptions: ReadonlyArray<unknown>
   generatorPreviewRecentSessionOptions: ReadonlyArray<unknown>
+  selectedGeneratorPreviewConflictStrategy: string
   selectedGeneratorPreviewRecentSessionId: string
   selectedGeneratorPreviewSchemaName: string
   selectedGeneratorPreviewFrontendTarget: string
@@ -197,6 +199,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "select-file", fileId: string): void
   (event: "open-file-upload"): void
   (event: "update-generator-schema-name", schemaName: string): void
+  (event: "update-generator-conflict-strategy", strategy: string): void
   (event: "update-generator-frontend-target", frontendTarget: string): void
   (event: "update-generator-query", value: string): void
   (event: "restore-generator-session", sessionId: string): void
@@ -491,10 +494,16 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       applyLoading: props.generatorPreviewApplyLoading,
       errorMessage: props.generatorPreviewErrorMessage,
       schemaOptions: props.generatorPreviewSchemaOptions,
+      conflictStrategyOptions:
+        props.generatorPreviewConflictStrategyOptions as Array<{
+          label: string
+          value: string
+        }>,
       recentSessionOptions: props.generatorPreviewRecentSessionOptions as Array<{
         label: string
         value: string
       }>,
+      selectedConflictStrategy: props.selectedGeneratorPreviewConflictStrategy,
       selectedRecentSessionId: props.selectedGeneratorPreviewRecentSessionId,
       selectedSchemaName: props.selectedGeneratorPreviewSchemaName,
       selectedFrontendTarget: props.selectedGeneratorPreviewFrontendTarget,
@@ -515,6 +524,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     listeners: {
       "update:selected-schema-name": (schemaName: unknown) =>
         emit("update-generator-schema-name", schemaName as string),
+      "update:selected-conflict-strategy": (strategy: unknown) =>
+        emit("update-generator-conflict-strategy", strategy as string),
       "update:selected-frontend-target": (frontendTarget: unknown) =>
         emit("update-generator-frontend-target", frontendTarget as string),
       "update:query": (value: unknown) =>

@@ -141,6 +141,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.applied":
     "本次预览已完成 staging apply，应用时间：{value}。",
   "app.generatorPreview.filter.schemaLabel": "模块 Schema",
+  "app.generatorPreview.filter.conflictLabel": "冲突策略",
   "app.generatorPreview.filter.frontendLabel": "前端目标",
   "app.generatorPreview.filter.searchLabel": "搜索产物",
   "app.generatorPreview.filter.searchPlaceholder": "按文件路径、理由或内容搜索",
@@ -149,6 +150,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.reset": "清空筛选",
   "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
   "app.generatorPreview.filter.frontendSummary": "前端: {value}",
+  "app.generatorPreview.filter.conflictSummary": "策略: {value}",
   "app.generatorPreview.filter.querySummary": "关键词: {value}",
   "app.generatorPreview.detailEyebrow": "预览详情",
   "app.generatorPreview.detailDescription":

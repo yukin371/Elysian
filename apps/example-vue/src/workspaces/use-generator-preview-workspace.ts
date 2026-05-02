@@ -6,6 +6,7 @@ import {
   listRegisteredSchemas,
 } from "../lib/generator-preview-browser"
 import {
+  type GeneratorPreviewConflictStrategy,
   type GeneratorPreviewDiffSummary,
   type GeneratorPreviewReport,
   type GeneratorPreviewSessionDetail,
@@ -48,6 +49,8 @@ export const useGeneratorPreviewWorkspace = (
     ref<GeneratorPreviewSqlProposalHandoff | null>(null)
   const recentSessions = ref<GeneratorPreviewSessionRecord[]>([])
   const selectedRecentSessionId = ref("")
+  const selectedConflictStrategy =
+    ref<GeneratorPreviewConflictStrategy>("fail")
   let latestPreviewRequestId = 0
 
   const schemaOptions = computed(() =>
@@ -105,6 +108,25 @@ export const useGeneratorPreviewWorkspace = (
     })),
   )
 
+  const conflictStrategyOptions = computed(() => [
+    {
+      label: t("app.generatorPreview.conflictStrategy.skip"),
+      value: "skip",
+    },
+    {
+      label: t("app.generatorPreview.conflictStrategy.overwrite"),
+      value: "overwrite",
+    },
+    {
+      label: t("app.generatorPreview.conflictStrategy.overwrite-generated-only"),
+      value: "overwrite-generated-only",
+    },
+    {
+      label: t("app.generatorPreview.conflictStrategy.fail"),
+      value: "fail",
+    },
+  ])
+
   const filterSummary = computed(() => {
     const fragments = [
       t("app.generatorPreview.filter.schemaSummary", {
@@ -112,6 +134,11 @@ export const useGeneratorPreviewWorkspace = (
       }),
       t("app.generatorPreview.filter.frontendSummary", {
         value: selectedFrontendTarget.value,
+      }),
+      t("app.generatorPreview.filter.conflictSummary", {
+        value: t(
+          `app.generatorPreview.conflictStrategy.${selectedConflictStrategy.value}`,
+        ),
       }),
     ]
 
@@ -168,6 +195,7 @@ export const useGeneratorPreviewWorkspace = (
   const applySessionDetail = (session: GeneratorPreviewSessionDetail) => {
     selectedSchemaName.value = session.schemaName
     selectedFrontendTarget.value = session.frontendTarget
+    selectedConflictStrategy.value = session.conflictStrategy
     currentSession.value = session
     currentDiffSummary.value = session.diffSummary
     currentReport.value = session.report
@@ -202,6 +230,7 @@ export const useGeneratorPreviewWorkspace = (
 
     try {
       const response = await createGeneratorPreviewSession({
+        conflictStrategy: selectedConflictStrategy.value,
         schemaName: selectedSchemaName.value,
         frontendTarget: selectedFrontendTarget.value,
         targetPreset: "staging",
@@ -357,6 +386,7 @@ export const useGeneratorPreviewWorkspace = (
     currentSession,
     currentSqlProposal,
     currentSqlProposalHandoff,
+    conflictStrategyOptions,
     errorMessage,
     filterSummary,
     filteredPreviewFiles,
@@ -370,6 +400,7 @@ export const useGeneratorPreviewWorkspace = (
     reviewPreview,
     schemaOptions,
     selectedRecentSessionId,
+    selectedConflictStrategy,
     selectedFilePath,
     selectedFrontendTarget,
     selectedPreviewFile,

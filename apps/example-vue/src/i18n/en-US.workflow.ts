@@ -150,6 +150,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.applied":
     "This preview has already been applied to staging at {value}.",
   "app.generatorPreview.filter.schemaLabel": "Module schema",
+  "app.generatorPreview.filter.conflictLabel": "Conflict strategy",
   "app.generatorPreview.filter.frontendLabel": "Frontend target",
   "app.generatorPreview.filter.searchLabel": "Search artifacts",
   "app.generatorPreview.filter.searchPlaceholder":
@@ -160,6 +161,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.reset": "Clear filters",
   "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
   "app.generatorPreview.filter.frontendSummary": "Frontend: {value}",
+  "app.generatorPreview.filter.conflictSummary": "Strategy: {value}",
   "app.generatorPreview.filter.querySummary": "Query: {value}",
   "app.generatorPreview.detailEyebrow": "Preview detail",
   "app.generatorPreview.detailDescription":

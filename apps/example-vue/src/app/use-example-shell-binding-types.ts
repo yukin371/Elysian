@@ -147,7 +147,9 @@ export interface UseExampleShellBindingsOptions {
   generatorPreviewApplyLoading: ValueSource<boolean>
   generatorPreviewErrorMessage: ValueSource<string>
   generatorPreviewSchemaOptions: ValueSource<unknown[]>
+  generatorPreviewConflictStrategyOptions: ValueSource<unknown[]>
   generatorPreviewRecentSessionOptions: ValueSource<unknown[]>
+  selectedGeneratorPreviewConflictStrategy: Ref<string>
   selectedGeneratorPreviewSchemaName: Ref<string>
   selectedGeneratorPreviewRecentSessionId: Ref<string>
   selectedGeneratorPreviewFrontendTarget: Ref<string>

@@ -3,6 +3,7 @@ import { ref } from "vue"
 
 import { clearAccessToken, setAccessToken } from "../lib/platform-api"
 import type {
+  GeneratorPreviewConflictStrategy,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewReport,
   GeneratorPreviewSessionDetail,
@@ -277,6 +278,60 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.selectedRecentSessionId.value).toBe("preview-session-2")
     expect(workspace.selectedFrontendTarget.value).toBe("react")
     expect(workspace.sqlProposal.value?.tableName).toBe("customers")
+  })
+
+  test("sends selected conflict strategy when refreshing preview", async () => {
+    let submittedConflictStrategy: GeneratorPreviewConflictStrategy | undefined
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(JSON.stringify({ items: [] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        submittedConflictStrategy = JSON.parse(
+          String(init?.body ?? "{}"),
+        ).conflictStrategy
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession({
+              conflictStrategy: submittedConflictStrategy ?? "fail",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(submittedConflictStrategy).toBe("overwrite-generated-only")
+    expect(workspace.currentSession.value?.conflictStrategy).toBe(
+      "overwrite-generated-only",
+    )
   })
 
   test("preserves current preview when same-context refresh fails", async () => {

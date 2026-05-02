@@ -46,7 +46,9 @@ export const createExampleShellWorkspaceMainBindings = ({
   generatorPreviewApplyLoading,
   generatorPreviewErrorMessage,
   generatorPreviewSchemaOptions,
+  generatorPreviewConflictStrategyOptions,
   generatorPreviewRecentSessionOptions,
+  selectedGeneratorPreviewConflictStrategy,
   selectedGeneratorPreviewRecentSessionId,
   selectedGeneratorPreviewSchemaName,
   selectedGeneratorPreviewFrontendTarget,
@@ -274,9 +276,14 @@ export const createExampleShellWorkspaceMainBindings = ({
     generatorPreviewApplyLoading: read(generatorPreviewApplyLoading),
     generatorPreviewErrorMessage: read(generatorPreviewErrorMessage),
     generatorPreviewSchemaOptions: read(generatorPreviewSchemaOptions),
+    generatorPreviewConflictStrategyOptions: read(
+      generatorPreviewConflictStrategyOptions,
+    ),
     generatorPreviewRecentSessionOptions: read(
       generatorPreviewRecentSessionOptions,
     ),
+    selectedGeneratorPreviewConflictStrategy:
+      selectedGeneratorPreviewConflictStrategy.value,
     selectedGeneratorPreviewRecentSessionId:
       selectedGeneratorPreviewRecentSessionId.value,
     selectedGeneratorPreviewSchemaName:
@@ -433,6 +440,9 @@ export const createExampleShellWorkspaceMainBindings = ({
     "open-file-upload": openFileUploadPanel,
     "update-generator-schema-name": (value: string) => {
       selectedGeneratorPreviewSchemaName.value = value
+    },
+    "update-generator-conflict-strategy": (value: string) => {
+      selectedGeneratorPreviewConflictStrategy.value = value
     },
     "update-generator-frontend-target": (value: string) => {
       selectedGeneratorPreviewFrontendTarget.value = value
