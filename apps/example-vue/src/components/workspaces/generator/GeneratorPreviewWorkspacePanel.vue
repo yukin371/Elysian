@@ -245,6 +245,18 @@ const copySourceValue = async () => {
   await copyTextByKey("sourceValue", props.session?.sourceValue ?? "")
 }
 
+const copyCreatedAt = async () => {
+  await copyTextByKey("createdAt", props.session?.createdAt ?? "")
+}
+
+const copyReviewedAt = async () => {
+  await copyTextByKey("reviewedAt", props.reviewEvidence?.reviewedAt ?? "")
+}
+
+const copyAppliedAt = async () => {
+  await copyTextByKey("appliedAt", props.applyEvidence?.appliedAt ?? "")
+}
+
 onBeforeUnmount(disposeCopyFeedbackTimers)
 
 </script>
@@ -380,7 +392,22 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
             <strong>{{ session.id }}</strong>
           </div>
           <div>
-            <span>{{ t("app.generatorPreview.meta.createdAt") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.createdAt") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="session.createdAt.trim().length === 0"
+                @click="copyCreatedAt"
+              >
+                {{
+                  resolveCopyLabel(
+                    "createdAt",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ session.createdAt }}</strong>
           </div>
           <div>
@@ -488,7 +515,22 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         <p class="enterprise-subheading">{{ t("app.generatorPreview.reviewTitle") }}</p>
         <div class="enterprise-metadata">
           <div>
-            <span>{{ t("app.generatorPreview.meta.reviewedAt") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.reviewedAt") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="(reviewEvidence.reviewedAt ?? '').trim().length === 0"
+                @click="copyReviewedAt"
+              >
+                {{
+                  resolveCopyLabel(
+                    "reviewedAt",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ reviewEvidence.reviewedAt ?? "-" }}</strong>
           </div>
           <div>
@@ -533,7 +575,22 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         <p class="enterprise-subheading">{{ t("app.generatorPreview.applyTitle") }}</p>
         <div class="enterprise-metadata">
           <div>
-            <span>{{ t("app.generatorPreview.meta.appliedAt") }}</span>
+            <div class="generator-metadata-label">
+              <span>{{ t("app.generatorPreview.meta.appliedAt") }}</span>
+              <button
+                type="button"
+                class="enterprise-button enterprise-button-ghost"
+                :disabled="(applyEvidence.appliedAt ?? '').trim().length === 0"
+                @click="copyAppliedAt"
+              >
+                {{
+                  resolveCopyLabel(
+                    "appliedAt",
+                    "app.generatorPreview.action.copySnippet",
+                  )
+                }}
+              </button>
+            </div>
             <strong>{{ applyEvidence.appliedAt ?? "-" }}</strong>
           </div>
           <div>

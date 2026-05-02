@@ -8,7 +8,9 @@ import {
 
 export type GeneratorPreviewCopyFeedbackKey =
   | "absolutePath"
+  | "appliedAt"
   | "commands"
+  | "createdAt"
   | "currentSource"
   | "drizzleDir"
   | "drizzleImport"
@@ -20,6 +22,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "reportPath"
   | "requestId"
   | "reviewComment"
+  | "reviewedAt"
   | "schemaDir"
   | "schemaIndexFile"
   | "sessionId"
@@ -38,7 +41,9 @@ const createInitialCopyFeedback = (): Record<
   GeneratorPreviewCopyFeedbackStatus
 > => ({
   absolutePath: "idle",
+  appliedAt: "idle",
   commands: "idle",
+  createdAt: "idle",
   currentSource: "idle",
   drizzleDir: "idle",
   drizzleImport: "idle",
@@ -50,6 +55,7 @@ const createInitialCopyFeedback = (): Record<
   reportPath: "idle",
   requestId: "idle",
   reviewComment: "idle",
+  reviewedAt: "idle",
   schemaDir: "idle",
   schemaIndexFile: "idle",
   sessionId: "idle",
