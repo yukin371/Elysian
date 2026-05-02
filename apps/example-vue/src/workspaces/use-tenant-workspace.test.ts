@@ -201,4 +201,57 @@ describe("useTenantWorkspace", () => {
     expect(workspace.tenantErrorMessage.value).toContain("status 401")
     expect(workspace.selectedTenant.value?.status).toBe("active")
   })
+
+  test("ignores row switches while tenant mutation is loading", async () => {
+    const firstTenant = createTenantRecord()
+    const secondTenant = createTenantRecord({
+      code: "tenant-beta",
+      id: "tenant-2",
+      name: "Tenant Beta",
+    })
+    const requests: string[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+      requests.push(`${method} ${url}`)
+
+      if (url.endsWith("/system/tenants/tenant-1") && method === "GET") {
+        return new Response(JSON.stringify(firstTenant), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/system/tenants/tenant-2") && method === "GET") {
+        return new Response(JSON.stringify(secondTenant), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(
+        JSON.stringify({
+          items: [firstTenant, secondTenant],
+        }),
+        {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        },
+      )
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+
+    await workspace.reloadTenants()
+    expect(workspace.selectedTenant.value?.id).toBe("tenant-1")
+
+    workspace.tenantLoading.value = true
+    await workspace.handleRowClick({ id: "tenant-2" })
+
+    expect(workspace.selectedTenant.value?.id).toBe("tenant-1")
+    expect(
+      requests.filter((request) => request.endsWith("/system/tenants/tenant-2")),
+    ).toHaveLength(0)
+  })
 })

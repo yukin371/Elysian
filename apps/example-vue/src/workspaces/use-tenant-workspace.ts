@@ -326,6 +326,10 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
   }
 
   const handleRowClick = async (row: Record<string, unknown>) => {
+    if (tenantLoading.value || tenantDetailLoading.value) {
+      return
+    }
+
     const rowId = String(row.id ?? "")
     const tenant = filteredTenantItems.value.find((item) => item.id === rowId)
 
