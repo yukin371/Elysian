@@ -75,8 +75,15 @@ interface UseExampleCsvExportsOptions {
   fileListQuery: ComputedRef<FileListQuery>
 }
 
-const createCsvExportFilename = (basename: string) =>
-  `${basename}-${new Date().toISOString().slice(0, 10)}.csv`
+type CsvExportDateLike = Pick<Date, "getDate" | "getFullYear" | "getMonth">
+
+const padDatePart = (value: number) => String(value).padStart(2, "0")
+
+export const createCsvExportFilename = (
+  basename: string,
+  now: CsvExportDateLike = new Date(),
+) =>
+  `${basename}-${now.getFullYear()}-${padDatePart(now.getMonth() + 1)}-${padDatePart(now.getDate())}.csv`
 
 export const useExampleCsvExports = ({
   t,
