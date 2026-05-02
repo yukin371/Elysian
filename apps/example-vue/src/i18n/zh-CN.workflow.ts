@@ -144,6 +144,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.frontendLabel": "前端目标",
   "app.generatorPreview.filter.searchLabel": "搜索产物",
   "app.generatorPreview.filter.searchPlaceholder": "按文件路径、理由或内容搜索",
+  "app.generatorPreview.filter.sessionLabel": "最近会话",
+  "app.generatorPreview.filter.sessionPlaceholder": "选择已有 preview 会话",
   "app.generatorPreview.filter.reset": "清空筛选",
   "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
   "app.generatorPreview.filter.frontendSummary": "前端: {value}",

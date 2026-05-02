@@ -5,6 +5,7 @@ import { clearAccessToken, setAccessToken } from "../lib/platform-api"
 import type {
   GeneratorPreviewDiffSummary,
   GeneratorPreviewReport,
+  GeneratorPreviewSessionDetail,
   GeneratorPreviewSessionRecord,
 } from "../lib/platform-api"
 import { useGeneratorPreviewWorkspace } from "./use-generator-preview-workspace"
@@ -128,6 +129,17 @@ const createSession = (
   ...overrides,
 })
 
+const createSessionDetail = (
+  overrides?: Partial<GeneratorPreviewSessionDetail>,
+): GeneratorPreviewSessionDetail => ({
+  ...createSession(),
+  diffSummary: createDiffSummary(),
+  report: createReport(),
+  sqlProposal: createSqlProposal(),
+  sqlProposalHandoff: createSqlProposalHandoff(),
+  ...overrides,
+})
+
 const createWorkspace = (options?: {
   enabled?: boolean
   onRecoverableAuthError?: (error: unknown) => void
@@ -202,6 +214,69 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.errorMessage.value).toContain("status 401")
     expect(workspace.currentSession.value).toBeNull()
     expect(workspace.currentDiffSummary.value).toBeNull()
+  })
+
+  test("loads recent session options and restores session detail", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                createdAt: "2026-05-02T13:00:00.000Z",
+                id: "preview-session-2",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-2") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              createdAt: "2026-05-02T13:00:00.000Z",
+              frontendTarget: "react",
+              id: "preview-session-2",
+              schemaName: "customer",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+    await waitForAsyncWork()
+
+    expect(workspace.recentSessionOptions.value).toHaveLength(1)
+    expect(workspace.recentSessionOptions.value[0]?.value).toBe("preview-session-2")
+
+    await workspace.restorePreviewSession("preview-session-2")
+
+    expect(workspace.currentSession.value?.id).toBe("preview-session-2")
+    expect(workspace.selectedRecentSessionId.value).toBe("preview-session-2")
+    expect(workspace.selectedFrontendTarget.value).toBe("react")
+    expect(workspace.sqlProposal.value?.tableName).toBe("customers")
   })
 
   test("preserves current preview when same-context refresh fails", async () => {

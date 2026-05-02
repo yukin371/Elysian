@@ -154,6 +154,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.searchLabel": "Search artifacts",
   "app.generatorPreview.filter.searchPlaceholder":
     "Search by file path, reason, or contents",
+  "app.generatorPreview.filter.sessionLabel": "Recent sessions",
+  "app.generatorPreview.filter.sessionPlaceholder":
+    "Select an existing preview session",
   "app.generatorPreview.filter.reset": "Clear filters",
   "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
   "app.generatorPreview.filter.frontendSummary": "Frontend: {value}",

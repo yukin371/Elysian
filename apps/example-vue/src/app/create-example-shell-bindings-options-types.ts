@@ -210,6 +210,8 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "generatorPreviewApplyLoading"
     | "generatorPreviewErrorMessage"
     | "generatorPreviewSchemaOptions"
+    | "generatorPreviewRecentSessionOptions"
+    | "selectedGeneratorPreviewRecentSessionId"
     | "selectedGeneratorPreviewSchemaName"
     | "selectedGeneratorPreviewFrontendTarget"
     | "generatorPreviewQuery"
@@ -228,6 +230,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "generatorPreviewSqlProposalHandoff"
     | "resetGeneratorPreviewFilters"
     | "refreshGeneratorPreview"
+    | "restoreGeneratorPreviewSession"
     | "reviewGeneratorPreview"
     | "applyGeneratorPreview"
   >

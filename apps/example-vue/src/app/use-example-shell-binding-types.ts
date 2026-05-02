@@ -147,7 +147,9 @@ export interface UseExampleShellBindingsOptions {
   generatorPreviewApplyLoading: ValueSource<boolean>
   generatorPreviewErrorMessage: ValueSource<string>
   generatorPreviewSchemaOptions: ValueSource<unknown[]>
+  generatorPreviewRecentSessionOptions: ValueSource<unknown[]>
   selectedGeneratorPreviewSchemaName: Ref<string>
+  selectedGeneratorPreviewRecentSessionId: Ref<string>
   selectedGeneratorPreviewFrontendTarget: Ref<string>
   generatorPreviewQuery: Ref<string>
   generatorPreviewFilterSummary: ValueSource<string>
@@ -347,6 +349,7 @@ export interface UseExampleShellBindingsOptions {
   openFileUploadPanel: () => void
   resetGeneratorPreviewFilters: () => void
   refreshGeneratorPreview: () => void
+  restoreGeneratorPreviewSession: (sessionId: string) => void
   reviewGeneratorPreview: (input: {
     decision: "approve" | "reject"
     comment?: string

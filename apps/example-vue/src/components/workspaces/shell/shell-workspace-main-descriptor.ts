@@ -61,6 +61,8 @@ export interface ShellWorkspaceMainSwitchProps {
   generatorPreviewApplyLoading: boolean
   generatorPreviewErrorMessage: string
   generatorPreviewSchemaOptions: ReadonlyArray<unknown>
+  generatorPreviewRecentSessionOptions: ReadonlyArray<unknown>
+  selectedGeneratorPreviewRecentSessionId: string
   selectedGeneratorPreviewSchemaName: string
   selectedGeneratorPreviewFrontendTarget: string
   generatorPreviewQuery: string
@@ -197,6 +199,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "update-generator-schema-name", schemaName: string): void
   (event: "update-generator-frontend-target", frontendTarget: string): void
   (event: "update-generator-query", value: string): void
+  (event: "restore-generator-session", sessionId: string): void
   (event: "select-generator-file", filePath: string): void
   (event: "reset-generator-filters"): void
   (event: "refresh-generator-preview"): void
@@ -488,6 +491,11 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       applyLoading: props.generatorPreviewApplyLoading,
       errorMessage: props.generatorPreviewErrorMessage,
       schemaOptions: props.generatorPreviewSchemaOptions,
+      recentSessionOptions: props.generatorPreviewRecentSessionOptions as Array<{
+        label: string
+        value: string
+      }>,
+      selectedRecentSessionId: props.selectedGeneratorPreviewRecentSessionId,
       selectedSchemaName: props.selectedGeneratorPreviewSchemaName,
       selectedFrontendTarget: props.selectedGeneratorPreviewFrontendTarget,
       query: props.generatorPreviewQuery,
@@ -511,6 +519,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
         emit("update-generator-frontend-target", frontendTarget as string),
       "update:query": (value: unknown) =>
         emit("update-generator-query", value as string),
+      "restore-session": (sessionId: unknown) =>
+        emit("restore-generator-session", sessionId as string),
       "select-file": (filePath: unknown) =>
         emit("select-generator-file", filePath as string),
       "reset-filters": () => emit("reset-generator-filters"),

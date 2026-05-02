@@ -340,6 +340,10 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.errorMessage,
       generatorPreviewSchemaOptions:
         input.workspaces.generatorPreviewWorkspace.schemaOptions,
+      generatorPreviewRecentSessionOptions:
+        input.workspaces.generatorPreviewWorkspace.recentSessionOptions,
+      selectedGeneratorPreviewRecentSessionId:
+        input.workspaces.generatorPreviewWorkspace.selectedRecentSessionId,
       selectedGeneratorPreviewSchemaName:
         input.workspaces.generatorPreviewWorkspace.selectedSchemaName,
       selectedGeneratorPreviewFrontendTarget:
@@ -376,6 +380,8 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.resetFilters,
       refreshGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.refreshPreview,
+      restoreGeneratorPreviewSession:
+        input.workspaces.generatorPreviewWorkspace.restorePreviewSession,
       reviewGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.reviewPreview,
       applyGeneratorPreview:

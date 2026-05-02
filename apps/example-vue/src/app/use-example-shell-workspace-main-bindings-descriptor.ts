@@ -46,6 +46,8 @@ export const createExampleShellWorkspaceMainBindings = ({
   generatorPreviewApplyLoading,
   generatorPreviewErrorMessage,
   generatorPreviewSchemaOptions,
+  generatorPreviewRecentSessionOptions,
+  selectedGeneratorPreviewRecentSessionId,
   selectedGeneratorPreviewSchemaName,
   selectedGeneratorPreviewFrontendTarget,
   generatorPreviewQuery,
@@ -180,6 +182,7 @@ export const createExampleShellWorkspaceMainBindings = ({
   openFileUploadPanel,
   resetGeneratorPreviewFilters,
   refreshGeneratorPreview,
+  restoreGeneratorPreviewSession,
   reviewGeneratorPreview,
   applyGeneratorPreview,
   handleDictionarySearch,
@@ -271,6 +274,11 @@ export const createExampleShellWorkspaceMainBindings = ({
     generatorPreviewApplyLoading: read(generatorPreviewApplyLoading),
     generatorPreviewErrorMessage: read(generatorPreviewErrorMessage),
     generatorPreviewSchemaOptions: read(generatorPreviewSchemaOptions),
+    generatorPreviewRecentSessionOptions: read(
+      generatorPreviewRecentSessionOptions,
+    ),
+    selectedGeneratorPreviewRecentSessionId:
+      selectedGeneratorPreviewRecentSessionId.value,
     selectedGeneratorPreviewSchemaName:
       selectedGeneratorPreviewSchemaName.value,
     selectedGeneratorPreviewFrontendTarget:
@@ -432,6 +440,7 @@ export const createExampleShellWorkspaceMainBindings = ({
     "update-generator-query": (value: string) => {
       generatorPreviewQuery.value = value
     },
+    "restore-generator-session": restoreGeneratorPreviewSession,
     "select-generator-file": (value: string) => {
       selectedGeneratorPreviewFilePath.value = value
     },

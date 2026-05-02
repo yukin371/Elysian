@@ -21,6 +21,8 @@ interface GeneratorPreviewWorkspaceMainProps {
   applyLoading: boolean
   errorMessage: string
   schemaOptions: GeneratorPreviewSchemaOption[]
+  recentSessionOptions: Array<{ label: string; value: string }>
+  selectedRecentSessionId: string
   selectedSchemaName: string
   selectedFrontendTarget: "vue" | "react"
   query: string
@@ -43,6 +45,7 @@ const emit = defineEmits<{
   (e: "update:selected-schema-name", value: string): void
   (e: "update:selected-frontend-target", value: "vue" | "react"): void
   (e: "update:query", value: string): void
+  (e: "restore-session", value: string): void
   (e: "select-file", value: string): void
   (e: "reset-filters"): void
   (e: "refresh-preview"): void
@@ -92,6 +95,14 @@ const handleFrontendChange = (
 ) => {
   if (value === "vue" || value === "react") {
     emit("update:selected-frontend-target", value)
+  }
+}
+
+const handleRecentSessionChange = (
+  value: string | number | Array<string | number>,
+) => {
+  if (typeof value === "string" && value.length > 0) {
+    emit("restore-session", value)
   }
 }
 
@@ -171,6 +182,20 @@ watch(
             :placeholder="t('app.generatorPreview.filter.searchPlaceholder')"
             clearable
             @update:model-value="handleQueryInput"
+          />
+        </label>
+
+        <label
+          v-if="recentSessionOptions.length > 0"
+          class="enterprise-field generator-filter-search"
+        >
+          <span>{{ t("app.generatorPreview.filter.sessionLabel") }}</span>
+          <TSelect
+            :model-value="selectedRecentSessionId"
+            :options="recentSessionOptions"
+            :placeholder="t('app.generatorPreview.filter.sessionPlaceholder')"
+            :disabled="loading || reviewLoading || applyLoading"
+            @update:model-value="handleRecentSessionChange"
           />
         </label>
       </div>
