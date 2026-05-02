@@ -363,6 +363,21 @@ export const useGeneratorPreviewWorkspace = (
     ]
   }
 
+  const persistCurrentSelection = () => {
+    if (!selectedSchemaName.value) {
+      return
+    }
+
+    persistGeneratorPreviewSelection({
+      conflictStrategy: selectedConflictStrategy.value,
+      frontendTarget: selectedFrontendTarget.value,
+      schemaName: selectedSchemaName.value,
+      sessionId: currentSelectionMatchesSession()
+        ? currentSession.value?.id ?? null
+        : null,
+    })
+  }
+
   const applySessionDetail = (session: GeneratorPreviewSessionDetail) => {
     cacheSessionDetail(session)
     upsertRecentSession(session)
@@ -375,6 +390,7 @@ export const useGeneratorPreviewWorkspace = (
     currentSqlProposal.value = session.sqlProposal
     currentSqlProposalHandoff.value = session.sqlProposalHandoff
     selectedRecentSessionId.value = session.id
+    persistCurrentSelection()
   }
 
   const loadRecentSessions = async () => {
@@ -549,6 +565,7 @@ export const useGeneratorPreviewWorkspace = (
         currentSqlProposal.value = response.sqlProposal
         currentSqlProposalHandoff.value = response.sqlProposalHandoff
         selectedRecentSessionId.value = response.session.id
+        persistCurrentSelection()
       }
     } catch (error) {
       onRecoverableAuthError(error)
@@ -599,6 +616,7 @@ export const useGeneratorPreviewWorkspace = (
         currentSqlProposal.value = response.sqlProposal
         currentSqlProposalHandoff.value = response.sqlProposalHandoff
         selectedRecentSessionId.value = response.session.id
+        persistCurrentSelection()
       }
     } catch (error) {
       onRecoverableAuthError(error)

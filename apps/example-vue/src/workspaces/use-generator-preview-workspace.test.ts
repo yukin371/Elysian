@@ -945,6 +945,18 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(detailRequestCount).toBe(1)
     expect(listRequestCount).toBe(0)
     expect(workspace.currentSession.value?.id).toBe("preview-session-4")
+    expect(
+      JSON.parse(
+        globalThis.localStorage.getItem(
+          "elysian.example-vue.generator-preview.selection",
+        ) ?? "{}",
+      ),
+    ).toEqual({
+      conflictStrategy: "overwrite-generated-only",
+      frontendTarget: "react",
+      schemaName: "customer",
+      sessionId: "preview-session-4",
+    })
   })
 
   test("persists latest generator preview selection locally", async () => {
