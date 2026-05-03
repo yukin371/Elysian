@@ -482,15 +482,6 @@ export const useGeneratorPreviewWorkspace = (
     return true
   }
 
-  const loadRecentSessions = async () => {
-    try {
-      const response = await listGeneratorPreviewSessions()
-      recentSessions.value = response.items
-    } catch {
-      recentSessions.value = []
-    }
-  }
-
   const restoreStoredSession = async () => {
     const storedSessionId = storedSelection?.sessionId
 
