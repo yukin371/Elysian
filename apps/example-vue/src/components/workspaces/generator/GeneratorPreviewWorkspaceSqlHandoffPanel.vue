@@ -32,6 +32,28 @@ const emit = defineEmits<{
   (event: "copy-persistence-index-file", path: string): void
   (event: "copy-steps"): void
 }>()
+
+const resolveMigrationProposalRecoveryNote = (
+  recovery: GeneratorPreviewSqlProposalHandoff["migrationProposalSnapshotRecovery"],
+) => {
+  if (!recovery || recovery.status === "none") {
+    return null
+  }
+
+  if (recovery.status === "rebuilt-from-corrupt") {
+    return {
+      tone: "warning" as const,
+      text: recovery.archivedSnapshotPath
+        ? `快照已从损坏副本重建，原始文件已归档到 ${recovery.archivedSnapshotPath}`
+        : "快照已从损坏副本重建。",
+    }
+  }
+
+  return {
+    tone: "info" as const,
+    text: "快照缺失，已按当前 report 重新生成并落盘。",
+  }
+}
 </script>
 
 <template>
@@ -177,6 +199,27 @@ const emit = defineEmits<{
       </p>
       <p class="generator-status-note">
         {{ migrationProposalSnapshot.snapshotPath }}
+      </p>
+      <p
+        v-if="
+          resolveMigrationProposalRecoveryNote(
+            sqlProposalHandoff.migrationProposalSnapshotRecovery,
+          )
+        "
+        :class="[
+          'enterprise-message',
+          resolveMigrationProposalRecoveryNote(
+            sqlProposalHandoff.migrationProposalSnapshotRecovery,
+          )?.tone === 'warning'
+            ? 'enterprise-message-warning'
+            : 'enterprise-message-info',
+        ]"
+      >
+        {{
+          resolveMigrationProposalRecoveryNote(
+            sqlProposalHandoff.migrationProposalSnapshotRecovery,
+          )?.text
+        }}
       </p>
     </section>
     <section class="generator-handoff-step-block">

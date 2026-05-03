@@ -110,6 +110,10 @@ const createSqlProposalHandoff = (): GeneratorPreviewSqlProposalHandoff => ({
   ],
   migrationProposalSnapshotPath:
     "/tmp/generator-session-report/customer.migration-proposal.json",
+  migrationProposalSnapshotRecovery: {
+    archivedSnapshotPath: null,
+    status: "none",
+  },
   migrationProposalSnapshot: {
     generatedAt: "2026-05-03T00:00:00.000Z",
     migrationProposalResolution: {
@@ -362,6 +366,9 @@ describe("useGeneratorPreviewWorkspace", () => {
     expect(workspace.selectedRecentSessionId.value).toBe("preview-session-2")
     expect(workspace.selectedFrontendTarget.value).toBe("react")
     expect(workspace.sqlProposal.value?.tableName).toBe("customers")
+    expect(
+      workspace.sqlProposalHandoff.value?.migrationProposalSnapshotRecovery?.status,
+    ).toBe("none")
   })
 
   test("restores latest matching session before creating a new preview", async () => {
