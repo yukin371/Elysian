@@ -107,6 +107,8 @@ const createSqlProposalHandoff = () => ({
     "Review the target-directory diff.",
     "Run db:generate before db:migrate.",
   ],
+  migrationProposalSnapshotPath:
+    "/tmp/generator-session-report/customer.migration-proposal.json",
   proposalStatus: "ready" as const,
   reviewMode: "manual" as const,
   sourceSchemaName: "customer",

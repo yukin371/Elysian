@@ -375,6 +375,12 @@ const copyCanonicalOwner = async () =>
     props.sqlProposalHandoff?.canonicalMigrationOwner,
   )
 
+const copyMigrationProposalSnapshotPath = async () =>
+  copyPanelValue(
+    "migrationProposalSnapshotPath",
+    props.sqlProposalHandoff?.migrationProposalSnapshotPath,
+  )
+
 const copyReviewMode = async () =>
   copyPanelValue("reviewMode", props.sqlProposalHandoff?.reviewMode)
 
@@ -604,6 +610,9 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
             'app.generatorPreview.action.copyCommands',
           )
         "
+        :migration-proposal-snapshot-path-copy-label="
+          resolveSnippetCopyLabel('migrationProposalSnapshotPath')
+        "
         :schema-dir-copy-label="resolveSnippetCopyLabel('schemaDir')"
         :drizzle-dir-copy-label="resolveSnippetCopyLabel('drizzleDir')"
         :schema-index-file-copy-label="
@@ -617,6 +626,9 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         "
         :steps-copy-label="resolveSnippetCopyLabel('steps')"
         @copy-suggested-commands="copySuggestedCommands"
+        @copy-migration-proposal-snapshot-path="
+          copyMigrationProposalSnapshotPath
+        "
         @copy-confirmation-checklist="copySqlConfirmationChecklist"
         @copy-schema-dir="
           (path) => copyHandoffTargetPath('schemaDir', path)

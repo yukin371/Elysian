@@ -101,6 +101,7 @@ export interface GeneratorPreviewSqlProposalHandoff {
   reviewMode: "manual"
   canonicalMigrationOwner: "packages/persistence"
   confirmationChecklist: string[]
+  migrationProposalSnapshotPath: string
   targetPaths: {
     drizzleDir: string
     schemaDir: string

@@ -244,6 +244,7 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         canonicalMigrationOwner: string
+        migrationProposalSnapshotPath: string
         proposalStatus: string
         reviewMode: string
         suggestedCommands: string[]
@@ -293,8 +294,21 @@ describe("generator session module", () => {
         schemaDir: "packages/persistence/src/schema",
       },
     })
+    expect(createBody.sqlProposalHandoff.migrationProposalSnapshotPath).toMatch(
+      /\.migration-proposal\.json$/,
+    )
     expect(createBody.sqlProposalHandoff.suggestedCommands).toContain(
       "bun run db:generate",
+    )
+    const migrationProposalSnapshotContents = await readFile(
+      createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      "utf8",
+    )
+    expect(migrationProposalSnapshotContents).toContain(
+      '"migrationProposalResolution"',
+    )
+    expect(migrationProposalSnapshotContents).toContain(
+      '"schemaName": "customer"',
     )
 
     const reportContents = await readFile(createBody.session.reportPath, "utf8")
@@ -346,6 +360,7 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         proposalStatus: string
+        migrationProposalSnapshotPath: string
       }
     }
     expect(reviewBody.session.id).toBe(createBody.session.id)
@@ -397,6 +412,7 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         confirmationChecklist: string[]
+        migrationProposalSnapshotPath: string
       }
     }
     expect(confirmBody.session.id).toBe(createBody.session.id)
@@ -488,6 +504,7 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         proposalStatus: string
+        migrationProposalSnapshotPath: string
       }
     }
     expect(applyBody.session.id).toBe(createBody.session.id)
@@ -598,6 +615,7 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         proposalStatus: string
+        migrationProposalSnapshotPath: string
         targetPaths: {
           persistenceIndexFile: string
         }
@@ -627,6 +645,9 @@ describe("generator session module", () => {
         persistenceIndexFile: "packages/persistence/src/index.ts",
       },
     })
+    expect(detailBody.sqlProposalHandoff.migrationProposalSnapshotPath).toBe(
+      createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+    )
 
     const auditLog = (await fixture.repository.listAuditLogs()).find(
       (entry) => entry.action === "preview_create",

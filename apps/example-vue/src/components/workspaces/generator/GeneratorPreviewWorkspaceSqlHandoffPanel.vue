@@ -9,6 +9,7 @@ interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   suggestedCommandsText: string
   commandsCopyLabel: string
+  migrationProposalSnapshotPathCopyLabel: string
   confirmationChecklistCopyLabel: string
   schemaDirCopyLabel: string
   drizzleDirCopyLabel: string
@@ -21,6 +22,7 @@ defineProps<GeneratorPreviewWorkspaceSqlHandoffPanelProps>()
 
 const emit = defineEmits<{
   (event: "copy-suggested-commands"): void
+  (event: "copy-migration-proposal-snapshot-path"): void
   (event: "copy-confirmation-checklist"): void
   (event: "copy-schema-dir", path: string): void
   (event: "copy-drizzle-dir", path: string): void
@@ -113,6 +115,22 @@ const emit = defineEmits<{
           </button>
         </div>
         <span>{{ sqlProposalHandoff.targetPaths.persistenceIndexFile }}</span>
+      </article>
+      <article>
+        <div class="generator-handoff-card-header">
+          <strong>{{ t("app.generatorPreview.migrationProposalSnapshotTitle") }}</strong>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="
+              sqlProposalHandoff.migrationProposalSnapshotPath.trim().length === 0
+            "
+            @click="emit('copy-migration-proposal-snapshot-path')"
+          >
+            {{ migrationProposalSnapshotPathCopyLabel }}
+          </button>
+        </div>
+        <span>{{ sqlProposalHandoff.migrationProposalSnapshotPath }}</span>
       </article>
     </div>
     <section class="generator-handoff-step-block">

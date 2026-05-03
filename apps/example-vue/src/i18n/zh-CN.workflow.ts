@@ -235,6 +235,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sqlProposalDrizzleSchemaTitle":
     "Drizzle Schema 片段",
   "app.generatorPreview.sqlHandoffTitle": "正式接入规范",
+  "app.generatorPreview.migrationProposalSnapshotTitle":
+    "迁移提案快照",
   "app.generatorPreview.sqlConfirmationTitle": "人工确认清单",
   "app.generatorPreview.sourceTitle": "生成源码",
   "app.generatorPreview.currentSourceTitle": "目标目录当前内容",

@@ -247,6 +247,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sqlProposalDrizzleSchemaTitle":
     "Drizzle schema snippet",
   "app.generatorPreview.sqlHandoffTitle": "Formal handoff guide",
+  "app.generatorPreview.migrationProposalSnapshotTitle":
+    "Migration proposal snapshot",
   "app.generatorPreview.sqlConfirmationTitle":
     "Manual confirmation checklist",
   "app.generatorPreview.sourceTitle": "Generated source",

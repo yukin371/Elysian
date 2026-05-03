@@ -233,10 +233,10 @@
 - `Track 1 / T1-4` 已落最小前端装配切片：`apps/example-vue` 的 generator workspace 当前已消费 `generator-session` 的 preview/apply DTO，主区展示文件计划与差异摘要，侧栏展示 session 元数据、SQL preview 与 apply evidence
 - `Track 1 / T1-5` 已落最小持久化切片：`packages/persistence` 新增 `generator_preview_sessions` 表与 CRUD helper，`apps/server` 在 `DATABASE_URL` 分支已切到持久化 repository，并通过 report path 回放 preview 详情与 apply 链路
 - `Track 2 / T2-1` 已落首个中性产物：`packages/generator` 当前可从 `ModuleSchema` 输出 `DatabaseChangePlan` create-table 计划，继续保持 SQL preview 在 generator、正式 migration proposal 在 persistence
-- `Track 2 / T2-2` 已落最小 proposal builder：`packages/persistence` 当前可基于 `DatabaseChangePlan` 形状输出 review-only SQL draft、Drizzle schema snippet 与风险标签，但仍不直接生成正式 migration 文件
+- `Track 2 / T2-2` 已落最小 proposal builder：`packages/persistence` 当前可基于 `DatabaseChangePlan` 形状输出 review-only SQL draft、Drizzle schema snippet 与风险标签；`generator-session` 也已开始落地 migration proposal snapshot 交接文件，但仍不直接生成正式 migration 文件
 - 已补 generator -> frontend 的最小静态契约入口：`packages/schema` 可选 `frontend` 元数据已进入 `ModuleSchema`，`packages/generator` 可生成 `*.frontend.ts` artifact，开始为后续替换 example-vue 手写注册做准备
 - 已完成一次功能矩阵复验：确认 generator session 列表 / 详情 / preview / staging apply 以及 auth refresh session 列表 / 单会话 revoke 均已落地，相关矩阵文档已按真实完成度回填
-- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff、冲突解释与人工确认清单；正式人工确认动作与 SQL proposal 到正式 migration 的人工接入规范仍待补齐
+- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff、冲突解释、人工确认清单与 migration proposal snapshot 交接文件；正式人工确认动作与 SQL proposal 到正式 migration 的人工接入规范仍待补齐
 - 完成 `Phase 1` 垂直切片闭环，打通 `schema -> server -> persistence -> generator -> frontend`
 - 用 Docker PostgreSQL + 浏览器 smoke 验证 customer create / update / delete 持久化链路
 - 固定仓库品牌与命名体系为 `Elysian` / `@elysian/*`

@@ -13,6 +13,9 @@ import {
   resolveTargetPresetOutputDir,
   writeGenerationPreviewReport,
 } from "@elysian/generator"
+import { resolveMigrationProposalFromChangePlan } from "@elysian/persistence"
+
+import { mkdir, writeFile } from "node:fs/promises"
 
 import { AppError } from "../../errors"
 import type { AuthIdentity } from "../auth"
@@ -274,6 +277,10 @@ export const createGeneratorSessionService = (
         options.reportRootDir ??
         join(outputDir, "reports", "generator-sessions")
       const reportPath = join(reportRootDir, `${sessionId}.preview.json`)
+      const migrationProposalSnapshotPath = join(
+        reportRootDir,
+        `${sessionId}.migration-proposal.json`,
+      )
       const report = await buildGenerationPreviewReport(schema, {
         outputDir,
         frontendTarget,
@@ -281,7 +288,26 @@ export const createGeneratorSessionService = (
         targetPreset,
       })
 
+      await mkdir(reportRootDir, { recursive: true })
       await writeGenerationPreviewReport(reportPath, report)
+      await writeFile(
+        migrationProposalSnapshotPath,
+        `${JSON.stringify(
+          {
+            generatedAt: createdAt,
+            migrationProposalResolution:
+              resolveMigrationProposalFromChangePlan(
+                report.databaseChangePlan,
+              ),
+            reportPath,
+            schemaName: schema.name,
+            sessionId,
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      )
 
       return repository.createPreviewSession({
         id: sessionId,

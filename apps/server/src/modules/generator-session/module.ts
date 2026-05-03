@@ -567,6 +567,9 @@ const buildConflictExplanations = (
 const resolveSqlProposal = (session: GeneratorPreviewSessionDetail) =>
   resolveMigrationProposalFromChangePlan(session.report.databaseChangePlan)
 
+const buildMigrationProposalSnapshotPath = (reportPath: string) =>
+  reportPath.replace(/\.preview\.json$/, ".migration-proposal.json")
+
 const buildSqlProposal = (session: GeneratorPreviewSessionDetail) => {
   return resolveSqlProposal(session).proposal
 }
@@ -614,6 +617,9 @@ const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
       buildSqlProposalConfirmationChecklist(sqlProposalResolution),
     unsupportedReason: sqlProposalResolution.unsupportedReason,
     sourceSchemaName: session.schemaName,
+    migrationProposalSnapshotPath: buildMigrationProposalSnapshotPath(
+      session.reportPath,
+    ),
   }
 }
 

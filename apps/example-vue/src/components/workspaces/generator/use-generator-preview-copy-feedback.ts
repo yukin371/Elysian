@@ -25,6 +25,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "manifestPath"
   | "managed"
   | "mergeStrategy"
+  | "migrationProposalSnapshotPath"
   | "outputDir"
   | "persistenceIndexFile"
   | "reportPath"
@@ -89,6 +90,7 @@ const createInitialCopyFeedback = (): Record<
   manifestPath: "idle",
   managed: "idle",
   mergeStrategy: "idle",
+  migrationProposalSnapshotPath: "idle",
   outputDir: "idle",
   persistenceIndexFile: "idle",
   reportPath: "idle",
