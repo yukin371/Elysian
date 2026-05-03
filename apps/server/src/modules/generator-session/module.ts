@@ -277,6 +277,21 @@ export const createGeneratorSessionModule = (
 
           const sqlProposalHandoff =
             await buildSqlProposalHandoff(sessionBeforeConfirm)
+          if (sqlProposalHandoff.proposalStatus !== "ready") {
+            throw new AppError({
+              code: "GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY",
+              message:
+                "Generator session SQL proposal is not ready for confirmation",
+              status: 409,
+              expose: true,
+              details: {
+                id: sessionBeforeConfirm.id,
+                proposalStatus: sqlProposalHandoff.proposalStatus,
+                unsupportedReason: sqlProposalHandoff.unsupportedReason,
+              },
+            })
+          }
+
           const session = await service.confirmPreviewSession({
             archivedSnapshotPath:
               sqlProposalHandoff.migrationProposalSnapshotRecovery
