@@ -312,13 +312,11 @@ describe("createServerApp system admin data", () => {
 
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.SETTING_KEY_CONFLICT,
-        message: "Setting key already exists",
-        status: 409,
-        details: {
-          key: "platform.brand_name",
-        },
+      code: errorCodes.SETTING_KEY_CONFLICT,
+      message: "Setting key already exists",
+      status: 409,
+      details: {
+        key: "platform.brand_name",
       },
     })
   })

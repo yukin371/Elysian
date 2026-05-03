@@ -848,11 +848,9 @@ describe("generator session module lifecycle", () => {
 
     expect(applyResponse.status).toBe(409)
     const errorBody = (await applyResponse.json()) as {
-      error: {
-        code: string
-      }
+      code: string
     }
-    expect(errorBody.error.code).toBe(
+    expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_REQUIRED,
     )
   })

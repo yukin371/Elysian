@@ -183,13 +183,11 @@ describe("createServerApp operation logs", () => {
 
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.OPERATION_LOG_NOT_FOUND,
-        message: "Operation log not found",
-        status: 404,
-        details: {
-          id: "missing_log",
-        },
+      code: errorCodes.OPERATION_LOG_NOT_FOUND,
+      message: "Operation log not found",
+      status: 404,
+      details: {
+        id: "missing_log",
       },
     })
   })

@@ -162,13 +162,11 @@ describe("createServerApp", () => {
 
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.CUSTOMER_NOT_FOUND,
-        message: "Customer not found",
-        status: 404,
-        details: {
-          id: "missing",
-        },
+      code: errorCodes.CUSTOMER_NOT_FOUND,
+      message: "Customer not found",
+      status: 404,
+      details: {
+        id: "missing",
       },
     })
   })

@@ -105,11 +105,9 @@ describe("generator session module guards", () => {
 
     expect(applyResponse.status).toBe(409)
     const errorBody = (await applyResponse.json()) as {
-      error: {
-        code: string
-      }
+      code: string
     }
-    expect(errorBody.error.code).toBe(errorCodes.GENERATOR_SESSION_STALE)
+    expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_STALE)
   })
 
   it("blocks apply for rejected generator preview sessions", async () => {
@@ -185,18 +183,16 @@ describe("generator session module guards", () => {
     )
     expect(confirmResponse.status).toBe(409)
     const confirmErrorBody = (await confirmResponse.json()) as {
-      error: {
-        code: string
-        details: {
-          id: string
-          status: string
-        }
+      code: string
+      details: {
+        id: string
+        status: string
       }
     }
-    expect(confirmErrorBody.error.code).toBe(
+    expect(confirmErrorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_NOT_READY,
     )
-    expect(confirmErrorBody.error.details).toMatchObject({
+    expect(confirmErrorBody.details).toMatchObject({
       id: createBody.session.id,
       status: "rejected",
     })
@@ -213,11 +209,9 @@ describe("generator session module guards", () => {
 
     expect(applyResponse.status).toBe(409)
     const errorBody = (await applyResponse.json()) as {
-      error: {
-        code: string
-      }
+      code: string
     }
-    expect(errorBody.error.code).toBe(errorCodes.GENERATOR_SESSION_REJECTED)
+    expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_REJECTED)
   })
 
   it("blocks confirmation when the sql proposal is unsupported", async () => {
@@ -290,18 +284,16 @@ describe("generator session module guards", () => {
 
     expect(confirmResponse.status).toBe(409)
     const errorBody = (await confirmResponse.json()) as {
-      error: {
-        code: string
-        details: {
-          proposalStatus: string
-          unsupportedReason: string
-        }
+      code: string
+      details: {
+        proposalStatus: string
+        unsupportedReason: string
       }
     }
-    expect(errorBody.error.code).toBe(
+    expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY,
     )
-    expect(errorBody.error.details).toMatchObject({
+    expect(errorBody.details).toMatchObject({
       proposalStatus: "unsupported",
       unsupportedReason: "Only single create-table change plans are supported.",
     })
@@ -378,18 +370,16 @@ describe("generator session module guards", () => {
     )
     expect(confirmResponse.status).toBe(409)
     const errorBody = (await confirmResponse.json()) as {
-      error: {
-        code: string
-        details: {
-          displayedSnapshotPath: string
-          expectedSnapshotPath: string
-        }
+      code: string
+      details: {
+        displayedSnapshotPath: string
+        expectedSnapshotPath: string
       }
     }
-    expect(errorBody.error.code).toBe(
+    expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH,
     )
-    expect(errorBody.error.details).toMatchObject({
+    expect(errorBody.details).toMatchObject({
       displayedSnapshotPath: `${createBody.sqlProposalHandoff.migrationProposalSnapshotPath}.stale`,
       expectedSnapshotPath:
         createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
@@ -496,16 +486,14 @@ describe("generator session module guards", () => {
 
     expect(secondApplyResponse.status).toBe(409)
     const errorBody = (await secondApplyResponse.json()) as {
-      error: {
-        code: string
-        details: {
-          id: string
-          status: string
-        }
+      code: string
+      details: {
+        id: string
+        status: string
       }
     }
-    expect(errorBody.error.code).toBe(errorCodes.GENERATOR_SESSION_NOT_READY)
-    expect(errorBody.error.details).toMatchObject({
+    expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_NOT_READY)
+    expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
       status: "applied",
     })
@@ -618,18 +606,16 @@ describe("generator session module guards", () => {
 
     expect(secondConfirmResponse.status).toBe(409)
     const errorBody = (await secondConfirmResponse.json()) as {
-      error: {
-        code: string
-        details: {
-          id: string
-          status: string
-        }
+      code: string
+      details: {
+        id: string
+        status: string
       }
     }
-    expect(errorBody.error.code).toBe(
+    expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_NOT_READY,
     )
-    expect(errorBody.error.details).toMatchObject({
+    expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
       status: "applied",
     })
@@ -741,18 +727,16 @@ describe("generator session module guards", () => {
 
     expect(secondReviewResponse.status).toBe(409)
     const errorBody = (await secondReviewResponse.json()) as {
-      error: {
-        code: string
-        details: {
-          id: string
-          status: string
-        }
+      code: string
+      details: {
+        id: string
+        status: string
       }
     }
-    expect(errorBody.error.code).toBe(
+    expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING,
     )
-    expect(errorBody.error.details).toMatchObject({
+    expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
       status: "applied",
     })
@@ -825,18 +809,16 @@ describe("generator session module guards", () => {
 
     expect(secondReviewResponse.status).toBe(409)
     const errorBody = (await secondReviewResponse.json()) as {
-      error: {
-        code: string
-        details: {
-          id: string
-          status: string
-        }
+      code: string
+      details: {
+        id: string
+        status: string
       }
     }
-    expect(errorBody.error.code).toBe(
+    expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING,
     )
-    expect(errorBody.error.details).toMatchObject({
+    expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
       status: "ready",
     })

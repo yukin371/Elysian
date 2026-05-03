@@ -40,6 +40,10 @@ export const clearAccessToken = () => {
 const toRequestError = async (response: Response) => {
   try {
     const payload = (await response.json()) as {
+      code?: number | string
+      message?: string
+      status?: number
+      details?: Record<string, unknown>
       error?: {
         code?: number | string
         message?: string
@@ -47,15 +51,16 @@ const toRequestError = async (response: Response) => {
         details?: Record<string, unknown>
       }
     }
-    const code = resolveApiErrorCode(payload.error?.code)
+    const envelope = payload.error ?? payload
+    const code = resolveApiErrorCode(envelope.code)
     const message =
-      payload.error?.message ?? `Request failed with status ${response.status}`
+      envelope.message ?? `Request failed with status ${response.status}`
 
     return new ApiError(
       message,
-      payload.error?.status ?? response.status,
+      envelope.status ?? response.status,
       code,
-      payload.error?.details,
+      envelope.details,
     )
   } catch {
     return new ApiError(

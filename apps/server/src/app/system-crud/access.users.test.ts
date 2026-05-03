@@ -351,13 +351,11 @@ describe("createServerApp system user access", () => {
 
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.USER_USERNAME_CONFLICT,
-        message: "Username already exists",
-        status: 409,
-        details: {
-          username: "operator",
-        },
+      code: errorCodes.USER_USERNAME_CONFLICT,
+      message: "Username already exists",
+      status: 409,
+      details: {
+        username: "operator",
       },
     })
   })

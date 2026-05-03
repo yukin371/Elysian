@@ -518,16 +518,14 @@ describe("generator session module detail responses", () => {
     expect(response.status).toBe(500)
 
     const body = (await response.json()) as {
-      error: {
-        code: string
-        details?: {
-          reportPath?: string
-        }
+      code: string
+      details?: {
+        reportPath?: string
       }
     }
-    expect(body.error.code).toBe(
+    expect(body.code).toBe(
       errorCodes.GENERATOR_SESSION_REPORT_READ_FAILED,
     )
-    expect(body.error.details?.reportPath).toBe(session.reportPath)
+    expect(body.details?.reportPath).toBe(session.reportPath)
   })
 })

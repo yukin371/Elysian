@@ -466,13 +466,11 @@ describe("createServerApp system admin data", () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.DICTIONARY_ITEM_TYPE_INVALID,
-        message: "Dictionary item type does not exist",
-        status: 400,
-        details: {
-          typeId: "missing-type",
-        },
+      code: errorCodes.DICTIONARY_ITEM_TYPE_INVALID,
+      message: "Dictionary item type does not exist",
+      status: 400,
+      details: {
+        typeId: "missing-type",
       },
     })
   })

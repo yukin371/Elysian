@@ -327,13 +327,11 @@ describe("createServerApp system organization", () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.DEPARTMENT_PARENT_INVALID,
-        message: "Department parent does not exist",
-        status: 400,
-        details: {
-          parentId: "missing-parent",
-        },
+      code: errorCodes.DEPARTMENT_PARENT_INVALID,
+      message: "Department parent does not exist",
+      status: 400,
+      details: {
+        parentId: "missing-parent",
       },
     })
   })
@@ -385,14 +383,12 @@ describe("createServerApp system organization", () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.DEPARTMENT_PARENT_INVALID,
-        message: "Department parent would create a cycle",
-        status: 400,
-        details: {
-          id: "department_root_1",
-          parentId: "department_ops_1",
-        },
+      code: errorCodes.DEPARTMENT_PARENT_INVALID,
+      message: "Department parent would create a cycle",
+      status: 400,
+      details: {
+        id: "department_root_1",
+        parentId: "department_ops_1",
       },
     })
   })
@@ -623,13 +619,11 @@ describe("createServerApp system organization", () => {
 
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.POST_CODE_CONFLICT,
-        message: "Post code already exists",
-        status: 409,
-        details: {
-          code: "ops-lead",
-        },
+      code: errorCodes.POST_CODE_CONFLICT,
+      message: "Post code already exists",
+      status: 409,
+      details: {
+        code: "ops-lead",
       },
     })
   })

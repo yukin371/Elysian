@@ -371,14 +371,12 @@ describe("createServerApp system role access", () => {
 
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.ROLE_SYSTEM_IMMUTABLE,
-        message: "System role status cannot be changed",
-        status: 409,
-        details: {
-          id: "role_admin_1",
-          code: "admin",
-        },
+      code: errorCodes.ROLE_SYSTEM_IMMUTABLE,
+      message: "System role status cannot be changed",
+      status: 409,
+      details: {
+        id: "role_admin_1",
+        code: "admin",
       },
     })
   })

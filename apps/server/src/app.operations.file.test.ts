@@ -252,11 +252,9 @@ describe("createServerApp files", () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.FILE_UPLOAD_REQUIRED,
-        message: "File upload is required",
-        status: 400,
-      },
+      code: errorCodes.FILE_UPLOAD_REQUIRED,
+      message: "File upload is required",
+      status: 400,
     })
   })
 

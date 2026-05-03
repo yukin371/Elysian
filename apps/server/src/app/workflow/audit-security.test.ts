@@ -347,13 +347,11 @@ describe("createServerApp workflow audit and security", () => {
 
     expect(todoResponse.status).toBe(403)
     expect(await todoResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_PERMISSION_DENIED,
-        message: "Permission denied",
-        status: 403,
-        details: {
-          permissionCode: "workflow:task:list",
-        },
+      code: errorCodes.AUTH_PERMISSION_DENIED,
+      message: "Permission denied",
+      status: 403,
+      details: {
+        permissionCode: "workflow:task:list",
       },
     })
 
@@ -367,13 +365,11 @@ describe("createServerApp workflow audit and security", () => {
 
     expect(doneResponse.status).toBe(403)
     expect(await doneResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_PERMISSION_DENIED,
-        message: "Permission denied",
-        status: 403,
-        details: {
-          permissionCode: "workflow:task:list",
-        },
+      code: errorCodes.AUTH_PERMISSION_DENIED,
+      message: "Permission denied",
+      status: 403,
+      details: {
+        permissionCode: "workflow:task:list",
       },
     })
   })
@@ -476,13 +472,11 @@ describe("createServerApp workflow audit and security", () => {
 
     expect(claimResponse.status).toBe(403)
     expect(await claimResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_PERMISSION_DENIED,
-        message: "Permission denied",
-        status: 403,
-        details: {
-          permissionCode: "workflow:task:claim",
-        },
+      code: errorCodes.AUTH_PERMISSION_DENIED,
+      message: "Permission denied",
+      status: 403,
+      details: {
+        permissionCode: "workflow:task:claim",
       },
     })
 
@@ -501,13 +495,11 @@ describe("createServerApp workflow audit and security", () => {
 
     expect(completeResponse.status).toBe(403)
     expect(await completeResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_PERMISSION_DENIED,
-        message: "Permission denied",
-        status: 403,
-        details: {
-          permissionCode: "workflow:task:complete",
-        },
+      code: errorCodes.AUTH_PERMISSION_DENIED,
+      message: "Permission denied",
+      status: 403,
+      details: {
+        permissionCode: "workflow:task:complete",
       },
     })
 
@@ -525,13 +517,11 @@ describe("createServerApp workflow audit and security", () => {
 
     expect(cancelResponse.status).toBe(403)
     expect(await cancelResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_PERMISSION_DENIED,
-        message: "Permission denied",
-        status: 403,
-        details: {
-          permissionCode: "workflow:instance:cancel",
-        },
+      code: errorCodes.AUTH_PERMISSION_DENIED,
+      message: "Permission denied",
+      status: 403,
+      details: {
+        permissionCode: "workflow:instance:cancel",
       },
     })
   })
@@ -714,13 +704,11 @@ describe("createServerApp workflow audit and security", () => {
 
     expect(crossTenantGetResponse.status).toBe(404)
     expect(await crossTenantGetResponse.json()).toEqual({
-      error: {
-        code: errorCodes.WORKFLOW_INSTANCE_NOT_FOUND,
-        message: "Workflow instance not found",
-        status: 404,
-        details: {
-          id: tenantAlphaInstance.id,
-        },
+      code: errorCodes.WORKFLOW_INSTANCE_NOT_FOUND,
+      message: "Workflow instance not found",
+      status: 404,
+      details: {
+        id: tenantAlphaInstance.id,
       },
     })
 

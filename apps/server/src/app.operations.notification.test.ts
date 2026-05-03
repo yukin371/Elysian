@@ -387,13 +387,11 @@ describe("createServerApp notifications", () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.NOTIFICATION_RECIPIENT_INVALID,
-        message: "Notification recipient does not exist",
-        status: 400,
-        details: {
-          recipientUserId: "missing_user",
-        },
+      code: errorCodes.NOTIFICATION_RECIPIENT_INVALID,
+      message: "Notification recipient does not exist",
+      status: 400,
+      details: {
+        recipientUserId: "missing_user",
       },
     })
   })

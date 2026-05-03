@@ -360,13 +360,11 @@ describe("createServerApp system menu access", () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.MENU_PARENT_INVALID,
-        message: "Menu parent does not exist",
-        status: 400,
-        details: {
-          parentId: "missing-parent",
-        },
+      code: errorCodes.MENU_PARENT_INVALID,
+      message: "Menu parent does not exist",
+      status: 400,
+      details: {
+        parentId: "missing-parent",
       },
     })
   })
@@ -419,14 +417,12 @@ describe("createServerApp system menu access", () => {
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.MENU_PARENT_INVALID,
-        message: "Menu parent would create a cycle",
-        status: 400,
-        details: {
-          id: "menu_system_root_1",
-          parentId: "menu_system_users_1",
-        },
+      code: errorCodes.MENU_PARENT_INVALID,
+      message: "Menu parent would create a cycle",
+      status: 400,
+      details: {
+        id: "menu_system_root_1",
+        parentId: "menu_system_users_1",
       },
     })
   })

@@ -6,12 +6,10 @@ import {
 } from "./errors/registry"
 
 export interface ErrorResponse {
-  error: {
-    code: AppErrorCode
-    message: string
-    status: number
-    details?: Record<string, unknown>
-  }
+  code: AppErrorCode
+  message: string
+  status: number
+  details?: Record<string, unknown>
 }
 
 interface AppErrorOptions {
@@ -77,14 +75,10 @@ const normalizeError = (
     return {
       status: error.status,
       body: {
-        error: {
-          code: error.code,
-          message: error.message,
-          status: error.status,
-          details: shouldExposeDetails(config, error)
-            ? error.details
-            : undefined,
-        },
+        code: error.code,
+        message: error.message,
+        status: error.status,
+        details: shouldExposeDetails(config, error) ? error.details : undefined,
       },
     }
   }
@@ -92,14 +86,12 @@ const normalizeError = (
   return {
     status: fallbackStatus,
     body: {
-      error: {
-        code: errorCodes.INTERNAL_ERROR,
-        message:
-          config.env === "production"
-            ? "Internal server error"
-            : unknownErrorMessage(error),
-        status: fallbackStatus,
-      },
+      code: errorCodes.INTERNAL_ERROR,
+      message:
+        config.env === "production"
+          ? "Internal server error"
+          : unknownErrorMessage(error),
+      status: fallbackStatus,
     },
   }
 }

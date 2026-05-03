@@ -172,13 +172,11 @@ describe("createServerApp auth sessions", () => {
 
     expect(refreshResponse.status).toBe(401)
     expect(await refreshResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_REFRESH_TOKEN_EXPIRED,
-        message: "Refresh token is expired or revoked",
-        status: 401,
-        details: {
-          sessionId: currentSession?.id,
-        },
+      code: errorCodes.AUTH_REFRESH_TOKEN_EXPIRED,
+      message: "Refresh token is expired or revoked",
+      status: 401,
+      details: {
+        sessionId: currentSession?.id,
       },
     })
 
@@ -230,13 +228,11 @@ describe("createServerApp auth sessions", () => {
 
     expect(revokeResponse.status).toBe(404)
     expect(await revokeResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_SESSION_NOT_FOUND,
-        message: "Session not found",
-        status: 404,
-        details: {
-          sessionId: unknownSessionId,
-        },
+      code: errorCodes.AUTH_SESSION_NOT_FOUND,
+      message: "Session not found",
+      status: 404,
+      details: {
+        sessionId: unknownSessionId,
       },
     })
 
@@ -291,13 +287,11 @@ describe("createServerApp auth sessions", () => {
 
     expect(refreshResponse.status).toBe(401)
     expect(await refreshResponse.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_REFRESH_TOKEN_EXPIRED,
-        message: "Refresh token is expired or revoked",
-        status: 401,
-        details: {
-          sessionId: expect.any(String),
-        },
+      code: errorCodes.AUTH_REFRESH_TOKEN_EXPIRED,
+      message: "Refresh token is expired or revoked",
+      status: 401,
+      details: {
+        sessionId: expect.any(String),
       },
     })
   })
@@ -322,13 +316,11 @@ describe("createServerApp auth sessions", () => {
 
     expect(response.status).toBe(401)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_INVALID_CREDENTIALS,
-        message: "Invalid username or password",
-        status: 401,
-        details: {
-          username: "admin",
-        },
+      code: errorCodes.AUTH_INVALID_CREDENTIALS,
+      message: "Invalid username or password",
+      status: 401,
+      details: {
+        username: "admin",
       },
     })
   })

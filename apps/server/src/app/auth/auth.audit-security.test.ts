@@ -203,26 +203,22 @@ describe("createServerApp auth audit and security", () => {
     expect(secondFailureResponse.status).toBe(423)
 
     const secondFailureBody = (await secondFailureResponse.json()) as {
-      error: {
-        code: string
-        message: string
-        status: number
-        details: {
-          username: string
-          lockedUntil: string
-        }
+      code: number
+      message: string
+      status: number
+      details: {
+        username: string
+        lockedUntil: string
       }
     }
 
     expect(secondFailureBody).toEqual({
-      error: {
-        code: errorCodes.AUTH_LOGIN_LOCKED,
-        message: "Login is temporarily locked",
-        status: 423,
-        details: {
-          username: "admin",
-          lockedUntil: expect.any(String),
-        },
+      code: errorCodes.AUTH_LOGIN_LOCKED,
+      message: "Login is temporarily locked",
+      status: 423,
+      details: {
+        username: "admin",
+        lockedUntil: expect.any(String),
       },
     })
 
@@ -230,7 +226,7 @@ describe("createServerApp auth audit and security", () => {
     expect(lockedUser).not.toBeNull()
     expect(lockedUser?.loginFailureCount).toBe(2)
     expect(lockedUser?.loginLockedUntil).toBe(
-      secondFailureBody.error.details.lockedUntil,
+      secondFailureBody.details.lockedUntil,
     )
 
     const lockedSuccessResponse = await loginWithCredentials(app, {

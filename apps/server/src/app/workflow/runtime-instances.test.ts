@@ -542,14 +542,12 @@ describe("createServerApp workflow runtime instances", () => {
 
     expect(peerCompleteResponse.status).toBe(403)
     expect(await peerCompleteResponse.json()).toEqual({
-      error: {
-        code: errorCodes.WORKFLOW_TASK_ASSIGNEE_MISMATCH,
-        message: "Workflow task is assigned to another user",
-        status: 403,
-        details: {
-          id: taskId,
-          assignee: `user:${claimerFixture.userId}`,
-        },
+      code: errorCodes.WORKFLOW_TASK_ASSIGNEE_MISMATCH,
+      message: "Workflow task is assigned to another user",
+      status: 403,
+      details: {
+        id: taskId,
+        assignee: `user:${claimerFixture.userId}`,
       },
     })
 

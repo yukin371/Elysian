@@ -33,11 +33,9 @@ describe("createServerApp customer auth", () => {
 
     expect(response.status).toBe(401)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_ACCESS_TOKEN_REQUIRED,
-        message: "Access token is required",
-        status: 401,
-      },
+      code: errorCodes.AUTH_ACCESS_TOKEN_REQUIRED,
+      message: "Access token is required",
+      status: 401,
     })
   })
 
@@ -79,13 +77,11 @@ describe("createServerApp customer auth", () => {
 
     expect(response.status).toBe(403)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.AUTH_PERMISSION_DENIED,
-        message: "Permission denied",
-        status: 403,
-        details: {
-          permissionCode: "customer:customer:list",
-        },
+      code: errorCodes.AUTH_PERMISSION_DENIED,
+      message: "Permission denied",
+      status: 403,
+      details: {
+        permissionCode: "customer:customer:list",
       },
     })
   })

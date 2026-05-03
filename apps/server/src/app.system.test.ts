@@ -140,14 +140,12 @@ describe("createServerApp", () => {
     expect(first.headers.get("x-ratelimit-reset")).toEqual(expect.any(String))
     expect(second.status).toBe(429)
     expect(await second.json()).toEqual({
-      error: {
-        code: errorCodes.RATE_LIMIT_EXCEEDED,
-        message: "Too many requests",
-        status: 429,
-        details: {
-          limit: 1,
-          windowMs: 60_000,
-        },
+      code: errorCodes.RATE_LIMIT_EXCEEDED,
+      message: "Too many requests",
+      status: 429,
+      details: {
+        limit: 1,
+        windowMs: 60_000,
       },
     })
     expect(second.headers.get("retry-after")).toBe("60")
@@ -177,14 +175,12 @@ describe("createServerApp", () => {
 
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.ROUTE_NOT_FOUND,
-        message: "Route not found",
-        status: 404,
-        details: {
-          method: "GET",
-          path: "/missing",
-        },
+      code: errorCodes.ROUTE_NOT_FOUND,
+      message: "Route not found",
+      status: 404,
+      details: {
+        method: "GET",
+        path: "/missing",
       },
     })
   })
@@ -195,14 +191,12 @@ describe("createServerApp", () => {
 
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.ROUTE_NOT_FOUND,
-        message: "Route not found",
-        status: 404,
-        details: {
-          method: "GET",
-          path: "/health",
-        },
+      code: errorCodes.ROUTE_NOT_FOUND,
+      message: "Route not found",
+      status: 404,
+      details: {
+        method: "GET",
+        path: "/health",
       },
     })
   })
@@ -229,13 +223,11 @@ describe("createServerApp", () => {
 
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.MODULE_FAILURE,
-        message: "Module failed",
-        status: 409,
-        details: {
-          reason: "test",
-        },
+      code: errorCodes.MODULE_FAILURE,
+      message: "Module failed",
+      status: 409,
+      details: {
+        reason: "test",
       },
     })
   })

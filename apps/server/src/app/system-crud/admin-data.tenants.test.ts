@@ -215,11 +215,9 @@ describe("createServerApp system admin data", () => {
 
     expect(response.status).toBe(403)
     expect(await response.json()).toEqual({
-      error: {
-        code: errorCodes.TENANT_SUPER_ADMIN_REQUIRED,
-        message: "Tenant management requires a super admin",
-        status: 403,
-      },
+      code: errorCodes.TENANT_SUPER_ADMIN_REQUIRED,
+      message: "Tenant management requires a super admin",
+      status: 403,
     })
   })
 })
