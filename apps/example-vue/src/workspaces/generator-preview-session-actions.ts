@@ -83,7 +83,8 @@ export const createGeneratorPreviewSessionActions = (
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message.includes("GENERATOR_SESSION_STALE")
+        (error.message.includes("GENERATOR_SESSION_STALE") ||
+          error.message.includes("GENERATOR_SESSION_APPLY_CONFLICT"))
       ) {
         if (await options.refreshPreviewAfterApplyStale()) {
           options.setErrorMessage(error.message)
