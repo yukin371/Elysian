@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { GeneratorPreviewFileCard, GeneratorPreviewTranslation } from "./types"
+import type {
+  GeneratorPreviewFileCard,
+  GeneratorPreviewTranslation,
+} from "./types"
 
 interface GeneratorPreviewWorkspaceSummaryPanelProps {
   t: GeneratorPreviewTranslation
@@ -10,6 +13,8 @@ interface GeneratorPreviewWorkspaceSummaryPanelProps {
   selectedSourceLineCount: number
   selectedActionLabel: string
   selectedChangeLabel: string
+  recoveryNoteText: string | null
+  recoveryNoteTone: "info" | "warning" | null
   schemaNameCopyLabel: string
   frontendTargetCopyLabel: string
   statusCopyLabel: string
@@ -35,9 +40,7 @@ const emit = defineEmits<{
 <template>
   <p class="enterprise-eyebrow">{{ t("app.generatorPreview.detailEyebrow") }}</p>
   <h3 class="enterprise-heading">
-    {{
-      selectedFile?.path ?? t("app.generatorPreview.detailEmptyTitle")
-    }}
+    {{ selectedFile?.path ?? t("app.generatorPreview.detailEmptyTitle") }}
   </h3>
   <p class="enterprise-copy">
     {{
@@ -45,6 +48,19 @@ const emit = defineEmits<{
         ? t("app.generatorPreview.detailDescription")
         : t("app.generatorPreview.detailEmptyDescription")
     }}
+  </p>
+
+  <p
+    v-if="recoveryNoteText"
+    :class="[
+      'enterprise-message',
+      recoveryNoteTone === 'warning'
+        ? 'enterprise-message-warning'
+        : 'enterprise-message-info',
+      'mt-5',
+    ]"
+  >
+    {{ recoveryNoteText }}
   </p>
 
   <div class="enterprise-metadata mt-5">

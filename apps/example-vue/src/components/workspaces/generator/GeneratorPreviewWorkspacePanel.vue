@@ -1,32 +1,31 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount } from "vue"
 
-import type {
-  GeneratorPreviewApplyEvidence,
-  GeneratorPreviewDiffSummary,
-  GeneratorPreviewFileCard,
-  GeneratorPreviewReviewEvidence,
-  GeneratorPreviewSessionRecord,
-  GeneratorPreviewSqlProposal,
-  GeneratorPreviewSqlProposalHandoff,
-  GeneratorPreviewSqlPreview,
-  GeneratorPreviewTranslation,
-} from "./types"
 import GeneratorPreviewWorkspaceApplyPanel from "./GeneratorPreviewWorkspaceApplyPanel.vue"
 import GeneratorPreviewWorkspaceDiffSummaryPanel from "./GeneratorPreviewWorkspaceDiffSummaryPanel.vue"
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
 import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
 import GeneratorPreviewWorkspaceReviewPanel from "./GeneratorPreviewWorkspaceReviewPanel.vue"
 import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
+import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import GeneratorPreviewWorkspaceSqlHandoffPanel from "./GeneratorPreviewWorkspaceSqlHandoffPanel.vue"
 import GeneratorPreviewWorkspaceSqlProposalPanel from "./GeneratorPreviewWorkspaceSqlProposalPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
-import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
-import {
-  joinGeneratorPreviewSuggestedCommands,
-} from "./generator-preview-handoff"
+import { joinGeneratorPreviewSuggestedCommands } from "./generator-preview-handoff"
+import { resolveGeneratorPreviewRecoveryNote } from "./generator-preview-recovery-note"
+import type {
+  GeneratorPreviewApplyEvidence,
+  GeneratorPreviewCopyFeedbackKey,
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewFileCard,
+  GeneratorPreviewReviewEvidence,
+  GeneratorPreviewSessionRecord,
+  GeneratorPreviewSqlPreview,
+  GeneratorPreviewSqlProposal,
+  GeneratorPreviewSqlProposalHandoff,
+  GeneratorPreviewTranslation,
+} from "./types"
 import { useGeneratorPreviewCopyFeedback } from "./use-generator-preview-copy-feedback"
-import type { GeneratorPreviewCopyFeedbackKey } from "./use-generator-preview-copy-feedback"
 
 interface GeneratorPreviewWorkspacePanelProps {
   t: GeneratorPreviewTranslation
@@ -190,6 +189,15 @@ const selectedDiffStats = computed(
     },
 )
 
+const recoveryNote = computed(() =>
+  props.sqlProposalHandoff
+    ? resolveGeneratorPreviewRecoveryNote(
+        props.t,
+        props.sqlProposalHandoff.migrationProposalSnapshotRecovery,
+      )
+    : null,
+)
+
 const suggestedCommandsText = computed(() =>
   props.sqlProposalHandoff
     ? joinGeneratorPreviewSuggestedCommands(
@@ -199,9 +207,7 @@ const suggestedCommandsText = computed(() =>
 )
 
 const sqlHandoffStepsText = computed(() =>
-  props.sqlProposalHandoff
-    ? props.sqlProposalHandoff.steps.join("\n")
-    : "",
+  props.sqlProposalHandoff ? props.sqlProposalHandoff.steps.join("\n") : "",
 )
 
 const sqlHandoffConfirmationChecklistText = computed(() =>
@@ -237,17 +243,11 @@ const copySqlDraft = async () =>
   copyPanelValue("sqlDraft", props.sqlProposal?.sqlDraft)
 
 const copyDrizzleImportSnippet = async () => {
-  await copyPanelValue(
-    "drizzleImport",
-    props.sqlProposal?.drizzleImportSnippet,
-  )
+  await copyPanelValue("drizzleImport", props.sqlProposal?.drizzleImportSnippet)
 }
 
 const copyDrizzleSchemaSnippet = async () => {
-  await copyPanelValue(
-    "drizzleSchema",
-    props.sqlProposal?.drizzleSchemaSnippet,
-  )
+  await copyPanelValue("drizzleSchema", props.sqlProposal?.drizzleSchemaSnippet)
 }
 
 const copySelectedAbsolutePath = async () =>
@@ -260,28 +260,20 @@ const copyGeneratedSource = async () =>
   copyPanelValue("generatedSource", props.selectedFile?.contents)
 
 const copyCurrentSource = async () => {
-  await copyPanelValue(
-    "currentSource",
-    props.selectedFile?.currentContents,
-  )
+  await copyPanelValue("currentSource", props.selectedFile?.currentContents)
 }
 
 const copySqlPreview = async () =>
   copyPanelValue("sqlPreview", props.sqlPreview?.contents)
 
 const copyHandoffTargetPath = async (
-  key:
-    | "schemaDir"
-    | "drizzleDir"
-    | "schemaIndexFile"
-    | "persistenceIndexFile",
+  key: "schemaDir" | "drizzleDir" | "schemaIndexFile" | "persistenceIndexFile",
   path: string,
 ) => {
   await copyPanelValue(key, path)
 }
 
-const copySessionId = async () =>
-  copyPanelValue("sessionId", props.session?.id)
+const copySessionId = async () => copyPanelValue("sessionId", props.session?.id)
 
 const copyManifestPath = async () => {
   await copyPanelValue("manifestPath", props.applyEvidence?.manifestPath)
@@ -433,7 +425,6 @@ const copyPlannedReason = async () =>
   copyPanelValue("plannedReason", props.selectedFile?.plannedReason)
 
 onBeforeUnmount(disposeCopyFeedbackTimers)
-
 </script>
 
 <template>
@@ -454,6 +445,8 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
       :merge-strategy-copy-label="resolveSnippetCopyLabel('mergeStrategy')"
       :file-action-copy-label="resolveSnippetCopyLabel('fileAction')"
       :changed-copy-label="resolveSnippetCopyLabel('changed')"
+      :recovery-note-text="recoveryNote?.text ?? null"
+      :recovery-note-tone="recoveryNote?.tone ?? null"
       @copy-schema-name="copySelectedSchemaName"
       @copy-frontend-target="copySelectedFrontendTarget"
       @copy-status="copySessionStatus"

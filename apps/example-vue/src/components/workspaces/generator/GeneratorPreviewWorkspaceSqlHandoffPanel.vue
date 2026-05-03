@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { computed } from "vue"
 import type {
   GeneratorPreviewMigrationProposalSnapshot,
   GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewTranslation,
 } from "./types"
-import { resolveGeneratorPreviewRecoveryNote } from "./generator-preview-recovery-note"
 
 interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   t: GeneratorPreviewTranslation
@@ -47,12 +45,6 @@ const emit = defineEmits<{
   (event: "copy-persistence-index-file", path: string): void
   (event: "copy-steps"): void
 }>()
-
-const recoveryNote = computed(() =>
-  resolveGeneratorPreviewRecoveryNote(
-    sqlProposalHandoff.migrationProposalSnapshotRecovery,
-  ),
-)
 </script>
 
 <template>
@@ -199,17 +191,6 @@ const recoveryNote = computed(() =>
       <p class="generator-status-note">
         {{ migrationProposalSnapshot.snapshotPath }}
       </p>
-      <p
-        v-if="recoveryNote"
-        :class="[
-          'enterprise-message',
-          recoveryNote?.tone === 'warning'
-            ? 'enterprise-message-warning'
-            : 'enterprise-message-info',
-        ]"
-      >
-        {{ recoveryNote?.text }}
-      </p>
     </section>
     <section class="generator-handoff-step-block">
       <div class="generator-handoff-card-header">
@@ -224,10 +205,7 @@ const recoveryNote = computed(() =>
         </button>
       </div>
       <ol class="generator-handoff-steps">
-        <li
-          v-for="item in sqlProposalHandoff.confirmationChecklist"
-          :key="item"
-        >
+        <li v-for="item in sqlProposalHandoff.confirmationChecklist" :key="item">
           {{ item }}
         </li>
       </ol>
@@ -245,17 +223,12 @@ const recoveryNote = computed(() =>
         </button>
       </div>
       <ol class="generator-handoff-steps">
-        <li
-          v-for="step in sqlProposalHandoff.steps"
-          :key="step"
-        >
+        <li v-for="step in sqlProposalHandoff.steps" :key="step">
           {{ step }}
         </li>
       </ol>
     </section>
-    <pre
-      class="generator-code-block"
-    ><code>{{ suggestedCommandsText }}</code></pre>
+    <pre class="generator-code-block"><code>{{ suggestedCommandsText }}</code></pre>
   </section>
 </template>
 

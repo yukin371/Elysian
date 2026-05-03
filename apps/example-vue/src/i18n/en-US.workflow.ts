@@ -214,7 +214,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.next.apply": "Next: apply to staging",
   "app.generatorPreview.next.confirmApply": "Next: confirm apply or cancel",
   "app.generatorPreview.next.applying": "Next: wait for apply",
-  "app.generatorPreview.next.resolveConflicts": "Next: resolve blocking conflicts",
+  "app.generatorPreview.next.resolveConflicts":
+    "Next: resolve blocking conflicts",
   "app.generatorPreview.next.done": "Next: complete",
   "app.generatorPreview.next.wait": "Next: wait for status update",
   "app.generatorPreview.reviewCommentLabel": "Review comment",
@@ -249,8 +250,11 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sqlHandoffTitle": "Formal handoff guide",
   "app.generatorPreview.migrationProposalSnapshotTitle":
     "Migration proposal snapshot",
-  "app.generatorPreview.sqlConfirmationTitle":
-    "Manual confirmation checklist",
+  "app.generatorPreview.sqlConfirmationTitle": "Manual confirmation checklist",
+  "app.generatorPreview.migrationProposalRecovery.rebuiltFromMissing":
+    "Snapshot was missing and has been regenerated from the current report.",
+  "app.generatorPreview.migrationProposalRecovery.rebuiltFromCorrupt":
+    "Snapshot was rebuilt from the corrupted copy, and the original file was archived to",
   "app.generatorPreview.sourceTitle": "Generated source",
   "app.generatorPreview.currentSourceTitle": "Current target contents",
   "app.generatorPreview.sqlTitle": "SQL preview",

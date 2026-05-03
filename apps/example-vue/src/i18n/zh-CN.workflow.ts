@@ -230,14 +230,15 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.applyTitle": "Apply 证据",
   "app.generatorPreview.sqlProposalTitle": "SQL 提案",
   "app.generatorPreview.sqlDraftTitle": "SQL 草案",
-  "app.generatorPreview.sqlProposalDrizzleImportTitle":
-    "Drizzle 导入片段",
-  "app.generatorPreview.sqlProposalDrizzleSchemaTitle":
-    "Drizzle Schema 片段",
+  "app.generatorPreview.sqlProposalDrizzleImportTitle": "Drizzle 导入片段",
+  "app.generatorPreview.sqlProposalDrizzleSchemaTitle": "Drizzle Schema 片段",
   "app.generatorPreview.sqlHandoffTitle": "正式接入规范",
-  "app.generatorPreview.migrationProposalSnapshotTitle":
-    "迁移提案快照",
+  "app.generatorPreview.migrationProposalSnapshotTitle": "迁移提案快照",
   "app.generatorPreview.sqlConfirmationTitle": "人工确认清单",
+  "app.generatorPreview.migrationProposalRecovery.rebuiltFromMissing":
+    "快照缺失，已按当前 report 重新生成并落盘。",
+  "app.generatorPreview.migrationProposalRecovery.rebuiltFromCorrupt":
+    "快照已从损坏副本重建，原始文件已归档到",
   "app.generatorPreview.sourceTitle": "生成源码",
   "app.generatorPreview.currentSourceTitle": "目标目录当前内容",
   "app.generatorPreview.sqlTitle": "SQL Preview",

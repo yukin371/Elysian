@@ -236,7 +236,7 @@
 - `Track 2 / T2-2` 已落最小 proposal builder：`packages/persistence` 当前可基于 `DatabaseChangePlan` 形状输出 review-only SQL draft、Drizzle schema snippet 与风险标签；`generator-session` 也已完成 migration proposal snapshot 交接文件的落盘/回读闭环，并把 handoff 改为直接读取 persistence artifact，但仍不直接生成正式 migration 文件
 - 已补 generator -> frontend 的最小静态契约入口：`packages/schema` 可选 `frontend` 元数据已进入 `ModuleSchema`，`packages/generator` 可生成 `*.frontend.ts` artifact，开始为后续替换 example-vue 手写注册做准备
 - 已完成一次功能矩阵复验：确认 generator session 列表 / 详情 / preview / staging apply 以及 auth refresh session 列表 / 单会话 revoke 均已落地，相关矩阵文档已按真实完成度回填
-- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff、冲突解释、人工确认清单与 migration proposal snapshot 交接文件；snapshot artifact 已能在 handoff 中直接读取，确认清单已改为 snapshot 驱动，handoff 对缺失或损坏的 snapshot 会自愈重建且会先归档损坏副本，同时把 recovery 状态显式带回，正式人工确认动作与 SQL proposal 到正式 migration 的人工接入规范仍待补齐
+- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff、冲突解释、人工确认清单与 migration proposal snapshot 交接文件；snapshot artifact 已能在 handoff 中直接读取，确认清单已改为 snapshot 驱动，handoff 对缺失或损坏的 snapshot 会自愈重建且会先归档损坏副本，同时把 recovery 状态显式带回；正式人工确认动作的语义与 SQL proposal 到正式 migration 的接入规范已进入独立设计文档，后续实现需继续沿该边界收口，而不是把确认责任迁回 example-vue
 - 完成 `Phase 1` 垂直切片闭环，打通 `schema -> server -> persistence -> generator -> frontend`
 - 用 Docker PostgreSQL + 浏览器 smoke 验证 customer create / update / delete 持久化链路
 - 固定仓库品牌与命名体系为 `Elysian` / `@elysian/*`
@@ -327,4 +327,5 @@
 2. 第二顺序：对 `WP-6` 导入链路做边界判断，只回答“哪些模块值得进入当前主线、最小入口是什么、哪些仍应暂缓”；在未完成这一步前，不把统一导入 DSL、模板体系或批量治理平台写成已实现方向。
 3. 第三顺序：`generator / frontend` 只做必要延伸，不再回到 example-vue 手写标准 CRUD；若后续继续推进，范围限定为 generator 产物与前端 artifact 的增量收口，而不是重开一轮本地前端脊柱重构。
 4. 第四顺序：企业后台基础能力继续维持验证对象定位，优先补会话设备化、diff/evidence 强化、SQL proposal 到人工接入规范等必要收口，不抢占 generator 自举闭环主线。
+5. 当前已经补了一份 generator SQL proposal confirmation handoff 设计文档，后续若要落代码，优先沿 `packages/persistence -> apps/server -> apps/example-vue` 的既有 owner 顺序推进，不要反向从 UI 推导正式 migration owner。
 5. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、第二套消息中心模型，以及任何新的前端 shared owner。

@@ -1,4 +1,7 @@
-import type { GeneratorPreviewSqlProposalHandoff } from "./types"
+import type {
+  GeneratorPreviewSqlProposalHandoff,
+  GeneratorPreviewTranslation,
+} from "./types"
 
 export interface GeneratorPreviewRecoveryNote {
   text: string
@@ -6,6 +9,7 @@ export interface GeneratorPreviewRecoveryNote {
 }
 
 export const resolveGeneratorPreviewRecoveryNote = (
+  t: GeneratorPreviewTranslation,
   recovery: GeneratorPreviewSqlProposalHandoff["migrationProposalSnapshotRecovery"],
 ): GeneratorPreviewRecoveryNote | null => {
   if (!recovery || recovery.status === "none") {
@@ -16,13 +20,17 @@ export const resolveGeneratorPreviewRecoveryNote = (
     return {
       tone: "warning",
       text: recovery.archivedSnapshotPath
-        ? `快照已从损坏副本重建，原始文件已归档到 ${recovery.archivedSnapshotPath}`
-        : "快照已从损坏副本重建。",
+        ? `${t("app.generatorPreview.migrationProposalRecovery.rebuiltFromCorrupt")} ${recovery.archivedSnapshotPath}`
+        : t(
+            "app.generatorPreview.migrationProposalRecovery.rebuiltFromCorrupt",
+          ),
     }
   }
 
   return {
     tone: "info",
-    text: "快照缺失，已按当前 report 重新生成并落盘。",
+    text: t(
+      "app.generatorPreview.migrationProposalRecovery.rebuiltFromMissing",
+    ),
   }
 }
