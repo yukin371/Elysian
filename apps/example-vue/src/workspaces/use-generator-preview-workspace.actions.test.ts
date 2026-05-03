@@ -437,6 +437,28 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.canConfirmPreview.value).toBe(true)
   })
 
+  test("does not expose confirmation when sql proposal handoff is missing", async () => {
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = null
+
+    expect(workspace.canConfirmPreview.value).toBe(false)
+  })
+
+  test("does not expose confirmation when sql proposal is not ready", async () => {
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = {
+      ...createSqlProposalHandoff(),
+      proposalStatus: "unsupported",
+      unsupportedReason: "Manual migration planning required.",
+    }
+
+    expect(workspace.canConfirmPreview.value).toBe(false)
+  })
+
   test("does not expose review or apply actions while workspace is disabled", async () => {
     const { workspace } = createWorkspace()
     workspace.currentSession.value = createSession({ status: "ready" })

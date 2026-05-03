@@ -348,6 +348,8 @@ export const useGeneratorPreviewWorkspace = (
       currentSession.value !== null &&
       currentSession.value.status === "ready" &&
       currentSession.value.confirmedAt === null &&
+      currentSqlProposalHandoff.value !== null &&
+      currentSqlProposalHandoff.value.proposalStatus === "ready" &&
       enabled.value &&
       !loading.value &&
       !reviewLoading.value &&
