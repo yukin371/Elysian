@@ -482,6 +482,30 @@ export const useGeneratorPreviewWorkspace = (
     return true
   }
 
+  const refreshSessionDetailAfterStateDrift = async (
+    sessionId: string,
+    staleMessage: string,
+  ) => {
+    try {
+      const session = await fetchGeneratorPreviewSession(sessionId)
+
+      if (applySessionDetail(session)) {
+        errorMessage.value = staleMessage
+        return true
+      }
+
+      resetPreviewState()
+      return false
+    } catch (refreshError) {
+      onRecoverableAuthError(refreshError)
+      errorMessage.value =
+        refreshError instanceof Error
+          ? refreshError.message
+          : "Generator session restore failed"
+      return true
+    }
+  }
+
   const restoreStoredSession = async () => {
     const storedSessionId = storedSelection?.sessionId
 
@@ -689,21 +713,9 @@ export const useGeneratorPreviewWorkspace = (
           error.message.includes("GENERATOR_SESSION_REJECTED") ||
           error.message.includes("GENERATOR_SESSION_CONFIRMATION_REQUIRED"))
       ) {
-        try {
-          const session = await fetchGeneratorPreviewSession(sessionId)
-
-          if (applySessionDetail(session)) {
-            errorMessage.value = error.message
-            return
-          }
-
-          resetPreviewState()
-        } catch (refreshError) {
-          onRecoverableAuthError(refreshError)
-          errorMessage.value =
-            refreshError instanceof Error
-              ? refreshError.message
-              : "Generator session restore failed"
+        if (
+          await refreshSessionDetailAfterStateDrift(sessionId, error.message)
+        ) {
           return
         }
       }
@@ -767,21 +779,9 @@ export const useGeneratorPreviewWorkspace = (
         error instanceof Error &&
         error.message.includes("GENERATOR_SESSION_REVIEW_NOT_PENDING")
       ) {
-        try {
-          const session = await fetchGeneratorPreviewSession(sessionId)
-
-          if (applySessionDetail(session)) {
-            errorMessage.value = error.message
-            return
-          }
-
-          resetPreviewState()
-        } catch (refreshError) {
-          onRecoverableAuthError(refreshError)
-          errorMessage.value =
-            refreshError instanceof Error
-              ? refreshError.message
-              : "Generator session restore failed"
+        if (
+          await refreshSessionDetailAfterStateDrift(sessionId, error.message)
+        ) {
           return
         }
       }
@@ -835,21 +835,9 @@ export const useGeneratorPreviewWorkspace = (
             "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
           ))
       ) {
-        try {
-          const session = await fetchGeneratorPreviewSession(sessionId)
-
-          if (applySessionDetail(session)) {
-            errorMessage.value = error.message
-            return
-          }
-
-          resetPreviewState()
-        } catch (refreshError) {
-          onRecoverableAuthError(refreshError)
-          errorMessage.value =
-            refreshError instanceof Error
-              ? refreshError.message
-              : "Generator session restore failed"
+        if (
+          await refreshSessionDetailAfterStateDrift(sessionId, error.message)
+        ) {
           return
         }
       }
