@@ -60,3 +60,14 @@ export type OpenApiRoleDetailRecord = ResponseContent<"getSystemRolesById", 200>
 export type OpenApiRoleRecord = OpenApiRolesResponse["items"][number]
 export type OpenApiCreateRoleInput = RequestBodyContent<"postSystemRoles">
 export type OpenApiUpdateRoleInput = RequestBodyContent<"putSystemRolesById">
+
+export type OpenApiNotificationsResponse =
+  ResponseContent<"getSystemNotifications", 200>
+export type OpenApiNotificationRecord =
+  ResponseContent<"getSystemNotificationsById", 200>
+export type OpenApiCreateNotificationInput =
+  RequestBodyContent<"postSystemNotifications">
+export type OpenApiMarkNotificationsAsReadInput =
+  RequestBodyContent<"postSystemNotificationsRead">
+export type OpenApiMarkNotificationsAsReadResponse =
+  ResponseContent<"postSystemNotificationsRead", 200>

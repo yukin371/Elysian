@@ -1,19 +1,15 @@
-import type { NotificationRecord } from "./types"
-
 import { requestBlob, requestJson } from "./core"
-export type { NotificationRecord } from "./types"
+import type {
+  OpenApiCreateNotificationInput,
+  OpenApiMarkNotificationsAsReadInput,
+  OpenApiMarkNotificationsAsReadResponse,
+  OpenApiNotificationRecord,
+  OpenApiNotificationsResponse,
+} from "./generated-types"
 
-export interface NotificationListResponse {
-  items: NotificationRecord[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
-
-export interface NotificationsResponse {
-  items: NotificationRecord[]
-}
+export type NotificationRecord = OpenApiNotificationRecord
+export type NotificationListResponse = OpenApiNotificationsResponse
+export type NotificationsResponse = OpenApiMarkNotificationsAsReadResponse
 
 export interface NotificationListQuery {
   recipientUserId?: string
@@ -25,12 +21,7 @@ export interface NotificationListQuery {
   pageSize?: number
 }
 
-export interface CreateNotificationRequest {
-  recipientUserId: string
-  title: string
-  content: string
-  level?: NotificationRecord["level"]
-}
+export type CreateNotificationRequest = OpenApiCreateNotificationInput
 
 const buildNotificationSearch = (query: NotificationListQuery = {}) => {
   const search = new URLSearchParams()
@@ -123,7 +114,7 @@ export const markNotificationAsRead = async (
   )
 
 export const markNotificationsAsRead = async (
-  ids: string[],
+  ids: OpenApiMarkNotificationsAsReadInput["ids"],
 ): Promise<NotificationsResponse> =>
   requestJson<NotificationsResponse>("/system/notifications/read", {
     method: "POST",
