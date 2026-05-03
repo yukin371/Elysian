@@ -33,10 +33,15 @@ import {
 } from "./generator-preview-selection-storage"
 import {
   buildGeneratorPreviewSessionDetail,
-  generatorPreviewSessionStatusPriority,
   isGeneratorPreviewRecoverableAuthError,
   isGeneratorPreviewSessionDetailConsistent,
 } from "./generator-preview-session-helpers"
+import {
+  buildGeneratorPreviewConflictStrategyOptions,
+  buildGeneratorPreviewRecentSessionOptions,
+  localizeGeneratorPreviewConflictStrategy,
+  prioritizeGeneratorPreviewRecentSessions,
+} from "./generator-preview-session-presentation"
 
 export const useGeneratorPreviewWorkspace = (
   t: (key: string, params?: Record<string, unknown>) => string,
@@ -104,110 +109,22 @@ export const useGeneratorPreviewWorkspace = (
 
   const sqlPreview = computed(() => currentReport.value?.sqlPreview ?? null)
 
-  const localizeSessionStatus = (
-    status: GeneratorPreviewSessionRecord["status"],
-  ) => {
-    if (status === "applied") {
-      return t("app.generatorPreview.status.applied")
-    }
-
-    if (status === "ready") {
-      return t("app.generatorPreview.status.ready")
-    }
-
-    if (status === "rejected") {
-      return t("app.generatorPreview.status.rejected")
-    }
-
-    return t("app.generatorPreview.status.pendingReview")
-  }
-
-  const localizeConflictStrategy = (
-    strategy: GeneratorPreviewConflictStrategy,
-  ) => t(`app.generatorPreview.conflictStrategy.${strategy}`)
-
   const isSessionMatchingSelection = (session: GeneratorPreviewSessionRecord) =>
     session.schemaName === selectedSchemaName.value &&
     session.frontendTarget === selectedFrontendTarget.value &&
     session.conflictStrategy === selectedConflictStrategy.value
 
-  const prioritizeRecentSessions = (
-    sessions: GeneratorPreviewSessionRecord[],
-  ) => {
-    const matchingSelection: Array<{
-      index: number
-      session: GeneratorPreviewSessionRecord
-    }> = []
-    const otherSessions: Array<{
-      index: number
-      session: GeneratorPreviewSessionRecord
-    }> = []
-
-    for (const [index, session] of sessions.entries()) {
-      if (isSessionMatchingSelection(session)) {
-        matchingSelection.push({ index, session })
-        continue
-      }
-
-      otherSessions.push({ index, session })
-    }
-
-    const sortByReviewPriority = (
-      left: { index: number; session: GeneratorPreviewSessionRecord },
-      right: { index: number; session: GeneratorPreviewSessionRecord },
-    ) => {
-      const statusPriorityDelta =
-        generatorPreviewSessionStatusPriority[left.session.status] -
-        generatorPreviewSessionStatusPriority[right.session.status]
-
-      if (statusPriorityDelta !== 0) {
-        return statusPriorityDelta
-      }
-
-      return left.index - right.index
-    }
-
-    return [
-      ...matchingSelection.sort(sortByReviewPriority),
-      ...otherSessions,
-    ].map(({ session }) => session)
-  }
-
   const recentSessionOptions = computed(() =>
-    prioritizeRecentSessions(recentSessions.value)
-      .slice(0, 8)
-      .map((session) => ({
-        label: [
-          session.schemaName,
-          session.frontendTarget,
-          localizeConflictStrategy(session.conflictStrategy),
-          localizeSessionStatus(session.status),
-          session.createdAt,
-        ].join(" · "),
-        value: session.id,
-      })),
+    buildGeneratorPreviewRecentSessionOptions(
+      t,
+      recentSessions.value,
+      isSessionMatchingSelection,
+    ),
   )
 
-  const conflictStrategyOptions = computed(() => [
-    {
-      label: t("app.generatorPreview.conflictStrategy.skip"),
-      value: "skip",
-    },
-    {
-      label: t("app.generatorPreview.conflictStrategy.overwrite"),
-      value: "overwrite",
-    },
-    {
-      label: t(
-        "app.generatorPreview.conflictStrategy.overwrite-generated-only",
-      ),
-      value: "overwrite-generated-only",
-    },
-    {
-      label: t("app.generatorPreview.conflictStrategy.fail"),
-      value: "fail",
-    },
-  ])
+  const conflictStrategyOptions = computed(() =>
+    buildGeneratorPreviewConflictStrategyOptions(t),
+  )
 
   const filterSummary = computed(() => {
     const fragments = [
@@ -218,8 +135,9 @@ export const useGeneratorPreviewWorkspace = (
         value: selectedFrontendTarget.value,
       }),
       t("app.generatorPreview.filter.conflictSummary", {
-        value: t(
-          `app.generatorPreview.conflictStrategy.${selectedConflictStrategy.value}`,
+        value: localizeGeneratorPreviewConflictStrategy(
+          t,
+          selectedConflictStrategy.value,
         ),
       }),
     ]
@@ -303,7 +221,10 @@ export const useGeneratorPreviewWorkspace = (
   const findMatchingRecentSession = (
     sessions: GeneratorPreviewSessionRecord[],
   ) =>
-    prioritizeRecentSessions(sessions).find(isSessionMatchingSelection) ?? null
+    prioritizeGeneratorPreviewRecentSessions(
+      sessions,
+      isSessionMatchingSelection,
+    ).find(isSessionMatchingSelection) ?? null
 
   const getCurrentSelectionCacheKey = () =>
     createGeneratorPreviewSelectionCacheKey(

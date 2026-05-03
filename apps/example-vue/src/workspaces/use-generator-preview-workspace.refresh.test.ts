@@ -110,6 +110,9 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
 
     const { enabled, workspace } = createWorkspace()
     workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+
+    await waitForAsyncWork()
+
     enabled.value = true
 
     await waitForAsyncWork()
