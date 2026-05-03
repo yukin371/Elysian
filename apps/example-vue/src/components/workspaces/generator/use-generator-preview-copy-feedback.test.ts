@@ -121,4 +121,17 @@ describe("useGeneratorPreviewCopyFeedback", () => {
     expect(clearedTimerIds).toContain(1)
     expect(scheduledTimers).toHaveLength(2)
   })
+
+  test("disposes all pending feedback reset timers", async () => {
+    const { copySuggestedCommandsByKey, copyTextByKey, disposeCopyFeedbackTimers } =
+      useGeneratorPreviewCopyFeedback(t)
+
+    await copyTextByKey("sqlDraft", "create table customer ();")
+    await copySuggestedCommandsByKey(["bun run db:generate"])
+
+    disposeCopyFeedbackTimers()
+
+    expect(clearedTimerIds).toContain(1)
+    expect(clearedTimerIds).toContain(2)
+  })
 })
