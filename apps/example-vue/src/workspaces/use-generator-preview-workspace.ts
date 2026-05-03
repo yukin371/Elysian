@@ -362,7 +362,12 @@ export const useGeneratorPreviewWorkspace = (
         return false
       }
 
-      if (!canPreservePreviewState()) {
+      if (
+        error instanceof Error &&
+        error.message.includes("GENERATOR_SCHEMA_NOT_FOUND")
+      ) {
+        resetPreviewState()
+      } else if (!canPreservePreviewState()) {
         resetPreviewState()
       }
       onRecoverableAuthError(error)

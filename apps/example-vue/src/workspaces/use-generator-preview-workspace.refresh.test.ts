@@ -316,6 +316,70 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     expect(workspace.selectedFilePath.value).toBe("generated/customer.ts")
   })
 
+  test("clears current preview when same-context refresh reports missing schema", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        if (previewRequestCount === 1) {
+          return new Response(
+            JSON.stringify({
+              diff: createDiffSummary(),
+              report: createReport(),
+              session: createSession(),
+              sqlProposal: createSqlProposal(),
+              sqlProposalHandoff: createSqlProposalHandoff(),
+            }),
+            {
+              headers: { "content-type": "application/json" },
+              status: 200,
+            },
+          )
+        }
+
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SCHEMA_NOT_FOUND",
+              message: "Generator schema not found",
+              status: 404,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 404,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+
+    await waitForAsyncWork()
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+
+    await workspace.refreshPreview()
+
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
+    expect(workspace.sqlPreview.value).toBeNull()
+    expect(workspace.selectedRecentSessionId.value).toBe("")
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SCHEMA_NOT_FOUND",
+    )
+  })
+
   test("clears current preview when context changes before refresh fails", async () => {
     const recoverableErrors: unknown[] = []
     let previewRequestCount = 0
