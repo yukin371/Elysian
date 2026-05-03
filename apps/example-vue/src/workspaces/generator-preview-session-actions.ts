@@ -232,6 +232,9 @@ export const createGeneratorPreviewSessionActions = (
           "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
         ) ||
           error.message.includes(
+            "GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY",
+          ) ||
+          error.message.includes(
             "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
           ))
       ) {
