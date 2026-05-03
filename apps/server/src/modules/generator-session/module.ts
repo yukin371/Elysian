@@ -1,6 +1,6 @@
 import { t } from "elysia"
 import {
-  buildMigrationProposalFromChangePlan,
+  resolveMigrationProposalFromChangePlan,
 } from "@elysian/persistence"
 
 import { AppError } from "../../errors"
@@ -419,19 +419,19 @@ const buildDiffSummary = (report: GeneratorPreviewSessionDetail["report"]) => {
   }
 }
 
+const resolveSqlProposal = (session: GeneratorPreviewSessionDetail) =>
+  resolveMigrationProposalFromChangePlan(session.report.databaseChangePlan)
+
 const buildSqlProposal = (session: GeneratorPreviewSessionDetail) => {
-  try {
-    return buildMigrationProposalFromChangePlan(session.report.databaseChangePlan)
-  } catch {
-    return null
-  }
+  return resolveSqlProposal(session).proposal
 }
 
 const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
-  const sqlProposal = buildSqlProposal(session)
+  const sqlProposalResolution = resolveSqlProposal(session)
 
   return {
-    proposalStatus: sqlProposal === null ? "unsupported" : "ready",
+    proposalStatus:
+      sqlProposalResolution.proposal === null ? "unsupported" : "ready",
     reviewMode: "manual",
     canonicalMigrationOwner: "packages/persistence",
     targetPaths: {
@@ -452,10 +452,7 @@ const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
       "bun run db:migrate",
       "bun test packages/persistence/src/migration-proposal.test.ts",
     ],
-    unsupportedReason:
-      sqlProposal === null
-        ? "The current database change plan cannot be converted into a review-only migration proposal automatically."
-        : null,
+    unsupportedReason: sqlProposalResolution.unsupportedReason,
     sourceSchemaName: session.schemaName,
   }
 }

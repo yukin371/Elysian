@@ -805,4 +805,69 @@ describe("generator session module", () => {
 
     expect(response.status).toBe(401)
   })
+
+  it("surfaces unsupported sql proposal reasons on the detail endpoint", async () => {
+    const repository = createInMemoryGeneratorSessionRepository()
+    const invalidChangePlan = {
+      canonicalMigrationOwner: "packages/persistence",
+      dialect: "postgresql",
+      operations: [
+        {
+          columns: [],
+          notes: [],
+          operation: "create-table",
+          sourceSchemaName: "ticket",
+          tableName: "ticket",
+        },
+        {
+          columns: [],
+          notes: [],
+          operation: "create-table",
+          sourceSchemaName: "ticket",
+          tableName: "ticket_shadow",
+        },
+      ],
+      reviewRequired: false,
+      sourceSchemaName: "ticket",
+    }
+    const session = await repository.createPreviewSession({
+      conflictStrategy: "skip",
+      createdAt: "2026-04-20T00:00:00.000Z",
+      frontendTarget: "vue",
+      hasBlockingConflicts: false,
+      outputDir: "/tmp/generator-session-unsupported",
+      previewFileCount: 1,
+      report: {
+        databaseChangePlan: invalidChangePlan,
+        files: [],
+        schemaName: "ticket",
+      } as never,
+      reportPath: "/tmp/generator-session-unsupported/report.json",
+      schemaName: "ticket",
+      sourceType: "registered-schema",
+      sourceValue: "ticket",
+      targetPreset: "default",
+    } as never)
+
+    const app = createTestApp([createGeneratorSessionModule(repository)])
+    const response = await app.handle(
+      new Request(`http://localhost/studio/generator/sessions/${session.id}`),
+    )
+
+    expect(response.status).toBe(200)
+
+    const body = (await response.json()) as {
+      sqlProposal: null
+      sqlProposalHandoff: {
+        proposalStatus: string
+        unsupportedReason: string | null
+      }
+    }
+    expect(body.sqlProposal).toBeNull()
+    expect(body.sqlProposalHandoff).toMatchObject({
+      proposalStatus: "unsupported",
+      unsupportedReason:
+        "Only single create-table change plans are supported.",
+    })
+  })
 })

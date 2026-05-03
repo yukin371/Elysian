@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test"
 import {
   type DatabaseChangePlanLike,
   buildMigrationProposalFromChangePlan,
+  resolveMigrationProposalFromChangePlan,
 } from "./migration-proposal"
 
 const ticketChangePlan: DatabaseChangePlanLike = {
@@ -129,5 +130,32 @@ describe("buildMigrationProposalFromChangePlan", () => {
     expect(() => buildMigrationProposalFromChangePlan(invalidPlan)).toThrow(
       "Only single create-table change plans are supported.",
     )
+  })
+
+  it("resolves unsupported operation shapes with a reason", () => {
+    const firstOperation = ticketChangePlan.operations[0]
+    if (!firstOperation) {
+      throw new Error("Missing test operation fixture.")
+    }
+
+    const invalidPlan: DatabaseChangePlanLike = {
+      ...ticketChangePlan,
+      operations: [
+        {
+          ...firstOperation,
+          operation: "create-table",
+        },
+        {
+          ...firstOperation,
+          tableName: "ticket_shadow",
+        },
+      ],
+    }
+
+    expect(resolveMigrationProposalFromChangePlan(invalidPlan)).toEqual({
+      proposal: null,
+      unsupportedReason:
+        "Only single create-table change plans are supported.",
+    })
   })
 })

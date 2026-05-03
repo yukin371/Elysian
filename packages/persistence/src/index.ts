@@ -6,8 +6,10 @@ export {
   type DatabaseColumnPlanLike,
   type DatabaseTableChangePlanLike,
   type MigrationProposal,
+  type MigrationProposalResolution,
   type MigrationProposalRisk,
   type MigrationProposalRiskCode,
+  resolveMigrationProposalFromChangePlan,
 } from "./migration-proposal"
 export {
   buildPaginatedResult,

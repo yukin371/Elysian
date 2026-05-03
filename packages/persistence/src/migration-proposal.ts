@@ -64,6 +64,11 @@ export interface MigrationProposal {
   tableName: string
 }
 
+export interface MigrationProposalResolution {
+  proposal: MigrationProposal | null
+  unsupportedReason: string | null
+}
+
 const toPascalCase = (value: string) =>
   value
     .split(/[^a-zA-Z0-9]+/)
@@ -241,5 +246,22 @@ export const buildMigrationProposalFromChangePlan = (
       ");",
     ].join("\n"),
     tableName: operation.tableName,
+  }
+}
+
+export const resolveMigrationProposalFromChangePlan = (
+  plan: DatabaseChangePlanLike,
+): MigrationProposalResolution => {
+  try {
+    return {
+      proposal: buildMigrationProposalFromChangePlan(plan),
+      unsupportedReason: null,
+    }
+  } catch (error) {
+    return {
+      proposal: null,
+      unsupportedReason:
+        error instanceof Error ? error.message : "Unsupported migration proposal.",
+    }
   }
 }
