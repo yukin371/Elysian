@@ -15,6 +15,8 @@ export {
   buildMigrationProposalSnapshot,
   type BuildMigrationProposalSnapshotInput,
   type MigrationProposalSnapshot,
+  readMigrationProposalSnapshot,
+  writeMigrationProposalSnapshot,
 } from "./migration-proposal-snapshot"
 export {
   buildPaginatedResult,

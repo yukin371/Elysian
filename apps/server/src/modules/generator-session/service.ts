@@ -13,9 +13,10 @@ import {
   resolveTargetPresetOutputDir,
   writeGenerationPreviewReport,
 } from "@elysian/generator"
-import { buildMigrationProposalSnapshot } from "@elysian/persistence"
-
-import { mkdir, writeFile } from "node:fs/promises"
+import {
+  buildMigrationProposalSnapshot,
+  writeMigrationProposalSnapshot,
+} from "@elysian/persistence"
 
 import { AppError } from "../../errors"
 import type { AuthIdentity } from "../auth"
@@ -291,13 +292,8 @@ export const createGeneratorSessionService = (
         sessionId,
       })
 
-      await mkdir(reportRootDir, { recursive: true })
       await writeGenerationPreviewReport(reportPath, report)
-      await writeFile(
-        migrationProposalSnapshot.snapshotPath,
-        `${JSON.stringify(migrationProposalSnapshot, null, 2)}\n`,
-        "utf8",
-      )
+      await writeMigrationProposalSnapshot(migrationProposalSnapshot)
 
       return repository.createPreviewSession({
         id: sessionId,
