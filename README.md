@@ -199,7 +199,6 @@ bun run hooks:install
 
 ## 下一步
 
-1. 启动 Phase 2，先固化认证方案 ADR 与 RBAC 数据模型。
-2. 为 generator 设计从 `generated/` 到正式模块目录的 apply / merge 流程。
-3. 增加第二个实体（如 `product`），验证生成模板与模块边界的可复用性。
-4. 在此基础上继续补 auth scaffold 和标准企业模块。
+1. 先把 generator 的自举闭环继续收口，重点补 `generated/` 到正式模块目录的 apply / merge、preview/report、前端 artifact 消费与回放证据。
+2. 增加第二个实体（如 `product`），验证生成模板与模块边界的可复用性。
+3. 在 generator 闭环稳定后，再继续补 auth scaffold 和标准企业模块，用作自举结果的持续验证面。

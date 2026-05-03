@@ -6,7 +6,7 @@
 
 - 绿地仓库
 - 目标形态是企业级快速开发平台
-- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾、`Phase 5 / P5A` 归档与 `Phase 6B` 企业增强收口；`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 完成阶段出口复验；`Phase 7 / P7A Round-1` 的最小 workflow 闭环与 `Round-2` 的验证补齐/最小 `claim` 收口均已落地，当前 workflow 阶段结果保持在“已验证的简化运行态”，不默认扩展为通用 BPM 能力
+- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾、`Phase 5 / P5A` 归档与 `Phase 6B` 企业增强收口；`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 完成阶段出口复验；`Phase 7 / P7A Round-1` 的最小 workflow 闭环与 `Round-2` 的验证补齐/最小 `claim` 收口均已落地，当前 workflow 阶段结果保持在“已验证的简化运行态”，不默认扩展为通用 BPM 能力；当前优先级已转向 generator 自举闭环，企业后台基础能力作为首批验证对象继续完善，而不是作为主叙事继续外扩
 
 ## 已确认事实
 
@@ -73,7 +73,7 @@
 - `packages/persistence` 的 `bun run db:migrate` 已可正常执行已提交的 SQL migrations。
 - `packages/persistence` 已支持 `bun run db:tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>` 初始化非默认租户。
 - `packages/persistence` 已补 workflow repository 独立测试，当前通过 `PGlite` 嵌入式 PostgreSQL 兼容底座覆盖 definition 版本唯一性、next version 计算、todo/done 查询边界、实例任务排序与取消语义；tenant RLS 仍继续由 server 测试与真实 PostgreSQL E2E 兜底。
-- `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试。
+- `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试，当前优先继续收口 preview/report、apply / merge、前端 artifact 与回放证据链路。
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
 - `packages/generator` 已新增 preview/report 能力，可在不写入目标目录的前提下输出文件动作预览、内容快照报告与 review-only SQL preview。
 - `packages/generator` 已新增 `DatabaseChangePlan` 中性数据库变更描述，可从 `ModuleSchema` 产出 reviewable create-table 计划，继续保持正式 migration owner 在 `packages/persistence`。
@@ -205,7 +205,7 @@
 - workflow 模块当前只验证了线性审批、最小动作闭环与白名单条件分支；独立权限点与更复杂任务语义仍未进入实现。
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。
 - generator 的 apply / merge 机制仍未定稿，二次生成进入正式模块目录的边界还不稳定。
-- 当前已有最小验证命令，但仍缺少自动化 E2E 等更完整的工程验证链路。
+- 当前已有最小验证命令，但仍缺少自动化 E2E 等更完整的工程验证链路；generator 自举闭环的完整可回放验证仍是当前重点收口方向。
 
 ## 当前可用验证
 

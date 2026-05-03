@@ -8,6 +8,7 @@ import {
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
   markGeneratorPreviewSessionApplied,
+  markGeneratorPreviewSessionReviewed,
 } from "./generator-session"
 import { insertTenant } from "./tenant"
 
@@ -112,6 +113,48 @@ describe("generator preview session persistence", () => {
       expect(persisted?.status).toBe("applied")
     })
   })
+
+  it("updates review evidence on the existing preview session", async () => {
+    await withGeneratorSessionTestDb(async ({ db }) => {
+      const created = await insertGeneratorPreviewSession(db, {
+        id: "77777777-7777-4777-8777-777777777777",
+        tenantId: tenantAlphaId,
+        actorDisplayName: "Alpha Admin",
+        actorUserId: "88888888-8888-4888-8888-888888888888",
+        actorUsername: "alpha-admin",
+        conflictStrategy: "fail",
+        createdAt: new Date("2026-04-27T11:00:00.000Z"),
+        frontendTarget: "vue",
+        hasBlockingConflicts: false,
+        outputDir: "E:/generated",
+        previewFileCount: 1,
+        reportPath: "E:/generated/reports/review.preview.json",
+        schemaName: "customer",
+        sourceType: "registered-schema",
+        sourceValue: "customer",
+        targetPreset: "staging",
+      })
+
+      const updated = await markGeneratorPreviewSessionReviewed(db, created.id, {
+        reviewComment: "Looks good",
+        reviewedAt: new Date("2026-04-27T11:20:00.000Z"),
+        reviewedByDisplayName: "Alpha Admin",
+        reviewedByUserId: "88888888-8888-4888-8888-888888888888",
+        reviewedByUsername: "alpha-admin",
+        status: "ready",
+      })
+
+      expect(updated?.status).toBe("ready")
+      expect(updated?.reviewComment).toBe("Looks good")
+      expect(updated?.reviewedByUsername).toBe("alpha-admin")
+
+      const persisted = await getGeneratorPreviewSessionById(db, created.id)
+      expect(persisted?.reviewedAt?.toISOString()).toBe(
+        "2026-04-27T11:20:00.000Z",
+      )
+      expect(persisted?.status).toBe("ready")
+    })
+  })
 })
 
 async function withGeneratorSessionTestDb(
@@ -198,11 +241,16 @@ create table generator_preview_sessions (
   output_dir text not null,
   preview_file_count integer not null,
   report_path text not null,
+  review_comment text,
+  reviewed_at timestamp with time zone,
+  reviewed_by_display_name text,
+  reviewed_by_user_id uuid,
+  reviewed_by_username text,
   schema_name text not null,
   skipped_file_count integer,
   source_type text not null,
   source_value text not null,
-  status text not null default 'ready',
+  status text not null default 'pending_review',
   target_preset text not null,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now()
