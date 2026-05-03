@@ -1,5 +1,8 @@
 import { t } from "elysia"
 import {
+  buildMigrationProposalSnapshot,
+  type MigrationProposalSnapshot,
+  writeMigrationProposalSnapshot,
   resolveMigrationProposalFromChangePlan,
   readMigrationProposalSnapshot,
   resolveMigrationProposalSnapshotPath,
@@ -589,9 +592,30 @@ const buildSqlProposalConfirmationChecklist = (
 
 const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) => {
   const snapshotPath = resolveMigrationProposalSnapshotPath(session.reportPath)
-  const migrationProposalSnapshot = await readMigrationProposalSnapshot(
-    snapshotPath,
-  )
+  let migrationProposalSnapshot: MigrationProposalSnapshot
+
+  try {
+    migrationProposalSnapshot = await readMigrationProposalSnapshot(snapshotPath)
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as { code?: string }).code === "ENOENT"
+    ) {
+      migrationProposalSnapshot = buildMigrationProposalSnapshot({
+        databaseChangePlan: session.report.databaseChangePlan,
+        generatedAt: session.createdAt,
+        reportPath: session.reportPath,
+        schemaName: session.schemaName,
+        sessionId: session.id,
+      })
+
+      await writeMigrationProposalSnapshot(migrationProposalSnapshot)
+    } else {
+      throw error
+    }
+  }
+
   const sqlProposalResolution = migrationProposalSnapshot.migrationProposalResolution
 
   return {
