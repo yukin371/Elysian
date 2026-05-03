@@ -115,6 +115,152 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     )
   })
 
+  test("refreshes current detail when apply session is no longer ready", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_NOT_READY",
+              message: "Generator session is not ready for apply",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              appliedAt: "2026-05-02T12:20:00.000Z",
+              appliedByDisplayName: "Admin",
+              appliedByUserId: "user-1",
+              appliedByUsername: "admin",
+              appliedFileCount: 1,
+              confirmedAt: "2026-05-02T12:10:00.000Z",
+              id: "preview-session-1",
+              status: "applied",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.applyPreview()
+
+    expect(detailRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.status).toBe("applied")
+    expect(workspace.currentSession.value?.appliedAt).toBe(
+      "2026-05-02T12:20:00.000Z",
+    )
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_NOT_READY",
+    )
+    expect(workspace.canApplyPreview.value).toBe(false)
+  })
+
+  test("reports refetch auth error when stale apply session cannot be refreshed", async () => {
+    const recoverableErrors: unknown[] = []
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_NOT_READY",
+              message: "Generator session is not ready for apply",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    workspace.currentSession.value = createSession({
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.applyPreview()
+
+    expect(detailRequestCount).toBe(1)
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.status).toBe("ready")
+    expect(workspace.canApplyPreview.value).toBe(true)
+  })
+
   test("approves pending preview sessions before confirm and apply", async () => {
     let submittedComment: string | undefined
 

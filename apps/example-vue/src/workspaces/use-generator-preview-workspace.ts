@@ -683,6 +683,31 @@ export const useGeneratorPreviewWorkspace = (
         persistCurrentSelection()
       }
     } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.message.includes("GENERATOR_SESSION_NOT_READY") ||
+          error.message.includes("GENERATOR_SESSION_REJECTED") ||
+          error.message.includes("GENERATOR_SESSION_CONFIRMATION_REQUIRED"))
+      ) {
+        try {
+          const session = await fetchGeneratorPreviewSession(sessionId)
+
+          if (applySessionDetail(session)) {
+            errorMessage.value = error.message
+            return
+          }
+
+          resetPreviewState()
+        } catch (refreshError) {
+          onRecoverableAuthError(refreshError)
+          errorMessage.value =
+            refreshError instanceof Error
+              ? refreshError.message
+              : "Generator session restore failed"
+          return
+        }
+      }
+
       onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error ? error.message : "Generator apply failed"
