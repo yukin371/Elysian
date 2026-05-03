@@ -33,3 +33,17 @@ export type OpenApiCustomersResponse = ResponseContent<"getCustomers", 200>
 export type OpenApiCustomerRecord = OpenApiCustomersResponse["items"][number]
 export type OpenApiCreateCustomerInput = RequestBodyContent<"postCustomers">
 export type OpenApiUpdateCustomerInput = RequestBodyContent<"putCustomersById">
+
+export type OpenApiSettingsResponse = ResponseContent<"getSystemSettings", 200>
+export type OpenApiSettingRecord = ResponseContent<"getSystemSettingsById", 200>
+export type OpenApiCreateSettingInput = RequestBodyContent<"postSystemSettings">
+export type OpenApiUpdateSettingInput =
+  RequestBodyContent<"putSystemSettingsById">
+
+export type OpenApiTenantsResponse = ResponseContent<"getSystemTenants", 200>
+export type OpenApiTenantRecord = ResponseContent<"getSystemTenantsById", 200>
+export type OpenApiCreateTenantInput = RequestBodyContent<"postSystemTenants">
+export type OpenApiUpdateTenantInput =
+  RequestBodyContent<"putSystemTenantsById">
+export type OpenApiUpdateTenantStatusInput =
+  RequestBodyContent<"putSystemTenantsByIdStatus">

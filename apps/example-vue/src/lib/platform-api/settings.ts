@@ -1,33 +1,21 @@
 import { requestBlob, requestJson } from "./core"
-import type { SettingRecord } from "./types"
-export type { SettingRecord } from "./types"
+import type {
+  OpenApiCreateSettingInput,
+  OpenApiSettingRecord,
+  OpenApiSettingsResponse,
+  OpenApiUpdateSettingInput,
+} from "./generated-types"
 
-export interface SettingsResponse {
-  items: SettingRecord[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
+export type SettingRecord = OpenApiSettingRecord
+export type SettingsResponse = OpenApiSettingsResponse
 
 export interface SettingListQuery {
   page?: number
   pageSize?: number
 }
 
-export interface CreateSettingRequest {
-  key: string
-  value: string
-  description?: string
-  status?: SettingRecord["status"]
-}
-
-export interface UpdateSettingRequest {
-  key?: string
-  value?: string
-  description?: string
-  status?: SettingRecord["status"]
-}
+export type CreateSettingRequest = OpenApiCreateSettingInput
+export type UpdateSettingRequest = OpenApiUpdateSettingInput
 
 export const fetchSettings = async (
   query: SettingListQuery = {},

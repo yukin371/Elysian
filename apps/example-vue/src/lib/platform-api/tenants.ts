@@ -1,23 +1,16 @@
-import type { TenantRecord, TenantStatus } from "./types"
-
 import { requestBlob, requestJson } from "./core"
-export type { TenantRecord } from "./types"
+import type {
+  OpenApiCreateTenantInput,
+  OpenApiTenantRecord,
+  OpenApiTenantsResponse,
+  OpenApiUpdateTenantInput,
+  OpenApiUpdateTenantStatusInput,
+} from "./generated-types"
 
-export interface TenantsResponse {
-  items: TenantRecord[]
-}
-
-export interface CreateTenantRequest {
-  code: string
-  name: string
-  status?: TenantStatus
-}
-
-export interface UpdateTenantRequest {
-  code?: string
-  name?: string
-  status?: TenantStatus
-}
+export type TenantRecord = OpenApiTenantRecord
+export type TenantsResponse = OpenApiTenantsResponse
+export type CreateTenantRequest = OpenApiCreateTenantInput
+export type UpdateTenantRequest = OpenApiUpdateTenantInput
 
 export const fetchTenants = async (): Promise<TenantsResponse> =>
   requestJson<TenantsResponse>("/system/tenants", {
@@ -55,7 +48,7 @@ export const updateTenant = async (
 
 export const updateTenantStatus = async (
   id: string,
-  status: TenantStatus,
+  status: OpenApiUpdateTenantStatusInput["status"],
 ): Promise<TenantRecord> =>
   requestJson<TenantRecord>(
     `/system/tenants/${encodeURIComponent(id)}/status`,
