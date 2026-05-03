@@ -21,6 +21,7 @@
 ## 文件体量说明
 
 - `e2e-smoke.ts` 保留真实 smoke 主流程编排。
+- `e2e-smoke-customer-case.ts` 承接 customer CRUD smoke 场景，入口仍持有 server 生命周期、报告写入和失败 cleanup 状态。
 - `e2e-smoke-support.ts` 只承接 smoke 脚本本地类型、报告、端口等待、server 终止和 workflow draft 构造。
 - 当前 `e2e-smoke*.ts` 文件均低于 `1000` 行；后续扩展 smoke 场景时，应优先按本地 support / scenario 文件继续拆分，而不是把所有步骤继续堆回主脚本。
 

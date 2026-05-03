@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process"
 import { join } from "node:path"
+import { runCustomerSmoke } from "./e2e-smoke-customer-case"
 import {
-  type CustomerRecord,
   type LoginResponse,
   type OperationLogRecord,
   type WorkflowDefinitionRecord,
@@ -80,74 +80,15 @@ const run = async () => {
     }
     cleanupAuthHeader = authHeader
 
-    lastStage = "customer_list"
-    const listResponse = await fetch(`${baseUrl}/customers`, {
-      headers: authHeader,
-    })
-    await assertStatus(listResponse, 200)
-
-    lastStage = "customer_create"
-    const createName = `smoke-${Date.now()}`
-    const createResponse = await fetch(`${baseUrl}/customers`, {
-      method: "POST",
-      headers: {
-        ...authHeader,
-        "content-type": "application/json",
+    await runCustomerSmoke({
+      authHeader,
+      setStage: (stage) => {
+        lastStage = stage
       },
-      body: JSON.stringify({
-        name: createName,
-        status: "active",
-      }),
-    })
-    await assertStatus(createResponse, 201)
-    const created = (await createResponse.json()) as CustomerRecord
-    customerId = created.id
-
-    if (!customerId) {
-      throw new Error("Create customer succeeded but id is missing")
-    }
-
-    lastStage = "customer_update"
-    const updateResponse = await fetch(`${baseUrl}/customers/${customerId}`, {
-      method: "PUT",
-      headers: {
-        ...authHeader,
-        "content-type": "application/json",
+      setCleanupCustomerId: (nextCustomerId) => {
+        customerId = nextCustomerId
       },
-      body: JSON.stringify({
-        status: "inactive",
-      }),
     })
-    await assertStatus(updateResponse, 200)
-
-    lastStage = "customer_detail"
-    const detailResponse = await fetch(`${baseUrl}/customers/${customerId}`, {
-      headers: authHeader,
-    })
-    await assertStatus(detailResponse, 200)
-    const detailPayload = (await detailResponse.json()) as CustomerRecord
-    if (detailPayload.status !== "inactive") {
-      throw new Error(
-        `Expected updated customer status=inactive, received ${detailPayload.status}`,
-      )
-    }
-
-    lastStage = "customer_delete"
-    const deleteResponse = await fetch(`${baseUrl}/customers/${customerId}`, {
-      method: "DELETE",
-      headers: authHeader,
-    })
-    await assertStatus(deleteResponse, 204)
-    customerId = null
-
-    lastStage = "customer_verify_deleted"
-    const afterDeleteResponse = await fetch(
-      `${baseUrl}/customers/${created.id}`,
-      {
-        headers: authHeader,
-      },
-    )
-    await assertStatus(afterDeleteResponse, 404)
 
     lastStage = "workflow_definition_create_linear"
     const createLinearDefinitionResponse = await fetch(
