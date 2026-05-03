@@ -36,11 +36,16 @@ describe("createServerApp auth sessions", () => {
     }
 
     expect(payload.paths["/auth/login"]?.post?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/auth/login"]?.post?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/auth/me"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/auth/me"]?.get?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/auth/sessions"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/auth/refresh"]?.post?.responses?.["200"]).toBeDefined()
     expect(
       payload.paths["/auth/sessions/{id}"]?.delete?.responses?.["204"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/auth/sessions/{id}"]?.delete?.responses?.["404"],
     ).toBeDefined()
     expect(payload.paths["/auth/logout"]?.post?.responses?.["204"]).toBeDefined()
   })

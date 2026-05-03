@@ -1,6 +1,7 @@
 import { deriveBodySchema, userModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import { userListResponseSchema, userRecordResponseSchema } from "./openapi"
@@ -70,6 +71,7 @@ export const createUserModule = (
           query: userListQuerySchema,
           response: {
             200: userListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["user"],
@@ -86,6 +88,9 @@ export const createUserModule = (
           return service.exportCsv()
         },
         {
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["user"],
             summary: "Export users as CSV",
@@ -105,6 +110,7 @@ export const createUserModule = (
           }),
           response: {
             200: userRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["user"],
@@ -124,6 +130,7 @@ export const createUserModule = (
           body: userCreateBodySchema,
           response: {
             201: userRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["user"],
@@ -145,6 +152,7 @@ export const createUserModule = (
           body: userUpdateBodySchema,
           response: {
             200: userRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["user"],
@@ -169,6 +177,7 @@ export const createUserModule = (
           }),
           response: {
             204: t.Void(),
+            ...createErrorResponses(400, 401, 403, 404),
           },
           detail: {
             tags: ["user"],

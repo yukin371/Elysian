@@ -36,9 +36,14 @@ describe("createServerApp system user access", () => {
     }
 
     expect(payload.paths["/system/users"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/users"]?.get?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/system/users"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/users"]?.post?.responses?.["409"]).toBeDefined()
     expect(payload.paths["/system/users/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/system/users/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/system/users/{id}"]?.put?.responses?.["404"],
+    ).toBeDefined()
     expect(
       payload.paths["/system/users/{id}/reset-password"]?.post?.responses?.[
         "204"

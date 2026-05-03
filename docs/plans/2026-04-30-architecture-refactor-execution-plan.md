@@ -30,7 +30,7 @@
 > - `1B / 后端错误码治理` 已补前端过渡兼容：`apps/example-vue` 的 `platform-api` 已改为结构化 `ApiError`，当前同时兼容顶层信封与旧 `error.{...}` 响应，`generator-preview` 工作区不再依赖 `message.includes(...)` 判断会话业务错误
 > - `1C / 前端 i18n 拆分` 已完成当前收口：`apps/example-vue/src/i18n/*modules.ts` 已按模块前缀拆到 `i18n/modules/`，中英文 key 数量与集合保持一致，并通过 `bun run build:vue`
 > - `6C-1 / OpenAPI spec 完整度评估` 已完成当前盘点：`apps/server` 已挂载 `/openapi` 与 `/openapi/json`，但当前 `92` 条路由里显式 `response` 契约为 `0`，仅 `3` 条声明 `query`、`14` 条声明 `body`、`40` 条声明 `params`；系统级 `/openapi/json` 输出也未包含可消费的 `responses`。结论：可确认具备 OpenAPI 基础入口，但暂不满足 `openapi-typescript` 作为前端主类型源的切换条件
-> - `6C / OpenAPI 响应契约补位` 已完成当前第十七刀：`system`、`auth`、`customer`、`role`、`menu`、`setting`、`department`、`post`、`dictionary`、`tenant`、`user`、`notification`、`operation-log`、`file`、`workflow` 与 `generator-session` 核心成功响应已写入 OpenAPI schema，并通过 `/openapi/json` 定向测试锁住 `200/201/204` responses；当前剩余缺口集中在统一错误响应文档化
+> - `6C / OpenAPI 响应契约补位` 已完成当前第十八刀：`system`、`auth`、`customer`、`role`、`menu`、`setting`、`department`、`post`、`dictionary`、`tenant`、`user`、`notification`、`operation-log`、`file`、`workflow` 与 `generator-session` 核心成功响应已写入 OpenAPI schema，并通过 `/openapi/json` 定向测试锁住 `200/201/204` responses；统一错误响应文档化已启动并完成 `auth / customer / file / user` 第一批补位，剩余模块继续按批次推进
 
 ---
 

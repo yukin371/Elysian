@@ -55,9 +55,12 @@ describe("createServerApp", () => {
     }
 
     expect(payload.paths["/customers"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/customers"]?.get?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/customers"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/customers"]?.post?.responses?.["400"]).toBeDefined()
     expect(payload.paths["/customers/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/customers/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/customers/{id}"]?.put?.responses?.["404"]).toBeDefined()
     expect(
       payload.paths["/customers/{id}"]?.delete?.responses?.["204"],
     ).toBeDefined()

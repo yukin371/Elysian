@@ -47,10 +47,18 @@ describe("createServerApp files", () => {
     }
 
     expect(payload.paths["/system/files"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/files"]?.get?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/system/files"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/files"]?.post?.responses?.["400"]).toBeDefined()
     expect(payload.paths["/system/files/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(
+      payload.paths["/system/files/{id}"]?.get?.responses?.["404"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/files/{id}"]?.delete?.responses?.["204"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/files/{id}/download"]?.get?.responses?.["404"],
     ).toBeDefined()
     expect(
       payload.paths["/system/files/delete"]?.post?.responses?.["200"],

@@ -3,6 +3,7 @@ import { t } from "elysia"
 
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
+import { createErrorResponses } from "../../openapi"
 import {
   customerListResponseSchema,
   customerRecordResponseSchema,
@@ -72,6 +73,7 @@ export const createCustomerModule = (
           }),
           response: {
             200: customerListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["customer"],
@@ -95,6 +97,7 @@ export const createCustomerModule = (
           }),
           response: {
             200: customerRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["customer"],
@@ -126,6 +129,7 @@ export const createCustomerModule = (
           }),
           response: {
             201: customerRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403),
           },
           detail: {
             tags: ["customer"],
@@ -155,6 +159,7 @@ export const createCustomerModule = (
           }),
           response: {
             200: customerRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404),
           },
           detail: {
             tags: ["customer"],
@@ -179,6 +184,7 @@ export const createCustomerModule = (
           }),
           response: {
             204: t.Void(),
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["customer"],

@@ -2,6 +2,7 @@ import { fileModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -71,6 +72,7 @@ export const createFileModule = (
           query: fileFilterSchema,
           response: {
             200: fileListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["file"],
@@ -91,6 +93,9 @@ export const createFileModule = (
         },
         {
           query: fileFilterSchema,
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["file"],
             summary: "Export file metadata as CSV",
@@ -110,6 +115,7 @@ export const createFileModule = (
           }),
           response: {
             200: fileRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["file"],
@@ -146,6 +152,7 @@ export const createFileModule = (
         {
           response: {
             201: fileRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403),
           },
           detail: {
             tags: ["file"],
@@ -171,6 +178,7 @@ export const createFileModule = (
           }),
           response: {
             200: fileBulkDeleteResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["file"],
@@ -205,6 +213,9 @@ export const createFileModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            ...createErrorResponses(401, 403, 404),
+          },
           detail: {
             tags: ["file"],
             summary: "Download file",
@@ -227,6 +238,7 @@ export const createFileModule = (
           }),
           response: {
             204: t.Void(),
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["file"],

@@ -7,6 +7,7 @@ import {
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
+import { createErrorResponses } from "../../openapi"
 import type { ServerModule } from "../module"
 import {
   authLoginResponseSchema,
@@ -109,6 +110,7 @@ export const createAuthModule = (
           }),
           response: {
             200: authLoginResponseSchema,
+            ...createErrorResponses(400, 401, 403, 423, 500),
           },
           detail: {
             tags: ["auth"],
@@ -123,6 +125,7 @@ export const createAuthModule = (
         {
           response: {
             200: authMeResponseSchema,
+            ...createErrorResponses(401),
           },
           detail: {
             tags: ["auth"],
@@ -139,6 +142,7 @@ export const createAuthModule = (
         {
           response: {
             200: authSessionsResponseSchema,
+            ...createErrorResponses(401),
           },
           detail: {
             tags: ["auth"],
@@ -177,6 +181,7 @@ export const createAuthModule = (
         {
           response: {
             200: authLoginResponseSchema,
+            ...createErrorResponses(401),
           },
           detail: {
             tags: ["auth"],
@@ -207,6 +212,7 @@ export const createAuthModule = (
           }),
           response: {
             204: t.Void(),
+            ...createErrorResponses(401, 404),
           },
           detail: {
             tags: ["auth"],
@@ -231,6 +237,7 @@ export const createAuthModule = (
         {
           response: {
             204: t.Void(),
+            ...createErrorResponses(401),
           },
           detail: {
             tags: ["auth"],

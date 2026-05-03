@@ -9,6 +9,11 @@ export const errorResponseSchema = t.Object({
   details: t.Optional(t.Record(t.String(), t.Unknown())),
 })
 
+export const createErrorResponses = (...statuses: number[]) =>
+  Object.fromEntries(
+    statuses.map((status) => [status, errorResponseSchema] as const),
+  )
+
 export const healthResponseSchema = t.Object({
   status: t.Literal("ok"),
   service: t.Literal(platformManifest.name),
