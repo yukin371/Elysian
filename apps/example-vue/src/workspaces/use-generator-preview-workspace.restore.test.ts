@@ -464,6 +464,56 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     )
   })
 
+  test("preserves current preview when restored session detail fails with auth error", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-protected") &&
+        method === "GET"
+      ) {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession({
+      id: "preview-session-current",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.selectedRecentSessionId.value = "preview-session-current"
+
+    await workspace.restorePreviewSession("preview-session-protected")
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.id).toBe("preview-session-current")
+    expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
+    expect(workspace.selectedRecentSessionId.value).toBe(
+      "preview-session-current",
+    )
+  })
+
   test("does not restore the current session again when already selected", async () => {
     let detailRequestCount = 0
 
