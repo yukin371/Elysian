@@ -13,11 +13,8 @@ import {
   type GeneratorPreviewSessionRecord,
   type GeneratorPreviewSqlProposal,
   type GeneratorPreviewSqlProposalHandoff,
-  applyGeneratorPreviewSession,
-  confirmGeneratorPreviewSession,
   createGeneratorPreviewSession,
   fetchGeneratorPreviewSession,
-  reviewGeneratorPreviewSession,
 } from "../lib/platform-api"
 
 import {
@@ -41,6 +38,7 @@ import {
   localizeGeneratorPreviewConflictStrategy,
   prioritizeGeneratorPreviewRecentSessions,
 } from "./generator-preview-session-presentation"
+import { createGeneratorPreviewSessionActions } from "./generator-preview-session-actions"
 import { createGeneratorPreviewSessionRestore } from "./generator-preview-session-restore"
 
 export const useGeneratorPreviewWorkspace = (
@@ -372,186 +370,29 @@ export const useGeneratorPreviewWorkspace = (
     }
   }
 
-  const applyPreview = async () => {
-    const sessionId = currentSession.value?.id
-    if (!sessionId || !canApplyPreview.value) {
-      return
-    }
-
-    applyLoading.value = true
-    errorMessage.value = ""
-
-    try {
-      const response = await applyGeneratorPreviewSession(sessionId)
-
-      if (response.session.id !== sessionId) {
-        errorMessage.value =
-          "Generator apply response does not match current session"
-        return
-      }
-
-      if (currentReport.value) {
-        applySessionDetail(
-          buildGeneratorPreviewSessionDetail(
-            response.session,
-            response.diff,
-            currentReport.value,
-            response.sqlProposal,
-            response.sqlProposalHandoff,
-          ),
-        )
-      } else {
-        upsertRecentSession(response.session)
-        currentSession.value = response.session
-        currentDiffSummary.value = response.diff
-        currentSqlProposal.value = response.sqlProposal
-        currentSqlProposalHandoff.value = response.sqlProposalHandoff
-        selectedRecentSessionId.value = response.session.id
-        persistCurrentSelection()
-      }
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        (error.message.includes("GENERATOR_SESSION_NOT_READY") ||
-          error.message.includes("GENERATOR_SESSION_REJECTED") ||
-          error.message.includes("GENERATOR_SESSION_CONFIRMATION_REQUIRED"))
-      ) {
-        if (
-          await refreshSessionDetailAfterStateDrift(sessionId, error.message)
-        ) {
-          return
-        }
-      }
-
-      onRecoverableAuthError(error)
-      errorMessage.value =
-        error instanceof Error ? error.message : "Generator apply failed"
-    } finally {
-      applyLoading.value = false
-    }
-  }
-
-  const reviewPreview = async (
-    decision: "approve" | "reject",
-    comment?: string,
-  ) => {
-    const sessionId = currentSession.value?.id
-    const canReview =
-      decision === "approve" ? canApprovePreview.value : canRejectPreview.value
-
-    if (!sessionId || !canReview) {
-      return
-    }
-
-    reviewLoading.value = true
-    errorMessage.value = ""
-
-    try {
-      const response = await reviewGeneratorPreviewSession(sessionId, {
-        comment: comment?.trim() ? comment.trim() : undefined,
-        decision,
-      })
-
-      if (response.session.id !== sessionId) {
-        errorMessage.value =
-          "Generator review response does not match current session"
-        return
-      }
-
-      if (currentReport.value) {
-        applySessionDetail(
-          buildGeneratorPreviewSessionDetail(
-            response.session,
-            response.diff,
-            currentReport.value,
-            response.sqlProposal,
-            response.sqlProposalHandoff,
-          ),
-        )
-      } else {
-        upsertRecentSession(response.session)
-        currentSession.value = response.session
-        currentDiffSummary.value = response.diff
-        currentSqlProposal.value = response.sqlProposal
-        currentSqlProposalHandoff.value = response.sqlProposalHandoff
-        selectedRecentSessionId.value = response.session.id
-        persistCurrentSelection()
-      }
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("GENERATOR_SESSION_REVIEW_NOT_PENDING")
-      ) {
-        if (
-          await refreshSessionDetailAfterStateDrift(sessionId, error.message)
-        ) {
-          return
-        }
-      }
-
-      onRecoverableAuthError(error)
-      errorMessage.value =
-        error instanceof Error ? error.message : "Generator review failed"
-    } finally {
-      reviewLoading.value = false
-    }
-  }
-
-  const confirmPreview = async () => {
-    const sessionId = currentSession.value?.id
-    const handoff = currentSqlProposalHandoff.value
-    if (!sessionId || !handoff || !canConfirmPreview.value) {
-      return
-    }
-
-    reviewLoading.value = true
-    errorMessage.value = ""
-
-    try {
-      const response = await confirmGeneratorPreviewSession(sessionId, {
-        displayedRecoveryStatus:
-          handoff.migrationProposalSnapshotRecovery?.status ?? "none",
-        displayedSnapshotPath: handoff.migrationProposalSnapshotPath,
-      })
-
-      if (response.session.id !== sessionId) {
-        errorMessage.value =
-          "Generator confirmation response does not match current session"
-        return
-      }
-
-      upsertRecentSession(response.session)
-      currentSession.value = {
-        ...currentSession.value,
-        ...response.session,
-      }
-      currentSqlProposalHandoff.value = response.sqlProposalHandoff
-      selectedRecentSessionId.value = response.session.id
-      persistCurrentSelection()
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        (error.message.includes(
-          "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
-        ) ||
-          error.message.includes(
-            "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
-          ))
-      ) {
-        if (
-          await refreshSessionDetailAfterStateDrift(sessionId, error.message)
-        ) {
-          return
-        }
-      }
-
-      onRecoverableAuthError(error)
-      errorMessage.value =
-        error instanceof Error ? error.message : "Generator confirmation failed"
-    } finally {
-      reviewLoading.value = false
-    }
-  }
+  const { applyPreview, confirmPreview, reviewPreview } =
+    createGeneratorPreviewSessionActions({
+      applyLoading,
+      applySessionDetail,
+      canApplyPreview,
+      canApprovePreview,
+      canConfirmPreview,
+      canRejectPreview,
+      currentDiffSummary,
+      currentReport,
+      currentSession,
+      currentSqlProposal,
+      currentSqlProposalHandoff,
+      onRecoverableAuthError,
+      persistCurrentSelection,
+      refreshSessionDetailAfterStateDrift,
+      reviewLoading,
+      selectedRecentSessionId,
+      setErrorMessage: (message) => {
+        errorMessage.value = message
+      },
+      upsertRecentSession,
+    })
 
   const restorePreviewSession = async (sessionId: string) => {
     if (
