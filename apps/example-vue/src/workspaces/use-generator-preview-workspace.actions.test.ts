@@ -639,6 +639,72 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.canApplyPreview.value).toBe(true)
   })
 
+  test("refreshes current detail when apply becomes blocked by conflicts", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_BLOCKING_CONFLICTS",
+              message: "Generator session still has blocking conflicts",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              confirmedAt: "2026-05-02T12:10:00.000Z",
+              hasBlockingConflicts: detailRequestCount > 1,
+              id: "preview-session-1",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace({ enabled: false })
+    await workspace.restorePreviewSession("preview-session-1")
+    enabled.value = true
+
+    await workspace.applyPreview()
+
+    expect(detailRequestCount).toBe(2)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentSession.value?.hasBlockingConflicts).toBe(true)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_BLOCKING_CONFLICTS",
+    )
+    expect(workspace.canApplyPreview.value).toBe(false)
+  })
+
   test("refreshes current detail when apply session has been rejected", async () => {
     let detailRequestCount = 0
 

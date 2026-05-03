@@ -98,7 +98,8 @@ export const createGeneratorPreviewSessionActions = (
         error instanceof Error &&
         (error.message.includes("GENERATOR_SESSION_NOT_READY") ||
           error.message.includes("GENERATOR_SESSION_REJECTED") ||
-          error.message.includes("GENERATOR_SESSION_CONFIRMATION_REQUIRED"))
+          error.message.includes("GENERATOR_SESSION_CONFIRMATION_REQUIRED") ||
+          error.message.includes("GENERATOR_SESSION_BLOCKING_CONFLICTS"))
       ) {
         if (
           await options.refreshSessionDetailAfterStateDrift(
