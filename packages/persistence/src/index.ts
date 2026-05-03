@@ -16,6 +16,7 @@ export {
   type BuildMigrationProposalSnapshotInput,
   type MigrationProposalSnapshot,
   readMigrationProposalSnapshot,
+  resolveMigrationProposalSnapshotPath,
   writeMigrationProposalSnapshot,
 } from "./migration-proposal-snapshot"
 export {

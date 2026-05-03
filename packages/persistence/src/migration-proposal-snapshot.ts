@@ -23,13 +23,14 @@ export interface BuildMigrationProposalSnapshotInput {
   sessionId: string
 }
 
+export const resolveMigrationProposalSnapshotPath = (
+  reportPath: string,
+): string => reportPath.replace(/\.preview\.json$/, ".migration-proposal.json")
+
 export const buildMigrationProposalSnapshot = (
   input: BuildMigrationProposalSnapshotInput,
 ): MigrationProposalSnapshot => {
-  const snapshotPath = input.reportPath.replace(
-    /\.preview\.json$/,
-    ".migration-proposal.json",
-  )
+  const snapshotPath = resolveMigrationProposalSnapshotPath(input.reportPath)
 
   return {
     generatedAt: input.generatedAt,

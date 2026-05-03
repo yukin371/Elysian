@@ -11,6 +11,10 @@ import {
   createInMemoryGeneratorSessionRepository,
   createPasswordHash,
 } from ".."
+import {
+  buildMigrationProposalSnapshot,
+  writeMigrationProposalSnapshot,
+} from "@elysian/persistence"
 import { type CreateServerAppOptions, createServerApp } from "../../app"
 import { createServerConfig } from "../../config"
 import type { ServerLogger } from "../../logging"
@@ -63,6 +67,25 @@ const createAuthorizedHeaders = (
   authorization: `Bearer ${accessToken}`,
   ...extraHeaders,
 })
+
+const writeMigrationProposalSnapshotFixture = async (
+  reportPath: string,
+  schemaName: string,
+  sessionId: string,
+  databaseChangePlan: Parameters<
+    typeof buildMigrationProposalSnapshot
+  >[0]["databaseChangePlan"],
+) => {
+  await writeMigrationProposalSnapshot(
+    buildMigrationProposalSnapshot({
+      databaseChangePlan,
+      generatedAt: "2026-04-20T00:00:00.000Z",
+      reportPath,
+      schemaName,
+      sessionId,
+    }),
+  )
+}
 
 const createAuthFixture = async () => {
   const adminRoleId = crypto.randomUUID()
@@ -1034,6 +1057,12 @@ describe("generator session module", () => {
       sourceValue: "ticket",
       targetPreset: "default",
     } as never)
+    await writeMigrationProposalSnapshotFixture(
+      session.reportPath,
+      session.schemaName,
+      session.id,
+      invalidChangePlan,
+    )
 
     const app = createTestApp([createGeneratorSessionModule(repository)])
     const response = await app.handle(
@@ -1144,6 +1173,12 @@ describe("generator session module", () => {
       sourceValue: "customer",
       targetPreset: "default",
     } as never)
+    await writeMigrationProposalSnapshotFixture(
+      session.reportPath,
+      session.schemaName,
+      session.id,
+      validChangePlan,
+    )
 
     const app = createTestApp([createGeneratorSessionModule(repository)])
     const response = await app.handle(

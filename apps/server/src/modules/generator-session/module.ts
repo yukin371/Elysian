@@ -1,8 +1,8 @@
 import { t } from "elysia"
 import {
   resolveMigrationProposalFromChangePlan,
-  buildMigrationProposalSnapshot,
-  type MigrationProposalSnapshot,
+  readMigrationProposalSnapshot,
+  resolveMigrationProposalSnapshotPath,
 } from "@elysian/persistence"
 
 import { AppError } from "../../errors"
@@ -136,7 +136,7 @@ export const createGeneratorSessionModule = (
             })
           }
 
-          return toSessionDetailResponse(session)
+          return await toSessionDetailResponse(session)
         },
         {
           params: t.Object({
@@ -184,7 +184,7 @@ export const createGeneratorSessionModule = (
             conflictExplanations: buildConflictExplanations(session.report),
             report: session.report,
             sqlProposal: buildSqlProposal(session),
-            sqlProposalHandoff: buildSqlProposalHandoff(session),
+            sqlProposalHandoff: await buildSqlProposalHandoff(session),
           }
         },
         {
@@ -232,7 +232,7 @@ export const createGeneratorSessionModule = (
             targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
             conflictExplanations: buildConflictExplanations(session.report),
             sqlProposal: buildSqlProposal(session),
-            sqlProposalHandoff: buildSqlProposalHandoff(session),
+            sqlProposalHandoff: await buildSqlProposalHandoff(session),
           }
         },
         {
@@ -271,8 +271,9 @@ export const createGeneratorSessionModule = (
 
           const session = await service.confirmPreviewSession({
             actor: identity,
-            confirmationChecklist:
-              buildSqlProposalHandoff(sessionBeforeConfirm).confirmationChecklist,
+            confirmationChecklist: (
+              await buildSqlProposalHandoff(sessionBeforeConfirm)
+            ).confirmationChecklist,
             id: params.id,
           })
 
@@ -291,7 +292,7 @@ export const createGeneratorSessionModule = (
 
           return {
             session: toSessionResponse(session),
-            sqlProposalHandoff: buildSqlProposalHandoff(session),
+            sqlProposalHandoff: await buildSqlProposalHandoff(session),
           }
         },
         {
@@ -339,7 +340,7 @@ export const createGeneratorSessionModule = (
             targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
             conflictExplanations: buildConflictExplanations(session.report),
             sqlProposal: buildSqlProposal(session),
-            sqlProposalHandoff: buildSqlProposalHandoff(session),
+            sqlProposalHandoff: await buildSqlProposalHandoff(session),
             apply: {
               files: session.applyResult.files,
               evidence: buildApplyEvidence(session),
@@ -400,14 +401,14 @@ const toSessionResponse = (session: GeneratorPreviewSessionRecord) => ({
   tenantId: session.tenantId,
 })
 
-const toSessionDetailResponse = (session: GeneratorPreviewSessionDetail) => ({
+const toSessionDetailResponse = async (session: GeneratorPreviewSessionDetail) => ({
   ...toSessionResponse(session),
   diffSummary: buildDiffSummary(session.report),
   targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
   conflictExplanations: buildConflictExplanations(session.report),
   report: session.report,
   sqlProposal: buildSqlProposal(session),
-  sqlProposalHandoff: buildSqlProposalHandoff(session),
+  sqlProposalHandoff: await buildSqlProposalHandoff(session),
 })
 
 const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
@@ -586,16 +587,12 @@ const buildSqlProposalConfirmationChecklist = (
   ]
 }
 
-const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
-  const sqlProposalResolution = resolveSqlProposal(session)
-  const migrationProposalSnapshot: MigrationProposalSnapshot =
-    buildMigrationProposalSnapshot({
-      databaseChangePlan: session.report.databaseChangePlan,
-      generatedAt: session.createdAt,
-      reportPath: session.reportPath,
-      schemaName: session.schemaName,
-      sessionId: session.id,
-    })
+const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) => {
+  const snapshotPath = resolveMigrationProposalSnapshotPath(session.reportPath)
+  const migrationProposalSnapshot = await readMigrationProposalSnapshot(
+    snapshotPath,
+  )
+  const sqlProposalResolution = migrationProposalSnapshot.migrationProposalResolution
 
   return {
     proposalStatus:
