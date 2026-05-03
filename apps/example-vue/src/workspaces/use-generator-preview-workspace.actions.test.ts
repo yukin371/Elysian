@@ -1355,6 +1355,77 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.canApprovePreview.value).toBe(true)
   })
 
+  test("does not report auth recovery when stale review session refresh fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REVIEW_NOT_PENDING",
+              message: "Generator session is not pending review",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REPORT_READ_FAILED",
+              message: "Generator session report read failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.reviewPreview("approve")
+
+    expect(detailRequestCount).toBe(1)
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REPORT_READ_FAILED",
+    )
+    expect(workspace.currentSession.value?.status).toBe("pending_review")
+    expect(workspace.canApprovePreview.value).toBe(true)
+  })
+
   test("does not apply pending review preview sessions", async () => {
     const { workspace } = createWorkspace()
     workspace.currentSession.value = createSession()
@@ -1705,6 +1776,80 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(detailRequestCount).toBe(1)
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentSession.value?.confirmedAt).toBeNull()
+    expect(workspace.canConfirmPreview.value).toBe(true)
+  })
+
+  test("does not report auth recovery when stale confirmation handoff refresh fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
+              message:
+                "Generator session confirmation does not match the displayed SQL handoff",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REPORT_READ_FAILED",
+              message: "Generator session report read failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+
+    await workspace.confirmPreview()
+
+    expect(detailRequestCount).toBe(1)
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REPORT_READ_FAILED",
+    )
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentSession.value?.confirmedAt).toBeNull()
     expect(workspace.canConfirmPreview.value).toBe(true)
