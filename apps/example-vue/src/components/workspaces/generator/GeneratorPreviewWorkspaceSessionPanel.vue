@@ -13,6 +13,7 @@ interface GeneratorPreviewWorkspaceSessionPanelProps {
   sessionConfirmedAtLabel: string
   sessionConfirmedByLabel: string
   sessionConfirmationNote: string | null
+  confirmationEvidenceSummary: string | null
   reportPathCopyLabel: string
   sessionIdCopyLabel: string
   createdAtCopyLabel: string
@@ -55,6 +56,12 @@ const emit = defineEmits<{
       class="enterprise-message enterprise-message-info"
     >
       {{ sessionConfirmationNote }}
+    </p>
+    <p
+      v-if="confirmationEvidenceSummary"
+      class="enterprise-message enterprise-message-info"
+    >
+      {{ confirmationEvidenceSummary }}
     </p>
     <div class="enterprise-metadata">
       <div>

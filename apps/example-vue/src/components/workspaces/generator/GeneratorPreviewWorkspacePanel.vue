@@ -41,6 +41,10 @@ interface GeneratorPreviewWorkspacePanelProps {
   applyEvidence: GeneratorPreviewApplyEvidence | null
 }
 
+interface GeneratorPreviewConfirmationEvidenceRecord {
+  checklist?: unknown
+}
+
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
 const {
   copySuggestedCommandsByKey,
@@ -137,6 +141,23 @@ const sessionConfirmationNote = computed(() =>
     ? props.t("app.generatorPreview.message.confirmedReady")
     : null,
 )
+
+const confirmationEvidenceSummary = computed(() => {
+  if (!props.session?.confirmedAt || !props.session.confirmationEvidence) {
+    return null
+  }
+
+  const evidence = props.session
+    .confirmationEvidence as GeneratorPreviewConfirmationEvidenceRecord
+
+  if (!Array.isArray(evidence.checklist)) {
+    return null
+  }
+
+  return props.t("app.generatorPreview.message.confirmationEvidenceCaptured", {
+    count: evidence.checklist.length,
+  })
+})
 
 const reviewActorLabel = computed(() =>
   resolveEvidenceActorLabel(props.reviewEvidence),
@@ -507,6 +528,7 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :session-confirmed-at-label="sessionConfirmedAtLabel"
         :session-confirmed-by-label="sessionConfirmedByLabel"
         :session-confirmation-note="sessionConfirmationNote"
+        :confirmation-evidence-summary="confirmationEvidenceSummary"
         :report-path-copy-label="resolveSnippetCopyLabel('reportPath')"
         :session-id-copy-label="resolveSnippetCopyLabel('sessionId')"
         :created-at-copy-label="resolveSnippetCopyLabel('createdAt')"
