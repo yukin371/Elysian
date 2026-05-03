@@ -8,6 +8,7 @@ import {
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
   markGeneratorPreviewSessionApplied,
+  markGeneratorPreviewSessionConfirmed,
   markGeneratorPreviewSessionReviewed,
 } from "./generator-session"
 import { insertTenant } from "./tenant"
@@ -185,6 +186,65 @@ describe("generator preview session persistence", () => {
       })
     })
   })
+
+  it("updates confirmation evidence on the existing preview session", async () => {
+    await withGeneratorSessionTestDb(async ({ db }) => {
+      const created = await insertGeneratorPreviewSession(db, {
+        id: "99999999-9999-4999-8999-999999999999",
+        tenantId: tenantAlphaId,
+        actorDisplayName: "Alpha Admin",
+        actorUserId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        actorUsername: "alpha-admin",
+        conflictStrategy: "fail",
+        createdAt: new Date("2026-04-27T12:00:00.000Z"),
+        frontendTarget: "vue",
+        hasBlockingConflicts: false,
+        outputDir: "E:/generated",
+        previewFileCount: 1,
+        reportPath: "E:/generated/reports/confirm.preview.json",
+        schemaName: "customer",
+        sourceType: "registered-schema",
+        sourceValue: "customer",
+        targetPreset: "staging",
+      })
+
+      const updated = await markGeneratorPreviewSessionConfirmed(
+        db,
+        created.id,
+        {
+          confirmedAt: new Date("2026-04-27T12:20:00.000Z"),
+          confirmedByDisplayName: "Alpha Admin",
+          confirmedByUserId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          confirmedByUsername: "alpha-admin",
+          confirmationEvidence: {
+            sessionId: created.id,
+            reportPath: "E:/generated/reports/confirm.preview.json",
+            confirmedAt: "2026-04-27T12:20:00.000Z",
+            actorDisplayName: "Alpha Admin",
+            actorUserId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+            actorUsername: "alpha-admin",
+            checklist: ["Review the SQL draft."],
+          },
+        },
+      )
+
+      expect(updated?.confirmedByUsername).toBe("alpha-admin")
+      expect(updated?.confirmationEvidence).toMatchObject({
+        sessionId: created.id,
+        confirmedAt: "2026-04-27T12:20:00.000Z",
+        checklist: ["Review the SQL draft."],
+      })
+
+      const persisted = await getGeneratorPreviewSessionById(db, created.id)
+      expect(persisted?.confirmedAt?.toISOString()).toBe(
+        "2026-04-27T12:20:00.000Z",
+      )
+      expect(persisted?.confirmationEvidence).toMatchObject({
+        sessionId: created.id,
+        actorUserId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      })
+    })
+  })
 })
 
 async function withGeneratorSessionTestDb(
@@ -277,6 +337,11 @@ create table generator_preview_sessions (
   reviewed_by_display_name text,
   reviewed_by_user_id uuid,
   reviewed_by_username text,
+  confirmed_at timestamp with time zone,
+  confirmed_by_display_name text,
+  confirmed_by_user_id uuid,
+  confirmed_by_username text,
+  confirmation_evidence jsonb,
   apply_evidence jsonb,
   schema_name text not null,
   skipped_file_count integer,

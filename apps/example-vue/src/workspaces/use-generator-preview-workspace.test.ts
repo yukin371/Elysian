@@ -149,6 +149,11 @@ const createSession = (
   reviewedByUserId: null,
   reviewedByUsername: null,
   reviewEvidence: null,
+  confirmedAt: null,
+  confirmedByDisplayName: null,
+  confirmedByUserId: null,
+  confirmedByUsername: null,
+  confirmationEvidence: null,
   schemaName: "customer",
   skippedFileCount: null,
   sourceType: "registered-schema",
@@ -1003,6 +1008,10 @@ describe("useGeneratorPreviewWorkspace", () => {
 
     expect(listRequestCount).toBe(1)
     expect(workspace.currentSession.value?.status).toBe("ready")
+    workspace.currentSession.value = {
+      ...workspace.currentSession.value!,
+      confirmedAt: "2026-05-02T16:07:00.000Z",
+    }
     expect(workspace.recentSessionOptions.value[0]?.value).toBe(
       "preview-session-created",
     )
@@ -1779,7 +1788,10 @@ describe("useGeneratorPreviewWorkspace", () => {
       },
     })
 
-    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentSession.value = createSession({
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+      status: "ready",
+    })
     workspace.currentDiffSummary.value = createDiffSummary()
     workspace.selectedFilePath.value = createReport().files[0]?.path ?? null
 
@@ -1821,7 +1833,10 @@ describe("useGeneratorPreviewWorkspace", () => {
     }) as typeof fetch
 
     const { workspace } = createWorkspace({ enabled: true })
-    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentSession.value = createSession({
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+      status: "ready",
+    })
     workspace.currentDiffSummary.value = createDiffSummary()
 
     await workspace.applyPreview()
@@ -1894,6 +1909,10 @@ describe("useGeneratorPreviewWorkspace", () => {
       "approve",
     )
     expect(submittedComment).toBe("ready for staging")
+    workspace.currentSession.value = {
+      ...workspace.currentSession.value!,
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+    }
     expect(workspace.canApplyPreview.value).toBe(true)
     expect(workspace.canApprovePreview.value).toBe(false)
   })
@@ -1990,6 +2009,66 @@ describe("useGeneratorPreviewWorkspace", () => {
     workspace.currentDiffSummary.value = createDiffSummary()
 
     expect(workspace.canApplyPreview.value).toBe(false)
+  })
+
+  test("confirms ready preview sessions before allowing apply", async () => {
+    let confirmRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        confirmRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            session: createSession({
+              confirmedAt: "2026-05-02T12:15:00.000Z",
+              confirmationEvidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                checklist: ["Review the SQL draft."],
+                confirmedAt: "2026-05-02T12:15:00.000Z",
+                reportPath: "generated/reports/preview-session-1.preview.json",
+                sessionId: "preview-session-1",
+              },
+              status: "ready",
+            }),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    expect(workspace.canConfirmPreview.value).toBe(true)
+    expect(workspace.canApplyPreview.value).toBe(false)
+
+    await workspace.confirmPreview()
+
+    expect(confirmRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.confirmedAt).toBe(
+      "2026-05-02T12:15:00.000Z",
+    )
+    expect(workspace.currentSession.value?.confirmationEvidence?.checklist).toEqual(
+      ["Review the SQL draft."],
+    )
+    expect(workspace.canConfirmPreview.value).toBe(false)
+    expect(workspace.canApplyPreview.value).toBe(true)
   })
 
   test("does not expose review or apply actions while workspace is disabled", async () => {

@@ -153,6 +153,11 @@ export interface GeneratorPreviewSessionRecord {
   reviewedByUserId: string | null
   reviewedByUsername: string | null
   reviewEvidence: GeneratorPreviewReviewEvidence | null
+  confirmedAt: string | null
+  confirmedByDisplayName: string | null
+  confirmedByUserId: string | null
+  confirmedByUsername: string | null
+  confirmationEvidence: Record<string, unknown> | null
   schemaName: string
   skippedFileCount: number | null
   sourceType: "registered-schema"
@@ -198,6 +203,11 @@ export interface ReviewGeneratorPreviewSessionResponse {
   session: GeneratorPreviewSessionRecord
   diff: GeneratorPreviewDiffSummary
   sqlProposal: GeneratorPreviewSqlProposal | null
+  sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
+}
+
+export interface ConfirmGeneratorPreviewSessionResponse {
+  session: GeneratorPreviewSessionRecord
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
 }
 
@@ -280,6 +290,17 @@ export const reviewGeneratorPreviewSession = async (
     {
       method: "POST",
       body: input,
+      auth: true,
+    },
+  )
+
+export const confirmGeneratorPreviewSession = async (
+  id: string,
+): Promise<ConfirmGeneratorPreviewSessionResponse> =>
+  requestJson<ConfirmGeneratorPreviewSessionResponse>(
+    `/studio/generator/sessions/${encodeURIComponent(id)}/confirm`,
+    {
+      method: "POST",
       auth: true,
     },
   )

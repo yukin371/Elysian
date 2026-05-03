@@ -40,6 +40,7 @@ interface GeneratorPreviewWorkspaceMainProps {
   canApprove: boolean
   canReject: boolean
   canApply: boolean
+  canConfirm: boolean
   diffSummary: GeneratorPreviewDiffSummary | null
   sessionStatus: "pending_review" | "ready" | "rejected" | "applied" | null
   reviewEvidence: GeneratorPreviewReviewEvidence | null
@@ -62,6 +63,7 @@ const emit = defineEmits<{
     e: "review-preview",
     value: { decision: "approve" | "reject"; comment?: string },
   ): void
+  (e: "confirm-preview"): void
   (e: "apply-preview"): void
 }>()
 
@@ -198,6 +200,10 @@ const nextOperationKey = computed(() => {
 
   if (props.hasBlockingConflicts) {
     return "app.generatorPreview.next.resolveConflicts"
+  }
+
+  if (props.sessionStatus === "ready" && props.canConfirm) {
+    return "app.generatorPreview.next.confirmChecklist"
   }
 
   if (props.sessionStatus === "ready" && props.canApply) {
@@ -341,6 +347,14 @@ const handleApplyPreview = () => {
   }
 
   emit("apply-preview")
+}
+
+const handleConfirmPreview = () => {
+  if (!props.canConfirm || props.loading || props.reviewLoading || props.applyLoading) {
+    return
+  }
+
+  emit("confirm-preview")
 }
 
 const cancelApplyConfirmation = () => {
@@ -536,6 +550,15 @@ watch(
             @click="cancelApplyConfirmation"
           >
             {{ t("app.generatorPreview.action.cancelApplyConfirm") }}
+          </button>
+          <button
+            v-if="canConfirm"
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="loading || reviewLoading || applyLoading"
+            @click="handleConfirmPreview"
+          >
+            {{ t("app.generatorPreview.action.confirmChecklist") }}
           </button>
           <button
             type="button"

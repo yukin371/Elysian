@@ -248,6 +248,61 @@ export const createGeneratorSessionModule = (
         },
       )
       .post(
+        "/studio/generator/sessions/:id/confirm",
+        async ({ params, request }) => {
+          const identity = (await authorize(request.headers)) ?? null
+          const sessionBeforeConfirm = await service.getPreviewSessionById(
+            params.id,
+          )
+
+          if (!sessionBeforeConfirm) {
+            throw new AppError({
+              code: "GENERATOR_SESSION_NOT_FOUND",
+              message: "Generator session not found",
+              status: 404,
+              expose: true,
+              details: {
+                id: params.id,
+              },
+            })
+          }
+
+          const session = await service.confirmPreviewSession({
+            actor: identity,
+            confirmationChecklist:
+              buildSqlProposalHandoff(sessionBeforeConfirm).confirmationChecklist,
+            id: params.id,
+          })
+
+          if (identity) {
+            await recordAuditBestEffort(request.headers, identity, {
+              action: "review_confirm",
+              details: {
+                schemaName: session.schemaName,
+                frontendTarget: session.frontendTarget,
+                targetPreset: session.targetPreset,
+                confirmedAt: session.confirmedAt,
+              },
+              sessionId: session.id,
+            })
+          }
+
+          return {
+            session: toSessionResponse(session),
+            sqlProposalHandoff: buildSqlProposalHandoff(session),
+          }
+        },
+        {
+          params: t.Object({
+            id: t.String({ minLength: 1 }),
+          }),
+          detail: {
+            tags: ["generator"],
+            summary: "Confirm a generator preview session checklist",
+          },
+        },
+      )
+      .post(
         "/studio/generator/sessions/:id/apply",
         async ({ params, request }) => {
           const identity = (await authorize(request.headers)) ?? null
@@ -329,6 +384,11 @@ const toSessionResponse = (session: GeneratorPreviewSessionRecord) => ({
   reviewedByUserId: session.reviewedByUserId,
   reviewedByUsername: session.reviewedByUsername,
   reviewEvidence: buildReviewEvidence(session),
+  confirmedAt: session.confirmedAt,
+  confirmedByDisplayName: session.confirmedByDisplayName,
+  confirmedByUserId: session.confirmedByUserId,
+  confirmedByUsername: session.confirmedByUsername,
+  confirmationEvidence: buildConfirmationEvidence(session),
   schemaName: session.schemaName,
   skippedFileCount: session.skippedFileCount,
   sourceType: session.sourceType,
@@ -372,6 +432,16 @@ const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
     actorUsername: session.appliedByUsername,
     requestId: session.applyRequestId,
   }
+}
+
+const buildConfirmationEvidence = (
+  session: GeneratorPreviewSessionRecord,
+) => {
+  if (session.confirmationEvidence != null) {
+    return session.confirmationEvidence
+  }
+
+  return null
 }
 
 const buildReviewEvidence = (session: GeneratorPreviewSessionRecord) => {

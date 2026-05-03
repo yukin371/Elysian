@@ -142,7 +142,36 @@ describe("createExampleShellBindingsOptions", () => {
       workflowWorkspace: createWorkspaceInput({}),
       generatorPreviewWorkspace: {
         generatorPreviewLoading: true,
+        generatorPreviewReviewLoading: false,
+        generatorPreviewApplyLoading: false,
+        generatorPreviewErrorMessage: "",
+        generatorPreviewSchemaOptions: [],
+        generatorPreviewConflictStrategyOptions: [],
+        generatorPreviewRecentSessionOptions: [],
+        selectedGeneratorPreviewConflictStrategy: "",
+        selectedGeneratorPreviewRecentSessionId: "",
+        selectedGeneratorPreviewSchemaName: "",
+        selectedGeneratorPreviewFrontendTarget: "vue",
+        generatorPreviewQuery: "",
+        generatorPreviewFilterSummary: "",
+        generatorPreviewFiles: [],
+        selectedGeneratorPreviewFilePath: null,
+        canApproveGeneratorPreview: false,
+        canRejectGeneratorPreview: false,
+        canApplyGeneratorPreview: false,
+        canConfirmGeneratorPreview: false,
+        generatorPreviewDiffSummary: null,
+        generatorPreviewSession: null,
+        selectedGeneratorPreviewSchema: null,
+        selectedGeneratorPreviewFile: null,
+        generatorPreviewSqlPreview: null,
+        generatorPreviewSqlProposal: null,
+        generatorPreviewSqlProposalHandoff: null,
         refreshGeneratorPreview,
+        restoreGeneratorPreviewSession: () => {},
+        reviewGeneratorPreview: () => {},
+        confirmGeneratorPreview: () => {},
+        applyGeneratorPreview: () => {},
       },
     } as unknown as CreateExampleShellBindingsOptionsInput
 
@@ -187,6 +216,8 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.fileExportLoading).toBe(true)
     expect(result.handleExportFiles).toBe(handleExportFiles)
     expect(result.generatorPreviewLoading).toBe(true)
+    expect(result.canConfirmGeneratorPreview).toBe(false)
     expect(result.refreshGeneratorPreview).toBe(refreshGeneratorPreview)
+    expect(result.confirmGeneratorPreview).toBeDefined()
   })
 })

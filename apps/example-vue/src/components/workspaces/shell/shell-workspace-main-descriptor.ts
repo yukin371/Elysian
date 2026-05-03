@@ -74,6 +74,7 @@ export interface ShellWorkspaceMainSwitchProps {
   canApproveGeneratorPreview: boolean
   canRejectGeneratorPreview: boolean
   canApplyGeneratorPreview: boolean
+  canConfirmGeneratorPreview: boolean
   generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null
   generatorPreviewSession: GeneratorPreviewSessionSummary | null
   dictionaryModuleReady: boolean
@@ -210,6 +211,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
     event: "review-generator-preview",
     input: { decision: "approve" | "reject"; comment?: string },
   ): void
+  (event: "confirm-generator-preview"): void
   (event: "apply-generator-preview"): void
   (event: "dictionary-search", payload: unknown): void
   (event: "dictionary-reset"): void
@@ -514,6 +516,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       canApprove: props.canApproveGeneratorPreview,
       canReject: props.canRejectGeneratorPreview,
       canApply: props.canApplyGeneratorPreview,
+      canConfirm: props.canConfirmGeneratorPreview,
       diffSummary: props.generatorPreviewDiffSummary,
       sessionStatus: props.generatorPreviewSession?.status ?? null,
       reviewEvidence: props.generatorPreviewSession?.reviewEvidence ?? null,
@@ -541,6 +544,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
           decision: "approve" | "reject"
           comment?: string
         }),
+      "confirm-preview": () => emit("confirm-generator-preview"),
       "apply-preview": () => emit("apply-generator-preview"),
     },
   }),

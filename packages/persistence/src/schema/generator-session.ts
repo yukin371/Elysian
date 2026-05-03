@@ -26,6 +26,8 @@ export const generatorPreviewSessions = pgTable("generator_preview_sessions", {
   appliedByUsername: text("applied_by_username"),
   applyManifestPath: text("apply_manifest_path"),
   applyRequestId: text("apply_request_id"),
+  confirmationEvidence: jsonb("confirmation_evidence")
+    .$type<Record<string, unknown> | null>(),
   conflictStrategy: text("conflict_strategy").notNull(),
   frontendTarget: text("frontend_target").notNull(),
   hasBlockingConflicts: boolean("has_blocking_conflicts")
@@ -41,6 +43,10 @@ export const generatorPreviewSessions = pgTable("generator_preview_sessions", {
   reviewedByUserId: uuid("reviewed_by_user_id"),
   reviewedByUsername: text("reviewed_by_username"),
   applyEvidence: jsonb("apply_evidence").$type<Record<string, unknown> | null>(),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  confirmedByDisplayName: text("confirmed_by_display_name"),
+  confirmedByUserId: uuid("confirmed_by_user_id"),
+  confirmedByUsername: text("confirmed_by_username"),
   schemaName: text("schema_name").notNull(),
   skippedFileCount: integer("skipped_file_count"),
   sourceType: text("source_type").notNull(),

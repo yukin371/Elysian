@@ -223,6 +223,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "canApproveGeneratorPreview"
     | "canRejectGeneratorPreview"
     | "canApplyGeneratorPreview"
+    | "canConfirmGeneratorPreview"
     | "generatorPreviewDiffSummary"
     | "generatorPreviewSession"
     | "selectedGeneratorPreviewSchema"
@@ -234,6 +235,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "refreshGeneratorPreview"
     | "restoreGeneratorPreviewSession"
     | "reviewGeneratorPreview"
+    | "confirmGeneratorPreview"
     | "applyGeneratorPreview"
   >
 }

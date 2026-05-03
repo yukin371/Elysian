@@ -19,6 +19,7 @@ export interface CreateGeneratorPreviewSessionPersistenceInput {
   appliedByUsername?: string | null
   applyManifestPath?: string | null
   applyRequestId?: string | null
+  confirmationEvidence?: Record<string, unknown> | null
   conflictStrategy: string
   createdAt: Date
   frontendTarget: string
@@ -32,6 +33,10 @@ export interface CreateGeneratorPreviewSessionPersistenceInput {
   reviewedByDisplayName?: string | null
   reviewedByUserId?: string | null
   reviewedByUsername?: string | null
+  confirmedAt?: Date | null
+  confirmedByDisplayName?: string | null
+  confirmedByUserId?: string | null
+  confirmedByUsername?: string | null
   applyEvidence?: Record<string, unknown> | null
   schemaName: string
   skippedFileCount?: number | null
@@ -63,6 +68,14 @@ export interface MarkGeneratorPreviewSessionReviewedPersistenceInput {
   status: "ready" | "rejected"
 }
 
+export interface MarkGeneratorPreviewSessionConfirmedPersistenceInput {
+  confirmedAt: Date
+  confirmedByDisplayName: string | null
+  confirmedByUserId: string | null
+  confirmedByUsername: string | null
+  confirmationEvidence: Record<string, unknown> | null
+}
+
 export async function insertGeneratorPreviewSession(
   db: DatabaseClient,
   input: CreateGeneratorPreviewSessionPersistenceInput,
@@ -82,6 +95,7 @@ export async function insertGeneratorPreviewSession(
       appliedByUsername: input.appliedByUsername ?? null,
       applyManifestPath: input.applyManifestPath ?? null,
       applyRequestId: input.applyRequestId ?? null,
+      confirmationEvidence: input.confirmationEvidence ?? null,
       conflictStrategy: input.conflictStrategy,
       createdAt: input.createdAt,
       frontendTarget: input.frontendTarget,
@@ -95,6 +109,10 @@ export async function insertGeneratorPreviewSession(
       reviewedByDisplayName: input.reviewedByDisplayName ?? null,
       reviewedByUserId: input.reviewedByUserId ?? null,
       reviewedByUsername: input.reviewedByUsername ?? null,
+      confirmedAt: input.confirmedAt ?? null,
+      confirmedByDisplayName: input.confirmedByDisplayName ?? null,
+      confirmedByUserId: input.confirmedByUserId ?? null,
+      confirmedByUsername: input.confirmedByUsername ?? null,
       applyEvidence: input.applyEvidence ?? null,
       schemaName: input.schemaName,
       skippedFileCount: input.skippedFileCount ?? null,
@@ -178,6 +196,27 @@ export async function markGeneratorPreviewSessionReviewed(
       reviewedByUsername: input.reviewedByUsername,
       status: input.status,
       updatedAt: input.reviewedAt,
+    })
+    .where(eq(generatorPreviewSessions.id, id))
+    .returning()
+
+  return row ?? null
+}
+
+export async function markGeneratorPreviewSessionConfirmed(
+  db: DatabaseClient,
+  id: string,
+  input: MarkGeneratorPreviewSessionConfirmedPersistenceInput,
+) {
+  const [row] = await db
+    .update(generatorPreviewSessions)
+    .set({
+      confirmedAt: input.confirmedAt,
+      confirmedByDisplayName: input.confirmedByDisplayName,
+      confirmedByUserId: input.confirmedByUserId,
+      confirmedByUsername: input.confirmedByUsername,
+      confirmationEvidence: input.confirmationEvidence,
+      updatedAt: input.confirmedAt,
     })
     .where(eq(generatorPreviewSessions.id, id))
     .returning()

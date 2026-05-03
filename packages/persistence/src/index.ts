@@ -94,9 +94,11 @@ export {
   getGeneratorPreviewSessionById,
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
+  markGeneratorPreviewSessionConfirmed,
   markGeneratorPreviewSessionApplied,
   markGeneratorPreviewSessionReviewed,
   type MarkGeneratorPreviewSessionAppliedPersistenceInput,
+  type MarkGeneratorPreviewSessionConfirmedPersistenceInput,
   type MarkGeneratorPreviewSessionReviewedPersistenceInput,
 } from "./generator-session"
 export {

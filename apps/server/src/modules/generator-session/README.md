@@ -6,7 +6,7 @@
 
 ## Owns
 
-- `/studio/generator/sessions` 的列表、详情、preview 创建、review、staging apply。
+- `/studio/generator/sessions` 的列表、详情、preview 创建、review、confirm、staging apply。
 - preview report 的落盘、session 元数据持久化、review/apply evidence 回传。
 - review-only SQL proposal 与正式 migration 人工接入规范回传。
 - blocking conflict / stale report / review required / rejected / apply conflict 的运行时错误语义。
@@ -47,12 +47,25 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  Apply[POST /sessions/:id/apply] --> Load[load session + report]
-  Load --> Guard{status=ready\nand no blocking conflicts?}
-  Guard -->|yes| Run[@elysian/generator\napply preview report]
-  Run --> Mark[markPreviewSessionApplied]
+  Confirm[POST /sessions/:id/confirm] --> Load[load session + report]
+  Load --> Guard{status=ready?}
+  Guard -->|yes| Mark[markPreviewSessionConfirmed]
   Mark --> Audit[best-effort audit]
   Guard -->|no| Conflict[409 AppError]
+```
+
+```mermaid
+flowchart TD
+  Apply[POST /sessions/:id/apply] --> Load[load session + report]
+  Load --> Ready{status=ready?}
+  Ready -->|yes| Confirmed{confirmedAt set?}
+  Confirmed -->|yes| Conflicts{no blocking conflicts?}
+  Conflicts -->|yes| Run[@elysian/generator\napply preview report]
+  Run --> Mark[markPreviewSessionApplied]
+  Mark --> Audit[best-effort audit]
+  Ready -->|no| Conflict[409 AppError]
+  Confirmed -->|no| Conflict
+  Conflicts -->|no| Conflict
 ```
 
 ## Validation
@@ -60,7 +73,8 @@ flowchart TD
 - `service.ts` 已确认 preview 前必须在 generator registry 中找到 schema，否则返回 `GENERATOR_SCHEMA_NOT_FOUND`。
 - `service.ts` 已确认新建 preview session 默认进入 `pending_review`。
 - `service.ts` 已确认 review 只允许在 `status=pending_review` 时执行，通过后进入 `ready`，拒绝后进入 `rejected`。
-- `service.ts` 已确认 apply 前必须满足 `status=ready` 且无 blocking conflicts；`pending_review` 会返回 `GENERATOR_SESSION_REVIEW_REQUIRED`，`rejected` 会返回 `GENERATOR_SESSION_REJECTED`。
+- `service.ts` 已确认 confirm 只允许在 `status=ready` 时执行，并会持久化确认人、确认时间和确认清单。
+- `service.ts` 已确认 apply 前必须满足 `status=ready`、`confirmedAt` 已写入且无 blocking conflicts；`pending_review` 会返回 `GENERATOR_SESSION_REVIEW_REQUIRED`，`rejected` 会返回 `GENERATOR_SESSION_REJECTED`，未确认会返回 `GENERATOR_SESSION_CONFIRMATION_REQUIRED`。
 - `service.ts` 已确认 stale report 与 apply conflict 会分流成 `GENERATOR_SESSION_STALE` / `GENERATOR_SESSION_APPLY_CONFLICT`。
 - `module.ts` 已确认通过 `@elysian/persistence` 的 proposal builder 返回 review-only SQL draft、Drizzle schema snippet、风险标签与人工 handoff 指引；proposal 构建失败不会阻断 preview session 本身。
 - `repository.ts` 已确认持久化 session 需要 `tenantId`，详情读取依赖落盘的 preview report。

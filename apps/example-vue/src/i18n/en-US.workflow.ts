@@ -193,6 +193,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.reject": "Reject",
   "app.generatorPreview.action.confirmReject": "Confirm reject",
   "app.generatorPreview.action.cancelRejectConfirm": "Cancel reject",
+  "app.generatorPreview.action.confirmChecklist": "Confirm checklist",
   "app.generatorPreview.action.apply": "Apply to staging",
   "app.generatorPreview.action.confirmApply": "Confirm staging apply",
   "app.generatorPreview.action.cancelApplyConfirm": "Cancel confirm",
@@ -208,6 +209,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.next.review": "Next: approve or reject",
   "app.generatorPreview.next.reviewing": "Next: wait for review",
   "app.generatorPreview.next.confirmReject": "Next: confirm reject or cancel",
+  "app.generatorPreview.next.confirmChecklist":
+    "Next: confirm checklist before apply",
   "app.generatorPreview.next.apply": "Next: apply to staging",
   "app.generatorPreview.next.confirmApply": "Next: confirm apply or cancel",
   "app.generatorPreview.next.applying": "Next: wait for apply",

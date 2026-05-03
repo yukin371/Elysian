@@ -42,6 +42,12 @@ interface ReviewGeneratorPreviewSessionInput {
   id: string
 }
 
+interface ConfirmGeneratorPreviewSessionInput {
+  actor: AuthIdentity | null
+  confirmationChecklist: string[]
+  id: string
+}
+
 export interface GeneratorSessionServiceOptions {
   now?: () => Date
   reportRootDir?: string
@@ -148,6 +154,19 @@ export const createGeneratorSessionService = (
         throw new AppError({
           code: "GENERATOR_SESSION_NOT_READY",
           message: "Generator session is not ready for apply",
+          status: 409,
+          expose: true,
+          details: {
+            id: session.id,
+            status: session.status,
+          },
+        })
+      }
+
+      if (session.confirmedAt === null) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_CONFIRMATION_REQUIRED",
+          message: "Generator session must be confirmed before apply",
           status: 409,
           expose: true,
           details: {
@@ -355,6 +374,74 @@ export const createGeneratorSessionService = (
       }
 
       return reviewedSession
+    },
+    async confirmPreviewSession(
+      input: ConfirmGeneratorPreviewSessionInput,
+    ): Promise<GeneratorPreviewSessionDetail> {
+      const session = await repository.getPreviewSessionById(input.id)
+      if (!session) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_NOT_FOUND",
+          message: "Generator session not found",
+          status: 404,
+          expose: true,
+          details: {
+            id: input.id,
+          },
+        })
+      }
+
+      if (session.status !== "ready") {
+        throw new AppError({
+          code: "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
+          message: "Generator session is not ready for confirmation",
+          status: 409,
+          expose: true,
+          details: {
+            id: session.id,
+            status: session.status,
+          },
+        })
+      }
+
+      if (session.confirmedAt !== null) {
+        return session
+      }
+
+      const confirmedAt = now().toISOString()
+      const confirmationEvidence = {
+        sessionId: session.id,
+        reportPath: session.reportPath,
+        confirmedAt,
+        actorDisplayName: input.actor?.user.displayName ?? null,
+        actorUserId: input.actor?.user.id ?? null,
+        actorUsername: input.actor?.user.username ?? null,
+        checklist: input.confirmationChecklist,
+      }
+      const confirmedSession = await repository.markPreviewSessionConfirmed(
+        session.id,
+        {
+          confirmedAt,
+          confirmedByDisplayName: input.actor?.user.displayName ?? null,
+          confirmedByUserId: input.actor?.user.id ?? null,
+          confirmedByUsername: input.actor?.user.username ?? null,
+          confirmationEvidence,
+        },
+      )
+
+      if (!confirmedSession) {
+        throw new AppError({
+          code: "GENERATOR_SESSION_NOT_FOUND",
+          message: "Generator session not found",
+          status: 404,
+          expose: true,
+          details: {
+            id: session.id,
+          },
+        })
+      }
+
+      return confirmedSession
     },
   }
 }

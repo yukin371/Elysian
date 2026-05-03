@@ -160,6 +160,7 @@ export interface UseExampleShellBindingsOptions {
   canApproveGeneratorPreview: ValueSource<boolean>
   canRejectGeneratorPreview: ValueSource<boolean>
   canApplyGeneratorPreview: ValueSource<boolean>
+  canConfirmGeneratorPreview: ValueSource<boolean>
   generatorPreviewDiffSummary: ValueSource<GeneratorPreviewDiffSummary | null>
   generatorPreviewSession: ValueSource<Record<string, unknown> | null>
   dictionaryModuleReady: ValueSource<boolean>
@@ -356,6 +357,7 @@ export interface UseExampleShellBindingsOptions {
     decision: "approve" | "reject"
     comment?: string
   }) => void
+  confirmGeneratorPreview: () => void
   applyGeneratorPreview: () => void
   handleDictionarySearch: (payload: unknown) => void
   handleDictionaryReset: () => void

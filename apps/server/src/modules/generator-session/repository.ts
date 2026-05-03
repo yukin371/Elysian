@@ -7,6 +7,7 @@ import {
   getGeneratorPreviewSessionById,
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
+  markGeneratorPreviewSessionConfirmed,
   markGeneratorPreviewSessionApplied,
   markGeneratorPreviewSessionReviewed,
 } from "@elysian/persistence"
@@ -30,6 +31,8 @@ export interface GeneratorPreviewSessionRecord {
   appliedByUsername: string | null
   applyManifestPath: string | null
   applyRequestId: string | null
+  applyEvidence: Record<string, unknown> | null
+  confirmationEvidence: Record<string, unknown> | null
   conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail"
   createdAt: string
   frontendTarget: "vue" | "react"
@@ -42,6 +45,11 @@ export interface GeneratorPreviewSessionRecord {
   reviewedByDisplayName: string | null
   reviewedByUserId: string | null
   reviewedByUsername: string | null
+  reviewEvidence: Record<string, unknown> | null
+  confirmedAt: string | null
+  confirmedByDisplayName: string | null
+  confirmedByUserId: string | null
+  confirmedByUsername: string | null
   schemaName: string
   skippedFileCount: number | null
   sourceType: GeneratorPreviewSessionSourceType
@@ -67,6 +75,7 @@ export interface CreateGeneratorPreviewSessionInput {
   appliedByUsername?: string | null
   applyManifestPath?: string | null
   applyRequestId?: string | null
+  applyEvidence?: Record<string, unknown> | null
   conflictStrategy: GeneratorPreviewSessionRecord["conflictStrategy"]
   createdAt: string
   frontendTarget: GeneratorPreviewSessionRecord["frontendTarget"]
@@ -81,6 +90,12 @@ export interface CreateGeneratorPreviewSessionInput {
   reviewedByDisplayName?: string | null
   reviewedByUserId?: string | null
   reviewedByUsername?: string | null
+  reviewEvidence?: Record<string, unknown> | null
+  confirmedAt?: string | null
+  confirmedByDisplayName?: string | null
+  confirmedByUserId?: string | null
+  confirmedByUsername?: string | null
+  confirmationEvidence?: Record<string, unknown> | null
   schemaName: string
   skippedFileCount?: number | null
   sourceType: GeneratorPreviewSessionSourceType
@@ -98,6 +113,7 @@ export interface MarkPreviewSessionAppliedInput {
   appliedByUsername: string | null
   applyManifestPath: string | null
   applyRequestId: string | null
+  applyEvidence: Record<string, unknown> | null
   skippedFileCount: number
 }
 
@@ -107,7 +123,16 @@ export interface MarkPreviewSessionReviewedInput {
   reviewedByDisplayName: string | null
   reviewedByUserId: string | null
   reviewedByUsername: string | null
+  reviewEvidence: Record<string, unknown> | null
   status: "ready" | "rejected"
+}
+
+export interface MarkPreviewSessionConfirmedInput {
+  confirmedAt: string
+  confirmedByDisplayName: string | null
+  confirmedByUserId: string | null
+  confirmedByUsername: string | null
+  confirmationEvidence: Record<string, unknown> | null
 }
 
 export interface GeneratorSessionRepository {
@@ -125,6 +150,10 @@ export interface GeneratorSessionRepository {
   markPreviewSessionReviewed: (
     id: string,
     input: MarkPreviewSessionReviewedInput,
+  ) => Promise<GeneratorPreviewSessionDetail | null>
+  markPreviewSessionConfirmed: (
+    id: string,
+    input: MarkPreviewSessionConfirmedInput,
   ) => Promise<GeneratorPreviewSessionDetail | null>
 }
 
@@ -151,6 +180,8 @@ export const createGeneratorSessionRepository = (
       appliedByUsername: input.appliedByUsername ?? null,
       applyManifestPath: input.applyManifestPath ?? null,
       applyRequestId: input.applyRequestId ?? null,
+      applyEvidence: input.applyEvidence ?? null,
+      confirmationEvidence: input.confirmationEvidence ?? null,
       conflictStrategy: input.conflictStrategy,
       createdAt: new Date(input.createdAt),
       frontendTarget: input.frontendTarget,
@@ -163,6 +194,11 @@ export const createGeneratorSessionRepository = (
       reviewedByDisplayName: input.reviewedByDisplayName ?? null,
       reviewedByUserId: input.reviewedByUserId ?? null,
       reviewedByUsername: input.reviewedByUsername ?? null,
+      reviewEvidence: input.reviewEvidence ?? null,
+      confirmedAt: toOptionalDate(input.confirmedAt),
+      confirmedByDisplayName: input.confirmedByDisplayName ?? null,
+      confirmedByUserId: input.confirmedByUserId ?? null,
+      confirmedByUsername: input.confirmedByUsername ?? null,
       schemaName: input.schemaName,
       skippedFileCount: input.skippedFileCount ?? null,
       sourceType: input.sourceType,
@@ -197,6 +233,7 @@ export const createGeneratorSessionRepository = (
       appliedByUsername: input.appliedByUsername,
       applyManifestPath: input.applyManifestPath,
       applyRequestId: input.applyRequestId,
+      applyEvidence: input.applyEvidence,
       skippedFileCount: input.skippedFileCount,
     })
 
@@ -209,7 +246,19 @@ export const createGeneratorSessionRepository = (
       reviewedByDisplayName: input.reviewedByDisplayName,
       reviewedByUserId: input.reviewedByUserId,
       reviewedByUsername: input.reviewedByUsername,
+      reviewEvidence: input.reviewEvidence,
       status: input.status,
+    })
+
+    return row ? mapPreviewSessionDetailRow(row) : null
+  },
+  async markPreviewSessionConfirmed(id, input) {
+    const row = await markGeneratorPreviewSessionConfirmed(db, id, {
+      confirmedAt: new Date(input.confirmedAt),
+      confirmedByDisplayName: input.confirmedByDisplayName,
+      confirmedByUserId: input.confirmedByUserId,
+      confirmedByUsername: input.confirmedByUsername,
+      confirmationEvidence: input.confirmationEvidence,
     })
 
     return row ? mapPreviewSessionDetailRow(row) : null
@@ -234,6 +283,7 @@ export const createInMemoryGeneratorSessionRepository =
           appliedByUsername: input.appliedByUsername ?? null,
           applyManifestPath: input.applyManifestPath ?? null,
           applyRequestId: input.applyRequestId ?? null,
+          applyEvidence: input.applyEvidence ?? null,
           conflictStrategy: input.conflictStrategy,
           createdAt: input.createdAt,
           frontendTarget: input.frontendTarget,
@@ -247,6 +297,12 @@ export const createInMemoryGeneratorSessionRepository =
           reviewedByDisplayName: input.reviewedByDisplayName ?? null,
           reviewedByUserId: input.reviewedByUserId ?? null,
           reviewedByUsername: input.reviewedByUsername ?? null,
+          reviewEvidence: input.reviewEvidence ?? null,
+          confirmedAt: input.confirmedAt ?? null,
+          confirmedByDisplayName: input.confirmedByDisplayName ?? null,
+          confirmedByUserId: input.confirmedByUserId ?? null,
+          confirmedByUsername: input.confirmedByUsername ?? null,
+          confirmationEvidence: input.confirmationEvidence ?? null,
           schemaName: input.schemaName,
           skippedFileCount: input.skippedFileCount ?? null,
           sourceType: input.sourceType,
@@ -308,6 +364,24 @@ export const createInMemoryGeneratorSessionRepository =
         sessions.set(id, updated)
         return updated
       },
+      async markPreviewSessionConfirmed(id, input) {
+        const current = sessions.get(id)
+        if (!current) {
+          return null
+        }
+
+        const updated: GeneratorPreviewSessionDetail = {
+          ...current,
+          confirmedAt: input.confirmedAt,
+          confirmedByDisplayName: input.confirmedByDisplayName,
+          confirmedByUserId: input.confirmedByUserId,
+          confirmedByUsername: input.confirmedByUsername,
+          confirmationEvidence: input.confirmationEvidence,
+        }
+
+        sessions.set(id, updated)
+        return updated
+      },
     }
   }
 
@@ -325,6 +399,7 @@ const toPreviewSessionRecord = (
   appliedByUsername: session.appliedByUsername,
   applyManifestPath: session.applyManifestPath,
   applyRequestId: session.applyRequestId,
+  applyEvidence: session.applyEvidence ?? null,
   conflictStrategy: session.conflictStrategy,
   createdAt: session.createdAt,
   frontendTarget: session.frontendTarget,
@@ -337,6 +412,12 @@ const toPreviewSessionRecord = (
   reviewedByDisplayName: session.reviewedByDisplayName,
   reviewedByUserId: session.reviewedByUserId,
   reviewedByUsername: session.reviewedByUsername,
+  reviewEvidence: session.reviewEvidence ?? null,
+  confirmedAt: session.confirmedAt,
+  confirmedByDisplayName: session.confirmedByDisplayName,
+  confirmedByUserId: session.confirmedByUserId,
+  confirmedByUsername: session.confirmedByUsername,
+  confirmationEvidence: session.confirmationEvidence ?? null,
   schemaName: session.schemaName,
   skippedFileCount: session.skippedFileCount,
   sourceType: session.sourceType,
@@ -360,6 +441,7 @@ const mapPreviewSessionRow = (
   appliedByUsername: row.appliedByUsername,
   applyManifestPath: row.applyManifestPath,
   applyRequestId: row.applyRequestId,
+  applyEvidence: row.applyEvidence ?? null,
   conflictStrategy:
     row.conflictStrategy as GeneratorPreviewSessionRecord["conflictStrategy"],
   createdAt: row.createdAt.toISOString(),
@@ -374,6 +456,12 @@ const mapPreviewSessionRow = (
   reviewedByDisplayName: row.reviewedByDisplayName,
   reviewedByUserId: row.reviewedByUserId,
   reviewedByUsername: row.reviewedByUsername,
+  reviewEvidence: row.reviewEvidence ?? null,
+  confirmedAt: row.confirmedAt?.toISOString() ?? null,
+  confirmedByDisplayName: row.confirmedByDisplayName,
+  confirmedByUserId: row.confirmedByUserId,
+  confirmedByUsername: row.confirmedByUsername,
+  confirmationEvidence: row.confirmationEvidence ?? null,
   schemaName: row.schemaName,
   skippedFileCount: row.skippedFileCount,
   sourceType: row.sourceType as GeneratorPreviewSessionSourceType,

@@ -13,6 +13,7 @@ import {
   type GeneratorPreviewSessionRecord,
   type GeneratorPreviewSqlProposal,
   type GeneratorPreviewSqlProposalHandoff,
+  confirmGeneratorPreviewSession,
   applyGeneratorPreviewSession,
   createGeneratorPreviewSession,
   fetchGeneratorPreviewSession,
@@ -335,7 +336,19 @@ export const useGeneratorPreviewWorkspace = (
     () =>
       currentSession.value !== null &&
       currentSession.value.status === "ready" &&
+      currentSession.value.confirmedAt !== null &&
       !currentSession.value.hasBlockingConflicts &&
+      enabled.value &&
+      !loading.value &&
+      !reviewLoading.value &&
+      !applyLoading.value,
+  )
+
+  const canConfirmPreview = computed(
+    () =>
+      currentSession.value !== null &&
+      currentSession.value.status === "ready" &&
+      currentSession.value.confirmedAt === null &&
       enabled.value &&
       !loading.value &&
       !reviewLoading.value &&
@@ -409,7 +422,7 @@ export const useGeneratorPreviewWorkspace = (
     diffSummary: GeneratorPreviewDiffSummary,
     report: GeneratorPreviewReport,
     sqlProposal: GeneratorPreviewSqlProposal | null,
-    sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff | null,
+    sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff,
   ): GeneratorPreviewSessionDetail => ({
     ...session,
     diffSummary,
@@ -421,7 +434,9 @@ export const useGeneratorPreviewWorkspace = (
   const upsertRecentSession = (session: GeneratorPreviewSessionRecord) => {
     recentSessions.value = [
       session,
-      ...recentSessions.value.filter((item) => item.id !== session.id),
+      ...recentSessions.value.filter(
+        (item: GeneratorPreviewSessionRecord) => item.id !== session.id,
+      ),
     ]
   }
 
@@ -718,6 +733,41 @@ export const useGeneratorPreviewWorkspace = (
     }
   }
 
+  const confirmPreview = async () => {
+    const sessionId = currentSession.value?.id
+    if (!sessionId || !canConfirmPreview.value) {
+      return
+    }
+
+    reviewLoading.value = true
+    errorMessage.value = ""
+
+    try {
+      const response = await confirmGeneratorPreviewSession(sessionId)
+
+      if (response.session.id !== sessionId) {
+        errorMessage.value =
+          "Generator confirmation response does not match current session"
+        return
+      }
+
+      upsertRecentSession(response.session)
+      currentSession.value = {
+        ...currentSession.value,
+        ...response.session,
+      }
+      currentSqlProposalHandoff.value = response.sqlProposalHandoff
+      selectedRecentSessionId.value = response.session.id
+      persistCurrentSelection()
+    } catch (error) {
+      onRecoverableAuthError(error)
+      errorMessage.value =
+        error instanceof Error ? error.message : "Generator confirmation failed"
+    } finally {
+      reviewLoading.value = false
+    }
+  }
+
   const restorePreviewSession = async (sessionId: string) => {
     if (!sessionId || loading.value || reviewLoading.value || applyLoading.value) {
       return
@@ -826,6 +876,7 @@ export const useGeneratorPreviewWorkspace = (
     applyPreview,
     canApplyPreview,
     canApprovePreview,
+    canConfirmPreview,
     canRejectPreview,
     currentDiffSummary,
     currentSession,
@@ -841,6 +892,7 @@ export const useGeneratorPreviewWorkspace = (
     refreshPreview,
     resetFilters,
     restorePreviewSession,
+    confirmPreview,
     reviewLoading,
     reviewPreview,
     schemaOptions,

@@ -155,6 +155,13 @@
       "when": 1778457600000,
       "tag": "0021_generator_preview_session_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1778544000000,
+      "tag": "0022_generator_preview_session_confirmation",
+      "breakpoints": true
     }
   ]
 }

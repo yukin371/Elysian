@@ -98,6 +98,7 @@ export {
   updateUser,
 } from "./platform-api/users"
 export {
+  confirmGeneratorPreviewSession,
   applyGeneratorPreviewSession,
   createGeneratorPreviewSession,
   fetchGeneratorPreviewSession,
@@ -196,6 +197,7 @@ export type {
 export type {
   AppliedGeneratorPreviewFile,
   ApplyGeneratorPreviewSessionResponse,
+  ConfirmGeneratorPreviewSessionResponse,
   CreateGeneratorPreviewSessionRequest,
   CreateGeneratorPreviewSessionResponse,
   GeneratorPreviewApplyEvidence,

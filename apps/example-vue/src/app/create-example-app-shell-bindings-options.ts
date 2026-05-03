@@ -366,6 +366,8 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.canRejectPreview,
       canApplyGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.canApplyPreview,
+      canConfirmGeneratorPreview:
+        input.workspaces.generatorPreviewWorkspace.canConfirmPreview,
       generatorPreviewDiffSummary:
         input.workspaces.generatorPreviewWorkspace.currentDiffSummary,
       generatorPreviewSession:
@@ -387,7 +389,13 @@ export const createExampleAppShellBindingsOptions = (
       restoreGeneratorPreviewSession:
         input.workspaces.generatorPreviewWorkspace.restorePreviewSession,
       reviewGeneratorPreview:
-        input.workspaces.generatorPreviewWorkspace.reviewPreview,
+        ({ decision, comment }) =>
+          input.workspaces.generatorPreviewWorkspace.reviewPreview(
+            decision,
+            comment,
+          ),
+      confirmGeneratorPreview:
+        input.workspaces.generatorPreviewWorkspace.confirmPreview,
       applyGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.applyPreview,
     },

@@ -368,6 +368,59 @@ describe("generator session module", () => {
     expect(reviewBody.sqlProposal.tableName).toBe("customer")
     expect(reviewBody.sqlProposalHandoff.proposalStatus).toBe("ready")
 
+    const confirmResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "user-agent": "generator-session-test-agent",
+            "x-request-id": "req-generator-session-confirm-1",
+          }),
+        },
+      ),
+    )
+    expect(confirmResponse.status).toBe(200)
+
+    const confirmBody = (await confirmResponse.json()) as {
+      session: {
+        confirmedAt: string
+        confirmedByUserId: string
+        confirmationEvidence: {
+          actorUserId: string
+          checklist: string[]
+          confirmedAt: string
+          reportPath: string
+          sessionId: string
+        }
+        id: string
+      }
+      sqlProposalHandoff: {
+        confirmationChecklist: string[]
+      }
+    }
+    expect(confirmBody.session.id).toBe(createBody.session.id)
+    expect(confirmBody.session.confirmedByUserId).toBe(
+      createBody.session.actorUserId,
+    )
+    expect(confirmBody.session.confirmationEvidence).toMatchObject({
+      sessionId: createBody.session.id,
+      reportPath: createBody.session.reportPath,
+      actorUserId: createBody.session.actorUserId,
+    })
+    expect(confirmBody.session.confirmationEvidence.confirmedAt).toBe(
+      confirmBody.session.confirmedAt,
+    )
+    expect(confirmBody.session.confirmationEvidence.checklist).toEqual(
+      confirmBody.sqlProposalHandoff.confirmationChecklist,
+    )
+    expect(confirmBody.sqlProposalHandoff.confirmationChecklist).toEqual([
+      "Review the SQL draft and Drizzle snippet before changing persistence files.",
+      "Review the target-directory diff and conflict explanations before approving.",
+      "Confirm the canonical owner and target paths match the intended persistence scope.",
+      "Run db:generate and db:migrate only after manual sign-off.",
+    ])
+
     const applyResponse = await app.handle(
       new Request(
         `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
@@ -398,6 +451,7 @@ describe("generator session module", () => {
         appliedAt: string
         appliedFileCount: number
         appliedByUserId: string
+        confirmedAt: string
         applyEvidence: {
           actorUserId: string
           appliedAt: string
@@ -450,6 +504,7 @@ describe("generator session module", () => {
     expect(applyBody.session.applyManifestPath).toBe(
       applyBody.apply.manifestPath,
     )
+    expect(applyBody.session.confirmedAt).toBeTruthy()
     expect(applyBody.session.reviewEvidence).toMatchObject({
       actorUserId: createBody.session.actorUserId,
       comment: "Looks good for staging",
@@ -681,6 +736,17 @@ describe("generator session module", () => {
     )
     expect(reviewResponse.status).toBe(200)
 
+    const confirmResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken),
+        },
+      ),
+    )
+    expect(confirmResponse.status).toBe(200)
+
     const applyResponse = await app.handle(
       new Request(
         `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
@@ -761,6 +827,17 @@ describe("generator session module", () => {
       ),
     )
     expect(reviewResponse.status).toBe(200)
+
+    const confirmResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken),
+        },
+      ),
+    )
+    expect(confirmResponse.status).toBe(409)
 
     const applyResponse = await app.handle(
       new Request(
