@@ -23,7 +23,7 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
     restoreGeneratorPreviewWorkspaceTestEnv()
   })
 
-  test("updates recent sessions locally after preview review and apply", async () => {
+  test("updates recent sessions locally after preview review, confirm, and apply", async () => {
     let listRequestCount = 0
 
     globalThis.fetch = (async (input, init) => {
@@ -157,6 +157,41 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
         )
       }
 
+      if (
+        url.endsWith(
+          "/studio/generator/sessions/preview-session-created/confirm",
+        ) &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            session: createSession({
+              confirmedAt: "2026-05-02T16:07:00.000Z",
+              confirmationEvidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                checklist: ["Review the SQL draft."],
+                confirmedAt: "2026-05-02T16:07:00.000Z",
+                reportPath:
+                  "generated/reports/preview-session-created.preview.json",
+                sessionId: "preview-session-created",
+              },
+              confirmedByDisplayName: "Admin",
+              confirmedByUserId: "user-1",
+              confirmedByUsername: "admin",
+              id: "preview-session-created",
+              status: "ready",
+            }),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
       return new Response("not found", { status: 404 })
     }) as typeof fetch
 
@@ -174,15 +209,11 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
 
     expect(listRequestCount).toBe(1)
     expect(workspace.currentSession.value?.status).toBe("ready")
-    const currentSession = workspace.currentSession.value
-    expect(currentSession).not.toBeNull()
-    if (!currentSession) {
-      throw new Error("Expected current session after review")
-    }
-    workspace.currentSession.value = {
-      ...currentSession,
-      confirmedAt: "2026-05-02T16:07:00.000Z",
-    }
+    await workspace.confirmPreview()
+
+    expect(workspace.currentSession.value?.confirmedAt).toBe(
+      "2026-05-02T16:07:00.000Z",
+    )
     expect(workspace.recentSessionOptions.value[0]?.value).toBe(
       "preview-session-created",
     )
