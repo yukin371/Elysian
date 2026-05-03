@@ -1,6 +1,8 @@
 import { t } from "elysia"
 import {
   resolveMigrationProposalFromChangePlan,
+  buildMigrationProposalSnapshot,
+  type MigrationProposalSnapshot,
 } from "@elysian/persistence"
 
 import { AppError } from "../../errors"
@@ -13,10 +15,8 @@ import type {
   GeneratorSessionRepository,
 } from "./repository"
 import {
-  buildMigrationProposalSnapshot,
   type GeneratorSessionServiceOptions,
   createGeneratorSessionService,
-  type MigrationProposalSnapshot,
 } from "./service"
 
 export interface GeneratorSessionModuleOptions

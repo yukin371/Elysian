@@ -13,8 +13,7 @@ import {
   resolveTargetPresetOutputDir,
   writeGenerationPreviewReport,
 } from "@elysian/generator"
-import { resolveMigrationProposalFromChangePlan } from "@elysian/persistence"
-import { type DatabaseChangePlanLike } from "@elysian/persistence"
+import { buildMigrationProposalSnapshot } from "@elysian/persistence"
 
 import { mkdir, writeFile } from "node:fs/promises"
 
@@ -24,25 +23,6 @@ import type {
   GeneratorPreviewSessionDetail,
   GeneratorSessionRepository,
 } from "./repository"
-
-export interface MigrationProposalSnapshot {
-  generatedAt: string
-  migrationProposalResolution: ReturnType<
-    typeof resolveMigrationProposalFromChangePlan
-  >
-  reportPath: string
-  schemaName: string
-  sessionId: string
-  snapshotPath: string
-}
-
-interface BuildMigrationProposalSnapshotInput {
-  databaseChangePlan: DatabaseChangePlanLike
-  generatedAt: string
-  reportPath: string
-  schemaName: string
-  sessionId: string
-}
 
 interface CreateGeneratorPreviewSessionInput {
   actor: AuthIdentity | null
@@ -116,26 +96,6 @@ const toApplyConflictError = (
       reason: error.message,
     },
   })
-}
-
-export const buildMigrationProposalSnapshot = (
-  input: BuildMigrationProposalSnapshotInput,
-): MigrationProposalSnapshot => {
-  const snapshotPath = input.reportPath.replace(
-    /\.preview\.json$/,
-    ".migration-proposal.json",
-  )
-
-  return {
-    generatedAt: input.generatedAt,
-    migrationProposalResolution: resolveMigrationProposalFromChangePlan(
-      input.databaseChangePlan,
-    ),
-    reportPath: input.reportPath,
-    schemaName: input.schemaName,
-    sessionId: input.sessionId,
-    snapshotPath,
-  }
 }
 
 export const createGeneratorSessionService = (

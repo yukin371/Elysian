@@ -12,6 +12,11 @@ export {
   resolveMigrationProposalFromChangePlan,
 } from "./migration-proposal"
 export {
+  buildMigrationProposalSnapshot,
+  type BuildMigrationProposalSnapshotInput,
+  type MigrationProposalSnapshot,
+} from "./migration-proposal-snapshot"
+export {
   buildPaginatedResult,
   normalizePagination,
   type NormalizedPagination,

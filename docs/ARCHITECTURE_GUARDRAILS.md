@@ -44,6 +44,7 @@
 - config: `apps/server`
 - auth: `apps/server`
 - persistence: `packages/persistence`
+- migration proposal snapshot artifacts: `packages/persistence`
 - HTTP / API client: 前端适配层各自实现，契约来源统一为 `apps/server` 输出的 API/schema
 - shared utilities: `packages/core`
 - UI primitives: 各前端适配层自己拥有，不放进通用无差别 shared 包
