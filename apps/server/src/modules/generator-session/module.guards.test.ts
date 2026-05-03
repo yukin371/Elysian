@@ -183,6 +183,22 @@ describe("generator session module guards", () => {
       ),
     )
     expect(confirmResponse.status).toBe(409)
+    const confirmErrorBody = (await confirmResponse.json()) as {
+      error: {
+        code: string
+        details: {
+          id: string
+          status: string
+        }
+      }
+    }
+    expect(confirmErrorBody.error.code).toBe(
+      "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
+    )
+    expect(confirmErrorBody.error.details).toMatchObject({
+      id: createBody.session.id,
+      status: "rejected",
+    })
 
     const applyResponse = await app.handle(
       new Request(
