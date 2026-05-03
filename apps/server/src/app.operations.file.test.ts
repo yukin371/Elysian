@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "./errors/registry"
 import {
   createAuthTestFixture,
   createFileSeedRecords,
@@ -252,7 +253,7 @@ describe("createServerApp files", () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: {
-        code: "FILE_UPLOAD_REQUIRED",
+        code: errorCodes.FILE_UPLOAD_REQUIRED,
         message: "File upload is required",
         status: 400,
       },

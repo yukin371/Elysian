@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 import {
   createAuthTestFixture,
   createTestApp,
@@ -172,7 +173,7 @@ describe("createServerApp auth sessions", () => {
     expect(refreshResponse.status).toBe(401)
     expect(await refreshResponse.json()).toEqual({
       error: {
-        code: "AUTH_REFRESH_TOKEN_EXPIRED",
+        code: errorCodes.AUTH_REFRESH_TOKEN_EXPIRED,
         message: "Refresh token is expired or revoked",
         status: 401,
         details: {
@@ -230,7 +231,7 @@ describe("createServerApp auth sessions", () => {
     expect(revokeResponse.status).toBe(404)
     expect(await revokeResponse.json()).toEqual({
       error: {
-        code: "AUTH_SESSION_NOT_FOUND",
+        code: errorCodes.AUTH_SESSION_NOT_FOUND,
         message: "Session not found",
         status: 404,
         details: {
@@ -291,7 +292,7 @@ describe("createServerApp auth sessions", () => {
     expect(refreshResponse.status).toBe(401)
     expect(await refreshResponse.json()).toEqual({
       error: {
-        code: "AUTH_REFRESH_TOKEN_EXPIRED",
+        code: errorCodes.AUTH_REFRESH_TOKEN_EXPIRED,
         message: "Refresh token is expired or revoked",
         status: 401,
         details: {
@@ -322,7 +323,7 @@ describe("createServerApp auth sessions", () => {
     expect(response.status).toBe(401)
     expect(await response.json()).toEqual({
       error: {
-        code: "AUTH_INVALID_CREDENTIALS",
+        code: errorCodes.AUTH_INVALID_CREDENTIALS,
         message: "Invalid username or password",
         status: 401,
         details: {

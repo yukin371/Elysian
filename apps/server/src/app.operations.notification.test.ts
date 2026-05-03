@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "./errors/registry"
 import {
   createAuthTestFixture,
   createNotificationSeedRecords,
@@ -387,7 +388,7 @@ describe("createServerApp notifications", () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: {
-        code: "NOTIFICATION_RECIPIENT_INVALID",
+        code: errorCodes.NOTIFICATION_RECIPIENT_INVALID,
         message: "Notification recipient does not exist",
         status: 400,
         details: {

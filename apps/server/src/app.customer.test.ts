@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 
 import { createServerApp } from "./app"
 import { createServerConfig } from "./config"
+import { errorCodes } from "./errors/registry"
 import type { ServerLogger } from "./logging"
 import {
   type ServerModule,
@@ -162,7 +163,7 @@ describe("createServerApp", () => {
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
       error: {
-        code: "CUSTOMER_NOT_FOUND",
+        code: errorCodes.CUSTOMER_NOT_FOUND,
         message: "Customer not found",
         status: 404,
         details: {

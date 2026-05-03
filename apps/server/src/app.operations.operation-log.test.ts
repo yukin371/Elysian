@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "./errors/registry"
 import {
   createAuthTestFixture,
   createOperationLogSeedRecords,
@@ -183,7 +184,7 @@ describe("createServerApp operation logs", () => {
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
       error: {
-        code: "OPERATION_LOG_NOT_FOUND",
+        code: errorCodes.OPERATION_LOG_NOT_FOUND,
         message: "Operation log not found",
         status: 404,
         details: {
