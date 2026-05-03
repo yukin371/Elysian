@@ -475,6 +475,116 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
     )
   })
 
+  test("falls through to matching recent session when persisted session is missing", async () => {
+    let listRequestCount = 0
+    let previewRequestCount = 0
+
+    globalThis.localStorage.setItem(
+      "elysian.example-vue.generator-preview.selection",
+      JSON.stringify({
+        conflictStrategy: "overwrite-generated-only",
+        frontendTarget: "react",
+        schemaName: "customer",
+        sessionId: "preview-session-missing",
+      }),
+    )
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-missing") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_NOT_FOUND",
+              message: "Generator session not found",
+              status: 404,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 404,
+          },
+        )
+      }
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        listRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:30:00.000Z",
+                frontendTarget: "react",
+                id: "preview-session-ready",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-ready") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              createdAt: "2026-05-02T14:30:00.000Z",
+              frontendTarget: "react",
+              id: "preview-session-ready",
+              report: createReport({
+                conflictStrategy: "overwrite-generated-only",
+                frontendTarget: "react",
+              }),
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(listRequestCount).toBe(1)
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-ready")
+    expect(workspace.selectedRecentSessionId.value).toBe("preview-session-ready")
+    expect(workspace.selectedFrontendTarget.value).toBe("react")
+    expect(workspace.selectedConflictStrategy.value).toBe(
+      "overwrite-generated-only",
+    )
+  })
+
   test("restores persisted session before loading recent sessions", async () => {
     let listRequestCount = 0
     let detailRequestCount = 0
