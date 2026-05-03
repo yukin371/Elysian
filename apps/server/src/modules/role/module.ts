@@ -3,6 +3,10 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  roleDetailResponseSchema,
+  roleListResponseSchema,
+} from "./openapi"
 import type { RoleRepository } from "./repository"
 import { createRoleService } from "./service"
 
@@ -81,6 +85,9 @@ export const createRoleModule = (
         },
         {
           query: roleListQuerySchema,
+          response: {
+            200: roleListResponseSchema,
+          },
           detail: {
             tags: ["role"],
             summary: "List roles",
@@ -113,6 +120,9 @@ export const createRoleModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: roleDetailResponseSchema,
+          },
           detail: {
             tags: ["role"],
             summary: "Get role by id",
@@ -129,6 +139,9 @@ export const createRoleModule = (
         },
         {
           body: roleCreateBodySchema,
+          response: {
+            201: roleDetailResponseSchema,
+          },
           detail: {
             tags: ["role"],
             summary: "Create role",
@@ -147,6 +160,9 @@ export const createRoleModule = (
             id: t.String(),
           }),
           body: roleUpdateBodySchema,
+          response: {
+            200: roleDetailResponseSchema,
+          },
           detail: {
             tags: ["role"],
             summary: "Update role",

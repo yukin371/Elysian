@@ -3,6 +3,11 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  menuDetailResponseSchema,
+  menuListResponseSchema,
+  menuRecordResponseSchema,
+} from "./openapi"
 import type { MenuRepository } from "./repository"
 import { createMenuService } from "./service"
 
@@ -82,6 +87,9 @@ export const createMenuModule = (
           }
         },
         {
+          response: {
+            200: menuListResponseSchema,
+          },
           detail: {
             tags: ["menu"],
             summary: "List menus",
@@ -114,6 +122,9 @@ export const createMenuModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: menuDetailResponseSchema,
+          },
           detail: {
             tags: ["menu"],
             summary: "Get menu by id",
@@ -130,6 +141,9 @@ export const createMenuModule = (
         },
         {
           body: menuCreateBodySchema,
+          response: {
+            201: menuDetailResponseSchema,
+          },
           detail: {
             tags: ["menu"],
             summary: "Create menu",
@@ -148,6 +162,9 @@ export const createMenuModule = (
             id: t.String(),
           }),
           body: menuUpdateBodySchema,
+          response: {
+            200: menuDetailResponseSchema,
+          },
           detail: {
             tags: ["menu"],
             summary: "Update menu",

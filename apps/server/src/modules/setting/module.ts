@@ -3,6 +3,10 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  settingListResponseSchema,
+  settingRecordResponseSchema,
+} from "./openapi"
 import type { SettingRepository } from "./repository"
 import { createSettingService } from "./service"
 
@@ -62,6 +66,9 @@ export const createSettingModule = (
         },
         {
           query: settingListQuerySchema,
+          response: {
+            200: settingListResponseSchema,
+          },
           detail: {
             tags: ["setting"],
             summary: "List settings",
@@ -94,6 +101,9 @@ export const createSettingModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: settingRecordResponseSchema,
+          },
           detail: {
             tags: ["setting"],
             summary: "Get setting by id",
@@ -110,6 +120,9 @@ export const createSettingModule = (
         },
         {
           body: settingCreateBodySchema,
+          response: {
+            201: settingRecordResponseSchema,
+          },
           detail: {
             tags: ["setting"],
             summary: "Create setting",
@@ -128,6 +141,9 @@ export const createSettingModule = (
             id: t.String(),
           }),
           body: settingUpdateBodySchema,
+          response: {
+            200: settingRecordResponseSchema,
+          },
           detail: {
             tags: ["setting"],
             summary: "Update setting",

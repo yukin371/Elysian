@@ -11,6 +11,37 @@ import {
 } from "./test-support"
 
 describe("createServerApp system menu access", () => {
+  it("publishes menu success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:menu:list"],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createMenuModule(createInMemoryMenuRepository(), {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(payload.paths["/system/menus"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/menus"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/menus/{id}"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/menus/{id}"]?.put?.responses?.["200"]).toBeDefined()
+  })
+
   it("lists and gets system menus when the access token has menu-list permission", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:menu:list"],
