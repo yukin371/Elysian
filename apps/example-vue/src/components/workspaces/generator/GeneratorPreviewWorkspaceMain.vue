@@ -5,6 +5,14 @@ import { Input as TInput } from "tdesign-vue-next/es/input"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 
+import { shouldSelectGeneratorPreviewFile } from "../../../lib/generator-preview-workspace"
+import GeneratorPreviewWorkspaceBlockedFiles from "./GeneratorPreviewWorkspaceBlockedFiles.vue"
+import GeneratorPreviewWorkspaceFileList from "./GeneratorPreviewWorkspaceFileList.vue"
+import {
+  clearGeneratorPreviewReviewDraft,
+  loadGeneratorPreviewReviewDraft,
+  persistGeneratorPreviewReviewDraft,
+} from "./generator-preview-review-draft"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
@@ -13,12 +21,6 @@ import type {
   GeneratorPreviewSchemaOption,
   GeneratorPreviewTranslation,
 } from "./types"
-import {
-  clearGeneratorPreviewReviewDraft,
-  loadGeneratorPreviewReviewDraft,
-  persistGeneratorPreviewReviewDraft,
-} from "./generator-preview-review-draft"
-import { shouldSelectGeneratorPreviewFile } from "../../../lib/generator-preview-workspace"
 
 interface GeneratorPreviewWorkspaceMainProps {
   t: GeneratorPreviewTranslation
@@ -77,10 +79,6 @@ const frontendOptions = [
   { label: "Vue", value: "vue" },
   { label: "React", value: "react" },
 ] as const
-
-const blockedFiles = computed(() =>
-  props.files.filter((file) => file.plannedAction === "block"),
-)
 
 const operationHint = computed<{
   key: string
@@ -245,10 +243,7 @@ const handleSchemaChange = (
 const handleConflictStrategyChange = (
   value: string | number | Array<string | number>,
 ) => {
-  if (
-    typeof value === "string" &&
-    value !== props.selectedConflictStrategy
-  ) {
+  if (typeof value === "string" && value !== props.selectedConflictStrategy) {
     emit("update:selected-conflict-strategy", value)
   }
 }
@@ -284,7 +279,9 @@ const handleRefreshPreview = () => {
   emit("refresh-preview")
 }
 
-const resolveStatusLabel = (status: GeneratorPreviewWorkspaceMainProps["sessionStatus"]) => {
+const resolveStatusLabel = (
+  status: GeneratorPreviewWorkspaceMainProps["sessionStatus"],
+) => {
   if (status === "applied") {
     return props.t("app.generatorPreview.status.applied")
   }
@@ -315,7 +312,12 @@ const handleReviewCommentInput = (value: string | number) => {
 const handleReviewPreview = (decision: "approve" | "reject") => {
   const canReview = decision === "approve" ? props.canApprove : props.canReject
 
-  if (!canReview || props.loading || props.reviewLoading || props.applyLoading) {
+  if (
+    !canReview ||
+    props.loading ||
+    props.reviewLoading ||
+    props.applyLoading
+  ) {
     return
   }
 
@@ -336,7 +338,12 @@ const handleReviewPreview = (decision: "approve" | "reject") => {
 }
 
 const handleApplyPreview = () => {
-  if (!props.canApply || props.loading || props.reviewLoading || props.applyLoading) {
+  if (
+    !props.canApply ||
+    props.loading ||
+    props.reviewLoading ||
+    props.applyLoading
+  ) {
     return
   }
 
@@ -350,7 +357,12 @@ const handleApplyPreview = () => {
 }
 
 const handleConfirmPreview = () => {
-  if (!props.canConfirm || props.loading || props.reviewLoading || props.applyLoading) {
+  if (
+    !props.canConfirm ||
+    props.loading ||
+    props.reviewLoading ||
+    props.applyLoading
+  ) {
     return
   }
 
@@ -387,9 +399,15 @@ watch(
     props.selectedFrontendTarget,
     props.reviewEvidence?.comment ?? null,
   ],
-  (
-    [status, canApply, canReject, loading, applyLoading, reviewLoading, sessionId],
-  ) => {
+  ([
+    status,
+    canApply,
+    canReject,
+    loading,
+    applyLoading,
+    reviewLoading,
+    sessionId,
+  ]) => {
     const resolvedSessionId =
       typeof sessionId === "string" && sessionId.trim().length > 0
         ? sessionId.trim()
@@ -405,10 +423,10 @@ watch(
 
     if (status === "pending_review") {
       reviewComment.value = resolvedSessionId
-        ? loadGeneratorPreviewReviewDraft(resolvedSessionId) ??
+        ? (loadGeneratorPreviewReviewDraft(resolvedSessionId) ??
           props.reviewEvidence?.comment ??
-          ""
-        : props.reviewEvidence?.comment ?? ""
+          "")
+        : (props.reviewEvidence?.comment ?? "")
       return
     }
 
@@ -591,39 +609,12 @@ watch(
         {{ t(operationHint.key) }}
       </div>
 
-      <section
-        v-if="blockedFiles.length > 0"
-        class="generator-blocked-section"
-      >
-        <div class="generator-blocked-header">
-          <strong>{{ t("app.generatorPreview.blockedTitle") }}</strong>
-          <span>
-            {{
-              t("app.generatorPreview.blockedCount", {
-                count: blockedFiles.length,
-              })
-            }}
-          </span>
-        </div>
-        <div class="generator-blocked-list">
-          <button
-            v-for="file in blockedFiles"
-            :key="file.path"
-            type="button"
-            class="generator-blocked-card"
-            :class="
-              selectedFilePath === file.path ? 'generator-blocked-card-active' : ''
-            "
-            @click="handleFileSelection(file.path)"
-          >
-            <strong>{{ file.path }}</strong>
-            <p>{{ file.plannedReason }}</p>
-            <span class="generator-blocked-card-hint">
-              {{ t("app.generatorPreview.blockedAction") }}
-            </span>
-          </button>
-        </div>
-      </section>
+      <GeneratorPreviewWorkspaceBlockedFiles
+        :t="t"
+        :files="files"
+        :selected-file-path="selectedFilePath"
+        @select-file="handleFileSelection"
+      />
 
       <label
         v-if="canApprove || canReject"
@@ -744,59 +735,19 @@ watch(
         </span>
       </p>
 
-      <div
-        v-if="loading"
-        class="enterprise-message enterprise-message-info"
-      >
-        {{ t("app.generatorPreview.loading") }}
-      </div>
-
-      <div
-        v-else-if="files.length === 0"
-        class="enterprise-message enterprise-message-warning"
-      >
-        {{ t("app.generatorPreview.emptyFiltered") }}
-      </div>
-
-      <div v-else class="generator-file-list">
-        <button
-          v-for="file in files"
-          :key="file.path"
-          type="button"
-          class="generator-file-card"
-          :class="
-            selectedFilePath === file.path ? 'generator-file-card-active' : ''
-          "
-          @click="handleFileSelection(file.path)"
-        >
-          <div class="generator-file-card-header">
-            <strong>{{ file.path }}</strong>
-            <span>{{ file.lineCount }} {{ t("app.generatorPreview.meta.lines") }}</span>
-          </div>
-          <p>{{ file.reason }}</p>
-          <div class="generator-file-card-meta">
-            <span class="generator-file-card-action">
-              {{ t(`app.generatorPreview.actionLabel.${file.plannedAction}`) }}
-            </span>
-            <span>{{ file.mergeStrategy }}</span>
-            <span class="generator-file-card-diff generator-file-card-diff-added">
-              +{{ file.diffStats.addedLineCount }}
-            </span>
-            <span class="generator-file-card-diff generator-file-card-diff-removed">
-              -{{ file.diffStats.removedLineCount }}
-            </span>
-            <span>{{ file.charCount }} chars</span>
-          </div>
-        </button>
-      </div>
+      <GeneratorPreviewWorkspaceFileList
+        :t="t"
+        :loading="loading"
+        :files="files"
+        :selected-file-path="selectedFilePath"
+        @select-file="handleFileSelection"
+      />
     </div>
   </section>
 </template>
 
 <style scoped>
-.enterprise-field span,
-.generator-file-card p,
-.generator-file-card-meta {
+.enterprise-field span {
   margin: 0;
 }
 
@@ -842,63 +793,6 @@ watch(
   font-size: 0.9rem;
 }
 
-.generator-blocked-section,
-.generator-blocked-list {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.generator-blocked-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.75rem;
-  align-items: center;
-  color: #9a3412;
-}
-
-.generator-blocked-card {
-  display: grid;
-  gap: 0.35rem;
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid rgba(154, 52, 18, 0.18);
-  background: rgba(255, 247, 237, 0.9);
-  padding: 0.85rem 0.95rem;
-  text-align: left;
-  color: #7c2d12;
-  transition:
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
-}
-
-.generator-blocked-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(154, 52, 18, 0.38);
-  box-shadow: 0 10px 18px rgba(124, 45, 18, 0.08);
-}
-
-.generator-blocked-card p {
-  margin: 0;
-  color: #7c2d12;
-}
-
-.generator-blocked-card-active {
-  border-color: rgba(194, 65, 12, 0.56);
-  box-shadow: 0 12px 22px rgba(194, 65, 12, 0.12);
-}
-
-.generator-blocked-card-hint {
-  color: #9a3412;
-  font-size: 0.78rem;
-}
-
-.generator-file-list {
-  display: grid;
-  gap: 0.85rem;
-}
-
 .generator-summary-grid {
   display: grid;
   gap: 0.85rem;
@@ -928,75 +822,6 @@ watch(
   margin-top: 0.45rem;
   color: #0f172a;
   font-size: 1.05rem;
-}
-
-.generator-file-card {
-  width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.88);
-  padding: 1rem;
-  text-align: left;
-  color: #0f172a;
-  transition:
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
-}
-
-.generator-file-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(36, 87, 214, 0.2);
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
-}
-
-.generator-file-card-active {
-  border-color: rgba(36, 87, 214, 0.45);
-  box-shadow: 0 12px 22px rgba(36, 87, 214, 0.1);
-}
-
-.generator-file-card-header,
-.generator-file-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.generator-file-card p {
-  margin-top: 0.7rem;
-  color: #475569;
-  line-height: 1.65;
-}
-
-.generator-file-card-meta {
-  margin-top: 0.8rem;
-  font-size: 0.78rem;
-  color: #64748b;
-}
-
-.generator-file-card-action {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(248, 250, 252, 0.8);
-  padding: 0.2rem 0.55rem;
-  color: #334155;
-}
-
-.generator-file-card-diff {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
-
-.generator-file-card-diff-added {
-  color: #15803d;
-}
-
-.generator-file-card-diff-removed {
-  color: #b91c1c;
 }
 
 @media (max-width: 900px) {
