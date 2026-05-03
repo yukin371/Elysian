@@ -93,7 +93,19 @@ export const createGeneratorPreviewSessionRestore = (
         return true
       }
 
-      return false
+      if (
+        error instanceof Error &&
+        error.message.includes("GENERATOR_SESSION_NOT_FOUND")
+      ) {
+        return false
+      }
+
+      options.setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Generator session restore failed",
+      )
+      return true
     } finally {
       options.loading.value = false
     }
