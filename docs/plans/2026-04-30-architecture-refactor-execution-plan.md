@@ -28,6 +28,7 @@
 > - `1B / 后端错误码治理` 已完成 4 位数字错误码注册表收口：`apps/server` 已新增注册表，`AppError` 现只接受注册表键并统一输出数字 `code`；注册表已补运行时唯一性与 4 位约束校验，避免继续写入游离业务码
 > - `1B / 后端错误码治理` 已完成顶层错误信封迁移：`apps/server` 现统一返回 `{ code, message, status, details? }`，相关集成测试与 `generator-session` 契约断言已同步更新
 > - `1B / 后端错误码治理` 已补前端过渡兼容：`apps/example-vue` 的 `platform-api` 已改为结构化 `ApiError`，当前同时兼容顶层信封与旧 `error.{...}` 响应，`generator-preview` 工作区不再依赖 `message.includes(...)` 判断会话业务错误
+> - `1C / 前端 i18n 拆分` 已完成当前收口：`apps/example-vue/src/i18n/*modules.ts` 已按模块前缀拆到 `i18n/modules/`，中英文 key 数量与集合保持一致，并通过 `bun run build:vue`
 
 ---
 
@@ -91,9 +92,9 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
-| 1C-1 将 `zh-CN.modules.ts` 按模块拆分 | `i18n/zh-CN.customer.ts` 等 14 个文件 | 聚合器 `index.ts` 正确导入 |
-| 1C-2 将 `en-US.modules.ts` 同步拆分 | 对应 14 个英文文件 | 中英文 key 完全对齐 |
-| 1C-3 验证前端构建无回归 | `bun run build:vue` | 无缺失 key 报错 |
+| 1C-1 将 `zh-CN.modules.ts` 按模块拆分 | `i18n/modules/zh-CN.*.ts` | 已完成：按模块前缀拆分并由聚合器统一导入 |
+| 1C-2 将 `en-US.modules.ts` 同步拆分 | `i18n/modules/en-US.*.ts` | 已完成：中英文 key 集合保持完全对齐 |
+| 1C-3 验证前端构建无回归 | `bun run build:vue` | 已完成：无缺失 key 报错，构建通过 |
 
 **检查点 CP1**：ADR 已提交 + 错误码注册表替换完成且测试绿 + i18n 拆分完成且构建绿
 

@@ -1,0 +1,55 @@
+import type { VueLocaleMessages } from "@elysian/frontend-vue"
+
+export const zhCNDictionaryLocaleMessages: VueLocaleMessages = {
+  "app.dictionary.sectionTitle": "字典管理工作区",
+  "app.dictionary.sectionCopy":
+    "字典页先收敛到真实类型列表、详情与基础编辑，字典项先围绕当前类型展示，不提前扩成第二个并列主工作区。",
+  "app.dictionary.shellTitle": "字典管理工作区",
+  "app.dictionary.shellDescription":
+    "列表与详情直接消费系统字典接口，当前主区聚焦字典类型，右侧围绕当前类型展示字典项。",
+  "app.dictionary.workspaceEyebrow": "真实模块工作区",
+  "app.dictionary.workspaceTitle": "系统字典类型",
+  "app.dictionary.workspaceDescription":
+    "主区只承接字典类型查询与列表，右侧围绕当前类型展示详情和字典项，避免把 type 与 item 并列成两个重复主体。",
+  "app.dictionary.emptyTitle": "当前筛选条件下没有字典类型",
+  "app.dictionary.emptyDescription": "清空条件或调整关键字后重试。",
+  "app.dictionary.detailEyebrow": "字典详情",
+  "app.dictionary.detailEmptyTitle": "尚未选择字典类型",
+  "app.dictionary.detailEmptyDescription": "请选择一条字典类型记录查看详情。",
+  "app.dictionary.detailLoading": "正在刷新当前字典详情...",
+  "app.dictionary.field.id": "ID",
+  "app.dictionary.field.code": "编码",
+  "app.dictionary.field.name": "名称",
+  "app.dictionary.field.description": "描述",
+  "app.dictionary.field.status": "状态",
+  "app.dictionary.field.createdAt": "创建时间",
+  "app.dictionary.field.updatedAt": "更新时间",
+  "app.dictionary.status.active": "启用",
+  "app.dictionary.status.disabled": "停用",
+  "app.dictionary.boolean.true": "是",
+  "app.dictionary.boolean.false": "否",
+  "app.dictionary.query.codePlaceholder": "按编码搜索",
+  "app.dictionary.query.namePlaceholder": "按名称搜索",
+  "app.dictionary.query.descriptionPlaceholder": "按描述搜索",
+  "app.dictionary.action.create": "新建字典类型",
+  "app.dictionary.action.edit": "编辑字典类型",
+  "app.dictionary.countLabel": "当前显示 {visible} 条，共 {total} 条",
+  "app.dictionary.statsHint": "当前可见字典类型条目数",
+  "app.dictionary.tabsHint": "{count} 个字典类型",
+  "app.dictionary.panelTitle.create": "新建字典类型",
+  "app.dictionary.panelTitle.edit": "编辑字典类型",
+  "app.dictionary.panelTitle.detailFallback": "字典详情",
+  "app.dictionary.panelDesc.create":
+    "创建流程直接调用系统字典模块接口，示例页只装配字典类型表单状态与交互。",
+  "app.dictionary.panelDesc.edit":
+    "编辑模式继续复用 schema 派生字段，不额外扩出第二套 shared owner。",
+  "app.dictionary.panelDesc.detail":
+    "右侧详情保持围绕当前字典类型，并附带同类型下的字典项快照。",
+  "app.dictionary.meta.itemCount": "字典项数",
+  "app.dictionary.meta.defaultCount": "默认项数",
+  "app.dictionary.meta.items": "字典项",
+  "app.dictionary.meta.itemStatus": "状态",
+  "app.dictionary.meta.itemSort": "排序",
+  "app.dictionary.meta.itemDefault": "默认项",
+  "app.dictionary.meta.empty": "暂无",
+}

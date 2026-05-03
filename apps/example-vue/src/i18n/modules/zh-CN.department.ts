@@ -1,0 +1,52 @@
+import type { VueLocaleMessages } from "@elysian/frontend-vue"
+
+export const zhCNDepartmentLocaleMessages: VueLocaleMessages = {
+  "app.department.sectionTitle": "部门管理工作区",
+  "app.department.sectionCopy":
+    "系统部门页先收敛到真实列表、详情与基础编辑，不提前扩成组织树设计器或关系编辑器。",
+  "app.department.shellTitle": "部门工作区",
+  "app.department.shellDescription":
+    "列表与详情直接消费系统部门接口，当前只做最小闭环，不在本轮扩写组织树编辑器。",
+  "app.department.workspaceEyebrow": "真实模块工作区",
+  "app.department.workspaceTitle": "系统部门清单",
+  "app.department.workspaceDescription":
+    "主区只承接查询与部门列表，右侧聚焦当前部门详情与基础编辑，避免在两侧重复堆叠主体信息。",
+  "app.department.emptyTitle": "当前筛选条件下没有部门",
+  "app.department.emptyDescription": "清空条件或调整关键字后重试。",
+  "app.department.detailEyebrow": "部门详情",
+  "app.department.detailEmptyTitle": "尚未选择部门",
+  "app.department.detailEmptyDescription": "请选择一条部门记录查看详情。",
+  "app.department.detailLoading": "正在刷新当前部门详情...",
+  "app.department.field.id": "ID",
+  "app.department.field.parentId": "上级部门",
+  "app.department.field.code": "编码",
+  "app.department.field.name": "名称",
+  "app.department.field.sort": "排序",
+  "app.department.field.status": "状态",
+  "app.department.field.createdAt": "创建时间",
+  "app.department.field.updatedAt": "更新时间",
+  "app.department.status.active": "启用",
+  "app.department.status.disabled": "停用",
+  "app.department.parentRoot": "顶级部门",
+  "app.department.parentPlaceholder": "选择上级部门",
+  "app.department.query.codePlaceholder": "按编码搜索",
+  "app.department.query.namePlaceholder": "按名称搜索",
+  "app.department.action.create": "新建部门",
+  "app.department.action.edit": "编辑部门",
+  "app.department.countLabel": "当前显示 {visible} 条，共 {total} 条",
+  "app.department.statsHint": "当前可见部门条目数",
+  "app.department.tabsHint": "{count} 个部门",
+  "app.department.panelTitle.create": "新建部门",
+  "app.department.panelTitle.edit": "编辑部门",
+  "app.department.panelTitle.detailFallback": "部门详情",
+  "app.department.panelDesc.create":
+    "创建流程直接调用系统部门模块接口，示例页只装配表单状态与交互。",
+  "app.department.panelDesc.edit":
+    "编辑模式继续复用 schema 派生字段，并保持关联用户为只读展示。",
+  "app.department.panelDesc.detail":
+    "右侧详情与动作保持围绕当前部门，不在主区重复堆叠编辑入口。",
+  "app.department.meta.parent": "上级部门",
+  "app.department.meta.userCount": "关联用户数",
+  "app.department.meta.userIds": "关联用户 ID",
+  "app.department.meta.empty": "暂无",
+}

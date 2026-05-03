@@ -1,0 +1,62 @@
+import type { VueLocaleMessages } from "@elysian/frontend-vue"
+
+export const zhCNUserLocaleMessages: VueLocaleMessages = {
+  "app.user.sectionTitle": "用户管理工作区",
+  "app.user.sectionCopy":
+    "系统用户页先收敛到真实列表与详情，不提前扩成第二套完整后台或重复 CRUD owner。",
+  "app.user.shellTitle": "用户工作区",
+  "app.user.shellDescription":
+    "列表与详情直接消费系统用户接口，用最小装配方式扩展示例应用的真实功能矩阵。",
+  "app.user.workspaceEyebrow": "真实模块工作区",
+  "app.user.workspaceTitle": "系统用户清单",
+  "app.user.workspaceDescription":
+    "主区只承接查询与用户列表，右侧聚焦当前选中用户详情，避免在两侧重复堆叠主体信息。",
+  "app.user.emptyTitle": "当前筛选条件下没有用户",
+  "app.user.emptyDescription": "清空条件或调整关键字后重试。",
+  "app.user.detailEyebrow": "用户详情",
+  "app.user.detailDescription":
+    "右侧详情保持聚焦，只展示当前用户的核心身份与审计相关元数据。",
+  "app.user.detailEmptyTitle": "尚未选择用户",
+  "app.user.detailEmptyDescription": "请选择一条用户记录查看详情。",
+  "app.user.status.active": "启用",
+  "app.user.status.disabled": "停用",
+  "app.user.field.id": "ID",
+  "app.user.field.username": "用户名",
+  "app.user.field.displayName": "显示名称",
+  "app.user.field.email": "邮箱",
+  "app.user.field.phone": "手机号",
+  "app.user.field.status": "状态",
+  "app.user.field.isSuperAdmin": "超管",
+  "app.user.field.lastLoginAt": "最近登录时间",
+  "app.user.field.createdAt": "创建时间",
+  "app.user.field.updatedAt": "更新时间",
+  "app.user.field.password": "密码",
+  "app.user.query.usernamePlaceholder": "按用户名搜索",
+  "app.user.query.displayNamePlaceholder": "按显示名称搜索",
+  "app.user.query.emailPlaceholder": "按邮箱搜索",
+  "app.user.query.phonePlaceholder": "按手机号搜索",
+  "app.user.passwordPlaceholder": "请输入密码",
+  "app.user.action.create": "新建用户",
+  "app.user.action.edit": "编辑用户",
+  "app.user.action.resetPassword": "重置密码",
+  "app.user.action.confirmResetPassword": "确认重置",
+  "app.user.panelTitle.create": "新建用户",
+  "app.user.panelTitle.edit": "编辑用户",
+  "app.user.panelTitle.reset": "重置密码: {name}",
+  "app.user.panelTitle.resetFallback": "重置密码",
+  "app.user.panelTitle.detailFallback": "用户详情",
+  "app.user.panelDesc.create":
+    "创建流程直接调用系统用户模块接口，示例页只装配表单状态与交互。",
+  "app.user.panelDesc.edit":
+    "编辑模式复用同一份 schema 派生字段，不另起第二套表单 owner。",
+  "app.user.panelDesc.reset":
+    "重置密码保持为单独动作，避免把敏感输入混入常规编辑表单。",
+  "app.user.panelDesc.detail":
+    "右侧详情与动作保持围绕当前用户，不在主区重复堆叠编辑入口。",
+  "app.user.boolean.true": "是",
+  "app.user.boolean.false": "否",
+  "app.user.lastLoginEmpty": "暂无记录",
+  "app.user.countLabel": "当前显示 {visible} 条，共 {total} 条",
+  "app.user.statsHint": "当前可见用户条目数",
+  "app.user.tabsHint": "{count} 个用户",
+}

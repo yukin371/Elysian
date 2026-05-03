@@ -1,0 +1,60 @@
+import type { VueLocaleMessages } from "@elysian/frontend-vue"
+
+export const zhCNFileLocaleMessages: VueLocaleMessages = {
+  "app.file.sectionTitle": "文件管理工作区",
+  "app.file.sectionCopy":
+    "文件页先收敛到真实列表、详情、上传、下载与删除闭环，不提前扩成对象存储控制台、批量编排或跨桶治理中心。",
+  "app.file.shellTitle": "文件工作区",
+  "app.file.shellDescription":
+    "工作区直接消费系统文件接口，当前保持最小文件管理闭环，不扩写成第二套存储平台。",
+  "app.file.workspaceEyebrow": "系统文件",
+  "app.file.workspaceTitle": "文件列表",
+  "app.file.workspaceDescription":
+    "主区聚焦筛选与列表，右侧承接详情、上传、下载与删除确认，避免重复渲染第二份文件表。",
+  "app.file.loading": "正在加载文件列表...",
+  "app.file.emptyTitle": "当前没有文件",
+  "app.file.emptyDescription":
+    "调整筛选条件，或从右侧上传一个文件完成最小闭环验证。",
+  "app.file.countLabel": "当前显示 {visible} 个文件，共 {total} 个文件",
+  "app.file.tabsHint": "当前可见 {count} 个文件",
+  "app.file.statsHint": "文件工作区保持列表、详情、上传、下载与删除闭环。",
+  "app.file.detailEyebrow": "文件详情",
+  "app.file.detailEmptyTitle": "文件详情",
+  "app.file.detailEmptyDescription":
+    "从左侧列表选择一个文件，或直接在右侧上传一个新文件。",
+  "app.file.detailLoading": "正在加载文件详情...",
+  "app.file.panelTitle.upload": "上传文件",
+  "app.file.panelTitle.delete": "删除文件",
+  "app.file.panelTitle.detailFallback": "文件详情",
+  "app.file.panelDesc.upload":
+    "上传流程当前只覆盖单文件最小闭环，不扩写批量上传、断点续传或跨存储策略。",
+  "app.file.panelDesc.delete":
+    "删除确认保持显式，不在本轮引入回收站、批量清理或生命周期策略。",
+  "app.file.panelDesc.detail":
+    "详情面板用于承接下载与删除动作，不再重复渲染第二份主列表。",
+  "app.file.field.originalName": "文件名",
+  "app.file.field.mimeType": "MIME 类型",
+  "app.file.field.size": "文件大小",
+  "app.file.field.uploaderUserId": "上传用户",
+  "app.file.field.createdAt": "上传时间",
+  "app.file.query.originalNamePlaceholder": "按文件名查询",
+  "app.file.query.mimeTypePlaceholder": "按 MIME 类型查询",
+  "app.file.query.uploaderUserIdPlaceholder": "按上传用户查询",
+  "app.file.filter.reset": "重置筛选",
+  "app.file.meta.id": "文件 ID",
+  "app.file.meta.mimeType": "MIME 类型",
+  "app.file.meta.size": "文件大小",
+  "app.file.meta.uploaderUserId": "上传用户",
+  "app.file.meta.createdAt": "上传时间",
+  "app.file.action.upload": "上传文件",
+  "app.file.action.submitUpload": "确认上传",
+  "app.file.action.download": "下载文件",
+  "app.file.action.delete": "删除文件",
+  "app.file.action.confirmDelete": "确认删除",
+  "app.file.action.cancelDelete": "取消删除",
+  "app.file.uploadFieldLabel": "选择文件",
+  "app.file.uploadPrompt": "选择一个文件，右侧即可提交上传。",
+  "app.file.mimeTypeEmpty": "未识别",
+  "app.file.uploaderEmpty": "系统",
+  "app.file.deleteConfirm": "确认删除文件 {name}？该动作会直接删除当前记录。",
+}

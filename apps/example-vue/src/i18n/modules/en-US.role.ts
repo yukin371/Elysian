@@ -1,0 +1,63 @@
+import type { VueLocaleMessages } from "@elysian/frontend-vue"
+
+export const enUSRoleLocaleMessages: VueLocaleMessages = {
+  "app.role.sectionTitle": "Roles workspace",
+  "app.role.sectionCopy":
+    "The system-roles page stays focused on a real list, detail, and basic edit loop instead of expanding into a relationship editor.",
+  "app.role.shellTitle": "Roles workspace",
+  "app.role.shellDescription":
+    "The workspace consumes the real system-role API and keeps relationship data read-only for this round.",
+  "app.role.workspaceEyebrow": "Real module workspace",
+  "app.role.workspaceTitle": "System roles",
+  "app.role.workspaceDescription":
+    "The main area owns the query bar and role list, while the side panel stays focused on detail and basic edit actions.",
+  "app.role.emptyTitle": "No roles match the current filters",
+  "app.role.emptyDescription": "Clear the filters or adjust the search terms.",
+  "app.role.detailEyebrow": "Role detail",
+  "app.role.detailEmptyTitle": "No role selected",
+  "app.role.detailEmptyDescription":
+    "Select a role row to inspect the detail panel.",
+  "app.role.detailLoading": "Refreshing role detail...",
+  "app.role.status.active": "Active",
+  "app.role.status.disabled": "Disabled",
+  "app.role.field.id": "ID",
+  "app.role.field.code": "Code",
+  "app.role.field.name": "Name",
+  "app.role.field.description": "Description",
+  "app.role.field.status": "Status",
+  "app.role.field.isSystem": "System Role",
+  "app.role.field.dataScope": "Data Scope",
+  "app.role.field.createdAt": "Created At",
+  "app.role.field.updatedAt": "Updated At",
+  "app.role.query.codePlaceholder": "Search by code",
+  "app.role.query.namePlaceholder": "Search by name",
+  "app.role.query.descriptionPlaceholder": "Search by description",
+  "app.role.action.create": "New role",
+  "app.role.action.edit": "Edit role",
+  "app.role.boolean.true": "Yes",
+  "app.role.boolean.false": "No",
+  "app.role.dataScope.1": "All data",
+  "app.role.dataScope.2": "Department and children",
+  "app.role.dataScope.3": "Department only",
+  "app.role.dataScope.4": "Self only",
+  "app.role.dataScope.5": "Custom departments",
+  "app.role.countLabel": "Showing {visible} of {total} roles",
+  "app.role.statsHint": "Current visible role rows",
+  "app.role.tabsHint": "{count} roles",
+  "app.role.panelTitle.create": "Create role",
+  "app.role.panelTitle.edit": "Edit role",
+  "app.role.panelTitle.detailFallback": "Role detail",
+  "app.role.panelDesc.create":
+    "Create mode calls the canonical system-role API directly while the example app only owns view state.",
+  "app.role.panelDesc.edit":
+    "Edit mode reuses the same schema-derived fields while relationship arrays stay read-only in this round.",
+  "app.role.panelDesc.detail":
+    "The side panel stays centered on the current role and keeps edit actions out of the main list area.",
+  "app.role.meta.permissionCount": "Permission Count",
+  "app.role.meta.userCount": "Linked Users",
+  "app.role.meta.deptCount": "Linked Departments",
+  "app.role.meta.permissionCodes": "Permission Codes",
+  "app.role.meta.userIds": "User IDs",
+  "app.role.meta.deptIds": "Department IDs",
+  "app.role.meta.empty": "None",
+}
