@@ -26,11 +26,13 @@ export interface CreateGeneratorPreviewSessionPersistenceInput {
   outputDir: string
   previewFileCount: number
   reportPath: string
+  reviewEvidence?: Record<string, unknown> | null
   reviewComment?: string | null
   reviewedAt?: Date | null
   reviewedByDisplayName?: string | null
   reviewedByUserId?: string | null
   reviewedByUsername?: string | null
+  applyEvidence?: Record<string, unknown> | null
   schemaName: string
   skippedFileCount?: number | null
   sourceType: string
@@ -47,10 +49,12 @@ export interface MarkGeneratorPreviewSessionAppliedPersistenceInput {
   appliedByUsername: string | null
   applyManifestPath: string | null
   applyRequestId: string | null
+  applyEvidence: Record<string, unknown> | null
   skippedFileCount: number
 }
 
 export interface MarkGeneratorPreviewSessionReviewedPersistenceInput {
+  reviewEvidence: Record<string, unknown> | null
   reviewComment: string | null
   reviewedAt: Date
   reviewedByDisplayName: string | null
@@ -85,11 +89,13 @@ export async function insertGeneratorPreviewSession(
       outputDir: input.outputDir,
       previewFileCount: input.previewFileCount,
       reportPath: input.reportPath,
+      reviewEvidence: input.reviewEvidence ?? null,
       reviewComment: input.reviewComment ?? null,
       reviewedAt: input.reviewedAt ?? null,
       reviewedByDisplayName: input.reviewedByDisplayName ?? null,
       reviewedByUserId: input.reviewedByUserId ?? null,
       reviewedByUsername: input.reviewedByUsername ?? null,
+      applyEvidence: input.applyEvidence ?? null,
       schemaName: input.schemaName,
       skippedFileCount: input.skippedFileCount ?? null,
       sourceType: input.sourceType,
@@ -145,6 +151,7 @@ export async function markGeneratorPreviewSessionApplied(
       appliedByUsername: input.appliedByUsername,
       applyManifestPath: input.applyManifestPath,
       applyRequestId: input.applyRequestId,
+      applyEvidence: input.applyEvidence,
       skippedFileCount: input.skippedFileCount,
       status: "applied",
       updatedAt: input.appliedAt,
@@ -163,6 +170,7 @@ export async function markGeneratorPreviewSessionReviewed(
   const [row] = await db
     .update(generatorPreviewSessions)
     .set({
+      reviewEvidence: input.reviewEvidence,
       reviewComment: input.reviewComment,
       reviewedAt: input.reviewedAt,
       reviewedByDisplayName: input.reviewedByDisplayName,

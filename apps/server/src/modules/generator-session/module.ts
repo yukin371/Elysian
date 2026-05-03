@@ -341,6 +341,10 @@ const toSessionDetailResponse = (session: GeneratorPreviewSessionDetail) => ({
 })
 
 const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
+  if (session.applyEvidence != null) {
+    return session.applyEvidence
+  }
+
   if (
     session.appliedAt === null &&
     session.applyManifestPath === null &&
@@ -363,6 +367,10 @@ const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
 }
 
 const buildReviewEvidence = (session: GeneratorPreviewSessionRecord) => {
+  if (session.reviewEvidence != null) {
+    return session.reviewEvidence
+  }
+
   if (
     session.reviewedAt === null &&
     session.reviewedByUserId === null &&

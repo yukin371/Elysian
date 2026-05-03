@@ -187,6 +187,16 @@ export const createGeneratorSessionService = (
         (file) => file.written,
       ).length
       const skippedFileCount = applyResult.files.length - appliedFileCount
+      const applyEvidence = {
+        sessionId: session.id,
+        reportPath: session.reportPath,
+        manifestPath: applyResult.manifestPath,
+        appliedAt,
+        actorDisplayName: input.actor?.user.displayName ?? null,
+        actorUserId: input.actor?.user.id ?? null,
+        actorUsername: input.actor?.user.username ?? null,
+        requestId: input.requestId,
+      }
       const updatedSession = await repository.markPreviewSessionApplied(
         session.id,
         {
@@ -197,6 +207,7 @@ export const createGeneratorSessionService = (
           appliedByUsername: input.actor?.user.username ?? null,
           applyManifestPath: applyResult.manifestPath,
           applyRequestId: input.requestId,
+          applyEvidence,
           skippedFileCount,
         },
       )
@@ -308,10 +319,21 @@ export const createGeneratorSessionService = (
       }
 
       const reviewedAt = now().toISOString()
+      const reviewEvidence = {
+        sessionId: session.id,
+        reportPath: session.reportPath,
+        reviewedAt,
+        actorDisplayName: input.actor?.user.displayName ?? null,
+        actorUserId: input.actor?.user.id ?? null,
+        actorUsername: input.actor?.user.username ?? null,
+        comment: input.comment?.trim() || null,
+        decision: input.decision,
+      }
       const reviewedSession = await repository.markPreviewSessionReviewed(
         session.id,
         {
-          reviewComment: input.comment?.trim() || null,
+          reviewComment: reviewEvidence.comment,
+          reviewEvidence,
           reviewedAt,
           reviewedByDisplayName: input.actor?.user.displayName ?? null,
           reviewedByUserId: input.actor?.user.id ?? null,

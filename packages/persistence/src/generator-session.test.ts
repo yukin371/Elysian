@@ -97,6 +97,16 @@ describe("generator preview session persistence", () => {
         appliedByUsername: "alpha-admin",
         applyManifestPath: "E:/generated/manifest.json",
         applyRequestId: "req-generator-session-apply-1",
+        applyEvidence: {
+          sessionId: created.id,
+          reportPath: "E:/generated/reports/apply.preview.json",
+          manifestPath: "E:/generated/manifest.json",
+          appliedAt: "2026-04-27T10:15:00.000Z",
+          actorDisplayName: "Alpha Admin",
+          actorUserId: "66666666-6666-4666-8666-666666666666",
+          actorUsername: "alpha-admin",
+          requestId: "req-generator-session-apply-1",
+        },
         skippedFileCount: 1,
       })
 
@@ -111,6 +121,11 @@ describe("generator preview session persistence", () => {
       )
       expect(persisted?.applyRequestId).toBe("req-generator-session-apply-1")
       expect(persisted?.status).toBe("applied")
+      expect(persisted?.applyEvidence).toMatchObject({
+        sessionId: created.id,
+        requestId: "req-generator-session-apply-1",
+        appliedAt: "2026-04-27T10:15:00.000Z",
+      })
     })
   })
 
@@ -137,6 +152,16 @@ describe("generator preview session persistence", () => {
 
       const updated = await markGeneratorPreviewSessionReviewed(db, created.id, {
         reviewComment: "Looks good",
+        reviewEvidence: {
+          sessionId: created.id,
+          reportPath: "E:/generated/reports/review.preview.json",
+          reviewedAt: "2026-04-27T11:20:00.000Z",
+          actorDisplayName: "Alpha Admin",
+          actorUserId: "88888888-8888-4888-8888-888888888888",
+          actorUsername: "alpha-admin",
+          comment: "Looks good",
+          decision: "approve",
+        },
         reviewedAt: new Date("2026-04-27T11:20:00.000Z"),
         reviewedByDisplayName: "Alpha Admin",
         reviewedByUserId: "88888888-8888-4888-8888-888888888888",
@@ -153,6 +178,11 @@ describe("generator preview session persistence", () => {
         "2026-04-27T11:20:00.000Z",
       )
       expect(persisted?.status).toBe("ready")
+      expect(persisted?.reviewEvidence).toMatchObject({
+        sessionId: created.id,
+        comment: "Looks good",
+        reviewedAt: "2026-04-27T11:20:00.000Z",
+      })
     })
   })
 })
@@ -241,11 +271,13 @@ create table generator_preview_sessions (
   output_dir text not null,
   preview_file_count integer not null,
   report_path text not null,
+  review_evidence jsonb,
   review_comment text,
   reviewed_at timestamp with time zone,
   reviewed_by_display_name text,
   reviewed_by_user_id uuid,
   reviewed_by_username text,
+  apply_evidence jsonb,
   schema_name text not null,
   skipped_file_count integer,
   source_type text not null,
