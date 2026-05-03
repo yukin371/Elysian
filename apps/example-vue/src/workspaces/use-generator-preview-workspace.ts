@@ -583,7 +583,13 @@ export const useGeneratorPreviewWorkspace = (
       } finally {
         loading.value = false
       }
-    } catch {
+    } catch (error) {
+      if (isGeneratorPreviewRecoverableAuthError(error)) {
+        onRecoverableAuthError(error)
+        errorMessage.value = error.message
+        return true
+      }
+
       recentSessions.value = []
       return false
     }

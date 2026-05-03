@@ -514,6 +514,83 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     )
   })
 
+  test("surfaces auth error instead of silently refreshing when matching recent session detail fails", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:30:00.000Z",
+                id: "preview-session-protected",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith(
+          "/studio/generator/sessions/preview-session-protected",
+        ) &&
+        method === "GET"
+      ) {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.selectedFrontendTarget.value).toBe("vue")
+    expect(workspace.selectedConflictStrategy.value).toBe(
+      "overwrite-generated-only",
+    )
+  })
+
   test("does not restore the current session again when already selected", async () => {
     let detailRequestCount = 0
 
