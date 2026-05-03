@@ -261,6 +261,147 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.canApplyPreview.value).toBe(true)
   })
 
+  test("refreshes current detail when apply session has been rejected", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REJECTED",
+              message: "Generator session has been rejected",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              id: "preview-session-1",
+              reviewComment: "Needs manual merge review",
+              reviewedAt: "2026-05-02T12:05:00.000Z",
+              status: "rejected",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.applyPreview()
+
+    expect(detailRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.status).toBe("rejected")
+    expect(workspace.currentSession.value?.reviewComment).toBe(
+      "Needs manual merge review",
+    )
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REJECTED",
+    )
+    expect(workspace.canApplyPreview.value).toBe(false)
+  })
+
+  test("refreshes current detail when apply confirmation has been cleared", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_CONFIRMATION_REQUIRED",
+              message: "Generator session must be confirmed before apply",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              confirmedAt: null,
+              id: "preview-session-1",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+
+    await workspace.applyPreview()
+
+    expect(detailRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.status).toBe("ready")
+    expect(workspace.currentSession.value?.confirmedAt).toBeNull()
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_CONFIRMATION_REQUIRED",
+    )
+    expect(workspace.canApplyPreview.value).toBe(false)
+    expect(workspace.canConfirmPreview.value).toBe(true)
+  })
+
   test("approves pending preview sessions before confirm and apply", async () => {
     let submittedComment: string | undefined
 
