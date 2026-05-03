@@ -72,6 +72,9 @@ const isGeneratorPreviewConflictStrategy = (
 const isFrontendTarget = (value: unknown): value is FrontendTarget =>
   value === "vue" || value === "react"
 
+const isGeneratorPreviewRecoverableAuthError = (error: unknown) =>
+  error instanceof Error && error.message.includes("status 401")
+
 const loadStoredGeneratorPreviewSelection = (
   availableSchemaNames: readonly string[],
 ): GeneratorPreviewStoredSelection | null => {
@@ -513,7 +516,13 @@ export const useGeneratorPreviewWorkspace = (
       }
 
       return applySessionDetail(session)
-    } catch {
+    } catch (error) {
+      if (isGeneratorPreviewRecoverableAuthError(error)) {
+        onRecoverableAuthError(error)
+        errorMessage.value = error.message
+        return true
+      }
+
       return false
     } finally {
       loading.value = false
