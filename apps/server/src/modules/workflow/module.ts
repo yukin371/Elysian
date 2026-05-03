@@ -2,6 +2,7 @@ import { workflowModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { AuditLogEvent, AuditLogWriter } from "../shared/audit-log"
@@ -110,6 +111,7 @@ export const createWorkflowModule = (
         {
           response: {
             200: workflowDefinitionListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["workflow"],
@@ -130,6 +132,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowDefinitionRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["workflow"],
@@ -160,6 +163,7 @@ export const createWorkflowModule = (
           }),
           response: {
             201: workflowDefinitionRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["workflow"],
@@ -192,6 +196,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowDefinitionRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["workflow"],
@@ -213,6 +218,7 @@ export const createWorkflowModule = (
         {
           response: {
             200: workflowInstanceListResponseSchema,
+            ...createErrorResponses(400, 401, 403),
           },
           detail: {
             tags: ["workflow"],
@@ -235,6 +241,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowInstanceDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404),
           },
           detail: {
             tags: ["workflow"],
@@ -275,6 +282,7 @@ export const createWorkflowModule = (
           }),
           response: {
             201: workflowInstanceDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["workflow"],
@@ -299,6 +307,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowTaskListResponseSchema,
+            ...createErrorResponses(400, 401, 403),
           },
           detail: {
             tags: ["workflow"],
@@ -323,6 +332,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowTaskListResponseSchema,
+            ...createErrorResponses(400, 401, 403),
           },
           detail: {
             tags: ["workflow"],
@@ -368,6 +378,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowInstanceDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["workflow"],
@@ -414,6 +425,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowInstanceDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["workflow"],
@@ -459,6 +471,7 @@ export const createWorkflowModule = (
           }),
           response: {
             200: workflowInstanceDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["workflow"],

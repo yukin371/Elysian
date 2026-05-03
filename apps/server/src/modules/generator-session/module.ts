@@ -10,6 +10,7 @@ import {
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { AuditLogWriter } from "../shared/audit-log"
@@ -125,6 +126,7 @@ export const createGeneratorSessionModule = (
         {
           response: {
             200: generatorSessionListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["generator"],
@@ -158,6 +160,7 @@ export const createGeneratorSessionModule = (
           }),
           response: {
             200: generatorSessionDetailResponseSchema,
+            ...createErrorResponses(401, 403, 404, 500),
           },
           detail: {
             tags: ["generator"],
@@ -213,6 +216,7 @@ export const createGeneratorSessionModule = (
           }),
           response: {
             201: generatorSessionPreviewResponseSchema,
+            ...createErrorResponses(401, 403, 404, 409, 500),
           },
           detail: {
             tags: ["generator"],
@@ -267,6 +271,7 @@ export const createGeneratorSessionModule = (
           }),
           response: {
             200: generatorSessionPreviewResponseSchema,
+            ...createErrorResponses(401, 403, 404, 409, 500),
           },
           detail: {
             tags: ["generator"],
@@ -381,6 +386,7 @@ export const createGeneratorSessionModule = (
           }),
           response: {
             200: generatorSessionConfirmResponseSchema,
+            ...createErrorResponses(401, 403, 404, 409, 500),
           },
           detail: {
             tags: ["generator"],
@@ -437,6 +443,7 @@ export const createGeneratorSessionModule = (
           }),
           response: {
             200: generatorSessionApplyResponseSchema,
+            ...createErrorResponses(401, 403, 404, 409, 500),
           },
           detail: {
             tags: ["generator"],

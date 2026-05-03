@@ -45,16 +45,31 @@ describe("createServerApp notifications", () => {
       payload.paths["/system/notifications"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/system/notifications"]?.get?.responses?.["401"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/notifications"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/notifications"]?.post?.responses?.["400"],
     ).toBeDefined()
     expect(
       payload.paths["/system/notifications/{id}"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/system/notifications/{id}"]?.get?.responses?.["404"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/notifications/read"]?.post?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/system/notifications/read"]?.post?.responses?.["404"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/notifications/{id}/read"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.["404"],
     ).toBeDefined()
   })
 

@@ -66,13 +66,25 @@ describe("createServerApp workflow definitions", () => {
       payload.paths["/workflow/definitions"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/workflow/definitions"]?.get?.responses?.["401"],
+    ).toBeDefined()
+    expect(
       payload.paths["/workflow/definitions"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/definitions"]?.post?.responses?.["409"],
     ).toBeDefined()
     expect(
       payload.paths["/workflow/definitions/{id}"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/workflow/definitions/{id}"]?.get?.responses?.["404"],
+    ).toBeDefined()
+    expect(
       payload.paths["/workflow/definitions/{id}"]?.put?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/definitions/{id}"]?.put?.responses?.["404"],
     ).toBeDefined()
   })
 

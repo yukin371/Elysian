@@ -1,6 +1,7 @@
 import { operationLogModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -69,6 +70,7 @@ export const createOperationLogModule = (
           query: operationLogFilterSchema,
           response: {
             200: operationLogListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["operation-log"],
@@ -86,6 +88,9 @@ export const createOperationLogModule = (
         },
         {
           query: operationLogFilterSchema,
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["operation-log"],
             summary: "Export operation logs as CSV",
@@ -105,6 +110,7 @@ export const createOperationLogModule = (
           }),
           response: {
             200: operationLogRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["operation-log"],

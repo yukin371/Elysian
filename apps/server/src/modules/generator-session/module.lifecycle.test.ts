@@ -37,19 +37,37 @@ describe("generator session module lifecycle", () => {
       payload.paths["/studio/generator/sessions"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/studio/generator/sessions"]?.get?.responses?.["401"],
+    ).toBeDefined()
+    expect(
       payload.paths["/studio/generator/sessions/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/{id}"]?.get?.responses?.["404"],
     ).toBeDefined()
     expect(
       payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.["201"],
     ).toBeDefined()
     expect(
+      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.["409"],
+    ).toBeDefined()
+    expect(
       payload.paths["/studio/generator/sessions/{id}/review"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/{id}/review"]?.post?.responses?.["404"],
     ).toBeDefined()
     expect(
       payload.paths["/studio/generator/sessions/{id}/confirm"]?.post?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post?.responses?.["409"],
+    ).toBeDefined()
+    expect(
       payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.["500"],
     ).toBeDefined()
   })
 

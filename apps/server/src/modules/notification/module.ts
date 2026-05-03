@@ -1,6 +1,7 @@
 import { deriveBodySchema, notificationModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -94,6 +95,7 @@ export const createNotificationModule = (
           query: notificationFilterSchema,
           response: {
             200: notificationListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["notification"],
@@ -114,6 +116,9 @@ export const createNotificationModule = (
         },
         {
           query: notificationFilterSchema,
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["notification"],
             summary: "Export notifications as CSV",
@@ -136,6 +141,7 @@ export const createNotificationModule = (
           }),
           response: {
             200: notificationRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["notification"],
@@ -162,6 +168,7 @@ export const createNotificationModule = (
           body: notificationCreateBodySchema,
           response: {
             201: notificationRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404),
           },
           detail: {
             tags: ["notification"],
@@ -187,6 +194,7 @@ export const createNotificationModule = (
           }),
           response: {
             200: notificationBulkReadResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["notification"],
@@ -210,6 +218,7 @@ export const createNotificationModule = (
           }),
           response: {
             200: notificationRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["notification"],

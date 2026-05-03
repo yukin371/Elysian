@@ -42,7 +42,13 @@ describe("createServerApp operation logs", () => {
       payload.paths["/system/operation-logs"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/system/operation-logs"]?.get?.responses?.["401"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/operation-logs/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/operation-logs/{id}"]?.get?.responses?.["404"],
     ).toBeDefined()
   })
 
