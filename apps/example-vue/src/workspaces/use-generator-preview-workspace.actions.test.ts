@@ -114,7 +114,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     )
   })
 
-  test("approves pending preview sessions before apply", async () => {
+  test("approves pending preview sessions before confirm and apply", async () => {
     let submittedComment: string | undefined
 
     globalThis.fetch = (async (input, init) => {
@@ -157,6 +157,37 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
         )
       }
 
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            session: createSession({
+              confirmedAt: "2026-05-02T12:10:00.000Z",
+              confirmationEvidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                checklist: ["Review the SQL draft."],
+                confirmedAt: "2026-05-02T12:10:00.000Z",
+                reportPath: "generated/reports/preview-session-1.preview.json",
+                sessionId: "preview-session-1",
+              },
+              confirmedByDisplayName: "Admin",
+              confirmedByUserId: "user-1",
+              confirmedByUsername: "admin",
+              status: "ready",
+            }),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
       return new Response("not found", { status: 404 })
     }) as typeof fetch
 
@@ -175,15 +206,11 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
       "approve",
     )
     expect(submittedComment).toBe("ready for staging")
-    const currentSession = workspace.currentSession.value
-    expect(currentSession).not.toBeNull()
-    if (!currentSession) {
-      throw new Error("Expected current session after approval")
-    }
-    workspace.currentSession.value = {
-      ...currentSession,
-      confirmedAt: "2026-05-02T12:10:00.000Z",
-    }
+    await workspace.confirmPreview()
+
+    expect(workspace.currentSession.value?.confirmedAt).toBe(
+      "2026-05-02T12:10:00.000Z",
+    )
     expect(workspace.canApplyPreview.value).toBe(true)
     expect(workspace.canApprovePreview.value).toBe(false)
   })
