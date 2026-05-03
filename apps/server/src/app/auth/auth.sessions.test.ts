@@ -13,6 +13,34 @@ import {
 } from "./test-support"
 
 describe("createServerApp auth sessions", () => {
+  it("publishes auth success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture()
+    const app = createTestApp({
+      modules: [fixture.authModule],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<
+          string,
+          {
+            responses?: Record<string, unknown>
+          }
+        >
+      >
+    }
+
+    expect(payload.paths["/auth/login"]?.post?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/auth/me"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/auth/sessions"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/auth/refresh"]?.post?.responses?.["200"]).toBeDefined()
+  })
+
   it("refreshes tokens and rotates the refresh session", async () => {
     const fixture = await createAuthTestFixture()
     const app = createTestApp({

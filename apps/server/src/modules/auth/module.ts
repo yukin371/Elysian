@@ -8,6 +8,11 @@ import { t } from "elysia"
 
 import { AppError } from "../../errors"
 import type { ServerModule } from "../module"
+import {
+  authLoginResponseSchema,
+  authMeResponseSchema,
+  authSessionsResponseSchema,
+} from "./openapi"
 import type { AuthRepository } from "./repository"
 import type { AuthLoginResponse } from "./service"
 import { createAuthService } from "./service"
@@ -102,6 +107,9 @@ export const createAuthModule = (
             password: t.String({ minLength: 1 }),
             tenantCode: t.Optional(t.String({ minLength: 1 })),
           }),
+          response: {
+            200: authLoginResponseSchema,
+          },
           detail: {
             tags: ["auth"],
             summary: "Login and issue tokens",
@@ -113,6 +121,9 @@ export const createAuthModule = (
         async ({ request }) =>
           service.me(extractBearerToken(request.headers.get("authorization"))),
         {
+          response: {
+            200: authMeResponseSchema,
+          },
           detail: {
             tags: ["auth"],
             summary: "Get current auth context",
@@ -126,6 +137,9 @@ export const createAuthModule = (
             extractBearerToken(request.headers.get("authorization")),
           ),
         {
+          response: {
+            200: authSessionsResponseSchema,
+          },
           detail: {
             tags: ["auth"],
             summary: "List current user refresh sessions",
@@ -161,6 +175,9 @@ export const createAuthModule = (
           return response
         },
         {
+          response: {
+            200: authLoginResponseSchema,
+          },
           detail: {
             tags: ["auth"],
             summary: "Refresh access token and rotate refresh session",
