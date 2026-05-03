@@ -1,3 +1,6 @@
+// Canonical frontend record/status types still come from schema.
+// OpenAPI-generated parallel types live under ./generated and are refreshed by
+// `bun run openapi:types:generate` until 6C-3 is ready to switch the gateway.
 export type {
   CustomerRecord,
   CustomerStatus,

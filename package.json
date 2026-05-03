@@ -18,6 +18,7 @@
     "dev:vue": "bun --filter @elysian/example-vue dev",
     "dev:uniapp": "bun --filter @elysian/example-uniapp dev:h5",
     "server": "bun --filter @elysian/server start",
+    "openapi:types:generate": "bun scripts/generate-openapi-types.ts",
     "build:vue": "bun --filter @elysian/example-vue build",
     "build:uniapp": "bun --filter @elysian/example-uniapp build:h5",
     "db:generate": "bun --filter @elysian/persistence db:generate",

@@ -22,6 +22,8 @@ build/
 generated/
 !apps/example-vue/src/app/workspace-registry/generated/
 !apps/example-vue/src/app/workspace-registry/generated/*.ts
+!apps/example-vue/src/lib/platform-api/generated/
+!apps/example-vue/src/lib/platform-api/generated/*
 .turbo/
 .cache/
 coverage/
