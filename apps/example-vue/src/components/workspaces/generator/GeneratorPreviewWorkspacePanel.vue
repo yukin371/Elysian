@@ -622,6 +622,9 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         v-if="sqlProposalHandoff"
         :t="t"
         :sql-proposal-handoff="sqlProposalHandoff"
+        :session-confirmed-at-label="sessionConfirmedAtLabel"
+        :session-confirmed-by-label="sessionConfirmedByLabel"
+        :session-confirmation-note="sessionConfirmationNote"
         :suggested-commands-text="suggestedCommandsText"
         :commands-copy-label="
           resolveCopyLabel(

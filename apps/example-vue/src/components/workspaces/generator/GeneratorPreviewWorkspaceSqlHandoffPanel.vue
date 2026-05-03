@@ -9,6 +9,9 @@ interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   t: GeneratorPreviewTranslation
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
+  sessionConfirmedAtLabel: string
+  sessionConfirmedByLabel: string
+  sessionConfirmationNote: string | null
   suggestedCommandsText: string
   commandsCopyLabel: string
   migrationProposalSnapshotPathCopyLabel: string
@@ -24,6 +27,9 @@ const {
   t,
   sqlProposalHandoff,
   migrationProposalSnapshot,
+  sessionConfirmedAtLabel,
+  sessionConfirmedByLabel,
+  sessionConfirmationNote,
   suggestedCommandsText,
   commandsCopyLabel,
   migrationProposalSnapshotPathCopyLabel,
@@ -203,6 +209,22 @@ const emit = defineEmits<{
         >
           {{ confirmationChecklistCopyLabel }}
         </button>
+      </div>
+      <p
+        v-if="sessionConfirmationNote"
+        class="enterprise-message enterprise-message-info"
+      >
+        {{ sessionConfirmationNote }}
+      </p>
+      <div v-if="sessionConfirmedAtLabel !== '-'" class="enterprise-metadata">
+        <div>
+          <span>{{ t("app.generatorPreview.meta.confirmedAt") }}</span>
+          <strong>{{ sessionConfirmedAtLabel }}</strong>
+        </div>
+        <div>
+          <span>{{ t("app.generatorPreview.meta.confirmedBy") }}</span>
+          <strong>{{ sessionConfirmedByLabel }}</strong>
+        </div>
       </div>
       <ol class="generator-handoff-steps">
         <li v-for="item in sqlProposalHandoff.confirmationChecklist" :key="item">
