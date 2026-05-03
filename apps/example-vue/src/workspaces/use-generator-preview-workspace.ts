@@ -311,15 +311,17 @@ export const useGeneratorPreviewWorkspace = (
     storedSessionId: storedSelection?.sessionId,
   })
 
-  const refreshPreview = async () => {
+  const refreshPreview = async (options?: {
+    ignoreApplyLoading?: boolean
+  }) => {
     if (
       loading.value ||
-      applyLoading.value ||
+      (!options?.ignoreApplyLoading && applyLoading.value) ||
       reviewLoading.value ||
       !enabled.value ||
       !selectedSchemaName.value
     ) {
-      return
+      return false
     }
 
     const requestId = latestPreviewRequestId + 1
@@ -336,7 +338,7 @@ export const useGeneratorPreviewWorkspace = (
       })
 
       if (requestId !== latestPreviewRequestId) {
-        return
+        return false
       }
 
       if (
@@ -351,10 +353,13 @@ export const useGeneratorPreviewWorkspace = (
         )
       ) {
         resetPreviewState()
+        return false
       }
+
+      return true
     } catch (error) {
       if (requestId !== latestPreviewRequestId) {
-        return
+        return false
       }
 
       if (!canPreservePreviewState()) {
@@ -363,6 +368,7 @@ export const useGeneratorPreviewWorkspace = (
       onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error ? error.message : "Generator preview failed"
+      return false
     } finally {
       if (requestId === latestPreviewRequestId) {
         loading.value = false
@@ -385,6 +391,8 @@ export const useGeneratorPreviewWorkspace = (
       currentSqlProposalHandoff,
       onRecoverableAuthError,
       persistCurrentSelection,
+      refreshPreviewAfterApplyStale: () =>
+        refreshPreview({ ignoreApplyLoading: true }),
       refreshSessionDetailAfterStateDrift,
       reviewLoading,
       selectedRecentSessionId,

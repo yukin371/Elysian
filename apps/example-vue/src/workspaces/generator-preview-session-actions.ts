@@ -28,6 +28,7 @@ type CreateGeneratorPreviewSessionActionsOptions = {
   currentSqlProposalHandoff: Ref<GeneratorPreviewSqlProposalHandoff | null>
   onRecoverableAuthError: (error: unknown) => void
   persistCurrentSelection: () => void
+  refreshPreviewAfterApplyStale: () => Promise<boolean>
   refreshSessionDetailAfterStateDrift: (
     sessionId: string,
     staleMessage: string,
@@ -80,6 +81,18 @@ export const createGeneratorPreviewSessionActions = (
         options.persistCurrentSelection()
       }
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes("GENERATOR_SESSION_STALE")
+      ) {
+        if (await options.refreshPreviewAfterApplyStale()) {
+          options.setErrorMessage(error.message)
+          return
+        }
+
+        return
+      }
+
       if (
         error instanceof Error &&
         (error.message.includes("GENERATOR_SESSION_NOT_READY") ||

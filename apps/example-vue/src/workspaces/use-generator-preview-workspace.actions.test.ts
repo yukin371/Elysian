@@ -190,6 +190,98 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.canApplyPreview.value).toBe(false)
   })
 
+  test("regenerates preview when apply session report becomes stale", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              confirmedAt: "2026-05-02T12:10:00.000Z",
+              id: "preview-session-1",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_STALE",
+              message: "Generator preview session is stale",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(JSON.stringify({ items: [] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport(),
+            session: createSession({
+              id: "preview-session-2",
+              status: "pending_review",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace({ enabled: false })
+    await workspace.restorePreviewSession("preview-session-1")
+    enabled.value = true
+
+    await workspace.applyPreview()
+
+    expect(previewRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-2")
+    expect(workspace.currentSession.value?.status).toBe("pending_review")
+    expect(workspace.errorMessage.value).toContain("GENERATOR_SESSION_STALE")
+    expect(workspace.canApplyPreview.value).toBe(false)
+  })
+
   test("reports refetch auth error when stale apply session cannot be refreshed", async () => {
     const recoverableErrors: unknown[] = []
     let detailRequestCount = 0
@@ -257,6 +349,100 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(detailRequestCount).toBe(1)
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.status).toBe("ready")
+    expect(workspace.canApplyPreview.value).toBe(true)
+  })
+
+  test("reports refresh auth error when stale apply session cannot be regenerated", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              confirmedAt: "2026-05-02T12:10:00.000Z",
+              id: "preview-session-1",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_STALE",
+              message: "Generator preview session is stale",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(JSON.stringify({ items: [] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace({
+      enabled: false,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    await workspace.restorePreviewSession("preview-session-1")
+    enabled.value = true
+
+    await workspace.applyPreview()
+
+    expect(previewRequestCount).toBe(1)
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentSession.value?.status).toBe("ready")
     expect(workspace.canApplyPreview.value).toBe(true)
   })
