@@ -379,6 +379,121 @@ describe("generator session module guards", () => {
     })
   })
 
+  it("blocks apply when the generator preview session is already applied", async () => {
+    const { accessToken, app } =
+      await createGeneratorSessionAuthenticatedContext()
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "customer",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          targetPreset: "staging",
+        }),
+      }),
+    )
+    expect(createResponse.status).toBe(201)
+
+    const createBody = (await createResponse.json()) as {
+      session: {
+        id: string
+      }
+      sqlProposalHandoff: {
+        migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery: {
+          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+        } | null
+      }
+    }
+
+    const reviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            comment: "Ready for first apply",
+            decision: "approve",
+          }),
+        },
+      ),
+    )
+    expect(reviewResponse.status).toBe(200)
+
+    const confirmResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+          }),
+        },
+      ),
+    )
+    expect(confirmResponse.status).toBe(200)
+
+    const firstApplyResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "x-request-id": "req-generator-session-apply-first",
+          }),
+        },
+      ),
+    )
+    expect(firstApplyResponse.status).toBe(200)
+
+    const secondApplyResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "x-request-id": "req-generator-session-apply-second",
+          }),
+        },
+      ),
+    )
+
+    expect(secondApplyResponse.status).toBe(409)
+    const errorBody = (await secondApplyResponse.json()) as {
+      error: {
+        code: string
+        details: {
+          id: string
+          status: string
+        }
+      }
+    }
+    expect(errorBody.error.code).toBe("GENERATOR_SESSION_NOT_READY")
+    expect(errorBody.error.details).toMatchObject({
+      id: createBody.session.id,
+      status: "applied",
+    })
+  })
+
   it("requires authentication for generator preview sessions when auth guard is configured", async () => {
     const fixture = await createAuthFixture()
     const repository = createInMemoryGeneratorSessionRepository()
