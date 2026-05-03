@@ -64,6 +64,52 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     expect(workspace.currentDiffSummary.value).toBeNull()
   })
 
+  test("does not report auth recovery when preview refresh fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_PREVIEW_CREATE_FAILED",
+              message: "Generator preview create failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    await waitForAsyncWork()
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_PREVIEW_CREATE_FAILED",
+    )
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+  })
+
   test("sends selected conflict strategy when refreshing preview", async () => {
     let submittedConflictStrategy: GeneratorPreviewConflictStrategy | undefined
 

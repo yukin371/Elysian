@@ -12,7 +12,10 @@ import {
   type GeneratorPreviewSqlProposalHandoff,
 } from "../lib/platform-api"
 
-import { buildGeneratorPreviewSessionDetail } from "./generator-preview-session-helpers"
+import {
+  buildGeneratorPreviewSessionDetail,
+  isGeneratorPreviewRecoverableAuthError,
+} from "./generator-preview-session-helpers"
 
 type CreateGeneratorPreviewSessionActionsOptions = {
   applyLoading: Ref<boolean>
@@ -111,7 +114,9 @@ export const createGeneratorPreviewSessionActions = (
         }
       }
 
-      options.onRecoverableAuthError(error)
+      if (isGeneratorPreviewRecoverableAuthError(error)) {
+        options.onRecoverableAuthError(error)
+      }
       options.setErrorMessage(
         error instanceof Error ? error.message : "Generator apply failed",
       )
@@ -184,7 +189,9 @@ export const createGeneratorPreviewSessionActions = (
         }
       }
 
-      options.onRecoverableAuthError(error)
+      if (isGeneratorPreviewRecoverableAuthError(error)) {
+        options.onRecoverableAuthError(error)
+      }
       options.setErrorMessage(
         error instanceof Error ? error.message : "Generator review failed",
       )
@@ -248,7 +255,9 @@ export const createGeneratorPreviewSessionActions = (
         }
       }
 
-      options.onRecoverableAuthError(error)
+      if (isGeneratorPreviewRecoverableAuthError(error)) {
+        options.onRecoverableAuthError(error)
+      }
       options.setErrorMessage(
         error instanceof Error
           ? error.message

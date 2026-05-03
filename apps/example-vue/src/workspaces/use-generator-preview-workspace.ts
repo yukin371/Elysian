@@ -375,7 +375,9 @@ export const useGeneratorPreviewWorkspace = (
       } else if (!canPreservePreviewState()) {
         resetPreviewState()
       }
-      onRecoverableAuthError(error)
+      if (isGeneratorPreviewRecoverableAuthError(error)) {
+        onRecoverableAuthError(error)
+      }
       errorMessage.value =
         error instanceof Error ? error.message : "Generator preview failed"
       return false
@@ -449,7 +451,9 @@ export const useGeneratorPreviewWorkspace = (
         resetPreviewState()
       }
 
-      onRecoverableAuthError(error)
+      if (isGeneratorPreviewRecoverableAuthError(error)) {
+        onRecoverableAuthError(error)
+      }
       errorMessage.value =
         error instanceof Error
           ? error.message
