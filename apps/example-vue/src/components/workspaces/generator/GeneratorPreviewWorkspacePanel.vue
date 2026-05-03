@@ -11,6 +11,7 @@ import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSou
 import GeneratorPreviewWorkspaceSqlHandoffPanel from "./GeneratorPreviewWorkspaceSqlHandoffPanel.vue"
 import GeneratorPreviewWorkspaceSqlProposalPanel from "./GeneratorPreviewWorkspaceSqlProposalPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
+import { resolveGeneratorPreviewConfirmationEvidenceSummary } from "./generator-preview-confirmation-evidence"
 import { joinGeneratorPreviewSuggestedCommands } from "./generator-preview-handoff"
 import { resolveGeneratorPreviewRecoveryNote } from "./generator-preview-recovery-note"
 import type {
@@ -39,10 +40,6 @@ interface GeneratorPreviewWorkspacePanelProps {
   diffSummary: GeneratorPreviewDiffSummary | null
   reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
-}
-
-interface GeneratorPreviewConfirmationEvidenceRecord {
-  checklist?: unknown
 }
 
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
@@ -143,20 +140,14 @@ const sessionConfirmationNote = computed(() =>
 )
 
 const confirmationEvidenceSummary = computed(() => {
-  if (!props.session?.confirmedAt || !props.session.confirmationEvidence) {
+  if (!props.session?.confirmedAt) {
     return null
   }
 
-  const evidence = props.session
-    .confirmationEvidence as GeneratorPreviewConfirmationEvidenceRecord
-
-  if (!Array.isArray(evidence.checklist)) {
-    return null
-  }
-
-  return props.t("app.generatorPreview.message.confirmationEvidenceCaptured", {
-    count: evidence.checklist.length,
-  })
+  return resolveGeneratorPreviewConfirmationEvidenceSummary(
+    props.t,
+    props.session.confirmationEvidence,
+  )
 })
 
 const reviewActorLabel = computed(() =>
