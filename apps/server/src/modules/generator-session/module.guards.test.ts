@@ -42,6 +42,12 @@ describe("generator session module guards", () => {
       session: {
         id: string
       }
+      sqlProposalHandoff: {
+        migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery: {
+          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+        } | null
+      }
     }
     const driftedPath = join(outputDir, "modules/customer/customer.schema.ts")
 
@@ -71,7 +77,16 @@ describe("generator session module guards", () => {
         `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
         {
           method: "POST",
-          headers: createAuthorizedHeaders(accessToken),
+          headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+          }),
         },
       ),
     )
@@ -122,6 +137,12 @@ describe("generator session module guards", () => {
       session: {
         id: string
       }
+      sqlProposalHandoff: {
+        migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery: {
+          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+        } | null
+      }
     }
 
     const reviewResponse = await app.handle(
@@ -148,7 +169,16 @@ describe("generator session module guards", () => {
         `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
         {
           method: "POST",
-          headers: createAuthorizedHeaders(accessToken),
+          headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+          }),
         },
       ),
     )
@@ -229,6 +259,14 @@ describe("generator session module guards", () => {
         `http://localhost/studio/generator/sessions/${session.id}/confirm`,
         {
           method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            displayedRecoveryStatus: "none",
+            displayedSnapshotPath:
+              "/tmp/generator-session-unsupported/report.migration-proposal.json",
+          }),
         },
       ),
     )
@@ -249,6 +287,95 @@ describe("generator session module guards", () => {
     expect(errorBody.error.details).toMatchObject({
       proposalStatus: "unsupported",
       unsupportedReason: "Only single create-table change plans are supported.",
+    })
+  })
+
+  it("blocks confirmation when displayed handoff facts do not match current snapshot", async () => {
+    const { accessToken, app } =
+      await createGeneratorSessionAuthenticatedContext()
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "customer",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          targetPreset: "staging",
+        }),
+      }),
+    )
+    expect(createResponse.status).toBe(201)
+
+    const createBody = (await createResponse.json()) as {
+      session: {
+        id: string
+      }
+      sqlProposalHandoff: {
+        migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery: {
+          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+        } | null
+      }
+    }
+
+    const reviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            decision: "approve",
+          }),
+        },
+      ),
+    )
+    expect(reviewResponse.status).toBe(200)
+
+    const confirmResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath: `${createBody.sqlProposalHandoff.migrationProposalSnapshotPath}.stale`,
+          }),
+        },
+      ),
+    )
+    expect(confirmResponse.status).toBe(409)
+    const errorBody = (await confirmResponse.json()) as {
+      error: {
+        code: string
+        details: {
+          displayedSnapshotPath: string
+          expectedSnapshotPath: string
+        }
+      }
+    }
+    expect(errorBody.error.code).toBe(
+      "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
+    )
+    expect(errorBody.error.details).toMatchObject({
+      displayedSnapshotPath: `${createBody.sqlProposalHandoff.migrationProposalSnapshotPath}.stale`,
+      expectedSnapshotPath:
+        createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
     })
   })
 

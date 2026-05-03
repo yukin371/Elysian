@@ -113,12 +113,10 @@ export interface GeneratorPreviewSqlProposalHandoff {
   reviewMode: "manual"
   canonicalMigrationOwner: "packages/persistence"
   confirmationChecklist: string[]
-  migrationProposalSnapshotRecovery?:
-    | {
-        archivedSnapshotPath: string | null
-        status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-      }
-    | null
+  migrationProposalSnapshotRecovery?: {
+    archivedSnapshotPath: string | null
+    status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+  } | null
   migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
   migrationProposalSnapshotPath: string
   targetPaths: {
@@ -231,6 +229,14 @@ export interface ConfirmGeneratorPreviewSessionResponse {
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
 }
 
+export interface ConfirmGeneratorPreviewSessionRequest {
+  displayedRecoveryStatus:
+    | "none"
+    | "rebuilt-from-corrupt"
+    | "rebuilt-from-missing"
+  displayedSnapshotPath: string
+}
+
 export interface AppliedGeneratorPreviewFile {
   absolutePath: string
   mergeStrategy: string
@@ -316,11 +322,13 @@ export const reviewGeneratorPreviewSession = async (
 
 export const confirmGeneratorPreviewSession = async (
   id: string,
+  input: ConfirmGeneratorPreviewSessionRequest,
 ): Promise<ConfirmGeneratorPreviewSessionResponse> =>
   requestJson<ConfirmGeneratorPreviewSessionResponse>(
     `/studio/generator/sessions/${encodeURIComponent(id)}/confirm`,
     {
       method: "POST",
+      body: input,
       auth: true,
     },
   )

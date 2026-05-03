@@ -284,6 +284,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
   test("confirms ready preview sessions before allowing apply", async () => {
     let confirmRequestCount = 0
+    let confirmRequestBody: Record<string, unknown> | null = null
 
     globalThis.fetch = (async (input, init) => {
       const url = String(input)
@@ -294,6 +295,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
         method === "POST"
       ) {
         confirmRequestCount += 1
+        confirmRequestBody = init?.body ? JSON.parse(String(init.body)) : null
 
         return new Response(
           JSON.stringify({
@@ -325,6 +327,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     const { workspace } = createWorkspace({ enabled: true })
     workspace.currentSession.value = createSession({ status: "ready" })
     workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
 
     expect(workspace.canConfirmPreview.value).toBe(true)
     expect(workspace.canApplyPreview.value).toBe(false)
@@ -332,6 +335,11 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     await workspace.confirmPreview()
 
     expect(confirmRequestCount).toBe(1)
+    expect(confirmRequestBody).toEqual({
+      displayedRecoveryStatus: "none",
+      displayedSnapshotPath:
+        "/tmp/generator-session-report/customer.migration-proposal.json",
+    })
     expect(workspace.currentSession.value?.confirmedAt).toBe(
       "2026-05-02T12:15:00.000Z",
     )

@@ -289,8 +289,16 @@ describe("generator session module lifecycle", () => {
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
             "user-agent": "generator-session-test-agent",
             "x-request-id": "req-generator-session-confirm-1",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              reviewBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath:
+              reviewBody.sqlProposalHandoff.migrationProposalSnapshotPath,
           }),
         },
       ),
@@ -698,7 +706,15 @@ describe("generator session module lifecycle", () => {
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
             "x-request-id": "req-generator-session-confirm-replay-1",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
           }),
         },
       ),
@@ -723,7 +739,15 @@ describe("generator session module lifecycle", () => {
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
             "x-request-id": "req-generator-session-confirm-replay-2",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
           }),
         },
       ),

@@ -257,7 +257,7 @@ export const createGeneratorSessionModule = (
       )
       .post(
         "/studio/generator/sessions/:id/confirm",
-        async ({ params, request }) => {
+        async ({ body, params, request }) => {
           const identity = (await authorize(request.headers)) ?? null
           const sessionBeforeConfirm = await service.getPreviewSessionById(
             params.id,
@@ -288,6 +288,31 @@ export const createGeneratorSessionModule = (
                 id: sessionBeforeConfirm.id,
                 proposalStatus: sqlProposalHandoff.proposalStatus,
                 unsupportedReason: sqlProposalHandoff.unsupportedReason,
+              },
+            })
+          }
+
+          const expectedRecoveryStatus =
+            sqlProposalHandoff.migrationProposalSnapshotRecovery?.status ??
+            "none"
+          if (
+            body.displayedSnapshotPath !==
+              sqlProposalHandoff.migrationProposalSnapshotPath ||
+            body.displayedRecoveryStatus !== expectedRecoveryStatus
+          ) {
+            throw new AppError({
+              code: "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
+              message:
+                "Generator session confirmation does not match the displayed SQL handoff",
+              status: 409,
+              expose: true,
+              details: {
+                displayedRecoveryStatus: body.displayedRecoveryStatus,
+                displayedSnapshotPath: body.displayedSnapshotPath,
+                expectedRecoveryStatus,
+                expectedSnapshotPath:
+                  sqlProposalHandoff.migrationProposalSnapshotPath,
+                id: sessionBeforeConfirm.id,
               },
             })
           }
@@ -324,6 +349,14 @@ export const createGeneratorSessionModule = (
           }
         },
         {
+          body: t.Object({
+            displayedRecoveryStatus: t.Union([
+              t.Literal("none"),
+              t.Literal("rebuilt-from-corrupt"),
+              t.Literal("rebuilt-from-missing"),
+            ]),
+            displayedSnapshotPath: t.String({ minLength: 1 }),
+          }),
           params: t.Object({
             id: t.String({ minLength: 1 }),
           }),
