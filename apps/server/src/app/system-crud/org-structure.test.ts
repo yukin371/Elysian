@@ -37,6 +37,56 @@ import {
 } from "./test-support"
 
 describe("createServerApp system organization", () => {
+  it("publishes department and post success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:department:list", "system:post:list"],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createDepartmentModule(createInMemoryDepartmentRepository(), {
+          authGuard: fixture.authGuard,
+        }),
+        createPostModule(createInMemoryPostRepository(), {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(
+      payload.paths["/system/departments"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/departments"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/departments/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/departments/{id}"]?.put?.responses?.["200"],
+    ).toBeDefined()
+    expect(payload.paths["/system/posts"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/posts"]?.post?.responses?.["201"]).toBeDefined()
+    expect(
+      payload.paths["/system/posts/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/posts/{id}"]?.put?.responses?.["200"],
+    ).toBeDefined()
+  })
+
   it("lists and gets system departments when the access token has department-list permission", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:department:list"],

@@ -4,6 +4,10 @@ import { t } from "elysia"
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  tenantListResponseSchema,
+  tenantRecordResponseSchema,
+} from "./openapi"
 import type { TenantRepository } from "./repository"
 import { createTenantService } from "./service"
 
@@ -74,6 +78,9 @@ export const createTenantModule = (
           }
         },
         {
+          response: {
+            200: tenantListResponseSchema,
+          },
           detail: {
             tags: ["tenant"],
             summary: "List tenants",
@@ -114,6 +121,9 @@ export const createTenantModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: tenantRecordResponseSchema,
+          },
           detail: {
             tags: ["tenant"],
             summary: "Get tenant by id",
@@ -134,6 +144,9 @@ export const createTenantModule = (
         },
         {
           body: tenantCreateBodySchema,
+          response: {
+            201: tenantRecordResponseSchema,
+          },
           detail: {
             tags: ["tenant"],
             summary: "Create tenant",
@@ -156,6 +169,9 @@ export const createTenantModule = (
             id: t.String(),
           }),
           body: tenantUpdateBodySchema,
+          response: {
+            200: tenantRecordResponseSchema,
+          },
           detail: {
             tags: ["tenant"],
             summary: "Update tenant",
@@ -180,6 +196,9 @@ export const createTenantModule = (
           body: t.Object({
             status: tenantStatusSchema,
           }),
+          response: {
+            200: tenantRecordResponseSchema,
+          },
           detail: {
             tags: ["tenant"],
             summary: "Update tenant status",

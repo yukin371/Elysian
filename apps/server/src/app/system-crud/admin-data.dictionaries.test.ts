@@ -13,6 +13,57 @@ import {
 } from "./test-support"
 
 describe("createServerApp system admin data", () => {
+  it("publishes dictionary success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:dictionary:list"],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createDictionaryModule(createInMemoryDictionaryRepository(), {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(
+      payload.paths["/system/dictionaries/types"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/types"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/types/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/types/{id}"]?.put?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/items"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/items"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/items/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/items/{id}"]?.put?.responses?.["200"],
+    ).toBeDefined()
+  })
+
   it("lists and gets dictionary types and items when the access token has dictionary-list permission", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:dictionary:list"],

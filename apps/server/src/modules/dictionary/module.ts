@@ -8,6 +8,12 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  dictionaryItemListResponseSchema,
+  dictionaryItemRecordResponseSchema,
+  dictionaryTypeDetailResponseSchema,
+  dictionaryTypeListResponseSchema,
+} from "./openapi"
 import type { DictionaryRepository } from "./repository"
 import { createDictionaryService } from "./service"
 
@@ -92,6 +98,9 @@ export const createDictionaryModule = (
           }
         },
         {
+          response: {
+            200: dictionaryTypeListResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "List dictionary types",
@@ -124,6 +133,9 @@ export const createDictionaryModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: dictionaryTypeDetailResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "Get dictionary type by id",
@@ -140,6 +152,9 @@ export const createDictionaryModule = (
         },
         {
           body: dictionaryTypeCreateBodySchema,
+          response: {
+            201: dictionaryTypeDetailResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "Create dictionary type",
@@ -158,6 +173,9 @@ export const createDictionaryModule = (
             id: t.String(),
           }),
           body: dictionaryTypeUpdateBodySchema,
+          response: {
+            200: dictionaryTypeDetailResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "Update dictionary type",
@@ -175,6 +193,9 @@ export const createDictionaryModule = (
         },
         {
           query: dictionaryItemFilterSchema,
+          response: {
+            200: dictionaryItemListResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "List dictionary items",
@@ -208,6 +229,9 @@ export const createDictionaryModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: dictionaryItemRecordResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "Get dictionary item by id",
@@ -224,6 +248,9 @@ export const createDictionaryModule = (
         },
         {
           body: dictionaryItemCreateBodySchema,
+          response: {
+            201: dictionaryItemRecordResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "Create dictionary item",
@@ -242,6 +269,9 @@ export const createDictionaryModule = (
             id: t.String(),
           }),
           body: dictionaryItemUpdateBodySchema,
+          response: {
+            200: dictionaryItemRecordResponseSchema,
+          },
           detail: {
             tags: ["dictionary"],
             summary: "Update dictionary item",

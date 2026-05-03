@@ -3,6 +3,10 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  departmentDetailResponseSchema,
+  departmentListResponseSchema,
+} from "./openapi"
 import type { DepartmentRepository } from "./repository"
 import { createDepartmentService } from "./service"
 
@@ -65,6 +69,9 @@ export const createDepartmentModule = (
           }
         },
         {
+          response: {
+            200: departmentListResponseSchema,
+          },
           detail: {
             tags: ["department"],
             summary: "List departments",
@@ -97,6 +104,9 @@ export const createDepartmentModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: departmentDetailResponseSchema,
+          },
           detail: {
             tags: ["department"],
             summary: "Get department by id",
@@ -113,6 +123,9 @@ export const createDepartmentModule = (
         },
         {
           body: departmentCreateBodySchema,
+          response: {
+            201: departmentDetailResponseSchema,
+          },
           detail: {
             tags: ["department"],
             summary: "Create department",
@@ -131,6 +144,9 @@ export const createDepartmentModule = (
             id: t.String(),
           }),
           body: departmentUpdateBodySchema,
+          response: {
+            200: departmentDetailResponseSchema,
+          },
           detail: {
             tags: ["department"],
             summary: "Update department",

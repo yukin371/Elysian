@@ -3,6 +3,7 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import { postListResponseSchema, postRecordResponseSchema } from "./openapi"
 import type { PostRepository } from "./repository"
 import { createPostService } from "./service"
 
@@ -59,6 +60,9 @@ export const createPostModule = (
           }
         },
         {
+          response: {
+            200: postListResponseSchema,
+          },
           detail: {
             tags: ["post"],
             summary: "List posts",
@@ -91,6 +95,9 @@ export const createPostModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: postRecordResponseSchema,
+          },
           detail: {
             tags: ["post"],
             summary: "Get post by id",
@@ -107,6 +114,9 @@ export const createPostModule = (
         },
         {
           body: postCreateBodySchema,
+          response: {
+            201: postRecordResponseSchema,
+          },
           detail: {
             tags: ["post"],
             summary: "Create post",
@@ -125,6 +135,9 @@ export const createPostModule = (
             id: t.String(),
           }),
           body: postUpdateBodySchema,
+          response: {
+            200: postRecordResponseSchema,
+          },
           detail: {
             tags: ["post"],
             summary: "Update post",
