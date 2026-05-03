@@ -191,7 +191,7 @@ describe("useExampleSessionOrchestration", () => {
 
     await orchestration.submitLogout()
 
-    expect(options.authErrorMessage.value).toContain("SYSTEM_UNAVAILABLE")
+    expect(options.authErrorMessage.value).toBe("logout unavailable")
     expect(options.authIdentity.value).toBeNull()
   })
 })
