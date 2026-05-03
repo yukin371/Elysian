@@ -618,6 +618,127 @@ describe("generator session module guards", () => {
     })
   })
 
+  it("blocks review when the generator preview session is already applied", async () => {
+    const { accessToken, app } =
+      await createGeneratorSessionAuthenticatedContext()
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "customer",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          targetPreset: "staging",
+        }),
+      }),
+    )
+    expect(createResponse.status).toBe(201)
+
+    const createBody = (await createResponse.json()) as {
+      session: {
+        id: string
+      }
+      sqlProposalHandoff: {
+        migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery: {
+          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+        } | null
+      }
+    }
+
+    const firstReviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            comment: "Ready for review/apply guard test",
+            decision: "approve",
+          }),
+        },
+      ),
+    )
+    expect(firstReviewResponse.status).toBe(200)
+
+    const confirmResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+          body: JSON.stringify({
+            displayedRecoveryStatus:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.status ?? "none",
+            displayedSnapshotPath:
+              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+          }),
+        },
+      ),
+    )
+    expect(confirmResponse.status).toBe(200)
+
+    const applyResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        {
+          method: "POST",
+          headers: createAuthorizedHeaders(accessToken, {
+            "x-request-id": "req-generator-session-apply-review-guard",
+          }),
+        },
+      ),
+    )
+    expect(applyResponse.status).toBe(200)
+
+    const secondReviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            comment: "Should be rejected after apply",
+            decision: "reject",
+          }),
+        },
+      ),
+    )
+
+    expect(secondReviewResponse.status).toBe(409)
+    const errorBody = (await secondReviewResponse.json()) as {
+      error: {
+        code: string
+        details: {
+          id: string
+          status: string
+        }
+      }
+    }
+    expect(errorBody.error.code).toBe("GENERATOR_SESSION_REVIEW_NOT_PENDING")
+    expect(errorBody.error.details).toMatchObject({
+      id: createBody.session.id,
+      status: "applied",
+    })
+  })
+
   it("requires authentication for generator preview sessions when auth guard is configured", async () => {
     const fixture = await createAuthFixture()
     const repository = createInMemoryGeneratorSessionRepository()
