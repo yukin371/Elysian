@@ -146,7 +146,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.operationApplied":
     "当前 preview session 已完成 staging apply，无需重复应用。",
   "app.generatorPreview.message.operationApplyUnavailable":
-    "当前 preview session 暂不可应用，请确认已审核通过且没有阻塞冲突。",
+    "当前 preview session 暂不可应用，请先确认清单，再确认没有阻塞冲突。",
   "app.generatorPreview.message.reviewApproved":
     "本次预览已完成审核通过，审核时间：{value}。",
   "app.generatorPreview.message.reviewRejected":

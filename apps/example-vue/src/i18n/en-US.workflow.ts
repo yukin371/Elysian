@@ -155,7 +155,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.operationApplied":
     "This preview session has already been applied to staging. It does not need to be applied again.",
   "app.generatorPreview.message.operationApplyUnavailable":
-    "This preview session cannot be applied yet. Confirm it is approved and has no blocking conflicts.",
+    "This preview session cannot be applied yet. Confirm the checklist first and make sure there are no blocking conflicts.",
   "app.generatorPreview.message.reviewApproved":
     "This preview passed review at {value}.",
   "app.generatorPreview.message.reviewRejected":
