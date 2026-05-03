@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 
 import {
   type InMemoryNotificationRepositorySeed,
@@ -65,7 +66,7 @@ describe("createNotificationService", () => {
         content: "World",
       }),
     ).rejects.toMatchObject({
-      code: "NOTIFICATION_RECIPIENT_INVALID",
+      code: errorCodes.NOTIFICATION_RECIPIENT_INVALID,
       status: 400,
       details: {
         recipientUserId: "user_missing_1",

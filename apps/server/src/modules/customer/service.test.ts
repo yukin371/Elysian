@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 
 import { createInMemoryCustomerRepository } from "./repository"
 import { createCustomerService } from "./service"
@@ -39,7 +40,7 @@ describe("createCustomerService", () => {
         name: "   ",
       }),
     ).rejects.toMatchObject({
-      code: "CUSTOMER_NAME_REQUIRED",
+      code: errorCodes.CUSTOMER_NAME_REQUIRED,
       status: 400,
     })
   })
@@ -50,7 +51,7 @@ describe("createCustomerService", () => {
     )
 
     await expect(service.remove("customer_missing_1")).rejects.toMatchObject({
-      code: "CUSTOMER_NOT_FOUND",
+      code: errorCodes.CUSTOMER_NOT_FOUND,
       status: 404,
       details: {
         id: "customer_missing_1",

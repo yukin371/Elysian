@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 
 import { createInMemoryRoleRepository } from "./repository"
 import { createRoleService } from "./service"
@@ -67,7 +68,7 @@ describe("createRoleService", () => {
         permissionCodes: ["system:role:list"],
       }),
     ).rejects.toMatchObject({
-      code: "ROLE_PERMISSION_CODES_INVALID",
+      code: errorCodes.ROLE_PERMISSION_CODES_INVALID,
       status: 400,
       details: {
         permissionCodes: ["system:role:list"],
@@ -87,7 +88,7 @@ describe("createRoleService", () => {
         code: "admin-renamed",
       }),
     ).rejects.toMatchObject({
-      code: "ROLE_SYSTEM_IMMUTABLE",
+      code: errorCodes.ROLE_SYSTEM_IMMUTABLE,
       status: 409,
       details: {
         id: "role_admin_1",

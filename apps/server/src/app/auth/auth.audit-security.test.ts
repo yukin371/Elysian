@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { DEFAULT_TENANT_ID } from "@elysian/persistence"
+import { errorCodes } from "../../errors/registry"
 import {
   createCustomerModule,
   createInMemoryCustomerRepository,
@@ -215,7 +216,7 @@ describe("createServerApp auth audit and security", () => {
 
     expect(secondFailureBody).toEqual({
       error: {
-        code: "AUTH_LOGIN_LOCKED",
+        code: errorCodes.AUTH_LOGIN_LOCKED,
         message: "Login is temporarily locked",
         status: 423,
         details: {

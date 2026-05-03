@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 
 import { createInMemoryFileRepository } from "./repository"
 import { createFileService } from "./service"
@@ -63,7 +64,7 @@ describe("createFileService", () => {
     )
 
     await expect(service.download("file_missing_1")).rejects.toMatchObject({
-      code: "FILE_NOT_FOUND",
+      code: errorCodes.FILE_NOT_FOUND,
       status: 404,
       details: {
         id: "file_missing_1",

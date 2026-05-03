@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 
 import type { WorkflowDefinitionDraft } from "@elysian/schema"
+import { errorCodes } from "../../errors/registry"
 
 import { createInMemoryWorkflowRepository } from "./repository"
 import { createWorkflowService } from "./service"
@@ -91,7 +92,7 @@ describe("createWorkflowService", () => {
         taskId,
       ),
     ).rejects.toMatchObject({
-      code: "WORKFLOW_TASK_CLAIM_FORBIDDEN",
+      code: errorCodes.WORKFLOW_TASK_CLAIM_FORBIDDEN,
       status: 403,
     })
 

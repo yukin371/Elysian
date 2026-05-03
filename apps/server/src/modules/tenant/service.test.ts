@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 
 import { createInMemoryTenantRepository } from "./repository"
 import { createTenantService } from "./service"
@@ -54,7 +55,7 @@ describe("createTenantService", () => {
         name: "Duplicate Tenant",
       }),
     ).rejects.toMatchObject({
-      code: "TENANT_CODE_CONFLICT",
+      code: errorCodes.TENANT_CODE_CONFLICT,
       status: 409,
       details: {
         code: "tenant-alpha",
@@ -72,7 +73,7 @@ describe("createTenantService", () => {
         code: "tenant-alpha",
       }),
     ).rejects.toMatchObject({
-      code: "TENANT_CODE_CONFLICT",
+      code: errorCodes.TENANT_CODE_CONFLICT,
       status: 409,
       details: {
         code: "tenant-alpha",
