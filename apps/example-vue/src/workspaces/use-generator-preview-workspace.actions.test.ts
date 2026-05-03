@@ -350,6 +350,93 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.canApplyPreview.value).toBe(true)
   })
 
+  test("does not accept mismatched confirmation response session", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            session: createSession({
+              id: "preview-session-other",
+              confirmedAt: "2026-05-02T12:15:00.000Z",
+              status: "ready",
+            }),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+
+    await workspace.confirmPreview()
+
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentSession.value?.confirmedAt).toBeNull()
+    expect(workspace.errorMessage.value).toBe(
+      "Generator confirmation response does not match current session",
+    )
+  })
+
+  test("reports recoverable auth errors when confirmation fails", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+
+    await workspace.confirmPreview()
+
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.confirmedAt).toBeNull()
+    expect(workspace.canConfirmPreview.value).toBe(true)
+  })
+
   test("does not expose review or apply actions while workspace is disabled", async () => {
     const { workspace } = createWorkspace()
     workspace.currentSession.value = createSession({ status: "ready" })
