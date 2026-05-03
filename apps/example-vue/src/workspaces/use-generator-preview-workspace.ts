@@ -787,8 +787,13 @@ export const useGeneratorPreviewWorkspace = (
           }
 
           resetPreviewState()
-        } catch {
-          // Fall through to the existing error path when detail refresh fails.
+        } catch (refreshError) {
+          onRecoverableAuthError(refreshError)
+          errorMessage.value =
+            refreshError instanceof Error
+              ? refreshError.message
+              : "Generator session restore failed"
+          return
         }
       }
 
