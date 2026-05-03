@@ -197,8 +197,21 @@ export const createGeneratorPreviewSessionRestore = (
         return true
       }
 
+      if (
+        error instanceof Error &&
+        error.message.includes("status 404")
+      ) {
+        options.recentSessions.value = []
+        return false
+      }
+
       options.recentSessions.value = []
-      return false
+      options.setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Generator session restore failed",
+      )
+      return true
     }
   }
 

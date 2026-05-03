@@ -857,6 +857,56 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     )
   })
 
+  test("surfaces restore error instead of silently refreshing when recent session list fails", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_LIST_READ_FAILED",
+              message: "Generator session list read failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_LIST_READ_FAILED",
+    )
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.recentSessionOptions.value).toHaveLength(0)
+    expect(workspace.selectedConflictStrategy.value).toBe(
+      "overwrite-generated-only",
+    )
+  })
+
   test("does not restore the current session again when already selected", async () => {
     let detailRequestCount = 0
 
