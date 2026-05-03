@@ -54,7 +54,9 @@ export const createGeneratorPreviewSessionRestore = (
       options.resetPreviewState()
       return false
     } catch (refreshError) {
-      options.onRecoverableAuthError(refreshError)
+      if (isGeneratorPreviewRecoverableAuthError(refreshError)) {
+        options.onRecoverableAuthError(refreshError)
+      }
       options.setErrorMessage(
         refreshError instanceof Error
           ? refreshError.message
