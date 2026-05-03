@@ -70,6 +70,58 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
   })
 
+  test("does not report auth recovery when apply fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/apply") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_APPLY_FAILED",
+              message: "Generator session apply failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+
+    workspace.currentSession.value = createSession({
+      confirmedAt: "2026-05-02T12:10:00.000Z",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.applyPreview()
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_APPLY_FAILED",
+    )
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
+  })
+
   test("does not apply mismatched apply response session", async () => {
     globalThis.fetch = (async (input, init) => {
       const url = String(input)
@@ -1033,6 +1085,53 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.currentSession.value?.status).toBe("pending_review")
   })
 
+  test("does not report auth recovery when review fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REVIEW_FAILED",
+              message: "Generator session review failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.reviewPreview("approve")
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REVIEW_FAILED",
+    )
+    expect(workspace.currentSession.value?.status).toBe("pending_review")
+  })
+
   test("refreshes current detail when review session is no longer pending", async () => {
     let detailRequestCount = 0
 
@@ -1341,6 +1440,55 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.confirmedAt).toBeNull()
+    expect(workspace.canConfirmPreview.value).toBe(true)
+  })
+
+  test("does not report auth recovery when confirmation fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_CONFIRMATION_FAILED",
+              message: "Generator session confirmation failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+
+    await workspace.confirmPreview()
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_CONFIRMATION_FAILED",
+    )
     expect(workspace.currentSession.value?.confirmedAt).toBeNull()
     expect(workspace.canConfirmPreview.value).toBe(true)
   })
