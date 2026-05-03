@@ -26,111 +26,17 @@ import {
   resolveGeneratorPreviewSelection,
   toGeneratorPreviewFileCard,
 } from "../lib/generator-preview-workspace"
-
-const GENERATOR_PREVIEW_SELECTION_STORAGE_KEY =
-  "elysian.example-vue.generator-preview.selection"
-
-type GeneratorPreviewStoredSelection = {
-  conflictStrategy: GeneratorPreviewConflictStrategy
-  frontendTarget: FrontendTarget
-  schemaName: string
-  sessionId: string | null
-}
-
-const resolveGeneratorPreviewSelectionStorage = () => {
-  try {
-    return globalThis.localStorage
-  } catch {
-    return undefined
-  }
-}
-
-const generatorPreviewSessionStatusPriority: Record<
-  GeneratorPreviewSessionRecord["status"],
-  number
-> = {
-  pending_review: 0,
-  ready: 1,
-  rejected: 2,
-  applied: 3,
-}
-
-const createGeneratorPreviewSelectionCacheKey = (
-  schemaName: string,
-  frontendTarget: FrontendTarget,
-  conflictStrategy: GeneratorPreviewConflictStrategy,
-) => `${schemaName}::${frontendTarget}::${conflictStrategy}`
-
-const isGeneratorPreviewConflictStrategy = (
-  value: unknown,
-): value is GeneratorPreviewConflictStrategy =>
-  value === "skip" ||
-  value === "overwrite" ||
-  value === "overwrite-generated-only" ||
-  value === "fail"
-
-const isFrontendTarget = (value: unknown): value is FrontendTarget =>
-  value === "vue" || value === "react"
-
-const isGeneratorPreviewRecoverableAuthError = (error: unknown) =>
-  error instanceof Error && error.message.includes("status 401")
-
-const loadStoredGeneratorPreviewSelection = (
-  availableSchemaNames: readonly string[],
-): GeneratorPreviewStoredSelection | null => {
-  const storage = resolveGeneratorPreviewSelectionStorage()
-
-  if (!storage) {
-    return null
-  }
-
-  try {
-    const raw = storage.getItem(GENERATOR_PREVIEW_SELECTION_STORAGE_KEY)
-
-    if (!raw) {
-      return null
-    }
-
-    const parsed = JSON.parse(raw) as Partial<GeneratorPreviewStoredSelection>
-
-    if (
-      typeof parsed.schemaName !== "string" ||
-      !availableSchemaNames.includes(parsed.schemaName) ||
-      !isFrontendTarget(parsed.frontendTarget) ||
-      !isGeneratorPreviewConflictStrategy(parsed.conflictStrategy)
-    ) {
-      return null
-    }
-
-    return {
-      conflictStrategy: parsed.conflictStrategy,
-      frontendTarget: parsed.frontendTarget,
-      schemaName: parsed.schemaName,
-      sessionId: typeof parsed.sessionId === "string" ? parsed.sessionId : null,
-    }
-  } catch {
-    return null
-  }
-}
-
-const persistGeneratorPreviewSelection = (
-  selection: GeneratorPreviewStoredSelection,
-) => {
-  const storage = resolveGeneratorPreviewSelectionStorage()
-
-  if (!storage) {
-    return
-  }
-
-  try {
-    storage.setItem(
-      GENERATOR_PREVIEW_SELECTION_STORAGE_KEY,
-      JSON.stringify(selection),
-    )
-  } catch {
-    // Selection persistence is best-effort; workspace state remains in memory.
-  }
-}
+import {
+  createGeneratorPreviewSelectionCacheKey,
+  loadStoredGeneratorPreviewSelection,
+  persistGeneratorPreviewSelection,
+} from "./generator-preview-selection-storage"
+import {
+  buildGeneratorPreviewSessionDetail,
+  generatorPreviewSessionStatusPriority,
+  isGeneratorPreviewRecoverableAuthError,
+  isGeneratorPreviewSessionDetailConsistent,
+} from "./generator-preview-session-helpers"
 
 export const useGeneratorPreviewWorkspace = (
   t: (key: string, params?: Record<string, unknown>) => string,
@@ -224,11 +130,6 @@ export const useGeneratorPreviewWorkspace = (
     session.schemaName === selectedSchemaName.value &&
     session.frontendTarget === selectedFrontendTarget.value &&
     session.conflictStrategy === selectedConflictStrategy.value
-
-  const isSessionDetailConsistent = (session: GeneratorPreviewSessionDetail) =>
-    session.report.schemaName === session.schemaName &&
-    session.report.frontendTarget === session.frontendTarget &&
-    session.report.conflictStrategy === session.conflictStrategy
 
   const prioritizeRecentSessions = (
     sessions: GeneratorPreviewSessionRecord[],
@@ -423,20 +324,6 @@ export const useGeneratorPreviewWorkspace = (
     )
   }
 
-  const buildSessionDetail = (
-    session: GeneratorPreviewSessionRecord,
-    diffSummary: GeneratorPreviewDiffSummary,
-    report: GeneratorPreviewReport,
-    sqlProposal: GeneratorPreviewSqlProposal | null,
-    sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff,
-  ): GeneratorPreviewSessionDetail => ({
-    ...session,
-    diffSummary,
-    report,
-    sqlProposal,
-    sqlProposalHandoff,
-  })
-
   const upsertRecentSession = (session: GeneratorPreviewSessionRecord) => {
     recentSessions.value = [
       session,
@@ -462,7 +349,7 @@ export const useGeneratorPreviewWorkspace = (
   }
 
   const applySessionDetail = (session: GeneratorPreviewSessionDetail) => {
-    if (!isSessionDetailConsistent(session)) {
+    if (!isGeneratorPreviewSessionDetailConsistent(session)) {
       errorMessage.value = "Generator session detail does not match its report"
       return false
     }
@@ -525,7 +412,7 @@ export const useGeneratorPreviewWorkspace = (
         session.schemaName !== selectedSchemaName.value ||
         session.frontendTarget !== selectedFrontendTarget.value ||
         session.conflictStrategy !== selectedConflictStrategy.value ||
-        !isSessionDetailConsistent(session)
+        !isGeneratorPreviewSessionDetailConsistent(session)
       ) {
         return false
       }
@@ -553,7 +440,7 @@ export const useGeneratorPreviewWorkspace = (
       return false
     }
 
-    if (!isSessionDetailConsistent(cachedSession)) {
+    if (!isGeneratorPreviewSessionDetailConsistent(cachedSession)) {
       return false
     }
 
@@ -589,7 +476,7 @@ export const useGeneratorPreviewWorkspace = (
 
         if (
           !isSessionMatchingSelection(session) ||
-          !isSessionDetailConsistent(session)
+          !isGeneratorPreviewSessionDetailConsistent(session)
         ) {
           return false
         }
@@ -640,7 +527,7 @@ export const useGeneratorPreviewWorkspace = (
 
       if (
         !applySessionDetail(
-          buildSessionDetail(
+          buildGeneratorPreviewSessionDetail(
             response.session,
             response.diff,
             response.report,
@@ -689,7 +576,7 @@ export const useGeneratorPreviewWorkspace = (
 
       if (currentReport.value) {
         applySessionDetail(
-          buildSessionDetail(
+          buildGeneratorPreviewSessionDetail(
             response.session,
             response.diff,
             currentReport.value,
@@ -757,7 +644,7 @@ export const useGeneratorPreviewWorkspace = (
 
       if (currentReport.value) {
         applySessionDetail(
-          buildSessionDetail(
+          buildGeneratorPreviewSessionDetail(
             response.session,
             response.diff,
             currentReport.value,
