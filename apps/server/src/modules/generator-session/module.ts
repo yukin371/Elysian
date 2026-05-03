@@ -1,13 +1,13 @@
-import { t } from "elysia"
-import {
-  buildMigrationProposalSnapshot,
-  type MigrationProposalSnapshot,
-  writeMigrationProposalSnapshot,
-  resolveMigrationProposalFromChangePlan,
-  readMigrationProposalSnapshot,
-  resolveMigrationProposalSnapshotPath,
-} from "@elysian/persistence"
 import { rename as renameFile } from "node:fs/promises"
+import {
+  type MigrationProposalSnapshot,
+  buildMigrationProposalSnapshot,
+  readMigrationProposalSnapshot,
+  resolveMigrationProposalFromChangePlan,
+  resolveMigrationProposalSnapshotPath,
+  writeMigrationProposalSnapshot,
+} from "@elysian/persistence"
+import { t } from "elysia"
 
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
@@ -218,7 +218,9 @@ export const createGeneratorSessionModule = (
           if (identity) {
             await recordAuditBestEffort(request.headers, identity, {
               action:
-                body.decision === "approve" ? "review_approve" : "review_reject",
+                body.decision === "approve"
+                  ? "review_approve"
+                  : "review_reject",
               details: {
                 schemaName: session.schemaName,
                 frontendTarget: session.frontendTarget,
@@ -273,12 +275,19 @@ export const createGeneratorSessionModule = (
             })
           }
 
+          const sqlProposalHandoff =
+            await buildSqlProposalHandoff(sessionBeforeConfirm)
           const session = await service.confirmPreviewSession({
+            archivedSnapshotPath:
+              sqlProposalHandoff.migrationProposalSnapshotRecovery
+                ?.archivedSnapshotPath ?? null,
             actor: identity,
-            confirmationChecklist: (
-              await buildSqlProposalHandoff(sessionBeforeConfirm)
-            ).confirmationChecklist,
+            confirmationChecklist: sqlProposalHandoff.confirmationChecklist,
             id: params.id,
+            recoveryStatus:
+              sqlProposalHandoff.migrationProposalSnapshotRecovery?.status ??
+              "none",
+            snapshotPath: sqlProposalHandoff.migrationProposalSnapshotPath,
           })
 
           if (identity) {
@@ -405,7 +414,9 @@ const toSessionResponse = (session: GeneratorPreviewSessionRecord) => ({
   tenantId: session.tenantId,
 })
 
-const toSessionDetailResponse = async (session: GeneratorPreviewSessionDetail) => ({
+const toSessionDetailResponse = async (
+  session: GeneratorPreviewSessionDetail,
+) => ({
   ...toSessionResponse(session),
   diffSummary: buildDiffSummary(session.report),
   targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
@@ -441,9 +452,7 @@ const buildApplyEvidence = (session: GeneratorPreviewSessionRecord) => {
   }
 }
 
-const buildConfirmationEvidence = (
-  session: GeneratorPreviewSessionRecord,
-) => {
+const buildConfirmationEvidence = (session: GeneratorPreviewSessionRecord) => {
   if (session.confirmationEvidence != null) {
     return session.confirmationEvidence
   }
@@ -593,21 +602,22 @@ const buildSqlProposalConfirmationChecklist = (
   ]
 }
 
-const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) => {
+const buildSqlProposalHandoff = async (
+  session: GeneratorPreviewSessionDetail,
+) => {
   const snapshotPath = resolveMigrationProposalSnapshotPath(session.reportPath)
   let migrationProposalSnapshot: MigrationProposalSnapshot
-  let migrationProposalSnapshotRecovery:
-    | {
-        archivedSnapshotPath: string | null
-        status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-      }
-    | null = {
-      archivedSnapshotPath: null,
-      status: "none",
-    }
+  let migrationProposalSnapshotRecovery: {
+    archivedSnapshotPath: string | null
+    status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+  } | null = {
+    archivedSnapshotPath: null,
+    status: "none",
+  }
 
   try {
-    migrationProposalSnapshot = await readMigrationProposalSnapshot(snapshotPath)
+    migrationProposalSnapshot =
+      await readMigrationProposalSnapshot(snapshotPath)
   } catch (error) {
     const isMissingSnapshot =
       error instanceof Error &&
@@ -647,7 +657,8 @@ const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) =
     }
   }
 
-  const sqlProposalResolution = migrationProposalSnapshot.migrationProposalResolution
+  const sqlProposalResolution =
+    migrationProposalSnapshot.migrationProposalResolution
 
   return {
     proposalStatus:

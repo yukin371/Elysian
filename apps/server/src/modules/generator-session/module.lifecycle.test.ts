@@ -303,10 +303,13 @@ describe("generator session module lifecycle", () => {
         confirmedByUserId: string
         confirmationEvidence: {
           actorUserId: string
+          archivedSnapshotPath: string | null
           checklist: string[]
           confirmedAt: string
+          recoveryStatus: string
           reportPath: string
           sessionId: string
+          snapshotPath: string
         }
         id: string
       }
@@ -332,6 +335,10 @@ describe("generator session module lifecycle", () => {
     expect(confirmBody.session.confirmationEvidence).toMatchObject({
       sessionId: createBody.session.id,
       reportPath: createBody.session.reportPath,
+      snapshotPath:
+        confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      recoveryStatus: "none",
+      archivedSnapshotPath: null,
       actorUserId: createBody.session.actorUserId,
     })
     expect(confirmBody.session.confirmationEvidence.confirmedAt).toBe(

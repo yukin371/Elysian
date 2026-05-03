@@ -48,8 +48,11 @@ interface ReviewGeneratorPreviewSessionInput {
 
 interface ConfirmGeneratorPreviewSessionInput {
   actor: AuthIdentity | null
+  archivedSnapshotPath: string | null
   confirmationChecklist: string[]
   id: string
+  recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+  snapshotPath: string
 }
 
 export interface GeneratorSessionServiceOptions {
@@ -424,6 +427,9 @@ export const createGeneratorSessionService = (
       const confirmationEvidence = {
         sessionId: session.id,
         reportPath: session.reportPath,
+        snapshotPath: input.snapshotPath,
+        recoveryStatus: input.recoveryStatus,
+        archivedSnapshotPath: input.archivedSnapshotPath,
         confirmedAt,
         actorDisplayName: input.actor?.user.displayName ?? null,
         actorUserId: input.actor?.user.id ?? null,

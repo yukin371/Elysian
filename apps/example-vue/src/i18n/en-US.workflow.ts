@@ -229,6 +229,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Confirmed. This proposal can now move to apply.",
   "app.generatorPreview.message.confirmationEvidenceCaptured":
     "Confirmation evidence captured with {count} checklist items.",
+  "app.generatorPreview.message.confirmationEvidenceDetailed":
+    "Confirmation evidence captured: {count} checklist items, report={reportPath}, snapshot={snapshotPath}, recovery={recoveryStatus}.",
   "app.generatorPreview.summary.changed": "Changed files",
   "app.generatorPreview.summary.create": "Create",
   "app.generatorPreview.summary.overwrite": "Overwrite",

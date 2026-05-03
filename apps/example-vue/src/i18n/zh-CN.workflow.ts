@@ -216,6 +216,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "已确认，当前 proposal 可进入应用步骤。",
   "app.generatorPreview.message.confirmationEvidenceCaptured":
     "已记录确认凭据，包含 {count} 条确认清单项。",
+  "app.generatorPreview.message.confirmationEvidenceDetailed":
+    "已记录确认凭据：{count} 条清单，report={reportPath}，snapshot={snapshotPath}，恢复状态={recoveryStatus}。",
   "app.generatorPreview.summary.changed": "变更文件",
   "app.generatorPreview.summary.create": "新增",
   "app.generatorPreview.summary.overwrite": "覆盖",
