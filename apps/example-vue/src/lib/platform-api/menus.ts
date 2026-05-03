@@ -1,38 +1,17 @@
 import { requestBlob, requestJson } from "./core"
-import type { MenuDetailRecord, MenuRecord } from "./types"
-export type { MenuDetailRecord, MenuRecord } from "./types"
+import type {
+  OpenApiCreateMenuInput,
+  OpenApiMenuDetailRecord,
+  OpenApiMenuRecord,
+  OpenApiMenusResponse,
+  OpenApiUpdateMenuInput,
+} from "./generated-types"
 
-export interface MenusResponse {
-  items: MenuRecord[]
-}
-
-export interface CreateMenuRequest {
-  parentId?: string | null
-  type: MenuRecord["type"]
-  code: string
-  name: string
-  path?: string | null
-  component?: string | null
-  icon?: string | null
-  sort?: number
-  isVisible?: boolean
-  status?: MenuRecord["status"]
-  permissionCode?: string | null
-}
-
-export interface UpdateMenuRequest {
-  parentId?: string | null
-  type?: MenuRecord["type"]
-  code?: string
-  name?: string
-  path?: string | null
-  component?: string | null
-  icon?: string | null
-  sort?: number
-  isVisible?: boolean
-  status?: MenuRecord["status"]
-  permissionCode?: string | null
-}
+export type MenuRecord = OpenApiMenuRecord
+export type MenuDetailRecord = OpenApiMenuDetailRecord
+export type MenusResponse = OpenApiMenusResponse
+export type CreateMenuRequest = OpenApiCreateMenuInput
+export type UpdateMenuRequest = OpenApiUpdateMenuInput
 
 export const fetchMenus = async (): Promise<MenusResponse> =>
   requestJson<MenusResponse>("/system/menus", {

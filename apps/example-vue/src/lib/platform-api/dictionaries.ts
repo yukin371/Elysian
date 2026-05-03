@@ -1,36 +1,21 @@
 import { requestBlob, requestJson } from "./core"
 import type {
-  DictionaryItemRecord,
-  DictionaryTypeDetailRecord,
-  DictionaryTypeRecord,
-} from "./types"
-export type {
-  DictionaryItemRecord,
-  DictionaryTypeDetailRecord,
-  DictionaryTypeRecord,
-} from "./types"
+  OpenApiCreateDictionaryTypeInput,
+  OpenApiDictionaryItemRecord,
+  OpenApiDictionaryItemsResponse,
+  OpenApiDictionaryTypeDetailRecord,
+  OpenApiDictionaryTypeRecord,
+  OpenApiDictionaryTypesResponse,
+  OpenApiUpdateDictionaryTypeInput,
+} from "./generated-types"
 
-export interface DictionaryTypesResponse {
-  items: DictionaryTypeRecord[]
-}
-
-export interface DictionaryItemsResponse {
-  items: DictionaryItemRecord[]
-}
-
-export interface CreateDictionaryTypeRequest {
-  code: string
-  name: string
-  description?: string
-  status?: DictionaryTypeRecord["status"]
-}
-
-export interface UpdateDictionaryTypeRequest {
-  code?: string
-  name?: string
-  description?: string
-  status?: DictionaryTypeRecord["status"]
-}
+export type DictionaryItemRecord = OpenApiDictionaryItemRecord
+export type DictionaryTypeDetailRecord = OpenApiDictionaryTypeDetailRecord
+export type DictionaryTypeRecord = OpenApiDictionaryTypeRecord
+export type DictionaryTypesResponse = OpenApiDictionaryTypesResponse
+export type DictionaryItemsResponse = OpenApiDictionaryItemsResponse
+export type CreateDictionaryTypeRequest = OpenApiCreateDictionaryTypeInput
+export type UpdateDictionaryTypeRequest = OpenApiUpdateDictionaryTypeInput
 
 export const fetchDictionaryTypes =
   async (): Promise<DictionaryTypesResponse> =>

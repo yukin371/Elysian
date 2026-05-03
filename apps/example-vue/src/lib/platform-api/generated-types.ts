@@ -86,3 +86,25 @@ export type OpenApiPostsResponse = ResponseContent<"getSystemPosts", 200>
 export type OpenApiPostRecord = ResponseContent<"getSystemPostsById", 200>
 export type OpenApiCreatePostInput = RequestBodyContent<"postSystemPosts">
 export type OpenApiUpdatePostInput = RequestBodyContent<"putSystemPostsById">
+
+export type OpenApiMenusResponse = ResponseContent<"getSystemMenus", 200>
+export type OpenApiMenuDetailRecord = ResponseContent<"getSystemMenusById", 200>
+export type OpenApiMenuRecord = OpenApiMenusResponse["items"][number]
+export type OpenApiCreateMenuInput = RequestBodyContent<"postSystemMenus">
+export type OpenApiUpdateMenuInput = RequestBodyContent<"putSystemMenusById">
+
+export type OpenApiDictionaryTypesResponse =
+  ResponseContent<"getSystemDictionariesTypes", 200>
+export type OpenApiDictionaryTypeDetailRecord =
+  ResponseContent<"getSystemDictionariesTypesById", 200>
+export type OpenApiDictionaryTypeRecord =
+  OpenApiDictionaryTypesResponse["items"][number]
+export type OpenApiCreateDictionaryTypeInput =
+  RequestBodyContent<"postSystemDictionariesTypes">
+export type OpenApiUpdateDictionaryTypeInput =
+  RequestBodyContent<"putSystemDictionariesTypesById">
+
+export type OpenApiDictionaryItemsResponse =
+  ResponseContent<"getSystemDictionariesItems", 200>
+export type OpenApiDictionaryItemRecord =
+  OpenApiDictionaryItemsResponse["items"][number]
