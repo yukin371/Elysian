@@ -29,6 +29,8 @@ import {
 } from "./generator-preview-selection-storage"
 import {
   buildGeneratorPreviewSessionDetail,
+  generatorPreviewErrorCodes,
+  isGeneratorPreviewErrorCode,
   isGeneratorPreviewRecoverableAuthError,
   isGeneratorPreviewSessionDetailConsistent,
 } from "./generator-preview-session-helpers"
@@ -368,8 +370,10 @@ export const useGeneratorPreviewWorkspace = (
       }
 
       if (
-        error instanceof Error &&
-        error.message.includes("GENERATOR_SCHEMA_NOT_FOUND")
+        isGeneratorPreviewErrorCode(
+          error,
+          generatorPreviewErrorCodes.GENERATOR_SCHEMA_NOT_FOUND,
+        )
       ) {
         resetPreviewState()
       } else if (!canPreservePreviewState()) {
@@ -445,8 +449,10 @@ export const useGeneratorPreviewWorkspace = (
       }
     } catch (error) {
       if (
-        error instanceof Error &&
-        error.message.includes("GENERATOR_SESSION_NOT_FOUND")
+        isGeneratorPreviewErrorCode(
+          error,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_NOT_FOUND,
+        )
       ) {
         resetPreviewState()
       }

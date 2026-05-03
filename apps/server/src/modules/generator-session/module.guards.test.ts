@@ -7,6 +7,7 @@ import {
   createGeneratorSessionModule,
   createInMemoryGeneratorSessionRepository,
 } from ".."
+import { errorCodes } from "../../errors/registry"
 import {
   createAuthFixture,
   createAuthorizedHeaders,
@@ -108,7 +109,7 @@ describe("generator session module guards", () => {
         code: string
       }
     }
-    expect(errorBody.error.code).toBe("GENERATOR_SESSION_STALE")
+    expect(errorBody.error.code).toBe(errorCodes.GENERATOR_SESSION_STALE)
   })
 
   it("blocks apply for rejected generator preview sessions", async () => {
@@ -193,7 +194,7 @@ describe("generator session module guards", () => {
       }
     }
     expect(confirmErrorBody.error.code).toBe(
-      "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
+      errorCodes.GENERATOR_SESSION_CONFIRMATION_NOT_READY,
     )
     expect(confirmErrorBody.error.details).toMatchObject({
       id: createBody.session.id,
@@ -216,7 +217,7 @@ describe("generator session module guards", () => {
         code: string
       }
     }
-    expect(errorBody.error.code).toBe("GENERATOR_SESSION_REJECTED")
+    expect(errorBody.error.code).toBe(errorCodes.GENERATOR_SESSION_REJECTED)
   })
 
   it("blocks confirmation when the sql proposal is unsupported", async () => {
@@ -298,7 +299,7 @@ describe("generator session module guards", () => {
       }
     }
     expect(errorBody.error.code).toBe(
-      "GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY",
+      errorCodes.GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY,
     )
     expect(errorBody.error.details).toMatchObject({
       proposalStatus: "unsupported",
@@ -386,7 +387,7 @@ describe("generator session module guards", () => {
       }
     }
     expect(errorBody.error.code).toBe(
-      "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
+      errorCodes.GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH,
     )
     expect(errorBody.error.details).toMatchObject({
       displayedSnapshotPath: `${createBody.sqlProposalHandoff.migrationProposalSnapshotPath}.stale`,
@@ -503,7 +504,7 @@ describe("generator session module guards", () => {
         }
       }
     }
-    expect(errorBody.error.code).toBe("GENERATOR_SESSION_NOT_READY")
+    expect(errorBody.error.code).toBe(errorCodes.GENERATOR_SESSION_NOT_READY)
     expect(errorBody.error.details).toMatchObject({
       id: createBody.session.id,
       status: "applied",
@@ -626,7 +627,7 @@ describe("generator session module guards", () => {
       }
     }
     expect(errorBody.error.code).toBe(
-      "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
+      errorCodes.GENERATOR_SESSION_CONFIRMATION_NOT_READY,
     )
     expect(errorBody.error.details).toMatchObject({
       id: createBody.session.id,
@@ -748,7 +749,9 @@ describe("generator session module guards", () => {
         }
       }
     }
-    expect(errorBody.error.code).toBe("GENERATOR_SESSION_REVIEW_NOT_PENDING")
+    expect(errorBody.error.code).toBe(
+      errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING,
+    )
     expect(errorBody.error.details).toMatchObject({
       id: createBody.session.id,
       status: "applied",
@@ -830,7 +833,9 @@ describe("generator session module guards", () => {
         }
       }
     }
-    expect(errorBody.error.code).toBe("GENERATOR_SESSION_REVIEW_NOT_PENDING")
+    expect(errorBody.error.code).toBe(
+      errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING,
+    )
     expect(errorBody.error.details).toMatchObject({
       id: createBody.session.id,
       status: "ready",

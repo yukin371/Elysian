@@ -14,6 +14,9 @@ import {
 
 import {
   buildGeneratorPreviewSessionDetail,
+  generatorPreviewErrorCodes,
+  isGeneratorPreviewErrorCode,
+  isGeneratorPreviewErrorCodeOneOf,
   isGeneratorPreviewRecoverableAuthError,
 } from "./generator-preview-session-helpers"
 
@@ -85,12 +88,15 @@ export const createGeneratorPreviewSessionActions = (
       }
     } catch (error) {
       if (
-        error instanceof Error &&
-        (error.message.includes("GENERATOR_SESSION_STALE") ||
-          error.message.includes("GENERATOR_SESSION_APPLY_CONFLICT"))
+        isGeneratorPreviewErrorCodeOneOf(error, [
+          generatorPreviewErrorCodes.GENERATOR_SESSION_STALE,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_APPLY_CONFLICT,
+        ])
       ) {
         if (await options.refreshPreviewAfterApplyStale()) {
-          options.setErrorMessage(error.message)
+          options.setErrorMessage(
+            error instanceof Error ? error.message : "Generator apply failed",
+          )
           return
         }
 
@@ -98,16 +104,17 @@ export const createGeneratorPreviewSessionActions = (
       }
 
       if (
-        error instanceof Error &&
-        (error.message.includes("GENERATOR_SESSION_NOT_READY") ||
-          error.message.includes("GENERATOR_SESSION_REJECTED") ||
-          error.message.includes("GENERATOR_SESSION_CONFIRMATION_REQUIRED") ||
-          error.message.includes("GENERATOR_SESSION_BLOCKING_CONFLICTS"))
+        isGeneratorPreviewErrorCodeOneOf(error, [
+          generatorPreviewErrorCodes.GENERATOR_SESSION_NOT_READY,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_REJECTED,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_CONFIRMATION_REQUIRED,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_BLOCKING_CONFLICTS,
+        ])
       ) {
         if (
           await options.refreshSessionDetailAfterStateDrift(
             sessionId,
-            error.message,
+            error instanceof Error ? error.message : "Generator apply failed",
           )
         ) {
           return
@@ -176,13 +183,15 @@ export const createGeneratorPreviewSessionActions = (
       }
     } catch (error) {
       if (
-        error instanceof Error &&
-        error.message.includes("GENERATOR_SESSION_REVIEW_NOT_PENDING")
+        isGeneratorPreviewErrorCode(
+          error,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING,
+        )
       ) {
         if (
           await options.refreshSessionDetailAfterStateDrift(
             sessionId,
-            error.message,
+            error instanceof Error ? error.message : "Generator review failed",
           )
         ) {
           return
@@ -234,21 +243,18 @@ export const createGeneratorPreviewSessionActions = (
       options.persistCurrentSelection()
     } catch (error) {
       if (
-        error instanceof Error &&
-        (error.message.includes(
-          "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
-        ) ||
-          error.message.includes(
-            "GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY",
-          ) ||
-          error.message.includes(
-            "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
-          ))
+        isGeneratorPreviewErrorCodeOneOf(error, [
+          generatorPreviewErrorCodes.GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_CONFIRMATION_NOT_READY,
+        ])
       ) {
         if (
           await options.refreshSessionDetailAfterStateDrift(
             sessionId,
-            error.message,
+            error instanceof Error
+              ? error.message
+              : "Generator confirmation failed",
           )
         ) {
           return

@@ -1,8 +1,13 @@
 import type { ServerConfig } from "./config"
+import {
+  type AppErrorCode,
+  type AppErrorCodeKey,
+  errorCodes,
+} from "./errors/registry"
 
 export interface ErrorResponse {
   error: {
-    code: string
+    code: AppErrorCode
     message: string
     status: number
     details?: Record<string, unknown>
@@ -10,7 +15,7 @@ export interface ErrorResponse {
 }
 
 interface AppErrorOptions {
-  code: string
+  code: AppErrorCodeKey
   message: string
   status: number
   expose?: boolean
@@ -19,7 +24,8 @@ interface AppErrorOptions {
 }
 
 export class AppError extends Error {
-  readonly code: string
+  readonly code: AppErrorCode
+  readonly codeKey: AppErrorCodeKey
   readonly status: number
   readonly expose: boolean
   readonly details?: Record<string, unknown>
@@ -27,7 +33,8 @@ export class AppError extends Error {
   constructor(options: AppErrorOptions) {
     super(options.message, { cause: options.cause })
     this.name = "AppError"
-    this.code = options.code
+    this.codeKey = options.code
+    this.code = errorCodes[options.code]
     this.status = options.status
     this.expose = options.expose ?? false
     this.details = options.details
@@ -86,7 +93,7 @@ const normalizeError = (
     status: fallbackStatus,
     body: {
       error: {
-        code: "INTERNAL_ERROR",
+        code: errorCodes.INTERNAL_ERROR,
         message:
           config.env === "production"
             ? "Internal server error"

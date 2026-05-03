@@ -24,6 +24,10 @@
 > - `6B-2 / workflow service mock 单测` 已完成：新增 `apps/server/src/modules/workflow/service.test.ts`，覆盖 `start / claim / complete / cancel` 核心状态流，并通过 `bun run check`
 > - `3D / service 层单元测试补位` 已完成当前批次收口：新增 `role / customer / notification / file` 四组 mock service tests，并已在 `2026-05-02` 通过定向 `bun test` 与仓库级 `bun run check`
 > - `3C-5 / compose smoke 独立复验` 已完成：在本地 PostgreSQL 环境下通过 `bun run e2e:smoke:full`，compose 分桶组装已补独立冒烟出口验证
+> 状态补记：`2026-05-04`
+> - `1B / 后端错误码治理` 已完成当前第一刀：`apps/server` 已新增 4 位数字错误码注册表，`AppError` 现只接受注册表键并统一输出数字 `error.code`；注册表已补运行时唯一性与 4 位约束校验，避免继续写入游离业务码
+> - `1B / 后端错误码治理` 当前仍未切到计划中的顶层 `{ code, message, data?, details? }` 新 envelope；本轮先保持既有 `error.code/error.message/error.status/error.details` 结构，缩小迁移风险
+> - `1B / 后端错误码治理` 已补前端最小消费收口：`apps/example-vue` 的 `platform-api` 已改为结构化 `ApiError`，`generator-preview` 工作区不再依赖 `message.includes(...)` 判断会话业务错误
 
 ---
 

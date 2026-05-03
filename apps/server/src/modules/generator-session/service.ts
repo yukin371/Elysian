@@ -109,6 +109,36 @@ export const createGeneratorSessionService = (
   const now = options.now ?? (() => new Date())
   const resolveOutputDir =
     options.resolveOutputDir ?? resolveTargetPresetOutputDir
+  const getPreviewSessionById = async (
+    id: string,
+  ): Promise<GeneratorPreviewSessionDetail | null> => {
+    try {
+      return await repository.getPreviewSessionById(id)
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error
+      }
+
+      throw new AppError({
+        code: "GENERATOR_SESSION_REPORT_READ_FAILED",
+        message: "Generator session report read failed",
+        status: 500,
+        expose: true,
+        details: {
+          id,
+          reportPath:
+            typeof error === "object" &&
+            error !== null &&
+            "path" in error &&
+            typeof error.path === "string"
+              ? error.path
+              : undefined,
+          reason: error instanceof Error ? error.message : String(error),
+        },
+        cause: error,
+      })
+    }
+  }
 
   return {
     async applyPreviewSession(
@@ -118,7 +148,7 @@ export const createGeneratorSessionService = (
         applyResult: AppliedGenerationPreviewReport
       }
     > {
-      const session = await repository.getPreviewSessionById(input.id)
+      const session = await getPreviewSessionById(input.id)
       if (!session) {
         throw new AppError({
           code: "GENERATOR_SESSION_NOT_FOUND",
@@ -321,12 +351,12 @@ export const createGeneratorSessionService = (
         tenantId: input.actor?.user.tenantId ?? null,
       })
     },
-    getPreviewSessionById: (id: string) => repository.getPreviewSessionById(id),
+    getPreviewSessionById,
     listPreviewSessions: () => repository.listPreviewSessions(),
     async reviewPreviewSession(
       input: ReviewGeneratorPreviewSessionInput,
     ): Promise<GeneratorPreviewSessionDetail> {
-      const session = await repository.getPreviewSessionById(input.id)
+      const session = await getPreviewSessionById(input.id)
       if (!session) {
         throw new AppError({
           code: "GENERATOR_SESSION_NOT_FOUND",
@@ -393,7 +423,7 @@ export const createGeneratorSessionService = (
     async confirmPreviewSession(
       input: ConfirmGeneratorPreviewSessionInput,
     ): Promise<GeneratorPreviewSessionDetail> {
-      const session = await repository.getPreviewSessionById(input.id)
+      const session = await getPreviewSessionById(input.id)
       if (!session) {
         throw new AppError({
           code: "GENERATOR_SESSION_NOT_FOUND",

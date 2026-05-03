@@ -8,6 +8,7 @@ import {
   createGeneratorSessionModule,
   createInMemoryGeneratorSessionRepository,
 } from ".."
+import { errorCodes } from "../../errors/registry"
 import {
   createTestApp,
   writeMigrationProposalSnapshotFixture,
@@ -466,5 +467,67 @@ describe("generator session module detail responses", () => {
       "utf8",
     )
     expect(archivedSnapshotContents).toContain('"broken":true')
+  })
+
+  it("surfaces explicit report read errors on the detail endpoint", async () => {
+    const repository = createInMemoryGeneratorSessionRepository()
+    const session = await repository.createPreviewSession({
+      conflictStrategy: "fail",
+      createdAt: "2026-04-20T00:00:00.000Z",
+      frontendTarget: "vue",
+      hasBlockingConflicts: false,
+      outputDir: "/tmp/generator-session-missing-report",
+      previewFileCount: 1,
+      report: {
+        databaseChangePlan: {
+          canonicalMigrationOwner: "packages/persistence",
+          dialect: "postgresql",
+          operations: [],
+          reviewRequired: false,
+          sourceSchemaName: "customer",
+        },
+        files: [],
+        schemaName: "customer",
+      } as never,
+      reportPath: "/tmp/generator-session-missing-report/report.preview.json",
+      schemaName: "customer",
+      sourceType: "registered-schema",
+      sourceValue: "customer",
+      targetPreset: "default",
+    } as never)
+
+    const dbRepository = {
+      ...repository,
+      async getPreviewSessionById(id: string) {
+        if (id !== session.id) {
+          return null
+        }
+
+        throw Object.assign(new Error("ENOENT: no such file or directory"), {
+          code: "ENOENT",
+          path: session.reportPath,
+        })
+      },
+    }
+
+    const app = createTestApp([createGeneratorSessionModule(dbRepository)])
+    const response = await app.handle(
+      new Request(`http://localhost/studio/generator/sessions/${session.id}`),
+    )
+
+    expect(response.status).toBe(500)
+
+    const body = (await response.json()) as {
+      error: {
+        code: string
+        details?: {
+          reportPath?: string
+        }
+      }
+    }
+    expect(body.error.code).toBe(
+      errorCodes.GENERATOR_SESSION_REPORT_READ_FAILED,
+    )
+    expect(body.error.details?.reportPath).toBe(session.reportPath)
   })
 })

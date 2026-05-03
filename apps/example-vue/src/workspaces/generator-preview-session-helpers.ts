@@ -6,6 +6,8 @@ import type {
   GeneratorPreviewSqlProposal,
   GeneratorPreviewSqlProposalHandoff,
 } from "../lib/platform-api"
+import { ApiError } from "../lib/platform-api/core"
+import { generatorPreviewErrorCodes } from "../lib/platform-api/error-codes"
 
 export const generatorPreviewSessionStatusPriority: Record<
   GeneratorPreviewSessionRecord["status"],
@@ -18,7 +20,19 @@ export const generatorPreviewSessionStatusPriority: Record<
 }
 
 export const isGeneratorPreviewRecoverableAuthError = (error: unknown) =>
-  error instanceof Error && error.message.includes("status 401")
+  error instanceof ApiError && error.status === 401
+
+export const isGeneratorPreviewErrorCode = (
+  error: unknown,
+  expectedCode: number,
+) => error instanceof ApiError && error.code === expectedCode
+
+export const isGeneratorPreviewErrorCodeOneOf = (
+  error: unknown,
+  expectedCodes: readonly number[],
+) => error instanceof ApiError && expectedCodes.includes(error.code ?? -1)
+
+export { generatorPreviewErrorCodes }
 
 export const isGeneratorPreviewSessionDetailConsistent = (
   session: GeneratorPreviewSessionDetail,

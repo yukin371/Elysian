@@ -1,3 +1,5 @@
+import { resolveApiErrorCode, resolveApiErrorCodeLabel } from "./error-codes"
+
 type MultipartRequestBody = FormData
 
 interface RequestJsonOptions {
@@ -14,6 +16,19 @@ const SERVER_URL =
 
 let accessToken: string | null = null
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code: number | null = null,
+    readonly details?: Record<string, unknown>,
+  ) {
+    const codeLabel = resolveApiErrorCodeLabel(code)
+    super(codeLabel === null ? message : `${message} [${codeLabel}]`)
+    this.name = "ApiError"
+  }
+}
+
 export const setAccessToken = (token: string | null) => {
   accessToken = token
 }
@@ -26,18 +41,27 @@ const toRequestError = async (response: Response) => {
   try {
     const payload = (await response.json()) as {
       error?: {
-        code?: string
+        code?: number | string
         message?: string
         status?: number
+        details?: Record<string, unknown>
       }
     }
-    const code = payload.error?.code
+    const code = resolveApiErrorCode(payload.error?.code)
     const message =
       payload.error?.message ?? `Request failed with status ${response.status}`
 
-    return new Error(code ? `${message} [${code}]` : message)
+    return new ApiError(
+      message,
+      payload.error?.status ?? response.status,
+      code,
+      payload.error?.details,
+    )
   } catch {
-    return new Error(`Request failed with status ${response.status}`)
+    return new ApiError(
+      `Request failed with status ${response.status}`,
+      response.status,
+    )
   }
 }
 

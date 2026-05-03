@@ -8,6 +8,7 @@ import {
   createGeneratorSessionModule,
   createInMemoryGeneratorSessionRepository,
 } from ".."
+import { errorCodes } from "../../errors/registry"
 import {
   createAuthFixture,
   createAuthorizedHeaders,
@@ -851,6 +852,8 @@ describe("generator session module lifecycle", () => {
         code: string
       }
     }
-    expect(errorBody.error.code).toBe("GENERATOR_SESSION_CONFIRMATION_REQUIRED")
+    expect(errorBody.error.code).toBe(
+      errorCodes.GENERATOR_SESSION_CONFIRMATION_REQUIRED,
+    )
   })
 })

@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test"
 import { createServerApp } from "./app"
 import { createServerConfig } from "./config"
 import { AppError } from "./errors"
+import { errorCodes } from "./errors/registry"
 import type { ServerLogger } from "./logging"
 import type { ServerModule } from "./modules"
 
@@ -140,7 +141,7 @@ describe("createServerApp", () => {
     expect(second.status).toBe(429)
     expect(await second.json()).toEqual({
       error: {
-        code: "RATE_LIMIT_EXCEEDED",
+        code: errorCodes.RATE_LIMIT_EXCEEDED,
         message: "Too many requests",
         status: 429,
         details: {
@@ -177,7 +178,7 @@ describe("createServerApp", () => {
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
       error: {
-        code: "ROUTE_NOT_FOUND",
+        code: errorCodes.ROUTE_NOT_FOUND,
         message: "Route not found",
         status: 404,
         details: {
@@ -195,7 +196,7 @@ describe("createServerApp", () => {
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({
       error: {
-        code: "ROUTE_NOT_FOUND",
+        code: errorCodes.ROUTE_NOT_FOUND,
         message: "Route not found",
         status: 404,
         details: {
@@ -229,7 +230,7 @@ describe("createServerApp", () => {
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
       error: {
-        code: "MODULE_FAILURE",
+        code: errorCodes.MODULE_FAILURE,
         message: "Module failed",
         status: 409,
         details: {

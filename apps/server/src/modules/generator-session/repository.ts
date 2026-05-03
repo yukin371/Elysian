@@ -12,6 +12,8 @@ import {
   markGeneratorPreviewSessionReviewed,
 } from "@elysian/persistence"
 
+import { AppError } from "../../errors"
+
 export type GeneratorPreviewSessionSourceType = "registered-schema"
 export type GeneratorPreviewSessionStatus =
   | "pending_review"
@@ -481,8 +483,23 @@ const mapPreviewSessionDetailRow = async (
 
 const readPreviewReport = async (
   reportPath: string,
-): Promise<GenerationPreviewReport> =>
-  JSON.parse(await readFile(reportPath, "utf8")) as GenerationPreviewReport
+): Promise<GenerationPreviewReport> => {
+  try {
+    return JSON.parse(await readFile(reportPath, "utf8")) as GenerationPreviewReport
+  } catch (error) {
+    throw new AppError({
+      code: "GENERATOR_SESSION_REPORT_READ_FAILED",
+      message: "Generator session report read failed",
+      status: 500,
+      expose: true,
+      details: {
+        reportPath,
+        reason: error instanceof Error ? error.message : String(error),
+      },
+      cause: error,
+    })
+  }
+}
 
 const toOptionalDate = (value?: string | null) =>
   value ? new Date(value) : null

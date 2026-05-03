@@ -10,6 +10,10 @@ import {
 } from "../lib/platform-api"
 
 import { isGeneratorPreviewRecoverableAuthError } from "./generator-preview-session-helpers"
+import {
+  generatorPreviewErrorCodes,
+  isGeneratorPreviewErrorCode,
+} from "./generator-preview-session-helpers"
 
 type CreateGeneratorPreviewSessionRestoreOptions = {
   applySessionDetail: (session: GeneratorPreviewSessionDetail) => boolean
@@ -91,13 +95,17 @@ export const createGeneratorPreviewSessionRestore = (
     } catch (error) {
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
-        options.setErrorMessage(error.message)
+        options.setErrorMessage(
+          error instanceof Error ? error.message : "Generator session restore failed",
+        )
         return true
       }
 
       if (
-        error instanceof Error &&
-        error.message.includes("GENERATOR_SESSION_NOT_FOUND")
+        isGeneratorPreviewErrorCode(
+          error,
+          generatorPreviewErrorCodes.GENERATOR_SESSION_NOT_FOUND,
+        )
       ) {
         return false
       }
@@ -168,13 +176,19 @@ export const createGeneratorPreviewSessionRestore = (
           } catch (error) {
             if (isGeneratorPreviewRecoverableAuthError(error)) {
               options.onRecoverableAuthError(error)
-              options.setErrorMessage(error.message)
+              options.setErrorMessage(
+                error instanceof Error
+                  ? error.message
+                  : "Generator session restore failed",
+              )
               return true
             }
 
             if (
-              error instanceof Error &&
-              error.message.includes("GENERATOR_SESSION_NOT_FOUND")
+              isGeneratorPreviewErrorCode(
+                error,
+                generatorPreviewErrorCodes.GENERATOR_SESSION_NOT_FOUND,
+              )
             ) {
               continue
             }
@@ -195,14 +209,13 @@ export const createGeneratorPreviewSessionRestore = (
     } catch (error) {
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
-        options.setErrorMessage(error.message)
+        options.setErrorMessage(
+          error instanceof Error ? error.message : "Generator session restore failed",
+        )
         return true
       }
 
-      if (
-        error instanceof Error &&
-        error.message.includes("status 404")
-      ) {
+      if (error instanceof Error && error.message.includes("status 404")) {
         options.recentSessions.value = []
         return false
       }
