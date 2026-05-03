@@ -4,6 +4,11 @@ import { t } from "elysia"
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  fileBulkDeleteResponseSchema,
+  fileListResponseSchema,
+  fileRecordResponseSchema,
+} from "./openapi"
 import type { FileRepository } from "./repository"
 import { createFileService } from "./service"
 import type { FileStorage } from "./storage"
@@ -64,6 +69,9 @@ export const createFileModule = (
         },
         {
           query: fileFilterSchema,
+          response: {
+            200: fileListResponseSchema,
+          },
           detail: {
             tags: ["file"],
             summary: "List files",
@@ -100,6 +108,9 @@ export const createFileModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: fileRecordResponseSchema,
+          },
           detail: {
             tags: ["file"],
             summary: "Get file by id",
@@ -133,6 +144,9 @@ export const createFileModule = (
           })
         },
         {
+          response: {
+            201: fileRecordResponseSchema,
+          },
           detail: {
             tags: ["file"],
             summary: "Upload file",
@@ -155,6 +169,9 @@ export const createFileModule = (
           body: t.Object({
             ids: t.Array(t.String()),
           }),
+          response: {
+            200: fileBulkDeleteResponseSchema,
+          },
           detail: {
             tags: ["file"],
             summary: "Delete files by id list",

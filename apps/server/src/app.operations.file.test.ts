@@ -13,6 +13,47 @@ import {
 } from "./modules"
 
 describe("createServerApp files", () => {
+  it("publishes file success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: [
+        "system:file:list",
+        "system:file:upload",
+        "system:file:delete",
+      ],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createFileModule(
+          createInMemoryFileRepository(),
+          createInMemoryFileStorage(),
+          {
+            authGuard: fixture.authGuard,
+          },
+        ),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(payload.paths["/system/files"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/files"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/files/{id}"]?.get?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/system/files/delete"]?.post?.responses?.["200"],
+    ).toBeDefined()
+  })
+
   it("uploads, lists, gets, downloads, and deletes files", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [

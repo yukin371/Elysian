@@ -33,6 +33,54 @@ import {
 } from "./test-support"
 
 describe("createServerApp workflow runtime instances", () => {
+  it("publishes workflow runtime success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: [...workflowAllPermissionCodes],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createWorkflowModule(
+          createInMemoryWorkflowDefinitionRepository(
+            createWorkflowDefinitionSeedRecords(),
+          ),
+          {
+            authGuard: fixture.authGuard,
+          },
+        ),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(payload.paths["/workflow/instances"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/workflow/instances"]?.post?.responses?.["201"]).toBeDefined()
+    expect(
+      payload.paths["/workflow/instances/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/instances/{id}/cancel"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(payload.paths["/workflow/tasks/todo"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/workflow/tasks/done"]?.get?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/workflow/tasks/{id}/claim"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/tasks/{id}/complete"]?.post?.responses?.["200"],
+    ).toBeDefined()
+  })
+
   it("starts workflow instances and lists todo tasks", async () => {
     const { app, accessToken, fixture } = await createWorkflowTestHarness()
 

@@ -5,6 +5,13 @@ import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { AuditLogEvent, AuditLogWriter } from "../shared/audit-log"
+import {
+  workflowDefinitionListResponseSchema,
+  workflowDefinitionRecordResponseSchema,
+  workflowInstanceDetailResponseSchema,
+  workflowInstanceListResponseSchema,
+  workflowTaskListResponseSchema,
+} from "./openapi"
 import type { WorkflowRepository } from "./repository"
 import { createWorkflowService } from "./service"
 
@@ -101,6 +108,9 @@ export const createWorkflowModule = (
           }
         },
         {
+          response: {
+            200: workflowDefinitionListResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "List workflow definitions",
@@ -118,6 +128,9 @@ export const createWorkflowModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: workflowDefinitionRecordResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Get workflow definition by id",
@@ -145,6 +158,9 @@ export const createWorkflowModule = (
             status: t.Optional(workflowDefinitionStatusSchema),
             definition: t.Any(),
           }),
+          response: {
+            201: workflowDefinitionRecordResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Create workflow definition",
@@ -174,6 +190,9 @@ export const createWorkflowModule = (
             status: t.Optional(workflowDefinitionStatusSchema),
             definition: t.Optional(t.Any()),
           }),
+          response: {
+            200: workflowDefinitionRecordResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Create a new workflow definition version",
@@ -192,6 +211,9 @@ export const createWorkflowModule = (
           }
         },
         {
+          response: {
+            200: workflowInstanceListResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "List workflow instances",
@@ -211,6 +233,9 @@ export const createWorkflowModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: workflowInstanceDetailResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Get workflow instance by id",
@@ -248,6 +273,9 @@ export const createWorkflowModule = (
             definitionId: t.String({ minLength: 1 }),
             variables: t.Optional(t.Any()),
           }),
+          response: {
+            201: workflowInstanceDetailResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Start workflow instance",
@@ -269,6 +297,9 @@ export const createWorkflowModule = (
           query: t.Object({
             assignee: t.Optional(t.String()),
           }),
+          response: {
+            200: workflowTaskListResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "List todo workflow tasks",
@@ -290,6 +321,9 @@ export const createWorkflowModule = (
           query: t.Object({
             assignee: t.Optional(t.String()),
           }),
+          response: {
+            200: workflowTaskListResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "List completed workflow tasks",
@@ -332,6 +366,9 @@ export const createWorkflowModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: workflowInstanceDetailResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Claim workflow task",
@@ -375,6 +412,9 @@ export const createWorkflowModule = (
           body: t.Object({
             result: t.Union([t.Literal("approved"), t.Literal("rejected")]),
           }),
+          response: {
+            200: workflowInstanceDetailResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Complete workflow task",
@@ -417,6 +457,9 @@ export const createWorkflowModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: workflowInstanceDetailResponseSchema,
+          },
           detail: {
             tags: ["workflow"],
             summary: "Cancel workflow instance",
