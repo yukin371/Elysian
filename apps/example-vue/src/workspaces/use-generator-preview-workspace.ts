@@ -738,6 +738,29 @@ export const useGeneratorPreviewWorkspace = (
         persistCurrentSelection()
       }
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes("GENERATOR_SESSION_REVIEW_NOT_PENDING")
+      ) {
+        try {
+          const session = await fetchGeneratorPreviewSession(sessionId)
+
+          if (applySessionDetail(session)) {
+            errorMessage.value = error.message
+            return
+          }
+
+          resetPreviewState()
+        } catch (refreshError) {
+          onRecoverableAuthError(refreshError)
+          errorMessage.value =
+            refreshError instanceof Error
+              ? refreshError.message
+              : "Generator session restore failed"
+          return
+        }
+      }
+
       onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error ? error.message : "Generator review failed"

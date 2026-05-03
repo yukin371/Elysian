@@ -302,6 +302,154 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.currentSession.value?.status).toBe("pending_review")
   })
 
+  test("refreshes current detail when review session is no longer pending", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REVIEW_NOT_PENDING",
+              message: "Generator session is not pending review",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              id: "preview-session-1",
+              reviewEvidence: {
+                actorDisplayName: "Admin",
+                actorUserId: "user-1",
+                actorUsername: "admin",
+                comment: null,
+                decision: "approve",
+                reportPath: "generated/reports/preview-session-1.preview.json",
+                reviewedAt: "2026-05-02T12:05:00.000Z",
+                sessionId: "preview-session-1",
+              },
+              reviewedAt: "2026-05-02T12:05:00.000Z",
+              reviewedByDisplayName: "Admin",
+              reviewedByUserId: "user-1",
+              reviewedByUsername: "admin",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.reviewPreview("approve")
+
+    expect(detailRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.status).toBe("ready")
+    expect(workspace.currentSession.value?.reviewedAt).toBe(
+      "2026-05-02T12:05:00.000Z",
+    )
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REVIEW_NOT_PENDING",
+    )
+    expect(workspace.canApprovePreview.value).toBe(false)
+    expect(workspace.canConfirmPreview.value).toBe(true)
+  })
+
+  test("reports refetch auth error when stale review session cannot be refreshed", async () => {
+    const recoverableErrors: unknown[] = []
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/review") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REVIEW_NOT_PENDING",
+              message: "Generator session is not pending review",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      if (url.endsWith("/auth/refresh") && method === "POST") {
+        return new Response(JSON.stringify({ message: "unauthorized" }), {
+          headers: { "content-type": "application/json" },
+          status: 401,
+        })
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      enabled: true,
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession()
+    workspace.currentDiffSummary.value = createDiffSummary()
+
+    await workspace.reviewPreview("approve")
+
+    expect(detailRequestCount).toBe(1)
+    expect(recoverableErrors).toHaveLength(1)
+    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.currentSession.value?.status).toBe("pending_review")
+    expect(workspace.canApprovePreview.value).toBe(true)
+  })
+
   test("does not apply pending review preview sessions", async () => {
     const { workspace } = createWorkspace()
     workspace.currentSession.value = createSession()
