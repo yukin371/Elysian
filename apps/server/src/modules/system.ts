@@ -2,6 +2,13 @@ import { platformManifest } from "@elysian/core"
 import { moduleSchemaVersion } from "@elysian/schema"
 
 import type { AnyServerApp, ServerModule } from "./module"
+import {
+  healthResponseSchema,
+  metricsResponseSchema,
+  platformResponseSchema,
+  prometheusMetricsResponseSchema,
+  systemModulesResponseSchema,
+} from "../openapi"
 
 const buildPrometheusMetricsPayload = () => {
   const uptimeSeconds = process.uptime()
@@ -45,6 +52,9 @@ export const systemModule: ServerModule = {
           schemaVersion: moduleSchemaVersion,
         }),
         {
+          response: {
+            200: healthResponseSchema,
+          },
           detail: {
             tags: ["system"],
             summary: "Health check",
@@ -62,6 +72,9 @@ export const systemModule: ServerModule = {
           ],
         }),
         {
+          response: {
+            200: platformResponseSchema,
+          },
           detail: {
             tags: ["system"],
             summary: "Platform manifest",
@@ -90,6 +103,9 @@ export const systemModule: ServerModule = {
           }
         },
         {
+          response: {
+            200: metricsResponseSchema,
+          },
           detail: {
             tags: ["system"],
             summary: "Runtime metrics snapshot",
@@ -104,6 +120,9 @@ export const systemModule: ServerModule = {
           return buildPrometheusMetricsPayload()
         },
         {
+          response: {
+            200: prometheusMetricsResponseSchema,
+          },
           detail: {
             tags: ["system"],
             summary: "Runtime metrics snapshot (Prometheus format)",
@@ -117,6 +136,9 @@ export const systemModule: ServerModule = {
           modules: context.moduleNames,
         }),
         {
+          response: {
+            200: systemModulesResponseSchema,
+          },
           detail: {
             tags: ["system"],
             summary: "Registered modules",

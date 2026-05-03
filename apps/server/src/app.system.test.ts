@@ -55,6 +55,36 @@ describe("createServerApp", () => {
     })
   })
 
+  it("publishes success responses in the openapi spec", async () => {
+    const app = createTestApp()
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      openapi: string
+      paths: Record<
+        string,
+        Record<
+          string,
+          {
+            responses?: Record<string, unknown>
+          }
+        >
+      >
+    }
+
+    expect(payload.openapi).toBe("3.0.3")
+    expect(payload.paths["/health"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/platform"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/metrics"]?.get?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/metrics/prometheus"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(payload.paths["/system/modules"]?.get?.responses?.["200"]).toBeDefined()
+  })
+
   it("returns a runtime metrics snapshot", async () => {
     const app = createTestApp()
     const response = await app.handle(new Request("http://localhost/metrics"))
