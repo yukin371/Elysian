@@ -9,6 +9,8 @@ interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   t: GeneratorPreviewTranslation
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
+  recoveryNoteText: string | null
+  recoveryNoteTone: "info" | "warning" | null
   sessionConfirmedAtLabel: string
   sessionConfirmedByLabel: string
   sessionConfirmationNote: string | null
@@ -27,6 +29,8 @@ const {
   t,
   sqlProposalHandoff,
   migrationProposalSnapshot,
+  recoveryNoteText,
+  recoveryNoteTone,
   sessionConfirmedAtLabel,
   sessionConfirmedByLabel,
   sessionConfirmationNote,
@@ -196,6 +200,17 @@ const emit = defineEmits<{
       </p>
       <p class="generator-status-note">
         {{ migrationProposalSnapshot.snapshotPath }}
+      </p>
+      <p
+        v-if="recoveryNoteText"
+        :class="[
+          'enterprise-message',
+          recoveryNoteTone === 'warning'
+            ? 'enterprise-message-warning'
+            : 'enterprise-message-info',
+        ]"
+      >
+        {{ recoveryNoteText }}
       </p>
     </section>
     <section class="generator-handoff-step-block">

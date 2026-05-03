@@ -644,6 +644,8 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         v-if="sqlProposalHandoff"
         :t="t"
         :sql-proposal-handoff="sqlProposalHandoff"
+        :recovery-note-text="recoveryNote?.text ?? null"
+        :recovery-note-tone="recoveryNote?.tone ?? null"
         :session-confirmed-at-label="sessionConfirmedAtLabel"
         :session-confirmed-by-label="sessionConfirmedByLabel"
         :session-confirmation-note="sessionConfirmationNote"
