@@ -432,6 +432,13 @@ export const useGeneratorPreviewWorkspace = (
         resetPreviewState()
       }
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes("GENERATOR_SESSION_NOT_FOUND")
+      ) {
+        resetPreviewState()
+      }
+
       onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error

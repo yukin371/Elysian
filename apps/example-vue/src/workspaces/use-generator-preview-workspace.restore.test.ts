@@ -514,6 +514,53 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     )
   })
 
+  test("clears current preview when requested restored session no longer exists", async () => {
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-missing") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_NOT_FOUND",
+              message: "Generator session not found",
+              status: 404,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 404,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace()
+    workspace.currentSession.value = createSession({
+      id: "preview-session-current",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.selectedRecentSessionId.value = "preview-session-current"
+
+    await workspace.restorePreviewSession("preview-session-missing")
+
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.currentDiffSummary.value).toBeNull()
+    expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
+    expect(workspace.sqlPreview.value).toBeNull()
+    expect(workspace.selectedRecentSessionId.value).toBe("")
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_NOT_FOUND",
+    )
+  })
+
   test("surfaces auth error instead of silently refreshing when matching recent session detail fails", async () => {
     const recoverableErrors: unknown[] = []
     let previewRequestCount = 0
