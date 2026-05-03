@@ -212,6 +212,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.status.ready": "待应用",
   "app.generatorPreview.status.rejected": "已拒绝",
   "app.generatorPreview.status.applied": "已应用",
+  "app.generatorPreview.message.confirmedReady":
+    "已确认，当前 proposal 可进入应用步骤。",
   "app.generatorPreview.summary.changed": "变更文件",
   "app.generatorPreview.summary.create": "新增",
   "app.generatorPreview.summary.overwrite": "覆盖",
@@ -265,6 +267,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.sourceType": "来源类型",
   "app.generatorPreview.meta.sourceValue": "来源值",
   "app.generatorPreview.meta.conflictStrategy": "冲突策略",
+  "app.generatorPreview.meta.confirmedAt": "确认时间",
+  "app.generatorPreview.meta.confirmedBy": "确认人",
   "app.generatorPreview.meta.templateReason": "模板用途",
   "app.generatorPreview.meta.plannedReason": "本次决策原因",
   "app.generatorPreview.meta.proposalStatus": "提案状态",

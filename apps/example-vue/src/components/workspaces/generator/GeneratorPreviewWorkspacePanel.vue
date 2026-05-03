@@ -115,6 +115,29 @@ const sessionConflictStrategyLabel = computed(() => {
   )
 })
 
+const sessionConfirmedAtLabel = computed(
+  () => props.session?.confirmedAt ?? "-",
+)
+
+const sessionConfirmedByLabel = computed(() => {
+  if (!props.session) {
+    return "-"
+  }
+
+  return (
+    props.session.confirmedByDisplayName ??
+    props.session.confirmedByUsername ??
+    props.session.confirmedByUserId ??
+    "-"
+  )
+})
+
+const sessionConfirmationNote = computed(() =>
+  props.session?.confirmedAt
+    ? props.t("app.generatorPreview.message.confirmedReady")
+    : null,
+)
+
 const reviewActorLabel = computed(() =>
   resolveEvidenceActorLabel(props.reviewEvidence),
 )
@@ -481,6 +504,9 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :session-actor-label="sessionActorLabel"
         :session-source-type-label="sessionSourceTypeLabel"
         :session-conflict-strategy-label="sessionConflictStrategyLabel"
+        :session-confirmed-at-label="sessionConfirmedAtLabel"
+        :session-confirmed-by-label="sessionConfirmedByLabel"
+        :session-confirmation-note="sessionConfirmationNote"
         :report-path-copy-label="resolveSnippetCopyLabel('reportPath')"
         :session-id-copy-label="resolveSnippetCopyLabel('sessionId')"
         :created-at-copy-label="resolveSnippetCopyLabel('createdAt')"

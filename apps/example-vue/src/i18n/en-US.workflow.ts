@@ -225,6 +225,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.status.ready": "Ready",
   "app.generatorPreview.status.rejected": "Rejected",
   "app.generatorPreview.status.applied": "Applied",
+  "app.generatorPreview.message.confirmedReady":
+    "Confirmed. This proposal can now move to apply.",
   "app.generatorPreview.summary.changed": "Changed files",
   "app.generatorPreview.summary.create": "Create",
   "app.generatorPreview.summary.overwrite": "Overwrite",
@@ -281,6 +283,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.sourceType": "Source type",
   "app.generatorPreview.meta.sourceValue": "Source value",
   "app.generatorPreview.meta.conflictStrategy": "Conflict strategy",
+  "app.generatorPreview.meta.confirmedAt": "Confirmed at",
+  "app.generatorPreview.meta.confirmedBy": "Confirmed by",
   "app.generatorPreview.meta.templateReason": "Template purpose",
   "app.generatorPreview.meta.plannedReason": "Decision reason",
   "app.generatorPreview.meta.proposalStatus": "Proposal status",

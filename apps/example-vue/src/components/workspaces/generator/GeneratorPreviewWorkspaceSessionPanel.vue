@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { GeneratorPreviewSessionRecord, GeneratorPreviewTranslation } from "./types"
+import type {
+  GeneratorPreviewSessionRecord,
+  GeneratorPreviewTranslation,
+} from "./types"
 
 interface GeneratorPreviewWorkspaceSessionPanelProps {
   t: GeneratorPreviewTranslation
@@ -7,6 +10,9 @@ interface GeneratorPreviewWorkspaceSessionPanelProps {
   sessionActorLabel: string
   sessionSourceTypeLabel: string
   sessionConflictStrategyLabel: string
+  sessionConfirmedAtLabel: string
+  sessionConfirmedByLabel: string
+  sessionConfirmationNote: string | null
   reportPathCopyLabel: string
   sessionIdCopyLabel: string
   createdAtCopyLabel: string
@@ -44,6 +50,12 @@ const emit = defineEmits<{
         {{ reportPathCopyLabel }}
       </button>
     </div>
+    <p
+      v-if="sessionConfirmationNote"
+      class="enterprise-message enterprise-message-info"
+    >
+      {{ sessionConfirmationNote }}
+    </p>
     <div class="enterprise-metadata">
       <div>
         <div class="generator-metadata-label">
@@ -152,6 +164,14 @@ const emit = defineEmits<{
           </button>
         </div>
         <strong>{{ sessionConflictStrategyLabel }}</strong>
+      </div>
+      <div v-if="session.confirmedAt">
+        <span>{{ t("app.generatorPreview.meta.confirmedAt") }}</span>
+        <strong>{{ sessionConfirmedAtLabel }}</strong>
+      </div>
+      <div v-if="session.confirmedAt">
+        <span>{{ t("app.generatorPreview.meta.confirmedBy") }}</span>
+        <strong>{{ sessionConfirmedByLabel }}</strong>
       </div>
     </div>
   </section>
