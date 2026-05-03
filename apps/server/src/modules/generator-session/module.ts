@@ -178,6 +178,8 @@ export const createGeneratorSessionModule = (
           return {
             session: toSessionResponse(session),
             diff: buildDiffSummary(session.report),
+            targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
+            conflictExplanations: buildConflictExplanations(session.report),
             report: session.report,
             sqlProposal: buildSqlProposal(session),
             sqlProposalHandoff: buildSqlProposalHandoff(session),
@@ -225,6 +227,8 @@ export const createGeneratorSessionModule = (
           return {
             session: toSessionResponse(session),
             diff: buildDiffSummary(session.report),
+            targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
+            conflictExplanations: buildConflictExplanations(session.report),
             sqlProposal: buildSqlProposal(session),
             sqlProposalHandoff: buildSqlProposalHandoff(session),
           }
@@ -275,6 +279,8 @@ export const createGeneratorSessionModule = (
           return {
             session: toSessionResponse(session),
             diff: buildDiffSummary(session.report),
+            targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
+            conflictExplanations: buildConflictExplanations(session.report),
             sqlProposal: buildSqlProposal(session),
             sqlProposalHandoff: buildSqlProposalHandoff(session),
             apply: {
@@ -335,6 +341,8 @@ const toSessionResponse = (session: GeneratorPreviewSessionRecord) => ({
 const toSessionDetailResponse = (session: GeneratorPreviewSessionDetail) => ({
   ...toSessionResponse(session),
   diffSummary: buildDiffSummary(session.report),
+  targetDirectoryDiff: buildTargetDirectoryDiff(session.report),
+  conflictExplanations: buildConflictExplanations(session.report),
   report: session.report,
   sqlProposal: buildSqlProposal(session),
   sqlProposalHandoff: buildSqlProposalHandoff(session),
@@ -418,6 +426,73 @@ const buildDiffSummary = (report: GeneratorPreviewSessionDetail["report"]) => {
     },
   }
 }
+
+const buildTargetDirectoryDiff = (
+  report: GeneratorPreviewSessionDetail["report"],
+) => {
+  const directoryMap = new Map<
+    string,
+    {
+      actionCounts: {
+        block: number
+        create: number
+        overwrite: number
+        skip: number
+      }
+      changedFileCount: number
+      fileCount: number
+    }
+  >()
+
+  for (const file of report.files) {
+    const normalizedPath = file.path.replaceAll("\\", "/")
+    const directory = normalizedPath.includes("/")
+      ? normalizedPath.slice(0, normalizedPath.lastIndexOf("/"))
+      : "."
+    const current = directoryMap.get(directory) ?? {
+      actionCounts: {
+        block: 0,
+        create: 0,
+        overwrite: 0,
+        skip: 0,
+      },
+      changedFileCount: 0,
+      fileCount: 0,
+    }
+
+    current.fileCount += 1
+    if (file.hasChanges) {
+      current.changedFileCount += 1
+    }
+    if (file.plannedAction in current.actionCounts) {
+      current.actionCounts[file.plannedAction] += 1
+    }
+
+    directoryMap.set(directory, current)
+  }
+
+  return [...directoryMap.entries()]
+    .map(([directory, summary]) => ({
+      directory,
+      fileCount: summary.fileCount,
+      changedFileCount: summary.changedFileCount,
+      actionCounts: summary.actionCounts,
+    }))
+    .sort((left, right) => left.directory.localeCompare(right.directory))
+}
+
+const buildConflictExplanations = (
+  report: GeneratorPreviewSessionDetail["report"],
+) =>
+  report.files
+    .filter((file) => file.plannedAction === "block" || file.reason.length > 0)
+    .map((file) => ({
+      path: file.path,
+      plannedAction: file.plannedAction,
+      plannedReason: file.plannedReason,
+      reason: file.reason,
+      mergeStrategy: file.mergeStrategy,
+    }))
 
 const resolveSqlProposal = (session: GeneratorPreviewSessionDetail) =>
   resolveMigrationProposalFromChangePlan(session.report.databaseChangePlan)

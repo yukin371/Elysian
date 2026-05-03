@@ -73,7 +73,7 @@
 | 生成预览（文件级） | ✅ 已完成 | CLI `--preview` 可输出文件动作预览 | `packages/generator` | 仍以 CLI 为主 |
 | 结构化预览报告 | ✅ 已完成 | 可输出 JSON report，用于回归与审查 | `packages/generator` | 尚无报告中心 UI |
 | 浏览器本地预览入口 | ✅ 已完成 | 已有 `@elysian/generator/browser`，示例页可消费 | `packages/generator` + `apps/example-vue` | 仅限本地纯渲染，不做真实 apply |
-| Studio 生成预览工作区 | 🟡 部分完成 | `example-vue` 已接入 server preview/apply DTO，可查看文件计划、差异摘要、SQL preview 与 apply evidence | `apps/example-vue` | 仍缺正式人工确认流与更细粒度 diff 解释 |
+| Studio 生成预览工作区 | 🟡 部分完成 | `example-vue` 已接入 server preview/apply DTO，可查看文件计划、差异摘要、SQL preview、apply evidence、目标目录 diff 与冲突解释 | `apps/example-vue` | 仍缺正式人工确认流 |
 | React / Vue 双前端目标 | ✅ 已完成 | 模板层已支持 `vue/react` 页面输出 | `packages/generator` | 两端都还只是最小页面模板 |
 | 模块级生成历史 / 任务记录 | 🟡 部分完成 | `apps/server` 已提供 preview session 列表、详情、report 路径与 apply evidence，`packages/persistence` 已持久化 session 元数据 | `apps/server` + `packages/persistence` | report 仍依赖文件落盘回放；尚未形成更完整的报告治理中心 |
 | Studio 内触发真实生成 apply | 🟡 部分完成 | 服务端已支持基于 preview session 执行 staging apply，并在 apply 前重验目标文件漂移 | `apps/server` | `example-vue` 已接入最小 apply 入口，但仍缺正式前端确认流 |
@@ -225,11 +225,12 @@
 
 ##### T1-4 diff / confirm / apply evidence
 
-状态：`已落最小 diff summary / evidence，未完成正式审查体验`
+状态：`已落最小 diff summary / 目录 diff / 冲突解释 / evidence，未完成正式审查体验`
 
 当前已实现：
 
 - preview / apply 响应会返回 diff summary
+- preview / apply / detail 响应会返回目标目录 diff 与冲突解释
 - apply evidence 已包含 session id、report path、manifest path、actor / request id / timestamp
 
 目标：
