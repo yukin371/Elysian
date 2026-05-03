@@ -608,6 +608,78 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.canConfirmPreview.value).toBe(true)
   })
 
+  test("refreshes current detail when confirmation is no longer ready on the server", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
+              message: "Generator session is not ready for confirmation",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              appliedAt: "2026-05-02T12:20:00.000Z",
+              appliedByDisplayName: "Admin",
+              appliedByUserId: "user-1",
+              appliedByUsername: "admin",
+              appliedFileCount: 1,
+              id: "preview-session-1",
+              status: "applied",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+
+    await workspace.confirmPreview()
+
+    expect(detailRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.status).toBe("applied")
+    expect(workspace.currentSession.value?.appliedAt).toBe(
+      "2026-05-02T12:20:00.000Z",
+    )
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
+    )
+    expect(workspace.canConfirmPreview.value).toBe(false)
+  })
+
   test("does not expose confirmation when sql proposal handoff is missing", async () => {
     const { workspace } = createWorkspace({ enabled: true })
     workspace.currentSession.value = createSession({ status: "ready" })

@@ -780,9 +780,12 @@ export const useGeneratorPreviewWorkspace = (
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message.includes(
+        (error.message.includes(
           "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
-        )
+        ) ||
+          error.message.includes(
+            "GENERATOR_SESSION_CONFIRMATION_NOT_READY",
+          ))
       ) {
         try {
           const session = await fetchGeneratorPreviewSession(sessionId)
