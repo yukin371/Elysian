@@ -739,6 +739,88 @@ describe("generator session module guards", () => {
     })
   })
 
+  it("blocks review when the generator preview session is already ready", async () => {
+    const { accessToken, app } =
+      await createGeneratorSessionAuthenticatedContext()
+
+    const createResponse = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "customer",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          targetPreset: "staging",
+        }),
+      }),
+    )
+    expect(createResponse.status).toBe(201)
+
+    const createBody = (await createResponse.json()) as {
+      session: {
+        id: string
+      }
+    }
+
+    const firstReviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            comment: "Ready for review replay guard",
+            decision: "approve",
+          }),
+        },
+      ),
+    )
+    expect(firstReviewResponse.status).toBe(200)
+
+    const secondReviewResponse = await app.handle(
+      new Request(
+        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        {
+          method: "POST",
+          headers: {
+            ...createAuthorizedHeaders(accessToken, {
+              "content-type": "application/json",
+            }),
+          },
+          body: JSON.stringify({
+            comment: "Should be rejected after approval",
+            decision: "reject",
+          }),
+        },
+      ),
+    )
+
+    expect(secondReviewResponse.status).toBe(409)
+    const errorBody = (await secondReviewResponse.json()) as {
+      error: {
+        code: string
+        details: {
+          id: string
+          status: string
+        }
+      }
+    }
+    expect(errorBody.error.code).toBe("GENERATOR_SESSION_REVIEW_NOT_PENDING")
+    expect(errorBody.error.details).toMatchObject({
+      id: createBody.session.id,
+      status: "ready",
+    })
+  })
+
   it("requires authentication for generator preview sessions when auth guard is configured", async () => {
     const fixture = await createAuthFixture()
     const repository = createInMemoryGeneratorSessionRepository()
