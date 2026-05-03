@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { computed } from "vue"
 import type {
   GeneratorPreviewMigrationProposalSnapshot,
   GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewTranslation,
 } from "./types"
+import { resolveGeneratorPreviewRecoveryNote } from "./generator-preview-recovery-note"
 
 interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   t: GeneratorPreviewTranslation
@@ -20,7 +22,20 @@ interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   stepsCopyLabel: string
 }
 
-defineProps<GeneratorPreviewWorkspaceSqlHandoffPanelProps>()
+const {
+  t,
+  sqlProposalHandoff,
+  migrationProposalSnapshot,
+  suggestedCommandsText,
+  commandsCopyLabel,
+  migrationProposalSnapshotPathCopyLabel,
+  confirmationChecklistCopyLabel,
+  schemaDirCopyLabel,
+  drizzleDirCopyLabel,
+  schemaIndexFileCopyLabel,
+  persistenceIndexFileCopyLabel,
+  stepsCopyLabel,
+} = defineProps<GeneratorPreviewWorkspaceSqlHandoffPanelProps>()
 
 const emit = defineEmits<{
   (event: "copy-suggested-commands"): void
@@ -33,27 +48,11 @@ const emit = defineEmits<{
   (event: "copy-steps"): void
 }>()
 
-const resolveMigrationProposalRecoveryNote = (
-  recovery: GeneratorPreviewSqlProposalHandoff["migrationProposalSnapshotRecovery"],
-) => {
-  if (!recovery || recovery.status === "none") {
-    return null
-  }
-
-  if (recovery.status === "rebuilt-from-corrupt") {
-    return {
-      tone: "warning" as const,
-      text: recovery.archivedSnapshotPath
-        ? `快照已从损坏副本重建，原始文件已归档到 ${recovery.archivedSnapshotPath}`
-        : "快照已从损坏副本重建。",
-    }
-  }
-
-  return {
-    tone: "info" as const,
-    text: "快照缺失，已按当前 report 重新生成并落盘。",
-  }
-}
+const recoveryNote = computed(() =>
+  resolveGeneratorPreviewRecoveryNote(
+    sqlProposalHandoff.migrationProposalSnapshotRecovery,
+  ),
+)
 </script>
 
 <template>
@@ -201,25 +200,15 @@ const resolveMigrationProposalRecoveryNote = (
         {{ migrationProposalSnapshot.snapshotPath }}
       </p>
       <p
-        v-if="
-          resolveMigrationProposalRecoveryNote(
-            sqlProposalHandoff.migrationProposalSnapshotRecovery,
-          )
-        "
+        v-if="recoveryNote"
         :class="[
           'enterprise-message',
-          resolveMigrationProposalRecoveryNote(
-            sqlProposalHandoff.migrationProposalSnapshotRecovery,
-          )?.tone === 'warning'
+          recoveryNote?.tone === 'warning'
             ? 'enterprise-message-warning'
             : 'enterprise-message-info',
         ]"
       >
-        {{
-          resolveMigrationProposalRecoveryNote(
-            sqlProposalHandoff.migrationProposalSnapshotRecovery,
-          )?.text
-        }}
+        {{ recoveryNote?.text }}
       </p>
     </section>
     <section class="generator-handoff-step-block">
