@@ -33,6 +33,33 @@ const createTestApp = (
   })
 
 describe("createServerApp", () => {
+  it("publishes customer success responses in the openapi spec", async () => {
+    const app = createTestApp({
+      modules: [createCustomerModule(createInMemoryCustomerRepository())],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<
+          string,
+          {
+            responses?: Record<string, unknown>
+          }
+        >
+      >
+    }
+
+    expect(payload.paths["/customers"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/customers"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/customers/{id}"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/customers/{id}"]?.put?.responses?.["200"]).toBeDefined()
+  })
+
   it("lists customers from the customer module", async () => {
     const app = createTestApp({
       modules: [

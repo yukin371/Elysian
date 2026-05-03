@@ -3,6 +3,10 @@ import { t } from "elysia"
 
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  customerListResponseSchema,
+  customerRecordResponseSchema,
+} from "./openapi"
 import type { CustomerRepository, UpdateCustomerInput } from "./repository"
 import { createCustomerService } from "./service"
 
@@ -66,6 +70,9 @@ export const createCustomerModule = (
               t.Union([t.Literal("asc"), t.Literal("desc")]),
             ),
           }),
+          response: {
+            200: customerListResponseSchema,
+          },
           detail: {
             tags: ["customer"],
             summary: "List customers",
@@ -86,6 +93,9 @@ export const createCustomerModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: customerRecordResponseSchema,
+          },
           detail: {
             tags: ["customer"],
             summary: "Get customer by id",
@@ -114,6 +124,9 @@ export const createCustomerModule = (
               t.Union([t.Literal("active"), t.Literal("inactive")]),
             ),
           }),
+          response: {
+            201: customerRecordResponseSchema,
+          },
           detail: {
             tags: ["customer"],
             summary: "Create customer",
@@ -140,6 +153,9 @@ export const createCustomerModule = (
               t.Union([t.Literal("active"), t.Literal("inactive")]),
             ),
           }),
+          response: {
+            200: customerRecordResponseSchema,
+          },
           detail: {
             tags: ["customer"],
             summary: "Update customer",
