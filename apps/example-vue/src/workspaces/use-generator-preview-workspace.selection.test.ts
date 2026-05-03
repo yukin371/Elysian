@@ -475,6 +475,75 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
     )
   })
 
+  test("does not report auth recovery when persisted session restore fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.localStorage.setItem(
+      "elysian.example-vue.generator-preview.selection",
+      JSON.stringify({
+        conflictStrategy: "overwrite-generated-only",
+        frontendTarget: "react",
+        schemaName: "customer",
+        sessionId: "preview-session-broken",
+      }),
+    )
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-broken") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REPORT_READ_FAILED",
+              message: "Generator session report read failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REPORT_READ_FAILED",
+    )
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.selectedSchemaName.value).toBe("customer")
+    expect(workspace.selectedFrontendTarget.value).toBe("react")
+    expect(workspace.selectedConflictStrategy.value).toBe(
+      "overwrite-generated-only",
+    )
+  })
+
   test("surfaces restore error instead of silently refreshing when persisted session restore fails", async () => {
     let previewRequestCount = 0
 
