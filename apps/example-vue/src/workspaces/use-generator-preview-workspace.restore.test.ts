@@ -608,6 +608,60 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     )
   })
 
+  test("does not report auth recovery when restored session detail fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-broken") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REPORT_READ_FAILED",
+              message: "Generator session report read failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.currentSession.value = createSession({
+      id: "preview-session-current",
+      status: "ready",
+    })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.selectedRecentSessionId.value = "preview-session-current"
+
+    await workspace.restorePreviewSession("preview-session-broken")
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REPORT_READ_FAILED",
+    )
+    expect(workspace.currentSession.value?.id).toBe("preview-session-current")
+    expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
+    expect(workspace.selectedRecentSessionId.value).toBe(
+      "preview-session-current",
+    )
+  })
+
   test("clears current preview when requested restored session no longer exists", async () => {
     globalThis.fetch = (async (input, init) => {
       const url = String(input)
@@ -730,6 +784,81 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     expect(workspace.selectedConflictStrategy.value).toBe(
       "overwrite-generated-only",
     )
+  })
+
+  test("does not report auth recovery when matching recent session detail fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:30:00.000Z",
+                id: "preview-session-broken",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-broken") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_REPORT_READ_FAILED",
+              message: "Generator session report read failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_REPORT_READ_FAILED",
+    )
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.currentSession.value).toBeNull()
   })
 
   test("surfaces restore error instead of silently refreshing when matching recent session detail fails", async () => {
@@ -855,6 +984,59 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     expect(workspace.selectedConflictStrategy.value).toBe(
       "overwrite-generated-only",
     )
+  })
+
+  test("does not report auth recovery when recent session list fails with non-auth error", async () => {
+    const recoverableErrors: unknown[] = []
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_LIST_READ_FAILED",
+              message: "Generator session list read failed",
+              status: 500,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 500,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace({
+      onRecoverableAuthError: (error) => {
+        recoverableErrors.push(error)
+      },
+    })
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(recoverableErrors).toHaveLength(0)
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_LIST_READ_FAILED",
+    )
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.currentSession.value).toBeNull()
+    expect(workspace.recentSessionOptions.value).toHaveLength(0)
   })
 
   test("surfaces restore error instead of silently refreshing when recent session list fails", async () => {
