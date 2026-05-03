@@ -772,6 +772,26 @@ export const useGeneratorPreviewWorkspace = (
       selectedRecentSessionId.value = response.session.id
       persistCurrentSelection()
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
+        )
+      ) {
+        try {
+          const session = await fetchGeneratorPreviewSession(sessionId)
+
+          if (applySessionDetail(session)) {
+            errorMessage.value = error.message
+            return
+          }
+
+          resetPreviewState()
+        } catch {
+          // Fall through to the existing error path when detail refresh fails.
+        }
+      }
+
       onRecoverableAuthError(error)
       errorMessage.value =
         error instanceof Error ? error.message : "Generator confirmation failed"

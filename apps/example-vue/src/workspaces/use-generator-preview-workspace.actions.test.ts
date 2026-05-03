@@ -405,10 +405,11 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
       return new Response("not found", { status: 404 })
     }) as typeof fetch
 
-    const { workspace } = createWorkspace({ enabled: true })
+    const { enabled, workspace } = createWorkspace()
     workspace.currentSession.value = createSession({ status: "ready" })
     workspace.currentDiffSummary.value = createDiffSummary()
     workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+    enabled.value = true
 
     await workspace.confirmPreview()
 
@@ -461,6 +462,78 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.errorMessage.value).toContain("status 401")
     expect(workspace.currentSession.value?.confirmedAt).toBeNull()
+    expect(workspace.canConfirmPreview.value).toBe(true)
+  })
+
+  test("refreshes current detail when confirmation handoff becomes stale", async () => {
+    let detailRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1/confirm") &&
+        method === "POST"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
+              message:
+                "Generator session confirmation does not match the displayed SQL handoff",
+              status: 409,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 409,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-1") &&
+        method === "GET"
+      ) {
+        detailRequestCount += 1
+
+        const refreshedDetail = createSessionDetail({
+          confirmedAt: null,
+          id: "preview-session-1",
+          sqlProposalHandoff: {
+            ...createSqlProposalHandoff(),
+            migrationProposalSnapshotPath:
+              "/tmp/generator-session-report/customer.migration-proposal.v2.json",
+          },
+          status: "ready",
+        })
+
+        return new Response(
+          JSON.stringify(refreshedDetail),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { workspace } = createWorkspace({ enabled: true })
+    workspace.currentSession.value = createSession({ status: "ready" })
+    workspace.currentDiffSummary.value = createDiffSummary()
+    workspace.sqlProposalHandoff.value = createSqlProposalHandoff()
+
+    await workspace.confirmPreview()
+
+    expect(detailRequestCount).toBe(1)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-1")
+    expect(workspace.currentSession.value?.confirmedAt).toBeNull()
+    expect(workspace.errorMessage.value).toContain(
+      "GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH",
+    )
     expect(workspace.canConfirmPreview.value).toBe(true)
   })
 
