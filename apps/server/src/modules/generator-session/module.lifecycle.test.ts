@@ -651,6 +651,20 @@ describe("generator session module lifecycle", () => {
       userAgent: "generator-session-test-agent",
       result: "success",
     })
+
+    const confirmAuditLog = (await fixture.repository.listAuditLogs()).find(
+      (entry) => entry.action === "review_confirm",
+    )
+    expect(confirmAuditLog).toMatchObject({
+      category: "generator",
+      action: "review_confirm",
+      actorUserId: createBody.session.actorUserId,
+      targetType: "generator-session",
+      targetId: createBody.session.id,
+      requestId: "req-generator-session-confirm-1",
+      userAgent: "generator-session-test-agent",
+      result: "success",
+    })
   })
 
   it("reuses the original confirmation evidence when the same session is confirmed twice", async () => {
