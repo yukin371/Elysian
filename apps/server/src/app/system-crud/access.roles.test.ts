@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 import { createInMemoryRoleRepository, createRoleModule } from "../../modules"
 import {
   createAuthTestFixture,
@@ -371,7 +372,7 @@ describe("createServerApp system role access", () => {
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
       error: {
-        code: "ROLE_SYSTEM_IMMUTABLE",
+        code: errorCodes.ROLE_SYSTEM_IMMUTABLE,
         message: "System role status cannot be changed",
         status: 409,
         details: {

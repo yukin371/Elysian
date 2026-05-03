@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { DEFAULT_TENANT_ID } from "@elysian/persistence"
+import { errorCodes } from "../../errors/registry"
 
 import {
   createDepartmentModule,
@@ -327,7 +328,7 @@ describe("createServerApp system organization", () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: {
-        code: "DEPARTMENT_PARENT_INVALID",
+        code: errorCodes.DEPARTMENT_PARENT_INVALID,
         message: "Department parent does not exist",
         status: 400,
         details: {
@@ -385,7 +386,7 @@ describe("createServerApp system organization", () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: {
-        code: "DEPARTMENT_PARENT_INVALID",
+        code: errorCodes.DEPARTMENT_PARENT_INVALID,
         message: "Department parent would create a cycle",
         status: 400,
         details: {
@@ -623,7 +624,7 @@ describe("createServerApp system organization", () => {
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
       error: {
-        code: "POST_CODE_CONFLICT",
+        code: errorCodes.POST_CODE_CONFLICT,
         message: "Post code already exists",
         status: 409,
         details: {

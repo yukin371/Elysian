@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 import {
   createDictionaryModule,
   createInMemoryDictionaryRepository,
@@ -466,7 +467,7 @@ describe("createServerApp system admin data", () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: {
-        code: "DICTIONARY_ITEM_TYPE_INVALID",
+        code: errorCodes.DICTIONARY_ITEM_TYPE_INVALID,
         message: "Dictionary item type does not exist",
         status: 400,
         details: {

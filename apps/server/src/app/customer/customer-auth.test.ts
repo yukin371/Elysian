@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 
 import {
   createCustomerModule,
@@ -33,7 +34,7 @@ describe("createServerApp customer auth", () => {
     expect(response.status).toBe(401)
     expect(await response.json()).toEqual({
       error: {
-        code: "AUTH_ACCESS_TOKEN_REQUIRED",
+        code: errorCodes.AUTH_ACCESS_TOKEN_REQUIRED,
         message: "Access token is required",
         status: 401,
       },
@@ -79,7 +80,7 @@ describe("createServerApp customer auth", () => {
     expect(response.status).toBe(403)
     expect(await response.json()).toEqual({
       error: {
-        code: "AUTH_PERMISSION_DENIED",
+        code: errorCodes.AUTH_PERMISSION_DENIED,
         message: "Permission denied",
         status: 403,
         details: {

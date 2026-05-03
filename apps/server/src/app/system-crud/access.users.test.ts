@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 import { createInMemoryUserRepository, createUserModule } from "../../modules"
 import {
   createAuthTestFixture,
@@ -351,7 +352,7 @@ describe("createServerApp system user access", () => {
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
       error: {
-        code: "USER_USERNAME_CONFLICT",
+        code: errorCodes.USER_USERNAME_CONFLICT,
         message: "Username already exists",
         status: 409,
         details: {

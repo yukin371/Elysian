@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 import { createInMemoryMenuRepository, createMenuModule } from "../../modules"
 import {
   createAuthTestFixture,
@@ -360,7 +361,7 @@ describe("createServerApp system menu access", () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: {
-        code: "MENU_PARENT_INVALID",
+        code: errorCodes.MENU_PARENT_INVALID,
         message: "Menu parent does not exist",
         status: 400,
         details: {
@@ -419,7 +420,7 @@ describe("createServerApp system menu access", () => {
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual({
       error: {
-        code: "MENU_PARENT_INVALID",
+        code: errorCodes.MENU_PARENT_INVALID,
         message: "Menu parent would create a cycle",
         status: 400,
         details: {

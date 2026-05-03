@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 import {
   createInMemorySettingRepository,
   createSettingModule,
@@ -312,7 +313,7 @@ describe("createServerApp system admin data", () => {
     expect(response.status).toBe(409)
     expect(await response.json()).toEqual({
       error: {
-        code: "SETTING_KEY_CONFLICT",
+        code: errorCodes.SETTING_KEY_CONFLICT,
         message: "Setting key already exists",
         status: 409,
         details: {

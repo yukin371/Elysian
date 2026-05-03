@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 
 import { DEFAULT_TENANT_ID } from "@elysian/persistence"
+import { errorCodes } from "../../errors/registry"
 import {
   createAuthGuard,
   createAuthModule,
@@ -347,7 +348,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(todoResponse.status).toBe(403)
     expect(await todoResponse.json()).toEqual({
       error: {
-        code: "AUTH_PERMISSION_DENIED",
+        code: errorCodes.AUTH_PERMISSION_DENIED,
         message: "Permission denied",
         status: 403,
         details: {
@@ -367,7 +368,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(doneResponse.status).toBe(403)
     expect(await doneResponse.json()).toEqual({
       error: {
-        code: "AUTH_PERMISSION_DENIED",
+        code: errorCodes.AUTH_PERMISSION_DENIED,
         message: "Permission denied",
         status: 403,
         details: {
@@ -476,7 +477,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(claimResponse.status).toBe(403)
     expect(await claimResponse.json()).toEqual({
       error: {
-        code: "AUTH_PERMISSION_DENIED",
+        code: errorCodes.AUTH_PERMISSION_DENIED,
         message: "Permission denied",
         status: 403,
         details: {
@@ -501,7 +502,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(completeResponse.status).toBe(403)
     expect(await completeResponse.json()).toEqual({
       error: {
-        code: "AUTH_PERMISSION_DENIED",
+        code: errorCodes.AUTH_PERMISSION_DENIED,
         message: "Permission denied",
         status: 403,
         details: {
@@ -525,7 +526,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(cancelResponse.status).toBe(403)
     expect(await cancelResponse.json()).toEqual({
       error: {
-        code: "AUTH_PERMISSION_DENIED",
+        code: errorCodes.AUTH_PERMISSION_DENIED,
         message: "Permission denied",
         status: 403,
         details: {
@@ -714,7 +715,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(crossTenantGetResponse.status).toBe(404)
     expect(await crossTenantGetResponse.json()).toEqual({
       error: {
-        code: "WORKFLOW_INSTANCE_NOT_FOUND",
+        code: errorCodes.WORKFLOW_INSTANCE_NOT_FOUND,
         message: "Workflow instance not found",
         status: 404,
         details: {

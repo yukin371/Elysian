@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { errorCodes } from "../../errors/registry"
 
 import {
   createAuthGuard,
@@ -542,7 +543,7 @@ describe("createServerApp workflow runtime instances", () => {
     expect(peerCompleteResponse.status).toBe(403)
     expect(await peerCompleteResponse.json()).toEqual({
       error: {
-        code: "WORKFLOW_TASK_ASSIGNEE_MISMATCH",
+        code: errorCodes.WORKFLOW_TASK_ASSIGNEE_MISMATCH,
         message: "Workflow task is assigned to another user",
         status: 403,
         details: {

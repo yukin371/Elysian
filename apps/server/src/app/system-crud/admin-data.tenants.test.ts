@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { DEFAULT_TENANT_ID } from "@elysian/persistence"
+import { errorCodes } from "../../errors/registry"
 
 import {
   createInMemoryTenantRepository,
@@ -215,7 +216,7 @@ describe("createServerApp system admin data", () => {
     expect(response.status).toBe(403)
     expect(await response.json()).toEqual({
       error: {
-        code: "TENANT_SUPER_ADMIN_REQUIRED",
+        code: errorCodes.TENANT_SUPER_ADMIN_REQUIRED,
         message: "Tenant management requires a super admin",
         status: 403,
       },
