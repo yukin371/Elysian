@@ -29,6 +29,7 @@
 > - `1B / 后端错误码治理` 已完成顶层错误信封迁移：`apps/server` 现统一返回 `{ code, message, status, details? }`，相关集成测试与 `generator-session` 契约断言已同步更新
 > - `1B / 后端错误码治理` 已补前端过渡兼容：`apps/example-vue` 的 `platform-api` 已改为结构化 `ApiError`，当前同时兼容顶层信封与旧 `error.{...}` 响应，`generator-preview` 工作区不再依赖 `message.includes(...)` 判断会话业务错误
 > - `1C / 前端 i18n 拆分` 已完成当前收口：`apps/example-vue/src/i18n/*modules.ts` 已按模块前缀拆到 `i18n/modules/`，中英文 key 数量与集合保持一致，并通过 `bun run build:vue`
+> - `6C-1 / OpenAPI spec 完整度评估` 已完成当前盘点：`apps/server` 已挂载 `/openapi` 与 `/openapi/json`，但当前 `92` 条路由里显式 `response` 契约为 `0`，仅 `3` 条声明 `query`、`14` 条声明 `body`、`40` 条声明 `params`；系统级 `/openapi/json` 输出也未包含可消费的 `responses`。结论：可确认具备 OpenAPI 基础入口，但暂不满足 `openapi-typescript` 作为前端主类型源的切换条件
 
 ---
 
@@ -285,9 +286,9 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 | 任务 | 产物 | 完成标准 |
 |------|------|---------|
 | 6C-1 评估 OpenAPI spec 完整度 | 评估报告 | 确认所有 endpoint 都有完整 schema |
-| 6C-2 配置 `openapi-typescript` 生成流程 | CI 步骤或手动脚本 | 可从 `/openapi` 生成类型文件 |
-| 6C-3 切换类型网关导入源 | `lib/platform-api/types.ts` | 从 `@elysian/schema` 切到 `./generated` |
-| 6C-4 验证前端类型检查通过 | `bun run typecheck` | 无类型错误 |
+| 6C-2 配置 `openapi-typescript` 生成流程 | CI 步骤或手动脚本 | 当前未推进：需先补最小请求/响应 schema 主线，否则生成结果仅有空壳 path/type 信息 |
+| 6C-3 切换类型网关导入源 | `lib/platform-api/types.ts` | 当前未推进：在 `response` 契约缺失前切换会降低类型质量 |
+| 6C-4 验证前端类型检查通过 | `bun run typecheck` | 当前未推进：待 6C-2/6C-3 落地后再验证 |
 
 **检查点 CP6**：类型网关落地 + 所有 platform-api 子模块统一从网关导入 + 后端核心 service 有单元测试覆盖
 
