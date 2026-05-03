@@ -39,6 +39,10 @@ describe("createServerApp auth sessions", () => {
     expect(payload.paths["/auth/me"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/auth/sessions"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/auth/refresh"]?.post?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/auth/sessions/{id}"]?.delete?.responses?.["204"],
+    ).toBeDefined()
+    expect(payload.paths["/auth/logout"]?.post?.responses?.["204"]).toBeDefined()
   })
 
   it("refreshes tokens and rotates the refresh session", async () => {

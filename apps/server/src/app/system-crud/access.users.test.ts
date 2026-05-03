@@ -39,6 +39,11 @@ describe("createServerApp system user access", () => {
     expect(payload.paths["/system/users"]?.post?.responses?.["201"]).toBeDefined()
     expect(payload.paths["/system/users/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/system/users/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/system/users/{id}/reset-password"]?.post?.responses?.[
+        "204"
+      ],
+    ).toBeDefined()
   })
 
   it("lists and gets system users when the access token has user-list permission", async () => {

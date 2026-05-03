@@ -167,6 +167,9 @@ export const createUserModule = (
           body: t.Object({
             password: t.String({ minLength: 1 }),
           }),
+          response: {
+            204: t.Void(),
+          },
           detail: {
             tags: ["user"],
             summary: "Reset user password",

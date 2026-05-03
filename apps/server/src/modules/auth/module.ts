@@ -205,6 +205,9 @@ export const createAuthModule = (
           params: t.Object({
             id: t.String({ minLength: 1 }),
           }),
+          response: {
+            204: t.Void(),
+          },
           detail: {
             tags: ["auth"],
             summary: "Revoke current user refresh session",
@@ -226,6 +229,9 @@ export const createAuthModule = (
           )
         },
         {
+          response: {
+            204: t.Void(),
+          },
           detail: {
             tags: ["auth"],
             summary: "Logout current refresh session",

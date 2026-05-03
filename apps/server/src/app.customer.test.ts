@@ -58,6 +58,9 @@ describe("createServerApp", () => {
     expect(payload.paths["/customers"]?.post?.responses?.["201"]).toBeDefined()
     expect(payload.paths["/customers/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/customers/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/customers/{id}"]?.delete?.responses?.["204"],
+    ).toBeDefined()
   })
 
   it("lists customers from the customer module", async () => {

@@ -177,6 +177,9 @@ export const createCustomerModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            204: t.Void(),
+          },
           detail: {
             tags: ["customer"],
             summary: "Delete customer",

@@ -225,6 +225,9 @@ export const createFileModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            204: t.Void(),
+          },
           detail: {
             tags: ["file"],
             summary: "Delete file",

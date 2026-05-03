@@ -50,6 +50,9 @@ describe("createServerApp files", () => {
     expect(payload.paths["/system/files"]?.post?.responses?.["201"]).toBeDefined()
     expect(payload.paths["/system/files/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(
+      payload.paths["/system/files/{id}"]?.delete?.responses?.["204"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/files/delete"]?.post?.responses?.["200"],
     ).toBeDefined()
   })
