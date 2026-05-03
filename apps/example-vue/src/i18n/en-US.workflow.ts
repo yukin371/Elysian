@@ -280,6 +280,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.templateReason": "Template purpose",
   "app.generatorPreview.meta.plannedReason": "Decision reason",
   "app.generatorPreview.meta.proposalStatus": "Proposal status",
+  "app.generatorPreview.meta.generatedAt": "Generated at",
   "app.generatorPreview.meta.canonicalOwner": "Canonical owner",
   "app.generatorPreview.meta.reviewMode": "Handoff mode",
   "app.generatorPreview.meta.schemaDir": "Schema directory",

@@ -96,11 +96,24 @@ export interface GeneratorPreviewSqlProposal {
   tableName: string
 }
 
+export interface GeneratorPreviewMigrationProposalSnapshot {
+  generatedAt: string
+  migrationProposalResolution: {
+    proposal: GeneratorPreviewSqlProposal | null
+    unsupportedReason: string | null
+  }
+  reportPath: string
+  schemaName: string
+  sessionId: string
+  snapshotPath: string
+}
+
 export interface GeneratorPreviewSqlProposalHandoff {
   proposalStatus: "ready" | "unsupported"
   reviewMode: "manual"
   canonicalMigrationOwner: "packages/persistence"
   confirmationChecklist: string[]
+  migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
   migrationProposalSnapshotPath: string
   targetPaths: {
     drizzleDir: string

@@ -14,6 +14,7 @@ import {
   writeGenerationPreviewReport,
 } from "@elysian/generator"
 import { resolveMigrationProposalFromChangePlan } from "@elysian/persistence"
+import { type DatabaseChangePlanLike } from "@elysian/persistence"
 
 import { mkdir, writeFile } from "node:fs/promises"
 
@@ -23,6 +24,25 @@ import type {
   GeneratorPreviewSessionDetail,
   GeneratorSessionRepository,
 } from "./repository"
+
+export interface MigrationProposalSnapshot {
+  generatedAt: string
+  migrationProposalResolution: ReturnType<
+    typeof resolveMigrationProposalFromChangePlan
+  >
+  reportPath: string
+  schemaName: string
+  sessionId: string
+  snapshotPath: string
+}
+
+interface BuildMigrationProposalSnapshotInput {
+  databaseChangePlan: DatabaseChangePlanLike
+  generatedAt: string
+  reportPath: string
+  schemaName: string
+  sessionId: string
+}
 
 interface CreateGeneratorPreviewSessionInput {
   actor: AuthIdentity | null
@@ -96,6 +116,26 @@ const toApplyConflictError = (
       reason: error.message,
     },
   })
+}
+
+export const buildMigrationProposalSnapshot = (
+  input: BuildMigrationProposalSnapshotInput,
+): MigrationProposalSnapshot => {
+  const snapshotPath = input.reportPath.replace(
+    /\.preview\.json$/,
+    ".migration-proposal.json",
+  )
+
+  return {
+    generatedAt: input.generatedAt,
+    migrationProposalResolution: resolveMigrationProposalFromChangePlan(
+      input.databaseChangePlan,
+    ),
+    reportPath: input.reportPath,
+    schemaName: input.schemaName,
+    sessionId: input.sessionId,
+    snapshotPath,
+  }
 }
 
 export const createGeneratorSessionService = (
@@ -277,35 +317,25 @@ export const createGeneratorSessionService = (
         options.reportRootDir ??
         join(outputDir, "reports", "generator-sessions")
       const reportPath = join(reportRootDir, `${sessionId}.preview.json`)
-      const migrationProposalSnapshotPath = join(
-        reportRootDir,
-        `${sessionId}.migration-proposal.json`,
-      )
       const report = await buildGenerationPreviewReport(schema, {
         outputDir,
         frontendTarget,
         conflictStrategy,
         targetPreset,
       })
+      const migrationProposalSnapshot = buildMigrationProposalSnapshot({
+        databaseChangePlan: report.databaseChangePlan,
+        generatedAt: createdAt,
+        reportPath,
+        schemaName: schema.name,
+        sessionId,
+      })
 
       await mkdir(reportRootDir, { recursive: true })
       await writeGenerationPreviewReport(reportPath, report)
       await writeFile(
-        migrationProposalSnapshotPath,
-        `${JSON.stringify(
-          {
-            generatedAt: createdAt,
-            migrationProposalResolution:
-              resolveMigrationProposalFromChangePlan(
-                report.databaseChangePlan,
-              ),
-            reportPath,
-            schemaName: schema.name,
-            sessionId,
-          },
-          null,
-          2,
-        )}\n`,
+        migrationProposalSnapshot.snapshotPath,
+        `${JSON.stringify(migrationProposalSnapshot, null, 2)}\n`,
         "utf8",
       )
 

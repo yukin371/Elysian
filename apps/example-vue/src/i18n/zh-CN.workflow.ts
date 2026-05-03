@@ -267,6 +267,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.templateReason": "模板用途",
   "app.generatorPreview.meta.plannedReason": "本次决策原因",
   "app.generatorPreview.meta.proposalStatus": "提案状态",
+  "app.generatorPreview.meta.generatedAt": "生成时间",
   "app.generatorPreview.meta.canonicalOwner": "规范 owner",
   "app.generatorPreview.meta.reviewMode": "接入模式",
   "app.generatorPreview.meta.schemaDir": "Schema 目录",

@@ -8,6 +8,7 @@ import type {
   GeneratorPreviewReport,
   GeneratorPreviewSessionDetail,
   GeneratorPreviewSessionRecord,
+  GeneratorPreviewSqlProposalHandoff,
 } from "../lib/platform-api"
 import { useGeneratorPreviewWorkspace } from "./use-generator-preview-workspace"
 
@@ -100,7 +101,7 @@ const createSqlProposal = () => ({
   tableName: "customers",
 })
 
-const createSqlProposalHandoff = () => ({
+const createSqlProposalHandoff = (): GeneratorPreviewSqlProposalHandoff => ({
   canonicalMigrationOwner: "packages/persistence" as const,
   confirmationChecklist: [
     "Review the SQL draft.",
@@ -109,6 +110,29 @@ const createSqlProposalHandoff = () => ({
   ],
   migrationProposalSnapshotPath:
     "/tmp/generator-session-report/customer.migration-proposal.json",
+  migrationProposalSnapshot: {
+    generatedAt: "2026-05-03T00:00:00.000Z",
+    migrationProposalResolution: {
+      proposal: {
+        canonicalMigrationOwner: "packages/persistence",
+        dialect: "postgresql",
+        drizzleImportSnippet: "import { pgTable } from \"drizzle-orm/pg-core\"",
+        drizzleSchemaSnippet:
+          "export const customer = pgTable(\"customer\", {})",
+        operationCount: 1,
+        risks: [],
+        sourceSchemaName: "customer",
+        sqlDraft: "CREATE TABLE customer ();",
+        tableName: "customer",
+      },
+      unsupportedReason: null,
+    },
+    reportPath: "/tmp/generator-session-report/customer.preview.json",
+    schemaName: "customer",
+    sessionId: "session-1",
+    snapshotPath:
+      "/tmp/generator-session-report/customer.migration-proposal.json",
+  },
   proposalStatus: "ready" as const,
   reviewMode: "manual" as const,
   sourceSchemaName: "customer",

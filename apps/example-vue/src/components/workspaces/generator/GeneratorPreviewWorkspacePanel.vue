@@ -613,6 +613,9 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :migration-proposal-snapshot-path-copy-label="
           resolveSnippetCopyLabel('migrationProposalSnapshotPath')
         "
+        :migration-proposal-snapshot="
+          sqlProposalHandoff.migrationProposalSnapshot
+        "
         :schema-dir-copy-label="resolveSnippetCopyLabel('schemaDir')"
         :drizzle-dir-copy-label="resolveSnippetCopyLabel('drizzleDir')"
         :schema-index-file-copy-label="

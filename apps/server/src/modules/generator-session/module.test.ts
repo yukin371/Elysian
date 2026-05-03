@@ -210,6 +210,7 @@ describe("generator session module", () => {
         unchangedFileCount: number
       }
       session: {
+        createdAt: string
         appliedAt: string | null
         appliedFileCount: number | null
         applyEvidence: null
@@ -244,6 +245,16 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         canonicalMigrationOwner: string
+        migrationProposalSnapshot: {
+          generatedAt: string
+          migrationProposalResolution: {
+            proposal: {
+              tableName: string
+            } | null
+            unsupportedReason: string | null
+          }
+          snapshotPath: string
+        }
         migrationProposalSnapshotPath: string
         proposalStatus: string
         reviewMode: string
@@ -297,6 +308,16 @@ describe("generator session module", () => {
     expect(createBody.sqlProposalHandoff.migrationProposalSnapshotPath).toMatch(
       /\.migration-proposal\.json$/,
     )
+    expect(createBody.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject(
+      {
+        generatedAt: createBody.session.createdAt,
+        migrationProposalResolution: {
+          unsupportedReason: null,
+        },
+        snapshotPath:
+          createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      },
+    )
     expect(createBody.sqlProposalHandoff.suggestedCommands).toContain(
       "bun run db:generate",
     )
@@ -309,6 +330,9 @@ describe("generator session module", () => {
     )
     expect(migrationProposalSnapshotContents).toContain(
       '"schemaName": "customer"',
+    )
+    expect(migrationProposalSnapshotContents).toContain(
+      '"snapshotPath"',
     )
 
     const reportContents = await readFile(createBody.session.reportPath, "utf8")
@@ -360,6 +384,16 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         proposalStatus: string
+        migrationProposalSnapshot: {
+          generatedAt: string
+          migrationProposalResolution: {
+            proposal: {
+              tableName: string
+            } | null
+            unsupportedReason: string | null
+          }
+          snapshotPath: string
+        }
         migrationProposalSnapshotPath: string
       }
     }
@@ -382,6 +416,12 @@ describe("generator session module", () => {
     expect(reviewBody.diff.totalFileCount).toBe(6)
     expect(reviewBody.sqlProposal.tableName).toBe("customer")
     expect(reviewBody.sqlProposalHandoff.proposalStatus).toBe("ready")
+    expect(reviewBody.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject(
+      {
+        snapshotPath:
+          reviewBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      },
+    )
 
     const confirmResponse = await app.handle(
       new Request(
@@ -412,6 +452,16 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         confirmationChecklist: string[]
+        migrationProposalSnapshot: {
+          generatedAt: string
+          migrationProposalResolution: {
+            proposal: {
+              tableName: string
+            } | null
+            unsupportedReason: string | null
+          }
+          snapshotPath: string
+        }
         migrationProposalSnapshotPath: string
       }
     }
@@ -429,6 +479,12 @@ describe("generator session module", () => {
     )
     expect(confirmBody.session.confirmationEvidence.checklist).toEqual(
       confirmBody.sqlProposalHandoff.confirmationChecklist,
+    )
+    expect(confirmBody.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject(
+      {
+        snapshotPath:
+          confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      },
     )
     expect(confirmBody.sqlProposalHandoff.confirmationChecklist).toEqual([
       "Review the SQL draft and Drizzle snippet before changing persistence files.",
@@ -504,6 +560,16 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         proposalStatus: string
+        migrationProposalSnapshot: {
+          generatedAt: string
+          migrationProposalResolution: {
+            proposal: {
+              tableName: string
+            } | null
+            unsupportedReason: string | null
+          }
+          snapshotPath: string
+        }
         migrationProposalSnapshotPath: string
       }
     }
@@ -540,6 +606,12 @@ describe("generator session module", () => {
     expect(applyBody.apply.files.every((file) => file.written)).toBe(true)
     expect(applyBody.sqlProposal.tableName).toBe("customer")
     expect(applyBody.sqlProposalHandoff.proposalStatus).toBe("ready")
+    expect(applyBody.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject(
+      {
+        snapshotPath:
+          applyBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      },
+    )
 
     const manifestContents = await readFile(
       applyBody.apply.manifestPath,
@@ -615,6 +687,16 @@ describe("generator session module", () => {
       }
       sqlProposalHandoff: {
         proposalStatus: string
+        migrationProposalSnapshot: {
+          generatedAt: string
+          migrationProposalResolution: {
+            proposal: {
+              tableName: string
+            } | null
+            unsupportedReason: string | null
+          }
+          snapshotPath: string
+        }
         migrationProposalSnapshotPath: string
         targetPaths: {
           persistenceIndexFile: string
@@ -645,6 +727,12 @@ describe("generator session module", () => {
         persistenceIndexFile: "packages/persistence/src/index.ts",
       },
     })
+    expect(detailBody.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject(
+      {
+        snapshotPath:
+          detailBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      },
+    )
     expect(detailBody.sqlProposalHandoff.migrationProposalSnapshotPath).toBe(
       createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
     )

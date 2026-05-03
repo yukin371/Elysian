@@ -204,6 +204,7 @@ export type {
   GeneratorPreviewConflictStrategy,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewPlannedAction,
+  GeneratorPreviewMigrationProposalSnapshot,
   GeneratorPreviewReport,
   GeneratorPreviewReportFile,
   GeneratorPreviewReviewEvidence,

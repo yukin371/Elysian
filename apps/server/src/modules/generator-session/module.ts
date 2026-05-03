@@ -13,8 +13,10 @@ import type {
   GeneratorSessionRepository,
 } from "./repository"
 import {
+  buildMigrationProposalSnapshot,
   type GeneratorSessionServiceOptions,
   createGeneratorSessionService,
+  type MigrationProposalSnapshot,
 } from "./service"
 
 export interface GeneratorSessionModuleOptions
@@ -567,9 +569,6 @@ const buildConflictExplanations = (
 const resolveSqlProposal = (session: GeneratorPreviewSessionDetail) =>
   resolveMigrationProposalFromChangePlan(session.report.databaseChangePlan)
 
-const buildMigrationProposalSnapshotPath = (reportPath: string) =>
-  reportPath.replace(/\.preview\.json$/, ".migration-proposal.json")
-
 const buildSqlProposal = (session: GeneratorPreviewSessionDetail) => {
   return resolveSqlProposal(session).proposal
 }
@@ -589,6 +588,14 @@ const buildSqlProposalConfirmationChecklist = (
 
 const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
   const sqlProposalResolution = resolveSqlProposal(session)
+  const migrationProposalSnapshot: MigrationProposalSnapshot =
+    buildMigrationProposalSnapshot({
+      databaseChangePlan: session.report.databaseChangePlan,
+      generatedAt: session.createdAt,
+      reportPath: session.reportPath,
+      schemaName: session.schemaName,
+      sessionId: session.id,
+    })
 
   return {
     proposalStatus:
@@ -617,9 +624,8 @@ const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
       buildSqlProposalConfirmationChecklist(sqlProposalResolution),
     unsupportedReason: sqlProposalResolution.unsupportedReason,
     sourceSchemaName: session.schemaName,
-    migrationProposalSnapshotPath: buildMigrationProposalSnapshotPath(
-      session.reportPath,
-    ),
+    migrationProposalSnapshot,
+    migrationProposalSnapshotPath: migrationProposalSnapshot.snapshotPath,
   }
 }
 

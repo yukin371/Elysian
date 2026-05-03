@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type {
+  GeneratorPreviewMigrationProposalSnapshot,
   GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewTranslation,
 } from "./types"
@@ -7,6 +8,7 @@ import type {
 interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   t: GeneratorPreviewTranslation
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
+  migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
   suggestedCommandsText: string
   commandsCopyLabel: string
   migrationProposalSnapshotPathCopyLabel: string
@@ -133,6 +135,50 @@ const emit = defineEmits<{
         <span>{{ sqlProposalHandoff.migrationProposalSnapshotPath }}</span>
       </article>
     </div>
+    <section class="generator-handoff-step-block">
+      <div class="generator-handoff-card-header">
+        <strong>{{ t("app.generatorPreview.migrationProposalSnapshotTitle") }}</strong>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="
+            migrationProposalSnapshot.snapshotPath.trim().length === 0
+          "
+          @click="emit('copy-migration-proposal-snapshot-path')"
+        >
+          {{ migrationProposalSnapshotPathCopyLabel }}
+        </button>
+      </div>
+      <div class="enterprise-metadata">
+        <div>
+          <span>{{ t("app.generatorPreview.meta.generatedAt") }}</span>
+          <strong>{{ migrationProposalSnapshot.generatedAt }}</strong>
+        </div>
+        <div>
+          <span>{{ t("app.generatorPreview.meta.proposalStatus") }}</span>
+          <strong>
+            {{
+              migrationProposalSnapshot.migrationProposalResolution.proposal
+                ? t("app.generatorPreview.sqlProposal.status.ready")
+                : t("app.generatorPreview.sqlProposal.status.unsupported")
+            }}
+          </strong>
+        </div>
+      </div>
+      <p
+        v-if="
+          migrationProposalSnapshot.migrationProposalResolution.unsupportedReason
+        "
+        class="enterprise-message enterprise-message-warning"
+      >
+        {{
+          migrationProposalSnapshot.migrationProposalResolution.unsupportedReason
+        }}
+      </p>
+      <p class="generator-status-note">
+        {{ migrationProposalSnapshot.snapshotPath }}
+      </p>
+    </section>
     <section class="generator-handoff-step-block">
       <div class="generator-handoff-card-header">
         <strong>{{ t("app.generatorPreview.sqlConfirmationTitle") }}</strong>
