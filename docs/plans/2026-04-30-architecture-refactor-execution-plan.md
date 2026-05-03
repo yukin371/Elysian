@@ -32,6 +32,7 @@
 > - `6C-1 / OpenAPI spec 完整度评估` 已完成当前盘点：`apps/server` 已挂载 `/openapi` 与 `/openapi/json`，但当前 `92` 条路由里显式 `response` 契约为 `0`，仅 `3` 条声明 `query`、`14` 条声明 `body`、`40` 条声明 `params`；系统级 `/openapi/json` 输出也未包含可消费的 `responses`。结论：可确认具备 OpenAPI 基础入口，但暂不满足 `openapi-typescript` 作为前端主类型源的切换条件
 > - `6C / OpenAPI 响应契约补位` 已完成当前第二十刀：`system`、`auth`、`customer`、`role`、`menu`、`setting`、`department`、`post`、`dictionary`、`tenant`、`user`、`notification`、`operation-log`、`file`、`workflow` 与 `generator-session` 核心成功响应已写入 OpenAPI schema，并通过 `/openapi/json` 定向测试锁住 `200/201/204` responses；统一错误响应文档化也已覆盖上述主模块当前路由，`openapi-typescript` 相关剩余判断已从“能否生成”收敛到“是否继续补更细粒度响应枚举”与“何时切换前端类型网关”
 > - `6C-2 / openapi-typescript 生成链路` 已完成最小落地：仓库已新增 `bun run openapi:types:generate`，可基于 `apps/server` 的 in-memory OpenAPI fixture 输出 `apps/example-vue/src/lib/platform-api/generated/openapi.json` 与 `openapi-types.d.ts`；当前仍保持 schema 类型网关为 canonical owner，不提前切 `6C-3`
+> - `6C-3 / OpenAPI 并行消费试点` 已启动最小落地：`apps/example-vue/src/lib/platform-api/generated-types.ts` 已从生成产物提取 `auth/customer` 所需响应与请求体别名，`auth.ts` 与 `customer.ts` 已切到并行消费这些类型；当前仍不修改 `lib/platform-api/types.ts` 的 canonical owner，后续只在更多低风险模块试点稳定后再评估是否切换前端类型网关
 
 ---
 
@@ -289,7 +290,7 @@ M1 ──── M2 ──── M3 ──── M4 ──── M5 ──── 
 |------|------|---------|
 | 6C-1 评估 OpenAPI spec 完整度 | 评估报告 | 确认所有 endpoint 都有完整 schema |
 | 6C-2 配置 `openapi-typescript` 生成流程 | CI 步骤或手动脚本 | 已完成最小脚本化落地：`bun run openapi:types:generate` 可输出 in-memory spec 快照与前端并行类型产物 |
-| 6C-3 切换类型网关导入源 | `lib/platform-api/types.ts` | 当前未推进：仍由 schema 类型网关担任 canonical owner，待评估细粒度响应枚举与消费收益后再切换 |
+| 6C-3 切换类型网关导入源 | `lib/platform-api/types.ts` | 已启动并行消费试点：`auth.ts`、`customer.ts` 先经由 `generated-types.ts` 消费 OpenAPI 生成类型；`types.ts` 仍保持 schema 类型网关 canonical owner，待更多低风险模块试点稳定后再评估是否切换 |
 | 6C-4 验证前端类型检查通过 | `bun run typecheck` | 已尝试；当前被仓库既有无关类型问题阻塞，未把这次生成链路误判为通过或失败 |
 
 **检查点 CP6**：类型网关落地 + 所有 platform-api 子模块统一从网关导入 + 后端核心 service 有单元测试覆盖

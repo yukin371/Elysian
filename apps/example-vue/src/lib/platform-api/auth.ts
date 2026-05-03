@@ -1,40 +1,24 @@
 import type { UiMenuItem } from "@elysian/ui-core"
 
 import { clearAccessToken, requestJson, setAccessToken } from "./core"
+import type {
+  OpenApiAuthLoginResponse,
+  OpenApiAuthMeResponse,
+  OpenApiAuthSessionsResponse,
+  OpenApiAuthSessionSummary,
+} from "./generated-types"
 
-export interface AuthIdentityResponse {
-  user: {
-    id: string
-    username: string
-    displayName: string
-    isSuperAdmin: boolean
-    tenantId: string
-  }
-  roles: string[]
-  permissionCodes: string[]
+export interface AuthIdentityResponse
+  extends Omit<OpenApiAuthMeResponse, "menus"> {
   menus: UiMenuItem[]
 }
 
-export interface LoginResponse extends AuthIdentityResponse {
-  accessToken: string
+export interface LoginResponse extends Omit<OpenApiAuthLoginResponse, "menus"> {
+  menus: UiMenuItem[]
 }
 
-export interface AuthSessionSummary {
-  id: string
-  userAgent: string | null
-  ip: string | null
-  expiresAt: string
-  lastUsedAt: string | null
-  revokedAt: string | null
-  replacedBySessionId: string | null
-  createdAt: string
-  updatedAt: string
-  isCurrent: boolean
-}
-
-export interface AuthSessionsResponse {
-  items: AuthSessionSummary[]
-}
+export type AuthSessionSummary = OpenApiAuthSessionSummary
+export type AuthSessionsResponse = OpenApiAuthSessionsResponse
 
 export const login = async (input: {
   username: string

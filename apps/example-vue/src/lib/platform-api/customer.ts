@@ -1,14 +1,12 @@
 import { requestJson } from "./core"
-import type { CustomerRecord } from "./types"
-export type { CustomerRecord } from "./types"
-
-export interface CustomersResponse {
-  items: CustomerRecord[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
+import type {
+  OpenApiCreateCustomerInput,
+  OpenApiCustomerRecord,
+  OpenApiCustomersResponse,
+  OpenApiUpdateCustomerInput,
+} from "./generated-types"
+export type CustomerRecord = OpenApiCustomerRecord
+export type CustomersResponse = OpenApiCustomersResponse
 
 export interface CustomerListQuery {
   q?: string
@@ -57,8 +55,8 @@ export const fetchCustomers = async (
 }
 
 export const createCustomer = (input: {
-  name: string
-  status: "active" | "inactive"
+  name: OpenApiCreateCustomerInput["name"]
+  status: OpenApiCreateCustomerInput["status"]
 }): Promise<CustomerRecord> =>
   requestJson<CustomerRecord>("/customers", {
     method: "POST",
@@ -68,7 +66,7 @@ export const createCustomer = (input: {
 
 export const updateCustomer = (
   id: string,
-  input: { name?: string; status?: "active" | "inactive" },
+  input: OpenApiUpdateCustomerInput,
 ): Promise<CustomerRecord> =>
   requestJson<CustomerRecord>(`/customers/${id}`, {
     method: "PUT",
