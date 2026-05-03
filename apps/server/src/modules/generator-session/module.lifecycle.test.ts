@@ -18,6 +18,41 @@ import {
 } from "./test-helpers"
 
 describe("generator session module lifecycle", () => {
+  it("publishes generator session success responses in the openapi spec", async () => {
+    const repository = createInMemoryGeneratorSessionRepository()
+    const app = createTestApp([createGeneratorSessionModule(repository)])
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(
+      payload.paths["/studio/generator/sessions"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/{id}/review"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.["200"],
+    ).toBeDefined()
+  })
+
   it("creates, applies, lists, and gets generator preview sessions", async () => {
     const fixture = await createAuthFixture()
     const repository = createInMemoryGeneratorSessionRepository()

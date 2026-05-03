@@ -13,6 +13,13 @@ import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { AuditLogWriter } from "../shared/audit-log"
+import {
+  generatorSessionApplyResponseSchema,
+  generatorSessionConfirmResponseSchema,
+  generatorSessionDetailResponseSchema,
+  generatorSessionListResponseSchema,
+  generatorSessionPreviewResponseSchema,
+} from "./openapi"
 import type {
   GeneratorPreviewSessionDetail,
   GeneratorPreviewSessionRecord,
@@ -116,6 +123,9 @@ export const createGeneratorSessionModule = (
           }
         },
         {
+          response: {
+            200: generatorSessionListResponseSchema,
+          },
           detail: {
             tags: ["generator"],
             summary: "List generator preview sessions",
@@ -146,6 +156,9 @@ export const createGeneratorSessionModule = (
           params: t.Object({
             id: t.String({ minLength: 1 }),
           }),
+          response: {
+            200: generatorSessionDetailResponseSchema,
+          },
           detail: {
             tags: ["generator"],
             summary: "Get generator preview session detail",
@@ -198,6 +211,9 @@ export const createGeneratorSessionModule = (
             conflictStrategy: t.Optional(conflictStrategySchema),
             targetPreset: t.Optional(t.Literal("staging")),
           }),
+          response: {
+            201: generatorSessionPreviewResponseSchema,
+          },
           detail: {
             tags: ["generator"],
             summary: "Create a generator preview session",
@@ -249,6 +265,9 @@ export const createGeneratorSessionModule = (
             decision: reviewDecisionSchema,
             comment: t.Optional(t.String()),
           }),
+          response: {
+            200: generatorSessionPreviewResponseSchema,
+          },
           detail: {
             tags: ["generator"],
             summary: "Review a generator preview session",
@@ -360,6 +379,9 @@ export const createGeneratorSessionModule = (
           params: t.Object({
             id: t.String({ minLength: 1 }),
           }),
+          response: {
+            200: generatorSessionConfirmResponseSchema,
+          },
           detail: {
             tags: ["generator"],
             summary: "Confirm a generator preview session checklist",
@@ -413,6 +435,9 @@ export const createGeneratorSessionModule = (
           params: t.Object({
             id: t.String({ minLength: 1 }),
           }),
+          response: {
+            200: generatorSessionApplyResponseSchema,
+          },
           detail: {
             tags: ["generator"],
             summary: "Apply a generator preview session to staging",
