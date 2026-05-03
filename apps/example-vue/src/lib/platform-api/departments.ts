@@ -1,26 +1,17 @@
 import { requestBlob, requestJson } from "./core"
-import type { DepartmentDetailRecord, DepartmentRecord } from "./types"
-export type { DepartmentDetailRecord, DepartmentRecord } from "./types"
+import type {
+  OpenApiCreateDepartmentInput,
+  OpenApiDepartmentDetailRecord,
+  OpenApiDepartmentRecord,
+  OpenApiDepartmentsResponse,
+  OpenApiUpdateDepartmentInput,
+} from "./generated-types"
 
-export interface DepartmentsResponse {
-  items: DepartmentRecord[]
-}
-
-export interface CreateDepartmentRequest {
-  parentId?: string | null
-  code: string
-  name: string
-  sort?: number
-  status?: DepartmentRecord["status"]
-}
-
-export interface UpdateDepartmentRequest {
-  parentId?: string | null
-  code?: string
-  name?: string
-  sort?: number
-  status?: DepartmentRecord["status"]
-}
+export type DepartmentRecord = OpenApiDepartmentRecord
+export type DepartmentDetailRecord = OpenApiDepartmentDetailRecord
+export type DepartmentsResponse = OpenApiDepartmentsResponse
+export type CreateDepartmentRequest = OpenApiCreateDepartmentInput
+export type UpdateDepartmentRequest = OpenApiUpdateDepartmentInput
 
 export const fetchDepartments = async (): Promise<DepartmentsResponse> =>
   requestJson<DepartmentsResponse>("/system/departments", {

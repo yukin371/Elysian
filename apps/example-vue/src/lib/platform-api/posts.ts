@@ -1,26 +1,15 @@
 import { requestBlob, requestJson } from "./core"
-import type { PostRecord } from "./types"
-export type { PostRecord } from "./types"
+import type {
+  OpenApiCreatePostInput,
+  OpenApiPostRecord,
+  OpenApiPostsResponse,
+  OpenApiUpdatePostInput,
+} from "./generated-types"
 
-export interface PostsResponse {
-  items: PostRecord[]
-}
-
-export interface CreatePostRequest {
-  code: string
-  name: string
-  sort?: number
-  status?: PostRecord["status"]
-  remark?: string
-}
-
-export interface UpdatePostRequest {
-  code?: string
-  name?: string
-  sort?: number
-  status?: PostRecord["status"]
-  remark?: string
-}
+export type PostRecord = OpenApiPostRecord
+export type PostsResponse = OpenApiPostsResponse
+export type CreatePostRequest = OpenApiCreatePostInput
+export type UpdatePostRequest = OpenApiUpdatePostInput
 
 export const fetchPosts = async (): Promise<PostsResponse> =>
   requestJson<PostsResponse>("/system/posts", {

@@ -71,3 +71,18 @@ export type OpenApiMarkNotificationsAsReadInput =
   RequestBodyContent<"postSystemNotificationsRead">
 export type OpenApiMarkNotificationsAsReadResponse =
   ResponseContent<"postSystemNotificationsRead", 200>
+
+export type OpenApiDepartmentsResponse =
+  ResponseContent<"getSystemDepartments", 200>
+export type OpenApiDepartmentDetailRecord =
+  ResponseContent<"getSystemDepartmentsById", 200>
+export type OpenApiDepartmentRecord = OpenApiDepartmentsResponse["items"][number]
+export type OpenApiCreateDepartmentInput =
+  RequestBodyContent<"postSystemDepartments">
+export type OpenApiUpdateDepartmentInput =
+  RequestBodyContent<"putSystemDepartmentsById">
+
+export type OpenApiPostsResponse = ResponseContent<"getSystemPosts", 200>
+export type OpenApiPostRecord = ResponseContent<"getSystemPostsById", 200>
+export type OpenApiCreatePostInput = RequestBodyContent<"postSystemPosts">
+export type OpenApiUpdatePostInput = RequestBodyContent<"putSystemPostsById">
