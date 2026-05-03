@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises"
+import { mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
@@ -1428,5 +1428,23 @@ describe("generator session module", () => {
     )
     expect(rebuiltSnapshotContents).toContain('"migrationProposalResolution"')
     expect(rebuiltSnapshotContents).toContain('"snapshotPath"')
+
+    const archivedSnapshotName = (
+      await readdir(dirname(body.sqlProposalHandoff.migrationProposalSnapshotPath))
+    ).find((entry) => entry.startsWith("report.migration-proposal.corrupt-"))
+    expect(archivedSnapshotName).toBeDefined()
+
+    if (!archivedSnapshotName) {
+      throw new Error("Missing archived corrupted snapshot")
+    }
+
+    const archivedSnapshotContents = await readFile(
+      join(
+        dirname(body.sqlProposalHandoff.migrationProposalSnapshotPath),
+        archivedSnapshotName,
+      ),
+      "utf8",
+    )
+    expect(archivedSnapshotContents).toContain('"broken":true')
   })
 })

@@ -7,6 +7,7 @@ import {
   readMigrationProposalSnapshot,
   resolveMigrationProposalSnapshotPath,
 } from "@elysian/persistence"
+import { rename as renameFile } from "node:fs/promises"
 
 import { AppError } from "../../errors"
 import type { AuthGuard, AuthIdentity } from "../auth"
@@ -599,6 +600,20 @@ const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) =
   try {
     migrationProposalSnapshot = await readMigrationProposalSnapshot(snapshotPath)
   } catch (error) {
+    const shouldArchiveCorruptedSnapshot =
+      !(error instanceof Error) ||
+      !("code" in error) ||
+      (error as { code?: string }).code !== "ENOENT"
+
+    if (shouldArchiveCorruptedSnapshot) {
+      const archivedSnapshotPath = snapshotPath.replace(
+        /\.json$/,
+        `.corrupt-${crypto.randomUUID()}.json`,
+      )
+
+      await renameFile(snapshotPath, archivedSnapshotPath)
+    }
+
     migrationProposalSnapshot = buildMigrationProposalSnapshot({
       databaseChangePlan: session.report.databaseChangePlan,
       generatedAt: session.createdAt,

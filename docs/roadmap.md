@@ -236,7 +236,7 @@
 - `Track 2 / T2-2` 已落最小 proposal builder：`packages/persistence` 当前可基于 `DatabaseChangePlan` 形状输出 review-only SQL draft、Drizzle schema snippet 与风险标签；`generator-session` 也已完成 migration proposal snapshot 交接文件的落盘/回读闭环，并把 handoff 改为直接读取 persistence artifact，但仍不直接生成正式 migration 文件
 - 已补 generator -> frontend 的最小静态契约入口：`packages/schema` 可选 `frontend` 元数据已进入 `ModuleSchema`，`packages/generator` 可生成 `*.frontend.ts` artifact，开始为后续替换 example-vue 手写注册做准备
 - 已完成一次功能矩阵复验：确认 generator session 列表 / 详情 / preview / staging apply 以及 auth refresh session 列表 / 单会话 revoke 均已落地，相关矩阵文档已按真实完成度回填
-- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff、冲突解释、人工确认清单与 migration proposal snapshot 交接文件；snapshot artifact 已能在 handoff 中直接读取，确认清单已改为 snapshot 驱动，handoff 对缺失或损坏的 snapshot 会自愈重建，正式人工确认动作与 SQL proposal 到正式 migration 的人工接入规范仍待补齐
+- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff、冲突解释、人工确认清单与 migration proposal snapshot 交接文件；snapshot artifact 已能在 handoff 中直接读取，确认清单已改为 snapshot 驱动，handoff 对缺失或损坏的 snapshot 会自愈重建且会先归档损坏副本，正式人工确认动作与 SQL proposal 到正式 migration 的人工接入规范仍待补齐
 - 完成 `Phase 1` 垂直切片闭环，打通 `schema -> server -> persistence -> generator -> frontend`
 - 用 Docker PostgreSQL + 浏览器 smoke 验证 customer create / update / delete 持久化链路
 - 固定仓库品牌与命名体系为 `Elysian` / `@elysian/*`
