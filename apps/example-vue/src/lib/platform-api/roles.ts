@@ -1,37 +1,23 @@
 import { requestBlob, requestJson } from "./core"
-import type { RoleDetailRecord, RoleRecord } from "./types"
-export type { RoleDetailRecord, RoleRecord } from "./types"
+import type {
+  OpenApiCreateRoleInput,
+  OpenApiRoleDetailRecord,
+  OpenApiRoleRecord,
+  OpenApiRolesResponse,
+  OpenApiUpdateRoleInput,
+} from "./generated-types"
 
-export interface RolesResponse {
-  items: RoleRecord[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
+export type RoleRecord = OpenApiRoleRecord
+export type RoleDetailRecord = OpenApiRoleDetailRecord
+export type RolesResponse = OpenApiRolesResponse
 
 export interface RoleListQuery {
   page?: number
   pageSize?: number
 }
 
-export interface CreateRoleRequest {
-  code: string
-  name: string
-  description?: string
-  status?: RoleRecord["status"]
-  isSystem?: boolean
-  dataScope?: RoleRecord["dataScope"]
-}
-
-export interface UpdateRoleRequest {
-  code?: string
-  name?: string
-  description?: string
-  status?: RoleRecord["status"]
-  isSystem?: boolean
-  dataScope?: RoleRecord["dataScope"]
-}
+export type CreateRoleRequest = OpenApiCreateRoleInput
+export type UpdateRoleRequest = OpenApiUpdateRoleInput
 
 export const fetchRoles = async (
   query: RoleListQuery = {},

@@ -1,38 +1,22 @@
 import { requestBlob, requestJson } from "./core"
-import type { UserRecord } from "./types"
-export type { UserRecord } from "./types"
+import type {
+  OpenApiCreateUserInput,
+  OpenApiResetUserPasswordInput,
+  OpenApiUpdateUserInput,
+  OpenApiUserRecord,
+  OpenApiUsersResponse,
+} from "./generated-types"
 
-export interface UsersResponse {
-  items: UserRecord[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
+export type UserRecord = OpenApiUserRecord
+export type UsersResponse = OpenApiUsersResponse
 
 export interface UserListQuery {
   page?: number
   pageSize?: number
 }
 
-export interface CreateUserRequest {
-  username: string
-  displayName: string
-  email?: string
-  phone?: string
-  password: string
-  status?: UserRecord["status"]
-  isSuperAdmin?: boolean
-}
-
-export interface UpdateUserRequest {
-  username?: string
-  displayName?: string
-  email?: string
-  phone?: string
-  status?: UserRecord["status"]
-  isSuperAdmin?: boolean
-}
+export type CreateUserRequest = OpenApiCreateUserInput
+export type UpdateUserRequest = OpenApiUpdateUserInput
 
 export const fetchUsers = async (
   query: UserListQuery = {},
@@ -86,7 +70,7 @@ export const updateUser = async (
 
 export const resetUserPassword = async (
   id: string,
-  password: string,
+  password: OpenApiResetUserPasswordInput["password"],
 ): Promise<void> =>
   requestJson<void>(`/system/users/${encodeURIComponent(id)}/reset-password`, {
     method: "POST",

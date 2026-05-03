@@ -47,3 +47,16 @@ export type OpenApiUpdateTenantInput =
   RequestBodyContent<"putSystemTenantsById">
 export type OpenApiUpdateTenantStatusInput =
   RequestBodyContent<"putSystemTenantsByIdStatus">
+
+export type OpenApiUsersResponse = ResponseContent<"getSystemUsers", 200>
+export type OpenApiUserRecord = ResponseContent<"getSystemUsersById", 200>
+export type OpenApiCreateUserInput = RequestBodyContent<"postSystemUsers">
+export type OpenApiUpdateUserInput = RequestBodyContent<"putSystemUsersById">
+export type OpenApiResetUserPasswordInput =
+  RequestBodyContent<"postSystemUsersByIdReset-password">
+
+export type OpenApiRolesResponse = ResponseContent<"getSystemRoles", 200>
+export type OpenApiRoleDetailRecord = ResponseContent<"getSystemRolesById", 200>
+export type OpenApiRoleRecord = OpenApiRolesResponse["items"][number]
+export type OpenApiCreateRoleInput = RequestBodyContent<"postSystemRoles">
+export type OpenApiUpdateRoleInput = RequestBodyContent<"putSystemRolesById">
