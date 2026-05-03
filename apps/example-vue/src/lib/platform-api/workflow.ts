@@ -113,6 +113,12 @@ export interface GeneratorPreviewSqlProposalHandoff {
   reviewMode: "manual"
   canonicalMigrationOwner: "packages/persistence"
   confirmationChecklist: string[]
+  migrationProposalSnapshotRecovery?:
+    | {
+        archivedSnapshotPath: string | null
+        status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+      }
+    | null
   migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
   migrationProposalSnapshotPath: string
   targetPaths: {

@@ -596,22 +596,40 @@ const buildSqlProposalConfirmationChecklist = (
 const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) => {
   const snapshotPath = resolveMigrationProposalSnapshotPath(session.reportPath)
   let migrationProposalSnapshot: MigrationProposalSnapshot
+  let migrationProposalSnapshotRecovery:
+    | {
+        archivedSnapshotPath: string | null
+        status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+      }
+    | null = {
+      archivedSnapshotPath: null,
+      status: "none",
+    }
 
   try {
     migrationProposalSnapshot = await readMigrationProposalSnapshot(snapshotPath)
   } catch (error) {
-    const shouldArchiveCorruptedSnapshot =
-      !(error instanceof Error) ||
-      !("code" in error) ||
-      (error as { code?: string }).code !== "ENOENT"
+    const isMissingSnapshot =
+      error instanceof Error &&
+      "code" in error &&
+      (error as { code?: string }).code === "ENOENT"
 
-    if (shouldArchiveCorruptedSnapshot) {
+    if (isMissingSnapshot) {
+      migrationProposalSnapshotRecovery = {
+        archivedSnapshotPath: null,
+        status: "rebuilt-from-missing",
+      }
+    } else {
       const archivedSnapshotPath = snapshotPath.replace(
         /\.json$/,
         `.corrupt-${crypto.randomUUID()}.json`,
       )
 
       await renameFile(snapshotPath, archivedSnapshotPath)
+      migrationProposalSnapshotRecovery = {
+        archivedSnapshotPath,
+        status: "rebuilt-from-corrupt",
+      }
     }
 
     migrationProposalSnapshot = buildMigrationProposalSnapshot({
@@ -658,6 +676,7 @@ const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) =
       migrationProposalSnapshot,
     ),
     unsupportedReason: sqlProposalResolution.unsupportedReason,
+    migrationProposalSnapshotRecovery,
     sourceSchemaName: session.schemaName,
     migrationProposalSnapshot,
     migrationProposalSnapshotPath: migrationProposalSnapshot.snapshotPath,

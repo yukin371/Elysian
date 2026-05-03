@@ -1249,6 +1249,7 @@ describe("generator session module", () => {
 
   it("rebuilds a missing migration proposal snapshot on detail lookup", async () => {
     const repository = createInMemoryGeneratorSessionRepository()
+    const reportRootDir = await mkdtemp(join(tmpdir(), "generator-session-missing-"))
     const changePlan = {
       canonicalMigrationOwner: "packages/persistence",
       dialect: "postgresql",
@@ -1281,14 +1282,14 @@ describe("generator session module", () => {
       createdAt: "2026-04-20T00:00:00.000Z",
       frontendTarget: "vue",
       hasBlockingConflicts: false,
-      outputDir: "/tmp/generator-session-rebuild",
+      outputDir: reportRootDir,
       previewFileCount: 1,
       report: {
         databaseChangePlan: changePlan,
         files: [],
         schemaName: "customer",
       } as never,
-      reportPath: "/tmp/generator-session-rebuild/report.preview.json",
+      reportPath: join(reportRootDir, "report.preview.json"),
       schemaName: "customer",
       sourceType: "registered-schema",
       sourceValue: "customer",
@@ -1312,17 +1313,27 @@ describe("generator session module", () => {
           snapshotPath: string
         }
         migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery:
+          | {
+              archivedSnapshotPath: string | null
+              status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+            }
+          | null
       }
     }
 
     expect(body.sqlProposalHandoff.migrationProposalSnapshotPath).toBe(
-      "/tmp/generator-session-rebuild/report.migration-proposal.json",
+      join(reportRootDir, "report.migration-proposal.json"),
     )
     expect(body.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject({
       generatedAt: "2026-04-20T00:00:00.000Z",
       migrationProposalResolution: {
         unsupportedReason: null,
       },
+    })
+    expect(body.sqlProposalHandoff.migrationProposalSnapshotRecovery).toEqual({
+      archivedSnapshotPath: null,
+      status: "rebuilt-from-missing",
     })
 
     const snapshotContents = await readFile(
@@ -1334,6 +1345,7 @@ describe("generator session module", () => {
 
   it("rebuilds a corrupted migration proposal snapshot on detail lookup", async () => {
     const repository = createInMemoryGeneratorSessionRepository()
+    const reportRootDir = await mkdtemp(join(tmpdir(), "generator-session-corrupt-"))
     const changePlan = {
       canonicalMigrationOwner: "packages/persistence",
       dialect: "postgresql",
@@ -1366,14 +1378,14 @@ describe("generator session module", () => {
       createdAt: "2026-04-20T00:00:00.000Z",
       frontendTarget: "vue",
       hasBlockingConflicts: false,
-      outputDir: "/tmp/generator-session-corrupt",
+      outputDir: reportRootDir,
       previewFileCount: 1,
       report: {
         databaseChangePlan: changePlan,
         files: [],
         schemaName: "customer",
       } as never,
-      reportPath: "/tmp/generator-session-corrupt/report.preview.json",
+      reportPath: join(reportRootDir, "report.preview.json"),
       schemaName: "customer",
       sourceType: "registered-schema",
       sourceValue: "customer",
@@ -1387,7 +1399,7 @@ describe("generator session module", () => {
       changePlan,
     )
     await writeFile(
-      "/tmp/generator-session-corrupt/report.migration-proposal.json",
+      join(reportRootDir, "report.migration-proposal.json"),
       "{\"broken\":true}\n",
       "utf8",
     )
@@ -1409,11 +1421,17 @@ describe("generator session module", () => {
           snapshotPath: string
         }
         migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery:
+          | {
+              archivedSnapshotPath: string | null
+              status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+            }
+          | null
       }
     }
 
     expect(body.sqlProposalHandoff.migrationProposalSnapshotPath).toBe(
-      "/tmp/generator-session-corrupt/report.migration-proposal.json",
+      join(reportRootDir, "report.migration-proposal.json"),
     )
     expect(body.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject({
       generatedAt: "2026-04-20T00:00:00.000Z",
@@ -1421,6 +1439,15 @@ describe("generator session module", () => {
         unsupportedReason: null,
       },
     })
+    expect(body.sqlProposalHandoff.migrationProposalSnapshotRecovery).toMatchObject(
+      {
+        status: "rebuilt-from-corrupt",
+      },
+    )
+    expect(
+      body.sqlProposalHandoff.migrationProposalSnapshotRecovery
+        ?.archivedSnapshotPath,
+    ).toContain(join(reportRootDir, "report.migration-proposal.corrupt-"))
 
     const rebuiltSnapshotContents = await readFile(
       body.sqlProposalHandoff.migrationProposalSnapshotPath,
