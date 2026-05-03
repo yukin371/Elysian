@@ -10,6 +10,37 @@ import {
 } from "./test-support"
 
 describe("createServerApp system user access", () => {
+  it("publishes user success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:user:list"],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createUserModule(createInMemoryUserRepository(), {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(payload.paths["/system/users"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/users"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/users/{id}"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/users/{id}"]?.put?.responses?.["200"]).toBeDefined()
+  })
+
   it("lists and gets system users when the access token has user-list permission", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:user:list"],

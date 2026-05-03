@@ -3,6 +3,10 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  operationLogListResponseSchema,
+  operationLogRecordResponseSchema,
+} from "./openapi"
 import type { OperationLogRepository } from "./repository"
 import { createOperationLogService } from "./service"
 
@@ -63,6 +67,9 @@ export const createOperationLogModule = (
         },
         {
           query: operationLogFilterSchema,
+          response: {
+            200: operationLogListResponseSchema,
+          },
           detail: {
             tags: ["operation-log"],
             summary: "List operation logs",
@@ -96,6 +103,9 @@ export const createOperationLogModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: operationLogRecordResponseSchema,
+          },
           detail: {
             tags: ["operation-log"],
             summary: "Get operation log by id",

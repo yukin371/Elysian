@@ -3,6 +3,7 @@ import { t } from "elysia"
 
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
+import { userListResponseSchema, userRecordResponseSchema } from "./openapi"
 import type { UserRepository } from "./repository"
 import { createUserService } from "./service"
 
@@ -67,6 +68,9 @@ export const createUserModule = (
         },
         {
           query: userListQuerySchema,
+          response: {
+            200: userListResponseSchema,
+          },
           detail: {
             tags: ["user"],
             summary: "List users",
@@ -99,6 +103,9 @@ export const createUserModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: userRecordResponseSchema,
+          },
           detail: {
             tags: ["user"],
             summary: "Get user by id",
@@ -115,6 +122,9 @@ export const createUserModule = (
         },
         {
           body: userCreateBodySchema,
+          response: {
+            201: userRecordResponseSchema,
+          },
           detail: {
             tags: ["user"],
             summary: "Create user",
@@ -133,6 +143,9 @@ export const createUserModule = (
             id: t.String(),
           }),
           body: userUpdateBodySchema,
+          response: {
+            200: userRecordResponseSchema,
+          },
           detail: {
             tags: ["user"],
             summary: "Update user",

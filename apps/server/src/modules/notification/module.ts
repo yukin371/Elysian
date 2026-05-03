@@ -3,6 +3,11 @@ import { t } from "elysia"
 
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
+import {
+  notificationBulkReadResponseSchema,
+  notificationListResponseSchema,
+  notificationRecordResponseSchema,
+} from "./openapi"
 import type { NotificationRepository } from "./repository"
 import { createNotificationService } from "./service"
 
@@ -87,6 +92,9 @@ export const createNotificationModule = (
         },
         {
           query: notificationFilterSchema,
+          response: {
+            200: notificationListResponseSchema,
+          },
           detail: {
             tags: ["notification"],
             summary: "List notifications",
@@ -126,6 +134,9 @@ export const createNotificationModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: notificationRecordResponseSchema,
+          },
           detail: {
             tags: ["notification"],
             summary: "Get notification by id",
@@ -149,6 +160,9 @@ export const createNotificationModule = (
         },
         {
           body: notificationCreateBodySchema,
+          response: {
+            201: notificationRecordResponseSchema,
+          },
           detail: {
             tags: ["notification"],
             summary: "Create notification",
@@ -171,6 +185,9 @@ export const createNotificationModule = (
           body: t.Object({
             ids: t.Array(t.String()),
           }),
+          response: {
+            200: notificationBulkReadResponseSchema,
+          },
           detail: {
             tags: ["notification"],
             summary: "Mark notifications as read",
@@ -191,6 +208,9 @@ export const createNotificationModule = (
           params: t.Object({
             id: t.String(),
           }),
+          response: {
+            200: notificationRecordResponseSchema,
+          },
           detail: {
             tags: ["notification"],
             summary: "Mark notification as read",

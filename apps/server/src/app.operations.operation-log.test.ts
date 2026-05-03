@@ -13,6 +13,39 @@ import {
 } from "./modules"
 
 describe("createServerApp operation logs", () => {
+  it("publishes operation log success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:operation-log:list"],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createOperationLogModule(createInMemoryOperationLogRepository(), {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(
+      payload.paths["/system/operation-logs"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/operation-logs/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+  })
+
   it("lists, filters, and gets operation logs", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:operation-log:list"],

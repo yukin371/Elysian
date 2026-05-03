@@ -12,6 +12,52 @@ import {
 } from "./modules"
 
 describe("createServerApp notifications", () => {
+  it("publishes notification success responses in the openapi spec", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: [
+        "system:notification:list",
+        "system:notification:create",
+        "system:notification:update",
+      ],
+      isSuperAdmin: false,
+    })
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createNotificationModule(createInMemoryNotificationRepository(), {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const response = await app.handle(
+      new Request("http://localhost/openapi/json"),
+    )
+
+    expect(response.status).toBe(200)
+    const payload = (await response.json()) as {
+      paths: Record<
+        string,
+        Record<string, { responses?: Record<string, unknown> }>
+      >
+    }
+
+    expect(
+      payload.paths["/system/notifications"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/notifications"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/notifications/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/notifications/read"]?.post?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.["200"],
+    ).toBeDefined()
+  })
+
   it("lists, filters, gets, creates, and marks notifications as read", async () => {
     const fixture = await createAuthTestFixture({
       permissions: [
