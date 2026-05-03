@@ -599,22 +599,18 @@ const buildSqlProposalHandoff = async (session: GeneratorPreviewSessionDetail) =
   try {
     migrationProposalSnapshot = await readMigrationProposalSnapshot(snapshotPath)
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      (error as { code?: string }).code === "ENOENT"
-    ) {
-      migrationProposalSnapshot = buildMigrationProposalSnapshot({
-        databaseChangePlan: session.report.databaseChangePlan,
-        generatedAt: session.createdAt,
-        reportPath: session.reportPath,
-        schemaName: session.schemaName,
-        sessionId: session.id,
-      })
+    migrationProposalSnapshot = buildMigrationProposalSnapshot({
+      databaseChangePlan: session.report.databaseChangePlan,
+      generatedAt: session.createdAt,
+      reportPath: session.reportPath,
+      schemaName: session.schemaName,
+      sessionId: session.id,
+    })
 
+    try {
       await writeMigrationProposalSnapshot(migrationProposalSnapshot)
-    } else {
-      throw error
+    } catch (writeError) {
+      throw writeError instanceof Error ? writeError : error
     }
   }
 
