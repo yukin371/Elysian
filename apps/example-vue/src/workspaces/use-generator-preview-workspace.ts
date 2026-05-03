@@ -298,6 +298,11 @@ export const useGeneratorPreviewWorkspace = (
     isSessionMatchingSelection,
     loading,
     onRecoverableAuthError,
+    prioritizeRecentSessions: (sessions) =>
+      prioritizeGeneratorPreviewRecentSessions(
+        sessions,
+        isSessionMatchingSelection,
+      ),
     recentSessions,
     resetPreviewState,
     selectedConflictStrategy,

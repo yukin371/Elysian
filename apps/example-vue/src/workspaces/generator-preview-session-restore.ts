@@ -22,6 +22,9 @@ type CreateGeneratorPreviewSessionRestoreOptions = {
   ) => boolean
   loading: Ref<boolean>
   onRecoverableAuthError: (error: unknown) => void
+  prioritizeRecentSessions: (
+    sessions: GeneratorPreviewSessionRecord[],
+  ) => GeneratorPreviewSessionRecord[]
   recentSessions: Ref<GeneratorPreviewSessionRecord[]>
   resetPreviewState: () => void
   selectedConflictStrategy: Readonly<Ref<GeneratorPreviewConflictStrategy>>
@@ -131,15 +134,33 @@ export const createGeneratorPreviewSessionRestore = (
       options.setErrorMessage("")
 
       try {
-        const session =
-          options.sessionDetailCache.get(matchedSession.id) ??
-          (await fetchGeneratorPreviewSession(matchedSession.id))
+        const orderedMatchingSessions = options
+          .prioritizeRecentSessions(response.items)
+          .filter(options.isSessionMatchingSelection)
 
-        if (!options.isSessionMatchingSelection(session)) {
-          return false
+        for (const candidateSession of orderedMatchingSessions) {
+          try {
+            const session =
+              options.sessionDetailCache.get(candidateSession.id) ??
+              (await fetchGeneratorPreviewSession(candidateSession.id))
+
+            if (!options.isSessionMatchingSelection(session)) {
+              continue
+            }
+
+            if (options.applySessionDetail(session)) {
+              return true
+            }
+          } catch (error) {
+            if (isGeneratorPreviewRecoverableAuthError(error)) {
+              options.onRecoverableAuthError(error)
+              options.setErrorMessage(error.message)
+              return true
+            }
+          }
         }
 
-        return options.applySessionDetail(session)
+        return false
       } finally {
         options.loading.value = false
       }

@@ -189,6 +189,100 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     )
   })
 
+  test("falls through to the next matching session when the newest one is missing", async () => {
+    let previewRequestCount = 0
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:30:00.000Z",
+                id: "preview-session-missing",
+                schemaName: "customer",
+                status: "pending_review",
+              }),
+              createSession({
+                conflictStrategy: "overwrite-generated-only",
+                createdAt: "2026-05-02T14:00:00.000Z",
+                id: "preview-session-ready",
+                schemaName: "customer",
+                status: "ready",
+              }),
+            ],
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-missing") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: "GENERATOR_SESSION_NOT_FOUND",
+              message: "Generator session not found",
+              status: 404,
+            },
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 404,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview-session-ready") &&
+        method === "GET"
+      ) {
+        return new Response(
+          JSON.stringify(
+            createSessionDetail({
+              conflictStrategy: "overwrite-generated-only",
+              createdAt: "2026-05-02T14:00:00.000Z",
+              id: "preview-session-ready",
+              status: "ready",
+            }),
+          ),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        previewRequestCount += 1
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    workspace.selectedConflictStrategy.value = "overwrite-generated-only"
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(previewRequestCount).toBe(0)
+    expect(workspace.currentSession.value?.id).toBe("preview-session-ready")
+    expect(workspace.selectedRecentSessionId.value).toBe("preview-session-ready")
+  })
+
   test("skips stale matching session detail before creating a new preview", async () => {
     let previewRequestCount = 0
 
