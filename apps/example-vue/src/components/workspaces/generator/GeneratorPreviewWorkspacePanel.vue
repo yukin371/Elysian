@@ -204,6 +204,12 @@ const sqlHandoffStepsText = computed(() =>
     : "",
 )
 
+const sqlHandoffConfirmationChecklistText = computed(() =>
+  props.sqlProposalHandoff
+    ? props.sqlProposalHandoff.confirmationChecklist.join("\n")
+    : "",
+)
+
 const copyPanelValue = async (
   key: GeneratorPreviewCopyFeedbackKey,
   value: string | null | undefined,
@@ -220,6 +226,12 @@ const copySuggestedCommands = async () => {
 
 const copySqlHandoffSteps = async () =>
   copyPanelValue("steps", sqlHandoffStepsText.value)
+
+const copySqlConfirmationChecklist = async () =>
+  copyPanelValue(
+    "confirmationChecklist",
+    sqlHandoffConfirmationChecklistText.value,
+  )
 
 const copySqlDraft = async () =>
   copyPanelValue("sqlDraft", props.sqlProposal?.sqlDraft)
@@ -600,8 +612,12 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
         :persistence-index-file-copy-label="
           resolveSnippetCopyLabel('persistenceIndexFile')
         "
+        :confirmation-checklist-copy-label="
+          resolveSnippetCopyLabel('confirmationChecklist')
+        "
         :steps-copy-label="resolveSnippetCopyLabel('steps')"
         @copy-suggested-commands="copySuggestedCommands"
+        @copy-confirmation-checklist="copySqlConfirmationChecklist"
         @copy-schema-dir="
           (path) => copyHandoffTargetPath('schemaDir', path)
         "

@@ -501,6 +501,19 @@ const buildSqlProposal = (session: GeneratorPreviewSessionDetail) => {
   return resolveSqlProposal(session).proposal
 }
 
+const buildSqlProposalConfirmationChecklist = (
+  sqlProposalResolution: ReturnType<typeof resolveSqlProposal>,
+) => {
+  return [
+    sqlProposalResolution.proposal === null
+      ? "Resolve the unsupported SQL proposal reason before changing persistence files."
+      : "Review the SQL draft and Drizzle snippet before changing persistence files.",
+    "Review the target-directory diff and conflict explanations before approving.",
+    "Confirm the canonical owner and target paths match the intended persistence scope.",
+    "Run db:generate and db:migrate only after manual sign-off.",
+  ]
+}
+
 const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
   const sqlProposalResolution = resolveSqlProposal(session)
 
@@ -527,6 +540,8 @@ const buildSqlProposalHandoff = (session: GeneratorPreviewSessionDetail) => {
       "bun run db:migrate",
       "bun test packages/persistence/src/migration-proposal.test.ts",
     ],
+    confirmationChecklist:
+      buildSqlProposalConfirmationChecklist(sqlProposalResolution),
     unsupportedReason: sqlProposalResolution.unsupportedReason,
     sourceSchemaName: session.schemaName,
   }

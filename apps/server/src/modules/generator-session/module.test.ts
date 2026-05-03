@@ -974,6 +974,9 @@ describe("generator session module", () => {
         plannedReason: string
         reason: string
       }>
+      sqlProposalHandoff: {
+        confirmationChecklist: string[]
+      }
       targetDirectoryDiff: Array<{
         actionCounts: {
           block: number
@@ -998,6 +1001,12 @@ describe("generator session module", () => {
           block: 1,
         },
       },
+    ])
+    expect(body.sqlProposalHandoff.confirmationChecklist).toEqual([
+      "Review the SQL draft and Drizzle snippet before changing persistence files.",
+      "Review the target-directory diff and conflict explanations before approving.",
+      "Confirm the canonical owner and target paths match the intended persistence scope.",
+      "Run db:generate and db:migrate only after manual sign-off.",
     ])
     expect(body.conflictExplanations).toEqual([
       {

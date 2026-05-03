@@ -12,7 +12,7 @@
 
 - 已决定：当前主线优先收口 generator 的自举闭环，目标是把 schema -> preview/report -> apply / merge -> frontend artifact -> 正式模块落地这条链路做稳
 - 入口依据：代码生成已经不只是辅助工具，而是平台最底层的使用方式之一；优先把 generator 做成可重复、可审计、可回放的主能力
-- 当前范围：优先补齐 generator 产物进入正式模块目录的边界、冲突解释、差异回放、人工确认与前端 artifact 消费链路，保证新 schema 能稳定生成并纳入主工程
+- 当前范围：优先补齐 generator 产物进入正式模块目录的边界、冲突解释、差异回放、人工确认清单与前端 artifact 消费链路，保证新 schema 能稳定生成并纳入主工程
 - 当前约束：不把 generator 扩成通用低代码平台，不新增第二套 shared owner，不把后台日常功能写成主线叙事
 - 已具备基础：后台常用模块、workflow 最小闭环、generator-session、SQL preview 与标准 CRUD 前端 surface 已可作为验证对象继续打磨
 - 当前结论：先把生成链路做成平台级主能力，再用企业后台常用模块持续验证生成结果的可用性、可维护性与可扩展性
@@ -236,7 +236,7 @@
 - `Track 2 / T2-2` 已落最小 proposal builder：`packages/persistence` 当前可基于 `DatabaseChangePlan` 形状输出 review-only SQL draft、Drizzle schema snippet 与风险标签，但仍不直接生成正式 migration 文件
 - 已补 generator -> frontend 的最小静态契约入口：`packages/schema` 可选 `frontend` 元数据已进入 `ModuleSchema`，`packages/generator` 可生成 `*.frontend.ts` artifact，开始为后续替换 example-vue 手写注册做准备
 - 已完成一次功能矩阵复验：确认 generator session 列表 / 详情 / preview / staging apply 以及 auth refresh session 列表 / 单会话 revoke 均已落地，相关矩阵文档已按真实完成度回填
-- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff 与冲突解释；正式人工确认体验与 SQL proposal 到正式 migration 的人工接入规范仍待补齐
+- 已确认当前缺口边界：`generator-session` 已具备最小持久化回放中心，并已补上目标目录 diff、冲突解释与人工确认清单；正式人工确认动作与 SQL proposal 到正式 migration 的人工接入规范仍待补齐
 - 完成 `Phase 1` 垂直切片闭环，打通 `schema -> server -> persistence -> generator -> frontend`
 - 用 Docker PostgreSQL + 浏览器 smoke 验证 customer create / update / delete 持久化链路
 - 固定仓库品牌与命名体系为 `Elysian` / `@elysian/*`

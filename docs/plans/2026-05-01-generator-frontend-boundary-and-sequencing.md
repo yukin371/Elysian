@@ -202,7 +202,7 @@
 包括：
 
 1. 更细粒度 diff / 冲突解释
-2. 正式人工确认流
+2. 正式人工确认动作
 3. preset / profile
 4. 表结构导入反推 `ModuleSchema`
 5. proposal 到正式 migration 的人工接入规范

@@ -57,6 +57,7 @@ export type GeneratorPreviewCopyFeedbackKey =
   | "diffUnchangedLines"
   | "proposalStatus"
   | "reviewMode"
+  | "confirmationChecklist"
   | "sqlPreview"
   | "unsupportedReason"
 
@@ -120,6 +121,7 @@ const createInitialCopyFeedback = (): Record<
   diffUnchangedLines: "idle",
   proposalStatus: "idle",
   reviewMode: "idle",
+  confirmationChecklist: "idle",
   sqlPreview: "idle",
   unsupportedReason: "idle",
 })

@@ -9,6 +9,7 @@ interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   suggestedCommandsText: string
   commandsCopyLabel: string
+  confirmationChecklistCopyLabel: string
   schemaDirCopyLabel: string
   drizzleDirCopyLabel: string
   schemaIndexFileCopyLabel: string
@@ -20,6 +21,7 @@ defineProps<GeneratorPreviewWorkspaceSqlHandoffPanelProps>()
 
 const emit = defineEmits<{
   (event: "copy-suggested-commands"): void
+  (event: "copy-confirmation-checklist"): void
   (event: "copy-schema-dir", path: string): void
   (event: "copy-drizzle-dir", path: string): void
   (event: "copy-schema-index-file", path: string): void
@@ -113,6 +115,27 @@ const emit = defineEmits<{
         <span>{{ sqlProposalHandoff.targetPaths.persistenceIndexFile }}</span>
       </article>
     </div>
+    <section class="generator-handoff-step-block">
+      <div class="generator-handoff-card-header">
+        <strong>{{ t("app.generatorPreview.sqlConfirmationTitle") }}</strong>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="sqlProposalHandoff.confirmationChecklist.length === 0"
+          @click="emit('copy-confirmation-checklist')"
+        >
+          {{ confirmationChecklistCopyLabel }}
+        </button>
+      </div>
+      <ol class="generator-handoff-steps">
+        <li
+          v-for="item in sqlProposalHandoff.confirmationChecklist"
+          :key="item"
+        >
+          {{ item }}
+        </li>
+      </ol>
+    </section>
     <section class="generator-handoff-step-block">
       <div class="generator-handoff-card-header">
         <strong>{{ t("app.generatorPreview.sqlHandoffTitle") }}</strong>

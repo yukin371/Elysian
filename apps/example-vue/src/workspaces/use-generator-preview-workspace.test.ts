@@ -102,6 +102,11 @@ const createSqlProposal = () => ({
 
 const createSqlProposalHandoff = () => ({
   canonicalMigrationOwner: "packages/persistence" as const,
+  confirmationChecklist: [
+    "Review the SQL draft.",
+    "Review the target-directory diff.",
+    "Run db:generate before db:migrate.",
+  ],
   proposalStatus: "ready" as const,
   reviewMode: "manual" as const,
   sourceSchemaName: "customer",
