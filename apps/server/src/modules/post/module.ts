@@ -1,6 +1,7 @@
 import { deriveBodySchema, postModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import { postListResponseSchema, postRecordResponseSchema } from "./openapi"
@@ -62,6 +63,7 @@ export const createPostModule = (
         {
           response: {
             200: postListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["post"],
@@ -78,6 +80,9 @@ export const createPostModule = (
           return service.exportCsv()
         },
         {
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["post"],
             summary: "Export posts as CSV",
@@ -97,6 +102,7 @@ export const createPostModule = (
           }),
           response: {
             200: postRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["post"],
@@ -116,6 +122,7 @@ export const createPostModule = (
           body: postCreateBodySchema,
           response: {
             201: postRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["post"],
@@ -137,6 +144,7 @@ export const createPostModule = (
           body: postUpdateBodySchema,
           response: {
             200: postRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["post"],

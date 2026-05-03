@@ -6,6 +6,7 @@ import {
 } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -100,6 +101,7 @@ export const createDictionaryModule = (
         {
           response: {
             200: dictionaryTypeListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["dictionary"],
@@ -120,6 +122,9 @@ export const createDictionaryModule = (
             tags: ["dictionary"],
             summary: "Export dictionary types as CSV",
           },
+          response: {
+            ...createErrorResponses(401, 403),
+          },
         },
       )
       .get(
@@ -135,6 +140,7 @@ export const createDictionaryModule = (
           }),
           response: {
             200: dictionaryTypeDetailResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["dictionary"],
@@ -154,6 +160,7 @@ export const createDictionaryModule = (
           body: dictionaryTypeCreateBodySchema,
           response: {
             201: dictionaryTypeDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["dictionary"],
@@ -175,6 +182,7 @@ export const createDictionaryModule = (
           body: dictionaryTypeUpdateBodySchema,
           response: {
             200: dictionaryTypeDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["dictionary"],
@@ -195,6 +203,7 @@ export const createDictionaryModule = (
           query: dictionaryItemFilterSchema,
           response: {
             200: dictionaryItemListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["dictionary"],
@@ -212,6 +221,9 @@ export const createDictionaryModule = (
         },
         {
           query: dictionaryItemFilterSchema,
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["dictionary"],
             summary: "Export dictionary items as CSV",
@@ -231,6 +243,7 @@ export const createDictionaryModule = (
           }),
           response: {
             200: dictionaryItemRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["dictionary"],
@@ -250,6 +263,7 @@ export const createDictionaryModule = (
           body: dictionaryItemCreateBodySchema,
           response: {
             201: dictionaryItemRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["dictionary"],
@@ -271,6 +285,7 @@ export const createDictionaryModule = (
           body: dictionaryItemUpdateBodySchema,
           response: {
             200: dictionaryItemRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["dictionary"],

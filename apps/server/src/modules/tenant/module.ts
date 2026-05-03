@@ -2,6 +2,7 @@ import { deriveBodySchema, tenantModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -80,6 +81,7 @@ export const createTenantModule = (
         {
           response: {
             200: tenantListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["tenant"],
@@ -100,6 +102,9 @@ export const createTenantModule = (
           return service.exportCsv()
         },
         {
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["tenant"],
             summary: "Export tenants as CSV",
@@ -123,6 +128,7 @@ export const createTenantModule = (
           }),
           response: {
             200: tenantRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["tenant"],
@@ -146,6 +152,7 @@ export const createTenantModule = (
           body: tenantCreateBodySchema,
           response: {
             201: tenantRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["tenant"],
@@ -171,6 +178,7 @@ export const createTenantModule = (
           body: tenantUpdateBodySchema,
           response: {
             200: tenantRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["tenant"],
@@ -198,6 +206,7 @@ export const createTenantModule = (
           }),
           response: {
             200: tenantRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404),
           },
           detail: {
             tags: ["tenant"],

@@ -37,9 +37,12 @@ describe("createServerApp system menu access", () => {
     }
 
     expect(payload.paths["/system/menus"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/menus"]?.get?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/system/menus"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/menus"]?.post?.responses?.["400"]).toBeDefined()
     expect(payload.paths["/system/menus/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/system/menus/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/menus/{id}"]?.put?.responses?.["404"]).toBeDefined()
   })
 
   it("lists and gets system menus when the access token has menu-list permission", async () => {

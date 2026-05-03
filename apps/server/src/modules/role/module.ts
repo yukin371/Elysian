@@ -1,6 +1,7 @@
 import { deriveBodySchema, roleModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -87,6 +88,7 @@ export const createRoleModule = (
           query: roleListQuerySchema,
           response: {
             200: roleListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["role"],
@@ -103,6 +105,9 @@ export const createRoleModule = (
           return service.exportCsv()
         },
         {
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["role"],
             summary: "Export roles as CSV",
@@ -122,6 +127,7 @@ export const createRoleModule = (
           }),
           response: {
             200: roleDetailResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["role"],
@@ -141,6 +147,7 @@ export const createRoleModule = (
           body: roleCreateBodySchema,
           response: {
             201: roleDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["role"],
@@ -162,6 +169,7 @@ export const createRoleModule = (
           body: roleUpdateBodySchema,
           response: {
             200: roleDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["role"],

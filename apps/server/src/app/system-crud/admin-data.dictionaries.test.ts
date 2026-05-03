@@ -42,7 +42,13 @@ describe("createServerApp system admin data", () => {
       payload.paths["/system/dictionaries/types"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/system/dictionaries/types"]?.get?.responses?.["401"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/dictionaries/types"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/types"]?.post?.responses?.["409"],
     ).toBeDefined()
     expect(
       payload.paths["/system/dictionaries/types/{id}"]?.get?.responses?.["200"],
@@ -54,6 +60,9 @@ describe("createServerApp system admin data", () => {
       payload.paths["/system/dictionaries/items"]?.get?.responses?.["200"],
     ).toBeDefined()
     expect(
+      payload.paths["/system/dictionaries/items"]?.post?.responses?.["400"],
+    ).toBeDefined()
+    expect(
       payload.paths["/system/dictionaries/items"]?.post?.responses?.["201"],
     ).toBeDefined()
     expect(
@@ -61,6 +70,9 @@ describe("createServerApp system admin data", () => {
     ).toBeDefined()
     expect(
       payload.paths["/system/dictionaries/items/{id}"]?.put?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/dictionaries/items/{id}"]?.put?.responses?.["404"],
     ).toBeDefined()
   })
 

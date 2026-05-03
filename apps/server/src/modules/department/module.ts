@@ -1,6 +1,7 @@
 import { departmentModuleSchema, deriveBodySchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -71,6 +72,7 @@ export const createDepartmentModule = (
         {
           response: {
             200: departmentListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["department"],
@@ -87,6 +89,9 @@ export const createDepartmentModule = (
           return service.exportCsv()
         },
         {
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["department"],
             summary: "Export departments as CSV",
@@ -106,6 +111,7 @@ export const createDepartmentModule = (
           }),
           response: {
             200: departmentDetailResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["department"],
@@ -125,6 +131,7 @@ export const createDepartmentModule = (
           body: departmentCreateBodySchema,
           response: {
             201: departmentDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["department"],
@@ -146,6 +153,7 @@ export const createDepartmentModule = (
           body: departmentUpdateBodySchema,
           response: {
             200: departmentDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["department"],

@@ -1,6 +1,7 @@
 import { deriveBodySchema, settingModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -68,6 +69,7 @@ export const createSettingModule = (
           query: settingListQuerySchema,
           response: {
             200: settingListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["setting"],
@@ -84,6 +86,9 @@ export const createSettingModule = (
           return service.exportCsv()
         },
         {
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["setting"],
             summary: "Export settings as CSV",
@@ -103,6 +108,7 @@ export const createSettingModule = (
           }),
           response: {
             200: settingRecordResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["setting"],
@@ -122,6 +128,7 @@ export const createSettingModule = (
           body: settingCreateBodySchema,
           response: {
             201: settingRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["setting"],
@@ -143,6 +150,7 @@ export const createSettingModule = (
           body: settingUpdateBodySchema,
           response: {
             200: settingRecordResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["setting"],

@@ -39,9 +39,14 @@ describe("createServerApp system admin data", () => {
     }
 
     expect(payload.paths["/system/settings"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/settings"]?.get?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/system/settings"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/settings"]?.post?.responses?.["409"]).toBeDefined()
     expect(payload.paths["/system/settings/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/system/settings/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/system/settings/{id}"]?.put?.responses?.["404"],
+    ).toBeDefined()
   })
 
   it("lists and gets system settings when the access token has setting-list permission", async () => {

@@ -37,9 +37,12 @@ describe("createServerApp system role access", () => {
     }
 
     expect(payload.paths["/system/roles"]?.get?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/roles"]?.get?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/system/roles"]?.post?.responses?.["201"]).toBeDefined()
+    expect(payload.paths["/system/roles"]?.post?.responses?.["409"]).toBeDefined()
     expect(payload.paths["/system/roles/{id}"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/system/roles/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(payload.paths["/system/roles/{id}"]?.put?.responses?.["404"]).toBeDefined()
   })
 
   it("lists and gets system roles when the access token has role-list permission", async () => {

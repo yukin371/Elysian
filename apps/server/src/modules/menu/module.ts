@@ -1,6 +1,7 @@
 import { deriveBodySchema, menuModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
 import type { ServerModule } from "../module"
 import {
@@ -89,6 +90,7 @@ export const createMenuModule = (
         {
           response: {
             200: menuListResponseSchema,
+            ...createErrorResponses(401, 403),
           },
           detail: {
             tags: ["menu"],
@@ -105,6 +107,9 @@ export const createMenuModule = (
           return service.exportCsv()
         },
         {
+          response: {
+            ...createErrorResponses(401, 403),
+          },
           detail: {
             tags: ["menu"],
             summary: "Export menus as CSV",
@@ -124,6 +129,7 @@ export const createMenuModule = (
           }),
           response: {
             200: menuDetailResponseSchema,
+            ...createErrorResponses(401, 403, 404),
           },
           detail: {
             tags: ["menu"],
@@ -143,6 +149,7 @@ export const createMenuModule = (
           body: menuCreateBodySchema,
           response: {
             201: menuDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 409),
           },
           detail: {
             tags: ["menu"],
@@ -164,6 +171,7 @@ export const createMenuModule = (
           body: menuUpdateBodySchema,
           response: {
             200: menuDetailResponseSchema,
+            ...createErrorResponses(400, 401, 403, 404, 409),
           },
           detail: {
             tags: ["menu"],
