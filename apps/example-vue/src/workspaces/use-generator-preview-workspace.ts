@@ -17,7 +17,6 @@ import {
   confirmGeneratorPreviewSession,
   createGeneratorPreviewSession,
   fetchGeneratorPreviewSession,
-  listGeneratorPreviewSessions,
   reviewGeneratorPreviewSession,
 } from "../lib/platform-api"
 
@@ -42,6 +41,7 @@ import {
   localizeGeneratorPreviewConflictStrategy,
   prioritizeGeneratorPreviewRecentSessions,
 } from "./generator-preview-session-presentation"
+import { createGeneratorPreviewSessionRestore } from "./generator-preview-session-restore"
 
 export const useGeneratorPreviewWorkspace = (
   t: (key: string, params?: Record<string, unknown>) => string,
@@ -290,133 +290,28 @@ export const useGeneratorPreviewWorkspace = (
     return true
   }
 
-  const refreshSessionDetailAfterStateDrift = async (
-    sessionId: string,
-    staleMessage: string,
-  ) => {
-    try {
-      const session = await fetchGeneratorPreviewSession(sessionId)
-
-      if (applySessionDetail(session)) {
-        errorMessage.value = staleMessage
-        return true
-      }
-
-      resetPreviewState()
-      return false
-    } catch (refreshError) {
-      onRecoverableAuthError(refreshError)
-      errorMessage.value =
-        refreshError instanceof Error
-          ? refreshError.message
-          : "Generator session restore failed"
-      return true
-    }
-  }
-
-  const restoreStoredSession = async () => {
-    const storedSessionId = storedSelection?.sessionId
-
-    if (!storedSessionId) {
-      return false
-    }
-
-    loading.value = true
-    errorMessage.value = ""
-
-    try {
-      const session =
-        sessionDetailCache.get(storedSessionId) ??
-        (await fetchGeneratorPreviewSession(storedSessionId))
-
-      if (
-        session.schemaName !== selectedSchemaName.value ||
-        session.frontendTarget !== selectedFrontendTarget.value ||
-        session.conflictStrategy !== selectedConflictStrategy.value ||
-        !isGeneratorPreviewSessionDetailConsistent(session)
-      ) {
-        return false
-      }
-
-      return applySessionDetail(session)
-    } catch (error) {
-      if (isGeneratorPreviewRecoverableAuthError(error)) {
-        onRecoverableAuthError(error)
-        errorMessage.value = error.message
-        return true
-      }
-
-      return false
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const restoreCachedMatchingSession = () => {
-    const cachedSession = selectionSessionCache.get(
-      getCurrentSelectionCacheKey(),
-    )
-
-    if (!cachedSession) {
-      return false
-    }
-
-    if (!isGeneratorPreviewSessionDetailConsistent(cachedSession)) {
-      return false
-    }
-
-    return applySessionDetail(cachedSession)
-  }
-
-  const restoreLatestMatchingSession = async () => {
-    if (await restoreStoredSession()) {
-      return true
-    }
-
-    if (restoreCachedMatchingSession()) {
-      return true
-    }
-
-    try {
-      const response = await listGeneratorPreviewSessions()
-      recentSessions.value = response.items
-
-      const matchedSession = findMatchingRecentSession(response.items)
-
-      if (!matchedSession) {
-        return false
-      }
-
-      loading.value = true
-      errorMessage.value = ""
-
-      try {
-        const session =
-          sessionDetailCache.get(matchedSession.id) ??
-          (await fetchGeneratorPreviewSession(matchedSession.id))
-
-        if (
-          !isSessionMatchingSelection(session) ||
-          !isGeneratorPreviewSessionDetailConsistent(session)
-        ) {
-          return false
-        }
-
-        return applySessionDetail(session)
-      } finally {
-        loading.value = false
-      }
-    } catch (error) {
-      if (isGeneratorPreviewRecoverableAuthError(error)) {
-        onRecoverableAuthError(error)
-        errorMessage.value = error.message
-        return true
-      }
-
-      recentSessions.value = []
-      return false
-    }
-  }
+  const {
+    refreshSessionDetailAfterStateDrift,
+    restoreLatestMatchingSession,
+  } = createGeneratorPreviewSessionRestore({
+    applySessionDetail,
+    findMatchingRecentSession,
+    getCurrentSelectionCacheKey,
+    isSessionMatchingSelection,
+    loading,
+    onRecoverableAuthError,
+    recentSessions,
+    resetPreviewState,
+    selectedConflictStrategy,
+    selectedFrontendTarget,
+    selectedSchemaName,
+    selectionSessionCache,
+    sessionDetailCache,
+    setErrorMessage: (message) => {
+      errorMessage.value = message
+    },
+    storedSessionId: storedSelection?.sessionId,
+  })
 
   const refreshPreview = async () => {
     if (
