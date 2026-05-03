@@ -510,8 +510,8 @@ describe("generator session module", () => {
       },
     )
     expect(confirmBody.sqlProposalHandoff.confirmationChecklist).toEqual([
-      "Review the SQL draft and Drizzle snippet before changing persistence files.",
-      "Review the target-directory diff and conflict explanations before approving.",
+      `Review the SQL draft and Drizzle snippet in ${confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath} before changing persistence files.`,
+      `Verify the migration proposal snapshot at ${confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath} was generated from ${createBody.session.reportPath} at ${createBody.session.createdAt}.`,
       "Confirm the canonical owner and target paths match the intended persistence scope.",
       "Run db:generate and db:migrate only after manual sign-off.",
     ])
@@ -1224,8 +1224,8 @@ describe("generator session module", () => {
       },
     ])
     expect(body.sqlProposalHandoff.confirmationChecklist).toEqual([
-      "Review the SQL draft and Drizzle snippet before changing persistence files.",
-      "Review the target-directory diff and conflict explanations before approving.",
+      `Review the SQL draft and Drizzle snippet in ${body.sqlProposalHandoff.migrationProposalSnapshotPath} before changing persistence files.`,
+      `Verify the migration proposal snapshot at ${body.sqlProposalHandoff.migrationProposalSnapshotPath} was generated from ${session.reportPath} at ${session.createdAt}.`,
       "Confirm the canonical owner and target paths match the intended persistence scope.",
       "Run db:generate and db:migrate only after manual sign-off.",
     ])
