@@ -7,6 +7,17 @@ import { useAuthSessionWorkspace } from "./use-auth-session-workspace"
 
 const originalFetch = globalThis.fetch
 
+type FetchMockHandler = (
+  ...args: Parameters<typeof fetch>
+) => ReturnType<typeof fetch>
+
+const createFetchMock = (handler: FetchMockHandler): typeof fetch =>
+  Object.assign(handler, { preconnect: originalFetch.preconnect })
+
+const installFetchMock = (handler: FetchMockHandler) => {
+  globalThis.fetch = createFetchMock(handler)
+}
+
 const createSession = (
   overrides: Partial<AuthSessionSummary> & Pick<AuthSessionSummary, "id">,
 ): AuthSessionSummary => ({
@@ -68,11 +79,13 @@ describe("useAuthSessionWorkspace", () => {
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148",
     })
 
-    globalThis.fetch = (async () =>
-      new Response(JSON.stringify({ items: [current, rotated, revoked] }), {
-        headers: { "content-type": "application/json" },
-        status: 200,
-      })) as unknown as typeof fetch
+    installFetchMock(
+      async () =>
+        new Response(JSON.stringify({ items: [current, rotated, revoked] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        }),
+    )
 
     const workspace = createWorkspace()
 
@@ -112,31 +125,30 @@ describe("useAuthSessionWorkspace", () => {
     const onCurrentSessionRevoked = mock(async () => {})
     const requests: Array<{ method: string; url: string }> = []
 
-    globalThis.fetch = (async (
-      input: string | URL | Request,
-      init?: RequestInit,
-    ) => {
-      const url = String(input)
-      const method = init?.method ?? "GET"
+    installFetchMock(
+      async (input: string | URL | Request, init?: RequestInit) => {
+        const url = String(input)
+        const method = init?.method ?? "GET"
 
-      requests.push({ method, url })
+        requests.push({ method, url })
 
-      if (url.endsWith("/auth/sessions") && method === "GET") {
-        return new Response(JSON.stringify({ items: [current] }), {
-          headers: { "content-type": "application/json" },
-          status: 200,
-        })
-      }
+        if (url.endsWith("/auth/sessions") && method === "GET") {
+          return new Response(JSON.stringify({ items: [current] }), {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          })
+        }
 
-      if (
-        url.endsWith("/auth/sessions/session-current") &&
-        method === "DELETE"
-      ) {
-        return new Response(null, { status: 204 })
-      }
+        if (
+          url.endsWith("/auth/sessions/session-current") &&
+          method === "DELETE"
+        ) {
+          return new Response(null, { status: 204 })
+        }
 
-      return new Response("not found", { status: 404 })
-    }) as unknown as typeof fetch
+        return new Response("not found", { status: 404 })
+      },
+    )
 
     const workspace = createWorkspace({ onCurrentSessionRevoked })
 
@@ -170,36 +182,35 @@ describe("useAuthSessionWorkspace", () => {
     })
     let listCalls = 0
 
-    globalThis.fetch = (async (
-      input: string | URL | Request,
-      init?: RequestInit,
-    ) => {
-      const url = String(input)
-      const method = init?.method ?? "GET"
+    installFetchMock(
+      async (input: string | URL | Request, init?: RequestInit) => {
+        const url = String(input)
+        const method = init?.method ?? "GET"
 
-      if (url.endsWith("/auth/sessions") && method === "GET") {
-        listCalls += 1
+        if (url.endsWith("/auth/sessions") && method === "GET") {
+          listCalls += 1
 
-        return new Response(
-          JSON.stringify({
-            items: listCalls === 1 ? [current, rotated] : [current],
-          }),
-          {
-            headers: { "content-type": "application/json" },
-            status: 200,
-          },
-        )
-      }
+          return new Response(
+            JSON.stringify({
+              items: listCalls === 1 ? [current, rotated] : [current],
+            }),
+            {
+              headers: { "content-type": "application/json" },
+              status: 200,
+            },
+          )
+        }
 
-      if (
-        url.endsWith("/auth/sessions/session-rotated") &&
-        method === "DELETE"
-      ) {
-        return new Response(null, { status: 204 })
-      }
+        if (
+          url.endsWith("/auth/sessions/session-rotated") &&
+          method === "DELETE"
+        ) {
+          return new Response(null, { status: 204 })
+        }
 
-      return new Response("not found", { status: 404 })
-    }) as unknown as typeof fetch
+        return new Response("not found", { status: 404 })
+      },
+    )
 
     const workspace = createWorkspace()
 
@@ -223,29 +234,28 @@ describe("useAuthSessionWorkspace", () => {
   test("reports recoverable auth errors when loading sessions fails", async () => {
     const recoverableErrors: unknown[] = []
 
-    globalThis.fetch = (async (
-      input: string | URL | Request,
-      init?: RequestInit,
-    ) => {
-      const url = String(input)
-      const method = init?.method ?? "GET"
+    installFetchMock(
+      async (input: string | URL | Request, init?: RequestInit) => {
+        const url = String(input)
+        const method = init?.method ?? "GET"
 
-      if (url.endsWith("/auth/sessions") && method === "GET") {
-        return new Response(JSON.stringify({ message: "unauthorized" }), {
-          headers: { "content-type": "application/json" },
-          status: 401,
-        })
-      }
+        if (url.endsWith("/auth/sessions") && method === "GET") {
+          return new Response(JSON.stringify({ message: "unauthorized" }), {
+            headers: { "content-type": "application/json" },
+            status: 401,
+          })
+        }
 
-      if (url.endsWith("/auth/refresh") && method === "POST") {
-        return new Response(JSON.stringify({ message: "unauthorized" }), {
-          headers: { "content-type": "application/json" },
-          status: 401,
-        })
-      }
+        if (url.endsWith("/auth/refresh") && method === "POST") {
+          return new Response(JSON.stringify({ message: "unauthorized" }), {
+            headers: { "content-type": "application/json" },
+            status: 401,
+          })
+        }
 
-      return new Response("not found", { status: 404 })
-    }) as unknown as typeof fetch
+        return new Response("not found", { status: 404 })
+      },
+    )
 
     const workspace = createWorkspace({
       onRecoverableAuthError: (error) => {
@@ -289,29 +299,28 @@ describe("useAuthSessionWorkspace", () => {
     const recoverableErrors: unknown[] = []
     let failReload = false
 
-    globalThis.fetch = (async (
-      input: string | URL | Request,
-      init?: RequestInit,
-    ) => {
-      const url = String(input)
-      const method = init?.method ?? "GET"
+    installFetchMock(
+      async (input: string | URL | Request, init?: RequestInit) => {
+        const url = String(input)
+        const method = init?.method ?? "GET"
 
-      if (url.endsWith("/auth/sessions") && method === "GET") {
-        if (failReload) {
-          return new Response(JSON.stringify({ message: "unavailable" }), {
+        if (url.endsWith("/auth/sessions") && method === "GET") {
+          if (failReload) {
+            return new Response(JSON.stringify({ message: "unavailable" }), {
+              headers: { "content-type": "application/json" },
+              status: 503,
+            })
+          }
+
+          return new Response(JSON.stringify({ items: [current, rotated] }), {
             headers: { "content-type": "application/json" },
-            status: 503,
+            status: 200,
           })
         }
 
-        return new Response(JSON.stringify({ items: [current, rotated] }), {
-          headers: { "content-type": "application/json" },
-          status: 200,
-        })
-      }
-
-      return new Response("not found", { status: 404 })
-    }) as unknown as typeof fetch
+        return new Response("not found", { status: 404 })
+      },
+    )
 
     const workspace = createWorkspace({
       onRecoverableAuthError: (error) => {
@@ -352,39 +361,38 @@ describe("useAuthSessionWorkspace", () => {
     })
     const recoverableErrors: unknown[] = []
 
-    globalThis.fetch = (async (
-      input: string | URL | Request,
-      init?: RequestInit,
-    ) => {
-      const url = String(input)
-      const method = init?.method ?? "GET"
+    installFetchMock(
+      async (input: string | URL | Request, init?: RequestInit) => {
+        const url = String(input)
+        const method = init?.method ?? "GET"
 
-      if (url.endsWith("/auth/sessions") && method === "GET") {
-        return new Response(JSON.stringify({ items: [current] }), {
-          headers: { "content-type": "application/json" },
-          status: 200,
-        })
-      }
+        if (url.endsWith("/auth/sessions") && method === "GET") {
+          return new Response(JSON.stringify({ items: [current] }), {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          })
+        }
 
-      if (
-        url.endsWith("/auth/sessions/session-current") &&
-        method === "DELETE"
-      ) {
-        return new Response(JSON.stringify({ message: "unauthorized" }), {
-          headers: { "content-type": "application/json" },
-          status: 401,
-        })
-      }
+        if (
+          url.endsWith("/auth/sessions/session-current") &&
+          method === "DELETE"
+        ) {
+          return new Response(JSON.stringify({ message: "unauthorized" }), {
+            headers: { "content-type": "application/json" },
+            status: 401,
+          })
+        }
 
-      if (url.endsWith("/auth/refresh") && method === "POST") {
-        return new Response(JSON.stringify({ message: "unauthorized" }), {
-          headers: { "content-type": "application/json" },
-          status: 401,
-        })
-      }
+        if (url.endsWith("/auth/refresh") && method === "POST") {
+          return new Response(JSON.stringify({ message: "unauthorized" }), {
+            headers: { "content-type": "application/json" },
+            status: 401,
+          })
+        }
 
-      return new Response("not found", { status: 404 })
-    }) as unknown as typeof fetch
+        return new Response("not found", { status: 404 })
+      },
+    )
 
     const workspace = createWorkspace({
       onRecoverableAuthError: (error) => {
