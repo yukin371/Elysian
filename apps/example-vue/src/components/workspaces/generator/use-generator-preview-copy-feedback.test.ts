@@ -1,11 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 
+import type { GeneratorPreviewClipboard } from "./generator-preview-handoff"
 import { useGeneratorPreviewCopyFeedback } from "./use-generator-preview-copy-feedback"
 
 const t = (key: string) => key
+type NavigatorWithClipboard = { clipboard?: GeneratorPreviewClipboard }
 
 describe("useGeneratorPreviewCopyFeedback", () => {
-  const originalClipboard = globalThis.navigator?.clipboard
+  const originalClipboard = (
+    globalThis.navigator as NavigatorWithClipboard | undefined
+  )?.clipboard
   const originalSetTimeout = globalThis.setTimeout
   const originalClearTimeout = globalThis.clearTimeout
 
@@ -28,16 +32,16 @@ describe("useGeneratorPreviewCopyFeedback", () => {
       },
     })
 
-    globalThis.setTimeout = (((callback: () => void) => {
+    globalThis.setTimeout = ((callback: () => void) => {
       const id = nextTimerId
       nextTimerId += 1
       scheduledTimers.push({ callback, id })
-      return id as ReturnType<typeof setTimeout>
-    }) as typeof setTimeout)
+      return id as unknown as ReturnType<typeof setTimeout>
+    }) as typeof setTimeout
 
-    globalThis.clearTimeout = (((timerId: number) => {
+    globalThis.clearTimeout = ((timerId: number) => {
       clearedTimerIds.push(timerId)
-    }) as typeof clearTimeout)
+    }) as typeof clearTimeout
   })
 
   afterEach(() => {
@@ -57,12 +61,14 @@ describe("useGeneratorPreviewCopyFeedback", () => {
   })
 
   test("updates snippet copy label on success and resets after timeout", async () => {
-    const { copyTextByKey, resolveCopyLabel } = useGeneratorPreviewCopyFeedback(
-      t,
-    )
+    const { copyTextByKey, resolveCopyLabel } =
+      useGeneratorPreviewCopyFeedback(t)
 
     expect(
-      resolveCopyLabel("migrationProposalSnapshotPath", "app.generatorPreview.action.copySnippet"),
+      resolveCopyLabel(
+        "migrationProposalSnapshotPath",
+        "app.generatorPreview.action.copySnippet",
+      ),
     ).toBe("app.generatorPreview.action.copySnippet")
 
     await copyTextByKey(
@@ -71,14 +77,20 @@ describe("useGeneratorPreviewCopyFeedback", () => {
     )
 
     expect(
-      resolveCopyLabel("migrationProposalSnapshotPath", "app.generatorPreview.action.copySnippet"),
+      resolveCopyLabel(
+        "migrationProposalSnapshotPath",
+        "app.generatorPreview.action.copySnippet",
+      ),
     ).toBe("app.generatorPreview.action.copySnippetDone")
     expect(scheduledTimers).toHaveLength(1)
 
     scheduledTimers[0]?.callback()
 
     expect(
-      resolveCopyLabel("migrationProposalSnapshotPath", "app.generatorPreview.action.copySnippet"),
+      resolveCopyLabel(
+        "migrationProposalSnapshotPath",
+        "app.generatorPreview.action.copySnippet",
+      ),
     ).toBe("app.generatorPreview.action.copySnippet")
   })
 
@@ -123,8 +135,11 @@ describe("useGeneratorPreviewCopyFeedback", () => {
   })
 
   test("disposes all pending feedback reset timers", async () => {
-    const { copySuggestedCommandsByKey, copyTextByKey, disposeCopyFeedbackTimers } =
-      useGeneratorPreviewCopyFeedback(t)
+    const {
+      copySuggestedCommandsByKey,
+      copyTextByKey,
+      disposeCopyFeedbackTimers,
+    } = useGeneratorPreviewCopyFeedback(t)
 
     await copyTextByKey("sqlDraft", "create table customer ();")
     await copySuggestedCommandsByKey(["bun run db:generate"])

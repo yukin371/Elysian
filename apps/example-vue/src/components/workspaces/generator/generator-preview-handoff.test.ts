@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test"
 
 import {
-  copyGeneratorPreviewText,
   copyGeneratorPreviewSuggestedCommands,
+  copyGeneratorPreviewText,
   joinGeneratorPreviewSuggestedCommands,
 } from "./generator-preview-handoff"
 
@@ -54,7 +54,7 @@ describe("generator preview handoff helpers", () => {
       copyGeneratorPreviewSuggestedCommands(
         ["bun run db:generate", "bun run db:migrate"],
         {
-          writeText: async (value) => {
+          writeText: async (value: string) => {
             writes.push(value)
           },
         },
@@ -69,7 +69,7 @@ describe("generator preview handoff helpers", () => {
 
     await expect(
       copyGeneratorPreviewText("create table customers (...);", {
-        writeText: async (value) => {
+        writeText: async (value: string) => {
           writes.push(value)
         },
       }),

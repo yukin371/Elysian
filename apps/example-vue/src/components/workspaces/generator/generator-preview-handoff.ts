@@ -1,3 +1,14 @@
+export interface GeneratorPreviewClipboard {
+  writeText(value: string): Promise<void> | void
+}
+
+type NavigatorWithClipboard = {
+  clipboard?: GeneratorPreviewClipboard
+}
+
+const resolveDefaultClipboard = () =>
+  (globalThis.navigator as NavigatorWithClipboard | undefined)?.clipboard
+
 export const joinGeneratorPreviewSuggestedCommands = (commands: string[]) =>
   commands
     .map((command) => command.trim())
@@ -6,8 +17,7 @@ export const joinGeneratorPreviewSuggestedCommands = (commands: string[]) =>
 
 export const copyGeneratorPreviewText = async (
   value: string,
-  clipboard: Pick<Clipboard, "writeText"> | undefined =
-    globalThis.navigator?.clipboard,
+  clipboard: GeneratorPreviewClipboard | undefined = resolveDefaultClipboard(),
 ) => {
   if (!clipboard || value.trim().length === 0) {
     return false
@@ -23,8 +33,7 @@ export const copyGeneratorPreviewText = async (
 
 export const copyGeneratorPreviewSuggestedCommands = async (
   commands: string[],
-  clipboard: Pick<Clipboard, "writeText"> | undefined =
-    globalThis.navigator?.clipboard,
+  clipboard: GeneratorPreviewClipboard | undefined = resolveDefaultClipboard(),
 ) =>
   copyGeneratorPreviewText(
     joinGeneratorPreviewSuggestedCommands(commands),

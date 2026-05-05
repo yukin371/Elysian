@@ -1,3 +1,5 @@
+import { describe, expect, test } from "bun:test"
+
 import { resolveGeneratorPreviewConfirmationEvidenceSummary } from "./generator-preview-confirmation-evidence"
 
 const t = (key: string, params?: Record<string, unknown>) =>
