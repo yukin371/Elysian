@@ -1,9 +1,6 @@
 import { t } from "elysia"
 
-const roleStatusSchema = t.Union([
-  t.Literal("active"),
-  t.Literal("disabled"),
-])
+const roleStatusSchema = t.Union([t.Literal("active"), t.Literal("disabled")])
 
 const roleDataScopeSchema = t.Union([
   t.Literal(1),

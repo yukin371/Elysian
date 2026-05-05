@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test"
-import { errorCodes } from "./errors/registry"
 import {
   createAuthTestFixture,
   createOperationLogSeedRecords,
@@ -7,6 +6,7 @@ import {
   loginAsAdmin,
   withDerivedAuthFields,
 } from "./app.operations.test-helpers"
+import { errorCodes } from "./errors/registry"
 import {
   createInMemoryOperationLogRepository,
   createOperationLogModule,

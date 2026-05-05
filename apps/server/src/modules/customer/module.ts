@@ -1,9 +1,9 @@
 import { customerModuleSchema } from "@elysian/schema"
 import { t } from "elysia"
 
+import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
-import { createErrorResponses } from "../../openapi"
 import {
   customerListResponseSchema,
   customerRecordResponseSchema,

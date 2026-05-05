@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test"
-import { errorCodes } from "./errors/registry"
 import {
   createAuthTestFixture,
   createFileSeedRecords,
   createTestApp,
   loginAsAdmin,
 } from "./app.operations.test-helpers"
+import { errorCodes } from "./errors/registry"
 import {
   createFileModule,
   createInMemoryFileRepository,
@@ -46,11 +46,21 @@ describe("createServerApp files", () => {
       >
     }
 
-    expect(payload.paths["/system/files"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/system/files"]?.get?.responses?.["401"]).toBeDefined()
-    expect(payload.paths["/system/files"]?.post?.responses?.["201"]).toBeDefined()
-    expect(payload.paths["/system/files"]?.post?.responses?.["400"]).toBeDefined()
-    expect(payload.paths["/system/files/{id}"]?.get?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/system/files"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/files"]?.get?.responses?.["401"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/files"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/files"]?.post?.responses?.["400"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/files/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
     expect(
       payload.paths["/system/files/{id}"]?.get?.responses?.["404"],
     ).toBeDefined()

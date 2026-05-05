@@ -7,8 +7,8 @@ import {
   getGeneratorPreviewSessionById,
   insertGeneratorPreviewSession,
   listGeneratorPreviewSessions,
-  markGeneratorPreviewSessionConfirmed,
   markGeneratorPreviewSessionApplied,
+  markGeneratorPreviewSessionConfirmed,
   markGeneratorPreviewSessionReviewed,
 } from "@elysian/persistence"
 
@@ -485,7 +485,9 @@ const readPreviewReport = async (
   reportPath: string,
 ): Promise<GenerationPreviewReport> => {
   try {
-    return JSON.parse(await readFile(reportPath, "utf8")) as GenerationPreviewReport
+    return JSON.parse(
+      await readFile(reportPath, "utf8"),
+    ) as GenerationPreviewReport
   } catch (error) {
     throw new AppError({
       code: "GENERATOR_SESSION_REPORT_READ_FAILED",

@@ -63,10 +63,18 @@ describe("createServerApp workflow runtime instances", () => {
       >
     }
 
-    expect(payload.paths["/workflow/instances"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/workflow/instances"]?.get?.responses?.["400"]).toBeDefined()
-    expect(payload.paths["/workflow/instances"]?.post?.responses?.["201"]).toBeDefined()
-    expect(payload.paths["/workflow/instances"]?.post?.responses?.["409"]).toBeDefined()
+    expect(
+      payload.paths["/workflow/instances"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/instances"]?.get?.responses?.["400"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/instances"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/instances"]?.post?.responses?.["409"],
+    ).toBeDefined()
     expect(
       payload.paths["/workflow/instances/{id}"]?.get?.responses?.["200"],
     ).toBeDefined()
@@ -74,15 +82,27 @@ describe("createServerApp workflow runtime instances", () => {
       payload.paths["/workflow/instances/{id}"]?.get?.responses?.["404"],
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances/{id}/cancel"]?.post?.responses?.["200"],
+      payload.paths["/workflow/instances/{id}/cancel"]?.post?.responses?.[
+        "200"
+      ],
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances/{id}/cancel"]?.post?.responses?.["409"],
+      payload.paths["/workflow/instances/{id}/cancel"]?.post?.responses?.[
+        "409"
+      ],
     ).toBeDefined()
-    expect(payload.paths["/workflow/tasks/todo"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/workflow/tasks/todo"]?.get?.responses?.["400"]).toBeDefined()
-    expect(payload.paths["/workflow/tasks/done"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/workflow/tasks/done"]?.get?.responses?.["400"]).toBeDefined()
+    expect(
+      payload.paths["/workflow/tasks/todo"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/tasks/todo"]?.get?.responses?.["400"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/tasks/done"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/workflow/tasks/done"]?.get?.responses?.["400"],
+    ).toBeDefined()
     expect(
       payload.paths["/workflow/tasks/{id}/claim"]?.post?.responses?.["200"],
     ).toBeDefined()

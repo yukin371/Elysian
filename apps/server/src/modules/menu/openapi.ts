@@ -6,10 +6,7 @@ const menuTypeSchema = t.Union([
   t.Literal("button"),
 ])
 
-const menuStatusSchema = t.Union([
-  t.Literal("active"),
-  t.Literal("disabled"),
-])
+const menuStatusSchema = t.Union([t.Literal("active"), t.Literal("disabled")])
 
 export const menuRecordResponseSchema = t.Object({
   id: t.String(),

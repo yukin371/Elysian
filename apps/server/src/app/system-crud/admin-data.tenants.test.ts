@@ -16,7 +16,11 @@ import {
 describe("createServerApp system admin data", () => {
   it("publishes tenant success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
-      permissions: ["system:tenant:list", "system:tenant:create", "system:tenant:update"],
+      permissions: [
+        "system:tenant:list",
+        "system:tenant:create",
+        "system:tenant:update",
+      ],
       isSuperAdmin: true,
     })
     const app = createTestApp({
@@ -39,12 +43,24 @@ describe("createServerApp system admin data", () => {
       >
     }
 
-    expect(payload.paths["/system/tenants"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/system/tenants"]?.get?.responses?.["403"]).toBeDefined()
-    expect(payload.paths["/system/tenants"]?.post?.responses?.["201"]).toBeDefined()
-    expect(payload.paths["/system/tenants"]?.post?.responses?.["409"]).toBeDefined()
-    expect(payload.paths["/system/tenants/{id}"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/system/tenants/{id}"]?.put?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/system/tenants"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/tenants"]?.get?.responses?.["403"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/tenants"]?.post?.responses?.["201"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/tenants"]?.post?.responses?.["409"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/tenants/{id}"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/system/tenants/{id}"]?.put?.responses?.["200"],
+    ).toBeDefined()
     expect(
       payload.paths["/system/tenants/{id}"]?.put?.responses?.["404"],
     ).toBeDefined()

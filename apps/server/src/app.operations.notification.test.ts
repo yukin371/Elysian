@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test"
-import { errorCodes } from "./errors/registry"
 import {
   createAuthTestFixture,
   createNotificationSeedRecords,
   createTestApp,
   loginAsAdmin,
 } from "./app.operations.test-helpers"
+import { errorCodes } from "./errors/registry"
 import {
   createInMemoryNotificationRepository,
   createNotificationModule,
@@ -66,10 +66,14 @@ describe("createServerApp notifications", () => {
       payload.paths["/system/notifications/read"]?.post?.responses?.["404"],
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.["200"],
+      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.[
+        "200"
+      ],
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.["404"],
+      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.[
+        "404"
+      ],
     ).toBeDefined()
   })
 

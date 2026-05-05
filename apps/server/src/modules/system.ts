@@ -1,7 +1,6 @@
 import { platformManifest } from "@elysian/core"
 import { moduleSchemaVersion } from "@elysian/schema"
 
-import type { AnyServerApp, ServerModule } from "./module"
 import {
   healthResponseSchema,
   metricsResponseSchema,
@@ -9,6 +8,7 @@ import {
   prometheusMetricsResponseSchema,
   systemModulesResponseSchema,
 } from "../openapi"
+import type { AnyServerApp, ServerModule } from "./module"
 
 const buildPrometheusMetricsPayload = () => {
   const uptimeSeconds = process.uptime()

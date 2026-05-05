@@ -82,7 +82,9 @@ describe("createServerApp", () => {
     expect(
       payload.paths["/metrics/prometheus"]?.get?.responses?.["200"],
     ).toBeDefined()
-    expect(payload.paths["/system/modules"]?.get?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/system/modules"]?.get?.responses?.["200"],
+    ).toBeDefined()
   })
 
   it("returns a runtime metrics snapshot", async () => {

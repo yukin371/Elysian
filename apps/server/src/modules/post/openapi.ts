@@ -1,9 +1,6 @@
 import { t } from "elysia"
 
-const postStatusSchema = t.Union([
-  t.Literal("active"),
-  t.Literal("disabled"),
-])
+const postStatusSchema = t.Union([t.Literal("active"), t.Literal("disabled")])
 
 export const postRecordResponseSchema = t.Object({
   id: t.String(),
