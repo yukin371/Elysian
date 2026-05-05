@@ -21,6 +21,30 @@ export type GeneratorPreviewSessionStatus =
   | "rejected"
   | "applied"
 
+const generatorPreviewSessionConflictStrategies = [
+  "skip",
+  "overwrite",
+  "overwrite-generated-only",
+  "fail",
+] as const satisfies readonly GeneratorPreviewSessionRecord["conflictStrategy"][]
+
+const generatorPreviewSessionFrontendTargets = [
+  "vue",
+  "react",
+] as const satisfies readonly GeneratorPreviewSessionRecord["frontendTarget"][]
+const generatorPreviewSessionSourceTypes = [
+  "registered-schema",
+] as const satisfies readonly GeneratorPreviewSessionSourceType[]
+const generatorPreviewSessionStatuses = [
+  "pending_review",
+  "ready",
+  "rejected",
+  "applied",
+] as const satisfies readonly GeneratorPreviewSessionStatus[]
+const generatorPreviewSessionTargetPresets = [
+  "staging",
+] as const satisfies readonly GeneratorPreviewSessionRecord["targetPreset"][]
+
 export interface GeneratorPreviewSessionRecord {
   id: string
   actorDisplayName: string | null
@@ -117,6 +141,29 @@ export interface MarkPreviewSessionAppliedInput {
   applyRequestId: string | null
   applyEvidence: Record<string, unknown> | null
   skippedFileCount: number
+}
+
+const resolvePreviewSessionLiteral = <T extends string>(
+  field: string,
+  value: string,
+  allowedValues: readonly T[],
+): T => {
+  for (const allowedValue of allowedValues) {
+    if (value === allowedValue) {
+      return allowedValue
+    }
+  }
+
+  throw new AppError({
+    code: "INTERNAL_ERROR",
+    message: "Generator preview session row is invalid",
+    status: 500,
+    expose: false,
+    details: {
+      field,
+      value,
+    },
+  })
 }
 
 export interface MarkPreviewSessionReviewedInput {
@@ -444,11 +491,17 @@ const mapPreviewSessionRow = (
   applyManifestPath: row.applyManifestPath,
   applyRequestId: row.applyRequestId,
   applyEvidence: row.applyEvidence ?? null,
-  conflictStrategy:
-    row.conflictStrategy as GeneratorPreviewSessionRecord["conflictStrategy"],
+  conflictStrategy: resolvePreviewSessionLiteral(
+    "conflictStrategy",
+    row.conflictStrategy,
+    generatorPreviewSessionConflictStrategies,
+  ),
   createdAt: row.createdAt.toISOString(),
-  frontendTarget:
-    row.frontendTarget as GeneratorPreviewSessionRecord["frontendTarget"],
+  frontendTarget: resolvePreviewSessionLiteral(
+    "frontendTarget",
+    row.frontendTarget,
+    generatorPreviewSessionFrontendTargets,
+  ),
   hasBlockingConflicts: row.hasBlockingConflicts,
   outputDir: row.outputDir,
   previewFileCount: row.previewFileCount,
@@ -466,11 +519,22 @@ const mapPreviewSessionRow = (
   confirmationEvidence: row.confirmationEvidence ?? null,
   schemaName: row.schemaName,
   skippedFileCount: row.skippedFileCount,
-  sourceType: row.sourceType as GeneratorPreviewSessionSourceType,
+  sourceType: resolvePreviewSessionLiteral(
+    "sourceType",
+    row.sourceType,
+    generatorPreviewSessionSourceTypes,
+  ),
   sourceValue: row.sourceValue,
-  status: row.status as GeneratorPreviewSessionStatus,
-  targetPreset:
-    row.targetPreset as GeneratorPreviewSessionRecord["targetPreset"],
+  status: resolvePreviewSessionLiteral(
+    "status",
+    row.status,
+    generatorPreviewSessionStatuses,
+  ),
+  targetPreset: resolvePreviewSessionLiteral(
+    "targetPreset",
+    row.targetPreset,
+    generatorPreviewSessionTargetPresets,
+  ),
   tenantId: row.tenantId,
 })
 
