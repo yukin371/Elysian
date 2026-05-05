@@ -24,16 +24,17 @@ import {
   updateWorkflowInstance,
   updateWorkflowTask,
 } from "@elysian/persistence"
-import type {
-  WorkflowDefinitionDraft,
-  WorkflowDefinitionRecord,
-  WorkflowDefinitionStatus,
-  WorkflowInstanceDetailRecord,
-  WorkflowInstanceRecord,
-  WorkflowInstanceStatus,
-  WorkflowTaskRecord,
-  WorkflowTaskResult,
-  WorkflowTaskStatus,
+import {
+  type WorkflowDefinitionDraft,
+  type WorkflowDefinitionRecord,
+  type WorkflowDefinitionStatus,
+  type WorkflowInstanceDetailRecord,
+  type WorkflowInstanceRecord,
+  type WorkflowInstanceStatus,
+  type WorkflowTaskRecord,
+  type WorkflowTaskResult,
+  type WorkflowTaskStatus,
+  validateWorkflowDefinitionDraft,
 } from "@elysian/schema"
 
 export interface CreateWorkflowDefinitionInput {
@@ -172,7 +173,7 @@ export const createWorkflowRepository = (
       name: input.name,
       version,
       status: input.status,
-      definition: input.definition as unknown as Record<string, unknown>,
+      definition: toPersistenceWorkflowDefinition(input.definition),
     } satisfies CreateWorkflowDefinitionPersistenceInput)
 
     return mapWorkflowDefinitionRow(row)
@@ -576,10 +577,42 @@ const mapWorkflowDefinitionRow = (
   name: row.name,
   version: row.version,
   status: row.status,
-  definition: row.definition as unknown as WorkflowDefinitionDraft,
+  definition: parseWorkflowDefinitionDraft(
+    row.definition,
+    `workflow definition ${row.id}`,
+  ),
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })
+
+const toPersistenceWorkflowDefinition = (
+  definition: WorkflowDefinitionDraft,
+): Record<string, unknown> => ({
+  ...definition,
+})
+
+const parseWorkflowDefinitionDraft = (
+  definition: Record<string, unknown>,
+  source: string,
+): WorkflowDefinitionDraft => {
+  const issues = validateWorkflowDefinitionDraft(definition)
+
+  if (issues.length > 0) {
+    const issueSummary = issues
+      .slice(0, 3)
+      .map((issue) => `${issue.path}: ${issue.message}`)
+      .join("; ")
+
+    throw new Error(
+      `Invalid persisted ${source}. ${issueSummary || "Unknown schema issue."}`,
+    )
+  }
+
+  return {
+    nodes: definition.nodes as WorkflowDefinitionDraft["nodes"],
+    edges: definition.edges as WorkflowDefinitionDraft["edges"],
+  }
+}
 
 const mapWorkflowInstanceRow = (
   row: WorkflowInstanceRow,
