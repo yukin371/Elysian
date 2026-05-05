@@ -7,15 +7,19 @@ type ItemWithId = {
   id: string
 }
 
-const createWorkspaceSyncOptions = (overrides: Record<string, unknown>) =>
-  new Proxy(overrides, {
+type ExampleWorkspaceSyncOptions = Parameters<typeof useExampleWorkspaceSync>[0]
+
+const createWorkspaceSyncOptions = (overrides: Record<string, unknown>) => {
+  const target = overrides as Partial<ExampleWorkspaceSyncOptions>
+
+  return new Proxy(target, {
     get(target, property) {
       if (typeof property !== "string") {
         return undefined
       }
 
       if (Object.prototype.hasOwnProperty.call(target, property)) {
-        return target[property]
+        return (target as Record<string, unknown>)[property]
       }
 
       if (
@@ -58,7 +62,8 @@ const createWorkspaceSyncOptions = (overrides: Record<string, unknown>) =>
 
       return ref(null)
     },
-  }) as unknown as Parameters<typeof useExampleWorkspaceSync>[0]
+  }) as ExampleWorkspaceSyncOptions
+}
 
 describe("useExampleWorkspaceSync", () => {
   test("exits tenant edit mode when sync reselects another visible tenant", async () => {
