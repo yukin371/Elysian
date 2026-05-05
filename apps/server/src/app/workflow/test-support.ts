@@ -3,7 +3,10 @@
   type DatabaseClient,
   createDefaultWorkflowDefinitionSeedSpec,
 } from "@elysian/persistence"
-import type { WorkflowDefinitionRecord } from "@elysian/schema"
+import {
+  type WorkflowDefinitionRecord,
+  validateWorkflowDefinitionDraft,
+} from "@elysian/schema"
 
 import { createServerApp } from "../../app"
 import { createServerConfig } from "../../config"
@@ -610,14 +613,23 @@ export const createWorkflowDefinitionSeedRecordFromDefault = (input: {
     )
   }
 
+  const definitionDraft: unknown = definition.definition
+
+  if (!isWorkflowDefinitionDraft(definitionDraft)) {
+    throw new Error(
+      `Invalid default workflow definition seed: ${formatWorkflowDefinitionDraftIssues(
+        definitionDraft,
+      )}`,
+    )
+  }
+
   return {
     id: input.id,
     key: definition.key,
     name: definition.name,
     version: definition.version,
     status: definition.status,
-    definition:
-      definition.definition as unknown as WorkflowDefinitionRecord["definition"],
+    definition: definitionDraft,
     createdAt: input.createdAt,
     updatedAt: input.createdAt,
   }
@@ -712,3 +724,13 @@ export const toCookieHeader = (setCookie: string | null) => {
 
   return setCookie.split(";")[0] ?? setCookie
 }
+
+const isWorkflowDefinitionDraft = (
+  input: unknown,
+): input is WorkflowDefinitionRecord["definition"] =>
+  validateWorkflowDefinitionDraft(input).length === 0
+
+const formatWorkflowDefinitionDraftIssues = (input: unknown) =>
+  validateWorkflowDefinitionDraft(input)
+    .map((issue) => `${issue.path} ${issue.message}`)
+    .join("; ")
