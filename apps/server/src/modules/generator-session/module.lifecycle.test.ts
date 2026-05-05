@@ -17,6 +17,86 @@ import {
   loginAsAdmin,
 } from "./test-helpers"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readNullableRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === null) {
+    return null
+  }
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected nullable object field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every(isRecord)) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "boolean") {
+    throw new Error(`Expected boolean field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("generator session module lifecycle", () => {
   it("publishes generator session success responses in the openapi spec", async () => {
     const repository = createInMemoryGeneratorSessionRepository()
@@ -26,60 +106,94 @@ describe("generator session module lifecycle", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/studio/generator/sessions"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/studio/generator/sessions", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/studio/generator/sessions", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}",
+        "get",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}"]?.get?.responses?.["404"],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}",
+        "get",
+        "404",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.[
-        "201"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/preview",
+        "post",
+        "201",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.[
-        "409"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/preview",
+        "post",
+        "409",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/review"]?.post
-        ?.responses?.["200"],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}/review",
+        "post",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/review"]?.post
-        ?.responses?.["404"],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}/review",
+        "post",
+        "404",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post
-        ?.responses?.["200"],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}/confirm",
+        "post",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post
-        ?.responses?.["409"],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}/confirm",
+        "post",
+        "409",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.[
-        "200"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}/apply",
+        "post",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.[
-        "500"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/studio/generator/sessions/{id}/apply",
+        "post",
+        "500",
+      ),
     ).toBeDefined()
   })
 
@@ -127,83 +241,46 @@ describe("generator session module lifecycle", () => {
 
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      diff: {
-        actionCounts: {
-          block: number
-          create: number
-          overwrite: number
-          skip: number
-        }
-        changedFileCount: number
-        totalFileCount: number
-        unchangedFileCount: number
-      }
-      session: {
-        createdAt: string
-        appliedAt: string | null
-        appliedFileCount: number | null
-        applyEvidence: null
-        applyManifestPath: string | null
-        id: string
-        actorUserId: string
-        actorUsername: string
-        previewFileCount: number
-        reportPath: string
-        reviewEvidence: null
-        schemaName: string
-        sourceType: string
-        status: string
-      }
-      report: {
-        databaseChangePlan: {
-          operations: Array<{
-            tableName: string
-          }>
-        }
-        schemaName: string
-        sqlPreview: {
-          tableName: string
-        }
-      }
-      sqlProposal: {
-        canonicalMigrationOwner: string
-        risks: Array<{
-          code: string
-        }>
-        tableName: string
-      }
-      sqlProposalHandoff: {
-        canonicalMigrationOwner: string
-        migrationProposalSnapshot: {
-          generatedAt: string
-          migrationProposalResolution: {
-            proposal: {
-              tableName: string
-            } | null
-            unsupportedReason: string | null
-          }
-          snapshotPath: string
-        }
-        migrationProposalSnapshotPath: string
-        proposalStatus: string
-        reviewMode: string
-        suggestedCommands: string[]
-        targetPaths: {
-          drizzleDir: string
-          schemaDir: string
-        }
-      }
-    }
+    const createBody = await readJsonRecord(createResponse)
+    const createSession = readRecord(createBody, "session")
+    const createDiff = readRecord(createBody, "diff")
+    const createReport = readRecord(createBody, "report")
+    const createDatabaseChangePlan = readRecord(
+      createReport,
+      "databaseChangePlan",
+    )
+    const createOperations = readRecordArray(
+      createDatabaseChangePlan,
+      "operations",
+    )
+    const createSqlPreview = readRecord(createReport, "sqlPreview")
+    const createSqlProposal = readRecord(createBody, "sqlProposal")
+    const createSqlProposalRisks = readRecordArray(createSqlProposal, "risks")
+    const createSqlProposalHandoff = readRecord(
+      createBody,
+      "sqlProposalHandoff",
+    )
+    const createMigrationProposalSnapshot = readRecord(
+      createSqlProposalHandoff,
+      "migrationProposalSnapshot",
+    )
+    const createMigrationProposalSnapshotPath = readString(
+      createSqlProposalHandoff,
+      "migrationProposalSnapshotPath",
+    )
+    const createSessionId = readString(createSession, "id")
+    const createSessionActorUserId = readString(createSession, "actorUserId")
+    const createSessionCreatedAt = readString(createSession, "createdAt")
+    const createSessionReportPath = readString(createSession, "reportPath")
 
-    expect(createBody.session.schemaName).toBe("customer")
-    expect(createBody.session.sourceType).toBe("registered-schema")
-    expect(createBody.session.actorUsername).toBe("admin")
-    expect(createBody.session.previewFileCount).toBe(6)
-    expect(createBody.session.applyEvidence).toBeNull()
-    expect(createBody.session.reviewEvidence).toBeNull()
-    expect(createBody.session.status).toBe("pending_review")
-    expect(createBody.diff).toEqual({
+    expect(createSession.schemaName).toBe("customer")
+    expect(createSession.sourceType).toBe("registered-schema")
+    expect(createSession.actorUsername).toBe("admin")
+    expect(createSession.previewFileCount).toBe(6)
+    expect(createSession.applyEvidence).toBeNull()
+    expect(createSession.reviewEvidence).toBeNull()
+    expect(createSession.status).toBe("pending_review")
+    expect(createDiff).toEqual({
       totalFileCount: 6,
       changedFileCount: 6,
       unchangedFileCount: 0,
@@ -214,19 +291,17 @@ describe("generator session module lifecycle", () => {
         block: 0,
       },
     })
-    expect(createBody.report.schemaName).toBe("customer")
-    expect(createBody.report.databaseChangePlan.operations[0]?.tableName).toBe(
-      "customer",
-    )
-    expect(createBody.report.sqlPreview.tableName).toBe("customer")
-    expect(createBody.sqlProposal).toMatchObject({
+    expect(createReport.schemaName).toBe("customer")
+    expect(createOperations[0]?.tableName).toBe("customer")
+    expect(createSqlPreview.tableName).toBe("customer")
+    expect(createSqlProposal).toMatchObject({
       canonicalMigrationOwner: "packages/persistence",
       tableName: "customer",
     })
-    expect(createBody.sqlProposal.risks.map((risk) => risk.code)).toContain(
-      "review-required",
-    )
-    expect(createBody.sqlProposalHandoff).toMatchObject({
+    expect(
+      createSqlProposalRisks.map((risk) => readString(risk, "code")),
+    ).toContain("review-required")
+    expect(createSqlProposalHandoff).toMatchObject({
       canonicalMigrationOwner: "packages/persistence",
       proposalStatus: "ready",
       reviewMode: "manual",
@@ -235,23 +310,21 @@ describe("generator session module lifecycle", () => {
         schemaDir: "packages/persistence/src/schema",
       },
     })
-    expect(createBody.sqlProposalHandoff.migrationProposalSnapshotPath).toMatch(
+    expect(createMigrationProposalSnapshotPath).toMatch(
       /\.migration-proposal\.json$/,
     )
-    expect(
-      createBody.sqlProposalHandoff.migrationProposalSnapshot,
-    ).toMatchObject({
-      generatedAt: createBody.session.createdAt,
+    expect(createMigrationProposalSnapshot).toMatchObject({
+      generatedAt: createSessionCreatedAt,
       migrationProposalResolution: {
         unsupportedReason: null,
       },
-      snapshotPath: createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      snapshotPath: createMigrationProposalSnapshotPath,
     })
-    expect(createBody.sqlProposalHandoff.suggestedCommands).toContain(
+    expect(createSqlProposalHandoff.suggestedCommands).toContain(
       "bun run db:generate",
     )
     const migrationProposalSnapshotContents = await readFile(
-      createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+      createMigrationProposalSnapshotPath,
       "utf8",
     )
     expect(migrationProposalSnapshotContents).toContain(
@@ -262,13 +335,13 @@ describe("generator session module lifecycle", () => {
     )
     expect(migrationProposalSnapshotContents).toContain('"snapshotPath"')
 
-    const reportContents = await readFile(createBody.session.reportPath, "utf8")
+    const reportContents = await readFile(createSessionReportPath, "utf8")
     expect(reportContents).toContain('"schemaName": "customer"')
     expect(reportContents).toContain('"databaseChangePlan"')
 
     const reviewResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/review`,
         {
           method: "POST",
           headers: {
@@ -287,74 +360,50 @@ describe("generator session module lifecycle", () => {
     )
     expect(reviewResponse.status).toBe(200)
 
-    const reviewBody = (await reviewResponse.json()) as {
-      diff: {
-        totalFileCount: number
-      }
-      session: {
-        id: string
-        reviewComment: string
-        reviewEvidence: {
-          actorUserId: string
-          comment: string
-          decision: string
-          reviewedAt: string
-          reportPath: string
-          sessionId: string
-        }
-        reviewedAt: string
-        reviewedByUserId: string
-        status: string
-      }
-      sqlProposal: {
-        tableName: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotRecovery: {
-          status: string
-        } | null
-        proposalStatus: string
-        migrationProposalSnapshot: {
-          generatedAt: string
-          migrationProposalResolution: {
-            proposal: {
-              tableName: string
-            } | null
-            unsupportedReason: string | null
-          }
-          snapshotPath: string
-        }
-        migrationProposalSnapshotPath: string
-      }
-    }
-    expect(reviewBody.session.id).toBe(createBody.session.id)
-    expect(reviewBody.session.status).toBe("ready")
-    expect(reviewBody.session.reviewComment).toBe("Looks good for staging")
-    expect(reviewBody.session.reviewedByUserId).toBe(
-      createBody.session.actorUserId,
+    const reviewBody = await readJsonRecord(reviewResponse)
+    const reviewSession = readRecord(reviewBody, "session")
+    const reviewDiff = readRecord(reviewBody, "diff")
+    const reviewSqlProposal = readRecord(reviewBody, "sqlProposal")
+    const reviewSqlProposalHandoff = readRecord(
+      reviewBody,
+      "sqlProposalHandoff",
     )
-    expect(reviewBody.session.reviewEvidence).toMatchObject({
-      sessionId: createBody.session.id,
-      reportPath: createBody.session.reportPath,
-      actorUserId: createBody.session.actorUserId,
+    const reviewMigrationProposalSnapshot = readRecord(
+      reviewSqlProposalHandoff,
+      "migrationProposalSnapshot",
+    )
+    const reviewEvidence = readRecord(reviewSession, "reviewEvidence")
+    const reviewMigrationProposalSnapshotRecovery = readNullableRecord(
+      reviewSqlProposalHandoff,
+      "migrationProposalSnapshotRecovery",
+    )
+    const reviewMigrationProposalSnapshotPath = readString(
+      reviewSqlProposalHandoff,
+      "migrationProposalSnapshotPath",
+    )
+
+    expect(reviewSession.id).toBe(createSessionId)
+    expect(reviewSession.status).toBe("ready")
+    expect(reviewSession.reviewComment).toBe("Looks good for staging")
+    expect(reviewSession.reviewedByUserId).toBe(createSessionActorUserId)
+    expect(reviewEvidence).toMatchObject({
+      sessionId: createSessionId,
+      reportPath: createSessionReportPath,
+      actorUserId: createSessionActorUserId,
       comment: "Looks good for staging",
       decision: "approve",
     })
-    expect(reviewBody.session.reviewEvidence.reviewedAt).toBe(
-      reviewBody.session.reviewedAt,
-    )
-    expect(reviewBody.diff.totalFileCount).toBe(6)
-    expect(reviewBody.sqlProposal.tableName).toBe("customer")
-    expect(reviewBody.sqlProposalHandoff.proposalStatus).toBe("ready")
-    expect(
-      reviewBody.sqlProposalHandoff.migrationProposalSnapshot,
-    ).toMatchObject({
-      snapshotPath: reviewBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+    expect(reviewEvidence.reviewedAt).toBe(reviewSession.reviewedAt)
+    expect(reviewDiff.totalFileCount).toBe(6)
+    expect(reviewSqlProposal.tableName).toBe("customer")
+    expect(reviewSqlProposalHandoff.proposalStatus).toBe("ready")
+    expect(reviewMigrationProposalSnapshot).toMatchObject({
+      snapshotPath: reviewMigrationProposalSnapshotPath,
     })
 
     const confirmResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/confirm`,
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken, {
@@ -364,82 +413,58 @@ describe("generator session module lifecycle", () => {
           }),
           body: JSON.stringify({
             displayedRecoveryStatus:
-              reviewBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
-                ?.status ?? "none",
-            displayedSnapshotPath:
-              reviewBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+              reviewMigrationProposalSnapshotRecovery === null
+                ? "none"
+                : readString(reviewMigrationProposalSnapshotRecovery, "status"),
+            displayedSnapshotPath: reviewMigrationProposalSnapshotPath,
           }),
         },
       ),
     )
     expect(confirmResponse.status).toBe(200)
 
-    const confirmBody = (await confirmResponse.json()) as {
-      session: {
-        confirmedAt: string
-        confirmedByUserId: string
-        confirmationEvidence: {
-          actorUserId: string
-          archivedSnapshotPath: string | null
-          checklist: string[]
-          confirmedAt: string
-          recoveryStatus: string
-          reportPath: string
-          sessionId: string
-          snapshotPath: string
-        }
-        id: string
-      }
-      sqlProposalHandoff: {
-        confirmationChecklist: string[]
-        migrationProposalSnapshot: {
-          generatedAt: string
-          migrationProposalResolution: {
-            proposal: {
-              tableName: string
-            } | null
-            unsupportedReason: string | null
-          }
-          snapshotPath: string
-        }
-        migrationProposalSnapshotPath: string
-      }
-    }
-    expect(confirmBody.session.id).toBe(createBody.session.id)
-    expect(confirmBody.session.confirmedByUserId).toBe(
-      createBody.session.actorUserId,
+    const confirmBody = await readJsonRecord(confirmResponse)
+    const confirmSession = readRecord(confirmBody, "session")
+    const confirmSqlProposalHandoff = readRecord(
+      confirmBody,
+      "sqlProposalHandoff",
     )
-    expect(confirmBody.session.confirmationEvidence).toMatchObject({
-      sessionId: createBody.session.id,
-      reportPath: createBody.session.reportPath,
-      snapshotPath:
-        confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+    const confirmMigrationProposalSnapshot = readRecord(
+      confirmSqlProposalHandoff,
+      "migrationProposalSnapshot",
+    )
+    const confirmEvidence = readRecord(confirmSession, "confirmationEvidence")
+    const confirmMigrationProposalSnapshotPath = readString(
+      confirmSqlProposalHandoff,
+      "migrationProposalSnapshotPath",
+    )
+    expect(confirmSession.id).toBe(createSessionId)
+    expect(confirmSession.confirmedByUserId).toBe(createSessionActorUserId)
+    expect(confirmEvidence).toMatchObject({
+      sessionId: createSessionId,
+      reportPath: createSessionReportPath,
+      snapshotPath: confirmMigrationProposalSnapshotPath,
       recoveryStatus: "none",
       archivedSnapshotPath: null,
-      actorUserId: createBody.session.actorUserId,
+      actorUserId: createSessionActorUserId,
     })
-    expect(confirmBody.session.confirmationEvidence.confirmedAt).toBe(
-      confirmBody.session.confirmedAt,
+    expect(confirmEvidence.confirmedAt).toBe(confirmSession.confirmedAt)
+    expect(confirmEvidence.checklist).toEqual(
+      confirmSqlProposalHandoff.confirmationChecklist,
     )
-    expect(confirmBody.session.confirmationEvidence.checklist).toEqual(
-      confirmBody.sqlProposalHandoff.confirmationChecklist,
-    )
-    expect(
-      confirmBody.sqlProposalHandoff.migrationProposalSnapshot,
-    ).toMatchObject({
-      snapshotPath:
-        confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+    expect(confirmMigrationProposalSnapshot).toMatchObject({
+      snapshotPath: confirmMigrationProposalSnapshotPath,
     })
-    expect(confirmBody.sqlProposalHandoff.confirmationChecklist).toEqual([
-      `Review the SQL draft and Drizzle snippet in ${confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath} before changing persistence files.`,
-      `Verify the migration proposal snapshot at ${confirmBody.sqlProposalHandoff.migrationProposalSnapshotPath} was generated from ${createBody.session.reportPath} at ${createBody.session.createdAt}.`,
+    expect(confirmSqlProposalHandoff.confirmationChecklist).toEqual([
+      `Review the SQL draft and Drizzle snippet in ${confirmMigrationProposalSnapshotPath} before changing persistence files.`,
+      `Verify the migration proposal snapshot at ${confirmMigrationProposalSnapshotPath} was generated from ${createSessionReportPath} at ${createSessionCreatedAt}.`,
       "Confirm the canonical owner and target paths match the intended persistence scope.",
       "Run db:generate and db:migrate only after manual sign-off.",
     ])
 
     const applyResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/apply`,
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken, {
@@ -451,115 +476,62 @@ describe("generator session module lifecycle", () => {
     )
     expect(applyResponse.status).toBe(200)
 
-    const applyBody = (await applyResponse.json()) as {
-      diff: {
-        actionCounts: {
-          block: number
-          create: number
-          overwrite: number
-          skip: number
-        }
-        changedFileCount: number
-        totalFileCount: number
-        unchangedFileCount: number
-      }
-      session: {
-        appliedAt: string
-        appliedFileCount: number
-        appliedByUserId: string
-        confirmedAt: string
-        applyEvidence: {
-          actorUserId: string
-          appliedAt: string
-          manifestPath: string
-          reportPath: string
-          requestId: string
-          sessionId: string
-        }
-        applyManifestPath: string
-        applyRequestId: string
-        id: string
-        reviewEvidence: {
-          actorUserId: string
-          comment: string
-          decision: string
-        }
-        skippedFileCount: number
-        status: string
-      }
-      apply: {
-        evidence: {
-          actorUserId: string
-          appliedAt: string
-          manifestPath: string
-          reportPath: string
-          requestId: string
-          sessionId: string
-        }
-        files: Array<{ written: boolean }>
-        manifestPath: string
-      }
-      sqlProposal: {
-        tableName: string
-      }
-      sqlProposalHandoff: {
-        proposalStatus: string
-        migrationProposalSnapshot: {
-          generatedAt: string
-          migrationProposalResolution: {
-            proposal: {
-              tableName: string
-            } | null
-            unsupportedReason: string | null
-          }
-          snapshotPath: string
-        }
-        migrationProposalSnapshotPath: string
-      }
-    }
-    expect(applyBody.session.id).toBe(createBody.session.id)
-    expect(applyBody.session.status).toBe("applied")
-    expect(applyBody.session.appliedAt).toBeTruthy()
-    expect(applyBody.session.appliedFileCount).toBe(6)
-    expect(applyBody.session.appliedByUserId).toBe(
-      createBody.session.actorUserId,
+    const applyBody = await readJsonRecord(applyResponse)
+    const applyDiff = readRecord(applyBody, "diff")
+    const applySession = readRecord(applyBody, "session")
+    const applyResult = readRecord(applyBody, "apply")
+    const applyEvidence = readRecord(applyResult, "evidence")
+    const applyFiles = readRecordArray(applyResult, "files")
+    const applySqlProposal = readRecord(applyBody, "sqlProposal")
+    const applySqlProposalHandoff = readRecord(applyBody, "sqlProposalHandoff")
+    const applyMigrationProposalSnapshot = readRecord(
+      applySqlProposalHandoff,
+      "migrationProposalSnapshot",
     )
-    expect(applyBody.session.skippedFileCount).toBe(0)
-    expect(applyBody.session.applyRequestId).toBe(
-      "req-generator-session-apply-1",
+    const applyManifestPath = readString(applyResult, "manifestPath")
+    const applySessionAppliedAt = readString(applySession, "appliedAt")
+    const applySessionApplyManifestPath = readString(
+      applySession,
+      "applyManifestPath",
     )
-    expect(applyBody.session.applyManifestPath).toBe(
-      applyBody.apply.manifestPath,
+    const applySessionId = readString(applySession, "id")
+    const applySessionActorUserId = readString(applySession, "appliedByUserId")
+    const applyMigrationProposalSnapshotPath = readString(
+      applySqlProposalHandoff,
+      "migrationProposalSnapshotPath",
     )
-    expect(applyBody.session.confirmedAt).toBeTruthy()
-    expect(applyBody.session.reviewEvidence).toMatchObject({
-      actorUserId: createBody.session.actorUserId,
+    expect(applySessionId).toBe(createSessionId)
+    expect(applySession.status).toBe("applied")
+    expect(applySessionAppliedAt).toBeTruthy()
+    expect(applySession.appliedFileCount).toBe(6)
+    expect(applySessionActorUserId).toBe(createSessionActorUserId)
+    expect(applySession.skippedFileCount).toBe(0)
+    expect(applySession.applyRequestId).toBe("req-generator-session-apply-1")
+    expect(applySessionApplyManifestPath).toBe(applyManifestPath)
+    expect(applySession.confirmedAt).toBeTruthy()
+    expect(applySession.reviewEvidence).toMatchObject({
+      actorUserId: createSessionActorUserId,
       comment: "Looks good for staging",
       decision: "approve",
     })
-    expect(applyBody.diff).toEqual(createBody.diff)
-    expect(applyBody.apply.evidence).toMatchObject({
-      sessionId: createBody.session.id,
-      reportPath: createBody.session.reportPath,
-      manifestPath: applyBody.apply.manifestPath,
-      actorUserId: createBody.session.actorUserId,
+    expect(applyDiff).toEqual(createDiff)
+    expect(applyEvidence).toMatchObject({
+      sessionId: createSessionId,
+      reportPath: createSessionReportPath,
+      manifestPath: applyManifestPath,
+      actorUserId: createSessionActorUserId,
       requestId: "req-generator-session-apply-1",
     })
-    expect(applyBody.apply.evidence.appliedAt).toBe(applyBody.session.appliedAt)
-    expect(applyBody.session.applyEvidence).toEqual(applyBody.apply.evidence)
-    expect(applyBody.apply.files.every((file) => file.written)).toBe(true)
-    expect(applyBody.sqlProposal.tableName).toBe("customer")
-    expect(applyBody.sqlProposalHandoff.proposalStatus).toBe("ready")
-    expect(
-      applyBody.sqlProposalHandoff.migrationProposalSnapshot,
-    ).toMatchObject({
-      snapshotPath: applyBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+    expect(applyEvidence.appliedAt).toBe(applySessionAppliedAt)
+    expect(applySession.applyEvidence).toEqual(applyEvidence)
+    expect(applyFiles.every((file) => readBoolean(file, "written"))).toBe(true)
+    expect(applySqlProposal.tableName).toBe("customer")
+    expect(applySqlProposalHandoff.proposalStatus).toBe("ready")
+    expect(applyMigrationProposalSnapshot).toMatchObject({
+      snapshotPath: applyMigrationProposalSnapshotPath,
     })
 
-    const manifestContents = await readFile(
-      applyBody.apply.manifestPath,
-      "utf8",
-    )
+    const manifestContents = await readFile(applyManifestPath, "utf8")
     expect(manifestContents).toContain('"schemaName": "customer"')
 
     const listResponse = await app.handle(
@@ -569,35 +541,36 @@ describe("generator session module lifecycle", () => {
     )
     expect(listResponse.status).toBe(200)
 
-    const listBody = (await listResponse.json()) as {
-      items: Array<{
-        applyEvidence: {
-          requestId: string
-        }
-        id: string
-        reviewEvidence: {
-          comment: string
-          decision: string
-        }
-        schemaName: string
-      }>
+    const listBody = await readJsonRecord(listResponse)
+    const listItems = readRecordArray(listBody, "items")
+    expect(listItems).toHaveLength(1)
+    const firstListItem = listItems[0]
+    if (!firstListItem) {
+      throw new Error("Expected list item")
     }
-    expect(listBody.items).toHaveLength(1)
-    expect(listBody.items[0]).toMatchObject({
-      id: createBody.session.id,
+    const firstListItemApplyEvidence = readRecord(
+      firstListItem,
+      "applyEvidence",
+    )
+    const firstListItemReviewEvidence = readRecord(
+      firstListItem,
+      "reviewEvidence",
+    )
+    expect(firstListItem).toMatchObject({
+      id: createSessionId,
       schemaName: "customer",
     })
-    expect(listBody.items[0]?.applyEvidence.requestId).toBe(
+    expect(firstListItemApplyEvidence.requestId).toBe(
       "req-generator-session-apply-1",
     )
-    expect(listBody.items[0]?.reviewEvidence).toMatchObject({
+    expect(firstListItemReviewEvidence).toMatchObject({
       comment: "Looks good for staging",
       decision: "approve",
     })
 
     const detailResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}`,
+        `http://localhost/studio/generator/sessions/${createSessionId}`,
         {
           headers: createAuthorizedHeaders(accessToken),
         },
@@ -605,78 +578,53 @@ describe("generator session module lifecycle", () => {
     )
     expect(detailResponse.status).toBe(200)
 
-    const detailBody = (await detailResponse.json()) as {
-      applyEvidence: {
-        actorUserId: string
-        requestId: string
-      }
-      diffSummary: {
-        actionCounts: {
-          create: number
-        }
-        totalFileCount: number
-      }
-      id: string
-      report: {
-        schemaName: string
-      }
-      reviewEvidence: {
-        actorUserId: string
-        comment: string
-        decision: string
-      }
-      sqlProposal: {
-        tableName: string
-      }
-      sqlProposalHandoff: {
-        proposalStatus: string
-        migrationProposalSnapshot: {
-          generatedAt: string
-          migrationProposalResolution: {
-            proposal: {
-              tableName: string
-            } | null
-            unsupportedReason: string | null
-          }
-          snapshotPath: string
-        }
-        migrationProposalSnapshotPath: string
-        targetPaths: {
-          persistenceIndexFile: string
-        }
-      }
-    }
+    const detailBody = await readJsonRecord(detailResponse)
+    const detailDiffSummary = readRecord(detailBody, "diffSummary")
+    const detailDiffActionCounts = readRecord(detailDiffSummary, "actionCounts")
+    const detailApplyEvidence = readRecord(detailBody, "applyEvidence")
+    const detailReviewEvidence = readRecord(detailBody, "reviewEvidence")
+    const detailSqlProposal = readRecord(detailBody, "sqlProposal")
+    const detailSqlProposalHandoff = readRecord(
+      detailBody,
+      "sqlProposalHandoff",
+    )
+    const detailMigrationProposalSnapshot = readRecord(
+      detailSqlProposalHandoff,
+      "migrationProposalSnapshot",
+    )
+    const detailMigrationProposalSnapshotPath = readString(
+      detailSqlProposalHandoff,
+      "migrationProposalSnapshotPath",
+    )
     expect(detailBody).toMatchObject({
-      id: createBody.session.id,
+      id: createSessionId,
       report: {
         schemaName: "customer",
       },
     })
-    expect(detailBody.diffSummary.totalFileCount).toBe(6)
-    expect(detailBody.diffSummary.actionCounts.create).toBe(6)
-    expect(detailBody.applyEvidence).toMatchObject({
-      actorUserId: createBody.session.actorUserId,
+    expect(detailDiffSummary.totalFileCount).toBe(6)
+    expect(detailDiffActionCounts.create).toBe(6)
+    expect(detailApplyEvidence).toMatchObject({
+      actorUserId: createSessionActorUserId,
       requestId: "req-generator-session-apply-1",
     })
-    expect(detailBody.reviewEvidence).toMatchObject({
-      actorUserId: createBody.session.actorUserId,
+    expect(detailReviewEvidence).toMatchObject({
+      actorUserId: createSessionActorUserId,
       comment: "Looks good for staging",
       decision: "approve",
     })
-    expect(detailBody.sqlProposal.tableName).toBe("customer")
-    expect(detailBody.sqlProposalHandoff).toMatchObject({
+    expect(detailSqlProposal.tableName).toBe("customer")
+    expect(detailSqlProposalHandoff).toMatchObject({
       proposalStatus: "ready",
       targetPaths: {
         persistenceIndexFile: "packages/persistence/src/index.ts",
       },
     })
-    expect(
-      detailBody.sqlProposalHandoff.migrationProposalSnapshot,
-    ).toMatchObject({
-      snapshotPath: detailBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+    expect(detailMigrationProposalSnapshot).toMatchObject({
+      snapshotPath: detailMigrationProposalSnapshotPath,
     })
-    expect(detailBody.sqlProposalHandoff.migrationProposalSnapshotPath).toBe(
-      createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+    expect(detailMigrationProposalSnapshotPath).toBe(
+      createMigrationProposalSnapshotPath,
     )
 
     const auditLog = (await fixture.repository.listAuditLogs()).find(
@@ -685,9 +633,9 @@ describe("generator session module lifecycle", () => {
     expect(auditLog).toMatchObject({
       category: "generator",
       action: "preview_create",
-      actorUserId: createBody.session.actorUserId,
+      actorUserId: createSessionActorUserId,
       targetType: "generator-session",
-      targetId: createBody.session.id,
+      targetId: createSessionId,
       requestId: "req-generator-session-1",
       userAgent: "generator-session-test-agent",
       result: "success",
@@ -699,9 +647,9 @@ describe("generator session module lifecycle", () => {
     expect(applyAuditLog).toMatchObject({
       category: "generator",
       action: "staging_apply",
-      actorUserId: createBody.session.actorUserId,
+      actorUserId: createSessionActorUserId,
       targetType: "generator-session",
-      targetId: createBody.session.id,
+      targetId: createSessionId,
       requestId: "req-generator-session-apply-1",
       userAgent: "generator-session-test-agent",
       result: "success",
@@ -713,9 +661,9 @@ describe("generator session module lifecycle", () => {
     expect(reviewAuditLog).toMatchObject({
       category: "generator",
       action: "review_approve",
-      actorUserId: createBody.session.actorUserId,
+      actorUserId: createSessionActorUserId,
       targetType: "generator-session",
-      targetId: createBody.session.id,
+      targetId: createSessionId,
       requestId: "req-generator-session-review-1",
       userAgent: "generator-session-test-agent",
       result: "success",
@@ -727,9 +675,9 @@ describe("generator session module lifecycle", () => {
     expect(confirmAuditLog).toMatchObject({
       category: "generator",
       action: "review_confirm",
-      actorUserId: createBody.session.actorUserId,
+      actorUserId: createSessionActorUserId,
       targetType: "generator-session",
-      targetId: createBody.session.id,
+      targetId: createSessionId,
       requestId: "req-generator-session-confirm-1",
       userAgent: "generator-session-test-agent",
       result: "success",
@@ -758,21 +706,25 @@ describe("generator session module lifecycle", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: string
-        } | null
-      }
-    }
+    const createBody = await readJsonRecord(createResponse)
+    const createSession = readRecord(createBody, "session")
+    const createSqlProposalHandoff = readRecord(
+      createBody,
+      "sqlProposalHandoff",
+    )
+    const createSessionId = readString(createSession, "id")
+    const createMigrationProposalSnapshotPath = readString(
+      createSqlProposalHandoff,
+      "migrationProposalSnapshotPath",
+    )
+    const createMigrationProposalSnapshotRecovery = readNullableRecord(
+      createSqlProposalHandoff,
+      "migrationProposalSnapshotRecovery",
+    )
 
     const reviewResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/review`,
         {
           method: "POST",
           headers: {
@@ -791,7 +743,7 @@ describe("generator session module lifecycle", () => {
 
     const firstConfirmResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/confirm`,
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken, {
@@ -800,31 +752,26 @@ describe("generator session module lifecycle", () => {
           }),
           body: JSON.stringify({
             displayedRecoveryStatus:
-              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
-                ?.status ?? "none",
-            displayedSnapshotPath:
-              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+              createMigrationProposalSnapshotRecovery === null
+                ? "none"
+                : readString(createMigrationProposalSnapshotRecovery, "status"),
+            displayedSnapshotPath: createMigrationProposalSnapshotPath,
           }),
         },
       ),
     )
     expect(firstConfirmResponse.status).toBe(200)
 
-    const firstConfirmBody = (await firstConfirmResponse.json()) as {
-      session: {
-        confirmedAt: string
-        confirmationEvidence: {
-          checklist: string[]
-          confirmedAt: string
-          reportPath: string
-          sessionId: string
-        }
-      }
-    }
+    const firstConfirmBody = await readJsonRecord(firstConfirmResponse)
+    const firstConfirmSession = readRecord(firstConfirmBody, "session")
+    const firstConfirmEvidence = readRecord(
+      firstConfirmSession,
+      "confirmationEvidence",
+    )
 
     const secondConfirmResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/confirm`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/confirm`,
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken, {
@@ -833,34 +780,27 @@ describe("generator session module lifecycle", () => {
           }),
           body: JSON.stringify({
             displayedRecoveryStatus:
-              createBody.sqlProposalHandoff.migrationProposalSnapshotRecovery
-                ?.status ?? "none",
-            displayedSnapshotPath:
-              createBody.sqlProposalHandoff.migrationProposalSnapshotPath,
+              createMigrationProposalSnapshotRecovery === null
+                ? "none"
+                : readString(createMigrationProposalSnapshotRecovery, "status"),
+            displayedSnapshotPath: createMigrationProposalSnapshotPath,
           }),
         },
       ),
     )
     expect(secondConfirmResponse.status).toBe(200)
 
-    const secondConfirmBody = (await secondConfirmResponse.json()) as {
-      session: {
-        confirmedAt: string
-        confirmationEvidence: {
-          checklist: string[]
-          confirmedAt: string
-          reportPath: string
-          sessionId: string
-        }
-      }
-    }
+    const secondConfirmBody = await readJsonRecord(secondConfirmResponse)
+    const secondConfirmSession = readRecord(secondConfirmBody, "session")
+    const secondConfirmEvidence = readRecord(
+      secondConfirmSession,
+      "confirmationEvidence",
+    )
 
-    expect(secondConfirmBody.session.confirmedAt).toBe(
-      firstConfirmBody.session.confirmedAt,
+    expect(secondConfirmSession.confirmedAt).toBe(
+      firstConfirmSession.confirmedAt,
     )
-    expect(secondConfirmBody.session.confirmationEvidence).toEqual(
-      firstConfirmBody.session.confirmationEvidence,
-    )
+    expect(secondConfirmEvidence).toEqual(firstConfirmEvidence)
   })
 
   it("requires confirmation before applying a ready generator preview session", async () => {
@@ -885,21 +825,13 @@ describe("generator session module lifecycle", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: string
-        } | null
-      }
-    }
+    const createBody = await readJsonRecord(createResponse)
+    const createSession = readRecord(createBody, "session")
+    const createSessionId = readString(createSession, "id")
 
     const reviewResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/review`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/review`,
         {
           method: "POST",
           headers: {
@@ -918,7 +850,7 @@ describe("generator session module lifecycle", () => {
 
     const applyResponse = await app.handle(
       new Request(
-        `http://localhost/studio/generator/sessions/${createBody.session.id}/apply`,
+        `http://localhost/studio/generator/sessions/${createSessionId}/apply`,
         {
           method: "POST",
           headers: createAuthorizedHeaders(accessToken),
@@ -927,9 +859,7 @@ describe("generator session module lifecycle", () => {
     )
 
     expect(applyResponse.status).toBe(409)
-    const errorBody = (await applyResponse.json()) as {
-      code: number
-    }
+    const errorBody = await readJsonRecord(applyResponse)
     expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_REQUIRED,
     )
