@@ -16,6 +16,119 @@ import {
   writeMigrationProposalSnapshotFixture,
 } from "./test-helpers"
 
+type MigrationProposalSnapshotRecoveryStatus =
+  | "none"
+  | "rebuilt-from-corrupt"
+  | "rebuilt-from-missing"
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "number") {
+    throw new Error(`Expected number field: ${key}`)
+  }
+
+  return property
+}
+
+const isMigrationProposalSnapshotRecoveryStatus = (
+  value: string,
+): value is MigrationProposalSnapshotRecoveryStatus =>
+  value === "none" ||
+  value === "rebuilt-from-corrupt" ||
+  value === "rebuilt-from-missing"
+
+const readMigrationProposalSnapshotRecovery = (
+  value: Record<string, unknown>,
+  key: string,
+) => {
+  const property = value[key]
+
+  if (property === null) {
+    return null
+  }
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  const status = readString(property, "status")
+
+  if (!isMigrationProposalSnapshotRecoveryStatus(status)) {
+    throw new Error("Expected migration proposal snapshot recovery status")
+  }
+
+  return { status }
+}
+
+const readCreatePreviewResponse = async (response: {
+  json(): Promise<unknown>
+}) => {
+  const body = await readJsonRecord(response)
+  const sqlProposalHandoff = readRecord(body, "sqlProposalHandoff")
+
+  return {
+    session: {
+      id: readString(readRecord(body, "session"), "id"),
+    },
+    sqlProposalHandoff: {
+      migrationProposalSnapshotPath: readString(
+        sqlProposalHandoff,
+        "migrationProposalSnapshotPath",
+      ),
+      migrationProposalSnapshotRecovery: readMigrationProposalSnapshotRecovery(
+        sqlProposalHandoff,
+        "migrationProposalSnapshotRecovery",
+      ),
+    },
+  }
+}
+
+const readErrorCode = async (response: { json(): Promise<unknown> }) =>
+  readNumber(await readJsonRecord(response), "code")
+
+const readErrorResponse = async (response: { json(): Promise<unknown> }) => {
+  const body = await readJsonRecord(response)
+
+  return {
+    code: readNumber(body, "code"),
+    details: readRecord(body, "details"),
+  }
+}
+
 describe("generator session module guards", () => {
   it("refuses to apply stale generator preview sessions", async () => {
     const { accessToken, app, outputDir } =
@@ -39,17 +152,7 @@ describe("generator session module guards", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
+    const createBody = await readCreatePreviewResponse(createResponse)
     const driftedPath = join(outputDir, "modules/customer/customer.schema.ts")
 
     await mkdir(dirname(driftedPath), { recursive: true })
@@ -104,10 +207,9 @@ describe("generator session module guards", () => {
     )
 
     expect(applyResponse.status).toBe(409)
-    const errorBody = (await applyResponse.json()) as {
-      code: number
-    }
-    expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_STALE)
+    expect(await readErrorCode(applyResponse)).toBe(
+      errorCodes.GENERATOR_SESSION_STALE,
+    )
   })
 
   it("blocks apply for rejected generator preview sessions", async () => {
@@ -132,17 +234,7 @@ describe("generator session module guards", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
+    const createBody = await readCreatePreviewResponse(createResponse)
 
     const reviewResponse = await app.handle(
       new Request(
@@ -182,13 +274,7 @@ describe("generator session module guards", () => {
       ),
     )
     expect(confirmResponse.status).toBe(409)
-    const confirmErrorBody = (await confirmResponse.json()) as {
-      code: number
-      details: {
-        id: string
-        status: string
-      }
-    }
+    const confirmErrorBody = await readErrorResponse(confirmResponse)
     expect(confirmErrorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_NOT_READY,
     )
@@ -208,10 +294,9 @@ describe("generator session module guards", () => {
     )
 
     expect(applyResponse.status).toBe(409)
-    const errorBody = (await applyResponse.json()) as {
-      code: number
-    }
-    expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_REJECTED)
+    expect(await readErrorCode(applyResponse)).toBe(
+      errorCodes.GENERATOR_SESSION_REJECTED,
+    )
   })
 
   it("blocks confirmation when the sql proposal is unsupported", async () => {
@@ -283,13 +368,7 @@ describe("generator session module guards", () => {
     )
 
     expect(confirmResponse.status).toBe(409)
-    const errorBody = (await confirmResponse.json()) as {
-      code: number
-      details: {
-        proposalStatus: string
-        unsupportedReason: string
-      }
-    }
+    const errorBody = await readErrorResponse(confirmResponse)
     expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_SQL_PROPOSAL_NOT_READY,
     )
@@ -321,17 +400,7 @@ describe("generator session module guards", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
+    const createBody = await readCreatePreviewResponse(createResponse)
 
     const reviewResponse = await app.handle(
       new Request(
@@ -369,13 +438,7 @@ describe("generator session module guards", () => {
       ),
     )
     expect(confirmResponse.status).toBe(409)
-    const errorBody = (await confirmResponse.json()) as {
-      code: number
-      details: {
-        displayedSnapshotPath: string
-        expectedSnapshotPath: string
-      }
-    }
+    const errorBody = await readErrorResponse(confirmResponse)
     expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH,
     )
@@ -408,17 +471,7 @@ describe("generator session module guards", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
+    const createBody = await readCreatePreviewResponse(createResponse)
 
     const reviewResponse = await app.handle(
       new Request(
@@ -485,13 +538,7 @@ describe("generator session module guards", () => {
     )
 
     expect(secondApplyResponse.status).toBe(409)
-    const errorBody = (await secondApplyResponse.json()) as {
-      code: number
-      details: {
-        id: string
-        status: string
-      }
-    }
+    const errorBody = await readErrorResponse(secondApplyResponse)
     expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_NOT_READY)
     expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
@@ -521,17 +568,7 @@ describe("generator session module guards", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
+    const createBody = await readCreatePreviewResponse(createResponse)
 
     const reviewResponse = await app.handle(
       new Request(
@@ -605,13 +642,7 @@ describe("generator session module guards", () => {
     )
 
     expect(secondConfirmResponse.status).toBe(409)
-    const errorBody = (await secondConfirmResponse.json()) as {
-      code: number
-      details: {
-        id: string
-        status: string
-      }
-    }
+    const errorBody = await readErrorResponse(secondConfirmResponse)
     expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_NOT_READY,
     )
@@ -643,17 +674,7 @@ describe("generator session module guards", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-      sqlProposalHandoff: {
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
+    const createBody = await readCreatePreviewResponse(createResponse)
 
     const firstReviewResponse = await app.handle(
       new Request(
@@ -726,13 +747,7 @@ describe("generator session module guards", () => {
     )
 
     expect(secondReviewResponse.status).toBe(409)
-    const errorBody = (await secondReviewResponse.json()) as {
-      code: number
-      details: {
-        id: string
-        status: string
-      }
-    }
+    const errorBody = await readErrorResponse(secondReviewResponse)
     expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING)
     expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
@@ -762,11 +777,7 @@ describe("generator session module guards", () => {
     )
     expect(createResponse.status).toBe(201)
 
-    const createBody = (await createResponse.json()) as {
-      session: {
-        id: string
-      }
-    }
+    const createBody = await readCreatePreviewResponse(createResponse)
 
     const firstReviewResponse = await app.handle(
       new Request(
@@ -806,13 +817,7 @@ describe("generator session module guards", () => {
     )
 
     expect(secondReviewResponse.status).toBe(409)
-    const errorBody = (await secondReviewResponse.json()) as {
-      code: number
-      details: {
-        id: string
-        status: string
-      }
-    }
+    const errorBody = await readErrorResponse(secondReviewResponse)
     expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING)
     expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
