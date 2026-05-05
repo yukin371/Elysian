@@ -4,16 +4,32 @@ import { t } from "elysia"
 import { AppError } from "../../errors"
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
-import type { ServerModule } from "../module"
-import {
-  tenantListResponseSchema,
-  tenantRecordResponseSchema,
-} from "./openapi"
+import type { AnyServerApp, ServerModule } from "../module"
+import { tenantListResponseSchema, tenantRecordResponseSchema } from "./openapi"
 import type { TenantRepository } from "./repository"
-import { createTenantService } from "./service"
+import {
+  type CreateTenantPayload,
+  type UpdateTenantPayload,
+  createTenantService,
+} from "./service"
 
 export interface TenantModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface TenantRouteRegistrar {
+  get: (...args: readonly unknown[]) => TenantRouteRegistrar
+  post: (...args: readonly unknown[]) => TenantRouteRegistrar
+  put: (...args: readonly unknown[]) => TenantRouteRegistrar
+}
+
+interface TenantRouteParams {
+  id: string
+}
+
+interface TenantRouteSet {
+  headers: Record<string, string>
+  status: number
 }
 
 const tenantPermissions = {
@@ -52,168 +68,186 @@ export const createTenantModule = (
     const authorize = async (
       headers: Headers,
       permissionCode: string,
-    ): Promise<AuthIdentity | undefined> => {
+    ): Promise<void> => {
       if (!options.authGuard) {
-        return undefined
+        return
       }
 
-      return options.authGuard.authorize(headers, permissionCode)
+      const identity = await options.authGuard.authorize(
+        headers,
+        permissionCode,
+      )
+      assertSuperAdmin(identity)
     }
 
     context.logger.info("Registering tenant module", {
       fields: tenantModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/tenants",
-        async ({ request }) => {
-          const identity = await authorize(
-            request.headers,
-            tenantPermissions.list,
-          )
-          assertSuperAdmin(identity)
+    let tenantApp = app as unknown as TenantRouteRegistrar
 
-          return {
-            items: await service.list(),
-          }
-        },
-        {
-          response: {
-            200: tenantListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["tenant"],
-            summary: "List tenants",
-          },
-        },
-      )
-      .get(
-        "/system/tenants/export",
-        async ({ request, set }) => {
-          const identity = await authorize(
-            request.headers,
-            tenantPermissions.list,
-          )
-          assertSuperAdmin(identity)
+    tenantApp = tenantApp.get(
+      "/system/tenants",
+      async ({ request }: { request: Request }) => {
+        await authorize(request.headers, tenantPermissions.list)
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv()
+        return {
+          items: await service.list(),
+        }
+      },
+      {
+        response: {
+          200: tenantListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["tenant"],
-            summary: "Export tenants as CSV",
-          },
+        detail: {
+          tags: ["tenant"],
+          summary: "List tenants",
         },
-      )
-      .get(
-        "/system/tenants/:id",
-        async ({ params, request }) => {
-          const identity = await authorize(
-            request.headers,
-            tenantPermissions.get,
-          )
-          assertSuperAdmin(identity)
+      },
+    )
 
-          return service.getById(params.id)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: tenantRecordResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["tenant"],
-            summary: "Get tenant by id",
-          },
-        },
-      )
-      .post(
-        "/system/tenants",
-        async ({ body, request, set }) => {
-          const identity = await authorize(
-            request.headers,
-            tenantPermissions.create,
-          )
-          assertSuperAdmin(identity)
-          set.status = 201
+    tenantApp = tenantApp.get(
+      "/system/tenants/export",
+      async ({ request, set }: { request: Request; set: TenantRouteSet }) => {
+        await authorize(request.headers, tenantPermissions.list)
 
-          return service.create(body)
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv()
+      },
+      {
+        response: {
+          ...createErrorResponses(401, 403),
         },
-        {
-          body: tenantCreateBodySchema,
-          response: {
-            201: tenantRecordResponseSchema,
-            ...createErrorResponses(400, 401, 403, 409),
-          },
-          detail: {
-            tags: ["tenant"],
-            summary: "Create tenant",
-          },
+        detail: {
+          tags: ["tenant"],
+          summary: "Export tenants as CSV",
         },
-      )
-      .put(
-        "/system/tenants/:id",
-        async ({ params, body, request }) => {
-          const identity = await authorize(
-            request.headers,
-            tenantPermissions.update,
-          )
-          assertSuperAdmin(identity)
+      },
+    )
 
-          return service.update(params.id, body)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          body: tenantUpdateBodySchema,
-          response: {
-            200: tenantRecordResponseSchema,
-            ...createErrorResponses(400, 401, 403, 404, 409),
-          },
-          detail: {
-            tags: ["tenant"],
-            summary: "Update tenant",
-          },
-        },
-      )
-      .put(
-        "/system/tenants/:id/status",
-        async ({ params, body, request }) => {
-          const identity = await authorize(
-            request.headers,
-            tenantPermissions.update,
-          )
-          assertSuperAdmin(identity)
+    tenantApp = tenantApp.get(
+      "/system/tenants/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: TenantRouteParams
+        request: Request
+      }) => {
+        await authorize(request.headers, tenantPermissions.get)
 
-          return service.updateStatus(params.id, body.status)
+        return service.getById(params.id)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: tenantRecordResponseSchema,
+          ...createErrorResponses(401, 403, 404),
         },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          body: t.Object({
-            status: tenantStatusSchema,
-          }),
-          response: {
-            200: tenantRecordResponseSchema,
-            ...createErrorResponses(400, 401, 403, 404),
-          },
-          detail: {
-            tags: ["tenant"],
-            summary: "Update tenant status",
-          },
+        detail: {
+          tags: ["tenant"],
+          summary: "Get tenant by id",
         },
-      )
+      },
+    )
+
+    tenantApp = tenantApp.post(
+      "/system/tenants",
+      async ({
+        body,
+        request,
+        set,
+      }: {
+        body: CreateTenantPayload
+        request: Request
+        set: TenantRouteSet
+      }) => {
+        await authorize(request.headers, tenantPermissions.create)
+        set.status = 201
+
+        return service.create(body)
+      },
+      {
+        body: tenantCreateBodySchema,
+        response: {
+          201: tenantRecordResponseSchema,
+          ...createErrorResponses(400, 401, 403, 409),
+        },
+        detail: {
+          tags: ["tenant"],
+          summary: "Create tenant",
+        },
+      },
+    )
+
+    tenantApp = tenantApp.put(
+      "/system/tenants/:id",
+      async ({
+        params,
+        body,
+        request,
+      }: {
+        params: TenantRouteParams
+        body: UpdateTenantPayload
+        request: Request
+      }) => {
+        await authorize(request.headers, tenantPermissions.update)
+
+        return service.update(params.id, body)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        body: tenantUpdateBodySchema,
+        response: {
+          200: tenantRecordResponseSchema,
+          ...createErrorResponses(400, 401, 403, 404, 409),
+        },
+        detail: {
+          tags: ["tenant"],
+          summary: "Update tenant",
+        },
+      },
+    )
+
+    tenantApp = tenantApp.put(
+      "/system/tenants/:id/status",
+      async ({
+        params,
+        body,
+        request,
+      }: {
+        params: TenantRouteParams
+        body: { status: NonNullable<CreateTenantPayload["status"]> }
+        request: Request
+      }) => {
+        await authorize(request.headers, tenantPermissions.update)
+
+        return service.updateStatus(params.id, body.status)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        body: t.Object({
+          status: tenantStatusSchema,
+        }),
+        response: {
+          200: tenantRecordResponseSchema,
+          ...createErrorResponses(400, 401, 403, 404),
+        },
+        detail: {
+          tags: ["tenant"],
+          summary: "Update tenant status",
+        },
+      },
+    )
+
+    return tenantApp as unknown as AnyServerApp
   },
 })
 
