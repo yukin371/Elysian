@@ -78,10 +78,239 @@ const parseWindowSize = () => {
   return size
 }
 
-const readJsonFile = async <T>(path: string): Promise<T | null> => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "boolean") {
+    throw new Error(`Expected boolean field: ${key}`)
+  }
+
+  return property
+}
+
+const readNullableString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === null || typeof property === "string") {
+    return property
+  }
+
+  throw new Error(`Expected nullable string field: ${key}`)
+}
+
+const readNullableBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === null || typeof property === "boolean") {
+    return property
+  }
+
+  throw new Error(`Expected nullable boolean field: ${key}`)
+}
+
+const readNullableNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === null || typeof property === "number") {
+    return property
+  }
+
+  throw new Error(`Expected nullable number field: ${key}`)
+}
+
+const readStringArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (
+    !Array.isArray(property) ||
+    !property.every((item) => typeof item === "string")
+  ) {
+    throw new Error(`Expected string array field: ${key}`)
+  }
+
+  return property
+}
+
+const readStatus = (
+  value: Record<string, unknown>,
+  key: string,
+): "passed" | "failed" => {
+  const status = readString(value, key)
+
+  if (status !== "passed" && status !== "failed") {
+    throw new Error(`Expected passed/failed field: ${key}`)
+  }
+
+  return status
+}
+
+const readGateStatus = (
+  value: Record<string, unknown>,
+  key: string,
+): GateStatus => {
+  const gateStatus = readString(value, key)
+
+  if (
+    gateStatus !== "passed" &&
+    gateStatus !== "failed" &&
+    gateStatus !== "unknown"
+  ) {
+    throw new Error(`Expected gate status field: ${key}`)
+  }
+
+  return gateStatus
+}
+
+const readSmokeFinalStatus = (
+  value: Record<string, unknown>,
+  key: string,
+): SmokeFinalStatus => {
+  const smokeFinalStatus = value[key]
+
+  if (
+    smokeFinalStatus === null ||
+    smokeFinalStatus === "passed" ||
+    smokeFinalStatus === "failed"
+  ) {
+    return smokeFinalStatus
+  }
+
+  throw new Error(`Expected nullable smoke final status field: ${key}`)
+}
+
+const readWindowEntry = (
+  value: Record<string, unknown>,
+): SmokeStabilityWindowEntry => ({
+  generatedAt: readString(value, "generatedAt"),
+  githubRunId: readNullableString(value, "githubRunId"),
+  githubRunNumber: readNullableString(value, "githubRunNumber"),
+  githubEventName: readNullableString(value, "githubEventName"),
+  githubRef: readNullableString(value, "githubRef"),
+  gitSha: readNullableString(value, "gitSha"),
+  gateStatus: readGateStatus(value, "gateStatus"),
+  smokeFinalStatus: readSmokeFinalStatus(value, "smokeFinalStatus"),
+  recoveredByRetry: readNullableBoolean(value, "recoveredByRetry"),
+  attempts: readNullableNumber(value, "attempts"),
+  notes: readStringArray(value, "notes"),
+})
+
+const readSmokeStabilitySnapshot = (
+  value: Record<string, unknown>,
+): SmokeStabilitySnapshot => ({
+  generatedAt: readString(value, "generatedAt"),
+  gitSha: readNullableString(value, "gitSha"),
+  githubRunId: readNullableString(value, "githubRunId"),
+  githubRunNumber: readNullableString(value, "githubRunNumber"),
+  githubEventName: readNullableString(value, "githubEventName"),
+  githubRef: readNullableString(value, "githubRef"),
+  reportDir: readString(value, "reportDir"),
+  gateStatus: readGateStatus(value, "gateStatus"),
+  smokeFinalStatus: readSmokeFinalStatus(value, "smokeFinalStatus"),
+  recoveredByRetry: readNullableBoolean(value, "recoveredByRetry"),
+  attempts: readNullableNumber(value, "attempts"),
+  gateConclusion: readNullableString(value, "gateConclusion"),
+  notes: readStringArray(value, "notes"),
+})
+
+const readSmokeStabilityWindowReport = (
+  value: Record<string, unknown>,
+): SmokeStabilityWindowReport => {
+  const entries = value.entries
+  const window = value.window
+
+  if (!Array.isArray(entries) || !entries.every(isRecord)) {
+    throw new Error("Expected stability window entries")
+  }
+
+  if (!isRecord(window)) {
+    throw new Error("Expected stability window summary")
+  }
+
+  const recommendation = readString(value, "recommendation")
+  if (
+    recommendation !== "hold_phase6a" &&
+    recommendation !== "candidate_for_next_phase"
+  ) {
+    throw new Error("Expected stability window recommendation")
+  }
+
+  return {
+    generatedAt: readString(value, "generatedAt"),
+    sourceSnapshotPath: readString(value, "sourceSnapshotPath"),
+    windowSize: (() => {
+      const windowSize = value.windowSize
+      if (typeof windowSize !== "number") {
+        throw new Error("Expected windowSize")
+      }
+      return windowSize
+    })(),
+    totalEntries: (() => {
+      const totalEntries = value.totalEntries
+      if (typeof totalEntries !== "number") {
+        throw new Error("Expected totalEntries")
+      }
+      return totalEntries
+    })(),
+    entries: entries.map(readWindowEntry),
+    window: {
+      collectedRuns: (() => {
+        const collectedRuns = window.collectedRuns
+        if (typeof collectedRuns !== "number") {
+          throw new Error("Expected collectedRuns")
+        }
+        return collectedRuns
+      })(),
+      hasMinimumRuns: readBoolean(window, "hasMinimumRuns"),
+      failedGateCount: (() => {
+        const failedGateCount = window.failedGateCount
+        if (typeof failedGateCount !== "number") {
+          throw new Error("Expected failedGateCount")
+        }
+        return failedGateCount
+      })(),
+      maxConsecutiveFailedGates: (() => {
+        const maxConsecutiveFailedGates = window.maxConsecutiveFailedGates
+        if (typeof maxConsecutiveFailedGates !== "number") {
+          throw new Error("Expected maxConsecutiveFailedGates")
+        }
+        return maxConsecutiveFailedGates
+      })(),
+      systemicBlockerDetected: readBoolean(window, "systemicBlockerDetected"),
+      qualifiedForPhaseTransition: readBoolean(
+        window,
+        "qualifiedForPhaseTransition",
+      ),
+    },
+    recommendation,
+  }
+}
+
+const readJsonFile = async <T>(
+  path: string,
+  reader: (value: Record<string, unknown>) => T,
+): Promise<T | null> => {
   try {
     const raw = await readFile(path, "utf8")
-    return JSON.parse(raw) as T
+    const parsed: unknown = JSON.parse(raw)
+
+    if (!isRecord(parsed)) {
+      throw new Error("Expected JSON object payload")
+    }
+
+    return reader(parsed)
   } catch {
     return null
   }
@@ -204,7 +433,7 @@ export const run = async () => {
   const windowPath = resolveWindowPath()
   const windowSize = parseWindowSize()
 
-  const snapshot = await readJsonFile<SmokeStabilitySnapshot>(snapshotPath)
+  const snapshot = await readJsonFile(snapshotPath, readSmokeStabilitySnapshot)
   const fallbackEntry: SmokeStabilityWindowEntry = {
     generatedAt: new Date().toISOString(),
     githubRunId: process.env.GITHUB_RUN_ID ?? null,
@@ -220,7 +449,10 @@ export const run = async () => {
   }
   const currentEntry = snapshot ? toEntry(snapshot) : fallbackEntry
 
-  const existing = await readJsonFile<SmokeStabilityWindowReport>(windowPath)
+  const existing = await readJsonFile(
+    windowPath,
+    readSmokeStabilityWindowReport,
+  )
   const mergedEntries = mergeEntries(existing?.entries ?? [], currentEntry)
   const windowAnalysis = analyzeWindow(mergedEntries, windowSize)
 
