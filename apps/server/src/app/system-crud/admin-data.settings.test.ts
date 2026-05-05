@@ -12,6 +12,52 @@ import {
   testAdminPassword,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp system admin data", () => {
   it("publishes setting success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -31,33 +77,29 @@ describe("createServerApp system admin data", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/system/settings"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/settings", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/settings"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/settings", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/settings"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/settings", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/settings"]?.post?.responses?.["409"],
+      getOpenApiResponse(paths, "/system/settings", "post", "409"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/settings/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/settings/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/settings/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/settings/{id}", "put", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/settings/{id}"]?.put?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/settings/{id}", "put", "404"),
     ).toBeDefined()
   })
 
@@ -89,14 +131,13 @@ describe("createServerApp system admin data", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const listResponse = await app.handle(
       new Request("http://localhost/system/settings", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -132,7 +173,7 @@ describe("createServerApp system admin data", () => {
     const pagedResponse = await app.handle(
       new Request("http://localhost/system/settings?page=2&pageSize=1", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -159,7 +200,7 @@ describe("createServerApp system admin data", () => {
     const getResponse = await app.handle(
       new Request("http://localhost/system/settings/setting_support_email_1", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -249,15 +290,14 @@ describe("createServerApp system admin data", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const createResponse = await app.handle(
       new Request("http://localhost/system/settings", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -269,15 +309,7 @@ describe("createServerApp system admin data", () => {
     )
 
     expect(createResponse.status).toBe(201)
-    const createdSetting = (await createResponse.json()) as {
-      id: string
-      key: string
-      value: string
-      description: string
-      status: string
-      createdAt: string
-      updatedAt: string
-    }
+    const createdSetting = await readJsonRecord(createResponse)
 
     expect(createdSetting).toEqual({
       id: expect.any(String),
@@ -290,17 +322,20 @@ describe("createServerApp system admin data", () => {
     })
 
     const updateResponse = await app.handle(
-      new Request(`http://localhost/system/settings/${createdSetting.id}`, {
-        method: "PUT",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
+      new Request(
+        `http://localhost/system/settings/${readString(createdSetting, "id")}`,
+        {
+          method: "PUT",
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            value: "UTC",
+            status: "disabled",
+          }),
         },
-        body: JSON.stringify({
-          value: "UTC",
-          status: "disabled",
-        }),
-      }),
+      ),
     )
 
     expect(updateResponse.status).toBe(200)
@@ -340,15 +375,14 @@ describe("createServerApp system admin data", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const response = await app.handle(
       new Request("http://localhost/system/settings", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
