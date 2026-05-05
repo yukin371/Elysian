@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-03`（generator 自举闭环优先，后台基础能力作为首批验证对象）
+更新时间：`2026-05-06`（generator 自举闭环优先，后台基础能力作为首批验证对象）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -224,6 +224,8 @@
 
 ## 最近进展
 
+- 已完成一轮“类型/验证基线收口”而非新功能扩张：`apps/server` 多组测试已把响应体裸断言收紧为运行时 shape 校验，`generator-session` 已补 preview report 与 snapshot 读取的 payload/error guard，`scripts` 的 smoke / tenant / stability / download 报告解析已完成最小 payload 校验，`apps/example-vue` 也已补 API error envelope 收窄，当前主线先继续清理低风险断言与解析入口，不提前扩到结构性重构
+- 已确认下一批边界：剩余风险点主要集中在结构层 cast（如 `module.ts` 装配断言）与通用泛型 helper / 模板层 JSON 解析，这部分需单独开批处理，不并入本轮进度同步
 - generator → frontend 注册契约已完成：`ModuleFrontendSchema` 已扩展 `permissionActions` / `workspaceKind` / `moduleCode`，13 个 `ModuleSchema` 已补 `frontend` 元数据，`buildWorkspaceRegistration` 已接入 `packages/frontend-vue` 并替换 `system-registry` / `business-registry` 全部 schema 支撑的手写注册项；generator artifact 已包含 kind / permissions / i18nKeys，当前 470 测试全绿
 - generator → frontend surface 闭环已推进：`example-vue` 已新增标准 CRUD surface 生成/校验脚本，`src/modules/*` 生成产物已提交入库并纳入 `build/check`，全部标准 CRUD main/panel 已开始消费生成组件
 - generator 已从”只写入”扩到”可预览后再决定是否落盘”，当前可在 CLI 预览文件动作、输出 JSON 报告并生成 review-only SQL preview
