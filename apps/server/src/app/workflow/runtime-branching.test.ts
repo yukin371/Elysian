@@ -31,6 +31,39 @@ import {
   workflowRuntimePermissionCodes,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every((item) => isRecord(item))) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
 describe("createServerApp workflow runtime branching", () => {
   it("routes workflow instances through the conditional approval branch", async () => {
     const { app, accessToken, fixture } = await createWorkflowTestHarness({
@@ -43,11 +76,12 @@ describe("createServerApp workflow runtime branching", () => {
         amount: 6800,
       },
     })
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      currentTasks: Array<{ id: string }>
-    }
-    const managerTaskId = startedInstance.currentTasks[0]?.id
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const currentTasks = readRecordArray(startedInstance, "currentTasks")
+    const managerTaskId = currentTasks[0]
+      ? readString(currentTasks[0], "id")
+      : undefined
 
     if (!managerTaskId) {
       throw new Error(
@@ -64,7 +98,7 @@ describe("createServerApp workflow runtime branching", () => {
 
     expect(managerCompleteResponse.status).toBe(200)
     expect(await managerCompleteResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_expense_condition_v1",
       definitionKey: "expense-approval-condition",
       definitionName: "Expense Approval Condition",
@@ -83,7 +117,7 @@ describe("createServerApp workflow runtime branching", () => {
       currentTasks: [
         {
           id: expect.any(String),
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_condition_v1",
           nodeId: "finance-review",
           nodeName: "Finance Review",
@@ -101,7 +135,7 @@ describe("createServerApp workflow runtime branching", () => {
       tasks: [
         {
           id: managerTaskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_condition_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -117,7 +151,7 @@ describe("createServerApp workflow runtime branching", () => {
         },
         {
           id: expect.any(String),
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_condition_v1",
           nodeId: "finance-review",
           nodeName: "Finance Review",
@@ -144,10 +178,11 @@ describe("createServerApp workflow runtime branching", () => {
         },
       ),
     )
-    const financeTodoBody = (await financeTodoResponse.json()) as {
-      items: Array<{ id: string }>
-    }
-    const financeTaskId = financeTodoBody.items[0]?.id
+    const financeTodoBody = await readJsonRecord(financeTodoResponse)
+    const financeTodoItems = readRecordArray(financeTodoBody, "items")
+    const financeTaskId = financeTodoItems[0]
+      ? readString(financeTodoItems[0], "id")
+      : undefined
 
     if (!financeTaskId) {
       throw new Error(
@@ -164,7 +199,7 @@ describe("createServerApp workflow runtime branching", () => {
 
     expect(financeCompleteResponse.status).toBe(200)
     expect(await financeCompleteResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_expense_condition_v1",
       definitionKey: "expense-approval-condition",
       definitionName: "Expense Approval Condition",
@@ -184,7 +219,7 @@ describe("createServerApp workflow runtime branching", () => {
       tasks: [
         {
           id: managerTaskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_condition_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -200,7 +235,7 @@ describe("createServerApp workflow runtime branching", () => {
         },
         {
           id: financeTaskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_condition_v1",
           nodeId: "finance-review",
           nodeName: "Finance Review",
@@ -246,15 +281,14 @@ describe("createServerApp workflow runtime branching", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const startResponse = await app.handle(
       new Request("http://localhost/workflow/instances", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -265,11 +299,12 @@ describe("createServerApp workflow runtime branching", () => {
         }),
       }),
     )
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      currentTasks: Array<{ id: string }>
-    }
-    const managerTaskId = startedInstance.currentTasks[0]?.id
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const currentTasks = readRecordArray(startedInstance, "currentTasks")
+    const managerTaskId = currentTasks[0]
+      ? readString(currentTasks[0], "id")
+      : undefined
 
     if (!managerTaskId) {
       throw new Error(
@@ -281,7 +316,7 @@ describe("createServerApp workflow runtime branching", () => {
       new Request(`http://localhost/workflow/tasks/${managerTaskId}/complete`, {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -292,7 +327,7 @@ describe("createServerApp workflow runtime branching", () => {
 
     expect(completeResponse.status).toBe(200)
     expect(await completeResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_expense_condition_v1",
       definitionKey: "expense-approval-condition",
       definitionName: "Expense Approval Condition",
@@ -312,7 +347,7 @@ describe("createServerApp workflow runtime branching", () => {
       tasks: [
         {
           id: managerTaskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_condition_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -339,11 +374,12 @@ describe("createServerApp workflow runtime branching", () => {
         reason: "budget-exceeded",
       },
     })
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      currentTasks: Array<{ id: string }>
-    }
-    const taskId = startedInstance.currentTasks[0]?.id
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const currentTasks = readRecordArray(startedInstance, "currentTasks")
+    const taskId = currentTasks[0]
+      ? readString(currentTasks[0], "id")
+      : undefined
 
     if (!taskId) {
       throw new Error("Expected workflow instance to create a todo task")
@@ -358,7 +394,7 @@ describe("createServerApp workflow runtime branching", () => {
 
     expect(rejectResponse.status).toBe(200)
     expect(await rejectResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_expense_v1",
       definitionKey: "expense-approval",
       definitionName: "Expense Approval",
@@ -378,7 +414,7 @@ describe("createServerApp workflow runtime branching", () => {
       tasks: [
         {
           id: taskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -402,17 +438,18 @@ describe("createServerApp workflow runtime branching", () => {
     const startResponse = await startWorkflowInstance(app, accessToken, {
       definitionId: "workflow_definition_expense_v1",
     })
-    const startedInstance = (await startResponse.json()) as { id: string }
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
 
     const cancelResponse = await cancelWorkflowInstance(
       app,
       accessToken,
-      startedInstance.id,
+      startedInstanceId,
     )
 
     expect(cancelResponse.status).toBe(200)
     expect(await cancelResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_expense_v1",
       definitionKey: "expense-approval",
       definitionName: "Expense Approval",
@@ -430,7 +467,7 @@ describe("createServerApp workflow runtime branching", () => {
       tasks: [
         {
           id: expect.any(String),
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
