@@ -1,3 +1,4 @@
+import type { ElyQueryValues } from "@elysian/ui-enterprise-vue"
 import { type ComputedRef, type Ref, isRef } from "vue"
 
 import type { FileWorkspaceQuery } from "../lib/file-workspace"
@@ -361,41 +362,41 @@ export interface UseExampleShellBindingsOptions {
   }) => void
   confirmGeneratorPreview: () => void
   applyGeneratorPreview: () => void
-  handleDictionarySearch: (payload: unknown) => void
+  handleDictionarySearch: (payload: ElyQueryValues) => void
   handleDictionaryReset: () => void
   handleDictionaryRowClick: (payload: unknown) => void
-  handleDepartmentSearch: (payload: unknown) => void
+  handleDepartmentSearch: (payload: ElyQueryValues) => void
   handleDepartmentReset: () => void
   handleDepartmentRowClick: (payload: unknown) => void
-  handleSessionSearch: (payload: unknown) => void
+  handleSessionSearch: (payload: ElyQueryValues) => void
   handleSessionReset: () => void
   handleSessionRowClick: (payload: unknown) => void
-  handlePostSearch: (payload: unknown) => void
+  handlePostSearch: (payload: ElyQueryValues) => void
   handlePostReset: () => void
   handlePostRowClick: (payload: unknown) => void
-  handleMenuSearch: (payload: unknown) => void
+  handleMenuSearch: (payload: ElyQueryValues) => void
   handleMenuReset: () => void
   handleMenuRowClick: (payload: unknown) => void
-  handleNotificationSearch: (payload: unknown) => void
+  handleNotificationSearch: (payload: ElyQueryValues) => void
   handleNotificationReset: () => void
   handleNotificationRowClick: (payload: unknown) => void
-  handleOperationLogSearch: (payload: unknown) => void
+  handleOperationLogSearch: (payload: ElyQueryValues) => void
   handleOperationLogReset: () => void
   handleOperationLogRowClick: (payload: unknown) => void
-  handleRoleSearch: (payload: unknown) => void
+  handleRoleSearch: (payload: ElyQueryValues) => void
   handleRoleReset: () => void
   handleRoleRowClick: (payload: unknown) => void
-  handleSettingSearch: (payload: unknown) => void
+  handleSettingSearch: (payload: ElyQueryValues) => void
   handleSettingReset: () => void
   handleSettingRowClick: (payload: unknown) => void
-  handleTenantSearch: (payload: unknown) => void
+  handleTenantSearch: (payload: ElyQueryValues) => void
   handleTenantReset: () => void
   handleTenantRowClick: (payload: unknown) => void
-  handleUserSearch: (payload: unknown) => void
+  handleUserSearch: (payload: ElyQueryValues) => void
   handleUserReset: () => void
   handleUserRowClick: (payload: unknown) => void
   openCustomerWorkspace: () => void
-  handleEnterpriseSearch: (payload: unknown) => void
+  handleEnterpriseSearch: (payload: ElyQueryValues) => void
   handleEnterpriseReset: () => void
   handleEnterpriseAction: (payload: unknown) => void
   handleEnterpriseRowClick: (payload: unknown) => void
