@@ -70,25 +70,35 @@ describe("generator-preview-workspace", () => {
   })
 
   it("prioritizes blocking and overwrite files in the filtered list", () => {
+    const schemaPreviewFile = previewFiles[0]
+    const pagePreviewFile = previewFiles[1]
+
+    expect(schemaPreviewFile).toBeDefined()
+    expect(pagePreviewFile).toBeDefined()
+
+    if (!schemaPreviewFile || !pagePreviewFile) {
+      throw new Error("Missing generator preview test fixtures.")
+    }
+
     const prioritizedFiles = filterGeneratorPreviewFiles(
       [
         {
-          ...previewFiles[0]!,
+          ...schemaPreviewFile,
           path: "modules/customer/customer.skip.ts",
           plannedAction: "skip",
         },
         {
-          ...previewFiles[1]!,
+          ...pagePreviewFile,
           path: "modules/customer/customer.create.ts",
           plannedAction: "create",
         },
         {
-          ...previewFiles[0]!,
+          ...schemaPreviewFile,
           path: "modules/customer/customer.block.ts",
           plannedAction: "block",
         },
         {
-          ...previewFiles[1]!,
+          ...pagePreviewFile,
           path: "modules/customer/customer.overwrite.ts",
           plannedAction: "overwrite",
         },
@@ -122,7 +132,8 @@ describe("generator-preview-workspace", () => {
       toGeneratorPreviewFileCard({
         absolutePath: "E:/generated/modules/customer/customer.schema.ts",
         path: "modules/customer/customer.schema.ts",
-        reason: "Persist the module schema alongside generated module artifacts.",
+        reason:
+          "Persist the module schema alongside generated module artifacts.",
         plannedAction: "create",
         plannedReason: "File does not exist yet.",
         exists: false,
@@ -157,7 +168,8 @@ describe("generator-preview-workspace", () => {
       toGeneratorPreviewFileCard({
         absolutePath: "E:/generated/modules/customer/customer.schema.ts",
         path: "modules/customer/customer.schema.ts",
-        reason: "Persist the module schema alongside generated module artifacts.",
+        reason:
+          "Persist the module schema alongside generated module artifacts.",
         plannedAction: "create",
         plannedReason: "File does not exist yet.",
         exists: false,

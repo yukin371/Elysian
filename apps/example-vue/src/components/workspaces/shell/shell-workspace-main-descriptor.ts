@@ -501,10 +501,11 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
           label: string
           value: string
         }>,
-      recentSessionOptions: props.generatorPreviewRecentSessionOptions as Array<{
-        label: string
-        value: string
-      }>,
+      recentSessionOptions:
+        props.generatorPreviewRecentSessionOptions as Array<{
+          label: string
+          value: string
+        }>,
       selectedConflictStrategy: props.selectedGeneratorPreviewConflictStrategy,
       selectedRecentSessionId: props.selectedGeneratorPreviewRecentSessionId,
       selectedSchemaName: props.selectedGeneratorPreviewSchemaName,
@@ -540,10 +541,13 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       "reset-filters": () => emit("reset-generator-filters"),
       "refresh-preview": () => emit("refresh-generator-preview"),
       "review-preview": (input: unknown) =>
-        emit("review-generator-preview", input as {
-          decision: "approve" | "reject"
-          comment?: string
-        }),
+        emit(
+          "review-generator-preview",
+          input as {
+            decision: "approve" | "reject"
+            comment?: string
+          },
+        ),
       "confirm-preview": () => emit("confirm-generator-preview"),
       "apply-preview": () => emit("apply-generator-preview"),
     },

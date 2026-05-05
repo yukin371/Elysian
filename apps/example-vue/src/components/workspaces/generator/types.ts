@@ -6,12 +6,12 @@ import type {
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
+  GeneratorPreviewMigrationProposalSnapshot,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSessionRecord,
-  GeneratorPreviewMigrationProposalSnapshot,
+  GeneratorPreviewSqlPreview,
   GeneratorPreviewSqlProposal,
   GeneratorPreviewSqlProposalHandoff,
-  GeneratorPreviewSqlPreview,
 } from "../../../lib/platform-api"
 
 export type GeneratorPreviewTranslation = (

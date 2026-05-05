@@ -103,6 +103,8 @@ describe("generator preview review draft storage", () => {
         "ready for staging",
       )
     }).not.toThrow()
-    expect(() => clearGeneratorPreviewReviewDraft("preview-session-1")).not.toThrow()
+    expect(() =>
+      clearGeneratorPreviewReviewDraft("preview-session-1"),
+    ).not.toThrow()
   })
 })

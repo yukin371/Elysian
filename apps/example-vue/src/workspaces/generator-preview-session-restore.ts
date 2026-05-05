@@ -2,11 +2,11 @@ import type { Ref } from "vue"
 
 import type { FrontendTarget } from "../lib/generator-preview-browser"
 import {
-  fetchGeneratorPreviewSession,
-  listGeneratorPreviewSessions,
   type GeneratorPreviewConflictStrategy,
   type GeneratorPreviewSessionDetail,
   type GeneratorPreviewSessionRecord,
+  fetchGeneratorPreviewSession,
+  listGeneratorPreviewSessions,
 } from "../lib/platform-api"
 
 import { isGeneratorPreviewRecoverableAuthError } from "./generator-preview-session-helpers"
@@ -96,7 +96,9 @@ export const createGeneratorPreviewSessionRestore = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
         options.setErrorMessage(
-          error instanceof Error ? error.message : "Generator session restore failed",
+          error instanceof Error
+            ? error.message
+            : "Generator session restore failed",
         )
         return true
       }
@@ -210,7 +212,9 @@ export const createGeneratorPreviewSessionRestore = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
         options.setErrorMessage(
-          error instanceof Error ? error.message : "Generator session restore failed",
+          error instanceof Error
+            ? error.message
+            : "Generator session restore failed",
         )
         return true
       }

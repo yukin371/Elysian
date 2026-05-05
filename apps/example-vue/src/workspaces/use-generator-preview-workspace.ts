@@ -27,6 +27,7 @@ import {
   loadStoredGeneratorPreviewSelection,
   persistGeneratorPreviewSelection,
 } from "./generator-preview-selection-storage"
+import { createGeneratorPreviewSessionActions } from "./generator-preview-session-actions"
 import {
   buildGeneratorPreviewSessionDetail,
   generatorPreviewErrorCodes,
@@ -40,7 +41,6 @@ import {
   localizeGeneratorPreviewConflictStrategy,
   prioritizeGeneratorPreviewRecentSessions,
 } from "./generator-preview-session-presentation"
-import { createGeneratorPreviewSessionActions } from "./generator-preview-session-actions"
 import { createGeneratorPreviewSessionRestore } from "./generator-preview-session-restore"
 
 export const useGeneratorPreviewWorkspace = (
@@ -290,33 +290,31 @@ export const useGeneratorPreviewWorkspace = (
     return true
   }
 
-  const {
-    refreshSessionDetailAfterStateDrift,
-    restoreLatestMatchingSession,
-  } = createGeneratorPreviewSessionRestore({
-    applySessionDetail,
-    findMatchingRecentSession,
-    getCurrentSelectionCacheKey,
-    isSessionMatchingSelection,
-    loading,
-    onRecoverableAuthError,
-    prioritizeRecentSessions: (sessions) =>
-      prioritizeGeneratorPreviewRecentSessions(
-        sessions,
-        isSessionMatchingSelection,
-      ),
-    recentSessions,
-    resetPreviewState,
-    selectedConflictStrategy,
-    selectedFrontendTarget,
-    selectedSchemaName,
-    selectionSessionCache,
-    sessionDetailCache,
-    setErrorMessage: (message) => {
-      errorMessage.value = message
-    },
-    storedSessionId: storedSelection?.sessionId,
-  })
+  const { refreshSessionDetailAfterStateDrift, restoreLatestMatchingSession } =
+    createGeneratorPreviewSessionRestore({
+      applySessionDetail,
+      findMatchingRecentSession,
+      getCurrentSelectionCacheKey,
+      isSessionMatchingSelection,
+      loading,
+      onRecoverableAuthError,
+      prioritizeRecentSessions: (sessions) =>
+        prioritizeGeneratorPreviewRecentSessions(
+          sessions,
+          isSessionMatchingSelection,
+        ),
+      recentSessions,
+      resetPreviewState,
+      selectedConflictStrategy,
+      selectedFrontendTarget,
+      selectedSchemaName,
+      selectionSessionCache,
+      sessionDetailCache,
+      setErrorMessage: (message) => {
+        errorMessage.value = message
+      },
+      storedSessionId: storedSelection?.sessionId,
+    })
 
   const refreshPreview = async (options?: {
     ignoreApplyLoading?: boolean

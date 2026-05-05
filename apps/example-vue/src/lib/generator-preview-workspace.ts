@@ -55,16 +55,20 @@ const buildLcsMatrix = (left: string[], right: string[]) => {
   )
 
   for (let leftIndex = left.length - 1; leftIndex >= 0; leftIndex -= 1) {
+    const row = matrix[leftIndex]
+    if (row === undefined) {
+      throw new Error("Generator preview diff matrix row is missing.")
+    }
+
     for (let rightIndex = right.length - 1; rightIndex >= 0; rightIndex -= 1) {
       if (left[leftIndex] === right[rightIndex]) {
-        matrix[leftIndex]![rightIndex] =
-          (matrix[leftIndex + 1]?.[rightIndex + 1] ?? 0) + 1
+        row[rightIndex] = (matrix[leftIndex + 1]?.[rightIndex + 1] ?? 0) + 1
         continue
       }
 
-      matrix[leftIndex]![rightIndex] = Math.max(
+      row[rightIndex] = Math.max(
         matrix[leftIndex + 1]?.[rightIndex] ?? 0,
-        matrix[leftIndex]?.[rightIndex + 1] ?? 0,
+        row[rightIndex + 1] ?? 0,
       )
     }
   }
@@ -76,7 +80,8 @@ const buildGeneratorPreviewDiffLines = (
   currentContents: string | null,
   nextContents: string,
 ): GeneratorPreviewDiffLine[] => {
-  const previousLines = currentContents === null ? [] : splitLines(currentContents)
+  const previousLines =
+    currentContents === null ? [] : splitLines(currentContents)
   const nextLines = splitLines(nextContents)
   const lcsMatrix = buildLcsMatrix(previousLines, nextLines)
   const diffLines: GeneratorPreviewDiffLine[] = []
@@ -85,10 +90,7 @@ const buildGeneratorPreviewDiffLines = (
   let oldLineNumber = 1
   let newLineNumber = 1
 
-  while (
-    previousIndex < previousLines.length &&
-    nextIndex < nextLines.length
-  ) {
+  while (previousIndex < previousLines.length && nextIndex < nextLines.length) {
     const previousLine = previousLines[previousIndex]
     const nextLine = nextLines[nextIndex]
 
@@ -160,7 +162,9 @@ const buildGeneratorPreviewDiffLines = (
 const buildGeneratorPreviewDiffStats = (
   diffLines: GeneratorPreviewDiffLine[],
 ): GeneratorPreviewFileDiffStats => {
-  const addedLineCount = diffLines.filter((line) => line.kind === "added").length
+  const addedLineCount = diffLines.filter(
+    (line) => line.kind === "added",
+  ).length
   const removedLineCount = diffLines.filter(
     (line) => line.kind === "removed",
   ).length

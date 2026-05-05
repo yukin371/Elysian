@@ -1,10 +1,10 @@
 import { ref } from "vue"
 
-import type { GeneratorPreviewTranslation } from "./types"
 import {
-  copyGeneratorPreviewText,
   copyGeneratorPreviewSuggestedCommands,
+  copyGeneratorPreviewText,
 } from "./generator-preview-handoff"
+import type { GeneratorPreviewTranslation } from "./types"
 
 export type GeneratorPreviewCopyFeedbackKey =
   | "absolutePath"

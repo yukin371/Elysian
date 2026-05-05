@@ -10,9 +10,9 @@ import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspa
 import type {
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
+  GeneratorPreviewSqlPreview,
   GeneratorPreviewSqlProposal,
   GeneratorPreviewSqlProposalHandoff,
-  GeneratorPreviewSqlPreview,
 } from "../generator/types"
 import OperationLogWorkspacePanel from "../operation-log/OperationLogWorkspacePanel.vue"
 import WorkflowWorkspacePanel from "../workflow/WorkflowWorkspacePanel.vue"

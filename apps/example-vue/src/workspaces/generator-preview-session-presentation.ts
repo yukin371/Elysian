@@ -3,10 +3,7 @@ import type { GeneratorPreviewSessionRecord } from "../lib/platform-api"
 
 import { generatorPreviewSessionStatusPriority } from "./generator-preview-session-helpers"
 
-type Translate = (
-  key: string,
-  params?: Record<string, unknown>,
-) => string
+type Translate = (key: string, params?: Record<string, unknown>) => string
 
 export const localizeGeneratorPreviewSessionStatus = (
   t: Translate,
