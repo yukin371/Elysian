@@ -649,15 +649,21 @@ const throwUnsupportedWorkflowStructure = (
   })
 }
 
+function assertWorkflowValue<T>(
+  value: T | undefined,
+  nodeId: string,
+): asserts value is Exclude<T, undefined> {
+  if (value === undefined) {
+    throwUnsupportedWorkflowStructure(nodeId)
+  }
+}
+
 const requireWorkflowValue = <T>(
   value: T | undefined,
   nodeId: string,
 ): Exclude<T, undefined> => {
-  if (value === undefined) {
-    throwUnsupportedWorkflowStructure(nodeId)
-  }
-
-  return value as Exclude<T, undefined>
+  assertWorkflowValue(value, nodeId)
+  return value
 }
 
 const resolveApprovalTransition = (

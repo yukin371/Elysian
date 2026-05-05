@@ -591,10 +591,10 @@ const toPersistenceWorkflowDefinition = (
   ...definition,
 })
 
-const parseWorkflowDefinitionDraft = (
-  definition: Record<string, unknown>,
+function assertWorkflowDefinitionDraft(
+  definition: unknown,
   source: string,
-): WorkflowDefinitionDraft => {
+): asserts definition is WorkflowDefinitionDraft {
   const issues = validateWorkflowDefinitionDraft(definition)
 
   if (issues.length > 0) {
@@ -607,11 +607,15 @@ const parseWorkflowDefinitionDraft = (
       `Invalid persisted ${source}. ${issueSummary || "Unknown schema issue."}`,
     )
   }
+}
 
-  return {
-    nodes: definition.nodes as WorkflowDefinitionDraft["nodes"],
-    edges: definition.edges as WorkflowDefinitionDraft["edges"],
-  }
+const parseWorkflowDefinitionDraft = (
+  definition: Record<string, unknown>,
+  source: string,
+): WorkflowDefinitionDraft => {
+  const draft: unknown = definition
+  assertWorkflowDefinitionDraft(draft, source)
+  return draft
 }
 
 const mapWorkflowInstanceRow = (
