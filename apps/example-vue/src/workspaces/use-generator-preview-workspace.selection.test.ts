@@ -465,7 +465,7 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
     await waitForAsyncWork()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(previewRequestCount).toBe(0)
     expect(workspace.currentSession.value).toBeNull()
     expect(workspace.selectedSchemaName.value).toBe("customer")
@@ -710,7 +710,9 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
     expect(listRequestCount).toBe(1)
     expect(previewRequestCount).toBe(0)
     expect(workspace.currentSession.value?.id).toBe("preview-session-ready")
-    expect(workspace.selectedRecentSessionId.value).toBe("preview-session-ready")
+    expect(workspace.selectedRecentSessionId.value).toBe(
+      "preview-session-ready",
+    )
     expect(workspace.selectedFrontendTarget.value).toBe("react")
     expect(workspace.selectedConflictStrategy.value).toBe(
       "overwrite-generated-only",
