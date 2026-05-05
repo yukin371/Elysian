@@ -3,17 +3,37 @@ import { t } from "elysia"
 
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
-import type { ServerModule } from "../module"
+import type { AnyServerApp, ServerModule } from "../module"
 import {
   notificationBulkReadResponseSchema,
   notificationListResponseSchema,
   notificationRecordResponseSchema,
 } from "./openapi"
 import type { NotificationRepository } from "./repository"
-import { createNotificationService } from "./service"
+import {
+  type CreateNotificationPayload,
+  type ListNotificationsPayload,
+  createNotificationService,
+} from "./service"
 
 export interface NotificationModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface NotificationRouteRegistrar {
+  get: (...args: readonly unknown[]) => NotificationRouteRegistrar
+  post: (...args: readonly unknown[]) => NotificationRouteRegistrar
+}
+
+interface NotificationRouteParams {
+  id: string
+}
+
+interface NotificationRouteQuery extends ListNotificationsPayload {}
+
+interface NotificationRouteSet {
+  headers: Record<string, string>
+  status: number
 }
 
 const notificationPermissions = {
@@ -80,151 +100,199 @@ export const createNotificationModule = (
       fields: notificationModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/notifications",
-        async ({ query, request }) => {
-          const identity = await authorize(
-            request.headers,
-            notificationPermissions.list,
-          )
+    let notificationApp = app as unknown as NotificationRouteRegistrar
 
-          return service.list(query, identity?.dataAccess)
-        },
-        {
-          query: notificationFilterSchema,
-          response: {
-            200: notificationListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["notification"],
-            summary: "List notifications",
-          },
-        },
-      )
-      .get(
-        "/system/notifications/export",
-        async ({ query, request, set }) => {
-          const identity = await authorize(
-            request.headers,
-            notificationPermissions.list,
-          )
+    notificationApp = notificationApp.get(
+      "/system/notifications",
+      async ({
+        query,
+        request,
+      }: {
+        query: NotificationRouteQuery
+        request: Request
+      }) => {
+        const identity = await authorize(
+          request.headers,
+          notificationPermissions.list,
+        )
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv(query, identity?.dataAccess)
+        return service.list(query, identity?.dataAccess)
+      },
+      {
+        query: notificationFilterSchema,
+        response: {
+          200: notificationListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          query: notificationFilterSchema,
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["notification"],
-            summary: "Export notifications as CSV",
-          },
+        detail: {
+          tags: ["notification"],
+          summary: "List notifications",
         },
-      )
-      .get(
-        "/system/notifications/:id",
-        async ({ params, request }) => {
-          const identity = await authorize(
-            request.headers,
-            notificationPermissions.get,
-          )
+      },
+    )
 
-          return service.getById(params.id, identity?.dataAccess)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: notificationRecordResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["notification"],
-            summary: "Get notification by id",
-          },
-        },
-      )
-      .post(
-        "/system/notifications",
-        async ({ body, request, set }) => {
-          const identity = await authorize(
-            request.headers,
-            notificationPermissions.create,
-          )
-          set.status = 201
+    notificationApp = notificationApp.get(
+      "/system/notifications/export",
+      async ({
+        query,
+        request,
+        set,
+      }: {
+        query: NotificationRouteQuery
+        request: Request
+        set: NotificationRouteSet
+      }) => {
+        const identity = await authorize(
+          request.headers,
+          notificationPermissions.list,
+        )
 
-          return service.create({
-            ...body,
-            createdByUserId: identity?.user.id ?? null,
-            deptId: identity?.deptIds[0] ?? null,
-          })
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv(query, identity?.dataAccess)
+      },
+      {
+        query: notificationFilterSchema,
+        response: {
+          ...createErrorResponses(401, 403),
         },
-        {
-          body: notificationCreateBodySchema,
-          response: {
-            201: notificationRecordResponseSchema,
-            ...createErrorResponses(400, 401, 403, 404),
-          },
-          detail: {
-            tags: ["notification"],
-            summary: "Create notification",
-          },
+        detail: {
+          tags: ["notification"],
+          summary: "Export notifications as CSV",
         },
-      )
-      .post(
-        "/system/notifications/read",
-        async ({ body, request }) => {
-          const identity = await authorize(
-            request.headers,
-            notificationPermissions.update,
-          )
+      },
+    )
 
-          return {
-            items: await service.markManyAsRead(body.ids, identity?.dataAccess),
-          }
-        },
-        {
-          body: t.Object({
-            ids: t.Array(t.String()),
-          }),
-          response: {
-            200: notificationBulkReadResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["notification"],
-            summary: "Mark notifications as read",
-          },
-        },
-      )
-      .post(
-        "/system/notifications/:id/read",
-        async ({ params, request }) => {
-          const identity = await authorize(
-            request.headers,
-            notificationPermissions.update,
-          )
+    notificationApp = notificationApp.get(
+      "/system/notifications/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: NotificationRouteParams
+        request: Request
+      }) => {
+        const identity = await authorize(
+          request.headers,
+          notificationPermissions.get,
+        )
 
-          return service.markAsRead(params.id, identity?.dataAccess)
+        return service.getById(params.id, identity?.dataAccess)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: notificationRecordResponseSchema,
+          ...createErrorResponses(401, 403, 404),
         },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: notificationRecordResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["notification"],
-            summary: "Mark notification as read",
-          },
+        detail: {
+          tags: ["notification"],
+          summary: "Get notification by id",
         },
-      )
+      },
+    )
+
+    notificationApp = notificationApp.post(
+      "/system/notifications",
+      async ({
+        body,
+        request,
+        set,
+      }: {
+        body: Omit<CreateNotificationPayload, "createdByUserId" | "deptId">
+        request: Request
+        set: NotificationRouteSet
+      }) => {
+        const identity = await authorize(
+          request.headers,
+          notificationPermissions.create,
+        )
+        set.status = 201
+
+        return service.create({
+          ...body,
+          createdByUserId: identity?.user.id ?? null,
+          deptId: identity?.deptIds[0] ?? null,
+        })
+      },
+      {
+        body: notificationCreateBodySchema,
+        response: {
+          201: notificationRecordResponseSchema,
+          ...createErrorResponses(400, 401, 403, 404),
+        },
+        detail: {
+          tags: ["notification"],
+          summary: "Create notification",
+        },
+      },
+    )
+
+    notificationApp = notificationApp.post(
+      "/system/notifications/read",
+      async ({
+        body,
+        request,
+      }: {
+        body: { ids: string[] }
+        request: Request
+      }) => {
+        const identity = await authorize(
+          request.headers,
+          notificationPermissions.update,
+        )
+
+        return {
+          items: await service.markManyAsRead(body.ids, identity?.dataAccess),
+        }
+      },
+      {
+        body: t.Object({
+          ids: t.Array(t.String()),
+        }),
+        response: {
+          200: notificationBulkReadResponseSchema,
+          ...createErrorResponses(401, 403, 404),
+        },
+        detail: {
+          tags: ["notification"],
+          summary: "Mark notifications as read",
+        },
+      },
+    )
+
+    notificationApp = notificationApp.post(
+      "/system/notifications/:id/read",
+      async ({
+        params,
+        request,
+      }: {
+        params: NotificationRouteParams
+        request: Request
+      }) => {
+        const identity = await authorize(
+          request.headers,
+          notificationPermissions.update,
+        )
+
+        return service.markAsRead(params.id, identity?.dataAccess)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: notificationRecordResponseSchema,
+          ...createErrorResponses(401, 403, 404),
+        },
+        detail: {
+          tags: ["notification"],
+          summary: "Mark notification as read",
+        },
+      },
+    )
+
+    return notificationApp as unknown as AnyServerApp
   },
 })
