@@ -208,7 +208,7 @@ describe("useCustomerWorkspace", () => {
     await workspace.handleFormSubmit({ name: "Alpha", status: "active" })
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.customerErrorMessage.value).toContain("status 401")
+    expect(workspace.customerErrorMessage.value).toContain("unauthorized")
     expect(workspace.customerFormMode.value).toBe("create")
   })
 
@@ -260,7 +260,7 @@ describe("useCustomerWorkspace", () => {
     })
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.customerErrorMessage.value).toContain("status 401")
+    expect(workspace.customerErrorMessage.value).toContain("unauthorized")
     expect(workspace.customerFormMode.value).toBe("edit")
   })
 
@@ -309,7 +309,7 @@ describe("useCustomerWorkspace", () => {
     await workspace.confirmDelete()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.customerErrorMessage.value).toContain("status 401")
+    expect(workspace.customerErrorMessage.value).toContain("unauthorized")
     expect(workspace.deleteConfirmId.value).toBe("cust-alpha")
   })
 })
