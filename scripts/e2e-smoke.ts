@@ -2,7 +2,6 @@ import { spawn } from "node:child_process"
 import { join } from "node:path"
 import { runCustomerSmoke } from "./e2e-smoke-customer-case"
 import {
-  type LoginResponse,
   type OperationLogRecord,
   type WorkflowDefinitionRecord,
   type WorkflowInstanceDetailRecord,
@@ -19,6 +18,39 @@ import {
   waitForRequiredModules,
   writeSmokeReport,
 } from "./e2e-smoke-support"
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
 
 const run = async () => {
   const startedAt = Date.now()
@@ -66,17 +98,13 @@ const run = async () => {
       }),
     })
     await assertStatus(loginResponse, 200)
-    const loginPayload = (await loginResponse.json()) as LoginResponse
-
-    if (!loginPayload.accessToken) {
-      throw new Error("Login succeeded but accessToken is missing")
-    }
-    if (!loginPayload.user?.id) {
-      throw new Error("Login succeeded but user.id is missing")
-    }
+    const loginPayload = await readJsonRecord(loginResponse)
+    const loginUser = readRecord(loginPayload, "user")
+    const loginUserId = readString(loginUser, "id")
+    const accessToken = readString(loginPayload, "accessToken")
 
     const authHeader = {
-      authorization: `Bearer ${loginPayload.accessToken}`,
+      authorization: `Bearer ${accessToken}`,
     }
     cleanupAuthHeader = authHeader
 
@@ -517,7 +545,7 @@ const run = async () => {
     const claimedInstance =
       await getResponseJson<WorkflowInstanceDetailRecord>(claimTaskResponse)
     const claimedTask = claimedInstance.currentTasks[0]
-    const claimedAssignee = `user:${loginPayload.user.id}`
+    const claimedAssignee = `user:${loginUserId}`
     if (!claimedTask || claimedTask.assignee !== claimedAssignee) {
       throw new Error(
         `Claimed workflow task assignee mismatch (expected=${claimedAssignee}, received=${claimedTask?.assignee ?? "missing"})`,
@@ -528,9 +556,9 @@ const run = async () => {
         `Claimed workflow task source assignee mismatch (expected=role:admin, received=${claimedTask.claimSourceAssignee ?? "missing"})`,
       )
     }
-    if (claimedTask.claimedByUserId !== loginPayload.user.id) {
+    if (claimedTask.claimedByUserId !== loginUserId) {
       throw new Error(
-        `Claimed workflow task claimer mismatch (expected=${loginPayload.user.id}, received=${claimedTask.claimedByUserId ?? "missing"})`,
+        `Claimed workflow task claimer mismatch (expected=${loginUserId}, received=${claimedTask.claimedByUserId ?? "missing"})`,
       )
     }
     if (!claimedTask.claimedAt) {
@@ -713,9 +741,9 @@ const run = async () => {
         `Workflow claim audit source assignee mismatch (expected=role:admin, received=${String(claimAudit.details?.claimSourceAssignee ?? "missing")})`,
       )
     }
-    if (claimAudit.details?.claimedByUserId !== loginPayload.user.id) {
+    if (claimAudit.details?.claimedByUserId !== loginUserId) {
       throw new Error(
-        `Workflow claim audit claimer mismatch (expected=${loginPayload.user.id}, received=${String(claimAudit.details?.claimedByUserId ?? "missing")})`,
+        `Workflow claim audit claimer mismatch (expected=${loginUserId}, received=${String(claimAudit.details?.claimedByUserId ?? "missing")})`,
       )
     }
     if (!claimAudit.details?.claimedAt) {
@@ -751,9 +779,9 @@ const run = async () => {
         `Workflow completion audit source assignee mismatch (expected=role:admin, received=${String(completeAudit.details?.claimSourceAssignee ?? "missing")})`,
       )
     }
-    if (completeAudit.details?.claimedByUserId !== loginPayload.user.id) {
+    if (completeAudit.details?.claimedByUserId !== loginUserId) {
       throw new Error(
-        `Workflow completion audit claimer mismatch (expected=${loginPayload.user.id}, received=${String(completeAudit.details?.claimedByUserId ?? "missing")})`,
+        `Workflow completion audit claimer mismatch (expected=${loginUserId}, received=${String(completeAudit.details?.claimedByUserId ?? "missing")})`,
       )
     }
     if (completeAudit.details?.result !== "approved") {
@@ -792,7 +820,10 @@ const run = async () => {
         `Workflow cancel audit cancelledTasks mismatch (expected=1, received=${Array.isArray(cancelledTasks) ? cancelledTasks.length : "missing"})`,
       )
     }
-    const cancelledAuditTask = cancelledTasks[0] as Record<string, unknown>
+    const cancelledAuditTask = cancelledTasks[0]
+    if (!isRecord(cancelledAuditTask)) {
+      throw new Error("Workflow cancel audit task payload is malformed")
+    }
     if (cancelledAuditTask.id !== cancellableTodoTask.id) {
       throw new Error(
         `Workflow cancel audit task id mismatch (expected=${cancellableTodoTask.id}, received=${String(cancelledAuditTask.id ?? "missing")})`,
