@@ -191,7 +191,46 @@ export interface ShellWorkspaceMainSwitchProps {
   canJumpToCustomerPage: boolean
 }
 
+type ShellWorkspaceMainListPayloadEvent =
+  | "dictionary-search"
+  | "dictionary-row-click"
+  | "department-search"
+  | "department-row-click"
+  | "session-search"
+  | "session-row-click"
+  | "post-search"
+  | "post-row-click"
+  | "menu-search"
+  | "menu-row-click"
+  | "notification-search"
+  | "notification-row-click"
+  | "operation-log-search"
+  | "operation-log-row-click"
+  | "role-search"
+  | "role-row-click"
+  | "setting-search"
+  | "setting-row-click"
+  | "tenant-search"
+  | "tenant-row-click"
+  | "user-search"
+  | "user-row-click"
+
+type ShellWorkspaceMainListResetEvent =
+  | "dictionary-reset"
+  | "department-reset"
+  | "session-reset"
+  | "post-reset"
+  | "menu-reset"
+  | "notification-reset"
+  | "operation-log-reset"
+  | "role-reset"
+  | "setting-reset"
+  | "tenant-reset"
+  | "user-reset"
+
 export type ShellWorkspaceMainSwitchEmitFn = {
+  (event: ShellWorkspaceMainListPayloadEvent, payload: unknown): void
+  (event: ShellWorkspaceMainListResetEvent): void
   (event: "workflow-update-query", value: string): void
   (event: "select-workflow-definition", definitionId: string): void
   (event: "select-workflow-status-filter", status: WorkflowStatusFilter): void
@@ -273,15 +312,19 @@ type ShellWorkspaceMainResolver = (
   emit: ShellWorkspaceMainSwitchEmitFn,
 ) => ShellWorkspaceMainDescriptor
 
-const emitMainEvent = (
+const emitMainListPayloadEvent = (
   emit: ShellWorkspaceMainSwitchEmitFn,
-  event: string,
-  ...args: unknown[]
+  event: ShellWorkspaceMainListPayloadEvent,
+  payload: unknown,
 ) => {
-  ;(emit as unknown as (event: string, ...args: unknown[]) => void)(
-    event,
-    ...args,
-  )
+  emit(event, payload)
+}
+
+const emitMainListResetEvent = (
+  emit: ShellWorkspaceMainSwitchEmitFn,
+  event: ShellWorkspaceMainListResetEvent,
+) => {
+  emit(event)
 }
 
 const workspaceListListeners = (
@@ -323,10 +366,11 @@ const workspaceListListeners = (
     | "tenant-row-click"
     | "user-row-click",
 ) => ({
-  search: (payload: unknown) => emitMainEvent(emit, searchEvent, payload),
-  reset: () => emitMainEvent(emit, resetEvent),
+  search: (payload: unknown) =>
+    emitMainListPayloadEvent(emit, searchEvent, payload),
+  reset: () => emitMainListResetEvent(emit, resetEvent),
   "row-click": (payload: unknown) =>
-    emitMainEvent(emit, rowClickEvent, payload),
+    emitMainListPayloadEvent(emit, rowClickEvent, payload),
 })
 
 const runtimeResolver: ShellWorkspaceMainResolver = (props) => ({

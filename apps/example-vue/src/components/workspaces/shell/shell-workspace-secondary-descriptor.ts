@@ -215,7 +215,37 @@ export interface ShellWorkspaceSecondarySwitchProps {
   authErrorMessage: string
 }
 
+type ShellWorkspaceSecondaryEditPayloadEvent =
+  | "submit-dictionary-form"
+  | "submit-department-form"
+  | "submit-post-form"
+  | "submit-menu-form"
+  | "submit-role-form"
+  | "submit-setting-form"
+
+type ShellWorkspaceSecondaryEditNoPayloadEvent =
+  | "start-dictionary-edit"
+  | "open-dictionary-create"
+  | "cancel-dictionary-panel"
+  | "start-department-edit"
+  | "open-department-create"
+  | "cancel-department-panel"
+  | "start-post-edit"
+  | "open-post-create"
+  | "cancel-post-panel"
+  | "start-menu-edit"
+  | "open-menu-create"
+  | "cancel-menu-panel"
+  | "start-role-edit"
+  | "open-role-create"
+  | "cancel-role-panel"
+  | "start-setting-edit"
+  | "open-setting-create"
+  | "cancel-setting-panel"
+
 export type ShellWorkspaceSecondarySwitchEmitFn = {
+  (event: ShellWorkspaceSecondaryEditPayloadEvent, payload: unknown): void
+  (event: ShellWorkspaceSecondaryEditNoPayloadEvent): void
   (event: "start-dictionary-edit"): void
   (event: "open-dictionary-create"): void
   (event: "submit-dictionary-form", payload: unknown): void
@@ -288,15 +318,19 @@ type ShellWorkspaceSecondaryResolver = (
   emit: ShellWorkspaceSecondarySwitchEmitFn,
 ) => ShellWorkspaceSecondaryDescriptor
 
-const emitSecondaryEvent = (
+const emitSecondaryEditPayloadEvent = (
   emit: ShellWorkspaceSecondarySwitchEmitFn,
-  event: string,
-  ...args: unknown[]
+  event: ShellWorkspaceSecondaryEditPayloadEvent,
+  payload: unknown,
 ) => {
-  ;(emit as unknown as (event: string, ...args: unknown[]) => void)(
-    event,
-    ...args,
-  )
+  emit(event, payload)
+}
+
+const emitSecondaryEditNoPayloadEvent = (
+  emit: ShellWorkspaceSecondarySwitchEmitFn,
+  event: ShellWorkspaceSecondaryEditNoPayloadEvent,
+) => {
+  emit(event)
 }
 
 const editPanelListeners = (
@@ -330,11 +364,11 @@ const editPanelListeners = (
     | "cancel-role-panel"
     | "cancel-setting-panel",
 ) => ({
-  "start-edit": () => emitSecondaryEvent(emit, startEditEvent),
-  "open-create": () => emitSecondaryEvent(emit, openCreateEvent),
+  "start-edit": () => emitSecondaryEditNoPayloadEvent(emit, startEditEvent),
+  "open-create": () => emitSecondaryEditNoPayloadEvent(emit, openCreateEvent),
   "submit-form": (payload: unknown) =>
-    emitSecondaryEvent(emit, submitEvent, payload),
-  "cancel-panel": () => emitSecondaryEvent(emit, cancelEvent),
+    emitSecondaryEditPayloadEvent(emit, submitEvent, payload),
+  "cancel-panel": () => emitSecondaryEditNoPayloadEvent(emit, cancelEvent),
 })
 
 const statusResolver: ShellWorkspaceSecondaryResolver = (props) => ({
