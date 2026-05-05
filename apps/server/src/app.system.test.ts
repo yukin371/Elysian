@@ -14,6 +14,52 @@ const silentLogger: ServerLogger = {
   error: () => {},
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 const createTestApp = (
   options: {
     modules?: ServerModule[]
@@ -62,28 +108,18 @@ describe("createServerApp", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      openapi: string
-      paths: Record<
-        string,
-        Record<
-          string,
-          {
-            responses?: Record<string, unknown>
-          }
-        >
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
-    expect(payload.openapi).toBe("3.0.3")
-    expect(payload.paths["/health"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/platform"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/metrics"]?.get?.responses?.["200"]).toBeDefined()
+    expect(readString(payload, "openapi")).toBe("3.0.3")
+    expect(getOpenApiResponse(paths, "/health", "get", "200")).toBeDefined()
+    expect(getOpenApiResponse(paths, "/platform", "get", "200")).toBeDefined()
+    expect(getOpenApiResponse(paths, "/metrics", "get", "200")).toBeDefined()
     expect(
-      payload.paths["/metrics/prometheus"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/metrics/prometheus", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/modules"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/modules", "get", "200"),
     ).toBeDefined()
   })
 
@@ -92,29 +128,18 @@ describe("createServerApp", () => {
     const response = await app.handle(new Request("http://localhost/metrics"))
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      service: string
-      schemaVersion: number
-      uptimeSeconds: number
-      process: {
-        rssBytes: number
-        heapUsedBytes: number
-      }
-      cpu: {
-        userMicros: number
-        systemMicros: number
-      }
-      timestamp: string
-    }
+    const payload = await readJsonRecord(response)
+    const process = readRecord(payload, "process")
+    const cpu = readRecord(payload, "cpu")
 
     expect(payload.service).toBe("elysian")
     expect(payload.schemaVersion).toBe(1)
     expect(payload.uptimeSeconds).toBeGreaterThanOrEqual(0)
-    expect(payload.process.rssBytes).toBeGreaterThan(0)
-    expect(payload.process.heapUsedBytes).toBeGreaterThan(0)
-    expect(payload.cpu.userMicros).toBeGreaterThanOrEqual(0)
-    expect(payload.cpu.systemMicros).toBeGreaterThanOrEqual(0)
-    expect(() => new Date(payload.timestamp)).not.toThrow()
+    expect(process.rssBytes).toBeGreaterThan(0)
+    expect(process.heapUsedBytes).toBeGreaterThan(0)
+    expect(cpu.userMicros).toBeGreaterThanOrEqual(0)
+    expect(cpu.systemMicros).toBeGreaterThanOrEqual(0)
+    expect(() => new Date(readString(payload, "timestamp"))).not.toThrow()
   })
 
   it("returns prometheus metrics snapshot", async () => {
