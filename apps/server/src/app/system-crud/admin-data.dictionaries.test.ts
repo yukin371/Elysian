@@ -12,6 +12,52 @@ import {
   testAdminPassword,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp system admin data", () => {
   it("publishes dictionary success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -31,48 +77,69 @@ describe("createServerApp system admin data", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/system/dictionaries/types"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/dictionaries/types", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/types"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/dictionaries/types", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/types"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/dictionaries/types", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/types"]?.post?.responses?.["409"],
+      getOpenApiResponse(paths, "/system/dictionaries/types", "post", "409"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/types/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(
+        paths,
+        "/system/dictionaries/types/{id}",
+        "get",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/types/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(
+        paths,
+        "/system/dictionaries/types/{id}",
+        "put",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/items"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/dictionaries/items", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/items"]?.post?.responses?.["400"],
+      getOpenApiResponse(paths, "/system/dictionaries/items", "post", "400"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/items"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/dictionaries/items", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/items/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(
+        paths,
+        "/system/dictionaries/items/{id}",
+        "get",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/items/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(
+        paths,
+        "/system/dictionaries/items/{id}",
+        "put",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/system/dictionaries/items/{id}"]?.put?.responses?.["404"],
+      getOpenApiResponse(
+        paths,
+        "/system/dictionaries/items/{id}",
+        "put",
+        "404",
+      ),
     ).toBeDefined()
   })
 
@@ -104,14 +171,13 @@ describe("createServerApp system admin data", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const listTypesResponse = await app.handle(
       new Request("http://localhost/system/dictionaries/types", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -145,7 +211,7 @@ describe("createServerApp system admin data", () => {
         "http://localhost/system/dictionaries/types/dictionary_type_status_1",
         {
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
           },
         },
       ),
@@ -191,7 +257,7 @@ describe("createServerApp system admin data", () => {
         "http://localhost/system/dictionaries/items?typeId=dictionary_type_status_1",
         {
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
           },
         },
       ),
@@ -230,7 +296,7 @@ describe("createServerApp system admin data", () => {
         "http://localhost/system/dictionaries/items/dictionary_item_status_active_1",
         {
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
           },
         },
       ),
@@ -343,15 +409,14 @@ describe("createServerApp system admin data", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const createTypeResponse = await app.handle(
       new Request("http://localhost/system/dictionaries/types", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -363,16 +428,8 @@ describe("createServerApp system admin data", () => {
     )
 
     expect(createTypeResponse.status).toBe(201)
-    const createdType = (await createTypeResponse.json()) as {
-      id: string
-      code: string
-      name: string
-      description: string
-      status: string
-      items: unknown[]
-      createdAt: string
-      updatedAt: string
-    }
+    const createdType = await readJsonRecord(createTypeResponse)
+    const createdTypeId = readString(createdType, "id")
 
     expect(createdType).toEqual({
       id: expect.any(String),
@@ -387,11 +444,11 @@ describe("createServerApp system admin data", () => {
 
     const updateTypeResponse = await app.handle(
       new Request(
-        `http://localhost/system/dictionaries/types/${createdType.id}`,
+        `http://localhost/system/dictionaries/types/${createdTypeId}`,
         {
           method: "PUT",
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
             "content-type": "application/json",
           },
           body: JSON.stringify({
@@ -414,7 +471,7 @@ describe("createServerApp system admin data", () => {
       new Request("http://localhost/system/dictionaries/items", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -428,17 +485,8 @@ describe("createServerApp system admin data", () => {
     )
 
     expect(createItemResponse.status).toBe(201)
-    const createdItem = (await createItemResponse.json()) as {
-      id: string
-      typeId: string
-      value: string
-      label: string
-      sort: number
-      isDefault: boolean
-      status: string
-      createdAt: string
-      updatedAt: string
-    }
+    const createdItem = await readJsonRecord(createItemResponse)
+    const createdItemId = readString(createdItem, "id")
 
     expect(createdItem).toEqual({
       id: expect.any(String),
@@ -454,11 +502,11 @@ describe("createServerApp system admin data", () => {
 
     const updateItemResponse = await app.handle(
       new Request(
-        `http://localhost/system/dictionaries/items/${createdItem.id}`,
+        `http://localhost/system/dictionaries/items/${createdItemId}`,
         {
           method: "PUT",
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
             "content-type": "application/json",
           },
           body: JSON.stringify({
@@ -508,15 +556,14 @@ describe("createServerApp system admin data", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const response = await app.handle(
       new Request("http://localhost/system/dictionaries/items", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
