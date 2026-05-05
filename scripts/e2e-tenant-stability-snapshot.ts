@@ -54,10 +54,95 @@ const resolveSnapshotPath = () =>
   readNonEmptyEnv("ELYSIAN_TENANT_STABILITY_SNAPSHOT_PATH") ??
   join(resolveTenantReportDir(), "e2e-tenant-stability-snapshot.json")
 
-const readJsonFile = async <T>(path: string): Promise<T | null> => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "number") {
+    throw new Error(`Expected number field: ${key}`)
+  }
+
+  return property
+}
+
+const readTenantE2eReport = (
+  value: Record<string, unknown>,
+): TenantE2eReport => ({
+  generatedAt: readString(value, "generatedAt"),
+  status: (() => {
+    const status = readString(value, "status")
+
+    if (status !== "passed" && status !== "failed") {
+      throw new Error("Expected tenant e2e status")
+    }
+
+    return status
+  })(),
+  baseUrl: readString(value, "baseUrl"),
+  durationMs: readNumber(value, "durationMs"),
+  lastStage: readString(value, "lastStage"),
+  failureCategory: (() => {
+    const failureCategory = value.failureCategory
+
+    if (
+      failureCategory === null ||
+      failureCategory === "environment" ||
+      failureCategory === "dependency" ||
+      failureCategory === "test_case"
+    ) {
+      return failureCategory
+    }
+
+    throw new Error("Expected tenant failure category")
+  })(),
+  failureMessage: (() => {
+    const failureMessage = value.failureMessage
+
+    if (failureMessage === null || typeof failureMessage === "string") {
+      return failureMessage
+    }
+
+    throw new Error("Expected nullable failureMessage")
+  })(),
+  tenantCodes: (() => {
+    const tenantCodes = value.tenantCodes
+
+    if (!isRecord(tenantCodes)) {
+      throw new Error("Expected tenantCodes object")
+    }
+
+    return {
+      alpha: readString(tenantCodes, "alpha"),
+      beta: readString(tenantCodes, "beta"),
+    }
+  })(),
+})
+
+const readJsonFile = async <T>(
+  path: string,
+  reader: (value: Record<string, unknown>) => T,
+): Promise<T | null> => {
   try {
     const raw = await readFile(path, "utf8")
-    return JSON.parse(raw) as T
+    const parsed: unknown = JSON.parse(raw)
+
+    if (!isRecord(parsed)) {
+      throw new Error("Expected JSON object payload")
+    }
+
+    return reader(parsed)
   } catch {
     return null
   }
@@ -66,7 +151,7 @@ const readJsonFile = async <T>(path: string): Promise<T | null> => {
 export const run = async () => {
   const reportDir = resolveTenantReportDir()
   const reportPath = resolveTenantReportPath()
-  const report = await readJsonFile<TenantE2eReport>(reportPath)
+  const report = await readJsonFile(reportPath, readTenantE2eReport)
   const notes: string[] = []
 
   if (!report) {
