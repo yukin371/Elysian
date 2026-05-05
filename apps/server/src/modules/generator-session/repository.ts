@@ -545,13 +545,44 @@ const mapPreviewSessionDetailRow = async (
   report: await readPreviewReport(row.reportPath),
 })
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const isSqlPreview = (value: unknown) =>
+  isRecord(value) &&
+  typeof value.dialect === "string" &&
+  typeof value.tableName === "string" &&
+  typeof value.contents === "string"
+
+const isPreviewReport = (value: unknown): value is GenerationPreviewReport => {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    typeof value.schemaName === "string" &&
+    typeof value.generatedAt === "string" &&
+    typeof value.outputDir === "string" &&
+    typeof value.frontendTarget === "string" &&
+    typeof value.targetPreset === "string" &&
+    typeof value.conflictStrategy === "string" &&
+    Array.isArray(value.files) &&
+    isRecord(value.databaseChangePlan) &&
+    isSqlPreview(value.sqlPreview)
+  )
+}
+
 const readPreviewReport = async (
   reportPath: string,
 ): Promise<GenerationPreviewReport> => {
   try {
-    return JSON.parse(
-      await readFile(reportPath, "utf8"),
-    ) as GenerationPreviewReport
+    const report: unknown = JSON.parse(await readFile(reportPath, "utf8"))
+
+    if (!isPreviewReport(report)) {
+      throw new Error("Malformed generator preview report payload")
+    }
+
+    return report
   } catch (error) {
     throw new AppError({
       code: "GENERATOR_SESSION_REPORT_READ_FAILED",
