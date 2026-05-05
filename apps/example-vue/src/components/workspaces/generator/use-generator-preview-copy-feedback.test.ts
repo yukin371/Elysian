@@ -5,6 +5,25 @@ import { useGeneratorPreviewCopyFeedback } from "./use-generator-preview-copy-fe
 
 const t = (key: string) => key
 type NavigatorWithClipboard = { clipboard?: GeneratorPreviewClipboard }
+type MockTimerHandle = ReturnType<typeof setTimeout>
+
+const createMockTimerHandle = (
+  id: number,
+  callback: () => void,
+): MockTimerHandle => {
+  const handle: MockTimerHandle = {
+    close: () => handle,
+    ref: () => handle,
+    unref: () => handle,
+    hasRef: () => true,
+    refresh: () => handle,
+    _onTimeout: callback,
+    [Symbol.dispose]: () => {},
+    [Symbol.toPrimitive]: () => id,
+  }
+
+  return handle
+}
 
 describe("useGeneratorPreviewCopyFeedback", () => {
   const originalClipboard = (
@@ -32,16 +51,27 @@ describe("useGeneratorPreviewCopyFeedback", () => {
       },
     })
 
-    globalThis.setTimeout = ((callback: () => void) => {
-      const id = nextTimerId
-      nextTimerId += 1
-      scheduledTimers.push({ callback, id })
-      return id as unknown as ReturnType<typeof setTimeout>
-    }) as typeof setTimeout
+    globalThis.setTimeout = Object.assign(
+      <TArgs extends unknown[]>(
+        handler: (...args: TArgs) => void,
+        _timeout?: number,
+        ...args: TArgs
+      ) => {
+        const id = nextTimerId
+        nextTimerId += 1
+        const callback = () => handler(...args)
+        const handle = createMockTimerHandle(id, callback)
+        scheduledTimers.push({ callback, id })
+        return handle
+      },
+      { __promisify__: originalSetTimeout.__promisify__ },
+    )
 
-    globalThis.clearTimeout = ((timerId: number) => {
-      clearedTimerIds.push(timerId)
-    }) as typeof clearTimeout
+    globalThis.clearTimeout = (timerId) => {
+      if (timerId !== undefined) {
+        clearedTimerIds.push(Number(timerId))
+      }
+    }
   })
 
   afterEach(() => {
