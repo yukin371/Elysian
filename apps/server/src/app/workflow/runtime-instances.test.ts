@@ -32,6 +32,72 @@ import {
   workflowRuntimePermissionCodes,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNullableString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property !== null && typeof property !== "string") {
+    throw new Error(`Expected nullable string field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every((item) => isRecord(item))) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp workflow runtime instances", () => {
   it("publishes workflow runtime success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -56,64 +122,66 @@ describe("createServerApp workflow runtime instances", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/workflow/instances"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/instances", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances"]?.get?.responses?.["400"],
+      getOpenApiResponse(paths, "/workflow/instances", "get", "400"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/workflow/instances", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances"]?.post?.responses?.["409"],
+      getOpenApiResponse(paths, "/workflow/instances", "post", "409"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/instances/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances/{id}"]?.get?.responses?.["404"],
+      getOpenApiResponse(paths, "/workflow/instances/{id}", "get", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances/{id}/cancel"]?.post?.responses?.[
-        "200"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/workflow/instances/{id}/cancel",
+        "post",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/instances/{id}/cancel"]?.post?.responses?.[
-        "409"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/workflow/instances/{id}/cancel",
+        "post",
+        "409",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/todo"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/tasks/todo", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/todo"]?.get?.responses?.["400"],
+      getOpenApiResponse(paths, "/workflow/tasks/todo", "get", "400"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/done"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/tasks/done", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/done"]?.get?.responses?.["400"],
+      getOpenApiResponse(paths, "/workflow/tasks/done", "get", "400"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/{id}/claim"]?.post?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/tasks/{id}/claim", "post", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/{id}/claim"]?.post?.responses?.["409"],
+      getOpenApiResponse(paths, "/workflow/tasks/{id}/claim", "post", "409"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/{id}/complete"]?.post?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/tasks/{id}/complete", "post", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/tasks/{id}/complete"]?.post?.responses?.["403"],
+      getOpenApiResponse(paths, "/workflow/tasks/{id}/complete", "post", "403"),
     ).toBeDefined()
   })
 
@@ -128,52 +196,24 @@ describe("createServerApp workflow runtime instances", () => {
     })
 
     expect(startResponse.status).toBe(201)
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      definitionId: string
-      status: string
-      currentNodeId: string | null
-      variables: Record<string, unknown>
-      currentTasks: Array<{
-        id: string
-        instanceId: string
-        definitionId: string
-        assignee: string
-        nodeId: string
-        nodeName: string
-        status: string
-        result: string | null
-        variables: Record<string, unknown>
-        createdAt: string
-        updatedAt: string
-        completedAt: string | null
-      }>
-      tasks: Array<{
-        id: string
-        instanceId: string
-        definitionId: string
-        assignee: string
-        nodeId: string
-        nodeName: string
-        status: string
-        result: string | null
-        variables: Record<string, unknown>
-        createdAt: string
-        updatedAt: string
-        completedAt: string | null
-      }>
-    }
-    expect(startedInstance.id).toEqual(expect.any(String))
-    expect(startedInstance.definitionId).toBe("workflow_definition_expense_v1")
-    expect(startedInstance.status).toBe("running")
-    expect(startedInstance.currentNodeId).toBe("manager-review")
-    expect(startedInstance.variables).toEqual({
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const currentTasks = readRecordArray(startedInstance, "currentTasks")
+    expect(startedInstanceId).toEqual(expect.any(String))
+    expect(readString(startedInstance, "definitionId")).toBe(
+      "workflow_definition_expense_v1",
+    )
+    expect(readString(startedInstance, "status")).toBe("running")
+    expect(readNullableString(startedInstance, "currentNodeId")).toBe(
+      "manager-review",
+    )
+    expect(readRecord(startedInstance, "variables")).toEqual({
       amount: 1200,
     })
-    expect(startedInstance.currentTasks).toEqual([
+    expect(currentTasks).toEqual([
       {
         id: expect.any(String),
-        instanceId: startedInstance.id,
+        instanceId: startedInstanceId,
         definitionId: "workflow_definition_expense_v1",
         assignee: "role:manager",
         nodeId: "manager-review",
@@ -188,8 +228,10 @@ describe("createServerApp workflow runtime instances", () => {
         },
       },
     ])
-    expect(startedInstance.tasks).toEqual(startedInstance.currentTasks)
-    const currentTaskId = startedInstance.currentTasks[0]?.id
+    expect(readRecordArray(startedInstance, "tasks")).toEqual(currentTasks)
+    const currentTaskId = currentTasks[0]
+      ? readString(currentTasks[0], "id")
+      : undefined
 
     if (!currentTaskId) {
       throw new Error("Expected workflow instance to create a todo task")
@@ -207,7 +249,7 @@ describe("createServerApp workflow runtime instances", () => {
     expect(await listInstancesResponse.json()).toEqual({
       items: [
         {
-          id: startedInstance.id,
+          id: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           definitionKey: "expense-approval",
           definitionName: "Expense Approval",
@@ -228,7 +270,7 @@ describe("createServerApp workflow runtime instances", () => {
     })
 
     const getInstanceResponse = await app.handle(
-      new Request(`http://localhost/workflow/instances/${startedInstance.id}`, {
+      new Request(`http://localhost/workflow/instances/${startedInstanceId}`, {
         headers: {
           authorization: `Bearer ${accessToken}`,
         },
@@ -237,7 +279,7 @@ describe("createServerApp workflow runtime instances", () => {
 
     expect(getInstanceResponse.status).toBe(200)
     expect(await getInstanceResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_expense_v1",
       definitionKey: "expense-approval",
       definitionName: "Expense Approval",
@@ -256,7 +298,7 @@ describe("createServerApp workflow runtime instances", () => {
       currentTasks: [
         {
           id: currentTaskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -274,7 +316,7 @@ describe("createServerApp workflow runtime instances", () => {
       tasks: [
         {
           id: currentTaskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -307,7 +349,7 @@ describe("createServerApp workflow runtime instances", () => {
       items: [
         {
           id: currentTaskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -353,15 +395,14 @@ describe("createServerApp workflow runtime instances", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const startResponse = await app.handle(
       new Request("http://localhost/workflow/instances", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -369,11 +410,12 @@ describe("createServerApp workflow runtime instances", () => {
         }),
       }),
     )
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      currentTasks: Array<{ id: string }>
-    }
-    const taskId = startedInstance.currentTasks[0]?.id
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const currentTasks = readRecordArray(startedInstance, "currentTasks")
+    const taskId = currentTasks[0]
+      ? readString(currentTasks[0], "id")
+      : undefined
 
     if (!taskId) {
       throw new Error("Expected workflow instance to create a todo task")
@@ -383,7 +425,7 @@ describe("createServerApp workflow runtime instances", () => {
       new Request(`http://localhost/workflow/tasks/${taskId}/complete`, {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -394,7 +436,7 @@ describe("createServerApp workflow runtime instances", () => {
 
     expect(completeResponse.status).toBe(200)
     expect(await completeResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_expense_v1",
       definitionKey: "expense-approval",
       definitionName: "Expense Approval",
@@ -412,7 +454,7 @@ describe("createServerApp workflow runtime instances", () => {
       tasks: [
         {
           id: taskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -432,7 +474,7 @@ describe("createServerApp workflow runtime instances", () => {
         "http://localhost/workflow/tasks/done?assignee=role:manager",
         {
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
           },
         },
       ),
@@ -443,7 +485,7 @@ describe("createServerApp workflow runtime instances", () => {
       items: [
         {
           id: taskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
@@ -461,7 +503,7 @@ describe("createServerApp workflow runtime instances", () => {
     const todoResponse = await app.handle(
       new Request("http://localhost/workflow/tasks/todo", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -511,11 +553,12 @@ describe("createServerApp workflow runtime instances", () => {
         definitionId: "workflow_definition_claimable_v1",
       },
     )
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      currentTasks: Array<{ id: string }>
-    }
-    const taskId = startedInstance.currentTasks[0]?.id
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const currentTasks = readRecordArray(startedInstance, "currentTasks")
+    const taskId = currentTasks[0]
+      ? readString(currentTasks[0], "id")
+      : undefined
 
     if (!taskId) {
       throw new Error("Expected workflow instance to create a claimable task")
@@ -529,7 +572,7 @@ describe("createServerApp workflow runtime instances", () => {
 
     expect(claimResponse.status).toBe(200)
     expect(await claimResponse.json()).toEqual({
-      id: startedInstance.id,
+      id: startedInstanceId,
       definitionId: "workflow_definition_claimable_v1",
       definitionKey: "expense-approval-claimable",
       definitionName: "Expense Approval Claimable",
@@ -546,7 +589,7 @@ describe("createServerApp workflow runtime instances", () => {
       currentTasks: [
         {
           id: taskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_claimable_v1",
           nodeId: "admin-review",
           nodeName: "Admin Review",
@@ -565,7 +608,7 @@ describe("createServerApp workflow runtime instances", () => {
       tasks: [
         {
           id: taskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_claimable_v1",
           nodeId: "admin-review",
           nodeName: "Admin Review",
@@ -599,7 +642,7 @@ describe("createServerApp workflow runtime instances", () => {
       items: [
         {
           id: taskId,
-          instanceId: startedInstance.id,
+          instanceId: startedInstanceId,
           definitionId: "workflow_definition_claimable_v1",
           nodeId: "admin-review",
           nodeName: "Admin Review",
