@@ -2,8 +2,8 @@ import type { InferInsertModel, InferSelectModel } from "drizzle-orm"
 import {
   boolean,
   integer,
-  pgTable,
   jsonb,
+  pgTable,
   text,
   timestamp,
   uuid,
@@ -26,8 +26,10 @@ export const generatorPreviewSessions = pgTable("generator_preview_sessions", {
   appliedByUsername: text("applied_by_username"),
   applyManifestPath: text("apply_manifest_path"),
   applyRequestId: text("apply_request_id"),
-  confirmationEvidence: jsonb("confirmation_evidence")
-    .$type<Record<string, unknown> | null>(),
+  confirmationEvidence: jsonb("confirmation_evidence").$type<Record<
+    string,
+    unknown
+  > | null>(),
   conflictStrategy: text("conflict_strategy").notNull(),
   frontendTarget: text("frontend_target").notNull(),
   hasBlockingConflicts: boolean("has_blocking_conflicts")
@@ -36,13 +38,19 @@ export const generatorPreviewSessions = pgTable("generator_preview_sessions", {
   outputDir: text("output_dir").notNull(),
   previewFileCount: integer("preview_file_count").notNull(),
   reportPath: text("report_path").notNull(),
-  reviewEvidence: jsonb("review_evidence").$type<Record<string, unknown> | null>(),
+  reviewEvidence: jsonb("review_evidence").$type<Record<
+    string,
+    unknown
+  > | null>(),
   reviewComment: text("review_comment"),
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   reviewedByDisplayName: text("reviewed_by_display_name"),
   reviewedByUserId: uuid("reviewed_by_user_id"),
   reviewedByUsername: text("reviewed_by_username"),
-  applyEvidence: jsonb("apply_evidence").$type<Record<string, unknown> | null>(),
+  applyEvidence: jsonb("apply_evidence").$type<Record<
+    string,
+    unknown
+  > | null>(),
   confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
   confirmedByDisplayName: text("confirmed_by_display_name"),
   confirmedByUserId: uuid("confirmed_by_user_id"),

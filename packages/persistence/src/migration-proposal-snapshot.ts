@@ -1,10 +1,10 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { dirname } from "node:path"
 import {
   type DatabaseChangePlanLike,
   type MigrationProposalResolution,
   resolveMigrationProposalFromChangePlan,
 } from "./migration-proposal"
-import { mkdir, readFile, writeFile } from "node:fs/promises"
-import { dirname } from "node:path"
 
 export interface MigrationProposalSnapshot {
   generatedAt: string
@@ -47,8 +47,7 @@ export const buildMigrationProposalSnapshot = (
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null
 
-const isString = (value: unknown): value is string =>
-  typeof value === "string"
+const isString = (value: unknown): value is string => typeof value === "string"
 
 const isNullableString = (value: unknown): value is string | null =>
   value === null || typeof value === "string"
@@ -108,7 +107,9 @@ export const readMigrationProposalSnapshot = async (
   }
 
   if (parsed.snapshotPath !== snapshotPath) {
-    throw new Error("Migration proposal snapshot path does not match file path.")
+    throw new Error(
+      "Migration proposal snapshot path does not match file path.",
+    )
   }
 
   return {

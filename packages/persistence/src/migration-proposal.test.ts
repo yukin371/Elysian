@@ -154,8 +154,7 @@ describe("buildMigrationProposalFromChangePlan", () => {
 
     expect(resolveMigrationProposalFromChangePlan(invalidPlan)).toEqual({
       proposal: null,
-      unsupportedReason:
-        "Only single create-table change plans are supported.",
+      unsupportedReason: "Only single create-table change plans are supported.",
     })
   })
 })

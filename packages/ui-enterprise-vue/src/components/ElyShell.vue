@@ -16,12 +16,12 @@ import {
   type ElyShellProps,
   resolveElyShellCopy,
 } from "../contracts"
+import ElyNavNodes from "./ElyNavNodes.vue"
+import ElyShellTabs from "./ElyShellTabs.vue"
 import {
   isElyShellMenuSelectable,
   toggleElyShellExpandedMenuValue,
 } from "./ely-shell-navigation"
-import ElyNavNodes from "./ElyNavNodes.vue"
-import ElyShellTabs from "./ElyShellTabs.vue"
 
 const props = withDefaults(defineProps<ElyShellProps>(), {
   navigationLabel: undefined,

@@ -151,24 +151,28 @@ describe("generator preview session persistence", () => {
         targetPreset: "staging",
       })
 
-      const updated = await markGeneratorPreviewSessionReviewed(db, created.id, {
-        reviewComment: "Looks good",
-        reviewEvidence: {
-          sessionId: created.id,
-          reportPath: "E:/generated/reports/review.preview.json",
-          reviewedAt: "2026-04-27T11:20:00.000Z",
-          actorDisplayName: "Alpha Admin",
-          actorUserId: "88888888-8888-4888-8888-888888888888",
-          actorUsername: "alpha-admin",
-          comment: "Looks good",
-          decision: "approve",
+      const updated = await markGeneratorPreviewSessionReviewed(
+        db,
+        created.id,
+        {
+          reviewComment: "Looks good",
+          reviewEvidence: {
+            sessionId: created.id,
+            reportPath: "E:/generated/reports/review.preview.json",
+            reviewedAt: "2026-04-27T11:20:00.000Z",
+            actorDisplayName: "Alpha Admin",
+            actorUserId: "88888888-8888-4888-8888-888888888888",
+            actorUsername: "alpha-admin",
+            comment: "Looks good",
+            decision: "approve",
+          },
+          reviewedAt: new Date("2026-04-27T11:20:00.000Z"),
+          reviewedByDisplayName: "Alpha Admin",
+          reviewedByUserId: "88888888-8888-4888-8888-888888888888",
+          reviewedByUsername: "alpha-admin",
+          status: "ready",
         },
-        reviewedAt: new Date("2026-04-27T11:20:00.000Z"),
-        reviewedByDisplayName: "Alpha Admin",
-        reviewedByUserId: "88888888-8888-4888-8888-888888888888",
-        reviewedByUsername: "alpha-admin",
-        status: "ready",
-      })
+      )
 
       expect(updated?.status).toBe("ready")
       expect(updated?.reviewComment).toBe("Looks good")

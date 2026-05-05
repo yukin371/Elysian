@@ -234,9 +234,9 @@ describe("ui-enterprise-vue adapters", () => {
 
     expect(isElyShellMenuSelectable(navigation, "system-root")).toBe(false)
     expect(isElyShellMenuSelectable(navigation, "system-users")).toBe(true)
-    expect(toggleElyShellExpandedMenuValue(["system-root"], "system-root")).toEqual(
-      [],
-    )
+    expect(
+      toggleElyShellExpandedMenuValue(["system-root"], "system-root"),
+    ).toEqual([])
     expect(toggleElyShellExpandedMenuValue([], "system-root")).toEqual([
       "system-root",
     ])

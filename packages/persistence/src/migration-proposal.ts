@@ -261,7 +261,9 @@ export const resolveMigrationProposalFromChangePlan = (
     return {
       proposal: null,
       unsupportedReason:
-        error instanceof Error ? error.message : "Unsupported migration proposal.",
+        error instanceof Error
+          ? error.message
+          : "Unsupported migration proposal.",
     }
   }
 }

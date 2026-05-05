@@ -3,9 +3,9 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
 import { createServerApp } from "../apps/server/src/app"
+import { createAuthTestFixture } from "../apps/server/src/app.operations.test-helpers"
 import { createServerConfig } from "../apps/server/src/config"
 import type { ServerLogger } from "../apps/server/src/logging"
-import { createAuthTestFixture } from "../apps/server/src/app.operations.test-helpers"
 import {
   createCustomerModule,
   createDepartmentModule,
@@ -46,9 +46,7 @@ const silentLogger: ServerLogger = {
   error: () => {},
 }
 
-const generatedDir = resolve(
-  "apps/example-vue/src/lib/platform-api/generated",
-)
+const generatedDir = resolve("apps/example-vue/src/lib/platform-api/generated")
 const openapiJsonPath = join(generatedDir, "openapi.json")
 const openapiTypesPath = join(generatedDir, "openapi-types.d.ts")
 
