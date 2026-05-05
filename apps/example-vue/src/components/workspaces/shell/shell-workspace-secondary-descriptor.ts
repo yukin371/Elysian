@@ -2,6 +2,7 @@ import type { Component } from "vue"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
 import { generatedStandardCrudWorkspaceKinds } from "../../../app/workspace-registry/generated"
+import type { FileRecord } from "../../../lib/platform-api"
 import { generatedStandardCrudPanelComponents } from "../../../modules/generated"
 import AuthSessionWorkspacePanel from "../auth-session/AuthSessionWorkspacePanel.vue"
 import CustomerWorkspacePanel from "../customer/CustomerWorkspacePanel.vue"
@@ -183,7 +184,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   fileErrorMessage: string
   fileDetailErrorMessage: string
   filePanelMode: string
-  selectedFile: Record<string, unknown> | null
+  selectedFile: FileRecord | null
   pendingUploadFile: File | null
   selectedGeneratorPreviewSchemaName: string
   selectedGeneratorPreviewFrontendTarget: string

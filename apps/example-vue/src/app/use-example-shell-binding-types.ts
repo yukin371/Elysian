@@ -4,6 +4,7 @@ import type { FileWorkspaceQuery } from "../lib/file-workspace"
 import type { GeneratorPreviewFileCard } from "../lib/generator-preview-workspace"
 import type {
   AuthIdentityResponse,
+  FileRecord,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewSqlPreview,
   GeneratorPreviewSqlProposal,
@@ -329,7 +330,7 @@ export interface UseExampleShellBindingsOptions {
   fileActionLoading: ValueSource<boolean>
   fileDetailErrorMessage: ValueSource<string>
   filePanelMode: ValueSource<string>
-  selectedFile: ValueSource<Record<string, unknown> | null>
+  selectedFile: ValueSource<FileRecord | null>
   pendingUploadFile: Ref<File | null>
   selectedGeneratorPreviewSchema: ValueSource<{ name?: string } | null>
   selectedGeneratorPreviewFile: ValueSource<GeneratorPreviewFileCard | null>
@@ -343,13 +344,13 @@ export interface UseExampleShellBindingsOptions {
   selectedCustomer: ValueSource<Record<string, unknown> | null>
   enterpriseFormFields: ValueSource<unknown[]>
   enterpriseFormValues: ValueSource<Record<string, unknown>>
-  fileItems: ValueSource<Array<{ id: string } & Record<string, unknown>>>
+  fileItems: ValueSource<FileRecord[]>
   handleWorkflowDefinitionSelect: (definitionId: string) => void
   setWorkflowStatusFilter: (status: WorkflowStatusFilter) => void
   resetWorkflowFilters: () => void
   updateFileQuery: (query: FileWorkspaceQuery) => void
   resetFileQuery: () => void
-  selectFile: (file: Record<string, unknown>) => Promise<void> | void
+  selectFile: (file: FileRecord) => Promise<void> | void
   openFileUploadPanel: () => void
   resetGeneratorPreviewFilters: () => void
   refreshGeneratorPreview: () => void
