@@ -398,7 +398,7 @@ export interface UseExampleShellBindingsOptions {
   openCustomerWorkspace: () => void
   handleEnterpriseSearch: (payload: ElyQueryValues) => void
   handleEnterpriseReset: () => void
-  handleEnterpriseAction: (payload: unknown) => void
+  handleEnterpriseAction: (key: string, row: Record<string, unknown>) => void
   handleEnterpriseRowClick: (payload: Record<string, unknown>) => void
   handleCustomerPageSizeChange: (value: string) => void
   handleCustomerSortChange: (value: string) => void
