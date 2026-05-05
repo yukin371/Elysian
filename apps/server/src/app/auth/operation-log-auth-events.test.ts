@@ -24,6 +24,14 @@ const toCookieHeader = (setCookie: string | null) => {
   return setCookie.split(";")[0] ?? setCookie
 }
 
+const isAuthEventType = (
+  action: string,
+): action is NonNullable<OperationLogRecord["authEventType"]> =>
+  action === "login" ||
+  action === "logout" ||
+  action === "refresh" ||
+  action === "session_revoke"
+
 const mapAuditLogToOperationLogRecord = (
   auditLog: Awaited<
     ReturnType<
@@ -37,9 +45,8 @@ const mapAuditLogToOperationLogRecord = (
   category: auditLog.category,
   action: auditLog.action,
   authEventType:
-    auditLog.category === "auth" &&
-    ["login", "logout", "refresh", "session_revoke"].includes(auditLog.action)
-      ? (auditLog.action as OperationLogRecord["authEventType"])
+    auditLog.category === "auth" && isAuthEventType(auditLog.action)
+      ? auditLog.action
       : null,
   authFailureReason:
     typeof auditLog.details?.reason === "string"

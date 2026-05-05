@@ -211,13 +211,22 @@ export const createOperationLogSeedRecords = () => [
   },
 ]
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const resolveAuthFailureReason = (details: unknown): string | null => {
+  if (!isRecord(details) || typeof details.reason !== "string") {
+    return null
+  }
+
+  return details.reason
+}
+
 export const withDerivedAuthFields = (
   record: typeof createOperationLogSeedRecords extends () => Array<infer T>
     ? T
     : never,
 ) => {
-  const details = record.details as Record<string, unknown> | undefined
-
   return {
     ...record,
     authEventType:
@@ -228,8 +237,7 @@ export const withDerivedAuthFields = (
         record.action === "session_revoke")
         ? record.action
         : null,
-    authFailureReason:
-      typeof details?.reason === "string" ? details.reason : null,
+    authFailureReason: resolveAuthFailureReason(record.details),
   }
 }
 
