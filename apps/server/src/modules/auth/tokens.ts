@@ -5,6 +5,9 @@ const UUID_PATTERN =
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string")
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
 export interface AccessTokenPayload {
   sub: string
   sid: string
@@ -15,19 +18,17 @@ export interface AccessTokenPayload {
 }
 
 const isAccessTokenPayload = (value: unknown): value is AccessTokenPayload => {
-  if (typeof value !== "object" || value === null) {
+  if (!isRecord(value)) {
     return false
   }
 
-  const payload = value as Record<string, unknown>
-
   return (
-    typeof payload.sub === "string" &&
-    typeof payload.sid === "string" &&
-    typeof payload.tid === "string" &&
-    typeof payload.iat === "number" &&
-    typeof payload.exp === "number" &&
-    isStringArray(payload.roles)
+    typeof value.sub === "string" &&
+    typeof value.sid === "string" &&
+    typeof value.tid === "string" &&
+    typeof value.iat === "number" &&
+    typeof value.exp === "number" &&
+    isStringArray(value.roles)
   )
 }
 
