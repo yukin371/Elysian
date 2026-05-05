@@ -46,10 +46,131 @@ const resolveSmokeReportDir = () =>
   process.env.ELYSIAN_SMOKE_REPORT_DIR ??
   join(process.env.RUNNER_TEMP ?? process.cwd(), "elysian-reports", "smoke")
 
-const readJsonFile = async <T>(path: string): Promise<T | null> => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "boolean") {
+    throw new Error(`Expected boolean field: ${key}`)
+  }
+
+  return property
+}
+
+const readAttemptSummaryArray = (
+  value: Record<string, unknown>,
+  key: string,
+) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every(isRecord)) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
+const readSmokeReportsIndex = (
+  value: Record<string, unknown>,
+): SmokeReportsIndex => ({
+  generatedAt: readString(value, "generatedAt"),
+  reportDir: readString(value, "reportDir"),
+  finalStatus: (() => {
+    const finalStatus = readString(value, "finalStatus")
+
+    if (finalStatus !== "passed" && finalStatus !== "failed") {
+      throw new Error("Expected smoke finalStatus")
+    }
+
+    return finalStatus
+  })(),
+  recoveredByRetry: readBoolean(value, "recoveredByRetry"),
+  attempts: readAttemptSummaryArray(value, "attempts").map((attempt) => {
+    const attemptName = readString(attempt, "attempt")
+    const status = readString(attempt, "status")
+    const failureCategory = attempt.failureCategory
+    const diagnosisPath = attempt.diagnosisPath
+    const shouldRetry = attempt.shouldRetry
+
+    if (attemptName !== "attempt1" && attemptName !== "attempt2") {
+      throw new Error("Expected smoke attempt discriminator")
+    }
+
+    if (status !== "passed" && status !== "failed") {
+      throw new Error("Expected smoke attempt status")
+    }
+
+    if (
+      failureCategory !== null &&
+      failureCategory !== "environment" &&
+      failureCategory !== "dependency" &&
+      failureCategory !== "test_case"
+    ) {
+      throw new Error("Expected smoke failure category")
+    }
+
+    if (diagnosisPath !== null && typeof diagnosisPath !== "string") {
+      throw new Error("Expected nullable diagnosisPath")
+    }
+
+    if (shouldRetry !== null && typeof shouldRetry !== "boolean") {
+      throw new Error("Expected nullable shouldRetry")
+    }
+
+    return {
+      attempt: attemptName,
+      reportPath: readString(attempt, "reportPath"),
+      diagnosisPath,
+      status,
+      failureCategory,
+      lastStage: readString(attempt, "lastStage"),
+      shouldRetry,
+    }
+  }),
+})
+
+const readSmokeGateReport = (
+  value: Record<string, unknown>,
+): SmokeGateReport => ({
+  generatedAt: readString(value, "generatedAt"),
+  indexPath: readString(value, "indexPath"),
+  status: (() => {
+    const status = readString(value, "status")
+
+    if (status !== "passed" && status !== "failed") {
+      throw new Error("Expected smoke gate status")
+    }
+
+    return status
+  })(),
+  conclusion: readString(value, "conclusion"),
+})
+
+const readJsonFile = async <T>(
+  path: string,
+  reader: (value: Record<string, unknown>) => T,
+): Promise<T | null> => {
   try {
     const raw = await readFile(path, "utf8")
-    return JSON.parse(raw) as T
+    const parsed: unknown = JSON.parse(raw)
+
+    if (!isRecord(parsed)) {
+      throw new Error("Expected JSON object payload")
+    }
+
+    return reader(parsed)
   } catch {
     return null
   }
@@ -60,8 +181,8 @@ export const run = async () => {
   const gatePath = join(reportDir, "e2e-smoke-reports-gate.json")
   const indexPath = join(reportDir, "e2e-smoke-reports-index.json")
 
-  const gate = await readJsonFile<SmokeGateReport>(gatePath)
-  const index = await readJsonFile<SmokeReportsIndex>(indexPath)
+  const gate = await readJsonFile(gatePath, readSmokeGateReport)
+  const index = await readJsonFile(indexPath, readSmokeReportsIndex)
 
   const notes: string[] = []
   if (!gate) {
