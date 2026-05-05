@@ -51,10 +51,7 @@ export const resolveApiErrorCode = (value: unknown): number | null => {
     return value
   }
 
-  if (
-    typeof value === "string" &&
-    value in errorCodeKeyMap
-  ) {
+  if (typeof value === "string" && value in errorCodeKeyMap) {
     return errorCodeKeyMap[value as keyof typeof errorCodeKeyMap]
   }
 
@@ -62,4 +59,4 @@ export const resolveApiErrorCode = (value: unknown): number | null => {
 }
 
 export const resolveApiErrorCodeLabel = (value: number | null) =>
-  value === null ? null : errorCodeMessageMap[value] ?? null
+  value === null ? null : (errorCodeMessageMap[value] ?? null)

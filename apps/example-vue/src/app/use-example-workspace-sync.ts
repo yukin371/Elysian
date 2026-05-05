@@ -477,10 +477,7 @@ export const useExampleWorkspaceSync = (
   watch(
     options.filteredTenantItems,
     async (items) => {
-      if (
-        !options.isTenantWorkspace.value ||
-        options.tenantLoading.value
-      ) {
+      if (!options.isTenantWorkspace.value || options.tenantLoading.value) {
         return
       }
 

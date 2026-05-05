@@ -58,9 +58,7 @@ export const useExampleQuerySummary = (
     return authEventType
   }
 
-  const localizeOperationLogAuthFailureReason = (
-    authFailureReason: string,
-  ) => {
+  const localizeOperationLogAuthFailureReason = (authFailureReason: string) => {
     if (
       authFailureReason === "invalid_password" ||
       authFailureReason === "account_locked" ||
