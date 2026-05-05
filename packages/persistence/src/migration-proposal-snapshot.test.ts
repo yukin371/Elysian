@@ -1,10 +1,11 @@
+import { describe, expect, it } from "bun:test"
 import { mkdtemp, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import {
-  buildMigrationProposalSnapshot,
   type BuildMigrationProposalSnapshotInput,
+  buildMigrationProposalSnapshot,
   readMigrationProposalSnapshot,
   writeMigrationProposalSnapshot,
 } from "./migration-proposal-snapshot"
