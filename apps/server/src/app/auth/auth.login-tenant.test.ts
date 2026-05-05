@@ -20,6 +20,62 @@ import {
   toCookieHeader,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: Response) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readStringArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (
+    !Array.isArray(property) ||
+    !property.every((item) => typeof item === "string")
+  ) {
+    throw new Error(`Expected string array field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every((item) => isRecord(item))) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
 describe("createServerApp auth login and tenant context", () => {
   it("logs in and returns the current auth context", async () => {
     const fixture = await createAuthTestFixture()
@@ -32,30 +88,28 @@ describe("createServerApp auth login and tenant context", () => {
     })
     expect(loginResponse.status).toBe(200)
 
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-      user: {
-        username: string
-        tenantId: string
-      }
-      roles: string[]
-      permissionCodes: string[]
-      menus: Array<{ code: string }>
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const loginAccessToken = readString(loginBody, "accessToken")
+    const loginUser = readRecord(loginBody, "user")
+    const loginRoles = readStringArray(loginBody, "roles")
+    const permissionCodes = readStringArray(loginBody, "permissionCodes")
+    const menus = readRecordArray(loginBody, "menus")
     const setCookie = loginResponse.headers.get("set-cookie")
 
-    expect(loginBody.user.username).toBe("admin")
-    expect(loginBody.user.tenantId).toBe(DEFAULT_TENANT_ID)
-    expect(loginBody.roles).toEqual(["admin"])
-    expect(loginBody.permissionCodes).toEqual(["system:user:list"])
-    expect(loginBody.menus.map((menu) => menu.code)).toEqual(["system-user"])
-    expect(typeof loginBody.accessToken).toBe("string")
+    expect(readString(loginUser, "username")).toBe("admin")
+    expect(readString(loginUser, "tenantId")).toBe(DEFAULT_TENANT_ID)
+    expect(loginRoles).toEqual(["admin"])
+    expect(permissionCodes).toEqual(["system:user:list"])
+    expect(menus.map((menu) => readString(menu, "code"))).toEqual([
+      "system-user",
+    ])
+    expect(typeof loginAccessToken).toBe("string")
     expect(setCookie).toContain(refreshCookiePrefix)
 
     const meResponse = await app.handle(
       new Request("http://localhost/auth/me", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${loginAccessToken}`,
         },
       }),
     )
@@ -111,9 +165,9 @@ describe("createServerApp auth login and tenant context", () => {
       username: "admin",
       password: testAdminPassword,
     })
-    const loginBody = (await loginResponse.json()) as { accessToken: string }
+    const loginBody = await readJsonRecord(loginResponse)
     const payload = await verifyAccessToken(
-      loginBody.accessToken,
+      readString(loginBody, "accessToken"),
       testAccessTokenSecret,
     )
     expect(payload.tid).toBe(DEFAULT_TENANT_ID)
@@ -134,11 +188,9 @@ describe("createServerApp auth login and tenant context", () => {
     )
 
     expect(refreshResponse.status).toBe(200)
-    const refreshBody = (await refreshResponse.json()) as {
-      accessToken: string
-    }
+    const refreshBody = await readJsonRecord(refreshResponse)
     const payload = await verifyAccessToken(
-      refreshBody.accessToken,
+      readString(refreshBody, "accessToken"),
       testAccessTokenSecret,
     )
     expect(payload.tid).toBe(DEFAULT_TENANT_ID)
@@ -176,15 +228,11 @@ describe("createServerApp auth login and tenant context", () => {
     )
 
     expect(loginResponse.status).toBe(200)
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-      user: {
-        tenantId: string
-      }
-    }
-    expect(loginBody.user.tenantId).toBe(tenantId)
+    const loginBody = await readJsonRecord(loginResponse)
+    const loginUser = readRecord(loginBody, "user")
+    expect(readString(loginUser, "tenantId")).toBe(tenantId)
     const loginPayload = await verifyAccessToken(
-      loginBody.accessToken,
+      readString(loginBody, "accessToken"),
       testAccessTokenSecret,
     )
     expect(loginPayload.tid).toBe(tenantId)
@@ -199,15 +247,11 @@ describe("createServerApp auth login and tenant context", () => {
     )
 
     expect(refreshResponse.status).toBe(200)
-    const refreshBody = (await refreshResponse.json()) as {
-      accessToken: string
-      user: {
-        tenantId: string
-      }
-    }
-    expect(refreshBody.user.tenantId).toBe(tenantId)
+    const refreshBody = await readJsonRecord(refreshResponse)
+    const refreshUser = readRecord(refreshBody, "user")
+    expect(readString(refreshUser, "tenantId")).toBe(tenantId)
     const refreshPayload = await verifyAccessToken(
-      refreshBody.accessToken,
+      readString(refreshBody, "accessToken"),
       testAccessTokenSecret,
     )
     expect(refreshPayload.tid).toBe(tenantId)
@@ -313,13 +357,8 @@ describe("createServerApp auth login and tenant context", () => {
       password: testAdminPassword,
     })
     expect(defaultLoginResponse.status).toBe(200)
-    const defaultLoginBody = (await defaultLoginResponse.json()) as {
-      user: {
-        id: string
-        tenantId: string
-      }
-    }
-    expect(defaultLoginBody.user).toMatchObject({
+    const defaultLoginBody = await readJsonRecord(defaultLoginResponse)
+    expect(readRecord(defaultLoginBody, "user")).toMatchObject({
       id: "user_default_admin",
       tenantId: DEFAULT_TENANT_ID,
     })
@@ -330,13 +369,8 @@ describe("createServerApp auth login and tenant context", () => {
       tenantCode: tenantAlphaCode,
     })
     expect(tenantLoginResponse.status).toBe(200)
-    const tenantLoginBody = (await tenantLoginResponse.json()) as {
-      user: {
-        id: string
-        tenantId: string
-      }
-    }
-    expect(tenantLoginBody.user).toMatchObject({
+    const tenantLoginBody = await readJsonRecord(tenantLoginResponse)
+    expect(readRecord(tenantLoginBody, "user")).toMatchObject({
       id: "user_tenant_admin",
       tenantId: tenantAlphaId,
     })
