@@ -280,7 +280,9 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
 
     expect(previewRequestCount).toBe(0)
     expect(workspace.currentSession.value?.id).toBe("preview-session-ready")
-    expect(workspace.selectedRecentSessionId.value).toBe("preview-session-ready")
+    expect(workspace.selectedRecentSessionId.value).toBe(
+      "preview-session-ready",
+    )
   })
 
   test("skips stale matching session detail before creating a new preview", async () => {
@@ -600,7 +602,7 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     await workspace.restorePreviewSession("preview-session-protected")
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.id).toBe("preview-session-current")
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
     expect(workspace.selectedRecentSessionId.value).toBe(
@@ -738,9 +740,7 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
       }
 
       if (
-        url.endsWith(
-          "/studio/generator/sessions/preview-session-protected",
-        ) &&
+        url.endsWith("/studio/generator/sessions/preview-session-protected") &&
         method === "GET"
       ) {
         return new Response(JSON.stringify({ message: "unauthorized" }), {
@@ -777,7 +777,7 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     await waitForAsyncWork()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(previewRequestCount).toBe(0)
     expect(workspace.currentSession.value).toBeNull()
     expect(workspace.selectedFrontendTarget.value).toBe("vue")
@@ -977,7 +977,7 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
     await waitForAsyncWork()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(previewRequestCount).toBe(0)
     expect(workspace.currentSession.value).toBeNull()
     expect(workspace.recentSessionOptions.value).toHaveLength(0)
