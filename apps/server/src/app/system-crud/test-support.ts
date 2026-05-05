@@ -64,8 +64,16 @@ export const loginAsAdmin = async (app: ReturnType<typeof createTestApp>) => {
       }),
     }),
   )
-  const body = (await response.json()) as {
-    accessToken: string
+  const body: unknown = await response.json()
+
+  if (
+    typeof body !== "object" ||
+    body === null ||
+    Array.isArray(body) ||
+    !("accessToken" in body) ||
+    typeof body.accessToken !== "string"
+  ) {
+    throw new Error("Malformed auth login response")
   }
 
   return body.accessToken
