@@ -682,6 +682,12 @@ const buildSqlProposalConfirmationChecklist = (
   ]
 }
 
+const hasErrorCode = (
+  value: unknown,
+): value is Error & {
+  code?: string
+} => value instanceof Error && "code" in value
+
 const buildSqlProposalHandoff = async (
   session: GeneratorPreviewSessionDetail,
 ) => {
@@ -699,10 +705,7 @@ const buildSqlProposalHandoff = async (
     migrationProposalSnapshot =
       await readMigrationProposalSnapshot(snapshotPath)
   } catch (error) {
-    const isMissingSnapshot =
-      error instanceof Error &&
-      "code" in error &&
-      (error as { code?: string }).code === "ENOENT"
+    const isMissingSnapshot = hasErrorCode(error) && error.code === "ENOENT"
 
     if (isMissingSnapshot) {
       migrationProposalSnapshotRecovery = {
