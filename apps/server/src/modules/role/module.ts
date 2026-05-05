@@ -3,13 +3,14 @@ import { t } from "elysia"
 
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
-import type { ServerModule } from "../module"
-import {
-  roleDetailResponseSchema,
-  roleListResponseSchema,
-} from "./openapi"
+import type { AnyServerApp, ServerModule } from "../module"
+import { roleDetailResponseSchema, roleListResponseSchema } from "./openapi"
 import type { RoleRepository } from "./repository"
-import { createRoleService } from "./service"
+import {
+  type CreateRolePayload,
+  type UpdateRolePayload,
+  createRoleService,
+} from "./service"
 
 const roleDataScopeSchema = t.Union([
   t.Literal(1),
@@ -21,6 +22,26 @@ const roleDataScopeSchema = t.Union([
 
 export interface RoleModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface RoleRouteRegistrar {
+  get: (...args: readonly unknown[]) => RoleRouteRegistrar
+  post: (...args: readonly unknown[]) => RoleRouteRegistrar
+  put: (...args: readonly unknown[]) => RoleRouteRegistrar
+}
+
+interface RoleRouteParams {
+  id: string
+}
+
+interface RoleRouteQuery {
+  page?: number
+  pageSize?: number
+}
+
+interface RoleRouteSet {
+  headers: Record<string, string>
+  status: number
 }
 
 const roleListQuerySchema = t.Object({
@@ -76,106 +97,141 @@ export const createRoleModule = (
       fields: roleModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/roles",
-        async ({ query, request }) => {
-          await authorize(request.headers, rolePermissions.list)
+    let roleApp = app as unknown as RoleRouteRegistrar
 
-          return service.list(query)
-        },
-        {
-          query: roleListQuerySchema,
-          response: {
-            200: roleListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["role"],
-            summary: "List roles",
-          },
-        },
-      )
-      .get(
-        "/system/roles/export",
-        async ({ request, set }) => {
-          await authorize(request.headers, rolePermissions.list)
+    roleApp = roleApp.get(
+      "/system/roles",
+      async ({
+        query,
+        request,
+      }: {
+        query: RoleRouteQuery
+        request: Request
+      }) => {
+        await authorize(request.headers, rolePermissions.list)
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv()
+        return service.list(query)
+      },
+      {
+        query: roleListQuerySchema,
+        response: {
+          200: roleListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["role"],
-            summary: "Export roles as CSV",
-          },
+        detail: {
+          tags: ["role"],
+          summary: "List roles",
         },
-      )
-      .get(
-        "/system/roles/:id",
-        async ({ params, request }) => {
-          await authorize(request.headers, rolePermissions.get)
+      },
+    )
 
-          return service.getById(params.id)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: roleDetailResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["role"],
-            summary: "Get role by id",
-          },
-        },
-      )
-      .post(
-        "/system/roles",
-        async ({ body, request, set }) => {
-          await authorize(request.headers, rolePermissions.create)
-          set.status = 201
+    roleApp = roleApp.get(
+      "/system/roles/export",
+      async ({ request, set }: { request: Request; set: RoleRouteSet }) => {
+        await authorize(request.headers, rolePermissions.list)
 
-          return service.create(body)
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv()
+      },
+      {
+        response: {
+          ...createErrorResponses(401, 403),
         },
-        {
-          body: roleCreateBodySchema,
-          response: {
-            201: roleDetailResponseSchema,
-            ...createErrorResponses(400, 401, 403, 409),
-          },
-          detail: {
-            tags: ["role"],
-            summary: "Create role",
-          },
+        detail: {
+          tags: ["role"],
+          summary: "Export roles as CSV",
         },
-      )
-      .put(
-        "/system/roles/:id",
-        async ({ params, body, request }) => {
-          await authorize(request.headers, rolePermissions.update)
+      },
+    )
 
-          return service.update(params.id, body)
+    roleApp = roleApp.get(
+      "/system/roles/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: RoleRouteParams
+        request: Request
+      }) => {
+        await authorize(request.headers, rolePermissions.get)
+
+        return service.getById(params.id)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: roleDetailResponseSchema,
+          ...createErrorResponses(401, 403, 404),
         },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          body: roleUpdateBodySchema,
-          response: {
-            200: roleDetailResponseSchema,
-            ...createErrorResponses(400, 401, 403, 404, 409),
-          },
-          detail: {
-            tags: ["role"],
-            summary: "Update role",
-          },
+        detail: {
+          tags: ["role"],
+          summary: "Get role by id",
         },
-      )
+      },
+    )
+
+    roleApp = roleApp.post(
+      "/system/roles",
+      async ({
+        body,
+        request,
+        set,
+      }: {
+        body: CreateRolePayload
+        request: Request
+        set: RoleRouteSet
+      }) => {
+        await authorize(request.headers, rolePermissions.create)
+        set.status = 201
+
+        return service.create(body)
+      },
+      {
+        body: roleCreateBodySchema,
+        response: {
+          201: roleDetailResponseSchema,
+          ...createErrorResponses(400, 401, 403, 409),
+        },
+        detail: {
+          tags: ["role"],
+          summary: "Create role",
+        },
+      },
+    )
+
+    roleApp = roleApp.put(
+      "/system/roles/:id",
+      async ({
+        params,
+        body,
+        request,
+      }: {
+        params: RoleRouteParams
+        body: UpdateRolePayload
+        request: Request
+      }) => {
+        await authorize(request.headers, rolePermissions.update)
+
+        return service.update(params.id, body)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        body: roleUpdateBodySchema,
+        response: {
+          200: roleDetailResponseSchema,
+          ...createErrorResponses(400, 401, 403, 404, 409),
+        },
+        detail: {
+          tags: ["role"],
+          summary: "Update role",
+        },
+      },
+    )
+
+    return roleApp as unknown as AnyServerApp
   },
 })
