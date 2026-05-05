@@ -16,6 +16,70 @@ const SERVER_URL =
 
 let accessToken: string | null = null
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readOptionalRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === undefined) {
+    return undefined
+  }
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected optional object field: ${key}`)
+  }
+
+  return property
+}
+
+const readOptionalStringOrNumber = (
+  value: Record<string, unknown>,
+  key: string,
+) => {
+  const property = value[key]
+
+  if (
+    property === undefined ||
+    typeof property === "string" ||
+    typeof property === "number"
+  ) {
+    return property
+  }
+
+  throw new Error(`Expected optional string/number field: ${key}`)
+}
+
+const readOptionalString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === undefined || typeof property === "string") {
+    return property
+  }
+
+  throw new Error(`Expected optional string field: ${key}`)
+}
+
+const readOptionalNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === undefined || typeof property === "number") {
+    return property
+  }
+
+  throw new Error(`Expected optional number field: ${key}`)
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -39,28 +103,18 @@ export const clearAccessToken = () => {
 
 const toRequestError = async (response: Response) => {
   try {
-    const payload = (await response.json()) as {
-      code?: number | string
-      message?: string
-      status?: number
-      details?: Record<string, unknown>
-      error?: {
-        code?: number | string
-        message?: string
-        status?: number
-        details?: Record<string, unknown>
-      }
-    }
+    const payload = await readJsonRecord(response)
     const envelope = payload.error ?? payload
-    const code = resolveApiErrorCode(envelope.code)
+    const envelopeRecord = isRecord(envelope) ? envelope : payload
     const message =
-      envelope.message ?? `Request failed with status ${response.status}`
+      readOptionalString(envelopeRecord, "message") ??
+      `Request failed with status ${response.status}`
 
     return new ApiError(
       message,
-      envelope.status ?? response.status,
-      code,
-      envelope.details,
+      readOptionalNumber(envelopeRecord, "status") ?? response.status,
+      resolveApiErrorCode(readOptionalStringOrNumber(envelopeRecord, "code")),
+      readOptionalRecord(envelopeRecord, "details"),
     )
   } catch {
     return new ApiError(
