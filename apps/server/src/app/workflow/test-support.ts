@@ -323,14 +323,15 @@ export const createAuthTestFixture = async (
 
 export const createTenantContextRecorder = () => {
   const statements: string[] = []
+  const execute = ((statement: Parameters<DatabaseClient["execute"]>[0]) => {
+    statements.push(String(statement))
+    return Promise.resolve([])
+  }) as DatabaseClient["execute"]
   const db = {
-    execute: async (statement: string) => {
-      statements.push(statement)
-      return []
-    },
-  } as unknown as DatabaseClient
+    execute,
+  }
 
-  return { db, statements }
+  return { db: db as DatabaseClient, statements }
 }
 
 export const createUserSeedRecords = async () => {
