@@ -51,6 +51,113 @@ interface TenantE2eReport {
   }
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "boolean") {
+    throw new Error(`Expected boolean field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every(isRecord)) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
+const readOptionalStringArray = (
+  value: Record<string, unknown>,
+  key: string,
+) => {
+  const property = value[key]
+
+  if (property === undefined) {
+    return []
+  }
+
+  if (
+    !Array.isArray(property) ||
+    !property.every((item) => typeof item === "string")
+  ) {
+    throw new Error(`Expected optional string array field: ${key}`)
+  }
+
+  return property
+}
+
+const readLoginResponse = (value: Record<string, unknown>): LoginResponse => {
+  const user = readRecord(value, "user")
+
+  return {
+    accessToken: readString(value, "accessToken"),
+    user: {
+      tenantId: readString(user, "tenantId"),
+      isSuperAdmin: readBoolean(user, "isSuperAdmin"),
+    },
+  }
+}
+
+const readCustomerRecord = (value: Record<string, unknown>): CustomerRecord => {
+  const id = readString(value, "id")
+  const name = readString(value, "name")
+  const status = readString(value, "status")
+
+  if (status !== "active" && status !== "inactive") {
+    throw new Error("Expected customer status")
+  }
+
+  return { id, name, status }
+}
+
+const readCustomerListResponse = (value: Record<string, unknown>) => ({
+  items: readRecordArray(value, "items").map(readCustomerRecord),
+})
+
+const readTenantListResponse = (value: Record<string, unknown>) => ({
+  items: readRecordArray(value, "items").map((item) => ({
+    code: readString(item, "code"),
+  })),
+})
+
 const requiredEnvKeys = ["DATABASE_URL", "ACCESS_TOKEN_SECRET"] as const
 
 const ensureRequiredEnv = () => {
@@ -155,10 +262,8 @@ const waitForRequiredModules = async (
         continue
       }
 
-      const payload = (await response.json()) as {
-        modules?: string[]
-      }
-      const modules = payload.modules ?? []
+      const payload = await readJsonRecord(response)
+      const modules = readOptionalStringArray(payload, "modules")
       const missing = requiredModules.filter((name) => !modules.includes(name))
 
       if (missing.length === 0) {
@@ -213,7 +318,7 @@ const login = async (input: {
     body: JSON.stringify(input),
   })
   await assertStatus(response, 200)
-  const payload = (await response.json()) as LoginResponse
+  const payload = readLoginResponse(await readJsonRecord(response))
 
   if (!payload.accessToken) {
     throw new Error("Login succeeded but accessToken is missing")
@@ -238,7 +343,7 @@ const createCustomerThroughApi = async (
     }),
   })
   await assertStatus(response, 201)
-  return (await response.json()) as CustomerRecord
+  return readCustomerRecord(await readJsonRecord(response))
 }
 
 const listCustomersThroughApi = async (accessToken: string) => {
@@ -248,9 +353,7 @@ const listCustomersThroughApi = async (accessToken: string) => {
     },
   })
   await assertStatus(response, 200)
-  return (await response.json()) as {
-    items: CustomerRecord[]
-  }
+  return readCustomerListResponse(await readJsonRecord(response))
 }
 
 const getCustomerThroughApi = async (accessToken: string, id: string) =>
@@ -562,9 +665,9 @@ const run = async () => {
       defaultLogin.accessToken,
     )
     await assertStatus(defaultTenantListResponse, 200)
-    const defaultTenantList = (await defaultTenantListResponse.json()) as {
-      items: Array<{ code: string }>
-    }
+    const defaultTenantList = readTenantListResponse(
+      await readJsonRecord(defaultTenantListResponse),
+    )
     if (
       !defaultTenantList.items.some(
         (item) => item.code === tenantCodes.alpha,
