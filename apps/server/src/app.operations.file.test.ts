@@ -12,6 +12,62 @@ import {
   createInMemoryFileStorage,
 } from "./modules"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "number") {
+    throw new Error(`Expected number field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp files", () => {
   it("publishes file success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -39,39 +95,35 @@ describe("createServerApp files", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/system/files"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/files", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/files", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/files", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files"]?.post?.responses?.["400"],
+      getOpenApiResponse(paths, "/system/files", "post", "400"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/files/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files/{id}"]?.get?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/files/{id}", "get", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files/{id}"]?.delete?.responses?.["204"],
+      getOpenApiResponse(paths, "/system/files/{id}", "delete", "204"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files/{id}/download"]?.get?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/files/{id}/download", "get", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/files/delete"]?.post?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/files/delete", "post", "200"),
     ).toBeDefined()
   })
 
@@ -220,23 +272,20 @@ describe("createServerApp files", () => {
     )
 
     expect(uploadResponse.status).toBe(201)
-    const createdFile = (await uploadResponse.json()) as {
-      id: string
-      originalName: string
-      mimeType?: string
-      size: number
-      uploaderUserId?: string
-      createdAt: string
-    }
-    expect(createdFile.id).toEqual(expect.any(String))
-    expect(createdFile.originalName).toBe("hello.txt")
-    expect(createdFile.mimeType).toContain("text/plain")
-    expect(createdFile.size).toBe(17)
-    expect(createdFile.uploaderUserId).toEqual(expect.any(String))
-    expect(createdFile.createdAt).toEqual(expect.any(String))
+    const createdFile = await readJsonRecord(uploadResponse)
+    const createdFileId = readString(createdFile, "id")
+
+    expect(createdFileId).toEqual(expect.any(String))
+    expect(readString(createdFile, "originalName")).toBe("hello.txt")
+    expect(readString(createdFile, "mimeType")).toContain("text/plain")
+    expect(readNumber(createdFile, "size")).toBe(17)
+    expect(readString(createdFile, "uploaderUserId")).toEqual(
+      expect.any(String),
+    )
+    expect(readString(createdFile, "createdAt")).toEqual(expect.any(String))
 
     const getResponse = await app.handle(
-      new Request(`http://localhost/system/files/${createdFile.id}`, {
+      new Request(`http://localhost/system/files/${createdFileId}`, {
         headers: {
           authorization: `Bearer ${accessToken}`,
         },
@@ -247,7 +296,7 @@ describe("createServerApp files", () => {
     expect(await getResponse.json()).toEqual(createdFile)
 
     const downloadResponse = await app.handle(
-      new Request(`http://localhost/system/files/${createdFile.id}/download`, {
+      new Request(`http://localhost/system/files/${createdFileId}/download`, {
         headers: {
           authorization: `Bearer ${accessToken}`,
         },
@@ -262,7 +311,7 @@ describe("createServerApp files", () => {
     expect(await downloadResponse.text()).toBe("hello file module")
 
     const deleteResponse = await app.handle(
-      new Request(`http://localhost/system/files/${createdFile.id}`, {
+      new Request(`http://localhost/system/files/${createdFileId}`, {
         method: "DELETE",
         headers: {
           authorization: `Bearer ${accessToken}`,
@@ -273,7 +322,7 @@ describe("createServerApp files", () => {
     expect(deleteResponse.status).toBe(204)
 
     const missingAfterDeleteResponse = await app.handle(
-      new Request(`http://localhost/system/files/${createdFile.id}`, {
+      new Request(`http://localhost/system/files/${createdFileId}`, {
         headers: {
           authorization: `Bearer ${accessToken}`,
         },
