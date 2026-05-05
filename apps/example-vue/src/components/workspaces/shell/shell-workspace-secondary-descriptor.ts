@@ -65,7 +65,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   selectedDepartmentDetail: Record<string, unknown> | null
   enterpriseDepartmentFormFields: ReadonlyArray<unknown>
   enterpriseDepartmentFormValues: Record<string, unknown>
-  departmentParentLookup: Record<string, string>
+  departmentParentLookup: Map<string, unknown>
   sessionModuleReady: boolean
   canEnterSessionWorkspace: boolean
   sessionLoading: boolean
@@ -105,7 +105,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   selectedMenuDetail: Record<string, unknown> | null
   enterpriseMenuFormFields: ReadonlyArray<unknown>
   enterpriseMenuFormValues: Record<string, unknown>
-  menuParentLookup: Record<string, string>
+  menuParentLookup: Map<string, unknown>
   notificationModuleReady: boolean
   canEnterNotificationWorkspace: boolean
   canViewNotifications: boolean

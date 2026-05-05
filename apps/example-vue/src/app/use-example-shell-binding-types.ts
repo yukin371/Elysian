@@ -10,6 +10,7 @@ import type {
   GeneratorPreviewSqlProposalHandoff,
   PlatformResponse,
 } from "../lib/platform-api"
+import type { WorkflowStatusFilter } from "../lib/workflow-workspace"
 import type { AppTranslate } from "./app-shell-helpers"
 
 export type ValueSource<T> = Ref<T> | ComputedRef<T>
@@ -269,7 +270,7 @@ export interface UseExampleShellBindingsOptions {
   selectedDepartmentDetail: ValueSource<Record<string, unknown> | null>
   enterpriseDepartmentFormFields: ValueSource<unknown[]>
   enterpriseDepartmentFormValues: ValueSource<Record<string, unknown>>
-  departmentParentLookup: ValueSource<Record<string, string>>
+  departmentParentLookup: ValueSource<Map<string, unknown>>
   sessionActionLoading: ValueSource<boolean>
   selectedSession: ValueSource<Record<string, unknown> | null>
   canUpdatePosts: ValueSource<boolean>
@@ -291,7 +292,7 @@ export interface UseExampleShellBindingsOptions {
   selectedMenuDetail: ValueSource<Record<string, unknown> | null>
   enterpriseMenuFormFields: ValueSource<unknown[]>
   enterpriseMenuFormValues: ValueSource<Record<string, unknown>>
-  menuParentLookup: ValueSource<Record<string, string>>
+  menuParentLookup: ValueSource<Map<string, unknown>>
   canUpdateNotifications: ValueSource<boolean>
   localizeNotificationStatus: (status: string) => string
   localizeNotificationLevel: (level: string) => string
@@ -344,9 +345,9 @@ export interface UseExampleShellBindingsOptions {
   enterpriseFormValues: ValueSource<Record<string, unknown>>
   fileItems: ValueSource<Array<{ id: string } & Record<string, unknown>>>
   handleWorkflowDefinitionSelect: (definitionId: string) => void
-  setWorkflowStatusFilter: (status: string) => void
+  setWorkflowStatusFilter: (status: WorkflowStatusFilter) => void
   resetWorkflowFilters: () => void
-  updateFileQuery: (query: string) => void
+  updateFileQuery: (query: FileWorkspaceQuery) => void
   resetFileQuery: () => void
   selectFile: (file: Record<string, unknown>) => Promise<void> | void
   openFileUploadPanel: () => void

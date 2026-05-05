@@ -11,6 +11,7 @@ import GeneratorPreviewWorkspaceMain from "../generator/GeneratorPreviewWorkspac
 import type { GeneratorPreviewDiffSummary } from "../generator/types"
 import OperationLogWorkspaceMain from "../operation-log/OperationLogWorkspaceMain.vue"
 import WorkflowWorkspaceMain from "../workflow/WorkflowWorkspaceMain.vue"
+import type { WorkflowStatusFilter } from "../workflow/types"
 import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 
 interface GeneratorPreviewSessionSummary {
@@ -40,7 +41,7 @@ export interface ShellWorkspaceMainSwitchProps {
   workflowErrorMessage: string
   workflowLoading: boolean
   workflowQuery: string
-  workflowStatusFilter: string
+  workflowStatusFilter: WorkflowStatusFilter
   workflowFilterSummary: string
   workflowDefinitionCards: ReadonlyArray<unknown>
   workflowDefinitionCount: number
@@ -193,9 +194,9 @@ export interface ShellWorkspaceMainSwitchProps {
 export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "workflow-update-query", value: string): void
   (event: "select-workflow-definition", definitionId: string): void
-  (event: "select-workflow-status-filter", status: string): void
+  (event: "select-workflow-status-filter", status: WorkflowStatusFilter): void
   (event: "reset-workflow-filters"): void
-  (event: "update-file-query", value: string): void
+  (event: "update-file-query", value: FileWorkspaceQuery): void
   (event: "reset-file-filters"): void
   (event: "select-file", fileId: string): void
   (event: "open-file-upload"): void
@@ -457,7 +458,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       "select-definition": (definitionId: unknown) =>
         emit("select-workflow-definition", definitionId as string),
       "select-status-filter": (status: unknown) =>
-        emit("select-workflow-status-filter", status as string),
+        emit("select-workflow-status-filter", status as WorkflowStatusFilter),
       "reset-filters": () => emit("reset-workflow-filters"),
     },
   }),
@@ -481,7 +482,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     },
     listeners: {
       "update:query": (value: unknown) =>
-        emit("update-file-query", value as string),
+        emit("update-file-query", value as FileWorkspaceQuery),
       "reset-filters": () => emit("reset-file-filters"),
       "select-file": (fileId: unknown) => emit("select-file", fileId as string),
       "open-upload": () => emit("open-file-upload"),
