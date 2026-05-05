@@ -105,7 +105,7 @@ describe("generator session module guards", () => {
 
     expect(applyResponse.status).toBe(409)
     const errorBody = (await applyResponse.json()) as {
-      code: string
+      code: number
     }
     expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_STALE)
   })
@@ -183,7 +183,7 @@ describe("generator session module guards", () => {
     )
     expect(confirmResponse.status).toBe(409)
     const confirmErrorBody = (await confirmResponse.json()) as {
-      code: string
+      code: number
       details: {
         id: string
         status: string
@@ -209,7 +209,7 @@ describe("generator session module guards", () => {
 
     expect(applyResponse.status).toBe(409)
     const errorBody = (await applyResponse.json()) as {
-      code: string
+      code: number
     }
     expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_REJECTED)
   })
@@ -237,7 +237,7 @@ describe("generator session module guards", () => {
       ],
       reviewRequired: false,
       sourceSchemaName: "ticket",
-    }
+    } satisfies Parameters<typeof writeMigrationProposalSnapshotFixture>[3]
     const session = await repository.createPreviewSession({
       conflictStrategy: "skip",
       createdAt: "2026-04-20T00:00:00.000Z",
@@ -284,7 +284,7 @@ describe("generator session module guards", () => {
 
     expect(confirmResponse.status).toBe(409)
     const errorBody = (await confirmResponse.json()) as {
-      code: string
+      code: number
       details: {
         proposalStatus: string
         unsupportedReason: string
@@ -370,7 +370,7 @@ describe("generator session module guards", () => {
     )
     expect(confirmResponse.status).toBe(409)
     const errorBody = (await confirmResponse.json()) as {
-      code: string
+      code: number
       details: {
         displayedSnapshotPath: string
         expectedSnapshotPath: string
@@ -486,7 +486,7 @@ describe("generator session module guards", () => {
 
     expect(secondApplyResponse.status).toBe(409)
     const errorBody = (await secondApplyResponse.json()) as {
-      code: string
+      code: number
       details: {
         id: string
         status: string
@@ -606,7 +606,7 @@ describe("generator session module guards", () => {
 
     expect(secondConfirmResponse.status).toBe(409)
     const errorBody = (await secondConfirmResponse.json()) as {
-      code: string
+      code: number
       details: {
         id: string
         status: string
@@ -727,15 +727,13 @@ describe("generator session module guards", () => {
 
     expect(secondReviewResponse.status).toBe(409)
     const errorBody = (await secondReviewResponse.json()) as {
-      code: string
+      code: number
       details: {
         id: string
         status: string
       }
     }
-    expect(errorBody.code).toBe(
-      errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING,
-    )
+    expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING)
     expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
       status: "applied",
@@ -809,15 +807,13 @@ describe("generator session module guards", () => {
 
     expect(secondReviewResponse.status).toBe(409)
     const errorBody = (await secondReviewResponse.json()) as {
-      code: string
+      code: number
       details: {
         id: string
         status: string
       }
     }
-    expect(errorBody.code).toBe(
-      errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING,
-    )
+    expect(errorBody.code).toBe(errorCodes.GENERATOR_SESSION_REVIEW_NOT_PENDING)
     expect(errorBody.details).toMatchObject({
       id: createBody.session.id,
       status: "ready",
