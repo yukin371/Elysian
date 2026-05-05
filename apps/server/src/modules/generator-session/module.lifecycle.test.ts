@@ -46,28 +46,40 @@ describe("generator session module lifecycle", () => {
       payload.paths["/studio/generator/sessions/{id}"]?.get?.responses?.["404"],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.["201"],
+      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.[
+        "201"
+      ],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.["409"],
+      payload.paths["/studio/generator/sessions/preview"]?.post?.responses?.[
+        "409"
+      ],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/review"]?.post?.responses?.["200"],
+      payload.paths["/studio/generator/sessions/{id}/review"]?.post
+        ?.responses?.["200"],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/review"]?.post?.responses?.["404"],
+      payload.paths["/studio/generator/sessions/{id}/review"]?.post
+        ?.responses?.["404"],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post?.responses?.["200"],
+      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post
+        ?.responses?.["200"],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post?.responses?.["409"],
+      payload.paths["/studio/generator/sessions/{id}/confirm"]?.post
+        ?.responses?.["409"],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.["200"],
+      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.[
+        "200"
+      ],
     ).toBeDefined()
     expect(
-      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.["500"],
+      payload.paths["/studio/generator/sessions/{id}/apply"]?.post?.responses?.[
+        "500"
+      ],
     ).toBeDefined()
   })
 
@@ -298,6 +310,9 @@ describe("generator session module lifecycle", () => {
         tableName: string
       }
       sqlProposalHandoff: {
+        migrationProposalSnapshotRecovery: {
+          status: string
+        } | null
         proposalStatus: string
         migrationProposalSnapshot: {
           generatedAt: string
@@ -747,6 +762,12 @@ describe("generator session module lifecycle", () => {
       session: {
         id: string
       }
+      sqlProposalHandoff: {
+        migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery: {
+          status: string
+        } | null
+      }
     }
 
     const reviewResponse = await app.handle(
@@ -868,6 +889,12 @@ describe("generator session module lifecycle", () => {
       session: {
         id: string
       }
+      sqlProposalHandoff: {
+        migrationProposalSnapshotPath: string
+        migrationProposalSnapshotRecovery: {
+          status: string
+        } | null
+      }
     }
 
     const reviewResponse = await app.handle(
@@ -901,7 +928,7 @@ describe("generator session module lifecycle", () => {
 
     expect(applyResponse.status).toBe(409)
     const errorBody = (await applyResponse.json()) as {
-      code: string
+      code: number
     }
     expect(errorBody.code).toBe(
       errorCodes.GENERATOR_SESSION_CONFIRMATION_REQUIRED,
