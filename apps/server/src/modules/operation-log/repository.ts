@@ -60,7 +60,7 @@ export const createOperationLogRepository = (
       requestId: filter.requestId,
       ip: filter.ip,
       userAgent: filter.userAgent,
-      result: filter.result as AuditLogResult | undefined,
+      result: filter.result,
       detailsReason: filter.authFailureReason,
       page: filter.page,
       pageSize: filter.pageSize,
@@ -229,14 +229,16 @@ const AUTH_EVENT_ACTIONS = [
   "session_revoke",
 ] as const
 
+const isAuthEventAction = (
+  action: string,
+): action is NonNullable<OperationLogRecord["authEventType"]> =>
+  AUTH_EVENT_ACTIONS.some((candidate) => candidate === action)
+
 const resolveAuthEventType = (
   category: string,
   action: string,
 ): OperationLogRecord["authEventType"] =>
-  category === "auth" &&
-  AUTH_EVENT_ACTIONS.includes(action as (typeof AUTH_EVENT_ACTIONS)[number])
-    ? (action as OperationLogRecord["authEventType"])
-    : null
+  category === "auth" && isAuthEventAction(action) ? action : null
 
 const resolveAuthFailureReason = (
   details: Record<string, unknown> | null,
