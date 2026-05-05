@@ -198,7 +198,7 @@ describe("useTenantWorkspace", () => {
     await workspace.toggleSelectedStatus()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.tenantErrorMessage.value).toContain("status 401")
+    expect(workspace.tenantErrorMessage.value).toContain("unauthorized")
     expect(workspace.selectedTenant.value?.status).toBe("active")
   })
 
@@ -251,7 +251,9 @@ describe("useTenantWorkspace", () => {
 
     expect(workspace.selectedTenant.value?.id).toBe("tenant-1")
     expect(
-      requests.filter((request) => request.endsWith("/system/tenants/tenant-2")),
+      requests.filter((request) =>
+        request.endsWith("/system/tenants/tenant-2"),
+      ),
     ).toHaveLength(0)
   })
 })
