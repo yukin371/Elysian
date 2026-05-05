@@ -10,6 +10,52 @@ import {
   testAdminPassword,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp system role access", () => {
   it("publishes role success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -29,33 +75,29 @@ describe("createServerApp system role access", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/system/roles"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/roles", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/roles"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/roles", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/roles"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/roles", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/roles"]?.post?.responses?.["409"],
+      getOpenApiResponse(paths, "/system/roles", "post", "409"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/roles/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/roles/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/roles/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/roles/{id}", "put", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/roles/{id}"]?.put?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/roles/{id}", "put", "404"),
     ).toBeDefined()
   })
 
@@ -95,14 +137,13 @@ describe("createServerApp system role access", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const listResponse = await app.handle(
       new Request("http://localhost/system/roles", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -142,7 +183,7 @@ describe("createServerApp system role access", () => {
     const pagedResponse = await app.handle(
       new Request("http://localhost/system/roles?page=2&pageSize=1", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -171,7 +212,7 @@ describe("createServerApp system role access", () => {
     const getResponse = await app.handle(
       new Request("http://localhost/system/roles/role_operator_1", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -284,15 +325,14 @@ describe("createServerApp system role access", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const createResponse = await app.handle(
       new Request("http://localhost/system/roles", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -312,20 +352,7 @@ describe("createServerApp system role access", () => {
 
     expect(createResponse.status).toBe(201)
 
-    const createdRole = (await createResponse.json()) as {
-      id: string
-      code: string
-      name: string
-      description: string
-      status: string
-      isSystem: boolean
-      dataScope: number
-      permissionCodes: string[]
-      userIds: string[]
-      deptIds: string[]
-      createdAt: string
-      updatedAt: string
-    }
+    const createdRole = await readJsonRecord(createResponse)
 
     expect(createdRole).toEqual({
       id: expect.any(String),
@@ -343,20 +370,23 @@ describe("createServerApp system role access", () => {
     })
 
     const updateResponse = await app.handle(
-      new Request(`http://localhost/system/roles/${createdRole.id}`, {
-        method: "PUT",
-        headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
-          "content-type": "application/json",
+      new Request(
+        `http://localhost/system/roles/${readString(createdRole, "id")}`,
+        {
+          method: "PUT",
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Lead Auditor",
+            dataScope: 3,
+            permissionCodes: ["system:user:list"],
+            userIds: ["user_admin_1", "user_ops_1"],
+            deptIds: ["department_root_1"],
+          }),
         },
-        body: JSON.stringify({
-          name: "Lead Auditor",
-          dataScope: 3,
-          permissionCodes: ["system:user:list"],
-          userIds: ["user_admin_1", "user_ops_1"],
-          deptIds: ["department_root_1"],
-        }),
-      }),
+      ),
     )
 
     expect(updateResponse.status).toBe(200)
@@ -401,14 +431,13 @@ describe("createServerApp system role access", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
     const response = await app.handle(
       new Request("http://localhost/system/roles/role_admin_1", {
         method: "PUT",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
