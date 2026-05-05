@@ -388,12 +388,11 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.refreshPreview,
       restoreGeneratorPreviewSession:
         input.workspaces.generatorPreviewWorkspace.restorePreviewSession,
-      reviewGeneratorPreview:
-        ({ decision, comment }) =>
-          input.workspaces.generatorPreviewWorkspace.reviewPreview(
-            decision,
-            comment,
-          ),
+      reviewGeneratorPreview: ({ decision, comment }) =>
+        input.workspaces.generatorPreviewWorkspace.reviewPreview(
+          decision,
+          comment,
+        ),
       confirmGeneratorPreview:
         input.workspaces.generatorPreviewWorkspace.confirmPreview,
       applyGeneratorPreview:

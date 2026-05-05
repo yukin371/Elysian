@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { GeneratorPreviewFileCard, GeneratorPreviewTranslation } from "./types"
+import type {
+  GeneratorPreviewFileCard,
+  GeneratorPreviewTranslation,
+} from "./types"
 
 interface GeneratorPreviewWorkspaceFileDecisionPanelProps {
   t: GeneratorPreviewTranslation

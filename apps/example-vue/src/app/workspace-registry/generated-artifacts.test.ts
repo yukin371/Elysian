@@ -19,12 +19,28 @@ const frontendModuleSchemas = registeredModuleSchemas.filter(
   (schema) => schema.frontend !== undefined,
 )
 
-const resolveSchemaModuleCode = (schema: (typeof frontendModuleSchemas)[number]) =>
-  schema.frontend?.moduleCode ?? schema.name
+const resolveSchemaModuleCode = (
+  schema: (typeof frontendModuleSchemas)[number],
+) => schema.frontend?.moduleCode ?? schema.name
 
 const artifactByModuleCode = new Map(
-  generatedFrontendModuleArtifacts.map((artifact) => [artifact.moduleCode, artifact]),
+  generatedFrontendModuleArtifacts.map((artifact) => [
+    artifact.moduleCode,
+    artifact,
+  ]),
 )
+
+const requireArtifact = (schema: (typeof frontendModuleSchemas)[number]) => {
+  const artifact = artifactByModuleCode.get(resolveSchemaModuleCode(schema))
+
+  expect(artifact).toBeDefined()
+
+  if (!artifact) {
+    throw new Error(`Missing generated artifact for schema ${schema.name}`)
+  }
+
+  return artifact
+}
 
 const generatedArtifactPath = (schemaName: string) =>
   fileURLToPath(
@@ -42,10 +58,9 @@ describe("workspace registry generated artifacts", () => {
     )
 
     for (const schema of frontendModuleSchemas) {
-      const artifact = artifactByModuleCode.get(resolveSchemaModuleCode(schema))
+      const artifact = requireArtifact(schema)
 
-      expect(artifact).toBeDefined()
-      expect(buildWorkspaceRegistrationFromArtifact(artifact!)).toEqual(
+      expect(buildWorkspaceRegistrationFromArtifact(artifact)).toEqual(
         buildWorkspaceRegistration(schema),
       )
     }
@@ -53,33 +68,32 @@ describe("workspace registry generated artifacts", () => {
 
   test("keep generated frontend surface metadata aligned with CRUD boundaries", () => {
     for (const schema of frontendModuleSchemas) {
-      const artifact = artifactByModuleCode.get(resolveSchemaModuleCode(schema))
+      const artifact = requireArtifact(schema)
       const standardCrud = isStandardCrudSchema(schema)
       const expectedPagePath = `modules/${schema.name}/${schema.name}.page.vue`
 
-      expect(artifact).toBeDefined()
-      expect(artifact!.pageComponentPath).toBe(expectedPagePath)
-      expect(artifact!.fieldKeys).toEqual(
+      expect(artifact.pageComponentPath).toBe(expectedPagePath)
+      expect(artifact.fieldKeys).toEqual(
         schema.fields.map((field) => field.key),
       )
-      expect(artifact!.searchableFieldKeys).toEqual(
+      expect(artifact.searchableFieldKeys).toEqual(
         schema.fields
           .filter((field) => field.searchable === true)
           .map((field) => field.key),
       )
 
       if (standardCrud) {
-        expect(artifact!.surfaceKind).toBe("standard-crud-enterprise")
-        expect(artifact!.panelComponentPath).toBe(
+        expect(artifact.surfaceKind).toBe("standard-crud-enterprise")
+        expect(artifact.panelComponentPath).toBe(
           `modules/${schema.name}/${schema.name}-panel.vue`,
         )
-        expect(artifact!.workspaceComponentPath).toBe(
+        expect(artifact.workspaceComponentPath).toBe(
           `modules/${schema.name}/${schema.name}-workspace.ts`,
         )
       } else {
-        expect(artifact!.surfaceKind).toBe("page-only")
-        expect(artifact!.panelComponentPath).toBeNull()
-        expect(artifact!.workspaceComponentPath).toBeNull()
+        expect(artifact.surfaceKind).toBe("page-only")
+        expect(artifact.panelComponentPath).toBeNull()
+        expect(artifact.workspaceComponentPath).toBeNull()
       }
     }
   })
@@ -105,9 +119,9 @@ describe("workspace registry generated artifacts", () => {
 
     const expectedStandardCrudArtifacts = frontendModuleSchemas
       .filter((schema) => isStandardCrudSchema(schema))
-      .map((schema) => artifactByModuleCode.get(resolveSchemaModuleCode(schema)))
+      .map((schema) => requireArtifact(schema))
     const expectedStandardCrudWorkspaceKinds =
-      expectedStandardCrudArtifacts.map((artifact) => artifact?.kind)
+      expectedStandardCrudArtifacts.map((artifact) => artifact.kind)
 
     expect([...generatedStandardCrudFrontendModuleArtifacts]).toEqual(
       expectedStandardCrudArtifacts,

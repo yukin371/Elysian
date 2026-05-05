@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { GeneratorPreviewDiffSummary, GeneratorPreviewTranslation } from "./types"
+import type {
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewTranslation,
+} from "./types"
 
 interface GeneratorPreviewWorkspaceDiffSummaryPanelProps {
   t: GeneratorPreviewTranslation

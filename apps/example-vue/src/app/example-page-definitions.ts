@@ -29,8 +29,7 @@ export const menuPageDefinition = requirePageDefinition("menu")
 
 export const notificationPageDefinition = requirePageDefinition("notification")
 
-export const operationLogPageDefinition =
-  requirePageDefinition("operation-log")
+export const operationLogPageDefinition = requirePageDefinition("operation-log")
 
 export const postPageDefinition = requirePageDefinition("post")
 

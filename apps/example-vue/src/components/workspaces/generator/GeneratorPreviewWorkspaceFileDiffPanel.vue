@@ -4,7 +4,9 @@ import type {
   GeneratorPreviewTranslation,
 } from "./types"
 
-type GeneratorPreviewFileDiffStats = NonNullable<GeneratorPreviewFileCard["diffStats"]>
+type GeneratorPreviewFileDiffStats = NonNullable<
+  GeneratorPreviewFileCard["diffStats"]
+>
 
 interface GeneratorPreviewWorkspaceFileDiffPanelProps {
   t: GeneratorPreviewTranslation

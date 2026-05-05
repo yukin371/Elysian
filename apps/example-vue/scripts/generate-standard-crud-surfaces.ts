@@ -3,8 +3,8 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { renderModuleFiles } from "@elysian/generator"
-import { registeredModuleSchemas } from "@elysian/schema"
 import { isStandardCrudSchema } from "@elysian/generator"
+import { registeredModuleSchemas } from "@elysian/schema"
 
 const frontendTarget = "vue" as const
 

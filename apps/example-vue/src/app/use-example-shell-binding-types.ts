@@ -5,9 +5,9 @@ import type { GeneratorPreviewFileCard } from "../lib/generator-preview-workspac
 import type {
   AuthIdentityResponse,
   GeneratorPreviewDiffSummary,
+  GeneratorPreviewSqlPreview,
   GeneratorPreviewSqlProposal,
   GeneratorPreviewSqlProposalHandoff,
-  GeneratorPreviewSqlPreview,
   PlatformResponse,
 } from "../lib/platform-api"
 import type { AppTranslate } from "./app-shell-helpers"

@@ -164,7 +164,9 @@ export const useExampleSessionOrchestration = (
     } catch (error) {
       if (!isRecoverableAuthError(error)) {
         options.authErrorMessage.value =
-          error instanceof Error ? error.message : options.t("app.error.signOut")
+          error instanceof Error
+            ? error.message
+            : options.t("app.error.signOut")
       }
     } finally {
       options.authIdentity.value = null

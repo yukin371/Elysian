@@ -430,7 +430,9 @@ export const createExampleShellWorkspaceSecondaryBindings = ({
     selectedGeneratorPreviewFile: read(selectedGeneratorPreviewFile),
     generatorPreviewSqlPreview: read(generatorPreviewSqlPreview),
     generatorPreviewSqlProposal: read(generatorPreviewSqlProposal),
-    generatorPreviewSqlProposalHandoff: read(generatorPreviewSqlProposalHandoff),
+    generatorPreviewSqlProposalHandoff: read(
+      generatorPreviewSqlProposalHandoff,
+    ),
     generatorPreviewSession: read(generatorPreviewSession),
     generatorPreviewDiffSummary: read(generatorPreviewDiffSummary),
     generatorPreviewReviewEvidence:
