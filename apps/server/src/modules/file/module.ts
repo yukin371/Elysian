@@ -4,7 +4,7 @@ import { t } from "elysia"
 import { AppError } from "../../errors"
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard, AuthIdentity } from "../auth"
-import type { ServerModule } from "../module"
+import type { AnyServerApp, ServerModule } from "../module"
 import {
   fileBulkDeleteResponseSchema,
   fileListResponseSchema,
@@ -16,6 +16,29 @@ import type { FileStorage } from "./storage"
 
 export interface FileModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface FileRouteRegistrar {
+  delete: (...args: readonly unknown[]) => FileRouteRegistrar
+  get: (...args: readonly unknown[]) => FileRouteRegistrar
+  post: (...args: readonly unknown[]) => FileRouteRegistrar
+}
+
+interface FileRouteParams {
+  id: string
+}
+
+interface FileRouteQuery {
+  originalName?: string
+  mimeType?: string
+  uploaderUserId?: string
+  page?: number
+  pageSize?: number
+}
+
+interface FileRouteSet {
+  headers: Record<string, string>
+  status: number
 }
 
 const filePermissions = {
@@ -57,112 +80,146 @@ export const createFileModule = (
       fields: fileModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/files",
-        async ({ query, request }) => {
-          const identity = await authorize(
-            request.headers,
-            filePermissions.list,
-          )
+    let fileApp = app as unknown as FileRouteRegistrar
 
-          return service.list(query, identity?.dataAccess)
-        },
-        {
-          query: fileFilterSchema,
-          response: {
-            200: fileListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["file"],
-            summary: "List files",
-          },
-        },
-      )
-      .get(
-        "/system/files/export",
-        async ({ query, request, set }) => {
-          const identity = await authorize(
-            request.headers,
-            filePermissions.list,
-          )
+    fileApp = fileApp.get(
+      "/system/files",
+      async ({
+        query,
+        request,
+      }: {
+        query: FileRouteQuery
+        request: Request
+      }) => {
+        const identity = await authorize(request.headers, filePermissions.list)
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv(query, identity?.dataAccess)
+        return service.list(query, identity?.dataAccess)
+      },
+      {
+        query: fileFilterSchema,
+        response: {
+          200: fileListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          query: fileFilterSchema,
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["file"],
-            summary: "Export file metadata as CSV",
-          },
+        detail: {
+          tags: ["file"],
+          summary: "List files",
         },
-      )
-      .get(
-        "/system/files/:id",
-        async ({ params, request }) => {
-          const identity = await authorize(request.headers, filePermissions.get)
+      },
+    )
 
-          return service.getById(params.id, identity?.dataAccess)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: fileRecordResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["file"],
-            summary: "Get file by id",
-          },
-        },
-      )
-      .post(
-        "/system/files",
-        async ({ request, set }) => {
-          const identity = await authorize(
-            request.headers,
-            filePermissions.upload,
-          )
-          const formData = await request.formData()
-          const uploadedFile = formData.get("file")
+    fileApp = fileApp.get(
+      "/system/files/export",
+      async ({
+        query,
+        request,
+        set,
+      }: {
+        query: FileRouteQuery
+        request: Request
+        set: FileRouteSet
+      }) => {
+        const identity = await authorize(request.headers, filePermissions.list)
 
-          if (!(uploadedFile instanceof File)) {
-            throw new AppError({
-              code: "FILE_UPLOAD_REQUIRED",
-              message: "File upload is required",
-              status: 400,
-              expose: true,
-            })
-          }
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv(query, identity?.dataAccess)
+      },
+      {
+        query: fileFilterSchema,
+        response: {
+          ...createErrorResponses(401, 403),
+        },
+        detail: {
+          tags: ["file"],
+          summary: "Export file metadata as CSV",
+        },
+      },
+    )
 
-          set.status = 201
-          return service.upload({
-            file: uploadedFile,
-            uploaderUserId: identity?.user.id ?? null,
-            deptId: identity?.deptIds[0] ?? null,
+    fileApp = fileApp.get(
+      "/system/files/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: FileRouteParams
+        request: Request
+      }) => {
+        const identity = await authorize(request.headers, filePermissions.get)
+
+        return service.getById(params.id, identity?.dataAccess)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: fileRecordResponseSchema,
+          ...createErrorResponses(401, 403, 404),
+        },
+        detail: {
+          tags: ["file"],
+          summary: "Get file by id",
+        },
+      },
+    )
+
+    fileApp = fileApp.post(
+      "/system/files",
+      async ({
+        request,
+        set,
+      }: {
+        request: Request
+        set: FileRouteSet
+      }) => {
+        const identity = await authorize(
+          request.headers,
+          filePermissions.upload,
+        )
+        const formData = await request.formData()
+        const uploadedFile = formData.get("file")
+
+        if (!(uploadedFile instanceof File)) {
+          throw new AppError({
+            code: "FILE_UPLOAD_REQUIRED",
+            message: "File upload is required",
+            status: 400,
+            expose: true,
           })
+        }
+
+        set.status = 201
+        return service.upload({
+          file: uploadedFile,
+          uploaderUserId: identity?.user.id ?? null,
+          deptId: identity?.deptIds[0] ?? null,
+        })
+      },
+      {
+        response: {
+          201: fileRecordResponseSchema,
+          ...createErrorResponses(400, 401, 403),
         },
-        {
-          response: {
-            201: fileRecordResponseSchema,
-            ...createErrorResponses(400, 401, 403),
-          },
-          detail: {
-            tags: ["file"],
-            summary: "Upload file",
-          },
+        detail: {
+          tags: ["file"],
+          summary: "Upload file",
         },
-      )
+      },
+    )
+
+    fileApp = fileApp
       .post(
         "/system/files/delete",
-        async ({ body, request }) => {
+        async ({
+          body,
+          request,
+        }: {
+          body: {
+            ids: string[]
+          }
+          request: Request
+        }) => {
           const identity = await authorize(
             request.headers,
             filePermissions.delete,
@@ -188,7 +245,15 @@ export const createFileModule = (
       )
       .get(
         "/system/files/:id/download",
-        async ({ params, request, set }) => {
+        async ({
+          params,
+          request,
+          set,
+        }: {
+          params: FileRouteParams
+          request: Request
+          set: FileRouteSet
+        }) => {
           const identity = await authorize(
             request.headers,
             filePermissions.download,
@@ -224,7 +289,15 @@ export const createFileModule = (
       )
       .delete(
         "/system/files/:id",
-        async ({ params, request, set }) => {
+        async ({
+          params,
+          request,
+          set,
+        }: {
+          params: FileRouteParams
+          request: Request
+          set: FileRouteSet
+        }) => {
           const identity = await authorize(
             request.headers,
             filePermissions.delete,
@@ -246,6 +319,8 @@ export const createFileModule = (
           },
         },
       )
+
+    return fileApp as unknown as AnyServerApp
   },
 })
 
