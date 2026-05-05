@@ -216,6 +216,51 @@ const defaultRunner: CommandRunner = {
   },
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "number") {
+    throw new Error(`Expected number field: ${key}`)
+  }
+
+  return property
+}
+
+const readNullableString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === null || typeof property === "string") {
+    return property
+  }
+
+  throw new Error(`Expected nullable string field: ${key}`)
+}
+
+const readTenantWorkflowRun = (
+  value: Record<string, unknown>,
+): TenantWorkflowRun => ({
+  databaseId: readNumber(value, "databaseId"),
+  status: readString(value, "status"),
+  conclusion: readNullableString(value, "conclusion"),
+  event: readString(value, "event"),
+  headBranch: readString(value, "headBranch"),
+  createdAt: readString(value, "createdAt"),
+  displayTitle: readString(value, "displayTitle"),
+})
+
 const resolveRepository = async (runner: CommandRunner) => {
   const explicit = readNonEmptyEnv(
     "ELYSIAN_TENANT_STABILITY_DOWNLOAD_REPOSITORY",
@@ -343,7 +388,13 @@ const listRuns = async (
     "databaseId,status,conclusion,event,headBranch,createdAt,displayTitle",
   ])
 
-  return JSON.parse(raw) as TenantWorkflowRun[]
+  const parsed: unknown = JSON.parse(raw)
+
+  if (!Array.isArray(parsed) || !parsed.every(isRecord)) {
+    throw new Error("Expected tenant workflow run array")
+  }
+
+  return parsed.map(readTenantWorkflowRun)
 }
 
 export const run = async (
