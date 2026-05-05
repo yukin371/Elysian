@@ -6,6 +6,7 @@ import { dirname, join } from "node:path"
 
 import {
   DEFAULT_TENANT_ID,
+  type DatabaseClient,
   createDatabaseClient,
   createTenantBootstrapSeedSpec,
   deleteCustomer,
@@ -333,17 +334,19 @@ const dropRuntimeRole = async (
   await db.execute(`DROP ROLE IF EXISTS ${quoteIdentifier(roleName)};`)
 }
 
+type TenantScopedDb = Pick<
+  DatabaseClient,
+  "delete" | "execute" | "insert" | "select"
+>
+
 const withTenantContext = async <T>(
   db: ReturnType<typeof createDatabaseClient>,
   tenantId: string,
-  action: (scopedDb: ReturnType<typeof createDatabaseClient>) => Promise<T>,
+  action: (scopedDb: TenantScopedDb) => Promise<T>,
 ) =>
   db.transaction(async (tx) => {
-    const scopedDb = tx as unknown as ReturnType<typeof createDatabaseClient>
-    await scopedDb.execute(
-      `SET LOCAL app.current_tenant = ${quoteLiteral(tenantId)}`,
-    )
-    return action(scopedDb)
+    await tx.execute(`SET LOCAL app.current_tenant = ${quoteLiteral(tenantId)}`)
+    return action(tx)
   })
 
 const run = async () => {

@@ -36,9 +36,13 @@ export interface CustomerPersistenceListResult {
 }
 
 const DEFAULT_CUSTOMER_PAGE_SIZE = 20
+type CustomerReadableDb = Pick<DatabaseClient, "select">
+type CustomerInsertDb = Pick<DatabaseClient, "insert">
+type CustomerUpdateDb = Pick<DatabaseClient, "update">
+type CustomerDeleteDb = Pick<DatabaseClient, "delete">
 
 export const listCustomers = async (
-  db: DatabaseClient,
+  db: CustomerReadableDb,
   options: CustomerPersistenceQueryOptions = {},
 ): Promise<CustomerPersistenceListResult> => {
   const query = normalizeCustomerListQuery(options.listQuery)
@@ -78,7 +82,7 @@ export const listCustomers = async (
 }
 
 export const getCustomerById = async (
-  db: DatabaseClient,
+  db: CustomerReadableDb,
   id: string,
   options: CustomerPersistenceQueryOptions = {},
 ): Promise<CustomerRow | null> => {
@@ -95,7 +99,7 @@ export const getCustomerById = async (
 }
 
 export const insertCustomer = async (
-  db: DatabaseClient,
+  db: CustomerInsertDb,
   input: CreateCustomerPersistenceInput,
 ): Promise<CustomerRow> => {
   const [row] = await db
@@ -117,7 +121,7 @@ export const insertCustomer = async (
 }
 
 export const updateCustomer = async (
-  db: DatabaseClient,
+  db: CustomerUpdateDb,
   id: string,
   input: Partial<Omit<CreateCustomerPersistenceInput, never>>,
   options: CustomerPersistenceQueryOptions = {},
@@ -138,7 +142,7 @@ export const updateCustomer = async (
 }
 
 export const deleteCustomer = async (
-  db: DatabaseClient,
+  db: CustomerDeleteDb,
   id: string,
   options: CustomerPersistenceQueryOptions = {},
 ): Promise<boolean> => {
