@@ -3,17 +3,36 @@ import { t } from "elysia"
 
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
-import type { ServerModule } from "../module"
+import type { AnyServerApp, ServerModule } from "../module"
 import {
   menuDetailResponseSchema,
   menuListResponseSchema,
   menuRecordResponseSchema,
 } from "./openapi"
 import type { MenuRepository } from "./repository"
-import { createMenuService } from "./service"
+import {
+  type CreateMenuPayload,
+  type UpdateMenuPayload,
+  createMenuService,
+} from "./service"
 
 export interface MenuModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface MenuRouteRegistrar {
+  get: (...args: readonly unknown[]) => MenuRouteRegistrar
+  post: (...args: readonly unknown[]) => MenuRouteRegistrar
+  put: (...args: readonly unknown[]) => MenuRouteRegistrar
+}
+
+interface MenuRouteParams {
+  id: string
+}
+
+interface MenuRouteSet {
+  headers: Record<string, string>
+  status: number
 }
 
 const menuPermissions = {
@@ -77,107 +96,136 @@ export const createMenuModule = (
       fields: menuModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/menus",
-        async ({ request }) => {
-          await authorize(request.headers, menuPermissions.list)
+    let menuApp = app as unknown as MenuRouteRegistrar
 
-          return {
-            items: await service.list(),
-          }
-        },
-        {
-          response: {
-            200: menuListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["menu"],
-            summary: "List menus",
-          },
-        },
-      )
-      .get(
-        "/system/menus/export",
-        async ({ request, set }) => {
-          await authorize(request.headers, menuPermissions.list)
+    menuApp = menuApp.get(
+      "/system/menus",
+      async ({ request }: { request: Request }) => {
+        await authorize(request.headers, menuPermissions.list)
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv()
+        return {
+          items: await service.list(),
+        }
+      },
+      {
+        response: {
+          200: menuListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["menu"],
-            summary: "Export menus as CSV",
-          },
+        detail: {
+          tags: ["menu"],
+          summary: "List menus",
         },
-      )
-      .get(
-        "/system/menus/:id",
-        async ({ params, request }) => {
-          await authorize(request.headers, menuPermissions.get)
+      },
+    )
 
-          return service.getById(params.id)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: menuDetailResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["menu"],
-            summary: "Get menu by id",
-          },
-        },
-      )
-      .post(
-        "/system/menus",
-        async ({ body, request, set }) => {
-          await authorize(request.headers, menuPermissions.create)
-          set.status = 201
+    menuApp = menuApp.get(
+      "/system/menus/export",
+      async ({ request, set }: { request: Request; set: MenuRouteSet }) => {
+        await authorize(request.headers, menuPermissions.list)
 
-          return service.create(body)
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv()
+      },
+      {
+        response: {
+          ...createErrorResponses(401, 403),
         },
-        {
-          body: menuCreateBodySchema,
-          response: {
-            201: menuDetailResponseSchema,
-            ...createErrorResponses(400, 401, 403, 409),
-          },
-          detail: {
-            tags: ["menu"],
-            summary: "Create menu",
-          },
+        detail: {
+          tags: ["menu"],
+          summary: "Export menus as CSV",
         },
-      )
-      .put(
-        "/system/menus/:id",
-        async ({ params, body, request }) => {
-          await authorize(request.headers, menuPermissions.update)
+      },
+    )
 
-          return service.update(params.id, body)
+    menuApp = menuApp.get(
+      "/system/menus/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: MenuRouteParams
+        request: Request
+      }) => {
+        await authorize(request.headers, menuPermissions.get)
+
+        return service.getById(params.id)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: menuDetailResponseSchema,
+          ...createErrorResponses(401, 403, 404),
         },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          body: menuUpdateBodySchema,
-          response: {
-            200: menuDetailResponseSchema,
-            ...createErrorResponses(400, 401, 403, 404, 409),
-          },
-          detail: {
-            tags: ["menu"],
-            summary: "Update menu",
-          },
+        detail: {
+          tags: ["menu"],
+          summary: "Get menu by id",
         },
-      )
+      },
+    )
+
+    menuApp = menuApp.post(
+      "/system/menus",
+      async ({
+        body,
+        request,
+        set,
+      }: {
+        body: CreateMenuPayload
+        request: Request
+        set: MenuRouteSet
+      }) => {
+        await authorize(request.headers, menuPermissions.create)
+        set.status = 201
+
+        return service.create(body)
+      },
+      {
+        body: menuCreateBodySchema,
+        response: {
+          201: menuDetailResponseSchema,
+          ...createErrorResponses(400, 401, 403, 409),
+        },
+        detail: {
+          tags: ["menu"],
+          summary: "Create menu",
+        },
+      },
+    )
+
+    menuApp = menuApp.put(
+      "/system/menus/:id",
+      async ({
+        params,
+        body,
+        request,
+      }: {
+        params: MenuRouteParams
+        body: UpdateMenuPayload
+        request: Request
+      }) => {
+        await authorize(request.headers, menuPermissions.update)
+
+        return service.update(params.id, body)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        body: menuUpdateBodySchema,
+        response: {
+          200: menuDetailResponseSchema,
+          ...createErrorResponses(400, 401, 403, 404, 409),
+        },
+        detail: {
+          tags: ["menu"],
+          summary: "Update menu",
+        },
+      },
+    )
+
+    return menuApp as unknown as AnyServerApp
   },
 })
