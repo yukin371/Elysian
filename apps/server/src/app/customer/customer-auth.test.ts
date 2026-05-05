@@ -15,6 +15,19 @@ import {
   testAdminPassword,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readAccessToken = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body) || typeof body.accessToken !== "string") {
+    throw new Error("Malformed auth login response")
+  }
+
+  return body.accessToken
+}
+
 describe("createServerApp customer auth", () => {
   it("returns 401 for protected customer routes without an access token", async () => {
     const fixture = await createAuthTestFixture({
@@ -64,13 +77,11 @@ describe("createServerApp customer auth", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const accessToken = await readAccessToken(loginResponse)
     const response = await app.handle(
       new Request("http://localhost/customers", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -122,13 +133,11 @@ describe("createServerApp customer auth", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const accessToken = await readAccessToken(loginResponse)
     const response = await app.handle(
       new Request("http://localhost/customers", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -210,13 +219,11 @@ describe("createServerApp customer auth", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const accessToken = await readAccessToken(loginResponse)
     const response = await app.handle(
       new Request("http://localhost/customers", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -291,15 +298,13 @@ describe("createServerApp customer auth", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const accessToken = await readAccessToken(loginResponse)
 
     const response = await app.handle(
       new Request("http://localhost/customers", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
