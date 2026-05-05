@@ -3,16 +3,35 @@ import { t } from "elysia"
 
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
-import type { ServerModule } from "../module"
+import type { AnyServerApp, ServerModule } from "../module"
 import {
   departmentDetailResponseSchema,
   departmentListResponseSchema,
 } from "./openapi"
 import type { DepartmentRepository } from "./repository"
-import { createDepartmentService } from "./service"
+import {
+  type CreateDepartmentPayload,
+  type UpdateDepartmentPayload,
+  createDepartmentService,
+} from "./service"
 
 export interface DepartmentModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface DepartmentRouteRegistrar {
+  get: (...args: readonly unknown[]) => DepartmentRouteRegistrar
+  post: (...args: readonly unknown[]) => DepartmentRouteRegistrar
+  put: (...args: readonly unknown[]) => DepartmentRouteRegistrar
+}
+
+interface DepartmentRouteParams {
+  id: string
+}
+
+interface DepartmentRouteSet {
+  headers: Record<string, string>
+  status: number
 }
 
 const departmentPermissions = {
@@ -59,107 +78,139 @@ export const createDepartmentModule = (
       fields: departmentModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/departments",
-        async ({ request }) => {
-          await authorize(request.headers, departmentPermissions.list)
+    let departmentApp = app as unknown as DepartmentRouteRegistrar
 
-          return {
-            items: await service.list(),
-          }
-        },
-        {
-          response: {
-            200: departmentListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["department"],
-            summary: "List departments",
-          },
-        },
-      )
-      .get(
-        "/system/departments/export",
-        async ({ request, set }) => {
-          await authorize(request.headers, departmentPermissions.list)
+    departmentApp = departmentApp.get(
+      "/system/departments",
+      async ({ request }: { request: Request }) => {
+        await authorize(request.headers, departmentPermissions.list)
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv()
+        return {
+          items: await service.list(),
+        }
+      },
+      {
+        response: {
+          200: departmentListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["department"],
-            summary: "Export departments as CSV",
-          },
+        detail: {
+          tags: ["department"],
+          summary: "List departments",
         },
-      )
-      .get(
-        "/system/departments/:id",
-        async ({ params, request }) => {
-          await authorize(request.headers, departmentPermissions.get)
+      },
+    )
 
-          return service.getById(params.id)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: departmentDetailResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["department"],
-            summary: "Get department by id",
-          },
-        },
-      )
-      .post(
-        "/system/departments",
-        async ({ body, request, set }) => {
-          await authorize(request.headers, departmentPermissions.create)
-          set.status = 201
+    departmentApp = departmentApp.get(
+      "/system/departments/export",
+      async ({
+        request,
+        set,
+      }: { request: Request; set: DepartmentRouteSet }) => {
+        await authorize(request.headers, departmentPermissions.list)
 
-          return service.create(body)
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv()
+      },
+      {
+        response: {
+          ...createErrorResponses(401, 403),
         },
-        {
-          body: departmentCreateBodySchema,
-          response: {
-            201: departmentDetailResponseSchema,
-            ...createErrorResponses(400, 401, 403, 409),
-          },
-          detail: {
-            tags: ["department"],
-            summary: "Create department",
-          },
+        detail: {
+          tags: ["department"],
+          summary: "Export departments as CSV",
         },
-      )
-      .put(
-        "/system/departments/:id",
-        async ({ params, body, request }) => {
-          await authorize(request.headers, departmentPermissions.update)
+      },
+    )
 
-          return service.update(params.id, body)
+    departmentApp = departmentApp.get(
+      "/system/departments/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: DepartmentRouteParams
+        request: Request
+      }) => {
+        await authorize(request.headers, departmentPermissions.get)
+
+        return service.getById(params.id)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: departmentDetailResponseSchema,
+          ...createErrorResponses(401, 403, 404),
         },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          body: departmentUpdateBodySchema,
-          response: {
-            200: departmentDetailResponseSchema,
-            ...createErrorResponses(400, 401, 403, 404, 409),
-          },
-          detail: {
-            tags: ["department"],
-            summary: "Update department",
-          },
+        detail: {
+          tags: ["department"],
+          summary: "Get department by id",
         },
-      )
+      },
+    )
+
+    departmentApp = departmentApp.post(
+      "/system/departments",
+      async ({
+        body,
+        request,
+        set,
+      }: {
+        body: CreateDepartmentPayload
+        request: Request
+        set: DepartmentRouteSet
+      }) => {
+        await authorize(request.headers, departmentPermissions.create)
+        set.status = 201
+
+        return service.create(body)
+      },
+      {
+        body: departmentCreateBodySchema,
+        response: {
+          201: departmentDetailResponseSchema,
+          ...createErrorResponses(400, 401, 403, 409),
+        },
+        detail: {
+          tags: ["department"],
+          summary: "Create department",
+        },
+      },
+    )
+
+    departmentApp = departmentApp.put(
+      "/system/departments/:id",
+      async ({
+        params,
+        body,
+        request,
+      }: {
+        params: DepartmentRouteParams
+        body: UpdateDepartmentPayload
+        request: Request
+      }) => {
+        await authorize(request.headers, departmentPermissions.update)
+
+        return service.update(params.id, body)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        body: departmentUpdateBodySchema,
+        response: {
+          200: departmentDetailResponseSchema,
+          ...createErrorResponses(400, 401, 403, 404, 409),
+        },
+        detail: {
+          tags: ["department"],
+          summary: "Update department",
+        },
+      },
+    )
+
+    return departmentApp as unknown as AnyServerApp
   },
 })
