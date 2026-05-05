@@ -77,6 +77,21 @@ describe("createExampleShellBindingsOptions", () => {
     const handleExportNotifications = () => Promise.resolve()
     const markVisibleNotificationsAsRead = () => Promise.resolve()
     const refreshGeneratorPreview = () => Promise.resolve()
+    const selectedRole = { id: "role-1", name: "Operator" }
+    const selectedCustomer = { id: "customer-1", name: "Acme" }
+    let editedRole: unknown = null
+    let editedCustomer: unknown = null
+    let deletedCustomer: unknown = null
+    let dictionaryEditCalls = 0
+    const startRoleEdit = (record: unknown) => {
+      editedRole = record
+    }
+    const startCustomerEdit = (record: unknown) => {
+      editedCustomer = record
+    }
+    const requestCustomerDelete = (record: unknown) => {
+      deletedCustomer = record
+    }
 
     const input = {
       shell: {
@@ -91,13 +106,23 @@ describe("createExampleShellBindingsOptions", () => {
         "workspace.roleLoading": true,
         "workspace.panelTitle": "Role Details",
         "workspace.reloadRoles": reloadRoles,
+        "workspace.selectedRole": { value: selectedRole },
+        "workspace.startEdit": startRoleEdit,
       }),
-      customerWorkspace: createWorkspaceInput({}),
+      customerWorkspace: createWorkspaceInput({
+        "workspace.selectedCustomer": { value: selectedCustomer },
+        "workspace.startEdit": startCustomerEdit,
+        "workspace.requestDelete": requestCustomerDelete,
+      }),
       dictionaryWorkspace: createWorkspaceInput({
         dictionaryTypeExportLoading: true,
         dictionaryItemsExportLoading: true,
         handleExportDictionaryTypes,
         handleExportDictionaryItems,
+        "workspace.selectedDictionaryType": { value: null },
+        "workspace.startEdit": () => {
+          dictionaryEditCalls += 1
+        },
       }),
       departmentWorkspace: createWorkspaceInput({
         departmentExportLoading: true,
@@ -219,5 +244,14 @@ describe("createExampleShellBindingsOptions", () => {
     expect(result.canConfirmGeneratorPreview).toBe(false)
     expect(result.refreshGeneratorPreview).toBe(refreshGeneratorPreview)
     expect(result.confirmGeneratorPreview).toBeDefined()
+    ;(result.startRoleEdit as () => void)()
+    ;(result.startEdit as () => void)()
+    ;(result.requestDelete as () => void)()
+    ;(result.startDictionaryEdit as () => void)()
+
+    expect(editedRole).toBe(selectedRole)
+    expect(editedCustomer).toBe(selectedCustomer)
+    expect(deletedCustomer).toBe(selectedCustomer)
+    expect(dictionaryEditCalls).toBe(0)
   })
 })

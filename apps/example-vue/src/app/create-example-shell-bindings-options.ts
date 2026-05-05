@@ -4,6 +4,15 @@ import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding
 export const createExampleShellBindingsOptions = (
   input: CreateExampleShellBindingsOptionsInput,
 ): UseExampleShellBindingsOptions => {
+  const runWithSelectedRecord = <TRecord>(
+    selectedRecord: { value: TRecord | null },
+    run: (record: TRecord) => void,
+  ) => {
+    if (selectedRecord.value) {
+      run(selectedRecord.value)
+    }
+  }
+
   const roleWorkspaceOptions = {
     isRoleWorkspace: input.roleWorkspace.isRoleWorkspace,
     roleLoading: input.roleWorkspace.workspace.roleLoading,
@@ -34,7 +43,11 @@ export const createExampleShellBindingsOptions = (
     openRoleCreatePanel: input.roleWorkspace.workspace.openCreatePanel,
     reloadRoles: input.roleWorkspace.workspace.reloadRoles,
     handleExportRoles: input.roleWorkspace.handleExportRoles,
-    startRoleEdit: input.roleWorkspace.workspace.startEdit,
+    startRoleEdit: () =>
+      runWithSelectedRecord(
+        input.roleWorkspace.workspace.selectedRole,
+        input.roleWorkspace.workspace.startEdit,
+      ),
     submitRoleForm: input.roleWorkspace.workspace.submitForm,
     cancelRolePanel: input.roleWorkspace.workspace.cancelPanel,
   }
@@ -109,8 +122,16 @@ export const createExampleShellBindingsOptions = (
     reloadCustomers: input.customerWorkspace.workspace.reloadCustomers,
     confirmDelete: input.customerWorkspace.workspace.confirmDelete,
     cancelDelete: input.customerWorkspace.workspace.cancelDelete,
-    startEdit: input.customerWorkspace.workspace.startEdit,
-    requestDelete: input.customerWorkspace.workspace.requestDelete,
+    startEdit: () =>
+      runWithSelectedRecord(
+        input.customerWorkspace.workspace.selectedCustomer,
+        input.customerWorkspace.workspace.startEdit,
+      ),
+    requestDelete: () =>
+      runWithSelectedRecord(
+        input.customerWorkspace.workspace.selectedCustomer,
+        input.customerWorkspace.workspace.requestDelete,
+      ),
     handleEnterpriseFormSubmit:
       input.customerWorkspace.workspace.handleFormSubmit,
     handleEnterpriseFormCancel:
@@ -171,7 +192,11 @@ export const createExampleShellBindingsOptions = (
       input.dictionaryWorkspace.handleExportDictionaryTypes,
     handleExportDictionaryItems:
       input.dictionaryWorkspace.handleExportDictionaryItems,
-    startDictionaryEdit: input.dictionaryWorkspace.workspace.startEdit,
+    startDictionaryEdit: () =>
+      runWithSelectedRecord(
+        input.dictionaryWorkspace.workspace.selectedDictionaryType,
+        input.dictionaryWorkspace.workspace.startEdit,
+      ),
     submitDictionaryForm: input.dictionaryWorkspace.workspace.submitForm,
     cancelDictionaryPanel: input.dictionaryWorkspace.workspace.cancelPanel,
   }
@@ -221,7 +246,11 @@ export const createExampleShellBindingsOptions = (
       input.departmentWorkspace.workspace.openCreatePanel,
     reloadDepartments: input.departmentWorkspace.workspace.reloadDepartments,
     handleExportDepartments: input.departmentWorkspace.handleExportDepartments,
-    startDepartmentEdit: input.departmentWorkspace.workspace.startEdit,
+    startDepartmentEdit: () =>
+      runWithSelectedRecord(
+        input.departmentWorkspace.workspace.selectedDepartment,
+        input.departmentWorkspace.workspace.startEdit,
+      ),
     submitDepartmentForm: input.departmentWorkspace.workspace.submitForm,
     cancelDepartmentPanel: input.departmentWorkspace.workspace.cancelPanel,
   }
@@ -274,7 +303,11 @@ export const createExampleShellBindingsOptions = (
     openPostCreatePanel: input.postWorkspace.workspace.openCreatePanel,
     reloadPosts: input.postWorkspace.workspace.reloadPosts,
     handleExportPosts: input.postWorkspace.handleExportPosts,
-    startPostEdit: input.postWorkspace.workspace.startEdit,
+    startPostEdit: () =>
+      runWithSelectedRecord(
+        input.postWorkspace.workspace.selectedPost,
+        input.postWorkspace.workspace.startEdit,
+      ),
     submitPostForm: input.postWorkspace.workspace.submitForm,
     cancelPostPanel: input.postWorkspace.workspace.cancelPanel,
   }
@@ -310,7 +343,11 @@ export const createExampleShellBindingsOptions = (
     openMenuCreatePanel: input.menuWorkspace.workspace.openCreatePanel,
     reloadMenus: input.menuWorkspace.workspace.reloadMenus,
     handleExportMenus: input.menuWorkspace.handleExportMenus,
-    startMenuEdit: input.menuWorkspace.workspace.startEdit,
+    startMenuEdit: () =>
+      runWithSelectedRecord(
+        input.menuWorkspace.workspace.selectedMenu,
+        input.menuWorkspace.workspace.startEdit,
+      ),
     submitMenuForm: input.menuWorkspace.workspace.submitForm,
     cancelMenuPanel: input.menuWorkspace.workspace.cancelPanel,
   }
@@ -428,8 +465,16 @@ export const createExampleShellBindingsOptions = (
     openUserCreatePanel: input.userWorkspace.workspace.openCreatePanel,
     reloadUsers: input.userWorkspace.workspace.reloadUsers,
     handleExportUsers: input.userWorkspace.handleExportUsers,
-    startUserEdit: input.userWorkspace.workspace.startEdit,
-    startUserPasswordReset: input.userWorkspace.workspace.startPasswordReset,
+    startUserEdit: () =>
+      runWithSelectedRecord(
+        input.userWorkspace.workspace.selectedUser,
+        input.userWorkspace.workspace.startEdit,
+      ),
+    startUserPasswordReset: () =>
+      runWithSelectedRecord(
+        input.userWorkspace.workspace.selectedUser,
+        input.userWorkspace.workspace.startPasswordReset,
+      ),
     submitUserForm: input.userWorkspace.workspace.submitForm,
     cancelUserPanel: input.userWorkspace.workspace.cancelPanel,
     submitUserPasswordReset: input.userWorkspace.workspace.submitPasswordReset,
@@ -455,7 +500,11 @@ export const createExampleShellBindingsOptions = (
     openSettingCreatePanel: input.settingWorkspace.workspace.openCreatePanel,
     reloadSettings: input.settingWorkspace.workspace.reloadSettings,
     handleExportSettings: input.settingWorkspace.handleExportSettings,
-    startSettingEdit: input.settingWorkspace.workspace.startEdit,
+    startSettingEdit: () =>
+      runWithSelectedRecord(
+        input.settingWorkspace.workspace.selectedSetting,
+        input.settingWorkspace.workspace.startEdit,
+      ),
     submitSettingForm: input.settingWorkspace.workspace.submitForm,
     cancelSettingPanel: input.settingWorkspace.workspace.cancelPanel,
   }
@@ -479,7 +528,11 @@ export const createExampleShellBindingsOptions = (
     openTenantCreatePanel: input.tenantWorkspace.workspace.openCreatePanel,
     reloadTenants: input.tenantWorkspace.workspace.reloadTenants,
     handleExportTenants: input.tenantWorkspace.handleExportTenants,
-    startTenantEdit: input.tenantWorkspace.workspace.startEdit,
+    startTenantEdit: () =>
+      runWithSelectedRecord(
+        input.tenantWorkspace.workspace.selectedTenant,
+        input.tenantWorkspace.workspace.startEdit,
+      ),
     toggleSelectedTenantStatus:
       input.tenantWorkspace.workspace.toggleSelectedStatus,
     submitTenantForm: input.tenantWorkspace.workspace.submitForm,
