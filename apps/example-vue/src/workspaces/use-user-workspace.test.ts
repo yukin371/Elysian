@@ -216,7 +216,7 @@ describe("useUserWorkspace", () => {
 
     expect(recoverableErrors).toHaveLength(1)
     expect(workspace.userPanelMode.value).toBe("reset")
-    expect(workspace.userErrorMessage.value).toContain("status 401")
+    expect(workspace.userErrorMessage.value).toContain("unauthorized")
   })
 
   test("returns to detail mode when selecting another user during password reset", async () => {
@@ -235,10 +235,13 @@ describe("useUserWorkspace", () => {
       const method = init?.method ?? "GET"
 
       if (url.endsWith("/system/users") && method === "GET") {
-        return new Response(JSON.stringify({ items: [firstUser, secondUser] }), {
-          headers: { "content-type": "application/json" },
-          status: 200,
-        })
+        return new Response(
+          JSON.stringify({ items: [firstUser, secondUser] }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
       }
 
       if (url.endsWith("/system/users/user-1") && method === "GET") {
