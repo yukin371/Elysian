@@ -15,6 +15,9 @@ import { insertTenant } from "./tenant"
 
 const tenantAlphaId = "00000000-0000-0000-0000-000000000001"
 const tenantBetaId = "00000000-0000-0000-0000-000000000002"
+type PgliteTestDatabaseClient = ReturnType<
+  typeof drizzle<Record<string, never>>
+>
 
 describe("generator preview session persistence", () => {
   it("persists preview metadata and lists newest sessions first", async () => {
@@ -268,7 +271,7 @@ async function withGeneratorSessionTestDb(
 async function createGeneratorSessionTestDb() {
   const client = new PGlite()
   await client.exec(generatorSessionTestSchemaSql)
-  const db = drizzle(client) as unknown as DatabaseClient
+  const db = createPgliteTestDatabaseClient(client)
 
   await insertTenant(db, {
     id: tenantAlphaId,
@@ -282,6 +285,11 @@ async function createGeneratorSessionTestDb() {
   })
 
   return { client, db }
+}
+
+function createPgliteTestDatabaseClient(client: PGlite): DatabaseClient {
+  const db: PgliteTestDatabaseClient = drizzle<Record<string, never>>(client)
+  return db as PgliteTestDatabaseClient & DatabaseClient
 }
 
 async function setSessionCreatedAt(

@@ -7,6 +7,9 @@ import { insertAuditLog, listAuditLogsByFilter } from "./audit-log"
 import type { DatabaseClient } from "./client"
 
 const tenantId = "00000000-0000-0000-0000-000000000001"
+type PgliteTestDatabaseClient = ReturnType<
+  typeof drizzle<Record<string, never>>
+>
 
 describe("audit log persistence", () => {
   it("filters operation logs with partial string matches across daily-use fields", async () => {
@@ -72,13 +75,18 @@ async function createAuditLogTestDb() {
 
   await client.exec(auditLogTestSchemaSql)
 
-  const db = drizzle(client) as unknown as DatabaseClient
+  const db = createPgliteTestDatabaseClient(client)
 
   await client.exec(
     `insert into tenants (id, code, name) values ('${tenantId}', 'tenant-alpha', 'Tenant Alpha')`,
   )
 
   return { client, db }
+}
+
+function createPgliteTestDatabaseClient(client: PGlite): DatabaseClient {
+  const db: PgliteTestDatabaseClient = drizzle<Record<string, never>>(client)
+  return db as PgliteTestDatabaseClient & DatabaseClient
 }
 
 async function withAuditLogTestDb(

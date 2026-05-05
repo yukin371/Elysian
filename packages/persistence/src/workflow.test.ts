@@ -21,6 +21,9 @@ import {
 
 const tenantAlphaId = "00000000-0000-0000-0000-000000000001"
 const tenantBetaId = "00000000-0000-0000-0000-000000000002"
+type PgliteTestDatabaseClient = ReturnType<
+  typeof drizzle<Record<string, never>>
+>
 
 describe("workflow persistence", () => {
   it("enforces definition version uniqueness per tenant while allowing the same version across tenants", async () => {
@@ -430,7 +433,7 @@ async function createWorkflowTestDb() {
 
   await client.exec(workflowTestSchemaSql)
 
-  const db = drizzle(client) as unknown as DatabaseClient
+  const db = createPgliteTestDatabaseClient(client)
 
   await insertTenant(db, {
     id: tenantAlphaId,
@@ -444,6 +447,11 @@ async function createWorkflowTestDb() {
   })
 
   return { client, db }
+}
+
+function createPgliteTestDatabaseClient(client: PGlite): DatabaseClient {
+  const db: PgliteTestDatabaseClient = drizzle<Record<string, never>>(client)
+  return db as PgliteTestDatabaseClient & DatabaseClient
 }
 
 async function withWorkflowTestDb(
