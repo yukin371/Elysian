@@ -205,14 +205,17 @@ export const createAuthService = (
     isCurrent: session.id === currentSessionId,
   })
 
-  const requireActiveUser = (user: AuthUserRecord | null, details?: object) => {
+  const requireActiveUser = (
+    user: AuthUserRecord | null,
+    details?: Record<string, unknown>,
+  ) => {
     if (!user) {
       throw new AppError({
         code: "AUTH_INVALID_CREDENTIALS",
         message: "Invalid username or password",
         status: 401,
         expose: true,
-        details: details as Record<string, unknown> | undefined,
+        details,
       })
     }
 
@@ -222,7 +225,7 @@ export const createAuthService = (
         message: "User is disabled",
         status: 403,
         expose: true,
-        details: details as Record<string, unknown> | undefined,
+        details,
       })
     }
 
