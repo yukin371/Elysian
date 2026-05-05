@@ -58,7 +58,7 @@ const createWorkspaceSyncOptions = (overrides: Record<string, unknown>) =>
 
       return ref(null)
     },
-  })
+  }) as unknown as Parameters<typeof useExampleWorkspaceSync>[0]
 
 describe("useExampleWorkspaceSync", () => {
   test("exits tenant edit mode when sync reselects another visible tenant", async () => {
