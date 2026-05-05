@@ -12,6 +12,42 @@ import {
   createOperationLogModule,
 } from "./modules"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp operation logs", () => {
   it("publishes operation log success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -31,24 +67,20 @@ describe("createServerApp operation logs", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/system/operation-logs"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/operation-logs", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/operation-logs"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/operation-logs", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/operation-logs/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/operation-logs/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/operation-logs/{id}"]?.get?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/operation-logs/{id}", "get", "404"),
     ).toBeDefined()
   })
 
