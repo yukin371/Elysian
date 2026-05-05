@@ -24,6 +24,59 @@ const toCookieHeader = (setCookie: string | null) => {
   return setCookie.split(";")[0] ?? setCookie
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNullableString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property !== null && typeof property !== "string") {
+    throw new Error(`Expected nullable string field: ${key}`)
+  }
+
+  return property
+}
+
+const readBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "boolean") {
+    throw new Error(`Expected boolean field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every((item) => isRecord(item))) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
 const isAuthEventType = (
   action: string,
 ): action is NonNullable<OperationLogRecord["authEventType"]> =>
@@ -100,9 +153,7 @@ describe("auth operation log query surface", () => {
       },
     )
     expect(loginResponse.status).toBe(200)
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
     const loginCookie = toCookieHeader(loginResponse.headers.get("set-cookie"))
 
     const refreshResponse = await refreshWithCookie(authApp, loginCookie, {
@@ -111,9 +162,7 @@ describe("auth operation log query surface", () => {
       "x-request-id": "req-refresh-query-1",
     })
     expect(refreshResponse.status).toBe(200)
-    const refreshBody = (await refreshResponse.json()) as {
-      accessToken: string
-    }
+    const refreshBody = await readJsonRecord(refreshResponse)
     const refreshedCookie = toCookieHeader(
       refreshResponse.headers.get("set-cookie"),
     )
@@ -121,19 +170,20 @@ describe("auth operation log query surface", () => {
     const sessionsResponse = await authApp.handle(
       new Request("http://localhost/auth/sessions", {
         headers: {
-          authorization: `Bearer ${refreshBody.accessToken}`,
+          authorization: `Bearer ${readString(refreshBody, "accessToken")}`,
         },
       }),
     )
     expect(sessionsResponse.status).toBe(200)
-    const sessionsBody = (await sessionsResponse.json()) as {
-      items: Array<{
-        id: string
-        isCurrent: boolean
-      }>
-    }
-    const currentSession = sessionsBody.items.find((item) => item.isCurrent)
+    const sessionsBody = await readJsonRecord(sessionsResponse)
+    const sessionItems = readRecordArray(sessionsBody, "items")
+    const currentSession = sessionItems.find((item) =>
+      readBoolean(item, "isCurrent"),
+    )
     expect(currentSession).toBeDefined()
+    const currentSessionId = currentSession
+      ? readString(currentSession, "id")
+      : undefined
 
     const logoutResponse = await logoutWithCookie(authApp, refreshedCookie, {
       "user-agent": "operation-log-auth-agent",
@@ -143,10 +193,10 @@ describe("auth operation log query surface", () => {
     expect(logoutResponse.status).toBe(204)
 
     const revokeResponse = await authApp.handle(
-      new Request(`http://localhost/auth/sessions/${currentSession?.id}`, {
+      new Request(`http://localhost/auth/sessions/${currentSessionId}`, {
         method: "DELETE",
         headers: {
-          authorization: `Bearer ${refreshBody.accessToken}`,
+          authorization: `Bearer ${readString(refreshBody, "accessToken")}`,
           "user-agent": "operation-log-auth-agent",
           "x-forwarded-for": "127.0.0.55",
           "x-request-id": "req-session-revoke-query-1",
@@ -174,26 +224,21 @@ describe("auth operation log query surface", () => {
         "http://localhost/system/operation-logs?authEventType=login",
         {
           headers: {
-            authorization: `Bearer ${refreshBody.accessToken}`,
+            authorization: `Bearer ${readString(refreshBody, "accessToken")}`,
           },
         },
       ),
     )
     expect(loginLogsResponse.status).toBe(200)
-    const loginLogsBody = (await loginLogsResponse.json()) as {
-      items: OperationLogRecord[]
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
+    const loginLogsBody = await readJsonRecord(loginLogsResponse)
+    const loginLogItems = readRecordArray(loginLogsBody, "items")
 
     expect(
-      loginLogsBody.items.map((item) => [
-        item.action,
-        item.result,
-        item.authEventType,
-        item.authFailureReason,
+      loginLogItems.map((item) => [
+        readString(item, "action"),
+        readString(item, "result"),
+        readNullableString(item, "authEventType"),
+        readNullableString(item, "authFailureReason"),
       ]),
     ).toEqual([
       ["login", "success", "login", null],
@@ -211,28 +256,23 @@ describe("auth operation log query surface", () => {
         "http://localhost/system/operation-logs?authEventType=login&authFailureReason=invalid_password",
         {
           headers: {
-            authorization: `Bearer ${refreshBody.accessToken}`,
+            authorization: `Bearer ${readString(refreshBody, "accessToken")}`,
           },
         },
       ),
     )
     expect(failedLoginResponse.status).toBe(200)
-    const failedLoginBody = (await failedLoginResponse.json()) as {
-      items: OperationLogRecord[]
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
+    const failedLoginBody = await readJsonRecord(failedLoginResponse)
+    const failedLoginItems = readRecordArray(failedLoginBody, "items")
 
-    expect(failedLoginBody.items).toHaveLength(1)
+    expect(failedLoginItems).toHaveLength(1)
     expect(failedLoginBody).toMatchObject({
       total: 1,
       page: 1,
       pageSize: 20,
       totalPages: 1,
     })
-    expect(failedLoginBody.items[0]).toMatchObject({
+    expect(failedLoginItems[0]).toMatchObject({
       action: "login",
       authEventType: "login",
       authFailureReason: "invalid_password",
@@ -250,7 +290,7 @@ describe("auth operation log query surface", () => {
         `http://localhost/system/operation-logs/${sessionRevokeLog?.id}`,
         {
           headers: {
-            authorization: `Bearer ${refreshBody.accessToken}`,
+            authorization: `Bearer ${readString(refreshBody, "accessToken")}`,
           },
         },
       ),
