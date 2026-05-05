@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm"
+import { and, desc, eq, ilike, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import {
@@ -33,6 +33,11 @@ export interface ListAuditLogsPersistenceFilter extends PaginationQuery {
   category?: string
   action?: string
   actorUserId?: string
+  targetType?: string
+  targetId?: string
+  requestId?: string
+  ip?: string
+  userAgent?: string
   result?: AuditLogResult
   detailsReason?: string
 }
@@ -107,10 +112,29 @@ export const listAuditLogsByFilter = async (
 ): Promise<AuditLogPersistenceListResult> => {
   const pagination = normalizePagination(filter, DEFAULT_AUDIT_LOG_PAGE_SIZE)
   const conditions = [
-    filter.category ? eq(auditLogs.category, filter.category) : undefined,
-    filter.action ? eq(auditLogs.action, filter.action) : undefined,
-    filter.actorUserId
-      ? eq(auditLogs.actorUserId, filter.actorUserId)
+    filter.category?.trim()
+      ? ilike(auditLogs.category, `%${filter.category.trim()}%`)
+      : undefined,
+    filter.action?.trim()
+      ? ilike(auditLogs.action, `%${filter.action.trim()}%`)
+      : undefined,
+    filter.actorUserId?.trim()
+      ? sql`${auditLogs.actorUserId}::text ilike ${`%${filter.actorUserId.trim()}%`}`
+      : undefined,
+    filter.targetType?.trim()
+      ? ilike(auditLogs.targetType, `%${filter.targetType.trim()}%`)
+      : undefined,
+    filter.targetId?.trim()
+      ? ilike(auditLogs.targetId, `%${filter.targetId.trim()}%`)
+      : undefined,
+    filter.requestId?.trim()
+      ? ilike(auditLogs.requestId, `%${filter.requestId.trim()}%`)
+      : undefined,
+    filter.ip?.trim()
+      ? ilike(auditLogs.ip, `%${filter.ip.trim()}%`)
+      : undefined,
+    filter.userAgent?.trim()
+      ? ilike(auditLogs.userAgent, `%${filter.userAgent.trim()}%`)
       : undefined,
     filter.result ? eq(auditLogs.result, filter.result) : undefined,
     filter.detailsReason

@@ -14,6 +14,11 @@ export interface ListOperationLogsInput {
   authEventType?: NonNullable<OperationLogRecord["authEventType"]>
   authFailureReason?: string
   actorUserId?: string
+  targetType?: string
+  targetId?: string
+  requestId?: string
+  ip?: string
+  userAgent?: string
   result?: OperationLogResult
   page?: number
   pageSize?: number
@@ -50,6 +55,11 @@ export const createOperationLogRepository = (
         (filter.authEventType || filter.authFailureReason ? "auth" : undefined),
       action: filter.action ?? filter.authEventType,
       actorUserId: filter.actorUserId,
+      targetType: filter.targetType,
+      targetId: filter.targetId,
+      requestId: filter.requestId,
+      ip: filter.ip,
+      userAgent: filter.userAgent,
       result: filter.result as AuditLogResult | undefined,
       detailsReason: filter.authFailureReason,
       page: filter.page,
@@ -103,14 +113,24 @@ export const createInMemoryOperationLogRepository = (
         typeof filter.pageSize === "number" && Number.isFinite(filter.pageSize)
           ? Math.min(100, Math.max(1, Math.trunc(filter.pageSize)))
           : 20
+      const category = normalizeOperationLogFilterValue(filter.category)
+      const action = normalizeOperationLogFilterValue(filter.action)
+      const actorUserId = normalizeOperationLogFilterValue(filter.actorUserId)
+      const targetType = normalizeOperationLogFilterValue(filter.targetType)
+      const targetId = normalizeOperationLogFilterValue(filter.targetId)
+      const requestId = normalizeOperationLogFilterValue(filter.requestId)
+      const ip = normalizeOperationLogFilterValue(filter.ip)
+      const userAgent = normalizeOperationLogFilterValue(filter.userAgent)
       const filteredItems = [...items.values()]
         .filter((item) =>
-          filter.category === undefined
+          category.length === 0
             ? true
-            : item.category === filter.category,
+            : item.category.toLowerCase().includes(category),
         )
         .filter((item) =>
-          filter.action === undefined ? true : item.action === filter.action,
+          action.length === 0
+            ? true
+            : item.action.toLowerCase().includes(action),
         )
         .filter((item) =>
           filter.authEventType === undefined
@@ -123,9 +143,32 @@ export const createInMemoryOperationLogRepository = (
             : item.authFailureReason === filter.authFailureReason,
         )
         .filter((item) =>
-          filter.actorUserId === undefined
+          actorUserId.length === 0
             ? true
-            : item.actorUserId === filter.actorUserId,
+            : (item.actorUserId ?? "").toLowerCase().includes(actorUserId),
+        )
+        .filter((item) =>
+          targetType.length === 0
+            ? true
+            : (item.targetType ?? "").toLowerCase().includes(targetType),
+        )
+        .filter((item) =>
+          targetId.length === 0
+            ? true
+            : (item.targetId ?? "").toLowerCase().includes(targetId),
+        )
+        .filter((item) =>
+          requestId.length === 0
+            ? true
+            : (item.requestId ?? "").toLowerCase().includes(requestId),
+        )
+        .filter((item) =>
+          ip.length === 0 ? true : (item.ip ?? "").toLowerCase().includes(ip),
+        )
+        .filter((item) =>
+          userAgent.length === 0
+            ? true
+            : (item.userAgent ?? "").toLowerCase().includes(userAgent),
         )
         .filter((item) =>
           filter.result === undefined ? true : item.result === filter.result,
@@ -199,3 +242,6 @@ const resolveAuthFailureReason = (
   details: Record<string, unknown> | null,
 ): string | null =>
   typeof details?.reason === "string" ? details.reason : null
+
+const normalizeOperationLogFilterValue = (value: string | undefined) =>
+  value?.trim().toLowerCase() ?? ""

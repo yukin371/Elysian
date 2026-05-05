@@ -47,6 +47,11 @@ export const enUSOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.query.authFailureReasonPlaceholder":
     "Search by auth failure reason",
   "app.operationLog.query.actorUserIdPlaceholder": "Search by actor user ID",
+  "app.operationLog.query.targetTypePlaceholder": "Search by target type",
+  "app.operationLog.query.targetIdPlaceholder": "Search by target ID",
+  "app.operationLog.query.requestIdPlaceholder": "Search by request ID",
+  "app.operationLog.query.ipPlaceholder": "Search by IP",
+  "app.operationLog.query.userAgentPlaceholder": "Search by user agent",
   "app.operationLog.query.resultPlaceholder": "Select result",
   "app.operationLog.countLabel": "Showing {visible} of {total} logs",
   "app.operationLog.statsHint": "Current visible operation log rows",

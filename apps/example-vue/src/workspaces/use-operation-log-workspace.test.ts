@@ -86,6 +86,50 @@ describe("useOperationLogWorkspace", () => {
     ])
   })
 
+  test("passes through request and target query fields with localized placeholders", () => {
+    const workspace = useOperationLogWorkspace({
+      currentShellTabKey: ref("overview"),
+      page: {
+        tableColumns: computed(() => []),
+        queryFields: computed(() => [
+          { key: "requestId", kind: "text" as const },
+          { key: "targetType", kind: "text" as const },
+          { key: "userAgent", kind: "text" as const },
+        ]),
+      },
+      locale: ref("zh-CN"),
+      t: (key) => key,
+      localizeFieldLabel: (fieldKey) => fieldKey,
+      localizeResult: (result) => `result:${result}`,
+      canView: computed(() => true),
+      onRecoverableAuthError: () => {},
+    })
+
+    expect(workspace.queryFields.value).toEqual([
+      {
+        key: "requestId",
+        kind: "text",
+        label: "requestId",
+        options: undefined,
+        placeholder: "app.operationLog.query.requestIdPlaceholder",
+      },
+      {
+        key: "targetType",
+        kind: "text",
+        label: "targetType",
+        options: undefined,
+        placeholder: "app.operationLog.query.targetTypePlaceholder",
+      },
+      {
+        key: "userAgent",
+        kind: "text",
+        label: "userAgent",
+        options: undefined,
+        placeholder: "app.operationLog.query.userAgentPlaceholder",
+      },
+    ])
+  })
+
   test("localizes user-disabled auth failure reasons in table items and detail values", async () => {
     const log = createOperationLogRecord({
       id: "login-disabled",
@@ -171,7 +215,7 @@ describe("useOperationLogWorkspace", () => {
     })
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.operationLogErrorMessage.value).toContain("status 401")
+    expect(workspace.operationLogErrorMessage.value).toContain("unauthorized")
     expect(workspace.filteredOperationLogItems.value).toEqual([])
     expect(workspace.operationLogQueryValues.value).toEqual({
       action: " login ",
@@ -249,7 +293,7 @@ describe("useOperationLogWorkspace", () => {
     await workspace.reloadOperationLogs()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.operationLogErrorMessage.value).toContain("status 503")
+    expect(workspace.operationLogErrorMessage.value).toContain("unavailable")
     expect(workspace.selectedOperationLogId.value).toBe("login-failed")
     expect(workspace.selectedOperationLog.value?.id).toBe("login-failed")
     expect(workspace.tableItems.value).toHaveLength(1)

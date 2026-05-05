@@ -25,6 +25,11 @@ export interface OperationLogWorkspaceQuery {
   authEventType?: NonNullable<OperationLogRecord["authEventType"]> | ""
   authFailureReason?: string
   actorUserId?: string
+  targetType?: string
+  targetId?: string
+  requestId?: string
+  ip?: string
+  userAgent?: string
   result?: OperationLogRecord["result"] | ""
 }
 
@@ -70,6 +75,26 @@ export const buildOperationLogListQuery = (
     query.actorUserId = values.actorUserId.trim()
   }
 
+  if (typeof values.targetType === "string" && values.targetType.trim()) {
+    query.targetType = values.targetType.trim()
+  }
+
+  if (typeof values.targetId === "string" && values.targetId.trim()) {
+    query.targetId = values.targetId.trim()
+  }
+
+  if (typeof values.requestId === "string" && values.requestId.trim()) {
+    query.requestId = values.requestId.trim()
+  }
+
+  if (typeof values.ip === "string" && values.ip.trim()) {
+    query.ip = values.ip.trim()
+  }
+
+  if (typeof values.userAgent === "string" && values.userAgent.trim()) {
+    query.userAgent = values.userAgent.trim()
+  }
+
   if (values.result === "success" || values.result === "failure") {
     query.result = values.result
   }
@@ -86,6 +111,11 @@ export const filterOperationLogs = (
   const authEventType = query.authEventType ?? ""
   const authFailureReason = normalizeQueryValue(query.authFailureReason)
   const actorUserId = normalizeQueryValue(query.actorUserId)
+  const targetType = normalizeQueryValue(query.targetType)
+  const targetId = normalizeQueryValue(query.targetId)
+  const requestId = normalizeQueryValue(query.requestId)
+  const ip = normalizeQueryValue(query.ip)
+  const userAgent = normalizeQueryValue(query.userAgent)
   const result = query.result ?? ""
 
   return items.filter((item) => {
@@ -114,6 +144,38 @@ export const filterOperationLogs = (
     if (
       actorUserId.length > 0 &&
       !(item.actorUserId ?? "").toLowerCase().includes(actorUserId)
+    ) {
+      return false
+    }
+
+    if (
+      targetType.length > 0 &&
+      !(item.targetType ?? "").toLowerCase().includes(targetType)
+    ) {
+      return false
+    }
+
+    if (
+      targetId.length > 0 &&
+      !(item.targetId ?? "").toLowerCase().includes(targetId)
+    ) {
+      return false
+    }
+
+    if (
+      requestId.length > 0 &&
+      !(item.requestId ?? "").toLowerCase().includes(requestId)
+    ) {
+      return false
+    }
+
+    if (ip.length > 0 && !(item.ip ?? "").toLowerCase().includes(ip)) {
+      return false
+    }
+
+    if (
+      userAgent.length > 0 &&
+      !(item.userAgent ?? "").toLowerCase().includes(userAgent)
     ) {
       return false
     }

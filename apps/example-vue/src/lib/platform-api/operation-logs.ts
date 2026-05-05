@@ -31,6 +31,11 @@ export interface OperationLogListQuery {
   authEventType?: NonNullable<OperationLogRecord["authEventType"]>
   authFailureReason?: string
   actorUserId?: string
+  targetType?: string
+  targetId?: string
+  requestId?: string
+  ip?: string
+  userAgent?: string
   result?: OperationLogRecord["result"]
   page?: number
   pageSize?: number
@@ -57,6 +62,26 @@ const buildOperationLogSearch = (query: OperationLogListQuery = {}) => {
 
   if (query.actorUserId?.trim()) {
     search.set("actorUserId", query.actorUserId.trim())
+  }
+
+  if (query.targetType?.trim()) {
+    search.set("targetType", query.targetType.trim())
+  }
+
+  if (query.targetId?.trim()) {
+    search.set("targetId", query.targetId.trim())
+  }
+
+  if (query.requestId?.trim()) {
+    search.set("requestId", query.requestId.trim())
+  }
+
+  if (query.ip?.trim()) {
+    search.set("ip", query.ip.trim())
+  }
+
+  if (query.userAgent?.trim()) {
+    search.set("userAgent", query.userAgent.trim())
   }
 
   if (query.result) {

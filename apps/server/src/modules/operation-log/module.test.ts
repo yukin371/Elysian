@@ -111,4 +111,23 @@ describe("operation log module", () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual(createOperationLogSeedRecords()[1])
   })
+
+  it("filters operation logs by partial target and request metadata", async () => {
+    const app = createTestApp(createOperationLogSeedRecords())
+
+    const response = await app.handle(
+      new Request(
+        "http://localhost/system/operation-logs?category=work&targetType=workflow&targetId=task_1&requestId=workflow",
+      ),
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      items: [createOperationLogSeedRecords()[2]],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+  })
 })

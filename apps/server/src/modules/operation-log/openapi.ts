@@ -23,7 +23,7 @@ export const operationLogRecordResponseSchema = t.Object({
   requestId: t.Nullable(t.String()),
   ip: t.Nullable(t.String()),
   userAgent: t.Nullable(t.String()),
-  details: t.Record(t.String(), t.Unknown()),
+  details: t.Nullable(t.Record(t.String(), t.Unknown())),
   createdAt: t.String({
     format: "date-time",
   }),

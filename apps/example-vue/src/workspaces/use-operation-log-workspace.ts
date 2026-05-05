@@ -111,6 +111,26 @@ export const useOperationLogWorkspace = (
         typeof operationLogQueryValues.value.actorUserId === "string"
           ? operationLogQueryValues.value.actorUserId
           : undefined,
+      targetType:
+        typeof operationLogQueryValues.value.targetType === "string"
+          ? operationLogQueryValues.value.targetType
+          : undefined,
+      targetId:
+        typeof operationLogQueryValues.value.targetId === "string"
+          ? operationLogQueryValues.value.targetId
+          : undefined,
+      requestId:
+        typeof operationLogQueryValues.value.requestId === "string"
+          ? operationLogQueryValues.value.requestId
+          : undefined,
+      ip:
+        typeof operationLogQueryValues.value.ip === "string"
+          ? operationLogQueryValues.value.ip
+          : undefined,
+      userAgent:
+        typeof operationLogQueryValues.value.userAgent === "string"
+          ? operationLogQueryValues.value.userAgent
+          : undefined,
       result:
         operationLogQueryValues.value.result === "success" ||
         operationLogQueryValues.value.result === "failure"
@@ -156,8 +176,44 @@ export const useOperationLogWorkspace = (
       "authEventType",
       "authFailureReason",
       "actorUserId",
+      "targetType",
+      "targetId",
+      "requestId",
+      "ip",
+      "userAgent",
       "result",
     ])
+
+    const resolveQueryPlaceholder = (fieldKey: string, fallback?: string) => {
+      switch (fieldKey) {
+        case "category":
+          return options.t("app.operationLog.query.categoryPlaceholder")
+        case "action":
+          return options.t("app.operationLog.query.actionPlaceholder")
+        case "authEventType":
+          return options.t("app.operationLog.query.authEventTypePlaceholder")
+        case "authFailureReason":
+          return options.t(
+            "app.operationLog.query.authFailureReasonPlaceholder",
+          )
+        case "actorUserId":
+          return options.t("app.operationLog.query.actorUserIdPlaceholder")
+        case "targetType":
+          return options.t("app.operationLog.query.targetTypePlaceholder")
+        case "targetId":
+          return options.t("app.operationLog.query.targetIdPlaceholder")
+        case "requestId":
+          return options.t("app.operationLog.query.requestIdPlaceholder")
+        case "ip":
+          return options.t("app.operationLog.query.ipPlaceholder")
+        case "userAgent":
+          return options.t("app.operationLog.query.userAgentPlaceholder")
+        case "result":
+          return options.t("app.operationLog.query.resultPlaceholder")
+        default:
+          return fallback
+      }
+    }
 
     return options.page.queryFields.value
       .filter((field) => supportedQueryKeys.has(field.key))
@@ -180,27 +236,12 @@ export const useOperationLogWorkspace = (
                     label: localizeAuthFailureReason(value),
                     value,
                   }))
-              : field.options,
+                : field.options,
         kind:
           field.key === "authEventType" || field.key === "authFailureReason"
             ? "select"
             : field.kind,
-        placeholder:
-          field.key === "category"
-            ? options.t("app.operationLog.query.categoryPlaceholder")
-            : field.key === "action"
-              ? options.t("app.operationLog.query.actionPlaceholder")
-              : field.key === "authEventType"
-                ? options.t("app.operationLog.query.authEventTypePlaceholder")
-                : field.key === "authFailureReason"
-                  ? options.t(
-                      "app.operationLog.query.authFailureReasonPlaceholder",
-                    )
-                  : field.key === "actorUserId"
-                    ? options.t("app.operationLog.query.actorUserIdPlaceholder")
-                    : field.key === "result"
-                      ? options.t("app.operationLog.query.resultPlaceholder")
-                      : field.placeholder,
+        placeholder: resolveQueryPlaceholder(field.key, field.placeholder),
       }))
   })
 

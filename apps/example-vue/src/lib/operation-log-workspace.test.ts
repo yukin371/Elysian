@@ -49,6 +49,11 @@ describe("operation log workspace helpers", () => {
       category: "workflow",
       action: "reject",
       actorUserId: "manager_1",
+      targetType: "workflow_task",
+      targetId: "task_expense_1",
+      requestId: "req-workflow-claim-1",
+      ip: "127.0.0.20",
+      userAgent: "workflow-agent",
       result: "failure",
       details: null,
     }),
@@ -86,6 +91,11 @@ describe("operation log workspace helpers", () => {
       authEventType: "refresh",
       authFailureReason: " invalid_password ",
       actorUserId: " manager_1 ",
+      targetType: " workflow_task ",
+      targetId: " session_1 ",
+      requestId: " req_1 ",
+      ip: " 127.0.0 ",
+      userAgent: " bun:test ",
       result: "failure",
     }
 
@@ -95,6 +105,11 @@ describe("operation log workspace helpers", () => {
       authEventType: "refresh",
       authFailureReason: "invalid_password",
       actorUserId: "manager_1",
+      targetType: "workflow_task",
+      targetId: "session_1",
+      requestId: "req_1",
+      ip: "127.0.0",
+      userAgent: "bun:test",
       result: "failure",
     })
   })
@@ -114,6 +129,16 @@ describe("operation log workspace helpers", () => {
         result: "success",
       }).map((item) => item.id),
     ).toEqual(["audit_login", "tenant_update"])
+
+    expect(
+      filterOperationLogs(logs, {
+        targetType: "workflow",
+        targetId: "expense",
+        requestId: "claim",
+        ip: "127.0.0",
+        userAgent: "workflow",
+      }).map((item) => item.id),
+    ).toEqual(["workflow_reject"])
 
     expect(
       filterOperationLogs(logs, {

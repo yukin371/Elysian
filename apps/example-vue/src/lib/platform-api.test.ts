@@ -588,12 +588,17 @@ describe("platform api operation log exports", () => {
           category: " auth ",
           authEventType: "login",
           authFailureReason: "invalid_password",
+          targetType: " session ",
+          targetId: " login_1 ",
+          requestId: " req-login ",
+          ip: " 127.0.0.1 ",
+          userAgent: " browser ",
           result: "failure",
         }),
       ).resolves.toBeInstanceOf(Blob)
       expect(fetchCalls).toEqual([
         {
-          url: "http://localhost:3000/system/operation-logs/export?category=auth&authEventType=login&authFailureReason=invalid_password&result=failure",
+          url: "http://localhost:3000/system/operation-logs/export?category=auth&authEventType=login&authFailureReason=invalid_password&targetType=session&targetId=login_1&requestId=req-login&ip=127.0.0.1&userAgent=browser&result=failure",
           authorization: "Bearer operation-log-token",
         },
       ])
