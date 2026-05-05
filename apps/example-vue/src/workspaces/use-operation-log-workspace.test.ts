@@ -51,7 +51,11 @@ describe("useOperationLogWorkspace", () => {
       page: {
         tableColumns: computed(() => []),
         queryFields: computed(() => [
-          { key: "authFailureReason", kind: "text" as const },
+          {
+            key: "authFailureReason",
+            kind: "text" as const,
+            label: "authFailureReason",
+          },
         ]),
       },
       locale: ref("zh-CN"),
@@ -92,9 +96,9 @@ describe("useOperationLogWorkspace", () => {
       page: {
         tableColumns: computed(() => []),
         queryFields: computed(() => [
-          { key: "requestId", kind: "text" as const },
-          { key: "targetType", kind: "text" as const },
-          { key: "userAgent", kind: "text" as const },
+          { key: "requestId", kind: "text" as const, label: "requestId" },
+          { key: "targetType", kind: "text" as const, label: "targetType" },
+          { key: "userAgent", kind: "text" as const, label: "userAgent" },
         ]),
       },
       locale: ref("zh-CN"),
