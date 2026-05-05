@@ -36,6 +36,52 @@ import {
   testAdminPassword,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp system organization", () => {
   it("publishes department and post success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -58,54 +104,50 @@ describe("createServerApp system organization", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/system/departments"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/departments", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/departments"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/departments", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/departments"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/departments", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/departments"]?.post?.responses?.["400"],
+      getOpenApiResponse(paths, "/system/departments", "post", "400"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/departments/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/departments/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/departments/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/departments/{id}", "put", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/departments/{id}"]?.put?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/departments/{id}", "put", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/posts"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/posts", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/posts"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/posts", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/posts"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/posts", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/posts"]?.post?.responses?.["409"],
+      getOpenApiResponse(paths, "/system/posts", "post", "409"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/posts/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/posts/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/posts/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/posts/{id}", "put", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/posts/{id}"]?.put?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/posts/{id}", "put", "404"),
     ).toBeDefined()
   })
 
@@ -138,14 +180,13 @@ describe("createServerApp system organization", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const listResponse = await app.handle(
       new Request("http://localhost/system/departments", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -179,7 +220,7 @@ describe("createServerApp system organization", () => {
     const getResponse = await app.handle(
       new Request("http://localhost/system/departments/department_ops_1", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -273,15 +314,14 @@ describe("createServerApp system organization", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const createResponse = await app.handle(
       new Request("http://localhost/system/departments", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -296,17 +336,7 @@ describe("createServerApp system organization", () => {
 
     expect(createResponse.status).toBe(201)
 
-    const createdDepartment = (await createResponse.json()) as {
-      id: string
-      parentId: string | null
-      code: string
-      name: string
-      sort: number
-      status: string
-      userIds: string[]
-      createdAt: string
-      updatedAt: string
-    }
+    const createdDepartment = await readJsonRecord(createResponse)
 
     expect(createdDepartment).toEqual({
       id: expect.any(String),
@@ -322,11 +352,11 @@ describe("createServerApp system organization", () => {
 
     const updateResponse = await app.handle(
       new Request(
-        `http://localhost/system/departments/${createdDepartment.id}`,
+        `http://localhost/system/departments/${readString(createdDepartment, "id")}`,
         {
           method: "PUT",
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
             "content-type": "application/json",
           },
           body: JSON.stringify({
@@ -377,15 +407,14 @@ describe("createServerApp system organization", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const response = await app.handle(
       new Request("http://localhost/system/departments", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -437,14 +466,13 @@ describe("createServerApp system organization", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
     const response = await app.handle(
       new Request("http://localhost/system/departments/department_root_1", {
         method: "PUT",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -612,16 +640,7 @@ describe("createServerApp system organization", () => {
 
     expect(createResponse.status).toBe(201)
 
-    const createdPost = (await createResponse.json()) as {
-      id: string
-      code: string
-      name: string
-      sort: number
-      status: string
-      remark: string
-      createdAt: string
-      updatedAt: string
-    }
+    const createdPost = await readJsonRecord(createResponse)
 
     expect(createdPost).toEqual({
       id: expect.any(String),
@@ -635,17 +654,20 @@ describe("createServerApp system organization", () => {
     })
 
     const updateResponse = await app.handle(
-      new Request(`http://localhost/system/posts/${createdPost.id}`, {
-        method: "PUT",
-        headers: createAuthorizedHeaders(accessToken, {
-          "content-type": "application/json",
-        }),
-        body: JSON.stringify({
-          name: "Support Lead",
-          status: "disabled",
-          remark: "Escalation owner",
-        }),
-      }),
+      new Request(
+        `http://localhost/system/posts/${readString(createdPost, "id")}`,
+        {
+          method: "PUT",
+          headers: createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+          body: JSON.stringify({
+            name: "Support Lead",
+            status: "disabled",
+            remark: "Escalation owner",
+          }),
+        },
+      ),
     )
 
     expect(updateResponse.status).toBe(200)
