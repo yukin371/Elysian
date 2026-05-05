@@ -75,7 +75,7 @@ describe("useFileWorkspace", () => {
     await workspace.reloadFiles()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.fileErrorMessage.value).toContain("status 503")
+    expect(workspace.fileErrorMessage.value).toContain("unavailable")
     expect(workspace.fileQuery.value).toEqual({
       originalName: "  report ",
       mimeType: " application/pdf ",
@@ -127,7 +127,7 @@ describe("useFileWorkspace", () => {
     await workspace.reloadFiles()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.fileErrorMessage.value).toContain("status 503")
+    expect(workspace.fileErrorMessage.value).toContain("unavailable")
     expect(workspace.filePanelMode.value).toBe("delete")
     expect(workspace.fileItems.value).toEqual([first])
     expect(workspace.selectedFileId.value).toBe("file-1")
