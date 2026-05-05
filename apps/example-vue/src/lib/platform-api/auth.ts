@@ -2,10 +2,9 @@ import type { UiMenuItem } from "@elysian/ui-core"
 
 import { clearAccessToken, requestJson, setAccessToken } from "./core"
 import type {
-  OpenApiAuthLoginResponse,
   OpenApiAuthMeResponse,
-  OpenApiAuthSessionsResponse,
   OpenApiAuthSessionSummary,
+  OpenApiAuthSessionsResponse,
 } from "./generated-types"
 
 export interface AuthIdentityResponse
@@ -13,12 +12,24 @@ export interface AuthIdentityResponse
   menus: UiMenuItem[]
 }
 
-export interface LoginResponse extends Omit<OpenApiAuthLoginResponse, "menus"> {
-  menus: UiMenuItem[]
+export type LoginResponse = AuthIdentityResponse & {
+  accessToken: string
 }
 
 export type AuthSessionSummary = OpenApiAuthSessionSummary
 export type AuthSessionsResponse = OpenApiAuthSessionsResponse
+
+const toAuthIdentityResponse = (
+  payload: LoginResponse,
+): AuthIdentityResponse => ({
+  user: payload.user,
+  deptIds: payload.deptIds,
+  dataScopes: payload.dataScopes,
+  dataAccess: payload.dataAccess,
+  roles: payload.roles,
+  permissionCodes: payload.permissionCodes,
+  menus: payload.menus,
+})
 
 export const login = async (input: {
   username: string
@@ -33,8 +44,7 @@ export const login = async (input: {
 
   setAccessToken(payload.accessToken)
 
-  const { accessToken: _ignored, ...identity } = payload
-  return identity
+  return toAuthIdentityResponse(payload)
 }
 
 export const refreshAuth = async (): Promise<AuthIdentityResponse> => {
@@ -45,8 +55,7 @@ export const refreshAuth = async (): Promise<AuthIdentityResponse> => {
 
   setAccessToken(payload.accessToken)
 
-  const { accessToken: _ignored, ...identity } = payload
-  return identity
+  return toAuthIdentityResponse(payload)
 }
 
 export const fetchMe = (): Promise<AuthIdentityResponse> =>

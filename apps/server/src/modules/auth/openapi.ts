@@ -75,6 +75,9 @@ const authSessionSummarySchema = t.Object({
 export const authLoginResponseSchema = t.Object({
   accessToken: t.String(),
   user: authIdentityUserSchema,
+  deptIds: t.Array(t.String()),
+  dataScopes: t.Array(dataScopeGrantSchema),
+  dataAccess: dataAccessContextSchema,
   roles: t.Array(t.String()),
   permissionCodes: t.Array(t.String()),
   menus: t.Array(authMenuSchema),

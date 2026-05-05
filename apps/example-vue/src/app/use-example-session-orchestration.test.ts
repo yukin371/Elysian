@@ -12,6 +12,14 @@ const originalFetch = globalThis.fetch
 
 const createAuthIdentity = (): AuthIdentityResponse => ({
   menus: [],
+  deptIds: [],
+  dataScopes: [],
+  dataAccess: {
+    userId: "user-1",
+    hasAllAccess: true,
+    accessibleDeptIds: [],
+    allowSelf: false,
+  },
   permissionCodes: ["system:user:list"],
   roles: ["super-admin"],
   user: {

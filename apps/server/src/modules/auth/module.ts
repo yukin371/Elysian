@@ -95,6 +95,9 @@ export const createAuthModule = (
           const response: AuthLoginResponse = {
             accessToken: result.accessToken,
             user: result.user,
+            deptIds: result.deptIds,
+            dataScopes: result.dataScopes,
+            dataAccess: result.dataAccess,
             roles: result.roles,
             permissionCodes: result.permissionCodes,
             menus: result.menus,
@@ -171,6 +174,9 @@ export const createAuthModule = (
           const response: AuthLoginResponse = {
             accessToken: result.accessToken,
             user: result.user,
+            deptIds: result.deptIds,
+            dataScopes: result.dataScopes,
+            dataAccess: result.dataAccess,
             roles: result.roles,
             permissionCodes: result.permissionCodes,
             menus: result.menus,

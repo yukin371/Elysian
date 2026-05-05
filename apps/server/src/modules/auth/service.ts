@@ -56,6 +56,9 @@ export interface AuthIdentity {
 export interface AuthLoginResponse {
   accessToken: string
   user: AuthIdentity["user"]
+  deptIds: string[]
+  dataScopes: AuthDataScopeProfile["dataScopes"]
+  dataAccess: AuthDataScopeProfile["dataAccess"]
   roles: string[]
   permissionCodes: string[]
   menus: AuthMenuRecord[]
@@ -70,6 +73,9 @@ export interface AuthResponse {
   accessToken: string
   refreshToken: string
   user: AuthIdentity["user"]
+  deptIds: string[]
+  dataScopes: AuthDataScopeProfile["dataScopes"]
+  dataAccess: AuthDataScopeProfile["dataAccess"]
   roles: string[]
   permissionCodes: string[]
   menus: AuthMenuRecord[]

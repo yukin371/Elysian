@@ -39,15 +39,21 @@ describe("createServerApp auth sessions", () => {
     expect(payload.paths["/auth/login"]?.post?.responses?.["401"]).toBeDefined()
     expect(payload.paths["/auth/me"]?.get?.responses?.["200"]).toBeDefined()
     expect(payload.paths["/auth/me"]?.get?.responses?.["401"]).toBeDefined()
-    expect(payload.paths["/auth/sessions"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/auth/refresh"]?.post?.responses?.["200"]).toBeDefined()
+    expect(
+      payload.paths["/auth/sessions"]?.get?.responses?.["200"],
+    ).toBeDefined()
+    expect(
+      payload.paths["/auth/refresh"]?.post?.responses?.["200"],
+    ).toBeDefined()
     expect(
       payload.paths["/auth/sessions/{id}"]?.delete?.responses?.["204"],
     ).toBeDefined()
     expect(
       payload.paths["/auth/sessions/{id}"]?.delete?.responses?.["404"],
     ).toBeDefined()
-    expect(payload.paths["/auth/logout"]?.post?.responses?.["204"]).toBeDefined()
+    expect(
+      payload.paths["/auth/logout"]?.post?.responses?.["204"],
+    ).toBeDefined()
   })
 
   it("refreshes tokens and rotates the refresh session", async () => {
@@ -61,6 +67,14 @@ describe("createServerApp auth sessions", () => {
     })
     const loginBody = (await loginResponse.json()) as {
       accessToken: string
+      deptIds: string[]
+      dataScopes: Array<{ scope: number; customDeptIds?: string[] }>
+      dataAccess: {
+        userId: string
+        hasAllAccess: boolean
+        accessibleDeptIds: string[]
+        allowSelf: boolean
+      }
     }
     const refreshResponse = await refreshWithCookie(
       app,
@@ -71,10 +85,29 @@ describe("createServerApp auth sessions", () => {
 
     const refreshBody = (await refreshResponse.json()) as {
       accessToken: string
+      deptIds: string[]
+      dataScopes: Array<{ scope: number; customDeptIds?: string[] }>
+      dataAccess: {
+        userId: string
+        hasAllAccess: boolean
+        accessibleDeptIds: string[]
+        allowSelf: boolean
+      }
       roles: string[]
     }
 
     expect(refreshBody.accessToken).not.toBe(loginBody.accessToken)
+    expect(loginBody.deptIds).toEqual([])
+    expect(loginBody.dataScopes).toEqual([{ scope: 1 }])
+    expect(loginBody.dataAccess).toEqual({
+      userId: fixture.userId,
+      hasAllAccess: true,
+      accessibleDeptIds: [],
+      allowSelf: false,
+    })
+    expect(refreshBody.deptIds).toEqual(loginBody.deptIds)
+    expect(refreshBody.dataScopes).toEqual(loginBody.dataScopes)
+    expect(refreshBody.dataAccess).toEqual(loginBody.dataAccess)
     expect(refreshBody.roles).toEqual(["admin"])
     expect(refreshResponse.headers.get("set-cookie")).toContain(
       refreshCookiePrefix,

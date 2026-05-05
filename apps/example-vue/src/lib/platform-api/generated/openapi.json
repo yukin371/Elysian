@@ -340,6 +340,9 @@
                   "required": [
                     "accessToken",
                     "user",
+                    "deptIds",
+                    "dataScopes",
+                    "dataAccess",
                     "roles",
                     "permissionCodes",
                     "menus"
@@ -372,6 +375,65 @@
                         },
                         "tenantId": {
                           "type": "string"
+                        }
+                      }
+                    },
+                    "deptIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "dataScopes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "scope"
+                        ],
+                        "properties": {
+                          "scope": {
+                            "type": "string",
+                            "enum": [
+                              1,
+                              2,
+                              3,
+                              4,
+                              5
+                            ]
+                          },
+                          "customDeptIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "dataAccess": {
+                      "type": "object",
+                      "required": [
+                        "userId",
+                        "hasAllAccess",
+                        "accessibleDeptIds",
+                        "allowSelf"
+                      ],
+                      "properties": {
+                        "userId": {
+                          "type": "string"
+                        },
+                        "hasAllAccess": {
+                          "type": "boolean"
+                        },
+                        "accessibleDeptIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "allowSelf": {
+                          "type": "boolean"
                         }
                       }
                     },
@@ -1101,6 +1163,9 @@
                   "required": [
                     "accessToken",
                     "user",
+                    "deptIds",
+                    "dataScopes",
+                    "dataAccess",
                     "roles",
                     "permissionCodes",
                     "menus"
@@ -1133,6 +1198,65 @@
                         },
                         "tenantId": {
                           "type": "string"
+                        }
+                      }
+                    },
+                    "deptIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "dataScopes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "scope"
+                        ],
+                        "properties": {
+                          "scope": {
+                            "type": "string",
+                            "enum": [
+                              1,
+                              2,
+                              3,
+                              4,
+                              5
+                            ]
+                          },
+                          "customDeptIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "dataAccess": {
+                      "type": "object",
+                      "required": [
+                        "userId",
+                        "hasAllAccess",
+                        "accessibleDeptIds",
+                        "allowSelf"
+                      ],
+                      "properties": {
+                        "userId": {
+                          "type": "string"
+                        },
+                        "hasAllAccess": {
+                          "type": "boolean"
+                        },
+                        "accessibleDeptIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "allowSelf": {
+                          "type": "boolean"
                         }
                       }
                     },
@@ -15830,6 +15954,46 @@
             }
           },
           {
+            "name": "targetType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userAgent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "result",
             "in": "query",
             "required": false,
@@ -15995,10 +16159,18 @@
                             ]
                           },
                           "details": {
-                            "type": "object",
-                            "patternProperties": {
-                              "^(.*)$": {}
-                            }
+                            "nullable": true,
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "patternProperties": {
+                                  "^(.*)$": {}
+                                }
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "createdAt": {
                             "format": "date-time",
@@ -16178,6 +16350,46 @@
           },
           {
             "name": "actorUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userAgent",
             "in": "query",
             "required": false,
             "schema": {
@@ -16423,10 +16635,18 @@
                       ]
                     },
                     "details": {
-                      "type": "object",
-                      "patternProperties": {
-                        "^(.*)$": {}
-                      }
+                      "nullable": true,
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "patternProperties": {
+                            "^(.*)$": {}
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "createdAt": {
                       "format": "date-time",

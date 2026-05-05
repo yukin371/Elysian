@@ -1415,6 +1415,18 @@ export interface operations {
                             isSuperAdmin: boolean;
                             tenantId: string;
                         };
+                        deptIds: string[];
+                        dataScopes: {
+                            /** @enum {string} */
+                            scope: 1 | 2 | 3 | 4 | 5;
+                            customDeptIds?: string[];
+                        }[];
+                        dataAccess: {
+                            userId: string;
+                            hasAllAccess: boolean;
+                            accessibleDeptIds: string[];
+                            allowSelf: boolean;
+                        };
                         roles: string[];
                         permissionCodes: string[];
                         menus: {
@@ -1667,6 +1679,18 @@ export interface operations {
                             displayName: string;
                             isSuperAdmin: boolean;
                             tenantId: string;
+                        };
+                        deptIds: string[];
+                        dataScopes: {
+                            /** @enum {string} */
+                            scope: 1 | 2 | 3 | 4 | 5;
+                            customDeptIds?: string[];
+                        }[];
+                        dataAccess: {
+                            userId: string;
+                            hasAllAccess: boolean;
+                            accessibleDeptIds: string[];
+                            allowSelf: boolean;
                         };
                         roles: string[];
                         permissionCodes: string[];
@@ -7742,6 +7766,11 @@ export interface operations {
                 authEventType?: "login" | "logout" | "refresh" | "session_revoke";
                 authFailureReason?: string;
                 actorUserId?: string;
+                targetType?: string;
+                targetId?: string;
+                requestId?: string;
+                ip?: string;
+                userAgent?: string;
                 result?: "success" | "failure";
                 page?: string | number;
                 pageSize?: string | number;
@@ -7771,9 +7800,9 @@ export interface operations {
                             requestId: (string | null) | null;
                             ip: (string | null) | null;
                             userAgent: (string | null) | null;
-                            details: {
+                            details: ({
                                 [key: string]: unknown;
-                            };
+                            } | null) | null;
                             /** Format: date-time */
                             createdAt: string;
                             authEventType: (("login" | "logout" | "refresh" | "session_revoke") | null) | null;
@@ -7828,6 +7857,11 @@ export interface operations {
                 authEventType?: "login" | "logout" | "refresh" | "session_revoke";
                 authFailureReason?: string;
                 actorUserId?: string;
+                targetType?: string;
+                targetId?: string;
+                requestId?: string;
+                ip?: string;
+                userAgent?: string;
                 result?: "success" | "failure";
                 page?: string | number;
                 pageSize?: string | number;
@@ -7901,9 +7935,9 @@ export interface operations {
                         requestId: (string | null) | null;
                         ip: (string | null) | null;
                         userAgent: (string | null) | null;
-                        details: {
+                        details: ({
                             [key: string]: unknown;
-                        };
+                        } | null) | null;
                         /** Format: date-time */
                         createdAt: string;
                         authEventType: (("login" | "logout" | "refresh" | "session_revoke") | null) | null;
