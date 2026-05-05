@@ -20,6 +20,39 @@ import {
   toCookieHeader,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
 describe("createServerApp auth audit and security", () => {
   it("writes audit logs for login, refresh, logout, and permission denial", async () => {
     const fixture = await createAuthTestFixture({
@@ -46,9 +79,7 @@ describe("createServerApp auth audit and security", () => {
         "x-request-id": "req-login-1",
       },
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
     const loginCookie = toCookieHeader(loginResponse.headers.get("set-cookie"))
 
     const refreshResponse = await app.handle(
@@ -68,7 +99,7 @@ describe("createServerApp auth audit and security", () => {
     const deniedResponse = await app.handle(
       new Request("http://localhost/customers", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${readString(loginBody, "accessToken")}`,
           "user-agent": "audit-test-agent",
           "x-forwarded-for": "127.0.0.11",
           "x-request-id": "req-authorize-1",
@@ -202,15 +233,8 @@ describe("createServerApp auth audit and security", () => {
     })
     expect(secondFailureResponse.status).toBe(423)
 
-    const secondFailureBody = (await secondFailureResponse.json()) as {
-      code: number
-      message: string
-      status: number
-      details: {
-        username: string
-        lockedUntil: string
-      }
-    }
+    const secondFailureBody = await readJsonRecord(secondFailureResponse)
+    const secondFailureDetails = readRecord(secondFailureBody, "details")
 
     expect(secondFailureBody).toEqual({
       code: errorCodes.AUTH_LOGIN_LOCKED,
@@ -226,7 +250,7 @@ describe("createServerApp auth audit and security", () => {
     expect(lockedUser).not.toBeNull()
     expect(lockedUser?.loginFailureCount).toBe(2)
     expect(lockedUser?.loginLockedUntil).toBe(
-      secondFailureBody.details.lockedUntil,
+      readString(secondFailureDetails, "lockedUntil"),
     )
 
     const lockedSuccessResponse = await loginWithCredentials(app, {
@@ -332,14 +356,12 @@ describe("createServerApp auth audit and security", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
 
     const deniedTaskListResponse = await app.handle(
       new Request("http://localhost/workflow/tasks/todo", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${readString(loginBody, "accessToken")}`,
           "user-agent": "workflow-audit-agent",
           "x-forwarded-for": "127.0.1.2",
           "x-request-id": "req-workflow-task-list-denied",
@@ -354,7 +376,7 @@ describe("createServerApp auth audit and security", () => {
         {
           method: "POST",
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${readString(loginBody, "accessToken")}`,
             "content-type": "application/json",
             "user-agent": "workflow-audit-agent",
             "x-forwarded-for": "127.0.1.3",
@@ -374,7 +396,7 @@ describe("createServerApp auth audit and security", () => {
         {
           method: "POST",
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${readString(loginBody, "accessToken")}`,
             "user-agent": "workflow-audit-agent",
             "x-forwarded-for": "127.0.1.4",
             "x-request-id": "req-workflow-instance-cancel-denied",
