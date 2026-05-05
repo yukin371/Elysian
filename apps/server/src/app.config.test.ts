@@ -52,6 +52,22 @@ describe("loadServerConfig", () => {
       }),
     ).toThrow("RATE_LIMIT_ENABLED must be true or false")
   })
+
+  it("throws on invalid APP_ENV values", () => {
+    expect(() =>
+      loadServerConfig({
+        APP_ENV: "staging",
+      }),
+    ).toThrow("APP_ENV must be one of: development, test, production")
+  })
+
+  it("throws on invalid LOG_LEVEL values", () => {
+    expect(() =>
+      loadServerConfig({
+        LOG_LEVEL: "trace",
+      }),
+    ).toThrow("LOG_LEVEL must be one of: debug, info, warn, error")
+  })
 })
 
 describe("resolveAccessTokenSecret", () => {

@@ -14,6 +14,8 @@ export interface ServerConfig {
 }
 
 const TEST_ACCESS_TOKEN_SECRET = "elysian-test-access-secret"
+const APP_ENV_VALUES = ["development", "test", "production"] as const
+const LOG_LEVEL_VALUES = ["debug", "info", "warn", "error"] as const
 
 const DEFAULT_SERVER_CONFIG: ServerConfig = {
   env: "development",
@@ -24,9 +26,6 @@ const DEFAULT_SERVER_CONFIG: ServerConfig = {
   rateLimitWindowMs: 60_000,
   rateLimitMaxRequests: 120,
 }
-
-const APP_ENVS = new Set<AppEnv>(["development", "test", "production"])
-const LOG_LEVELS = new Set<LogLevel>(["debug", "info", "warn", "error"])
 
 export const createServerConfig = (
   overrides: Partial<ServerConfig> = {},
@@ -93,13 +92,13 @@ const parseAppEnv = (value: string | undefined): AppEnv => {
     return DEFAULT_SERVER_CONFIG.env
   }
 
-  if (APP_ENVS.has(value as AppEnv)) {
-    return value as AppEnv
+  if (value === "development" || value === "test" || value === "production") {
+    return value
   }
 
   throw new AppError({
     code: "CONFIG_INVALID",
-    message: `APP_ENV must be one of: ${[...APP_ENVS].join(", ")}`,
+    message: `APP_ENV must be one of: ${APP_ENV_VALUES.join(", ")}`,
     status: 500,
     expose: true,
     details: { key: "APP_ENV", value },
@@ -132,13 +131,18 @@ const parseLogLevel = (value: string | undefined): LogLevel => {
     return DEFAULT_SERVER_CONFIG.logLevel
   }
 
-  if (LOG_LEVELS.has(value as LogLevel)) {
-    return value as LogLevel
+  if (
+    value === "debug" ||
+    value === "info" ||
+    value === "warn" ||
+    value === "error"
+  ) {
+    return value
   }
 
   throw new AppError({
     code: "CONFIG_INVALID",
-    message: `LOG_LEVEL must be one of: ${[...LOG_LEVELS].join(", ")}`,
+    message: `LOG_LEVEL must be one of: ${LOG_LEVEL_VALUES.join(", ")}`,
     status: 500,
     expose: true,
     details: { key: "LOG_LEVEL", value },
