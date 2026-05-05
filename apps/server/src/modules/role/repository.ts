@@ -287,6 +287,17 @@ const buildRoleDetailRecord = async (
   deptIds: await listDepartmentIdsForRole(db, row.id),
 })
 
+const normalizeRoleDataScope = (
+  value: number,
+  source: string,
+): RoleDataScope => {
+  if (value === 1 || value === 2 || value === 3 || value === 4 || value === 5) {
+    return value
+  }
+
+  throw new Error(`Invalid persisted ${source} dataScope: ${value}`)
+}
+
 const mapRoleRow = (row: RoleRow): RoleRecord => ({
   id: row.id,
   code: row.code,
@@ -294,7 +305,7 @@ const mapRoleRow = (row: RoleRow): RoleRecord => ({
   description: row.description ?? undefined,
   status: row.status,
   isSystem: row.isSystem,
-  dataScope: row.dataScope as RoleDataScope,
+  dataScope: normalizeRoleDataScope(row.dataScope, `role ${row.id}`),
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })
