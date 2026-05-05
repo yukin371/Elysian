@@ -31,6 +31,62 @@ import {
   workflowRuntimePermissionCodes,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "number") {
+    throw new Error(`Expected number field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp workflow definitions", () => {
   it("publishes workflow definition success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -55,36 +111,32 @@ describe("createServerApp workflow definitions", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/workflow/definitions"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/definitions", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/definitions"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/workflow/definitions", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/definitions"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/workflow/definitions", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/definitions"]?.post?.responses?.["409"],
+      getOpenApiResponse(paths, "/workflow/definitions", "post", "409"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/definitions/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/definitions/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/definitions/{id}"]?.get?.responses?.["404"],
+      getOpenApiResponse(paths, "/workflow/definitions/{id}", "get", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/definitions/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(paths, "/workflow/definitions/{id}", "put", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/workflow/definitions/{id}"]?.put?.responses?.["404"],
+      getOpenApiResponse(paths, "/workflow/definitions/{id}", "put", "404"),
     ).toBeDefined()
   })
 
@@ -116,14 +168,13 @@ describe("createServerApp workflow definitions", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const listResponse = await app.handle(
       new Request("http://localhost/workflow/definitions", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -138,7 +189,7 @@ describe("createServerApp workflow definitions", () => {
         "http://localhost/workflow/definitions/workflow_definition_expense_v1",
         {
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
           },
         },
       ),
@@ -153,7 +204,7 @@ describe("createServerApp workflow definitions", () => {
       new Request("http://localhost/workflow/definitions", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -181,22 +232,13 @@ describe("createServerApp workflow definitions", () => {
     )
 
     expect(createResponse.status).toBe(201)
-    const createdDefinition = (await createResponse.json()) as {
-      id: string
-      key: string
-      name: string
-      version: number
-      status: string
-      definition: Record<string, unknown>
-      createdAt: string
-      updatedAt: string
-    }
-    expect(createdDefinition.id).toEqual(expect.any(String))
-    expect(createdDefinition.key).toBe("leave-approval")
-    expect(createdDefinition.name).toBe("Leave Approval")
-    expect(createdDefinition.version).toBe(1)
-    expect(createdDefinition.status).toBe("active")
-    expect(createdDefinition.definition).toEqual({
+    const createdDefinition = await readJsonRecord(createResponse)
+    expect(readString(createdDefinition, "id")).toEqual(expect.any(String))
+    expect(readString(createdDefinition, "key")).toBe("leave-approval")
+    expect(readString(createdDefinition, "name")).toBe("Leave Approval")
+    expect(readNumber(createdDefinition, "version")).toBe(1)
+    expect(readString(createdDefinition, "status")).toBe("active")
+    expect(readRecord(createdDefinition, "definition")).toEqual({
       nodes: [
         { id: "start", type: "start", name: "Start" },
         {
@@ -212,8 +254,12 @@ describe("createServerApp workflow definitions", () => {
         { from: "leader-review", to: "approved" },
       ],
     })
-    expect(createdDefinition.createdAt).toEqual(expect.any(String))
-    expect(createdDefinition.updatedAt).toEqual(expect.any(String))
+    expect(readString(createdDefinition, "createdAt")).toEqual(
+      expect.any(String),
+    )
+    expect(readString(createdDefinition, "updatedAt")).toEqual(
+      expect.any(String),
+    )
 
     const updateResponse = await app.handle(
       new Request(
@@ -221,7 +267,7 @@ describe("createServerApp workflow definitions", () => {
         {
           method: "PUT",
           headers: {
-            authorization: `Bearer ${loginBody.accessToken}`,
+            authorization: `Bearer ${accessToken}`,
             "content-type": "application/json",
           },
           body: JSON.stringify({
