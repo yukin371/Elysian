@@ -14,6 +14,39 @@ import {
   writeMigrationProposalSnapshotFixture,
 } from "./test-helpers"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
 describe("generator session module detail responses", () => {
   it("surfaces unsupported sql proposal reasons on the detail endpoint", async () => {
     const repository = createInMemoryGeneratorSessionRepository()
@@ -71,15 +104,10 @@ describe("generator session module detail responses", () => {
 
     expect(response.status).toBe(200)
 
-    const body = (await response.json()) as {
-      sqlProposal: null
-      sqlProposalHandoff: {
-        proposalStatus: string
-        unsupportedReason: string | null
-      }
-    }
+    const body = await readJsonRecord(response)
+    const sqlProposalHandoff = readRecord(body, "sqlProposalHandoff")
     expect(body.sqlProposal).toBeNull()
-    expect(body.sqlProposalHandoff).toMatchObject({
+    expect(sqlProposalHandoff).toMatchObject({
       proposalStatus: "unsupported",
       unsupportedReason: "Only single create-table change plans are supported.",
     })
@@ -190,30 +218,12 @@ describe("generator session module detail responses", () => {
 
     expect(response.status).toBe(200)
 
-    const body = (await response.json()) as {
-      conflictExplanations: Array<{
-        mergeStrategy: string
-        path: string
-        plannedAction: string
-        plannedReason: string
-        reason: string
-      }>
-      sqlProposalHandoff: {
-        confirmationChecklist: string[]
-        migrationProposalSnapshotPath: string
-      }
-      targetDirectoryDiff: Array<{
-        actionCounts: {
-          block: number
-          create: number
-          overwrite: number
-          skip: number
-        }
-        changedFileCount: number
-        directory: string
-        fileCount: number
-      }>
-    }
+    const body = await readJsonRecord(response)
+    const sqlProposalHandoff = readRecord(body, "sqlProposalHandoff")
+    const migrationProposalSnapshotPath = readString(
+      sqlProposalHandoff,
+      "migrationProposalSnapshotPath",
+    )
     expect(body.targetDirectoryDiff).toEqual([
       {
         directory: "modules/customer",
@@ -227,9 +237,9 @@ describe("generator session module detail responses", () => {
         },
       },
     ])
-    expect(body.sqlProposalHandoff.confirmationChecklist).toEqual([
-      `Review the SQL draft and Drizzle snippet in ${body.sqlProposalHandoff.migrationProposalSnapshotPath} before changing persistence files.`,
-      `Verify the migration proposal snapshot at ${body.sqlProposalHandoff.migrationProposalSnapshotPath} was generated from ${session.reportPath} at ${session.createdAt}.`,
+    expect(sqlProposalHandoff.confirmationChecklist).toEqual([
+      `Review the SQL draft and Drizzle snippet in ${migrationProposalSnapshotPath} before changing persistence files.`,
+      `Verify the migration proposal snapshot at ${migrationProposalSnapshotPath} was generated from ${session.reportPath} at ${session.createdAt}.`,
       "Confirm the canonical owner and target paths match the intended persistence scope.",
       "Run db:generate and db:migrate only after manual sign-off.",
     ])
@@ -310,39 +320,29 @@ describe("generator session module detail responses", () => {
 
     expect(response.status).toBe(200)
 
-    const body = (await response.json()) as {
-      sqlProposalHandoff: {
-        migrationProposalSnapshot: {
-          generatedAt: string
-          migrationProposalResolution: {
-            unsupportedReason: string | null
-          }
-          snapshotPath: string
-        }
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          archivedSnapshotPath: string | null
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
+    const body = await readJsonRecord(response)
+    const sqlProposalHandoff = readRecord(body, "sqlProposalHandoff")
+    const migrationProposalSnapshotPath = readString(
+      sqlProposalHandoff,
+      "migrationProposalSnapshotPath",
+    )
 
-    expect(body.sqlProposalHandoff.migrationProposalSnapshotPath).toBe(
+    expect(migrationProposalSnapshotPath).toBe(
       join(reportRootDir, "report.migration-proposal.json"),
     )
-    expect(body.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject({
+    expect(sqlProposalHandoff.migrationProposalSnapshot).toMatchObject({
       generatedAt: "2026-04-20T00:00:00.000Z",
       migrationProposalResolution: {
         unsupportedReason: null,
       },
     })
-    expect(body.sqlProposalHandoff.migrationProposalSnapshotRecovery).toEqual({
+    expect(sqlProposalHandoff.migrationProposalSnapshotRecovery).toEqual({
       archivedSnapshotPath: null,
       status: "rebuilt-from-missing",
     })
 
     const snapshotContents = await readFile(
-      body.sqlProposalHandoff.migrationProposalSnapshotPath,
+      migrationProposalSnapshotPath,
       "utf8",
     )
     expect(snapshotContents).toContain('"snapshotPath"')
@@ -415,50 +415,39 @@ describe("generator session module detail responses", () => {
 
     expect(response.status).toBe(200)
 
-    const body = (await response.json()) as {
-      sqlProposalHandoff: {
-        migrationProposalSnapshot: {
-          generatedAt: string
-          migrationProposalResolution: {
-            unsupportedReason: string | null
-          }
-          snapshotPath: string
-        }
-        migrationProposalSnapshotPath: string
-        migrationProposalSnapshotRecovery: {
-          archivedSnapshotPath: string | null
-          status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-        } | null
-      }
-    }
-
-    expect(body.sqlProposalHandoff.migrationProposalSnapshotPath).toBe(
-      corruptedSnapshotPath,
+    const body = await readJsonRecord(response)
+    const sqlProposalHandoff = readRecord(body, "sqlProposalHandoff")
+    const migrationProposalSnapshotPath = readString(
+      sqlProposalHandoff,
+      "migrationProposalSnapshotPath",
     )
-    expect(body.sqlProposalHandoff.migrationProposalSnapshot).toMatchObject({
+
+    expect(migrationProposalSnapshotPath).toBe(corruptedSnapshotPath)
+    expect(sqlProposalHandoff.migrationProposalSnapshot).toMatchObject({
       generatedAt: "2026-04-20T00:00:00.000Z",
       migrationProposalResolution: {
         unsupportedReason: null,
       },
     })
-    expect(
-      body.sqlProposalHandoff.migrationProposalSnapshotRecovery,
-    ).toMatchObject({
+    expect(sqlProposalHandoff.migrationProposalSnapshotRecovery).toMatchObject({
       status: "rebuilt-from-corrupt",
     })
 
     const rebuiltSnapshotContents = await readFile(
-      body.sqlProposalHandoff.migrationProposalSnapshotPath,
+      migrationProposalSnapshotPath,
       "utf8",
     )
     expect(rebuiltSnapshotContents).toContain('"migrationProposalResolution"')
     expect(rebuiltSnapshotContents).toContain('"snapshotPath"')
 
-    const archivedSnapshotName =
-      body.sqlProposalHandoff.migrationProposalSnapshotRecovery
-        ?.archivedSnapshotPath
+    const snapshotRecovery =
+      sqlProposalHandoff.migrationProposalSnapshotRecovery
+    if (!isRecord(snapshotRecovery)) {
+      throw new Error("Expected snapshot recovery metadata")
+    }
+    const archivedSnapshotName = snapshotRecovery.archivedSnapshotPath
     expect(archivedSnapshotName).toBeDefined()
-    if (!archivedSnapshotName) {
+    if (typeof archivedSnapshotName !== "string") {
       throw new Error("Expected archived snapshot path to be defined")
     }
 
@@ -517,13 +506,9 @@ describe("generator session module detail responses", () => {
 
     expect(response.status).toBe(500)
 
-    const body = (await response.json()) as {
-      code: number
-      details?: {
-        reportPath?: string
-      }
-    }
+    const body = await readJsonRecord(response)
+    const details = readRecord(body, "details")
     expect(body.code).toBe(errorCodes.GENERATOR_SESSION_REPORT_READ_FAILED)
-    expect(body.details?.reportPath).toBe(session.reportPath)
+    expect(details.reportPath).toBe(session.reportPath)
   })
 })
