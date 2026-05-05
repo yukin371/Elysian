@@ -71,10 +71,146 @@ const attemptConfigs = [
   },
 ]
 
-const readJsonFile = async <T>(path: string): Promise<T | null> => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "boolean") {
+    throw new Error(`Expected boolean field: ${key}`)
+  }
+
+  return property
+}
+
+const readOptionalString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property === null || typeof property === "string") {
+    return property
+  }
+
+  throw new Error(`Expected nullable string field: ${key}`)
+}
+
+const readAttempt = (
+  value: Record<string, unknown>,
+): SmokeAttemptSummary["attempt"] => {
+  const attempt = readString(value, "attempt")
+
+  if (attempt !== "attempt1" && attempt !== "attempt2") {
+    throw new Error("Expected smoke attempt discriminator")
+  }
+
+  return attempt
+}
+
+const readOptionalFailureCategory = (
+  value: Record<string, unknown>,
+  key: string,
+): SmokeFailureCategory | null => {
+  const property = value[key]
+
+  if (
+    property === null ||
+    property === "environment" ||
+    property === "dependency" ||
+    property === "test_case"
+  ) {
+    return property
+  }
+
+  throw new Error(`Expected smoke failure category field: ${key}`)
+}
+
+const readRetryRecommendation = (value: Record<string, unknown>) => {
+  const retryRecommendation = value.retryRecommendation
+
+  if (!isRecord(retryRecommendation)) {
+    throw new Error("Expected retryRecommendation object")
+  }
+
+  return {
+    shouldRetry: readBoolean(retryRecommendation, "shouldRetry"),
+    reason: readString(retryRecommendation, "reason"),
+  }
+}
+
+const readStatus = (
+  value: Record<string, unknown>,
+  key: string,
+): "passed" | "failed" => {
+  const status = readString(value, key)
+
+  if (status !== "passed" && status !== "failed") {
+    throw new Error(`Expected passed/failed field: ${key}`)
+  }
+
+  return status
+}
+
+const readSmokeReport = (value: Record<string, unknown>): SmokeReport => ({
+  generatedAt: readString(value, "generatedAt"),
+  status: readStatus(value, "status"),
+  baseUrl: readString(value, "baseUrl"),
+  durationMs: (() => {
+    const durationMs = value.durationMs
+    if (typeof durationMs !== "number") {
+      throw new Error("Expected smoke report durationMs")
+    }
+    return durationMs
+  })(),
+  lastStage: readString(value, "lastStage"),
+  failureCategory: readOptionalFailureCategory(value, "failureCategory"),
+  failureMessage: readOptionalString(value, "failureMessage"),
+})
+
+const readSmokeDiagnosisReport = (
+  value: Record<string, unknown>,
+): SmokeDiagnosisReport => ({
+  generatedAt: readString(value, "generatedAt"),
+  sourceReportPath: readString(value, "sourceReportPath"),
+  status: readStatus(value, "status"),
+  failureCategory: readOptionalFailureCategory(value, "failureCategory"),
+  lastStage: readString(value, "lastStage"),
+  conclusion: readString(value, "conclusion"),
+  retryRecommendation: readRetryRecommendation(value),
+  recommendedActions: (() => {
+    const actions = value.recommendedActions
+    if (
+      !Array.isArray(actions) ||
+      !actions.every((action) => typeof action === "string")
+    ) {
+      throw new Error("Expected recommendedActions string array")
+    }
+    return actions
+  })(),
+})
+
+const readJsonFile = async <T>(
+  path: string,
+  reader: (value: Record<string, unknown>) => T,
+): Promise<T | null> => {
   try {
     const raw = await readFile(path, "utf8")
-    return JSON.parse(raw) as T
+    const parsed: unknown = JSON.parse(raw)
+
+    if (!isRecord(parsed)) {
+      throw new Error("Expected JSON object payload")
+    }
+
+    return reader(parsed)
   } catch {
     return null
   }
@@ -112,13 +248,16 @@ export const run = async () => {
   for (const config of attemptConfigs) {
     const reportPath = join(reportDir, config.reportPath)
     const diagnosisPath = join(reportDir, config.diagnosisPath)
-    const report = await readJsonFile<SmokeReport>(reportPath)
+    const report = await readJsonFile(reportPath, readSmokeReport)
 
     if (!report) {
       continue
     }
 
-    const diagnosis = await readJsonFile<SmokeDiagnosisReport>(diagnosisPath)
+    const diagnosis = await readJsonFile(
+      diagnosisPath,
+      readSmokeDiagnosisReport,
+    )
     attempts.push({
       attempt: config.attempt,
       reportPath: basename(reportPath),
