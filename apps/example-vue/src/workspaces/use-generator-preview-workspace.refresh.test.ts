@@ -59,7 +59,7 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     await waitForAsyncWork()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value).toBeNull()
     expect(workspace.currentDiffSummary.value).toBeNull()
   })
@@ -353,7 +353,7 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     await workspace.refreshPreview()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
     expect(workspace.filteredPreviewFiles.value).toHaveLength(1)
@@ -494,9 +494,7 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
     expect(workspace.sqlPreview.value).toBeNull()
     expect(workspace.selectedRecentSessionId.value).toBe("")
-    expect(workspace.errorMessage.value).toContain(
-      "GENERATOR_SCHEMA_NOT_FOUND",
-    )
+    expect(workspace.errorMessage.value).toContain("GENERATOR_SCHEMA_NOT_FOUND")
   })
 
   test("clears current preview when context changes before refresh fails", async () => {
@@ -558,7 +556,7 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     await waitForAsyncWork()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value).toBeNull()
     expect(workspace.currentDiffSummary.value).toBeNull()
     expect(workspace.filteredPreviewFiles.value).toHaveLength(0)
