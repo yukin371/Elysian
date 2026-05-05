@@ -11,6 +11,17 @@ import {
   validateWorkflowDefinitionDraft,
 } from "./index"
 
+type DerivedBodyObjectSchema = {
+  properties: Record<string, { minLength?: number }>
+  required?: string[]
+}
+
+function isDerivedBodyObjectSchema(
+  schema: ReturnType<typeof deriveBodySchema>,
+): schema is ReturnType<typeof deriveBodySchema> & DerivedBodyObjectSchema {
+  return "properties" in schema
+}
+
 describe("validateModuleSchema", () => {
   it("accepts an existing module schema contract", () => {
     expect(validateModuleSchema(customerModuleSchema)).toEqual([])
@@ -287,9 +298,11 @@ describe("deriveBodySchema", () => {
           t.Union([t.Literal("active"), t.Literal("disabled")]),
         ),
       },
-    }) as unknown as {
-      properties: Record<string, { minLength?: number }>
-      required?: string[]
+    })
+    expect(isDerivedBodyObjectSchema(schema)).toBe(true)
+
+    if (!isDerivedBodyObjectSchema(schema)) {
+      throw new Error("Expected deriveBodySchema to return an object schema.")
     }
 
     expect(Object.keys(schema.properties)).toEqual([
@@ -309,9 +322,11 @@ describe("deriveBodySchema", () => {
   it("derives an update body with excluded datetime fields", () => {
     const schema = deriveBodySchema(roleModuleSchema, {
       mode: "update",
-    }) as unknown as {
-      properties: Record<string, unknown>
-      required?: string[]
+    })
+    expect(isDerivedBodyObjectSchema(schema)).toBe(true)
+
+    if (!isDerivedBodyObjectSchema(schema)) {
+      throw new Error("Expected deriveBodySchema to return an object schema.")
     }
 
     expect(schema.required).toBeUndefined()
