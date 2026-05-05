@@ -3,13 +3,37 @@ import { t } from "elysia"
 
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
-import type { ServerModule } from "../module"
+import type { AnyServerApp, ServerModule } from "../module"
 import { userListResponseSchema, userRecordResponseSchema } from "./openapi"
 import type { UserRepository } from "./repository"
-import { createUserService } from "./service"
+import {
+  type CreateUserPayload,
+  type UpdateUserPayload,
+  createUserService,
+} from "./service"
 
 export interface UserModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface UserRouteRegistrar {
+  get: (...args: readonly unknown[]) => UserRouteRegistrar
+  post: (...args: readonly unknown[]) => UserRouteRegistrar
+  put: (...args: readonly unknown[]) => UserRouteRegistrar
+}
+
+interface UserRouteParams {
+  id: string
+}
+
+interface UserRouteQuery {
+  page?: number
+  pageSize?: number
+}
+
+interface UserRouteSet {
+  headers: Record<string, string>
+  status: number
 }
 
 const userListQuerySchema = t.Object({
@@ -59,131 +83,177 @@ export const createUserModule = (
       fields: userModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/users",
-        async ({ query, request }) => {
-          await authorize(request.headers, userPermissions.list)
+    let userApp = app as unknown as UserRouteRegistrar
 
-          return service.list(query)
-        },
-        {
-          query: userListQuerySchema,
-          response: {
-            200: userListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["user"],
-            summary: "List users",
-          },
-        },
-      )
-      .get(
-        "/system/users/export",
-        async ({ request, set }) => {
-          await authorize(request.headers, userPermissions.list)
+    userApp = userApp.get(
+      "/system/users",
+      async ({
+        query,
+        request,
+      }: {
+        query: UserRouteQuery
+        request: Request
+      }) => {
+        await authorize(request.headers, userPermissions.list)
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv()
+        return service.list(query)
+      },
+      {
+        query: userListQuerySchema,
+        response: {
+          200: userListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["user"],
-            summary: "Export users as CSV",
-          },
+        detail: {
+          tags: ["user"],
+          summary: "List users",
         },
-      )
-      .get(
-        "/system/users/:id",
-        async ({ params, request }) => {
-          await authorize(request.headers, userPermissions.get)
+      },
+    )
 
-          return service.getById(params.id)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: userRecordResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["user"],
-            summary: "Get user by id",
-          },
-        },
-      )
-      .post(
-        "/system/users",
-        async ({ body, request, set }) => {
-          await authorize(request.headers, userPermissions.create)
-          set.status = 201
+    userApp = userApp.get(
+      "/system/users/export",
+      async ({ request, set }: { request: Request; set: UserRouteSet }) => {
+        await authorize(request.headers, userPermissions.list)
 
-          return service.create(body)
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv()
+      },
+      {
+        response: {
+          ...createErrorResponses(401, 403),
         },
-        {
-          body: userCreateBodySchema,
-          response: {
-            201: userRecordResponseSchema,
-            ...createErrorResponses(400, 401, 403, 409),
-          },
-          detail: {
-            tags: ["user"],
-            summary: "Create user",
-          },
+        detail: {
+          tags: ["user"],
+          summary: "Export users as CSV",
         },
-      )
-      .put(
-        "/system/users/:id",
-        async ({ params, body, request }) => {
-          await authorize(request.headers, userPermissions.update)
+      },
+    )
 
-          return service.update(params.id, body)
-        },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          body: userUpdateBodySchema,
-          response: {
-            200: userRecordResponseSchema,
-            ...createErrorResponses(400, 401, 403, 404, 409),
-          },
-          detail: {
-            tags: ["user"],
-            summary: "Update user",
-          },
-        },
-      )
-      .post(
-        "/system/users/:id/reset-password",
-        async ({ params, body, request, set }) => {
-          await authorize(request.headers, userPermissions.resetPassword)
+    userApp = userApp.get(
+      "/system/users/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: UserRouteParams
+        request: Request
+      }) => {
+        await authorize(request.headers, userPermissions.get)
 
-          await service.resetPassword(params.id, body.password)
-          set.status = 204
+        return service.getById(params.id)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: userRecordResponseSchema,
+          ...createErrorResponses(401, 403, 404),
         },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          body: t.Object({
-            password: t.String({ minLength: 1 }),
-          }),
-          response: {
-            204: t.Void(),
-            ...createErrorResponses(400, 401, 403, 404),
-          },
-          detail: {
-            tags: ["user"],
-            summary: "Reset user password",
-          },
+        detail: {
+          tags: ["user"],
+          summary: "Get user by id",
         },
-      )
+      },
+    )
+
+    userApp = userApp.post(
+      "/system/users",
+      async ({
+        body,
+        request,
+        set,
+      }: {
+        body: CreateUserPayload
+        request: Request
+        set: UserRouteSet
+      }) => {
+        await authorize(request.headers, userPermissions.create)
+        set.status = 201
+
+        return service.create(body)
+      },
+      {
+        body: userCreateBodySchema,
+        response: {
+          201: userRecordResponseSchema,
+          ...createErrorResponses(400, 401, 403, 409),
+        },
+        detail: {
+          tags: ["user"],
+          summary: "Create user",
+        },
+      },
+    )
+
+    userApp = userApp.put(
+      "/system/users/:id",
+      async ({
+        params,
+        body,
+        request,
+      }: {
+        params: UserRouteParams
+        body: UpdateUserPayload
+        request: Request
+      }) => {
+        await authorize(request.headers, userPermissions.update)
+
+        return service.update(params.id, body)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        body: userUpdateBodySchema,
+        response: {
+          200: userRecordResponseSchema,
+          ...createErrorResponses(400, 401, 403, 404, 409),
+        },
+        detail: {
+          tags: ["user"],
+          summary: "Update user",
+        },
+      },
+    )
+
+    userApp = userApp.post(
+      "/system/users/:id/reset-password",
+      async ({
+        params,
+        body,
+        request,
+        set,
+      }: {
+        params: UserRouteParams
+        body: { password: string }
+        request: Request
+        set: UserRouteSet
+      }) => {
+        await authorize(request.headers, userPermissions.resetPassword)
+
+        await service.resetPassword(params.id, body.password)
+        set.status = 204
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        body: t.Object({
+          password: t.String({ minLength: 1 }),
+        }),
+        response: {
+          204: t.Void(),
+          ...createErrorResponses(400, 401, 403, 404),
+        },
+        detail: {
+          tags: ["user"],
+          summary: "Reset user password",
+        },
+      },
+    )
+
+    return userApp as unknown as AnyServerApp
   },
 })
