@@ -20,7 +20,7 @@ const createRole = (
   id: overrides.id,
   code: overrides.code ?? overrides.id,
   name: overrides.name ?? `role:${overrides.id}`,
-  description: overrides.description,
+  description: overrides.description ?? null,
   status: overrides.status ?? "active",
   isSystem: overrides.isSystem ?? false,
   dataScope: overrides.dataScope ?? 1,

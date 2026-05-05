@@ -18,7 +18,7 @@ const createSetting = (
   id: overrides.id,
   key: overrides.key ?? overrides.id,
   value: overrides.value ?? `value:${overrides.id}`,
-  description: overrides.description,
+  description: overrides.description ?? null,
   status: overrides.status ?? "active",
   createdAt: overrides.createdAt ?? "2026-04-27T08:00:00.000Z",
   updatedAt: overrides.updatedAt ?? "2026-04-27T08:00:00.000Z",

@@ -18,7 +18,7 @@ const createDictionaryType = (
   id: overrides.id,
   code: overrides.code ?? overrides.id,
   name: overrides.name ?? `dict:${overrides.id}`,
-  description: overrides.description,
+  description: overrides.description ?? null,
   status: overrides.status ?? "active",
   createdAt: overrides.createdAt ?? "2026-04-27T08:00:00.000Z",
   updatedAt: overrides.updatedAt ?? "2026-04-27T08:00:00.000Z",
