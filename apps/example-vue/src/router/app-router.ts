@@ -21,8 +21,8 @@ const registeredWorkspacePaths = new Set(
   exampleWorkspaceRoutes.map((route) => route.path),
 )
 
-const exampleWorkspaceRouteRecords: RouteRecordRaw[] = exampleWorkspaceRoutes.map(
-  (route) => ({
+const exampleWorkspaceRouteRecords: RouteRecordRaw[] =
+  exampleWorkspaceRoutes.map((route) => ({
     path: route.path,
     name: route.kind,
     component: ExampleWorkspaceRouteView,
@@ -30,8 +30,7 @@ const exampleWorkspaceRouteRecords: RouteRecordRaw[] = exampleWorkspaceRoutes.ma
       moduleCode: route.moduleCode,
       workspaceKind: route.kind,
     },
-  }),
-)
+  }))
 
 const resolveFallbackWorkspacePath = (path: string) => {
   const normalizedPath = normalizeWorkspaceRoutePath(path)
@@ -43,11 +42,13 @@ const resolveFallbackWorkspacePath = (path: string) => {
   return defaultExampleWorkspacePath ?? "/"
 }
 
+const canUseBrowserHistory = () =>
+  (globalThis as { location?: unknown }).location !== undefined
+
 export const exampleAppRouter = createRouter({
-  history:
-    typeof location === "undefined"
-      ? createMemoryHistory()
-      : createWebHashHistory(),
+  history: canUseBrowserHistory()
+    ? createWebHashHistory()
+    : createMemoryHistory(),
   routes: [
     {
       path: "/",

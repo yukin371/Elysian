@@ -10,12 +10,12 @@ import {
   resolveWorkspaceMenuKeyByPath,
   toWorkspaceRouteHash,
 } from "../lib/navigation-workspace"
+import { exampleAppRouter } from "./app-router"
 import {
   defaultExampleWorkspacePath,
   resolveExampleWorkspacePathByKind,
   resolveExampleWorkspaceRoute,
 } from "./example-workspace-routes"
-import { exampleAppRouter } from "./app-router"
 
 export type ExampleAppLayout = "auth" | "admin"
 
@@ -43,7 +43,8 @@ interface ExampleBrowserWindow {
 const getBrowserWindow = () =>
   (globalThis as { window?: ExampleBrowserWindow }).window ?? null
 
-const canUseVueRouter = () => typeof document !== "undefined"
+const canUseVueRouter = () =>
+  (globalThis as { document?: unknown }).document !== undefined
 
 const findNavigationItemById = (
   items: UiNavigationNode[],
@@ -124,7 +125,9 @@ export const readCurrentWorkspaceRouteMenuKey = (items: UiNavigationNode[]) => {
 
 export const readCurrentWorkspaceRoutePath = () => {
   if (canUseVueRouter()) {
-    return normalizeWorkspaceRoutePath(exampleAppRouter.currentRoute.value.fullPath)
+    return normalizeWorkspaceRoutePath(
+      exampleAppRouter.currentRoute.value.fullPath,
+    )
   }
 
   const browserWindow = getBrowserWindow()
