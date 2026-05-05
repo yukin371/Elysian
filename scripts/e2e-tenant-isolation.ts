@@ -743,8 +743,8 @@ const run = async () => {
   } finally {
     for (const item of createdCustomerIds) {
       try {
-        await withTenantContext(db, item.tenantId, () =>
-          deleteCustomer(db, item.customerId),
+        await withTenantContext(db, item.tenantId, (scopedDb) =>
+          deleteCustomer(scopedDb, item.customerId),
         )
       } catch {
         // noop
