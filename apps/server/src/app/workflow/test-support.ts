@@ -75,6 +75,19 @@ export const createTestApp = (
     modules: options.modules,
   })
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readAccessTokenFromResponse = async (response: Response) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body) || typeof body.accessToken !== "string") {
+    throw new Error("Malformed auth login response")
+  }
+
+  return body.accessToken
+}
+
 export const loginAsAdmin = async (app: ReturnType<typeof createTestApp>) => {
   const response = await app.handle(
     new Request("http://localhost/auth/login", {
@@ -88,11 +101,8 @@ export const loginAsAdmin = async (app: ReturnType<typeof createTestApp>) => {
       }),
     }),
   )
-  const body = (await response.json()) as {
-    accessToken: string
-  }
 
-  return body.accessToken
+  return readAccessTokenFromResponse(response)
 }
 
 export const createAuthorizedHeaders = (
