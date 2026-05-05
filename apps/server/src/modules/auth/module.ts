@@ -21,6 +21,7 @@ import { extractTenantIdFromRefreshToken } from "./tokens"
 
 const DEFAULT_REFRESH_COOKIE_NAME = "elysian_refresh_token"
 const DEFAULT_REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
+type TenantContextDb = Pick<DatabaseClient, "execute">
 
 export interface AuthModuleOptions {
   accessTokenSecret?: string
@@ -31,7 +32,7 @@ export interface AuthModuleOptions {
   loginLockDurationSeconds?: number
   refreshCookieName?: string
   secureCookies?: boolean
-  tenantContextDb?: DatabaseClient
+  tenantContextDb?: TenantContextDb
   resolveTenantIdByCode?: (tenantCode: string) => Promise<string | null>
 }
 
@@ -298,7 +299,7 @@ const buildAuthRequestContext = (
 })
 
 const withTenantContext = async <T>(
-  db: DatabaseClient,
+  db: TenantContextDb,
   tenantId: string,
   action: () => Promise<T>,
 ) => {

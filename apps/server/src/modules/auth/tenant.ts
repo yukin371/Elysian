@@ -8,6 +8,7 @@ import type { AnyServerApp, ServerModule } from "../module"
 import { extractTenantIdFromRefreshToken, verifyAccessToken } from "./tokens"
 
 const DEFAULT_REFRESH_COOKIE_NAME = "elysian_refresh_token"
+type TenantContextDb = Pick<DatabaseClient, "execute">
 
 export interface TenantModuleOptions {
   accessTokenSecret: string
@@ -61,7 +62,7 @@ const resolveTenantIdForRequest = async (
 }
 
 export const createTenantContextModule = (
-  db: DatabaseClient,
+  db: TenantContextDb,
   options: TenantModuleOptions,
 ): ServerModule => ({
   name: "tenant-context",

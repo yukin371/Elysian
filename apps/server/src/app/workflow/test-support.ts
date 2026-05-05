@@ -221,7 +221,7 @@ export const createAuthTestFixture = async (
     userDepartmentIds?: string[]
     roleDepartmentIds?: string[]
     departments?: Array<{ id: string; parentId: string | null }>
-    tenantContextDb?: DatabaseClient
+    tenantContextDb?: Pick<DatabaseClient, "execute">
     resolveTenantIdByCode?: (tenantCode: string) => Promise<string | null>
   } = {},
 ) => {
@@ -326,15 +326,14 @@ export const createAuthTestFixture = async (
 
 export const createTenantContextRecorder = () => {
   const statements: string[] = []
-  const execute = ((statement: Parameters<DatabaseClient["execute"]>[0]) => {
-    statements.push(String(statement))
-    return Promise.resolve([])
-  }) as DatabaseClient["execute"]
-  const db = {
-    execute,
+  const db: Pick<DatabaseClient, "execute"> = {
+    execute: ((statement: Parameters<DatabaseClient["execute"]>[0]) => {
+      statements.push(String(statement))
+      return Promise.resolve([])
+    }) as DatabaseClient["execute"],
   }
 
-  return { db: db as DatabaseClient, statements }
+  return { db, statements }
 }
 
 export const createUserSeedRecords = async () => {

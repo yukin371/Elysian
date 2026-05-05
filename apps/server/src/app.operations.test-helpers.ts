@@ -73,7 +73,7 @@ export const createAuthTestFixture = async (
     userDepartmentIds?: string[]
     roleDepartmentIds?: string[]
     departments?: Array<{ id: string; parentId: string | null }>
-    tenantContextDb?: DatabaseClient
+    tenantContextDb?: Pick<DatabaseClient, "execute">
     resolveTenantIdByCode?: (tenantCode: string) => Promise<string | null>
   } = {},
 ) => {
