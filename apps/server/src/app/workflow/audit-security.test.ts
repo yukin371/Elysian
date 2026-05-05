@@ -34,6 +34,49 @@ import {
   workflowRuntimePermissionCodes,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every((item) => isRecord(item))) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
 describe("createServerApp workflow audit and security", () => {
   it("writes audit logs for workflow runtime actions", async () => {
     const fixture = await createAuthTestFixture({
@@ -65,12 +108,12 @@ describe("createServerApp workflow audit and security", () => {
         "x-request-id": "req-workflow-start-audit-1",
       },
     )
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      status: string
-      currentTasks: Array<{ id: string }>
-    }
-    const taskId = startedInstance.currentTasks[0]?.id
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const startedCurrentTasks = readRecordArray(startedInstance, "currentTasks")
+    const taskId = startedCurrentTasks[0]
+      ? readString(startedCurrentTasks[0], "id")
+      : undefined
 
     if (!taskId) {
       throw new Error("Expected workflow instance to create a todo task")
@@ -108,11 +151,15 @@ describe("createServerApp workflow audit and security", () => {
         "x-request-id": "req-workflow-start-audit-2",
       },
     )
-    const secondStartedInstance = (await secondStartResponse.json()) as {
-      id: string
-      currentTasks: Array<{ id: string }>
-    }
-    const secondTaskId = secondStartedInstance.currentTasks[0]?.id
+    const secondStartedInstance = await readJsonRecord(secondStartResponse)
+    const secondStartedInstanceId = readString(secondStartedInstance, "id")
+    const secondCurrentTasks = readRecordArray(
+      secondStartedInstance,
+      "currentTasks",
+    )
+    const secondTaskId = secondCurrentTasks[0]
+      ? readString(secondCurrentTasks[0], "id")
+      : undefined
 
     if (!secondTaskId) {
       throw new Error("Expected second workflow instance to create a todo task")
@@ -121,7 +168,7 @@ describe("createServerApp workflow audit and security", () => {
     const cancelResponse = await cancelWorkflowInstance(
       app,
       accessToken,
-      secondStartedInstance.id,
+      secondStartedInstanceId,
       {
         "user-agent": "workflow-runtime-audit-agent",
         "x-forwarded-for": "127.0.2.5",
@@ -139,7 +186,7 @@ describe("createServerApp workflow audit and security", () => {
       category: "workflow",
       action: "workflow_instance_cancel",
       targetType: "workflow_instance",
-      targetId: secondStartedInstance.id,
+      targetId: secondStartedInstanceId,
       actorUserId: fixture.userId,
       requestId: "req-workflow-cancel-audit-1",
       ip: "127.0.2.5",
@@ -163,7 +210,7 @@ describe("createServerApp workflow audit and security", () => {
       category: "workflow",
       action: "workflow_instance_start",
       targetType: "workflow_instance",
-      targetId: secondStartedInstance.id,
+      targetId: secondStartedInstanceId,
       actorUserId: fixture.userId,
       requestId: "req-workflow-start-audit-2",
       ip: "127.0.2.4",
@@ -189,7 +236,7 @@ describe("createServerApp workflow audit and security", () => {
         claimSourceAssignee: "role:manager",
         claimedByUserId: fixture.userId,
         claimedAt: expect.any(String),
-        instanceId: startedInstance.id,
+        instanceId: startedInstanceId,
         result: "approved",
         status: "completed",
       },
@@ -209,7 +256,7 @@ describe("createServerApp workflow audit and security", () => {
         claimSourceAssignee: "role:manager",
         claimedByUserId: fixture.userId,
         claimedAt: expect.any(String),
-        instanceId: startedInstance.id,
+        instanceId: startedInstanceId,
         status: "running",
       },
     })
@@ -217,7 +264,7 @@ describe("createServerApp workflow audit and security", () => {
       category: "workflow",
       action: "workflow_instance_start",
       targetType: "workflow_instance",
-      targetId: startedInstance.id,
+      targetId: startedInstanceId,
       actorUserId: fixture.userId,
       requestId: "req-workflow-start-audit-1",
       ip: "127.0.2.1",
@@ -333,14 +380,13 @@ describe("createServerApp workflow audit and security", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
+    const accessToken = readString(loginBody, "accessToken")
 
     const todoResponse = await app.handle(
       new Request("http://localhost/workflow/tasks/todo", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -358,7 +404,7 @@ describe("createServerApp workflow audit and security", () => {
     const doneResponse = await app.handle(
       new Request("http://localhost/workflow/tasks/done", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       }),
     )
@@ -420,9 +466,8 @@ describe("createServerApp workflow audit and security", () => {
         }),
       }),
     )
-    const privilegedLoginBody = (await privilegedLoginResponse.json()) as {
-      accessToken: string
-    }
+    const privilegedLoginBody = await readJsonRecord(privilegedLoginResponse)
+    const privilegedAccessToken = readString(privilegedLoginBody, "accessToken")
     const restrictedLoginResponse = await restrictedApp.handle(
       new Request("http://localhost/auth/login", {
         method: "POST",
@@ -435,15 +480,14 @@ describe("createServerApp workflow audit and security", () => {
         }),
       }),
     )
-    const restrictedLoginBody = (await restrictedLoginResponse.json()) as {
-      accessToken: string
-    }
+    const restrictedLoginBody = await readJsonRecord(restrictedLoginResponse)
+    const restrictedAccessToken = readString(restrictedLoginBody, "accessToken")
 
     const startResponse = await privilegedApp.handle(
       new Request("http://localhost/workflow/instances", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${privilegedLoginBody.accessToken}`,
+          authorization: `Bearer ${privilegedAccessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -451,11 +495,12 @@ describe("createServerApp workflow audit and security", () => {
         }),
       }),
     )
-    const startedInstance = (await startResponse.json()) as {
-      id: string
-      currentTasks: Array<{ id: string }>
-    }
-    const taskId = startedInstance.currentTasks[0]?.id
+    const startedInstance = await readJsonRecord(startResponse)
+    const startedInstanceId = readString(startedInstance, "id")
+    const startedCurrentTasks = readRecordArray(startedInstance, "currentTasks")
+    const taskId = startedCurrentTasks[0]
+      ? readString(startedCurrentTasks[0], "id")
+      : undefined
 
     if (!taskId) {
       throw new Error("Expected workflow instance to create a todo task")
@@ -465,7 +510,7 @@ describe("createServerApp workflow audit and security", () => {
       new Request(`http://localhost/workflow/tasks/${taskId}/claim`, {
         method: "POST",
         headers: {
-          authorization: `Bearer ${restrictedLoginBody.accessToken}`,
+          authorization: `Bearer ${restrictedAccessToken}`,
         },
       }),
     )
@@ -484,7 +529,7 @@ describe("createServerApp workflow audit and security", () => {
       new Request(`http://localhost/workflow/tasks/${taskId}/complete`, {
         method: "POST",
         headers: {
-          authorization: `Bearer ${restrictedLoginBody.accessToken}`,
+          authorization: `Bearer ${restrictedAccessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -505,11 +550,11 @@ describe("createServerApp workflow audit and security", () => {
 
     const cancelResponse = await restrictedApp.handle(
       new Request(
-        `http://localhost/workflow/instances/${startedInstance.id}/cancel`,
+        `http://localhost/workflow/instances/${startedInstanceId}/cancel`,
         {
           method: "POST",
           headers: {
-            authorization: `Bearer ${restrictedLoginBody.accessToken}`,
+            authorization: `Bearer ${restrictedAccessToken}`,
           },
         },
       ),
@@ -578,9 +623,8 @@ describe("createServerApp workflow audit and security", () => {
         }),
       }),
     )
-    const defaultLoginBody = (await defaultLoginResponse.json()) as {
-      accessToken: string
-    }
+    const defaultLoginBody = await readJsonRecord(defaultLoginResponse)
+    const defaultAccessToken = readString(defaultLoginBody, "accessToken")
     const tenantAlphaLoginResponse = await tenantAlphaApp.handle(
       new Request("http://localhost/auth/login", {
         method: "POST",
@@ -593,15 +637,17 @@ describe("createServerApp workflow audit and security", () => {
         }),
       }),
     )
-    const tenantAlphaLoginBody = (await tenantAlphaLoginResponse.json()) as {
-      accessToken: string
-    }
+    const tenantAlphaLoginBody = await readJsonRecord(tenantAlphaLoginResponse)
+    const tenantAlphaAccessToken = readString(
+      tenantAlphaLoginBody,
+      "accessToken",
+    )
 
     const defaultStartResponse = await defaultApp.handle(
       new Request("http://localhost/workflow/instances", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${defaultLoginBody.accessToken}`,
+          authorization: `Bearer ${defaultAccessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -610,15 +656,14 @@ describe("createServerApp workflow audit and security", () => {
       }),
     )
     expect(defaultStartResponse.status).toBe(201)
-    const defaultInstance = (await defaultStartResponse.json()) as {
-      id: string
-    }
+    const defaultInstance = await readJsonRecord(defaultStartResponse)
+    const defaultInstanceId = readString(defaultInstance, "id")
 
     const tenantAlphaStartResponse = await tenantAlphaApp.handle(
       new Request("http://localhost/workflow/instances", {
         method: "POST",
         headers: {
-          authorization: `Bearer ${tenantAlphaLoginBody.accessToken}`,
+          authorization: `Bearer ${tenantAlphaAccessToken}`,
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -627,14 +672,13 @@ describe("createServerApp workflow audit and security", () => {
       }),
     )
     expect(tenantAlphaStartResponse.status).toBe(201)
-    const tenantAlphaInstance = (await tenantAlphaStartResponse.json()) as {
-      id: string
-    }
+    const tenantAlphaInstance = await readJsonRecord(tenantAlphaStartResponse)
+    const tenantAlphaInstanceId = readString(tenantAlphaInstance, "id")
 
     const defaultListResponse = await defaultApp.handle(
       new Request("http://localhost/workflow/instances", {
         headers: {
-          authorization: `Bearer ${defaultLoginBody.accessToken}`,
+          authorization: `Bearer ${defaultAccessToken}`,
         },
       }),
     )
@@ -643,7 +687,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(await defaultListResponse.json()).toEqual({
       items: [
         {
-          id: defaultInstance.id,
+          id: defaultInstanceId,
           definitionId: "workflow_definition_expense_v1",
           definitionKey: "expense-approval",
           definitionName: "Expense Approval",
@@ -664,7 +708,7 @@ describe("createServerApp workflow audit and security", () => {
     const tenantAlphaListResponse = await tenantAlphaApp.handle(
       new Request("http://localhost/workflow/instances", {
         headers: {
-          authorization: `Bearer ${tenantAlphaLoginBody.accessToken}`,
+          authorization: `Bearer ${tenantAlphaAccessToken}`,
         },
       }),
     )
@@ -673,7 +717,7 @@ describe("createServerApp workflow audit and security", () => {
     expect(await tenantAlphaListResponse.json()).toEqual({
       items: [
         {
-          id: tenantAlphaInstance.id,
+          id: tenantAlphaInstanceId,
           definitionId: "workflow_definition_expense_v1",
           definitionKey: "expense-approval",
           definitionName: "Expense Approval",
@@ -693,10 +737,10 @@ describe("createServerApp workflow audit and security", () => {
 
     const crossTenantGetResponse = await defaultApp.handle(
       new Request(
-        `http://localhost/workflow/instances/${tenantAlphaInstance.id}`,
+        `http://localhost/workflow/instances/${tenantAlphaInstanceId}`,
         {
           headers: {
-            authorization: `Bearer ${defaultLoginBody.accessToken}`,
+            authorization: `Bearer ${defaultAccessToken}`,
           },
         },
       ),
@@ -708,14 +752,14 @@ describe("createServerApp workflow audit and security", () => {
       message: "Workflow instance not found",
       status: 404,
       details: {
-        id: tenantAlphaInstance.id,
+        id: tenantAlphaInstanceId,
       },
     })
 
     const defaultTodoResponse = await defaultApp.handle(
       new Request("http://localhost/workflow/tasks/todo", {
         headers: {
-          authorization: `Bearer ${defaultLoginBody.accessToken}`,
+          authorization: `Bearer ${defaultAccessToken}`,
         },
       }),
     )
@@ -725,7 +769,7 @@ describe("createServerApp workflow audit and security", () => {
       items: [
         {
           id: expect.any(String),
-          instanceId: defaultInstance.id,
+          instanceId: defaultInstanceId,
           definitionId: "workflow_definition_expense_v1",
           nodeId: "manager-review",
           nodeName: "Manager Review",
