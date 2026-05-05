@@ -12,6 +12,117 @@ import {
   toCookieHeader,
 } from "./test-support"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readNullableString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (property !== null && typeof property !== "string") {
+    throw new Error(`Expected nullable string field: ${key}`)
+  }
+
+  return property
+}
+
+const readBoolean = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "boolean") {
+    throw new Error(`Expected boolean field: ${key}`)
+  }
+
+  return property
+}
+
+const readStringArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (
+    !Array.isArray(property) ||
+    !property.every((item) => typeof item === "string")
+  ) {
+    throw new Error(`Expected string array field: ${key}`)
+  }
+
+  return property
+}
+
+const readRecordArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property) || !property.every((item) => isRecord(item))) {
+    throw new Error(`Expected object array field: ${key}`)
+  }
+
+  return property
+}
+
+const readSessionItems = (value: Record<string, unknown>) =>
+  readRecordArray(value, "items")
+
+const readAuthContextBody = async (response: Response) => {
+  const body = await readJsonRecord(response)
+  const accessToken = readString(body, "accessToken")
+  const deptIds = readStringArray(body, "deptIds")
+  const dataScopes = body.dataScopes
+  const dataAccess = readRecord(body, "dataAccess")
+
+  if (!Array.isArray(dataScopes)) {
+    throw new Error("Expected array field: dataScopes")
+  }
+
+  return {
+    accessToken,
+    deptIds,
+    dataScopes,
+    dataAccess,
+  }
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp auth sessions", () => {
   it("publishes auth success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture()
@@ -23,36 +134,31 @@ describe("createServerApp auth sessions", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<
-          string,
-          {
-            responses?: Record<string, unknown>
-          }
-        >
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
-    expect(payload.paths["/auth/login"]?.post?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/auth/login"]?.post?.responses?.["401"]).toBeDefined()
-    expect(payload.paths["/auth/me"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/auth/me"]?.get?.responses?.["401"]).toBeDefined()
     expect(
-      payload.paths["/auth/sessions"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/auth/login", "post", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/auth/refresh"]?.post?.responses?.["200"],
+      getOpenApiResponse(paths, "/auth/login", "post", "401"),
+    ).toBeDefined()
+    expect(getOpenApiResponse(paths, "/auth/me", "get", "200")).toBeDefined()
+    expect(getOpenApiResponse(paths, "/auth/me", "get", "401")).toBeDefined()
+    expect(
+      getOpenApiResponse(paths, "/auth/sessions", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/auth/sessions/{id}"]?.delete?.responses?.["204"],
+      getOpenApiResponse(paths, "/auth/refresh", "post", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/auth/sessions/{id}"]?.delete?.responses?.["404"],
+      getOpenApiResponse(paths, "/auth/sessions/{id}", "delete", "204"),
     ).toBeDefined()
     expect(
-      payload.paths["/auth/logout"]?.post?.responses?.["204"],
+      getOpenApiResponse(paths, "/auth/sessions/{id}", "delete", "404"),
+    ).toBeDefined()
+    expect(
+      getOpenApiResponse(paths, "/auth/logout", "post", "204"),
     ).toBeDefined()
   })
 
@@ -65,17 +171,7 @@ describe("createServerApp auth sessions", () => {
       username: "admin",
       password: testAdminPassword,
     })
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-      deptIds: string[]
-      dataScopes: Array<{ scope: number; customDeptIds?: string[] }>
-      dataAccess: {
-        userId: string
-        hasAllAccess: boolean
-        accessibleDeptIds: string[]
-        allowSelf: boolean
-      }
-    }
+    const loginBody = await readAuthContextBody(loginResponse)
     const refreshResponse = await refreshWithCookie(
       app,
       toCookieHeader(loginResponse.headers.get("set-cookie")),
@@ -83,18 +179,10 @@ describe("createServerApp auth sessions", () => {
 
     expect(refreshResponse.status).toBe(200)
 
-    const refreshBody = (await refreshResponse.json()) as {
-      accessToken: string
-      deptIds: string[]
-      dataScopes: Array<{ scope: number; customDeptIds?: string[] }>
-      dataAccess: {
-        userId: string
-        hasAllAccess: boolean
-        accessibleDeptIds: string[]
-        allowSelf: boolean
-      }
-      roles: string[]
-    }
+    const refreshResponseClone = refreshResponse.clone()
+    const refreshBody = await readAuthContextBody(refreshResponse)
+    const refreshJson = await readJsonRecord(refreshResponseClone)
+    const roles = readStringArray(refreshJson, "roles")
 
     expect(refreshBody.accessToken).not.toBe(loginBody.accessToken)
     expect(loginBody.deptIds).toEqual([])
@@ -108,7 +196,7 @@ describe("createServerApp auth sessions", () => {
     expect(refreshBody.deptIds).toEqual(loginBody.deptIds)
     expect(refreshBody.dataScopes).toEqual(loginBody.dataScopes)
     expect(refreshBody.dataAccess).toEqual(loginBody.dataAccess)
-    expect(refreshBody.roles).toEqual(["admin"])
+    expect(roles).toEqual(["admin"])
     expect(refreshResponse.headers.get("set-cookie")).toContain(
       refreshCookiePrefix,
     )
@@ -140,35 +228,31 @@ describe("createServerApp auth sessions", () => {
         },
       }),
     )
-    const refreshBody = (await refreshResponse.json()) as {
-      accessToken: string
-    }
+    const refreshBody = await readJsonRecord(refreshResponse)
 
     const sessionsResponse = await app.handle(
       new Request("http://localhost/auth/sessions", {
         headers: {
-          authorization: `Bearer ${refreshBody.accessToken}`,
+          authorization: `Bearer ${readString(refreshBody, "accessToken")}`,
         },
       }),
     )
 
     expect(sessionsResponse.status).toBe(200)
 
-    const sessionsBody = (await sessionsResponse.json()) as {
-      items: Array<{
-        id: string
-        isCurrent: boolean
-        lastUsedAt: string | null
-        revokedAt: string | null
-        replacedBySessionId: string | null
-        userAgent: string | null
-        ip: string | null
-      }>
-    }
-    const currentSession = sessionsBody.items.find((item) => item.isCurrent)
-    const rotatedSession = sessionsBody.items.find((item) => !item.isCurrent)
+    const sessionsBody = await readJsonRecord(sessionsResponse)
+    const sessionItems = readSessionItems(sessionsBody)
+    const currentSession = sessionItems.find((item) =>
+      readBoolean(item, "isCurrent"),
+    )
+    const rotatedSession = sessionItems.find(
+      (item) => !readBoolean(item, "isCurrent"),
+    )
+    const currentSessionId = currentSession
+      ? readString(currentSession, "id")
+      : undefined
 
-    expect(sessionsBody.items).toHaveLength(2)
+    expect(sessionItems).toHaveLength(2)
     expect(currentSession).toMatchObject({
       revokedAt: null,
       userAgent: "session-list-agent",
@@ -179,7 +263,7 @@ describe("createServerApp auth sessions", () => {
       ip: "127.0.0.21",
       lastUsedAt: expect.any(String),
       revokedAt: expect.any(String),
-      replacedBySessionId: currentSession?.id,
+      replacedBySessionId: currentSessionId,
     })
   })
 
@@ -202,32 +286,31 @@ describe("createServerApp auth sessions", () => {
         }),
       }),
     )
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
     const cookieHeader = toCookieHeader(loginResponse.headers.get("set-cookie"))
 
     const sessionsResponse = await app.handle(
       new Request("http://localhost/auth/sessions", {
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${readString(loginBody, "accessToken")}`,
         },
       }),
     )
-    const sessionsBody = (await sessionsResponse.json()) as {
-      items: Array<{
-        id: string
-        isCurrent: boolean
-      }>
-    }
-    const currentSession = sessionsBody.items.find((item) => item.isCurrent)
+    const sessionsBody = await readJsonRecord(sessionsResponse)
+    const sessionItems = readSessionItems(sessionsBody)
+    const currentSession = sessionItems.find((item) =>
+      readBoolean(item, "isCurrent"),
+    )
     expect(currentSession).toBeDefined()
+    const currentSessionId = currentSession
+      ? readString(currentSession, "id")
+      : undefined
 
     const revokeResponse = await app.handle(
-      new Request(`http://localhost/auth/sessions/${currentSession?.id}`, {
+      new Request(`http://localhost/auth/sessions/${currentSessionId}`, {
         method: "DELETE",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${readString(loginBody, "accessToken")}`,
           "user-agent": "session-revoke-agent",
           "x-forwarded-for": "127.0.0.32",
           "x-request-id": "req-session-revoke-1",
@@ -246,7 +329,7 @@ describe("createServerApp auth sessions", () => {
       message: "Refresh token is expired or revoked",
       status: 401,
       details: {
-        sessionId: currentSession?.id,
+        sessionId: currentSessionId,
       },
     })
 
@@ -258,7 +341,7 @@ describe("createServerApp auth sessions", () => {
       action: "session_revoke",
       actorUserId: fixture.userId,
       targetType: "session",
-      targetId: currentSession?.id,
+      targetId: currentSessionId,
       result: "success",
       requestId: "req-session-revoke-1",
       ip: "127.0.0.32",
@@ -279,16 +362,14 @@ describe("createServerApp auth sessions", () => {
       username: "admin",
       password: testAdminPassword,
     })
-    const loginBody = (await loginResponse.json()) as {
-      accessToken: string
-    }
+    const loginBody = await readJsonRecord(loginResponse)
     const unknownSessionId = crypto.randomUUID()
 
     const revokeResponse = await app.handle(
       new Request(`http://localhost/auth/sessions/${unknownSessionId}`, {
         method: "DELETE",
         headers: {
-          authorization: `Bearer ${loginBody.accessToken}`,
+          authorization: `Bearer ${readString(loginBody, "accessToken")}`,
           "user-agent": "session-revoke-missing-agent",
           "x-forwarded-for": "127.0.0.33",
           "x-request-id": "req-session-revoke-missing-1",
