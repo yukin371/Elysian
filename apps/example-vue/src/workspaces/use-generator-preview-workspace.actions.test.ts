@@ -65,7 +65,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     await workspace.applyPreview()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentDiffSummary.value?.changedFileCount).toBe(1)
   })
@@ -400,7 +400,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
     expect(detailRequestCount).toBe(1)
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.status).toBe("ready")
     expect(workspace.canApplyPreview.value).toBe(true)
   })
@@ -568,7 +568,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
     expect(previewRequestCount).toBe(1)
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentSession.value?.status).toBe("ready")
     expect(workspace.canApplyPreview.value).toBe(true)
@@ -760,7 +760,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
     expect(previewRequestCount).toBe(1)
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentSession.value?.status).toBe("ready")
     expect(workspace.canApplyPreview.value).toBe(true)
@@ -1154,7 +1154,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     await workspace.reviewPreview("approve")
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.status).toBe("pending_review")
   })
 
@@ -1348,7 +1348,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
     expect(detailRequestCount).toBe(1)
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.status).toBe("pending_review")
     expect(workspace.canApprovePreview.value).toBe(true)
   })
@@ -1591,7 +1591,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     await workspace.confirmPreview()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.confirmedAt).toBeNull()
     expect(workspace.canConfirmPreview.value).toBe(true)
   })
@@ -1778,7 +1778,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
     expect(detailRequestCount).toBe(1)
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.errorMessage.value).toContain("status 401")
+    expect(workspace.errorMessage.value).toContain("unauthorized")
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentSession.value?.confirmedAt).toBeNull()
     expect(workspace.canConfirmPreview.value).toBe(true)
