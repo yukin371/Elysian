@@ -897,9 +897,7 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.currentSession.value?.reviewComment).toBe(
       "Needs manual merge review",
     )
-    expect(workspace.errorMessage.value).toContain(
-      "GENERATOR_SESSION_REJECTED",
-    )
+    expect(workspace.errorMessage.value).toContain("GENERATOR_SESSION_REJECTED")
     expect(workspace.canApplyPreview.value).toBe(false)
   })
 
@@ -1436,7 +1434,10 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
 
   test("confirms ready preview sessions before allowing apply", async () => {
     let confirmRequestCount = 0
-    let confirmRequestBody: Record<string, unknown> | null = null
+    let confirmRequestBody!: {
+      displayedRecoveryStatus: string
+      displayedSnapshotPath: string
+    } | null
 
     globalThis.fetch = (async (input, init) => {
       const url = String(input)
@@ -1447,7 +1448,12 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
         method === "POST"
       ) {
         confirmRequestCount += 1
-        confirmRequestBody = init?.body ? JSON.parse(String(init.body)) : null
+        confirmRequestBody = init?.body
+          ? (JSON.parse(String(init.body)) as {
+              displayedRecoveryStatus: string
+              displayedSnapshotPath: string
+            })
+          : null
 
         return new Response(
           JSON.stringify({
@@ -1683,13 +1689,10 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
           status: "ready",
         })
 
-        return new Response(
-          JSON.stringify(refreshedDetail),
-          {
-            headers: { "content-type": "application/json" },
-            status: 200,
-          },
-        )
+        return new Response(JSON.stringify(refreshedDetail), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
       }
 
       return new Response("not found", { status: 404 })
