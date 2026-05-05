@@ -3,16 +3,33 @@ import { t } from "elysia"
 
 import { createErrorResponses } from "../../openapi"
 import type { AuthGuard } from "../auth"
-import type { ServerModule } from "../module"
+import type { AnyServerApp, ServerModule } from "../module"
 import {
   operationLogListResponseSchema,
   operationLogRecordResponseSchema,
 } from "./openapi"
 import type { OperationLogRepository } from "./repository"
-import { createOperationLogService } from "./service"
+import {
+  type ListOperationLogsPayload,
+  createOperationLogService,
+} from "./service"
 
 export interface OperationLogModuleOptions {
   authGuard?: AuthGuard
+}
+
+interface OperationLogRouteRegistrar {
+  get: (...args: readonly unknown[]) => OperationLogRouteRegistrar
+}
+
+interface OperationLogRouteParams {
+  id: string
+}
+
+interface OperationLogRouteQuery extends ListOperationLogsPayload {}
+
+interface OperationLogRouteSet {
+  headers: Record<string, string>
 }
 
 const operationLogPermissions = {
@@ -63,65 +80,90 @@ export const createOperationLogModule = (
       fields: operationLogModuleSchema.fields.map((field) => field.key),
     })
 
-    return app
-      .get(
-        "/system/operation-logs",
-        async ({ query, request }) => {
-          await authorize(request.headers, operationLogPermissions.list)
+    let operationLogApp = app as unknown as OperationLogRouteRegistrar
 
-          return service.list(query)
-        },
-        {
-          query: operationLogFilterSchema,
-          response: {
-            200: operationLogListResponseSchema,
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["operation-log"],
-            summary: "List operation logs",
-          },
-        },
-      )
-      .get(
-        "/system/operation-logs/export",
-        async ({ query, request, set }) => {
-          await authorize(request.headers, operationLogPermissions.export)
+    operationLogApp = operationLogApp.get(
+      "/system/operation-logs",
+      async ({
+        query,
+        request,
+      }: {
+        query: OperationLogRouteQuery
+        request: Request
+      }) => {
+        await authorize(request.headers, operationLogPermissions.list)
 
-          set.headers["content-type"] = "text/csv; charset=utf-8"
-          return service.exportCsv(query)
+        return service.list(query)
+      },
+      {
+        query: operationLogFilterSchema,
+        response: {
+          200: operationLogListResponseSchema,
+          ...createErrorResponses(401, 403),
         },
-        {
-          query: operationLogFilterSchema,
-          response: {
-            ...createErrorResponses(401, 403),
-          },
-          detail: {
-            tags: ["operation-log"],
-            summary: "Export operation logs as CSV",
-          },
+        detail: {
+          tags: ["operation-log"],
+          summary: "List operation logs",
         },
-      )
-      .get(
-        "/system/operation-logs/:id",
-        async ({ params, request }) => {
-          await authorize(request.headers, operationLogPermissions.get)
+      },
+    )
 
-          return service.getById(params.id)
+    operationLogApp = operationLogApp.get(
+      "/system/operation-logs/export",
+      async ({
+        query,
+        request,
+        set,
+      }: {
+        query: OperationLogRouteQuery
+        request: Request
+        set: OperationLogRouteSet
+      }) => {
+        await authorize(request.headers, operationLogPermissions.export)
+
+        set.headers["content-type"] = "text/csv; charset=utf-8"
+        return service.exportCsv(query)
+      },
+      {
+        query: operationLogFilterSchema,
+        response: {
+          ...createErrorResponses(401, 403),
         },
-        {
-          params: t.Object({
-            id: t.String(),
-          }),
-          response: {
-            200: operationLogRecordResponseSchema,
-            ...createErrorResponses(401, 403, 404),
-          },
-          detail: {
-            tags: ["operation-log"],
-            summary: "Get operation log by id",
-          },
+        detail: {
+          tags: ["operation-log"],
+          summary: "Export operation logs as CSV",
         },
-      )
+      },
+    )
+
+    operationLogApp = operationLogApp.get(
+      "/system/operation-logs/:id",
+      async ({
+        params,
+        request,
+      }: {
+        params: OperationLogRouteParams
+        request: Request
+      }) => {
+        await authorize(request.headers, operationLogPermissions.get)
+
+        return service.getById(params.id)
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: operationLogRecordResponseSchema,
+          ...createErrorResponses(401, 403, 404),
+        },
+        detail: {
+          tags: ["operation-log"],
+          summary: "Get operation log by id",
+        },
+      },
+    )
+
+    return operationLogApp as unknown as AnyServerApp
   },
 })
