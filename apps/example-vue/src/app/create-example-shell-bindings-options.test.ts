@@ -36,28 +36,37 @@ void roleWorkspaceAliasTypeCheck
 const createDeepProxy = (
   overrides: Record<string, unknown>,
   path = "",
-): Record<string, unknown> =>
-  new Proxy(
-    {},
-    {
-      get(_target, property) {
-        if (typeof property !== "string") {
-          return undefined
-        }
-
-        const nextPath = path ? `${path}.${property}` : property
-        if (Object.prototype.hasOwnProperty.call(overrides, nextPath)) {
-          return overrides[nextPath]
-        }
-
-        return createDeepProxy(overrides, nextPath)
-      },
-    },
+): Record<string, unknown> => {
+  const target = Object.fromEntries(
+    Object.entries(overrides).filter(([key]) => !key.includes(".")),
   )
 
-const createWorkspaceInput = (
+  return new Proxy(target, {
+    get(_target, property) {
+      if (typeof property !== "string") {
+        return undefined
+      }
+
+      const nextPath = path ? `${path}.${property}` : property
+      if (Object.prototype.hasOwnProperty.call(overrides, nextPath)) {
+        return overrides[nextPath]
+      }
+
+      return createDeepProxy(overrides, nextPath)
+    },
+  })
+}
+
+const createTypedDeepProxy = <Value extends object>(
   overrides: Record<string, unknown>,
-): Record<string, unknown> => createDeepProxy(overrides)
+): Value => createDeepProxy(overrides) as Value
+
+const createWorkspaceInput = <
+  WorkspaceInput extends
+    CreateExampleShellBindingsOptionsInput[keyof CreateExampleShellBindingsOptionsInput],
+>(
+  overrides: Record<string, unknown>,
+): WorkspaceInput => createTypedDeepProxy<WorkspaceInput>(overrides)
 
 describe("createExampleShellBindingsOptions", () => {
   test("keeps shell passthrough and workspace mapping stable", () => {
@@ -93,12 +102,16 @@ describe("createExampleShellBindingsOptions", () => {
       deletedCustomer = record
     }
 
-    const input = {
-      shell: {
+    const input: CreateExampleShellBindingsOptionsInput = {
+      shell: createTypedDeepProxy<
+        CreateExampleShellBindingsOptionsInput["shell"]
+      >({
         authStatusLabel: "Authenticated",
         submitLogout,
-      },
-      roleWorkspace: createWorkspaceInput({
+      }),
+      roleWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["roleWorkspace"]
+      >({
         isRoleWorkspace: true,
         roleExportLoading: true,
         canUpdateRoles: true,
@@ -109,12 +122,16 @@ describe("createExampleShellBindingsOptions", () => {
         "workspace.selectedRole": { value: selectedRole },
         "workspace.startEdit": startRoleEdit,
       }),
-      customerWorkspace: createWorkspaceInput({
+      customerWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["customerWorkspace"]
+      >({
         "workspace.selectedCustomer": { value: selectedCustomer },
         "workspace.startEdit": startCustomerEdit,
         "workspace.requestDelete": requestCustomerDelete,
       }),
-      dictionaryWorkspace: createWorkspaceInput({
+      dictionaryWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["dictionaryWorkspace"]
+      >({
         dictionaryTypeExportLoading: true,
         dictionaryItemsExportLoading: true,
         handleExportDictionaryTypes,
@@ -124,48 +141,72 @@ describe("createExampleShellBindingsOptions", () => {
           dictionaryEditCalls += 1
         },
       }),
-      departmentWorkspace: createWorkspaceInput({
+      departmentWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["departmentWorkspace"]
+      >({
         departmentExportLoading: true,
         handleExportDepartments,
       }),
-      sessionWorkspace: createWorkspaceInput({}),
-      postWorkspace: createWorkspaceInput({
+      sessionWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["sessionWorkspace"]
+      >({}),
+      postWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["postWorkspace"]
+      >({
         postExportLoading: true,
         handleExportPosts,
       }),
-      menuWorkspace: createWorkspaceInput({
+      menuWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["menuWorkspace"]
+      >({
         menuExportLoading: true,
         handleExportMenus,
       }),
-      notificationWorkspace: createWorkspaceInput({
+      notificationWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["notificationWorkspace"]
+      >({
         notificationExportLoading: true,
         handleExportNotifications,
         visibleUnreadNotificationCount: 2,
         "workspace.markVisibleAsRead": markVisibleNotificationsAsRead,
       }),
-      operationLogWorkspace: createWorkspaceInput({
+      operationLogWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["operationLogWorkspace"]
+      >({
         operationLogExportLoading: true,
         canExportOperationLogs: true,
         handleExportOperationLogs,
       }),
-      userWorkspace: createWorkspaceInput({
+      userWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["userWorkspace"]
+      >({
         userExportLoading: true,
         handleExportUsers,
       }),
-      settingWorkspace: createWorkspaceInput({
+      settingWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["settingWorkspace"]
+      >({
         settingExportLoading: true,
         handleExportSettings,
       }),
-      tenantWorkspace: createWorkspaceInput({
+      tenantWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["tenantWorkspace"]
+      >({
         tenantExportLoading: true,
         handleExportTenants,
       }),
-      fileWorkspace: createWorkspaceInput({
+      fileWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["fileWorkspace"]
+      >({
         fileExportLoading: true,
         handleExportFiles,
       }),
-      workflowWorkspace: createWorkspaceInput({}),
-      generatorPreviewWorkspace: {
+      workflowWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["workflowWorkspace"]
+      >({}),
+      generatorPreviewWorkspace: createWorkspaceInput<
+        CreateExampleShellBindingsOptionsInput["generatorPreviewWorkspace"]
+      >({
         generatorPreviewLoading: true,
         generatorPreviewReviewLoading: false,
         generatorPreviewApplyLoading: false,
@@ -197,57 +238,64 @@ describe("createExampleShellBindingsOptions", () => {
         reviewGeneratorPreview: () => {},
         confirmGeneratorPreview: () => {},
         applyGeneratorPreview: () => {},
-      },
-    } as unknown as CreateExampleShellBindingsOptionsInput
+      }),
+    }
 
-    const result = createExampleShellBindingsOptions(
-      input,
-    ) as unknown as Record<string, unknown>
+    const result = createExampleShellBindingsOptions(input)
+    const resultRecord = Object(result) as Record<string, unknown>
 
-    expect(result.authStatusLabel).toBe("Authenticated")
-    expect(result.submitLogout).toBe(submitLogout)
-    expect(result.isRoleWorkspace).toBe(true)
-    expect(result.roleLoading).toBe(true)
-    expect(result.roleExportLoading).toBe(true)
-    expect(result.canUpdateRoles).toBe(true)
-    expect(result.rolePanelTitle).toBe("Role Details")
-    expect(result.reloadRoles).toBe(reloadRoles)
-    expect(result.handleExportRoles).toBe(handleExportRoles)
-    expect(result.dictionaryTypeExportLoading).toBe(true)
-    expect(result.handleExportDictionaryTypes).toBe(handleExportDictionaryTypes)
-    expect(result.dictionaryItemsExportLoading).toBe(true)
-    expect(result.handleExportDictionaryItems).toBe(handleExportDictionaryItems)
-    expect(result.departmentExportLoading).toBe(true)
-    expect(result.handleExportDepartments).toBe(handleExportDepartments)
-    expect(result.postExportLoading).toBe(true)
-    expect(result.handleExportPosts).toBe(handleExportPosts)
-    expect(result.menuExportLoading).toBe(true)
-    expect(result.handleExportMenus).toBe(handleExportMenus)
-    expect(result.notificationExportLoading).toBe(true)
-    expect(result.handleExportNotifications).toBe(handleExportNotifications)
-    expect(result.visibleUnreadNotificationCount).toBe(2)
-    expect(result.markVisibleNotificationsAsRead).toBe(
+    expect(resultRecord.authStatusLabel).toBe("Authenticated")
+    expect(resultRecord.submitLogout).toBe(submitLogout)
+    expect(resultRecord.isRoleWorkspace).toBe(true)
+    expect(resultRecord.roleLoading).toBe(true)
+    expect(resultRecord.roleExportLoading).toBe(true)
+    expect(resultRecord.canUpdateRoles).toBe(true)
+    expect(resultRecord.rolePanelTitle).toBe("Role Details")
+    expect(resultRecord.reloadRoles).toBe(reloadRoles)
+    expect(resultRecord.handleExportRoles).toBe(handleExportRoles)
+    expect(resultRecord.dictionaryTypeExportLoading).toBe(true)
+    expect(resultRecord.handleExportDictionaryTypes).toBe(
+      handleExportDictionaryTypes,
+    )
+    expect(resultRecord.dictionaryItemsExportLoading).toBe(true)
+    expect(resultRecord.handleExportDictionaryItems).toBe(
+      handleExportDictionaryItems,
+    )
+    expect(resultRecord.departmentExportLoading).toBe(true)
+    expect(resultRecord.handleExportDepartments).toBe(handleExportDepartments)
+    expect(resultRecord.postExportLoading).toBe(true)
+    expect(resultRecord.handleExportPosts).toBe(handleExportPosts)
+    expect(resultRecord.menuExportLoading).toBe(true)
+    expect(resultRecord.handleExportMenus).toBe(handleExportMenus)
+    expect(resultRecord.notificationExportLoading).toBe(true)
+    expect(resultRecord.handleExportNotifications).toBe(
+      handleExportNotifications,
+    )
+    expect(resultRecord.visibleUnreadNotificationCount).toBe(2)
+    expect(resultRecord.markVisibleNotificationsAsRead).toBe(
       markVisibleNotificationsAsRead,
     )
-    expect(result.operationLogExportLoading).toBe(true)
-    expect(result.canExportOperationLogs).toBe(true)
-    expect(result.handleExportOperationLogs).toBe(handleExportOperationLogs)
-    expect(result.userExportLoading).toBe(true)
-    expect(result.handleExportUsers).toBe(handleExportUsers)
-    expect(result.settingExportLoading).toBe(true)
-    expect(result.handleExportSettings).toBe(handleExportSettings)
-    expect(result.tenantExportLoading).toBe(true)
-    expect(result.handleExportTenants).toBe(handleExportTenants)
-    expect(result.fileExportLoading).toBe(true)
-    expect(result.handleExportFiles).toBe(handleExportFiles)
-    expect(result.generatorPreviewLoading).toBe(true)
-    expect(result.canConfirmGeneratorPreview).toBe(false)
-    expect(result.refreshGeneratorPreview).toBe(refreshGeneratorPreview)
-    expect(result.confirmGeneratorPreview).toBeDefined()
-    ;(result.startRoleEdit as () => void)()
-    ;(result.startEdit as () => void)()
-    ;(result.requestDelete as () => void)()
-    ;(result.startDictionaryEdit as () => void)()
+    expect(resultRecord.operationLogExportLoading).toBe(true)
+    expect(resultRecord.canExportOperationLogs).toBe(true)
+    expect(resultRecord.handleExportOperationLogs).toBe(
+      handleExportOperationLogs,
+    )
+    expect(resultRecord.userExportLoading).toBe(true)
+    expect(resultRecord.handleExportUsers).toBe(handleExportUsers)
+    expect(resultRecord.settingExportLoading).toBe(true)
+    expect(resultRecord.handleExportSettings).toBe(handleExportSettings)
+    expect(resultRecord.tenantExportLoading).toBe(true)
+    expect(resultRecord.handleExportTenants).toBe(handleExportTenants)
+    expect(resultRecord.fileExportLoading).toBe(true)
+    expect(resultRecord.handleExportFiles).toBe(handleExportFiles)
+    expect(resultRecord.generatorPreviewLoading).toBe(true)
+    expect(resultRecord.canConfirmGeneratorPreview).toBe(false)
+    expect(resultRecord.refreshGeneratorPreview).toBe(refreshGeneratorPreview)
+    expect(resultRecord.confirmGeneratorPreview).toBeDefined()
+    result.startRoleEdit()
+    result.startEdit()
+    result.requestDelete()
+    result.startDictionaryEdit()
 
     expect(editedRole).toBe(selectedRole)
     expect(editedCustomer).toBe(selectedCustomer)
