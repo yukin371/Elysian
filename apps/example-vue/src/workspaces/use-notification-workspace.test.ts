@@ -214,7 +214,10 @@ describe("useNotificationWorkspace", () => {
       const url = String(input)
       const method = init?.method ?? "GET"
 
-      if (url.endsWith("/system/notifications/notice-1/read") && method === "POST") {
+      if (
+        url.endsWith("/system/notifications/notice-1/read") &&
+        method === "POST"
+      ) {
         return new Response(JSON.stringify({ message: "unauthorized" }), {
           headers: { "content-type": "application/json" },
           status: 401,
@@ -244,7 +247,7 @@ describe("useNotificationWorkspace", () => {
     await workspace.markSelectedAsRead()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.notificationErrorMessage.value).toContain("status 401")
+    expect(workspace.notificationErrorMessage.value).toContain("unauthorized")
     expect(workspace.selectedNotification.value?.status).toBe("unread")
   })
 
