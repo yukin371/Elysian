@@ -11,6 +11,62 @@ import {
   createNotificationModule,
 } from "./modules"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property)) {
+    throw new Error(`Expected array field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp notifications", () => {
   it("publishes notification success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
@@ -34,46 +90,48 @@ describe("createServerApp notifications", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<string, { responses?: Record<string, unknown> }>
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
     expect(
-      payload.paths["/system/notifications"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/notifications", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications"]?.get?.responses?.["401"],
+      getOpenApiResponse(paths, "/system/notifications", "get", "401"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications"]?.post?.responses?.["201"],
+      getOpenApiResponse(paths, "/system/notifications", "post", "201"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications"]?.post?.responses?.["400"],
+      getOpenApiResponse(paths, "/system/notifications", "post", "400"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/notifications/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/{id}"]?.get?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/notifications/{id}", "get", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/read"]?.post?.responses?.["200"],
+      getOpenApiResponse(paths, "/system/notifications/read", "post", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/read"]?.post?.responses?.["404"],
+      getOpenApiResponse(paths, "/system/notifications/read", "post", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.[
-        "200"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/system/notifications/{id}/read",
+        "post",
+        "200",
+      ),
     ).toBeDefined()
     expect(
-      payload.paths["/system/notifications/{id}/read"]?.post?.responses?.[
-        "404"
-      ],
+      getOpenApiResponse(
+        paths,
+        "/system/notifications/{id}/read",
+        "post",
+        "404",
+      ),
     ).toBeDefined()
   })
 
@@ -208,17 +266,7 @@ describe("createServerApp notifications", () => {
     )
 
     expect(createResponse.status).toBe(201)
-    const createdNotification = (await createResponse.json()) as {
-      id: string
-      recipientUserId: string
-      title: string
-      content: string
-      level: string
-      status: string
-      createdByUserId?: string
-      readAt?: string
-      createdAt: string
-    }
+    const createdNotification = await readJsonRecord(createResponse)
     expect(createdNotification.id).toEqual(expect.any(String))
     expect(createdNotification.recipientUserId).toBe("user_ops_1")
     expect(createdNotification.title).toBe("New Approval Pending")
@@ -233,7 +281,10 @@ describe("createServerApp notifications", () => {
 
     const readResponse = await app.handle(
       new Request(
-        `http://localhost/system/notifications/${createdNotification.id}/read`,
+        `http://localhost/system/notifications/${readString(
+          createdNotification,
+          "id",
+        )}/read`,
         {
           method: "POST",
           headers: {
@@ -261,7 +312,7 @@ describe("createServerApp notifications", () => {
           ids: [
             "notification_1",
             "notification_2",
-            createdNotification.id,
+            readString(createdNotification, "id"),
             "missing_notification",
           ],
         }),
@@ -379,16 +430,7 @@ describe("createServerApp notifications", () => {
     )
 
     expect(createResponse.status).toBe(201)
-    const createdNotification = (await createResponse.json()) as {
-      id: string
-      recipientUserId: string
-      title: string
-      content: string
-      level: string
-      status: string
-      createdByUserId?: string
-      createdAt: string
-    }
+    const createdNotification = await readJsonRecord(createResponse)
 
     const listAfterCreateResponse = await app.handle(
       new Request("http://localhost/system/notifications", {
@@ -399,15 +441,17 @@ describe("createServerApp notifications", () => {
     )
 
     expect(listAfterCreateResponse.status).toBe(200)
-    const listAfterCreateBody = (await listAfterCreateResponse.json()) as {
-      items: Array<{ id: string }>
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }
-    expect(listAfterCreateBody.items.map((item) => item.id)).toEqual([
-      createdNotification.id,
+    const listAfterCreateBody = await readJsonRecord(listAfterCreateResponse)
+    expect(
+      readArray(listAfterCreateBody, "items").map((item) => {
+        if (!isRecord(item)) {
+          throw new Error("Expected object notification item.")
+        }
+
+        return readString(item, "id")
+      }),
+    ).toEqual([
+      readString(createdNotification, "id"),
       "notification_visible_ops_1",
     ])
     expect(listAfterCreateBody.total).toBe(2)
