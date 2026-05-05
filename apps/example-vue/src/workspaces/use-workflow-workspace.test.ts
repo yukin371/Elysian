@@ -109,7 +109,7 @@ describe("useWorkflowWorkspace", () => {
     await workspace.reloadWorkflowDefinitions()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.workflowErrorMessage.value).toContain("status 401")
+    expect(workspace.workflowErrorMessage.value).toContain("unauthorized")
     expect(workspace.workflowDefinitions.value).toEqual([])
     expect(workspace.selectedWorkflowDefinition.value).toBeNull()
     expect(workspace.workflowQuery.value).toBe(" expense ")
@@ -156,7 +156,7 @@ describe("useWorkflowWorkspace", () => {
     await workspace.selectWorkflowDefinition(definition)
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.workflowDetailErrorMessage.value).toContain("status 401")
+    expect(workspace.workflowDetailErrorMessage.value).toContain("unauthorized")
     expect(workspace.selectedWorkflowDefinition.value?.id).toBe(
       "workflow-definition-1",
     )
@@ -220,7 +220,7 @@ describe("useWorkflowWorkspace", () => {
     await workspace.reloadWorkflowDefinitions()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.workflowErrorMessage.value).toContain("status 503")
+    expect(workspace.workflowErrorMessage.value).toContain("unavailable")
     expect(workspace.workflowDefinitions.value).toEqual([primary, archived])
     expect(workspace.selectedWorkflowDefinitionId.value).toBe(
       "workflow-definition-1",
