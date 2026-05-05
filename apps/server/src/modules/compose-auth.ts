@@ -53,14 +53,12 @@ export const composeAuthModules = (
         tenantContextDb: db,
         resolveTenantIdByCode: (tenantCode) =>
           db.transaction(async (tx) => {
-            const scopedDb = tx as unknown as typeof db
-
-            await clearTenantContext(scopedDb)
+            await clearTenantContext(tx)
 
             try {
-              return (await getTenantByCode(scopedDb, tenantCode))?.id ?? null
+              return (await getTenantByCode(tx, tenantCode))?.id ?? null
             } finally {
-              await resetTenantContext(scopedDb)
+              await resetTenantContext(tx)
             }
           }),
       }),

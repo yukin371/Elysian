@@ -20,7 +20,11 @@ export interface UpdateTenantPersistenceInput {
   status?: "active" | "suspended"
 }
 
-export async function getTenantById(db: DatabaseClient, id: string) {
+type TenantReadableDb = Pick<DatabaseClient, "execute" | "select">
+type TenantListingDb = Pick<DatabaseClient, "select">
+type TenantContextDb = Pick<DatabaseClient, "execute">
+
+export async function getTenantById(db: TenantReadableDb, id: string) {
   const rows = await db
     .select()
     .from(tenants)
@@ -29,7 +33,7 @@ export async function getTenantById(db: DatabaseClient, id: string) {
   return rows[0] ?? null
 }
 
-export async function getTenantByCode(db: DatabaseClient, code: string) {
+export async function getTenantByCode(db: TenantReadableDb, code: string) {
   const rows = await db
     .select()
     .from(tenants)
@@ -38,7 +42,7 @@ export async function getTenantByCode(db: DatabaseClient, code: string) {
   return rows[0] ?? null
 }
 
-export async function listTenants(db: DatabaseClient) {
+export async function listTenants(db: TenantListingDb) {
   return db
     .select()
     .from(tenants)
@@ -91,16 +95,16 @@ export async function updateTenant(
   return row ?? null
 }
 
-export async function setTenantContext(db: DatabaseClient, tenantId: string) {
+export async function setTenantContext(db: TenantContextDb, tenantId: string) {
   assertTenantId(tenantId)
   await db.execute(`SET app.current_tenant = '${tenantId}'`)
 }
 
-export async function resetTenantContext(db: DatabaseClient) {
+export async function resetTenantContext(db: TenantContextDb) {
   await db.execute("RESET app.current_tenant")
 }
 
-export async function clearTenantContext(db: DatabaseClient) {
+export async function clearTenantContext(db: TenantContextDb) {
   await db.execute(`SET app.current_tenant = ''`)
 }
 
