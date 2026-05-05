@@ -32,6 +32,62 @@ const createTestApp = (
     modules: options.modules,
   })
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readRecord = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!isRecord(property)) {
+    throw new Error(`Expected object field: ${key}`)
+  }
+
+  return property
+}
+
+const readString = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "string") {
+    throw new Error(`Expected string field: ${key}`)
+  }
+
+  return property
+}
+
+const readArray = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (!Array.isArray(property)) {
+    throw new Error(`Expected array field: ${key}`)
+  }
+
+  return property
+}
+
+const getOpenApiResponse = (
+  paths: Record<string, unknown>,
+  routePath: string,
+  method: string,
+  status: string,
+) => {
+  const route = readRecord(paths, routePath)
+  const operation = readRecord(route, method)
+  const responses = readRecord(operation, "responses")
+
+  return responses[status]
+}
+
 describe("createServerApp", () => {
   it("publishes customer success responses in the openapi spec", async () => {
     const app = createTestApp({
@@ -42,33 +98,24 @@ describe("createServerApp", () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = (await response.json()) as {
-      paths: Record<
-        string,
-        Record<
-          string,
-          {
-            responses?: Record<string, unknown>
-          }
-        >
-      >
-    }
+    const payload = await readJsonRecord(response)
+    const paths = readRecord(payload, "paths")
 
-    expect(payload.paths["/customers"]?.get?.responses?.["200"]).toBeDefined()
-    expect(payload.paths["/customers"]?.get?.responses?.["401"]).toBeDefined()
-    expect(payload.paths["/customers"]?.post?.responses?.["201"]).toBeDefined()
-    expect(payload.paths["/customers"]?.post?.responses?.["400"]).toBeDefined()
+    expect(getOpenApiResponse(paths, "/customers", "get", "200")).toBeDefined()
+    expect(getOpenApiResponse(paths, "/customers", "get", "401")).toBeDefined()
+    expect(getOpenApiResponse(paths, "/customers", "post", "201")).toBeDefined()
+    expect(getOpenApiResponse(paths, "/customers", "post", "400")).toBeDefined()
     expect(
-      payload.paths["/customers/{id}"]?.get?.responses?.["200"],
+      getOpenApiResponse(paths, "/customers/{id}", "get", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/customers/{id}"]?.put?.responses?.["200"],
+      getOpenApiResponse(paths, "/customers/{id}", "put", "200"),
     ).toBeDefined()
     expect(
-      payload.paths["/customers/{id}"]?.put?.responses?.["404"],
+      getOpenApiResponse(paths, "/customers/{id}", "put", "404"),
     ).toBeDefined()
     expect(
-      payload.paths["/customers/{id}"]?.delete?.responses?.["204"],
+      getOpenApiResponse(paths, "/customers/{id}", "delete", "204"),
     ).toBeDefined()
   })
 
@@ -181,14 +228,10 @@ describe("createServerApp", () => {
 
     expect(response.status).toBe(201)
 
-    const body = (await response.json()) as {
-      id: string
-      name: string
-      status: string
-    }
-    expect(body.name).toBe("Northwind")
-    expect(body.status).toBe("inactive")
-    expect(typeof body.id).toBe("string")
+    const body = await readJsonRecord(response)
+    expect(readString(body, "name")).toBe("Northwind")
+    expect(readString(body, "status")).toBe("inactive")
+    expect(typeof readString(body, "id")).toBe("string")
   })
 
   it("returns customer not found for unknown ids", async () => {
@@ -232,12 +275,9 @@ describe("createServerApp", () => {
     )
 
     expect(response.status).toBe(200)
-    const body = (await response.json()) as {
-      name: string
-      status: string
-    }
-    expect(body.name).toBe("Acme Updated")
-    expect(body.status).toBe("inactive")
+    const body = await readJsonRecord(response)
+    expect(readString(body, "name")).toBe("Acme Updated")
+    expect(readString(body, "status")).toBe("inactive")
   })
 
   it("deletes a customer through the customer module", async () => {
@@ -264,8 +304,8 @@ describe("createServerApp", () => {
     const listResponse = await app.handle(
       new Request("http://localhost/customers"),
     )
-    const body = (await listResponse.json()) as { items: unknown[] }
-    expect(body.items).toHaveLength(0)
+    const body = await readJsonRecord(listResponse)
+    expect(readArray(body, "items")).toHaveLength(0)
   })
 
   it("returns 404 when updating a missing customer", async () => {
