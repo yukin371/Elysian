@@ -9,6 +9,40 @@ import {
 } from "./tokens"
 
 const testSecret = "test-tenant-secret"
+const encoder = new TextEncoder()
+
+const base64UrlEncode = (value: string) =>
+  Buffer.from(value)
+    .toString("base64")
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "")
+
+const signRawToken = async (payload: unknown, secret: string) => {
+  const unsignedToken = [
+    base64UrlEncode(JSON.stringify({ alg: "HS256", typ: "JWT" })),
+    base64UrlEncode(JSON.stringify(payload)),
+  ].join(".")
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  )
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(unsignedToken),
+  )
+  const encodedSignature = Buffer.from(signature)
+    .toString("base64")
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "")
+
+  return `${unsignedToken}.${encodedSignature}`
+}
 
 describe("signAccessToken / verifyAccessToken with tid", () => {
   it("includes tid in the signed JWT payload", async () => {
@@ -37,6 +71,24 @@ describe("signAccessToken / verifyAccessToken with tid", () => {
     const payload = await verifyAccessToken(token, testSecret)
 
     expect(payload.tid).toBe(DEFAULT_TENANT_ID)
+  })
+
+  it("rejects signed tokens with malformed payload shapes", async () => {
+    const token = await signRawToken(
+      {
+        sub: "user-1",
+        sid: "session-1",
+        tid: DEFAULT_TENANT_ID,
+        roles: "admin",
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 300,
+      },
+      testSecret,
+    )
+
+    await expect(verifyAccessToken(token, testSecret)).rejects.toThrow(
+      "Malformed access token payload",
+    )
   })
 })
 

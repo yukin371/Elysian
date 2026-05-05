@@ -2,6 +2,9 @@ const encoder = new TextEncoder()
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string")
+
 export interface AccessTokenPayload {
   sub: string
   sid: string
@@ -9,6 +12,23 @@ export interface AccessTokenPayload {
   roles: string[]
   iat: number
   exp: number
+}
+
+const isAccessTokenPayload = (value: unknown): value is AccessTokenPayload => {
+  if (typeof value !== "object" || value === null) {
+    return false
+  }
+
+  const payload = value as Record<string, unknown>
+
+  return (
+    typeof payload.sub === "string" &&
+    typeof payload.sid === "string" &&
+    typeof payload.tid === "string" &&
+    typeof payload.iat === "number" &&
+    typeof payload.exp === "number" &&
+    isStringArray(payload.roles)
+  )
 }
 
 const base64UrlEncode = (value: string | Uint8Array) =>
@@ -84,9 +104,11 @@ export const verifyAccessToken = async (
     throw new Error("Invalid access token signature")
   }
 
-  const payload = JSON.parse(
-    base64UrlDecode(encodedPayload).toString("utf8"),
-  ) as AccessTokenPayload
+  const payload = JSON.parse(base64UrlDecode(encodedPayload).toString("utf8"))
+
+  if (!isAccessTokenPayload(payload)) {
+    throw new Error("Malformed access token payload")
+  }
 
   if (payload.exp <= Math.floor(Date.now() / 1000)) {
     throw new Error("Access token expired")
