@@ -622,7 +622,7 @@ export const createExampleShellBindingsOptions = (
       input.workflowWorkspace.workspace.reloadWorkflowDefinitions,
   }
 
-  return {
+  const options = {
     ...input.shell,
     ...roleWorkspaceOptions,
     ...customerWorkspaceOptions,
@@ -639,5 +639,7 @@ export const createExampleShellBindingsOptions = (
     ...fileWorkspaceOptions,
     ...workflowWorkspaceOptions,
     ...input.generatorPreviewWorkspace,
-  } as unknown as UseExampleShellBindingsOptions
+  } satisfies UseExampleShellBindingsOptions
+
+  return options
 }
