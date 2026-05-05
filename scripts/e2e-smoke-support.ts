@@ -118,6 +118,39 @@ export const classifyFailure = (message: string): SmokeFailureCategory => {
   return "test_case"
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const readJsonRecord = async (response: { json(): Promise<unknown> }) => {
+  const body: unknown = await response.json()
+
+  if (!isRecord(body)) {
+    throw new Error("Malformed JSON response")
+  }
+
+  return body
+}
+
+const readOptionalStringArray = (
+  value: Record<string, unknown>,
+  key: string,
+) => {
+  const property = value[key]
+
+  if (property === undefined) {
+    return []
+  }
+
+  if (
+    !Array.isArray(property) ||
+    !property.every((item) => typeof item === "string")
+  ) {
+    throw new Error(`Expected optional string array field: ${key}`)
+  }
+
+  return property
+}
+
 export const waitForHealth = async (timeoutMs: number) => {
   const startedAt = Date.now()
 
@@ -151,11 +184,8 @@ export const waitForRequiredModules = async (
         continue
       }
 
-      const payload = (await response.json()) as {
-        modules?: string[]
-      }
-
-      const modules = payload.modules ?? []
+      const payload = await readJsonRecord(response)
+      const modules = readOptionalStringArray(payload, "modules")
       const missing = requiredModules.filter((name) => !modules.includes(name))
 
       if (missing.length === 0) {
