@@ -261,7 +261,7 @@ describe("useAuthSessionWorkspace", () => {
     await workspace.reloadSessions()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.sessionErrorMessage.value).toContain("status 401")
+    expect(workspace.sessionErrorMessage.value).toContain("unauthorized")
     expect(workspace.filteredSessionItems.value).toEqual([])
     expect(workspace.sessionQueryValues.value).toEqual({
       keyword: " safari ",
@@ -331,12 +331,10 @@ describe("useAuthSessionWorkspace", () => {
     await workspace.reloadSessions()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.sessionErrorMessage.value).toContain("status 503")
+    expect(workspace.sessionErrorMessage.value).toContain("unavailable")
     expect(workspace.selectedSessionId.value).toBe("session-rotated")
     expect(workspace.selectedSession.value?.id).toBe("session-rotated")
-    expect(workspace.countLabel.value).toBe(
-      "app.onlineSession.countLabel",
-    )
+    expect(workspace.countLabel.value).toBe("app.onlineSession.countLabel")
     expect(workspace.filteredSessionItems.value.map((item) => item.id)).toEqual(
       ["session-rotated"],
     )
@@ -399,7 +397,7 @@ describe("useAuthSessionWorkspace", () => {
     await workspace.revokeSelectedSession()
 
     expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.sessionErrorMessage.value).toContain("status 401")
+    expect(workspace.sessionErrorMessage.value).toContain("unauthorized")
     expect(workspace.sessionActionLoading.value).toBe(false)
     expect(workspace.selectedSession.value?.id).toBe("session-current")
   })
