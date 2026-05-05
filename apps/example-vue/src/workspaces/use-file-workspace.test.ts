@@ -34,7 +34,7 @@ const createWorkspace = (options?: {
 
 describe("useFileWorkspace", () => {
   beforeEach(() => {
-    globalThis.fetch = undefined as unknown as typeof fetch
+    Reflect.deleteProperty(globalThis, "fetch")
   })
 
   test("preserves active filters when reloading files fails", async () => {
