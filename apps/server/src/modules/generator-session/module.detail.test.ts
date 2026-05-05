@@ -38,7 +38,7 @@ describe("generator session module detail responses", () => {
       ],
       reviewRequired: false,
       sourceSchemaName: "ticket",
-    }
+    } satisfies Parameters<typeof writeMigrationProposalSnapshotFixture>[3]
     const session = await repository.createPreviewSession({
       conflictStrategy: "skip",
       createdAt: "2026-04-20T00:00:00.000Z",
@@ -113,7 +113,7 @@ describe("generator session module detail responses", () => {
       ],
       reviewRequired: false,
       sourceSchemaName: "customer",
-    }
+    } satisfies Parameters<typeof writeMigrationProposalSnapshotFixture>[3]
     const session = await repository.createPreviewSession({
       conflictStrategy: "fail",
       createdAt: "2026-04-20T00:00:00.000Z",
@@ -518,14 +518,12 @@ describe("generator session module detail responses", () => {
     expect(response.status).toBe(500)
 
     const body = (await response.json()) as {
-      code: string
+      code: number
       details?: {
         reportPath?: string
       }
     }
-    expect(body.code).toBe(
-      errorCodes.GENERATOR_SESSION_REPORT_READ_FAILED,
-    )
+    expect(body.code).toBe(errorCodes.GENERATOR_SESSION_REPORT_READ_FAILED)
     expect(body.details?.reportPath).toBe(session.reportPath)
   })
 })
