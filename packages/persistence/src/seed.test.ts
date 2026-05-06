@@ -59,6 +59,7 @@ describe("createDefaultAuthSeedSpec", () => {
       "system:role:create",
       "system:role:update",
       "system:menu:list",
+      "system:menu:create",
       "system:menu:update",
       "system:department:list",
       "system:department:create",

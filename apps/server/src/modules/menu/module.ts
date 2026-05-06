@@ -38,7 +38,7 @@ interface MenuRouteSet {
 const menuPermissions = {
   list: "system:menu:list",
   get: "system:menu:list",
-  create: "system:menu:update",
+  create: "system:menu:create",
   update: "system:menu:update",
 } as const
 

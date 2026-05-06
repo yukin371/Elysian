@@ -197,62 +197,81 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
     ),
   )
 
+  const visibleTableColumnKeys = new Set([
+    "name",
+    "code",
+    "type",
+    "parentId",
+    "path",
+    "permissionCode",
+    "status",
+  ])
+  const visibleQueryFieldKeys = new Set([
+    "type",
+    "code",
+    "name",
+    "path",
+    "permissionCode",
+    "status",
+  ])
+  const visibleDetailFieldKeys = new Set([
+    "name",
+    "code",
+    "type",
+    "parentId",
+    "path",
+    "permissionCode",
+    "status",
+  ])
+
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "parentId"
+    options.page.tableColumns.value
+      .filter((column) => visibleTableColumnKeys.has(column.key))
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "parentId"
             ? "220"
             : column.key === "type"
               ? "140"
-              : column.key === "sort"
+              : column.key === "status"
                 ? "120"
-                : column.key === "isVisible"
-                  ? "140"
-                  : column.key === "status"
-                    ? "120"
-                    : column.key.endsWith("At")
-                      ? "200"
-                      : undefined,
-    })),
+                : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
-    options.page.queryFields.value.map((field) => ({
-      ...field,
-      label: options.localizeFieldLabel(field.key),
-      options:
-        field.key === "type" && field.options
-          ? field.options.map((option) => ({
-              ...option,
-              label: options.localizeType(option.value),
-            }))
-          : field.key === "status" && field.options
+    options.page.queryFields.value
+      .filter((field) => visibleQueryFieldKeys.has(field.key))
+      .map((field) => ({
+        ...field,
+        label: options.localizeFieldLabel(field.key),
+        options:
+          field.key === "type" && field.options
             ? field.options.map((option) => ({
                 ...option,
-                label: options.localizeStatus(option.value),
+                label: options.localizeType(option.value),
               }))
-            : field.options,
-      placeholder:
-        field.key === "code"
-          ? options.t("app.menu.query.codePlaceholder")
-          : field.key === "name"
-            ? options.t("app.menu.query.namePlaceholder")
-            : field.key === "path"
-              ? options.t("app.menu.query.pathPlaceholder")
-              : field.key === "component"
-                ? options.t("app.menu.query.componentPlaceholder")
-                : field.key === "icon"
-                  ? options.t("app.menu.query.iconPlaceholder")
-                  : field.key === "permissionCode"
-                    ? options.t("app.menu.query.permissionCodePlaceholder")
-                    : field.key === "status"
-                      ? options.t("copy.query.statusPlaceholder")
-                      : field.placeholder,
-    })),
+            : field.key === "status" && field.options
+              ? field.options.map((option) => ({
+                  ...option,
+                  label: options.localizeStatus(option.value),
+                }))
+              : field.options,
+        placeholder:
+          field.key === "code"
+            ? options.t("app.menu.query.codePlaceholder")
+            : field.key === "name"
+              ? options.t("app.menu.query.namePlaceholder")
+              : field.key === "path"
+                ? options.t("app.menu.query.pathPlaceholder")
+                : field.key === "permissionCode"
+                  ? options.t("app.menu.query.permissionCodePlaceholder")
+                  : field.key === "status"
+                    ? options.t("copy.query.statusPlaceholder")
+                    : field.placeholder,
+      })),
   )
 
   const tableItems = computed(() =>
@@ -350,21 +369,7 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
       return baseFields
     }
 
-    return [
-      ...baseFields,
-      {
-        key: "createdAt",
-        label: options.t("app.menu.field.createdAt"),
-        input: "datetime",
-        disabled: true,
-      },
-      {
-        key: "updatedAt",
-        label: options.t("app.menu.field.updatedAt"),
-        input: "datetime",
-        disabled: true,
-      },
-    ]
+    return baseFields.filter((field) => visibleDetailFieldKeys.has(field.key))
   })
 
   const formValues = computed<MenuFormValues>(() => {
@@ -423,17 +428,11 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
   })
 
   const panelDescription = computed(() => {
-    if (menuPanelMode.value === "edit") {
-      return options.t("app.menu.panelDesc.edit")
+    if (!selectedMenu.value && menuPanelMode.value === "detail") {
+      return options.t("app.menu.detailEmptyDescription")
     }
 
-    if (menuPanelMode.value === "create") {
-      return options.t("app.menu.panelDesc.create")
-    }
-
-    return selectedMenu.value
-      ? options.t("app.menu.panelDesc.detail")
-      : options.t("app.menu.detailEmptyDescription")
+    return ""
   })
 
   const cancelPanel = menuWorkspace.cancelPanel

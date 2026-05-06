@@ -15,6 +15,7 @@ export const defaultAuthSeedIds = {
     systemRoleUpdate: "00000000-0000-0000-0000-000000000113",
     systemMenuList: "00000000-0000-0000-0000-000000000121",
     systemMenuUpdate: "00000000-0000-0000-0000-000000000122",
+    systemMenuCreate: "00000000-0000-0000-0000-000000000124",
     systemDepartmentList: "00000000-0000-0000-0000-000000000131",
     systemDepartmentCreate: "00000000-0000-0000-0000-000000000132",
     systemDepartmentUpdate: "00000000-0000-0000-0000-000000000133",
@@ -186,6 +187,15 @@ export const defaultAuthSeedBlueprint = {
       action: "list",
       name: "List system menus",
       description: "View system menu tree",
+    },
+    {
+      id: defaultAuthSeedIds.permissions.systemMenuCreate,
+      code: "system:menu:create",
+      module: "system",
+      resource: "menu",
+      action: "create",
+      name: "Create system menu",
+      description: "Create system menus",
     },
     {
       id: defaultAuthSeedIds.permissions.systemMenuUpdate,

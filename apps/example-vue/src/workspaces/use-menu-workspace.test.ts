@@ -33,7 +33,9 @@ const createMenuDetailRecord = (
   ...overrides,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (
+  page?: Partial<Parameters<typeof useMenuWorkspace>[0]["page"]>,
+) =>
   useMenuWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
@@ -49,6 +51,7 @@ const createWorkspace = () =>
       formFields: computed(() => []),
       queryFields: computed(() => []),
       tableColumns: computed(() => []),
+      ...page,
     },
     t: (key) => key,
   })
@@ -132,6 +135,107 @@ describe("useMenuWorkspace", () => {
       "menu-2",
     ])
     expect(workspace.menuQueryValues.value).toEqual({})
+  })
+
+  test("keeps menu table columns compact for daily management", () => {
+    const workspace = createWorkspace({
+      tableColumns: computed(() => [
+        { key: "id" },
+        { key: "name" },
+        { key: "code" },
+        { key: "type" },
+        { key: "parentId" },
+        { key: "path" },
+        { key: "component" },
+        { key: "icon" },
+        { key: "sort" },
+        { key: "isVisible" },
+        { key: "permissionCode" },
+        { key: "status" },
+        { key: "createdAt" },
+        { key: "updatedAt" },
+      ]),
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "name",
+      "code",
+      "type",
+      "parentId",
+      "path",
+      "permissionCode",
+      "status",
+    ])
+  })
+
+  test("keeps menu query and detail fields compact", async () => {
+    const allFieldKeys = [
+      "id",
+      "name",
+      "code",
+      "type",
+      "parentId",
+      "path",
+      "component",
+      "icon",
+      "sort",
+      "isVisible",
+      "permissionCode",
+      "status",
+      "createdAt",
+      "updatedAt",
+    ]
+    const workspace = createWorkspace({
+      formFields: computed(() =>
+        allFieldKeys.map((key) => ({
+          input: "text" as const,
+          key,
+          label: key,
+        })),
+      ),
+      queryFields: computed(() =>
+        allFieldKeys.map((key) => ({ kind: "text" as const, key, label: key })),
+      ),
+    })
+
+    expect(workspace.queryFields.value.map((field) => field.key)).toEqual([
+      "name",
+      "code",
+      "type",
+      "path",
+      "permissionCode",
+      "status",
+    ])
+
+    const menu = createMenuDetailRecord()
+    globalThis.fetch = (async (input) => {
+      const url = String(input)
+
+      if (url.endsWith("/system/menus/menu-1")) {
+        return new Response(JSON.stringify(menu), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(JSON.stringify({ items: [menu] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    await workspace.reloadMenus()
+
+    expect(workspace.formFields.value.map((field) => field.key)).toEqual([
+      "name",
+      "code",
+      "type",
+      "parentId",
+      "path",
+      "permissionCode",
+      "status",
+    ])
+    expect(workspace.panelDescription.value).toBe("")
   })
 
   test("normalizes create payload and returns to detail mode after creation", async () => {

@@ -15,9 +15,11 @@ export interface CreateMenuPayload
 export interface UpdateMenuPayload extends UpdateMenuInput {}
 
 export const createMenuService = (repository: MenuRepository) => ({
-  list: () => repository.list(),
+  async list() {
+    return dedupeMenusByCode(await repository.list())
+  },
   async exportCsv() {
-    const items = await repository.list()
+    const items = dedupeMenusByCode(await repository.list())
 
     return buildCsv(
       [
@@ -348,6 +350,20 @@ const normalizeStringArray = (values: string[] | undefined) =>
   [
     ...new Set((values ?? []).map((value) => value.trim()).filter(Boolean)),
   ].sort()
+
+const dedupeMenusByCode = <TMenu extends { code: string }>(
+  items: TMenu[],
+): TMenu[] => {
+  const uniqueItems = new Map<string, TMenu>()
+
+  for (const item of items) {
+    if (!uniqueItems.has(item.code)) {
+      uniqueItems.set(item.code, item)
+    }
+  }
+
+  return [...uniqueItems.values()]
+}
 
 const buildCsv = (
   header: string[],

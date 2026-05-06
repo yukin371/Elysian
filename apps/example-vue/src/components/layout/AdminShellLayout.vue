@@ -73,8 +73,8 @@ const wrapListeners = (listeners: ListenerMap) =>
   Object.fromEntries(
     Object.entries(listeners).map(([eventName, listener]) => [
       eventName,
-      (...args: unknown[]) => {
-        listener(...args)
+      async (...args: unknown[]) => {
+        await Promise.resolve(listener(...args))
 
         if (shouldCloseSecondaryForEvent(eventName)) {
           closeSecondaryDialog()

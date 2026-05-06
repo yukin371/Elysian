@@ -95,10 +95,6 @@ const resolvedSelectedMenu = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.selectedMenu ?? null),
   null as MenuRecord | null,
 )
-const resolvedSelectedMenuDetail = readInjectedValue(
-  computed(() => resolvedMenuWorkspaceState.value?.selectedMenuDetail ?? null),
-  null as { roleIds?: string[] } | null,
-)
 const resolvedFormFields = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.formFields ?? null),
   [] as ElyFormField[],
@@ -107,17 +103,15 @@ const resolvedFormValues = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.formValues ?? null),
   {} as ElyFormValues,
 )
-const resolvedMenuParentLookup = readInjectedValue(
-  computed(() => resolvedMenuWorkspaceState.value?.parentLookup ?? null),
-  new Map<string, unknown>(),
-)
 </script>
 
 <template>
   <section class="enterprise-card">
     <p class="enterprise-eyebrow">{{ t("app.menu.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
+    <p v-if="resolvedPanelDescription" class="enterprise-copy">
+      {{ resolvedPanelDescription }}
+    </p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.menuModuleOffline") }}
@@ -175,39 +169,6 @@ const resolvedMenuParentLookup = readInjectedValue(
         :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
       />
-
-      <div class="enterprise-metadata mt-5">
-        <div>
-          <span>{{ t("app.menu.meta.parent") }}</span>
-          <strong>{{
-            resolvedSelectedMenu.parentId
-              ? ((resolvedMenuParentLookup.get(
-                  resolvedSelectedMenu.parentId,
-                ) as { name?: string } | undefined)?.name ??
-                resolvedSelectedMenu.parentId)
-              : t("app.menu.parentRoot")
-          }}</strong>
-        </div>
-        <div v-if="resolvedSelectedMenuDetail">
-          <span>{{ t("app.menu.meta.roleCount") }}</span>
-          <strong>{{ resolvedSelectedMenuDetail.roleIds?.length ?? 0 }}</strong>
-        </div>
-      </div>
-
-      <div v-if="resolvedSelectedMenuDetail" class="mt-5 space-y-4">
-        <div>
-          <p class="enterprise-subheading">
-            {{ t("app.menu.meta.roleIds") }}
-          </p>
-          <p class="enterprise-copy">
-            {{
-              (resolvedSelectedMenuDetail.roleIds?.length ?? 0) > 0
-                ? resolvedSelectedMenuDetail.roleIds?.join(", ")
-                : t("app.menu.meta.empty")
-            }}
-          </p>
-        </div>
-      </div>
     </template>
 
     <template

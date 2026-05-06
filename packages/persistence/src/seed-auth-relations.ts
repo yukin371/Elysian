@@ -43,6 +43,10 @@ export const defaultAuthSeedRelations = {
     },
     {
       roleId: defaultAuthSeedIds.roles.admin,
+      permissionId: defaultAuthSeedIds.permissions.systemMenuCreate,
+    },
+    {
+      roleId: defaultAuthSeedIds.roles.admin,
       permissionId: defaultAuthSeedIds.permissions.systemMenuUpdate,
     },
     {

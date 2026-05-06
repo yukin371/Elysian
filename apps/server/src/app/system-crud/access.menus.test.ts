@@ -59,7 +59,7 @@ const getOpenApiResponse = (
 describe("createServerApp system menu access", () => {
   it("publishes menu success responses in the openapi spec", async () => {
     const fixture = await createAuthTestFixture({
-      permissions: ["system:menu:list"],
+      permissions: ["system:menu:list", "system:menu:create"],
       isSuperAdmin: false,
     })
     const app = createTestApp({
@@ -272,7 +272,11 @@ describe("createServerApp system menu access", () => {
 
   it("creates and updates menus with parent, permission, and role bindings", async () => {
     const fixture = await createAuthTestFixture({
-      permissions: ["system:menu:list", "system:menu:update"],
+      permissions: [
+        "system:menu:list",
+        "system:menu:create",
+        "system:menu:update",
+      ],
       isSuperAdmin: false,
     })
     const menuRepository = createInMemoryMenuRepository({
@@ -383,12 +387,12 @@ describe("createServerApp system menu access", () => {
 
   it("rejects invalid menu relations", async () => {
     const fixture = await createAuthTestFixture({
-      permissions: ["system:menu:update"],
+      permissions: ["system:menu:create", "system:menu:update"],
       isSuperAdmin: false,
     })
     const menuRepository = createInMemoryMenuRepository({
       menus: createMenuSeedRecords(),
-      availablePermissionCodes: ["system:menu:list"],
+      availablePermissionCodes: ["system:menu:list", "system:menu:create"],
       availableRoleIds: ["role_admin_1"],
     })
     const app = createTestApp({
@@ -445,12 +449,12 @@ describe("createServerApp system menu access", () => {
 
   it("rejects menu parent cycles", async () => {
     const fixture = await createAuthTestFixture({
-      permissions: ["system:menu:update"],
+      permissions: ["system:menu:create", "system:menu:update"],
       isSuperAdmin: false,
     })
     const menuRepository = createInMemoryMenuRepository({
       menus: createMenuSeedRecords(),
-      availablePermissionCodes: ["system:menu:update"],
+      availablePermissionCodes: ["system:menu:create", "system:menu:update"],
       availableRoleIds: ["role_admin_1"],
     })
     const app = createTestApp({
