@@ -114,6 +114,8 @@ export {
   type CreateWorkflowDefinitionPersistenceInput,
   type CreateWorkflowInstancePersistenceInput,
   type CreateWorkflowTaskPersistenceInput,
+  type ListWorkflowDefinitionsPersistenceFilter,
+  type ListWorkflowDefinitionsPersistenceResult,
   getWorkflowTaskById,
   getLatestWorkflowDefinitionByKey,
   getWorkflowInstanceById,

@@ -35,19 +35,14 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.workflow.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">
       {{
         selectedDefinition?.name ??
         t("app.workflow.detailEmptyTitle")
       }}
     </h3>
-    <p class="enterprise-copy">
-      {{
-        selectedDefinition
-          ? t("app.workflow.detailDescription")
-          : t("app.workflow.detailEmpty")
-      }}
+    <p v-if="!selectedDefinition" class="enterprise-copy">
+      {{ t("app.workflow.detailEmpty") }}
     </p>
 
     <div
@@ -145,9 +140,9 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 .workflow-version-history {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: center;
-  margin-top: 0.75rem;
+  margin-top: 0.55rem;
 }
 
 .workflow-version-card {
@@ -156,12 +151,12 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
   align-items: flex-start;
   gap: 0.25rem;
   border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 12px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.96);
   color: #0f172a;
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 0.7rem 0.85rem;
+  padding: 0.55rem 0.7rem;
 }
 
 .workflow-version-card-active {
@@ -176,18 +171,18 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 
 .workflow-node-list {
   display: grid;
-  gap: 0.85rem;
-  margin: 0.75rem 0 0;
+  gap: 0.55rem;
+  margin: 0.55rem 0 0;
   padding: 0;
   list-style: none;
 }
 
 .workflow-node-item {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255, 255, 255, 0.96);
-  padding: 1rem;
+  padding: 0.75rem 0.85rem;
   text-align: left;
   color: #0f172a;
 }
@@ -217,8 +212,8 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 }
 
 .workflow-node-copy {
-  margin: 0.7rem 0 0;
+  margin: 0.45rem 0 0;
   color: #475569;
-  line-height: 1.65;
+  line-height: 1.5;
 }
 </style>

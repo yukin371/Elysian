@@ -70,7 +70,7 @@ const emit = defineEmits<{
       v-else
       :eyebrow="t('app.operationLog.workspaceEyebrow')"
       :title="t('app.operationLog.workspaceTitle')"
-      :description="t('app.operationLog.workspaceDescription')"
+      :description="''"
       :query-fields="queryFields"
       :query-loading="loading"
       :table-columns="tableColumns"

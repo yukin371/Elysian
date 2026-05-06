@@ -11,6 +11,7 @@ import {
 import { AppError } from "../../errors"
 import type {
   CreateWorkflowDefinitionInput,
+  ListWorkflowDefinitionsFilter,
   ListWorkflowTasksFilter,
   WorkflowRepository,
 } from "./repository"
@@ -158,7 +159,8 @@ interface WorkflowRuntimeContext {
 }
 
 export const createWorkflowService = (repository: WorkflowRepository) => ({
-  list: () => repository.list(),
+  list: (filter: ListWorkflowDefinitionsFilter = {}) =>
+    repository.list(normalizeDefinitionListFilter(filter)),
   async getById(id: string) {
     const definition = await repository.getById(id)
 
@@ -617,6 +619,18 @@ const normalizeTaskFilter = (
     filter.assignee !== undefined && filter.assignee.trim().length > 0
       ? filter.assignee.trim()
       : undefined,
+})
+
+const normalizeDefinitionListFilter = (
+  filter: ListWorkflowDefinitionsFilter,
+): ListWorkflowDefinitionsFilter => ({
+  q:
+    filter.q !== undefined && filter.q.trim().length > 0
+      ? filter.q.trim()
+      : undefined,
+  status: filter.status,
+  page: filter.page,
+  pageSize: filter.pageSize,
 })
 
 const resolveInitialTransition = (

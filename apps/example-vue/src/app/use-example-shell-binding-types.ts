@@ -134,6 +134,10 @@ export interface UseExampleShellBindingsOptions {
   workflowFilterSummary: ValueSource<string>
   workflowDefinitionCards: ValueSource<unknown[]>
   workflowDefinitions: ValueSource<unknown[]>
+  workflowPaginationSummary: ValueSource<string>
+  workflowCanGoToPreviousPage: ValueSource<boolean>
+  workflowCanGoToNextPage: ValueSource<boolean>
+  workflowDetailDialogOpen: ValueSource<boolean>
   selectedWorkflowDefinitionId: ValueSource<string | null>
   fileModuleReady: ValueSource<boolean>
   canEnterFileWorkspace: ValueSource<boolean>
@@ -347,8 +351,12 @@ export interface UseExampleShellBindingsOptions {
   enterpriseFormValues: ValueSource<Record<string, unknown>>
   fileItems: ValueSource<FileRecord[]>
   handleWorkflowDefinitionSelect: (definitionId: string) => void
+  closeWorkflowDefinitionDetail: () => void
+  setWorkflowQuery: (query: string) => void
   setWorkflowStatusFilter: (status: WorkflowStatusFilter) => void
   resetWorkflowFilters: () => void
+  goToPreviousWorkflowPage: () => void
+  goToNextWorkflowPage: () => void
   updateFileQuery: (query: FileWorkspaceQuery) => void
   resetFileQuery: () => void
   selectFile: (file: FileRecord) => Promise<void> | void

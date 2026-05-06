@@ -73,6 +73,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   sessionActionLoading: boolean
   sessionErrorMessage: string
   selectedSession: Record<string, unknown> | null
+  hideSessionCard?: boolean
   postModuleReady: boolean
   canEnterPostWorkspace: boolean
   canViewPosts: boolean

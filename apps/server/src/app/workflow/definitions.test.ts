@@ -145,8 +145,12 @@ describe("createServerApp workflow definitions", () => {
       permissions: [...workflowDefinitionPermissionCodes],
       isSuperAdmin: false,
     })
+    const workflowDefinitionSeedRecords = [
+      ...createWorkflowDefinitionSeedRecords(),
+      ...createClaimableWorkflowDefinitionSeedRecords(),
+    ]
     const workflowRepository = createInMemoryWorkflowDefinitionRepository(
-      createWorkflowDefinitionSeedRecords(),
+      workflowDefinitionSeedRecords,
     )
     const app = createTestApp({
       modules: [
@@ -181,7 +185,28 @@ describe("createServerApp workflow definitions", () => {
 
     expect(listResponse.status).toBe(200)
     expect(await listResponse.json()).toEqual({
-      items: createWorkflowDefinitionSeedRecords(),
+      items: workflowDefinitionSeedRecords,
+      page: 1,
+      pageSize: 20,
+      total: workflowDefinitionSeedRecords.length,
+      totalPages: 1,
+    })
+
+    const paginatedListResponse = await app.handle(
+      new Request("http://localhost/workflow/definitions?page=2&pageSize=1", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(paginatedListResponse.status).toBe(200)
+    expect(await paginatedListResponse.json()).toEqual({
+      items: [workflowDefinitionSeedRecords[1]],
+      page: 2,
+      pageSize: 1,
+      total: workflowDefinitionSeedRecords.length,
+      totalPages: workflowDefinitionSeedRecords.length,
     })
 
     const getResponse = await app.handle(

@@ -3,6 +3,7 @@ import type { Component } from "vue"
 import type { AppTranslate } from "../../../app/app-shell-helpers"
 import { generatedStandardCrudWorkspaceKinds } from "../../../app/workspace-registry/generated"
 import type { FileWorkspaceQuery } from "../../../lib/file-workspace"
+import type { WorkflowDefinitionRecord } from "../../../lib/platform-api"
 import { generatedStandardCrudMainComponents } from "../../../modules/generated"
 import AuthSessionWorkspaceMain from "../auth-session/AuthSessionWorkspaceMain.vue"
 import CustomerWorkspaceMain from "../customer/CustomerWorkspaceMain.vue"
@@ -11,7 +12,10 @@ import GeneratorPreviewWorkspaceMain from "../generator/GeneratorPreviewWorkspac
 import type { GeneratorPreviewDiffSummary } from "../generator/types"
 import OperationLogWorkspaceMain from "../operation-log/OperationLogWorkspaceMain.vue"
 import WorkflowWorkspaceMain from "../workflow/WorkflowWorkspaceMain.vue"
-import type { WorkflowStatusFilter } from "../workflow/types"
+import type {
+  WorkflowDefinitionDetailCard,
+  WorkflowStatusFilter,
+} from "../workflow/types"
 import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 
 interface GeneratorPreviewSessionSummary {
@@ -45,7 +49,17 @@ export interface ShellWorkspaceMainSwitchProps {
   workflowFilterSummary: string
   workflowDefinitionCards: ReadonlyArray<unknown>
   workflowDefinitionCount: number
+  workflowPaginationSummary: string
+  workflowCanGoToPreviousPage: boolean
+  workflowCanGoToNextPage: boolean
+  workflowDetailDialogOpen: boolean
   selectedWorkflowDefinitionId: string | null
+  workflowDetailLoading: boolean
+  workflowDetailErrorMessage: string
+  selectedWorkflowDefinition: Record<string, unknown> | null
+  workflowVersionHistoryCards: ReadonlyArray<unknown>
+  workflowDefinitionDetailCards: ReadonlyArray<unknown>
+  localizeWorkflowStatus: (status: string) => string
   fileModuleReady: boolean
   canEnterFileWorkspace: boolean
   canViewFiles: boolean
@@ -233,8 +247,11 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: ShellWorkspaceMainListResetEvent): void
   (event: "workflow-update-query", value: string): void
   (event: "select-workflow-definition", definitionId: string): void
+  (event: "close-workflow-definition-detail"): void
   (event: "select-workflow-status-filter", status: WorkflowStatusFilter): void
   (event: "reset-workflow-filters"): void
+  (event: "go-previous-workflow-page"): void
+  (event: "go-next-workflow-page"): void
   (event: "update-file-query", value: FileWorkspaceQuery): void
   (event: "reset-file-filters"): void
   (event: "select-file", fileId: string): void
@@ -494,16 +511,31 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       filterSummary: props.workflowFilterSummary,
       definitionCards: props.workflowDefinitionCards,
       definitionCount: props.workflowDefinitionCount,
+      paginationSummary: props.workflowPaginationSummary,
+      canGoToPreviousPage: props.workflowCanGoToPreviousPage,
+      canGoToNextPage: props.workflowCanGoToNextPage,
+      detailDialogOpen: props.workflowDetailDialogOpen,
       selectedDefinitionId: props.selectedWorkflowDefinitionId,
+      detailLoading: props.workflowDetailLoading,
+      detailErrorMessage: props.workflowDetailErrorMessage,
+      selectedDefinition:
+        props.selectedWorkflowDefinition as WorkflowDefinitionRecord | null,
+      versionHistoryCards: props.workflowVersionHistoryCards,
+      detailCards:
+        props.workflowDefinitionDetailCards as WorkflowDefinitionDetailCard[],
+      localizeStatus: props.localizeWorkflowStatus,
     },
     listeners: {
       "update:query": (value: unknown) =>
         emit("workflow-update-query", value as string),
       "select-definition": (definitionId: unknown) =>
         emit("select-workflow-definition", definitionId as string),
+      "close-detail": () => emit("close-workflow-definition-detail"),
       "select-status-filter": (status: unknown) =>
         emit("select-workflow-status-filter", status as WorkflowStatusFilter),
       "reset-filters": () => emit("reset-workflow-filters"),
+      "go-previous-page": () => emit("go-previous-workflow-page"),
+      "go-next-page": () => emit("go-next-workflow-page"),
     },
   }),
   file: (props, emit) => ({

@@ -218,5 +218,7 @@ export type {
   GeneratorPreviewSqlPreview,
   ReviewGeneratorPreviewSessionRequest,
   ReviewGeneratorPreviewSessionResponse,
+  WorkflowDefinitionRecord,
   WorkflowDefinitionsResponse,
+  WorkflowDefinitionListQuery,
 } from "./platform-api/workflow"

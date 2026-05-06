@@ -14,7 +14,7 @@ import {
   type ElyQueryValues,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
-import { computed, inject } from "vue"
+import { computed, inject, ref, watch } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "@elysian/frontend-vue"
 import {
@@ -77,6 +77,55 @@ const resolvedItems = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.tableItems ?? null),
   [] as MenuRecord[],
 )
+
+const pageSizeOptions = [20, 50, 100]
+const currentPage = ref(1)
+const pageSize = ref(20)
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(resolvedItems.value.length / pageSize.value)),
+)
+const pageStart = computed(() =>
+  resolvedItems.value.length === 0
+    ? 0
+    : (currentPage.value - 1) * pageSize.value + 1,
+)
+const pageEnd = computed(() =>
+  Math.min(resolvedItems.value.length, currentPage.value * pageSize.value),
+)
+const paginatedItems = computed(() =>
+  resolvedItems.value.slice(
+    (currentPage.value - 1) * pageSize.value,
+    currentPage.value * pageSize.value,
+  ),
+)
+const paginationSummary = computed(() =>
+  props.t("app.pagination.summary", {
+    page: currentPage.value,
+    totalPages: totalPages.value,
+    start: pageStart.value,
+    end: pageEnd.value,
+    total: resolvedItems.value.length,
+  }),
+)
+
+const goPreviousPage = () => {
+  currentPage.value = Math.max(1, currentPage.value - 1)
+}
+
+const goNextPage = () => {
+  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
+}
+
+const updatePageSize = (event: Event) => {
+  const nextValue = Number((event.target as HTMLSelectElement).value)
+
+  pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
+  currentPage.value = 1
+}
+
+watch(resolvedItems, () => {
+  currentPage.value = Math.min(currentPage.value, totalPages.value)
+})
 </script>
 
 <template>
@@ -110,11 +159,11 @@ const resolvedItems = readInjectedValue(
       v-else
       :eyebrow="t('app.menu.workspaceEyebrow')"
       :title="t('app.menu.workspaceTitle')"
-      :description="t('app.menu.workspaceDescription')"
+      :description="''"
       :query-fields="queryFields"
       :query-loading="resolvedLoading"
       :table-columns="tableColumns"
-      :items="resolvedItems"
+      :items="paginatedItems"
       :table-loading="resolvedLoading"
       :table-actions="[]"
       :item-count-label="itemCountLabel"
@@ -130,6 +179,69 @@ const resolvedItems = readInjectedValue(
           {{ currentQuerySummary }}
         </span>
       </template>
+      <template #footer>
+        <div class="menu-pagination">
+          <span>{{ paginationSummary }}</span>
+          <label>
+            <small>{{ t("app.pagination.pageSize") }}</small>
+            <select :value="pageSize" @change="updatePageSize">
+              <option
+                v-for="option in pageSizeOptions"
+                :key="option"
+                :value="option"
+              >
+                {{ option }}
+              </option>
+            </select>
+          </label>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="currentPage <= 1"
+            @click="goPreviousPage"
+          >
+            {{ t("app.pagination.previous") }}
+          </button>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="currentPage >= totalPages"
+            @click="goNextPage"
+          >
+            {{ t("app.pagination.next") }}
+          </button>
+        </div>
+      </template>
     </ElyCrudWorkspace>
   </section>
   </template>
+
+<style scoped>
+.menu-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.menu-pagination label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.menu-pagination small {
+  color: #64748b;
+}
+
+.menu-pagination select {
+  height: 2rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 4px;
+  background: white;
+  color: #0f172a;
+}
+</style>

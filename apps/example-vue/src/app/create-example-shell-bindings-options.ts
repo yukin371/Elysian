@@ -599,6 +599,14 @@ export const createExampleShellBindingsOptions = (
     workflowDefinitionCards:
       input.workflowWorkspace.workspace.workflowDefinitionCards,
     workflowDefinitions: input.workflowWorkspace.workspace.workflowDefinitions,
+    workflowPaginationSummary:
+      input.workflowWorkspace.workspace.workflowPaginationSummary,
+    workflowCanGoToPreviousPage:
+      input.workflowWorkspace.workspace.workflowCanGoToPreviousPage,
+    workflowCanGoToNextPage:
+      input.workflowWorkspace.workspace.workflowCanGoToNextPage,
+    workflowDetailDialogOpen:
+      input.workflowWorkspace.workspace.workflowDetailDialogOpen,
     selectedWorkflowDefinitionId:
       input.workflowWorkspace.workspace.selectedWorkflowDefinitionId,
     workflowDetailLoading:
@@ -614,10 +622,17 @@ export const createExampleShellBindingsOptions = (
     localizeWorkflowStatus: input.workflowWorkspace.localizeWorkflowStatus,
     handleWorkflowDefinitionSelect:
       input.workflowWorkspace.workspace.handleWorkflowDefinitionSelect,
+    closeWorkflowDefinitionDetail:
+      input.workflowWorkspace.workspace.closeWorkflowDefinitionDetail,
+    setWorkflowQuery: input.workflowWorkspace.workspace.setWorkflowQuery,
     setWorkflowStatusFilter:
       input.workflowWorkspace.workspace.setWorkflowStatusFilter,
     resetWorkflowFilters:
       input.workflowWorkspace.workspace.resetWorkflowFilters,
+    goToPreviousWorkflowPage:
+      input.workflowWorkspace.workspace.goToPreviousWorkflowPage,
+    goToNextWorkflowPage:
+      input.workflowWorkspace.workspace.goToNextWorkflowPage,
     reloadWorkflowDefinitions:
       input.workflowWorkspace.workspace.reloadWorkflowDefinitions,
   }

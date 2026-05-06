@@ -48,6 +48,7 @@ defineEmits<{
   (event: "submit-login"): void
   (event: "menu-select", menuKey: string): void
   (event: "tab-select", tabKey: string): void
+  (event: "user-click"): void
 }>()
 </script>
 
@@ -102,6 +103,7 @@ defineEmits<{
           :workspace-secondary-listeners="workspaceSecondaryListeners"
           @menu-select="$emit('menu-select', $event)"
           @tab-select="$emit('tab-select', $event)"
+          @user-click="$emit('user-click')"
         />
       </template>
     </div>

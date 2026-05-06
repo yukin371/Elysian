@@ -85,6 +85,7 @@ export const createExampleShellMetaOptions = ({
   tenantItems: workspaces.tenantWorkspace.filteredTenantItems,
   userItems: workspaces.userWorkspace.filteredUserItems,
   workflowDefinitions: workspaces.workflowWorkspace.workflowDefinitionCards,
+  workflowDefinitionTotal: workspaces.workflowWorkspace.workflowTotal,
   fileItems: workspaces.fileWorkspace.filteredFileItems,
   generatorPreviewFiles:
     workspaces.generatorPreviewWorkspace.filteredPreviewFiles,

@@ -106,7 +106,7 @@ const resolvedItems = computed(
       v-else
       :eyebrow="t('app.role.workspaceEyebrow')"
       :title="t('app.role.workspaceTitle')"
-      :description="t('app.role.workspaceDescription')"
+      :description="''"
       :query-fields="queryFields"
       :query-loading="resolvedLoading"
       :table-columns="tableColumns"

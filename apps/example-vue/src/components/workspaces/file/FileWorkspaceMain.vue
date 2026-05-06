@@ -55,7 +55,6 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
     <div class="workspace-header">
       <p class="enterprise-eyebrow">{{ t("app.file.workspaceEyebrow") }}</p>
       <h3 class="enterprise-heading">{{ t("app.file.workspaceTitle") }}</h3>
-      <p class="enterprise-copy">{{ t("app.file.workspaceDescription") }}</p>
     </div>
 
     <div

@@ -2,12 +2,12 @@ import type { WorkflowDefinitionRecord, WorkflowNode } from "@elysian/schema"
 import { type ComputedRef, type Ref, computed, ref } from "vue"
 
 import {
+  type WorkflowDefinitionListQuery,
   fetchWorkflowDefinitionById,
   fetchWorkflowDefinitions,
 } from "../lib/platform-api"
 import {
   type WorkflowStatusFilter,
-  filterWorkflowDefinitions,
   listWorkflowDefinitionVersions,
 } from "../lib/workflow-workspace"
 
@@ -44,8 +44,13 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
   const workflowDetailErrorMessage = ref("")
   const selectedWorkflowDefinitionId = ref<string | null>(null)
   const workflowDefinitionDetail = ref<WorkflowDefinitionRecord | null>(null)
+  const workflowDetailDialogOpen = ref(false)
   const workflowQuery = ref("")
   const workflowStatusFilter = ref<WorkflowStatusFilter>("all")
+  const workflowPage = ref(1)
+  const workflowPageSize = ref(20)
+  const workflowTotal = ref(0)
+  const workflowTotalPages = ref(1)
 
   const selectedWorkflowListItem = computed(
     () =>
@@ -59,24 +64,48 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
     () => workflowDefinitionDetail.value ?? selectedWorkflowListItem.value,
   )
 
-  const filteredWorkflowDefinitions = computed(() =>
-    filterWorkflowDefinitions(
-      workflowDefinitions.value,
-      workflowQuery.value,
-      workflowStatusFilter.value,
-    ),
+  const filteredWorkflowDefinitions = computed(() => workflowDefinitions.value)
+
+  const workflowVisibleDefinitionCards = computed<WorkflowDefinitionCard[]>(
+    () => workflowDefinitionCards.value,
   )
 
+  const workflowCanGoToPreviousPage = computed(() => workflowPage.value > 1)
+  const workflowCanGoToNextPage = computed(
+    () => workflowPage.value < workflowTotalPages.value,
+  )
+  const workflowPaginationSummary = computed(() => {
+    if (workflowTotal.value === 0) {
+      return options.t("app.workflow.pagination.empty")
+    }
+
+    const start = (workflowPage.value - 1) * workflowPageSize.value + 1
+    const end = Math.min(
+      workflowPage.value * workflowPageSize.value,
+      workflowTotal.value,
+    )
+
+    return options.t("app.workflow.pagination.summary", {
+      start,
+      end,
+      total: workflowTotal.value,
+      page: workflowPage.value,
+      totalPages: workflowTotalPages.value,
+    })
+  })
+
   const workflowDefinitionCards = computed<WorkflowDefinitionCard[]>(() =>
-    filteredWorkflowDefinitions.value.map((definition) => ({
-      ...definition,
-      updatedAtLabel: new Date(definition.updatedAt).toLocaleString(
-        options.locale.value,
-      ),
-      statusLabel: options.localizeStatus(definition.status),
-      nodeCount: definition.definition.nodes.length,
-      edgeCount: definition.definition.edges.length,
-    })),
+    workflowDefinitions.value.map(
+      (definition: WorkflowDefinitionRecord): WorkflowDefinitionCard => ({
+        ...definition,
+        updatedAtLabel: new Date(definition.updatedAt).toLocaleString(
+          options.locale.value,
+        ),
+        statusLabel: options.localizeStatus(definition.status),
+        nodeCount: definition.definition.nodes.length,
+        edgeCount: definition.definition.edges.length,
+      }),
+    ),
   )
 
   const workflowDefinitionDetailCards = computed<
@@ -134,17 +163,23 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
 
   const clearWorkflowDefinitions = () => {
     workflowDefinitions.value = []
+    workflowPage.value = 1
+    workflowTotal.value = 0
+    workflowTotalPages.value = 1
     selectedWorkflowDefinitionId.value = null
     workflowDefinitionDetail.value = null
+    workflowDetailDialogOpen.value = false
     workflowDetailErrorMessage.value = ""
   }
 
   const selectWorkflowDefinition = async (
     definition: WorkflowDefinitionRecord,
+    optionsOverride: { openDetail?: boolean } = {},
   ) => {
     options.currentShellTabKey.value = "workspace"
     selectedWorkflowDefinitionId.value = definition.id
     workflowDefinitionDetail.value = definition
+    workflowDetailDialogOpen.value = optionsOverride.openDetail ?? false
     workflowDetailLoading.value = true
     workflowDetailErrorMessage.value = ""
 
@@ -174,12 +209,19 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
     workflowDetailErrorMessage.value = ""
 
     try {
-      const payload = await fetchWorkflowDefinitions()
+      const payload = await fetchWorkflowDefinitions(
+        buildWorkflowDefinitionListQuery(),
+      )
       workflowDefinitions.value = payload.items
+      workflowPage.value = payload.page
+      workflowPageSize.value = payload.pageSize
+      workflowTotal.value = payload.total
+      workflowTotalPages.value = payload.totalPages
 
       if (payload.items.length === 0) {
         selectedWorkflowDefinitionId.value = null
         workflowDefinitionDetail.value = null
+        workflowDetailDialogOpen.value = false
         return
       }
 
@@ -211,39 +253,101 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
       return
     }
 
-    await selectWorkflowDefinition(definition)
+    await selectWorkflowDefinition(definition, { openDetail: true })
   }
 
-  const setWorkflowStatusFilter = (filter: WorkflowStatusFilter) => {
+  const closeWorkflowDefinitionDetail = () => {
+    workflowDetailDialogOpen.value = false
+  }
+
+  const setWorkflowQuery = async (query: string) => {
+    workflowQuery.value = query
+    workflowPage.value = 1
+    await reloadWorkflowDefinitions()
+  }
+
+  const setWorkflowStatusFilter = async (filter: WorkflowStatusFilter) => {
     workflowStatusFilter.value = filter
+    workflowPage.value = 1
+    await reloadWorkflowDefinitions()
   }
 
-  const resetWorkflowFilters = () => {
+  const resetWorkflowFilters = async () => {
     workflowQuery.value = ""
     workflowStatusFilter.value = "all"
+    workflowPage.value = 1
+    await reloadWorkflowDefinitions()
+  }
+
+  const goToPreviousWorkflowPage = async () => {
+    if (!workflowCanGoToPreviousPage.value) {
+      return
+    }
+
+    workflowPage.value -= 1
+    await reloadWorkflowDefinitions()
+  }
+
+  const goToNextWorkflowPage = async () => {
+    if (!workflowCanGoToNextPage.value) {
+      return
+    }
+
+    workflowPage.value += 1
+    await reloadWorkflowDefinitions()
+  }
+
+  const buildWorkflowDefinitionListQuery = (): WorkflowDefinitionListQuery => ({
+    q: workflowQuery.value,
+    status:
+      workflowStatusFilter.value === "all"
+        ? undefined
+        : workflowStatusFilter.value,
+    page: workflowPage.value,
+    pageSize: workflowPageSize.value,
+  })
+
+  const changeWorkflowPageSize = async (pageSize: number) => {
+    workflowPageSize.value = pageSize
+    workflowPage.value = 1
+    await reloadWorkflowDefinitions()
   }
 
   return {
+    changeWorkflowPageSize,
     clearWorkflowDefinitions,
+    closeWorkflowDefinitionDetail,
     filteredWorkflowDefinitions,
+    goToNextWorkflowPage,
+    goToPreviousWorkflowPage,
     handleWorkflowDefinitionSelect,
     reloadWorkflowDefinitions,
     resetWorkflowFilters,
     selectWorkflowDefinition,
     selectedWorkflowDefinition,
     selectedWorkflowDefinitionId,
+    setWorkflowQuery,
     setWorkflowStatusFilter,
+    workflowCanGoToNextPage,
+    workflowCanGoToPreviousPage,
     workflowDefinitionCards,
     workflowDefinitionDetail,
     workflowDefinitionDetailCards,
     workflowDefinitions,
     workflowDetailErrorMessage,
+    workflowDetailDialogOpen,
     workflowDetailLoading,
     workflowErrorMessage,
     workflowFilterSummary,
     workflowLoading,
+    workflowPage,
+    workflowPageSize,
+    workflowPaginationSummary,
     workflowQuery,
     workflowStatusFilter,
+    workflowTotal,
+    workflowTotalPages,
+    workflowVisibleDefinitionCards,
     workflowVersionHistoryCards,
   }
 }

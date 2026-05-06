@@ -5,14 +5,12 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.sectionCopy":
     "这里开始承接真实 workflow 模块。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
   "app.workflow.shellTitle": "流程定义工作区",
-  "app.workflow.shellDescription":
-    "列表与详情直接消费 workflow definitions 接口，验证多模块工作区的最小真实闭环。",
+  "app.workflow.shellDescription": "流程定义列表与详情。",
   "app.workflow-definition.sectionTitle": "流程定义工作区",
   "app.workflow-definition.sectionCopy":
     "这里开始承接真实 workflow 模块。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
   "app.workflow-definition.shellTitle": "流程定义工作区",
-  "app.workflow-definition.shellDescription":
-    "列表与详情直接消费 workflow definitions 接口，验证多模块工作区的最小真实闭环。",
+  "app.workflow-definition.shellDescription": "流程定义列表与详情。",
   "app.message.customerModuleOffline":
     "`customer` 模块尚未注册。请配置 `DATABASE_URL`，执行迁移与 seed 后重启服务。",
   "app.message.signInToLoad": "请先从侧栏登录，再加载受保护的客户数据。",
@@ -81,8 +79,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.empty": "当前租户下还没有流程定义。",
   "app.workflow.listEyebrow": "真实模块工作区",
   "app.workflow.listTitle": "流程定义清单",
-  "app.workflow.listDescription":
-    "主区只承接定义列表，点击后在右侧读取详情，避免在同一视图重复堆叠主体信息。",
+  "app.workflow.listDescription": "点击列表项打开详情弹窗。",
   "app.workflow.filter.searchLabel": "搜索定义",
   "app.workflow.filter.searchPlaceholder": "按名称、编码或 ID 搜索",
   "app.workflow.filter.statusTitle": "状态筛选",
@@ -93,9 +90,14 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.filter.none": "当前未启用筛选条件",
   "app.workflow.filter.querySummary": "关键词: {value}",
   "app.workflow.filter.statusSummary": "状态: {value}",
+  "app.workflow.pagination.empty": "共 0 条",
+  "app.workflow.pagination.summary":
+    "第 {page}/{totalPages} 页，{start}-{end} / {total} 条",
+  "app.workflow.pagination.previous": "上一页",
+  "app.workflow.pagination.next": "下一页",
   "app.workflow.detailEyebrow": "流程详情",
   "app.workflow.detailDescription":
-    "右侧详情保持聚焦，只展示当前定义的结构、状态与版本元数据。",
+    "详情弹窗保持聚焦，只展示当前定义的结构、状态与版本元数据。",
   "app.workflow.detailEmpty": "请选择一条流程定义查看结构详情。",
   "app.workflow.detailEmptyTitle": "尚未选择流程定义",
   "app.workflow.detailLoading": "正在刷新当前流程定义详情...",
@@ -128,7 +130,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.workspaceEyebrow": "生成会话预览",
   "app.generatorPreview.workspaceTitle": "Generator 产物清单",
   "app.generatorPreview.workspaceDescription":
-    "左侧选择 schema 与前端目标，主区展示 preview session 的文件计划与差异摘要；右侧聚焦当前文件、会话元数据与 apply 证据。",
+    "选择 schema 与前端目标后，主区展示 preview session 的文件计划、差异摘要与流程状态；下方信息卡片区聚焦当前文件、会话元数据与 apply 证据。",
   "app.generatorPreview.message.localOnly":
     "当前工作区只做本地预览，不会写入生成目录，也不会替代 CLI 的真实 apply/preview 报告。",
   "app.generatorPreview.message.runtimeBacked":
@@ -177,7 +179,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.querySummary": "关键词: {value}",
   "app.generatorPreview.detailEyebrow": "预览详情",
   "app.generatorPreview.detailDescription":
-    "右侧保持聚焦，只展示当前文件、preview session 元数据与 SQL preview，避免在两侧重复铺开文件列表。",
+    "详情卡片保持聚焦，只展示当前文件、preview session 元数据与 SQL preview，避免重复铺开文件列表。",
   "app.generatorPreview.detailEmptyTitle": "尚未选择生成文件",
   "app.generatorPreview.detailEmptyDescription":
     "从左侧产物列表中选择一项，查看源码、会话信息与 SQL preview。",
@@ -212,6 +214,11 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.next.resolveConflicts": "下一步：处理阻塞冲突",
   "app.generatorPreview.next.done": "下一步：已完成",
   "app.generatorPreview.next.wait": "下一步：等待状态更新",
+  "app.generatorPreview.flow.refresh": "1. 刷新预览",
+  "app.generatorPreview.flow.review": "2. 审核差异",
+  "app.generatorPreview.flow.confirm": "3. 确认清单",
+  "app.generatorPreview.flow.apply": "4. 应用到 staging",
+  "app.generatorPreview.flow.handoff": "5. 接入正式模块",
   "app.generatorPreview.reviewCommentLabel": "审核备注",
   "app.generatorPreview.reviewCommentPlaceholder":
     "可选：补充本次通过或拒绝的原因",
@@ -391,7 +398,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "`file` 模块尚未注册。请确认服务端已启用系统文件模块后再重试。",
   "app.message.fileSignInToLoad": "请先登录，再加载受保护的文件数据。",
   "app.message.fileNoListPermission":
-    "当前身份没有 `system:file:list` 权限；若仍具备上传权限，可以直接使用右侧上传面板。",
+    "当前身份没有 `system:file:list` 权限；若仍具备上传权限，可以直接使用下方上传卡片。",
   "app.error.loadFiles": "文件列表加载失败",
   "app.error.loadFileDetail": "文件详情加载失败",
   "app.error.uploadFile": "文件上传失败",

@@ -98,6 +98,10 @@ describe("platform api workflow overrides", () => {
 
     await expect(fetchWorkflowDefinitions()).resolves.toEqual({
       items: workflowOverrides,
+      page: 1,
+      pageSize: 20,
+      total: workflowOverrides.length,
+      totalPages: 1,
     })
   })
 

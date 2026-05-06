@@ -10,7 +10,9 @@ import {
 } from "./shell-workspace-secondary-descriptor"
 import { resolveProvidedWorkspaceState } from "./workspace-state-provider"
 
-const props = defineProps<ShellWorkspaceSecondarySwitchProps>()
+const props = withDefaults(defineProps<ShellWorkspaceSecondarySwitchProps>(), {
+  hideSessionCard: false,
+})
 const emit = defineEmits<ShellWorkspaceSecondarySwitchEmitFn>()
 
 const activeWorkspace = computed(() =>
@@ -170,6 +172,7 @@ provide(WORKSPACE_STATE_KEY, providedWorkspaceState)
   />
 
   <ShellWorkspaceSessionCard
+    v-if="!hideSessionCard"
     :t="t"
     :auth-module-ready="authModuleReady"
     :is-authenticated="isAuthenticated"

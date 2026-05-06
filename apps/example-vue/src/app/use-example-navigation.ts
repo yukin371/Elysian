@@ -179,6 +179,9 @@ export const useExampleNavigation = ({
       "customer",
     ),
   )
+  const sessionNavigationItem = computed(() =>
+    resolveWorkspaceNavigationItemByKind(enterpriseNavigation.value, "session"),
+  )
 
   const currentWorkspaceModuleStatus = computed(() =>
     resolveExampleWorkspaceModuleStatus({
@@ -265,6 +268,24 @@ export const useExampleNavigation = ({
     currentShellTabKey.value = selectionIntent.selectedTabKey
   }
 
+  const openSessionWorkspace = () => {
+    if (!sessionNavigationItem.value) {
+      return
+    }
+
+    const selectionIntent = resolveExampleWorkspaceSelectionIntent(
+      enterpriseNavigation.value,
+      sessionNavigationItem.value.id,
+    )
+
+    if (!selectionIntent) {
+      return
+    }
+
+    currentMenuKey.value = selectionIntent.selectedMenuKey
+    currentShellTabKey.value = selectionIntent.selectedTabKey
+  }
+
   const openCurrentWorkspaceTab = () => {
     currentShellTabKey.value = "workspace"
   }
@@ -329,6 +350,7 @@ export const useExampleNavigation = ({
     navigationItemCount,
     openCurrentWorkspaceTab,
     openCustomerWorkspace,
+    openSessionWorkspace,
     placeholderWorkspaceCopy,
     selectShellMenu,
     selectShellTab,

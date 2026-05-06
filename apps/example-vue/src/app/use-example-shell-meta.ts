@@ -12,6 +12,7 @@ import type {
 import type { AppTranslate, ExampleWorkspaceKind } from "./app-shell-helpers"
 
 type ItemCollection = Ref<unknown[]> | ComputedRef<unknown[]>
+type NumberSource = Ref<number> | ComputedRef<number>
 
 export interface UseExampleShellMetaOptions {
   t: AppTranslate
@@ -52,6 +53,7 @@ export interface UseExampleShellMetaOptions {
   tenantItems: ItemCollection
   userItems: ItemCollection
   workflowDefinitions: ItemCollection
+  workflowDefinitionTotal: NumberSource
   fileItems: ItemCollection
   generatorPreviewFiles: ItemCollection
 }
@@ -95,6 +97,7 @@ export const useExampleShellMeta = ({
   tenantItems,
   userItems,
   workflowDefinitions,
+  workflowDefinitionTotal,
   fileItems,
   generatorPreviewFiles,
 }: UseExampleShellMetaOptions) => {
@@ -341,7 +344,7 @@ export const useExampleShellMeta = ({
                                     })
                                   : isWorkflowDefinitionsWorkspace.value
                                     ? t("app.workflow.tabsHint", {
-                                        count: workflowDefinitions.value.length,
+                                        count: workflowDefinitionTotal.value,
                                       })
                                     : currentNavigationPath.value,
     },

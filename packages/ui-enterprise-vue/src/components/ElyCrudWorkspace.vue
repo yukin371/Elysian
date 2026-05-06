@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Button as TButton } from "tdesign-vue-next/es/button"
 import { Empty as TEmpty } from "tdesign-vue-next/es/empty"
 import { Space as TSpace } from "tdesign-vue-next/es/space"
 
+import { computed } from "vue"
 import type { ElyCrudWorkspaceEmits, ElyCrudWorkspaceProps } from "../contracts"
 import ElyQueryBar from "./ElyQueryBar.vue"
 import ElyTable from "./ElyTable.vue"
 
 const props = defineProps<ElyCrudWorkspaceProps>()
 const emit = defineEmits<ElyCrudWorkspaceEmits>()
+const hasDescription = computed(() => props.description.trim().length > 0)
 
 const handleAction = (key: string, row: Record<string, unknown>) => {
   emit("action", key, row)
@@ -21,7 +22,7 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
       <div>
         <p class="ely-crud-eyebrow">{{ eyebrow }}</p>
         <h3>{{ title }}</h3>
-        <p class="ely-crud-copy">{{ description }}</p>
+        <p v-if="hasDescription" class="ely-crud-copy">{{ description }}</p>
       </div>
 
       <div class="ely-crud-toolbar">
@@ -51,13 +52,6 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
           </span>
         </div>
 
-        <TButton
-          theme="primary"
-          variant="text"
-          class="ely-crud-card-button"
-        >
-          {{ copy?.liveContractLabel ?? "实时契约" }}
-        </TButton>
       </div>
 
       <div v-if="props.items.length === 0 && !tableLoading" class="ely-crud-empty">
@@ -153,10 +147,6 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   margin-top: 0.4rem;
   font-size: 0.84rem;
   color: #94a3b8;
-}
-
-.ely-crud-card-button {
-  color: #1d4ed8;
 }
 
 .ely-crud-empty {

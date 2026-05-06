@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import type { WorkflowDefinitionRecord } from "@elysian/schema"
+import { Dialog as TDialog } from "tdesign-vue-next/es/dialog"
 import { Input as TInput } from "tdesign-vue-next/es/input"
+import { computed } from "vue"
 
 import type {
   WorkflowDefinitionCard,
+  WorkflowDefinitionDetailCard,
   WorkflowStatusFilter,
   WorkflowTranslation,
 } from "./types"
@@ -21,6 +25,16 @@ interface WorkflowWorkspaceMainProps {
   filterSummary: string
   definitionCards: WorkflowDefinitionCard[]
   definitionCount: number
+  paginationSummary: string
+  canGoToPreviousPage: boolean
+  canGoToNextPage: boolean
+  detailDialogOpen: boolean
+  detailLoading: boolean
+  detailErrorMessage: string
+  selectedDefinition: WorkflowDefinitionRecord | null
+  versionHistoryCards: WorkflowDefinitionCard[]
+  detailCards: WorkflowDefinitionDetailCard[]
+  localizeStatus: (status: WorkflowDefinitionRecord["status"]) => string
   selectedDefinitionId: string | null
 }
 
@@ -31,6 +45,9 @@ const emit = defineEmits<{
   (e: "select-definition", definitionId: string): void
   (e: "select-status-filter", filter: WorkflowStatusFilter): void
   (e: "reset-filters"): void
+  (e: "go-previous-page"): void
+  (e: "go-next-page"): void
+  (e: "close-detail"): void
 }>()
 
 const handleQueryInput = (value: string | number) => {
@@ -39,13 +56,24 @@ const handleQueryInput = (value: string | number) => {
 
 const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
   props.statusFilter === filter
+
+const selectedDefinitionUpdatedAtLabel = computed(() =>
+  props.selectedDefinition
+    ? new Date(props.selectedDefinition.updatedAt).toLocaleString()
+    : "",
+)
 </script>
 
 <template>
   <section class="enterprise-card enterprise-main-card">
-    <p class="enterprise-eyebrow">{{ t("app.workflow.listEyebrow") }}</p>
-    <h3 class="enterprise-heading">{{ t("app.workflow.listTitle") }}</h3>
-    <p class="enterprise-copy">{{ t("app.workflow.listDescription") }}</p>
+    <div class="workflow-list-head">
+      <div>
+        <h3 class="enterprise-heading">{{ t("app.workflow.listTitle") }}</h3>
+      </div>
+      <span class="enterprise-toolbar-pill">
+        {{ paginationSummary }}
+      </span>
+    </div>
 
     <div
       v-if="!moduleReady"
@@ -191,14 +219,151 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
           </div>
         </button>
       </div>
+
+      <div class="workflow-pagination">
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="!canGoToPreviousPage"
+          @click="emit('go-previous-page')"
+        >
+          {{ t("app.workflow.pagination.previous") }}
+        </button>
+        <span>{{ paginationSummary }}</span>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="!canGoToNextPage"
+          @click="emit('go-next-page')"
+        >
+          {{ t("app.workflow.pagination.next") }}
+        </button>
+      </div>
     </div>
+
+    <TDialog
+      :visible="detailDialogOpen"
+      :header="
+        selectedDefinition?.name ?? t('app.workflow.detailEmptyTitle')
+      "
+      width="760px"
+      placement="center"
+      :footer="false"
+      destroy-on-close
+      @close="emit('close-detail')"
+      @update:visible="
+        (visible) => {
+          if (!visible) emit('close-detail')
+        }
+      "
+    >
+      <div class="workflow-detail-dialog">
+        <div
+          v-if="detailLoading && selectedDefinition"
+          class="enterprise-inline-warning"
+        >
+          {{ t("app.workflow.detailLoading") }}
+        </div>
+
+        <div v-if="detailErrorMessage" class="enterprise-inline-warning">
+          {{ detailErrorMessage }}
+        </div>
+
+        <div v-if="selectedDefinition" class="enterprise-metadata">
+          <div>
+            <span>{{ t("app.workflow.meta.status") }}</span>
+            <strong>{{ localizeStatus(selectedDefinition.status) }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.workflow.meta.key") }}</span>
+            <strong>{{ selectedDefinition.key }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.workflow.meta.version") }}</span>
+            <strong>v{{ selectedDefinition.version }}</strong>
+          </div>
+          <div>
+            <span>{{ t("app.workflow.meta.structure") }}</span>
+            <strong>
+              {{ selectedDefinition.definition.nodes.length }}
+              {{ t("app.workflow.meta.nodes") }}
+              / {{ selectedDefinition.definition.edges.length }}
+              {{ t("app.workflow.meta.edges") }}
+            </strong>
+          </div>
+          <div>
+            <span>{{ t("app.workflow.meta.updatedAt") }}</span>
+            <strong>{{ selectedDefinitionUpdatedAtLabel }}</strong>
+          </div>
+        </div>
+
+        <div v-if="selectedDefinition" class="workflow-detail-grid">
+          <section>
+            <p class="enterprise-subheading">
+              {{ t("app.workflow.versionHistoryTitle") }}
+            </p>
+            <div class="workflow-version-history">
+              <button
+                v-for="definition in versionHistoryCards"
+                :key="definition.id"
+                type="button"
+                class="workflow-version-card"
+                :class="
+                  selectedDefinitionId === definition.id
+                    ? 'workflow-version-card-active'
+                    : ''
+                "
+                @click="emit('select-definition', definition.id)"
+              >
+                <strong>v{{ definition.version }}</strong>
+                <span>{{ definition.statusLabel }}</span>
+                <small>{{ definition.updatedAtLabel }}</small>
+              </button>
+            </div>
+          </section>
+
+          <section>
+            <p class="enterprise-subheading">
+              {{ t("app.workflow.nodeFlowTitle") }}
+            </p>
+            <ul class="workflow-node-list">
+              <li
+                v-for="node in detailCards"
+                :key="node.id"
+                class="workflow-node-item"
+              >
+                <div class="workflow-node-item-header">
+                  <strong>{{ node.name }}</strong>
+                  <span>{{ node.typeLabel }}</span>
+                </div>
+                <p v-if="node.description" class="workflow-node-copy">
+                  {{ node.description }}
+                </p>
+              </li>
+            </ul>
+          </section>
+        </div>
+
+        <div v-else class="enterprise-message enterprise-message-info">
+          {{ t("app.workflow.detailEmpty") }}
+        </div>
+      </div>
+    </TDialog>
   </section>
 </template>
 
 <style scoped>
+.workflow-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
 .workflow-filter-bar {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .workflow-filter-search {
@@ -237,15 +402,15 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
 
 .workflow-definition-list {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.6rem;
 }
 
 .workflow-definition-card {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255, 255, 255, 0.96);
-  padding: 1rem;
+  padding: 0.75rem 0.85rem;
   text-align: left;
   color: #0f172a;
   transition:
@@ -286,7 +451,7 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem 0.85rem;
-  margin-top: 0.9rem;
+  margin-top: 0.55rem;
   font-size: 0.8rem;
   color: #475569;
 }
@@ -301,5 +466,111 @@ const isStatusFilterActive = (filter: WorkflowStatusFilter) =>
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;
+}
+
+.workflow-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.workflow-detail-dialog {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.workflow-detail-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+}
+
+.workflow-version-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.workflow-version-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.55rem 0.7rem;
+}
+
+.workflow-version-card-active {
+  border-color: rgba(36, 87, 214, 0.3);
+  background: rgba(36, 87, 214, 0.1);
+  color: #173ea6;
+}
+
+.workflow-version-card small {
+  color: #64748b;
+}
+
+.workflow-node-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workflow-node-item {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  color: #0f172a;
+}
+
+.workflow-node-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.workflow-node-item-header strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.workflow-node-item-header span {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(36, 87, 214, 0.1);
+  color: #173ea6;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.workflow-node-copy {
+  margin: 0.45rem 0 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .workflow-detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

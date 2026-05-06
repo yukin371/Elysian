@@ -101,14 +101,18 @@ export const createWorkflowModule = (
     return app
       .get(
         "/workflow/definitions",
-        async ({ request }) => {
+        async ({ query, request }) => {
           await authorize(request.headers, workflowPermissions.listDefinition)
 
-          return {
-            items: await service.list(),
-          }
+          return service.list(query)
         },
         {
+          query: t.Object({
+            q: t.Optional(t.String()),
+            status: t.Optional(workflowDefinitionStatusSchema),
+            page: t.Optional(t.Numeric()),
+            pageSize: t.Optional(t.Numeric()),
+          }),
           response: {
             200: workflowDefinitionListResponseSchema,
             ...createErrorResponses(401, 403),

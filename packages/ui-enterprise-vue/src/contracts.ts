@@ -51,6 +51,7 @@ export interface ElyShellProps {
 export interface ElyShellEmits {
   (e: "menu-select", key: string): void
   (e: "tab-select", key: string): void
+  (e: "user-click"): void
 }
 
 export interface ResolvedElyShellCopy {

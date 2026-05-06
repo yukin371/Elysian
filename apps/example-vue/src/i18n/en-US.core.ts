@@ -85,7 +85,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
     "The table, actions, and query inputs come from the shared customer page definition and are rendered through the enterprise wrapper.",
   "app.workspace.emptyTitle": "No customers in scope",
   "app.workspace.emptyDescription":
-    "Adjust the filters or create a new customer from the side panel.",
+    "Adjust the filters or create a new customer from the detail cards.",
   "app.workspace.countLabel":
     "{visible} rows on this page, {total} total, page {page} of {totalPages}",
   "app.workspace.footerStatus": "Preset status",
@@ -110,11 +110,15 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.workspace.paginationJumpLabel": "Jump to page",
   "app.workspace.paginationJumpPlaceholder": "Enter page",
   "app.workspace.paginationJumpSubmit": "Go",
+  "app.pagination.summary": "Page {page}/{totalPages}, {start}-{end} / {total}",
+  "app.pagination.pageSize": "Per page",
+  "app.pagination.previous": "Previous",
+  "app.pagination.next": "Next",
   "app.placeholder.eyebrow": "Page status",
   "app.placeholder.sideEyebrow": "Integration status",
   "app.placeholder.sideTitle": "Page boundary",
   "app.placeholder.sideDescription":
-    "The side panel now keeps only assembly boundaries and integration rules instead of repeating the main-state summary.",
+    "The detail cards now keep only assembly boundaries and integration rules instead of repeating the main-state summary.",
   "app.placeholder.sideOwnerLabel": "Page owner",
   "app.placeholder.sideOwnerValue": "apps/example-vue",
   "app.placeholder.sideSharedLabel": "Shared shell",

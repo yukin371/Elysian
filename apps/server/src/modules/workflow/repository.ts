@@ -3,6 +3,7 @@ import {
   type CreateWorkflowInstancePersistenceInput,
   type CreateWorkflowTaskPersistenceInput,
   type DatabaseClient,
+  type ListWorkflowDefinitionsPersistenceResult,
   type WorkflowDefinitionRow,
   type WorkflowInstanceRow,
   type WorkflowTaskRow,
@@ -73,6 +74,21 @@ export interface ListWorkflowTasksFilter {
   assignee?: string
 }
 
+export interface ListWorkflowDefinitionsFilter {
+  q?: string
+  status?: WorkflowDefinitionStatus
+  page?: number
+  pageSize?: number
+}
+
+export interface WorkflowDefinitionListResult {
+  items: WorkflowDefinitionRecord[]
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+}
+
 export interface UpdateWorkflowInstanceInput {
   status?: WorkflowInstanceStatus
   currentNodeId?: string | null
@@ -105,7 +121,9 @@ export interface InMemoryWorkflowRepositorySeed {
 }
 
 export interface WorkflowRepository {
-  list: () => Promise<WorkflowDefinitionRecord[]>
+  list: (
+    filter?: ListWorkflowDefinitionsFilter,
+  ) => Promise<WorkflowDefinitionListResult>
   getById: (id: string) => Promise<WorkflowDefinitionRecord | null>
   getLatestByKey: (key: string) => Promise<WorkflowDefinitionRecord | null>
   create: (
@@ -153,9 +171,9 @@ export type WorkflowDefinitionRepository = WorkflowRepository
 export const createWorkflowRepository = (
   db: DatabaseClient,
 ): WorkflowRepository => ({
-  list: async () => {
-    const rows = await listWorkflowDefinitions(db)
-    return rows.map(mapWorkflowDefinitionRow)
+  list: async (filter = {}) => {
+    const result = await listWorkflowDefinitions(db, filter)
+    return mapWorkflowDefinitionListResult(result)
   },
   getById: async (id) => {
     const row = await getWorkflowDefinitionById(db, id)
@@ -311,8 +329,20 @@ export const createInMemoryWorkflowRepository = (
   const tasks = new Map(seedTasks.map((item) => [item.id, item] as const))
 
   return {
-    async list() {
-      return [...definitions.values()].sort(compareWorkflowDefinitions)
+    async list(filter = {}) {
+      const items = filterWorkflowDefinitions(
+        [...definitions.values()],
+        filter,
+      ).sort(compareWorkflowDefinitions)
+      const pagination = paginateWorkflowDefinitions(items, filter)
+
+      return {
+        ...pagination,
+        items: items.slice(
+          (pagination.page - 1) * pagination.pageSize,
+          pagination.page * pagination.pageSize,
+        ),
+      }
     },
     async getById(id) {
       return definitions.get(id) ?? null
@@ -584,6 +614,58 @@ const mapWorkflowDefinitionRow = (
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 })
+
+const mapWorkflowDefinitionListResult = (
+  result: ListWorkflowDefinitionsPersistenceResult,
+): WorkflowDefinitionListResult => ({
+  items: result.items.map(mapWorkflowDefinitionRow),
+  page: result.page,
+  pageSize: result.pageSize,
+  total: result.total,
+  totalPages: result.totalPages,
+})
+
+const filterWorkflowDefinitions = (
+  definitions: WorkflowDefinitionRecord[],
+  filter: ListWorkflowDefinitionsFilter,
+) => {
+  const query = filter.q?.trim().toLowerCase()
+
+  return definitions.filter((definition) => {
+    const matchesQuery =
+      !query ||
+      definition.name.toLowerCase().includes(query) ||
+      definition.key.toLowerCase().includes(query) ||
+      definition.id.toLowerCase().includes(query)
+    const matchesStatus = !filter.status || definition.status === filter.status
+
+    return matchesQuery && matchesStatus
+  })
+}
+
+const paginateWorkflowDefinitions = (
+  items: WorkflowDefinitionRecord[],
+  filter: ListWorkflowDefinitionsFilter,
+): Omit<WorkflowDefinitionListResult, "items"> => {
+  const pageSize =
+    typeof filter.pageSize === "number" && Number.isFinite(filter.pageSize)
+      ? Math.min(100, Math.max(1, Math.trunc(filter.pageSize)))
+      : 20
+  const requestedPage =
+    typeof filter.page === "number" && Number.isFinite(filter.page)
+      ? Math.max(1, Math.trunc(filter.page))
+      : 1
+  const total = items.length
+  const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+  const page = Math.min(requestedPage, totalPages)
+
+  return {
+    page,
+    pageSize,
+    total,
+    totalPages,
+  }
+}
 
 const toPersistenceWorkflowDefinition = (
   definition: WorkflowDefinitionDraft,

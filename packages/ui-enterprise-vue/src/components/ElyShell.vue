@@ -179,8 +179,14 @@ const handleDirectoryToggle = (menuKey: string) => {
 
       <TLayout class="ely-shell-main">
         <THeader height="auto" class="ely-shell-header">
-          <div>
+          <div class="ely-header-primary">
             <h2>{{ workspaceTitle }}</h2>
+            <ElyShellTabs
+              v-if="tabs && tabs.length > 0"
+              :tabs="tabs"
+              :selected-key="selectedTabKey"
+              @select="handleTabSelect"
+            />
           </div>
 
           <div class="ely-header-actions">
@@ -188,7 +194,12 @@ const handleDirectoryToggle = (menuKey: string) => {
               <slot name="header-actions" />
             </TSpace>
 
-            <div v-if="user" class="ely-user">
+            <button
+              v-if="user"
+              type="button"
+              class="ely-user"
+              @click="emit('user-click')"
+            >
               <TAvatar size="42px" class="ely-user-avatar">
                 {{ userInitial }}
               </TAvatar>
@@ -196,16 +207,9 @@ const handleDirectoryToggle = (menuKey: string) => {
                 <strong>{{ user.displayName }}</strong>
                 <span>{{ user.username }}</span>
               </div>
-            </div>
+            </button>
           </div>
         </THeader>
-
-        <ElyShellTabs
-          v-if="tabs && tabs.length > 0"
-          :tabs="tabs"
-          :selected-key="selectedTabKey"
-          @select="handleTabSelect"
-        />
 
         <TContent class="ely-shell-content">
           <div v-if="stats.length > 0" class="ely-stat-grid">
@@ -237,9 +241,9 @@ const handleDirectoryToggle = (menuKey: string) => {
               </slot>
             </section>
 
-            <aside v-if="$slots.secondary" class="ely-workspace-side">
+            <section v-if="$slots.secondary" class="ely-workspace-side">
               <slot name="secondary" />
-            </aside>
+            </section>
           </div>
         </TContent>
       </TLayout>
@@ -414,24 +418,28 @@ const handleDirectoryToggle = (menuKey: string) => {
 
 .ely-shell-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   flex-shrink: 0;
   min-height: auto;
-  padding: 0.9rem 1rem;
+  padding: 0.55rem 0.75rem;
   background: #ffffff;
   border-bottom: 1px solid var(--elysian-ely-border);
 }
 
-.ely-shell-header > div:first-child {
+.ely-header-primary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   flex: 1;
   min-width: 0;
 }
 
 .ely-shell-header h2 {
   margin: 0;
-  font-size: 1.25rem;
+  flex-shrink: 0;
+  font-size: 1.05rem;
   line-height: 1.25;
   word-break: keep-all;
   color: var(--elysian-ely-ink);
@@ -440,7 +448,7 @@ const handleDirectoryToggle = (menuKey: string) => {
 .ely-header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.55rem;
   flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -459,11 +467,33 @@ const handleDirectoryToggle = (menuKey: string) => {
 .ely-user {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 0.55rem 0.85rem;
+  gap: 0.65rem;
+  padding: 0.35rem 0.65rem;
   border: 1px solid var(--elysian-ely-border);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.72);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.ely-user:hover {
+  border-color: rgba(36, 87, 214, 0.22);
+  background: rgba(239, 246, 255, 0.72);
+}
+
+.ely-user:active {
+  transform: translateY(1px);
+}
+
+.ely-user:focus-visible {
+  outline: 2px solid rgba(36, 87, 214, 0.35);
+  outline-offset: 2px;
 }
 
 .ely-user strong {
@@ -478,6 +508,13 @@ const handleDirectoryToggle = (menuKey: string) => {
   color: var(--elysian-ely-slate);
 }
 
+.ely-shell-header :deep(.ely-shell-tabs) {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border-bottom: 0;
+}
+
 .ely-user-avatar {
   background: var(--elysian-ely-accent-soft);
   color: var(--elysian-ely-accent);
@@ -485,6 +522,7 @@ const handleDirectoryToggle = (menuKey: string) => {
 }
 
 .ely-shell-content {
+  position: relative;
   flex: 1;
   min-height: 0;
   padding: 0.75rem;
@@ -523,7 +561,7 @@ const handleDirectoryToggle = (menuKey: string) => {
 .ely-workspace-grid {
   display: grid;
   gap: 0.75rem;
-  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  grid-template-columns: 1fr;
   margin-top: 0;
 }
 
@@ -532,6 +570,15 @@ const handleDirectoryToggle = (menuKey: string) => {
 }
 
 .ely-workspace-main,
+.ely-workspace-side {
+  gap: 0.75rem;
+}
+
+.ely-workspace-main {
+  display: flex;
+  flex-direction: column;
+}
+
 .ely-workspace-side {
   display: flex;
   flex-direction: column;
@@ -550,6 +597,13 @@ const handleDirectoryToggle = (menuKey: string) => {
 
   .ely-shell-header {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ely-header-primary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
   }
 
   .ely-header-actions {

@@ -70,6 +70,7 @@ const {
   enterpriseNavigation,
   enterpriseSelectedMenuKey,
   enterpriseSelectedTabKey,
+  openSessionWorkspace,
   selectShellMenu,
   selectShellTab,
 } = exampleWorkspaces.exampleNavigation
@@ -116,6 +117,7 @@ const {
       @submit-login="submitLogin"
       @menu-select="selectShellMenu"
       @tab-select="selectShellTab"
+      @user-click="openSessionWorkspace"
     />
   </TConfigProvider>
 </template>

@@ -1,6 +1,12 @@
-import { and, asc, desc, eq, sql } from "drizzle-orm"
+import { type SQL, and, asc, desc, eq, ilike, or, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
+import {
+  type PaginatedResult,
+  type PaginationQuery,
+  buildPaginatedResult,
+  normalizePagination,
+} from "./query-utils"
 import {
   type WorkflowDefinitionRow,
   type WorkflowInstanceRow,
@@ -50,6 +56,15 @@ export interface ListWorkflowTasksPersistenceFilter {
   assignee?: string
 }
 
+export interface ListWorkflowDefinitionsPersistenceFilter
+  extends PaginationQuery {
+  q?: string
+  status?: "active" | "disabled"
+}
+
+export type ListWorkflowDefinitionsPersistenceResult =
+  PaginatedResult<WorkflowDefinitionRow>
+
 export interface UpdateWorkflowInstancePersistenceInput {
   status?: "running" | "completed" | "terminated"
   currentNodeId?: string | null
@@ -67,15 +82,65 @@ export interface UpdateWorkflowTaskPersistenceInput {
   completedAt?: Date | null
 }
 
-export async function listWorkflowDefinitions(db: DatabaseClient) {
-  return db
+const DEFAULT_WORKFLOW_DEFINITION_PAGE_SIZE = 20
+
+export async function listWorkflowDefinitions(
+  db: DatabaseClient,
+  filter: ListWorkflowDefinitionsPersistenceFilter = {},
+): Promise<ListWorkflowDefinitionsPersistenceResult> {
+  const pagination = normalizePagination(
+    filter,
+    DEFAULT_WORKFLOW_DEFINITION_PAGE_SIZE,
+  )
+  const where = buildWorkflowDefinitionWhere(filter)
+  const [countRow] = await db
+    .select({
+      total: sql<number>`cast(count(*) as int)`,
+    })
+    .from(workflowDefinitions)
+    .where(where)
+  const total = countRow?.total ?? 0
+  const paginated = buildPaginatedResult([], total, pagination)
+  const items = await db
     .select()
     .from(workflowDefinitions)
+    .where(where)
     .orderBy(
       asc(workflowDefinitions.key),
       desc(workflowDefinitions.version),
       desc(workflowDefinitions.createdAt),
     )
+    .limit(pagination.pageSize)
+    .offset((paginated.page - 1) * pagination.pageSize)
+
+  return {
+    ...paginated,
+    items,
+  }
+}
+
+const buildWorkflowDefinitionWhere = (
+  filter: ListWorkflowDefinitionsPersistenceFilter,
+): SQL | undefined => {
+  const conditions: SQL[] = []
+  const query = filter.q?.trim()
+
+  if (query) {
+    const pattern = `%${query}%`
+    conditions.push(
+      or(
+        ilike(workflowDefinitions.name, pattern),
+        ilike(workflowDefinitions.key, pattern),
+        ilike(workflowDefinitions.id, pattern),
+      ) as SQL,
+    )
+  }
+
+  if (filter.status) {
+    conditions.push(eq(workflowDefinitions.status, filter.status))
+  }
+
+  return conditions.length > 0 ? and(...conditions) : undefined
 }
 
 export async function getWorkflowDefinitionById(

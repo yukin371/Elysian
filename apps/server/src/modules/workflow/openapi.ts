@@ -87,6 +87,10 @@ export const workflowDefinitionRecordResponseSchema = t.Object({
 
 export const workflowDefinitionListResponseSchema = t.Object({
   items: t.Array(workflowDefinitionRecordResponseSchema),
+  page: t.Number(),
+  pageSize: t.Number(),
+  total: t.Number(),
+  totalPages: t.Number(),
 })
 
 export const workflowTaskRecordResponseSchema = t.Object({

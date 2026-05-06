@@ -30,7 +30,7 @@ defineEmits<(event: "select", key: string) => void>()
   display: flex;
   flex-shrink: 0;
   gap: 0;
-  min-height: 42px;
+  min-height: 34px;
   padding: 0 1rem;
   background: #ffffff;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
@@ -39,8 +39,8 @@ defineEmits<(event: "select", key: string) => void>()
 
 .ely-shell-tab {
   appearance: none;
-  min-width: 116px;
-  padding: 0.5rem 0.85rem;
+  min-width: 104px;
+  padding: 0.35rem 0.7rem;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -54,12 +54,13 @@ defineEmits<(event: "select", key: string) => void>()
 }
 
 .ely-shell-tab strong {
+  font-size: 0.86rem;
   color: #0f172a;
 }
 
 .ely-shell-tab span {
-  margin-top: 0.18rem;
-  font-size: 0.76rem;
+  margin-top: 0.1rem;
+  font-size: 0.7rem;
   color: #5b6678;
 }
 

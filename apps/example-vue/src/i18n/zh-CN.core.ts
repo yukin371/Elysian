@@ -84,7 +84,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.workspace.description":
     "表格、动作和查询条件都来自共享的客户页面定义，再通过企业预设进行渲染。",
   "app.workspace.emptyTitle": "当前范围内没有客户",
-  "app.workspace.emptyDescription": "调整筛选条件，或从右侧面板新建客户。",
+  "app.workspace.emptyDescription": "调整筛选条件，或从下方信息卡片新建客户。",
   "app.workspace.countLabel":
     "当前页 {visible} 条，共 {total} 条，第 {page}/{totalPages} 页",
   "app.workspace.footerStatus": "预设状态",
@@ -109,11 +109,16 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.workspace.paginationJumpLabel": "跳转页码",
   "app.workspace.paginationJumpPlaceholder": "输入页码",
   "app.workspace.paginationJumpSubmit": "跳转",
+  "app.pagination.summary":
+    "第 {page}/{totalPages} 页，{start}-{end} / {total} 条",
+  "app.pagination.pageSize": "每页",
+  "app.pagination.previous": "上一页",
+  "app.pagination.next": "下一页",
   "app.placeholder.eyebrow": "页面说明",
   "app.placeholder.sideEyebrow": "接入状态",
   "app.placeholder.sideTitle": "页面边界",
   "app.placeholder.sideDescription":
-    "右侧只保留装配边界与接入决策，不再重复主区已经展示的状态信息。",
+    "信息卡片区只保留装配边界与接入决策，不再重复主区已经展示的状态信息。",
   "app.placeholder.sideOwnerLabel": "页面 owner",
   "app.placeholder.sideOwnerValue": "apps/example-vue",
   "app.placeholder.sideSharedLabel": "共享壳层",
@@ -165,7 +170,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.runtime.sideEyebrow": "运行态边界",
   "app.runtime.sideTitle": "当前 tab 语义",
   "app.runtime.sideDescription":
-    "切到运行态后，右侧副栏不再显示业务详情或编辑面板，只保留页面诊断与边界说明。",
+    "切到运行态后，信息卡片区不再显示业务详情或编辑面板，只保留页面诊断与边界说明。",
   "app.runtime.sideAuthLabel": "会话状态",
   "app.runtime.sideModuleCodeLabel": "模块代码",
   "app.runtime.sideDecisionTitle": "当前约束",

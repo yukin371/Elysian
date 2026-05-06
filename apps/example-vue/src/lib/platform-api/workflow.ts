@@ -5,6 +5,17 @@ export type { WorkflowDefinitionRecord } from "./types"
 
 export interface WorkflowDefinitionsResponse {
   items: WorkflowDefinitionRecord[]
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+}
+
+export interface WorkflowDefinitionListQuery {
+  q?: string
+  status?: "active" | "disabled"
+  page?: number
+  pageSize?: number
 }
 
 export type GeneratorPreviewConflictStrategy =
@@ -339,20 +350,119 @@ const readWorkflowDefinitionOverrides = () => {
   )
 }
 
-export const fetchWorkflowDefinitions =
-  async (): Promise<WorkflowDefinitionsResponse> => {
-    const overrides = readWorkflowDefinitionOverrides()
+export const fetchWorkflowDefinitions = async (
+  query: WorkflowDefinitionListQuery = {},
+): Promise<WorkflowDefinitionsResponse> => {
+  const overrides = readWorkflowDefinitionOverrides()
 
-    if (overrides) {
-      return {
-        items: overrides,
-      }
-    }
+  if (overrides) {
+    const pageSize =
+      typeof query.pageSize === "number" && Number.isFinite(query.pageSize)
+        ? Math.min(100, Math.max(1, Math.trunc(query.pageSize)))
+        : overrides.length > 0
+          ? 20
+          : 20
+    const page =
+      typeof query.page === "number" && Number.isFinite(query.page)
+        ? Math.max(1, Math.trunc(query.page))
+        : 1
+    const filtered = overrides.filter((definition) => {
+      const normalizedQuery = query.q?.trim().toLowerCase()
+      const matchesQuery =
+        !normalizedQuery ||
+        definition.name.toLowerCase().includes(normalizedQuery) ||
+        definition.key.toLowerCase().includes(normalizedQuery) ||
+        definition.id.toLowerCase().includes(normalizedQuery)
+      const matchesStatus = !query.status || definition.status === query.status
 
-    return requestJson<WorkflowDefinitionsResponse>("/workflow/definitions", {
-      auth: true,
+      return matchesQuery && matchesStatus
     })
+    const total = filtered.length
+    const totalPages = total === 0 ? 1 : Math.ceil(total / pageSize)
+    const resolvedPage = Math.min(page, totalPages)
+    const items = filtered.slice(
+      (resolvedPage - 1) * pageSize,
+      resolvedPage * pageSize,
+    )
+
+    return {
+      items,
+      page: resolvedPage,
+      pageSize,
+      total,
+      totalPages,
+    }
   }
+
+  const searchParams = new URLSearchParams()
+
+  if (query.q?.trim()) {
+    searchParams.set("q", query.q.trim())
+  }
+
+  if (query.status) {
+    searchParams.set("status", query.status)
+  }
+
+  if (typeof query.page === "number") {
+    searchParams.set("page", String(Math.trunc(query.page)))
+  }
+
+  if (typeof query.pageSize === "number") {
+    searchParams.set("pageSize", String(Math.trunc(query.pageSize)))
+  }
+
+  const queryString = searchParams.toString()
+
+  const payload = await requestJson<Partial<WorkflowDefinitionsResponse>>(
+    `/workflow/definitions${queryString ? `?${queryString}` : ""}`,
+    {
+      auth: true,
+    },
+  )
+
+  return normalizeWorkflowDefinitionsResponse(payload, query)
+}
+
+const normalizeWorkflowDefinitionsResponse = (
+  payload: Partial<WorkflowDefinitionsResponse>,
+  query: WorkflowDefinitionListQuery,
+): WorkflowDefinitionsResponse => {
+  const items = Array.isArray(payload.items) ? payload.items : []
+  const pageSize =
+    typeof payload.pageSize === "number" && Number.isFinite(payload.pageSize)
+      ? payload.pageSize
+      : typeof query.pageSize === "number" && Number.isFinite(query.pageSize)
+        ? Math.max(1, Math.trunc(query.pageSize))
+        : items.length > 0
+          ? items.length
+          : 20
+  const total =
+    typeof payload.total === "number" && Number.isFinite(payload.total)
+      ? payload.total
+      : items.length
+  const totalPages =
+    typeof payload.totalPages === "number" &&
+    Number.isFinite(payload.totalPages)
+      ? payload.totalPages
+      : total === 0
+        ? 1
+        : Math.ceil(total / pageSize)
+  const page =
+    typeof payload.page === "number" && Number.isFinite(payload.page)
+      ? payload.page
+      : typeof query.page === "number" && Number.isFinite(query.page)
+        ? Math.min(Math.max(1, Math.trunc(query.page)), totalPages)
+        : 1
+
+  return {
+    items,
+    page,
+    pageSize,
+    total,
+    totalPages,
+  }
+}
 
 export const fetchWorkflowDefinitionById = async (
   id: string,

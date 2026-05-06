@@ -211,6 +211,51 @@ const nextOperationKey = computed(() => {
   return "app.generatorPreview.next.wait"
 })
 
+const flowSteps = computed(() => [
+  {
+    key: "refresh",
+    labelKey: "app.generatorPreview.flow.refresh",
+    active: props.loading || !props.sessionStatus,
+    done: Boolean(props.sessionStatus),
+  },
+  {
+    key: "review",
+    labelKey: "app.generatorPreview.flow.review",
+    active: props.sessionStatus === "pending_review" || props.reviewLoading,
+    done: props.sessionStatus === "ready" || props.sessionStatus === "applied",
+  },
+  {
+    key: "confirm",
+    labelKey: "app.generatorPreview.flow.confirm",
+    active:
+      props.sessionStatus === "ready" &&
+      props.canConfirm &&
+      !props.hasBlockingConflicts,
+    done:
+      props.sessionStatus === "ready" &&
+      !props.canConfirm &&
+      !props.hasBlockingConflicts,
+  },
+  {
+    key: "apply",
+    labelKey: "app.generatorPreview.flow.apply",
+    active:
+      props.applyLoading ||
+      (props.sessionStatus === "ready" &&
+        props.canApply &&
+        !props.hasBlockingConflicts),
+    done: props.sessionStatus === "applied",
+  },
+  {
+    key: "handoff",
+    labelKey: "app.generatorPreview.flow.handoff",
+    active:
+      props.sessionStatus === "applied" ||
+      (props.sessionStatus === "ready" && props.hasBlockingConflicts),
+    done: props.sessionStatus === "applied",
+  },
+])
+
 const resolveEvidenceActorLabel = (
   evidence:
     | GeneratorPreviewReviewEvidence
@@ -595,6 +640,20 @@ watch(
         </div>
       </div>
 
+      <div class="generator-flow">
+        <article
+          v-for="step in flowSteps"
+          :key="step.key"
+          class="generator-flow-step"
+          :class="{
+            'generator-flow-step-active': step.active,
+            'generator-flow-step-done': step.done,
+          }"
+        >
+          <span>{{ t(step.labelKey) }}</span>
+        </article>
+      </div>
+
       <div
         v-if="errorMessage"
         class="enterprise-message enterprise-message-danger"
@@ -780,6 +839,34 @@ watch(
   border-color: rgba(36, 87, 214, 0.18);
   background: rgba(239, 246, 255, 0.72);
   color: #1d4ed8;
+}
+
+.generator-flow {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
+}
+
+.generator-flow-step {
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(248, 250, 252, 0.68);
+  color: #64748b;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.generator-flow-step-active {
+  border-color: rgba(36, 87, 214, 0.22);
+  background: rgba(239, 246, 255, 0.76);
+  color: #1d4ed8;
+}
+
+.generator-flow-step-done {
+  border-color: rgba(22, 163, 74, 0.16);
+  background: rgba(240, 253, 244, 0.72);
+  color: #15803d;
 }
 
 .generator-review-comment {

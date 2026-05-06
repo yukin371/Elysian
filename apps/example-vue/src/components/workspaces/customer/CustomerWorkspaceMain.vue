@@ -132,7 +132,7 @@ const resolvedItems = readInjectedValue(
     v-else
     :eyebrow="t('app.workspace.eyebrow')"
     :title="t('app.workspace.title')"
-    :description="t('app.workspace.description')"
+    :description="''"
     :query-fields="queryFields"
     :query-loading="resolvedLoading"
     :table-columns="tableColumns"

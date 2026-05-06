@@ -81,7 +81,7 @@ describe("useWorkflowWorkspace", () => {
       const url = String(input)
       const method = init?.method ?? "GET"
 
-      if (url.endsWith("/workflow/definitions") && method === "GET") {
+      if (url.includes("/workflow/definitions") && method === "GET") {
         return new Response(JSON.stringify({ message: "unauthorized" }), {
           headers: { "content-type": "application/json" },
           status: 401,
@@ -105,7 +105,7 @@ describe("useWorkflowWorkspace", () => {
     })
 
     workspace.workflowQuery.value = " expense "
-    workspace.setWorkflowStatusFilter("active")
+    workspace.workflowStatusFilter.value = "active"
     await workspace.reloadWorkflowDefinitions()
 
     expect(recoverableErrors).toHaveLength(1)
@@ -189,7 +189,10 @@ describe("useWorkflowWorkspace", () => {
         })
       }
 
-      if (url.endsWith("/workflow/definitions") && method === "GET") {
+      if (
+        url.endsWith("/workflow/definitions?page=1&pageSize=20") &&
+        method === "GET"
+      ) {
         if (failReload) {
           return new Response(JSON.stringify({ message: "unavailable" }), {
             headers: { "content-type": "application/json" },
@@ -197,10 +200,47 @@ describe("useWorkflowWorkspace", () => {
           })
         }
 
-        return new Response(JSON.stringify({ items: [primary, archived] }), {
-          headers: { "content-type": "application/json" },
-          status: 200,
-        })
+        return new Response(
+          JSON.stringify({
+            items: [primary, archived],
+            page: 1,
+            pageSize: 20,
+            total: 2,
+            totalPages: 1,
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      if (
+        url.endsWith(
+          "/workflow/definitions?q=expense&status=active&page=1&pageSize=20",
+        ) &&
+        method === "GET"
+      ) {
+        if (failReload) {
+          return new Response(JSON.stringify({ message: "unavailable" }), {
+            headers: { "content-type": "application/json" },
+            status: 503,
+          })
+        }
+
+        return new Response(
+          JSON.stringify({
+            items: [primary],
+            page: 1,
+            pageSize: 20,
+            total: 1,
+            totalPages: 1,
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
       }
 
       return new Response("not found", { status: 404 })
@@ -214,7 +254,7 @@ describe("useWorkflowWorkspace", () => {
 
     await workspace.reloadWorkflowDefinitions()
     workspace.workflowQuery.value = " expense "
-    workspace.setWorkflowStatusFilter("active")
+    workspace.workflowStatusFilter.value = "active"
     failReload = true
 
     await workspace.reloadWorkflowDefinitions()

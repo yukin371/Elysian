@@ -5,14 +5,13 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.sectionCopy":
     "This is the first real workflow surface instead of another placeholder. Scope stays tight: definitions list plus detail only.",
   "app.workflow.shellTitle": "Workflow definitions workspace",
-  "app.workflow.shellDescription":
-    "The workspace reads real workflow definition APIs to prove a minimum multi-module page loop.",
+  "app.workflow.shellDescription": "Workflow definition list and detail.",
   "app.workflow-definition.sectionTitle": "Workflow definitions workspace",
   "app.workflow-definition.sectionCopy":
     "This is the first real workflow surface instead of another placeholder. Scope stays tight: definitions list plus detail only.",
   "app.workflow-definition.shellTitle": "Workflow definitions workspace",
   "app.workflow-definition.shellDescription":
-    "The workspace reads real workflow definition APIs to prove a minimum multi-module page loop.",
+    "Workflow definition list and detail.",
   "app.message.customerModuleOffline":
     "`customer` module is not registered yet. Add `DATABASE_URL`, run migrations and seed, then restart the server.",
   "app.message.signInToLoad":
@@ -88,7 +87,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.listEyebrow": "Real module workspace",
   "app.workflow.listTitle": "Workflow definitions",
   "app.workflow.listDescription":
-    "The main area owns the definitions list only. Clicking a row refreshes the detail panel instead of duplicating the same content.",
+    "Select a list item to inspect the side-panel detail.",
   "app.workflow.filter.searchLabel": "Search definitions",
   "app.workflow.filter.searchPlaceholder": "Search by name, key, or id",
   "app.workflow.filter.statusTitle": "Status filter",
@@ -99,9 +98,14 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.filter.none": "No active filters",
   "app.workflow.filter.querySummary": "Query: {value}",
   "app.workflow.filter.statusSummary": "Status: {value}",
+  "app.workflow.pagination.empty": "0 total",
+  "app.workflow.pagination.summary":
+    "Page {page}/{totalPages}, {start}-{end} of {total}",
+  "app.workflow.pagination.previous": "Previous",
+  "app.workflow.pagination.next": "Next",
   "app.workflow.detailEyebrow": "Definition detail",
   "app.workflow.detailDescription":
-    "The side panel stays focused on structure, status, and version metadata for the selected definition.",
+    "The detail dialog stays focused on structure, status, and version metadata for the selected definition.",
   "app.workflow.detailEmpty":
     "Select a workflow definition to inspect its structure.",
   "app.workflow.detailEmptyTitle": "No definition selected",
@@ -187,7 +191,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.querySummary": "Query: {value}",
   "app.generatorPreview.detailEyebrow": "Preview detail",
   "app.generatorPreview.detailDescription":
-    "The side panel stays focused on the selected file, preview session metadata, and SQL preview instead of duplicating the file list.",
+    "The detail cards stay focused on the selected file, preview session metadata, and SQL preview instead of duplicating the file list.",
   "app.generatorPreview.detailEmptyTitle": "No generated file selected",
   "app.generatorPreview.detailEmptyDescription":
     "Pick an artifact from the list to inspect source, session details, and SQL preview.",
@@ -225,6 +229,11 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Next: resolve blocking conflicts",
   "app.generatorPreview.next.done": "Next: complete",
   "app.generatorPreview.next.wait": "Next: wait for status update",
+  "app.generatorPreview.flow.refresh": "1. Refresh preview",
+  "app.generatorPreview.flow.review": "2. Review diff",
+  "app.generatorPreview.flow.confirm": "3. Confirm checklist",
+  "app.generatorPreview.flow.apply": "4. Apply to staging",
+  "app.generatorPreview.flow.handoff": "5. Wire into module",
   "app.generatorPreview.reviewCommentLabel": "Review comment",
   "app.generatorPreview.reviewCommentPlaceholder":
     "Optional: explain why this preview is approved or rejected",
