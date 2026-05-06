@@ -5,7 +5,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.hero.title":
     "同一份 CRUD 契约，已经在自定义 Vue 与企业 Vue 界面中跑通。",
   "app.hero.copy":
-    "当前示例保留自定义预设作为对照，但下方的企业工作区已经通过 `ui-enterprise-vue` 的 shell、查询栏、表格与表单封装跑通。",
+    "当前示例保留自定义预设作为对照，企业工作区已经通过 `ui-enterprise-vue` 的 shell、查询栏、表格与表单封装跑通。",
   "app.badge.custom": "Vue 自定义预设",
   "app.badge.enterprise": "Vue 企业预设",
   "app.badge.runtime": "运行时",
@@ -84,7 +84,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.workspace.description":
     "表格、动作和查询条件都来自共享的客户页面定义，再通过企业预设进行渲染。",
   "app.workspace.emptyTitle": "当前范围内没有客户",
-  "app.workspace.emptyDescription": "调整筛选条件，或从下方信息卡片新建客户。",
+  "app.workspace.emptyDescription": "调整筛选条件，或使用新建入口创建客户。",
   "app.workspace.countLabel":
     "当前页 {visible} 条，共 {total} 条，第 {page}/{totalPages} 页",
   "app.workspace.footerStatus": "预设状态",
@@ -118,7 +118,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.placeholder.sideEyebrow": "接入状态",
   "app.placeholder.sideTitle": "页面边界",
   "app.placeholder.sideDescription":
-    "信息卡片区只保留装配边界与接入决策，不再重复主区已经展示的状态信息。",
+    "页面只保留装配边界与接入决策，不重复已经展示的状态信息。",
   "app.placeholder.sideOwnerLabel": "页面 owner",
   "app.placeholder.sideOwnerValue": "apps/example-vue",
   "app.placeholder.sideSharedLabel": "共享壳层",
@@ -170,7 +170,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.runtime.sideEyebrow": "运行态边界",
   "app.runtime.sideTitle": "当前 tab 语义",
   "app.runtime.sideDescription":
-    "切到运行态后，信息卡片区不再显示业务详情或编辑面板，只保留页面诊断与边界说明。",
+    "切到运行态后，不再重复显示业务详情或编辑面板，只保留页面诊断与边界说明。",
   "app.runtime.sideAuthLabel": "会话状态",
   "app.runtime.sideModuleCodeLabel": "模块代码",
   "app.runtime.sideDecisionTitle": "当前约束",

@@ -10,7 +10,7 @@ export const enUSDictionaryLocaleMessages: VueLocaleMessages = {
   "app.dictionary.workspaceEyebrow": "Real module workspace",
   "app.dictionary.workspaceTitle": "System dictionary types",
   "app.dictionary.workspaceDescription":
-    "The main area owns dictionary-type query and list views, while the side panel stays centered on the selected type and its items.",
+    "Dictionary type query, list, detail, and items stay in one operation loop.",
   "app.dictionary.emptyTitle": "No dictionary types match the current filters",
   "app.dictionary.emptyDescription":
     "Clear the filters or adjust the search terms.",
@@ -46,7 +46,7 @@ export const enUSDictionaryLocaleMessages: VueLocaleMessages = {
   "app.dictionary.panelDesc.edit":
     "Edit mode reuses the same schema-derived fields instead of introducing a second shared owner.",
   "app.dictionary.panelDesc.detail":
-    "The side panel stays centered on the current dictionary type and carries a snapshot of its items.",
+    "Detail stays focused on the current dictionary type and carries an item snapshot.",
   "app.dictionary.meta.itemCount": "Item Count",
   "app.dictionary.meta.defaultCount": "Default Count",
   "app.dictionary.meta.items": "Dictionary Items",

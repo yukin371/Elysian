@@ -10,10 +10,10 @@ export const enUSNotificationLocaleMessages: VueLocaleMessages = {
   "app.notification.workspaceEyebrow": "In-app notifications",
   "app.notification.workspaceTitle": "Notification list",
   "app.notification.workspaceDescription":
-    "The main area stays focused on list and filters while the side panel owns detail, read action, and create flow to avoid a second redundant list.",
+    "List, filters, detail, read action, and create flow stay in one operation loop.",
   "app.notification.emptyTitle": "No notifications in scope",
   "app.notification.emptyDescription":
-    "Adjust the filters or create a new in-app notification from the side panel.",
+    "Adjust the filters or create a new in-app notification.",
   "app.notification.countLabel":
     "{visible} visible notifications out of {total}",
   "app.notification.tabsHint": "{count} notifications in view",

@@ -10,7 +10,7 @@ export const zhCNPostLocaleMessages: VueLocaleMessages = {
   "app.post.workspaceEyebrow": "真实模块工作区",
   "app.post.workspaceTitle": "系统岗位清单",
   "app.post.workspaceDescription":
-    "主区只承接查询与岗位列表，右侧聚焦当前岗位详情与基础编辑，避免在两侧重复堆叠主体信息。",
+    "查询、岗位列表、详情与基础编辑保持同一条操作链路。",
   "app.post.emptyTitle": "当前筛选条件下没有岗位",
   "app.post.emptyDescription": "清空条件或调整关键字后重试。",
   "app.post.detailEyebrow": "岗位详情",
@@ -40,6 +40,5 @@ export const zhCNPostLocaleMessages: VueLocaleMessages = {
     "创建流程直接调用系统岗位模块接口，示例页只装配表单状态与交互。",
   "app.post.panelDesc.edit":
     "编辑模式继续复用 schema 派生字段，并保持岗位状态与备注在同一表单内收口。",
-  "app.post.panelDesc.detail":
-    "右侧详情与动作保持围绕当前岗位，不在主区重复堆叠编辑入口。",
+  "app.post.panelDesc.detail": "详情与动作保持围绕当前岗位。",
 }

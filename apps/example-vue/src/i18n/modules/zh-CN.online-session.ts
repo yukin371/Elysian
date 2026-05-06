@@ -10,7 +10,7 @@ export const zhCNOnlineSessionLocaleMessages: VueLocaleMessages = {
   "app.onlineSession.workspaceEyebrow": "当前用户会话",
   "app.onlineSession.workspaceTitle": "在线会话清单",
   "app.onlineSession.workspaceDescription":
-    "主区只承接筛选与会话列表，下方信息卡片聚焦当前会话详情与强制下线动作，避免堆出第二个安全工作台。",
+    "筛选、会话列表、详情与强制下线保持同一条操作链路。",
   "app.onlineSession.emptyTitle": "当前筛选条件下没有会话",
   "app.onlineSession.emptyDescription":
     "清空条件后重试，或等待下一次会话刷新。",
@@ -21,8 +21,7 @@ export const zhCNOnlineSessionLocaleMessages: VueLocaleMessages = {
   "app.onlineSession.detailEmptyDescription":
     "请选择一条会话记录查看详情，或直接管理当前登录会话。",
   "app.onlineSession.panelTitle.detailFallback": "会话详情",
-  "app.onlineSession.panelDesc.detail":
-    "详情卡片与动作只围绕当前会话，不额外扩写批量踢下线或在线用户总览。",
+  "app.onlineSession.panelDesc.detail": "详情与动作只围绕当前会话。",
   "app.onlineSession.field.keyword": "关键字",
   "app.onlineSession.field.state": "状态",
   "app.onlineSession.field.scope": "范围",

@@ -10,7 +10,7 @@ export const enUSOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.workspaceEyebrow": "Real module workspace",
   "app.operationLog.workspaceTitle": "System operation logs",
   "app.operationLog.workspaceDescription":
-    "The main area owns the real query bar and log list, while the side panel stays focused on the selected audit detail.",
+    "Query, log list, and audit detail stay in one operation loop.",
   "app.operationLog.emptyTitle": "No operation logs match the current filters",
   "app.operationLog.emptyDescription":
     "Clear the filters or adjust the search terms.",
@@ -58,7 +58,7 @@ export const enUSOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.tabsHint": "{count} logs",
   "app.operationLog.panelTitle.detailFallback": "Log detail",
   "app.operationLog.panelDesc.detail":
-    "The side panel stays centered on the current log and keeps audit detail out of the main list area.",
+    "Detail stays focused on the current log and audit context.",
   "app.operationLog.meta.details": "Detail Payload",
   "app.operationLog.meta.empty": "None",
 }

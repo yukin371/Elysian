@@ -10,7 +10,7 @@ export const enUSMenuLocaleMessages: VueLocaleMessages = {
   "app.menu.workspaceEyebrow": "Real module workspace",
   "app.menu.workspaceTitle": "System menus",
   "app.menu.workspaceDescription":
-    "The main area owns the query bar and menu list, while the side panel stays focused on detail and basic edit actions.",
+    "Query, menu list, detail, and basic edit stay in one operation loop.",
   "app.menu.emptyTitle": "No menus match the current filters",
   "app.menu.emptyDescription": "Clear the filters or adjust the search terms.",
   "app.menu.detailEyebrow": "Menu detail",
@@ -60,7 +60,7 @@ export const enUSMenuLocaleMessages: VueLocaleMessages = {
   "app.menu.panelDesc.edit":
     "Edit mode reuses the same schema-derived fields while linked roles stay read-only in this round.",
   "app.menu.panelDesc.detail":
-    "The side panel stays centered on the current menu and keeps edit actions out of the main list area.",
+    "Detail and actions stay focused on the current menu.",
   "app.menu.meta.parent": "Parent Menu",
   "app.menu.meta.roleCount": "Linked Roles",
   "app.menu.meta.roleIds": "Role IDs",

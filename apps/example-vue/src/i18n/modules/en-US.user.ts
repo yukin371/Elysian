@@ -10,12 +10,12 @@ export const enUSUserLocaleMessages: VueLocaleMessages = {
   "app.user.workspaceEyebrow": "Real module workspace",
   "app.user.workspaceTitle": "System users",
   "app.user.workspaceDescription":
-    "The main area owns the query bar and list, while the side panel stays focused on the selected user detail.",
+    "Query, list, and selected user detail stay in one operation loop.",
   "app.user.emptyTitle": "No users match the current filters",
   "app.user.emptyDescription": "Clear the filters or adjust the search terms.",
   "app.user.detailEyebrow": "User detail",
   "app.user.detailDescription":
-    "The side panel stays focused on the selected user's identity and audit-related metadata.",
+    "Detail stays focused on the selected user's identity and audit metadata.",
   "app.user.detailEmptyTitle": "No user selected",
   "app.user.detailEmptyDescription":
     "Select a user row to inspect the detail panel.",
@@ -53,7 +53,7 @@ export const enUSUserLocaleMessages: VueLocaleMessages = {
   "app.user.panelDesc.reset":
     "Password reset stays a dedicated action so sensitive input does not leak into the regular edit flow.",
   "app.user.panelDesc.detail":
-    "The side panel stays centered on the current user and keeps edit actions out of the main list area.",
+    "Detail and actions stay focused on the current user.",
   "app.user.boolean.true": "Yes",
   "app.user.boolean.false": "No",
   "app.user.lastLoginEmpty": "No record",

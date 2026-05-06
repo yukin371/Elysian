@@ -10,10 +10,9 @@ export const zhCNNotificationLocaleMessages: VueLocaleMessages = {
   "app.notification.workspaceEyebrow": "站内通知",
   "app.notification.workspaceTitle": "通知列表",
   "app.notification.workspaceDescription":
-    "主区聚焦通知列表与筛选，右侧承接详情、已读动作与新建入口，避免重复展示第二份列表。",
+    "通知列表、筛选、详情、已读动作与新建入口保持同一条操作链路。",
   "app.notification.emptyTitle": "当前没有通知",
-  "app.notification.emptyDescription":
-    "调整筛选条件，或从右侧新建一条站内通知。",
+  "app.notification.emptyDescription": "调整筛选条件，或新建一条站内通知。",
   "app.notification.countLabel": "当前显示 {visible} 条，共 {total} 条通知",
   "app.notification.tabsHint": "当前可见 {count} 条通知",
   "app.notification.statsHint": "通知工作区保持列表、详情、创建与已读闭环。",

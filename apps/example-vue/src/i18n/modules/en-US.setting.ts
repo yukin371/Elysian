@@ -10,7 +10,7 @@ export const enUSSettingLocaleMessages: VueLocaleMessages = {
   "app.setting.workspaceEyebrow": "Real module workspace",
   "app.setting.workspaceTitle": "System settings",
   "app.setting.workspaceDescription":
-    "The main area owns the query bar and settings list, while the side panel stays focused on detail and basic edit actions.",
+    "Query, settings list, detail, and basic edit stay in one operation loop.",
   "app.setting.emptyTitle": "No settings match the current filters",
   "app.setting.emptyDescription":
     "Clear the filters or adjust the search terms.",
@@ -44,5 +44,5 @@ export const enUSSettingLocaleMessages: VueLocaleMessages = {
   "app.setting.panelDesc.edit":
     "Edit mode reuses the same schema-derived fields instead of adding a second form owner.",
   "app.setting.panelDesc.detail":
-    "The side panel stays centered on the current setting and keeps edit actions out of the main list area.",
+    "Detail and actions stay focused on the current setting.",
 }

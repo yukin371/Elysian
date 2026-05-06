@@ -10,7 +10,7 @@ export const zhCNMenuLocaleMessages: VueLocaleMessages = {
   "app.menu.workspaceEyebrow": "真实模块工作区",
   "app.menu.workspaceTitle": "系统菜单清单",
   "app.menu.workspaceDescription":
-    "主区只承接查询与菜单列表，右侧聚焦当前菜单详情与基础编辑，避免在两侧重复堆叠主体信息。",
+    "查询、菜单列表、详情与基础编辑保持同一条操作链路。",
   "app.menu.emptyTitle": "当前筛选条件下没有菜单",
   "app.menu.emptyDescription": "清空条件或调整关键字后重试。",
   "app.menu.detailEyebrow": "菜单详情",
@@ -58,8 +58,7 @@ export const zhCNMenuLocaleMessages: VueLocaleMessages = {
     "创建流程直接调用系统菜单模块接口，示例页只装配表单状态与交互。",
   "app.menu.panelDesc.edit":
     "编辑模式继续复用 schema 派生字段，并保持关联角色为只读展示。",
-  "app.menu.panelDesc.detail":
-    "右侧详情与动作保持围绕当前菜单，不在主区重复堆叠编辑入口。",
+  "app.menu.panelDesc.detail": "详情与动作保持围绕当前菜单。",
   "app.menu.meta.parent": "上级菜单",
   "app.menu.meta.roleCount": "关联角色数",
   "app.menu.meta.roleIds": "关联角色 ID",

@@ -10,12 +10,12 @@ export const zhCNUserLocaleMessages: VueLocaleMessages = {
   "app.user.workspaceEyebrow": "真实模块工作区",
   "app.user.workspaceTitle": "系统用户清单",
   "app.user.workspaceDescription":
-    "主区只承接查询与用户列表，右侧聚焦当前选中用户详情，避免在两侧重复堆叠主体信息。",
+    "查询、用户列表与当前用户详情保持同一条操作链路。",
   "app.user.emptyTitle": "当前筛选条件下没有用户",
   "app.user.emptyDescription": "清空条件或调整关键字后重试。",
   "app.user.detailEyebrow": "用户详情",
   "app.user.detailDescription":
-    "右侧详情保持聚焦，只展示当前用户的核心身份与审计相关元数据。",
+    "详情保持聚焦，只展示当前用户的核心身份与审计相关元数据。",
   "app.user.detailEmptyTitle": "尚未选择用户",
   "app.user.detailEmptyDescription": "请选择一条用户记录查看详情。",
   "app.user.status.active": "启用",
@@ -51,8 +51,7 @@ export const zhCNUserLocaleMessages: VueLocaleMessages = {
     "编辑模式复用同一份 schema 派生字段，不另起第二套表单 owner。",
   "app.user.panelDesc.reset":
     "重置密码保持为单独动作，避免把敏感输入混入常规编辑表单。",
-  "app.user.panelDesc.detail":
-    "右侧详情与动作保持围绕当前用户，不在主区重复堆叠编辑入口。",
+  "app.user.panelDesc.detail": "详情与动作保持围绕当前用户。",
   "app.user.boolean.true": "是",
   "app.user.boolean.false": "否",
   "app.user.lastLoginEmpty": "暂无记录",

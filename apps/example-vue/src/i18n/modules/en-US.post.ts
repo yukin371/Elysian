@@ -10,7 +10,7 @@ export const enUSPostLocaleMessages: VueLocaleMessages = {
   "app.post.workspaceEyebrow": "Real module workspace",
   "app.post.workspaceTitle": "System posts",
   "app.post.workspaceDescription":
-    "The main area stays focused on query plus post list, while the side panel keeps the current post detail and basic edit loop.",
+    "Query, post list, detail, and basic edit stay in one operation loop.",
   "app.post.emptyTitle": "No posts match the current filters",
   "app.post.emptyDescription": "Clear the filters or adjust the search terms.",
   "app.post.detailEyebrow": "Post detail",
@@ -41,5 +41,5 @@ export const enUSPostLocaleMessages: VueLocaleMessages = {
   "app.post.panelDesc.edit":
     "Edit mode reuses the same schema-derived fields while status and remark stay in one form.",
   "app.post.panelDesc.detail":
-    "The side panel stays centered on the current post and keeps edit actions out of the main list area.",
+    "Detail and actions stay focused on the current post.",
 }

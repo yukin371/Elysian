@@ -10,7 +10,7 @@ export const enUSDepartmentLocaleMessages: VueLocaleMessages = {
   "app.department.workspaceEyebrow": "Real module workspace",
   "app.department.workspaceTitle": "System departments",
   "app.department.workspaceDescription":
-    "The main area owns the query bar and department list, while the side panel stays focused on detail and basic edit actions.",
+    "Query, department list, detail, and basic edit stay in one operation loop.",
   "app.department.emptyTitle": "No departments match the current filters",
   "app.department.emptyDescription":
     "Clear the filters or adjust the search terms.",
@@ -46,7 +46,7 @@ export const enUSDepartmentLocaleMessages: VueLocaleMessages = {
   "app.department.panelDesc.edit":
     "Edit mode reuses the same schema-derived fields while linked users stay read-only in this round.",
   "app.department.panelDesc.detail":
-    "The side panel stays centered on the current department and keeps edit actions out of the main list area.",
+    "Detail and actions stay focused on the current department.",
   "app.department.meta.parent": "Parent Department",
   "app.department.meta.userCount": "Linked Users",
   "app.department.meta.userIds": "User IDs",

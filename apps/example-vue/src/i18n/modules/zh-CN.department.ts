@@ -10,7 +10,7 @@ export const zhCNDepartmentLocaleMessages: VueLocaleMessages = {
   "app.department.workspaceEyebrow": "真实模块工作区",
   "app.department.workspaceTitle": "系统部门清单",
   "app.department.workspaceDescription":
-    "主区只承接查询与部门列表，右侧聚焦当前部门详情与基础编辑，避免在两侧重复堆叠主体信息。",
+    "查询、部门列表、详情与基础编辑保持同一条操作链路。",
   "app.department.emptyTitle": "当前筛选条件下没有部门",
   "app.department.emptyDescription": "清空条件或调整关键字后重试。",
   "app.department.detailEyebrow": "部门详情",
@@ -43,8 +43,7 @@ export const zhCNDepartmentLocaleMessages: VueLocaleMessages = {
     "创建流程直接调用系统部门模块接口，示例页只装配表单状态与交互。",
   "app.department.panelDesc.edit":
     "编辑模式继续复用 schema 派生字段，并保持关联用户为只读展示。",
-  "app.department.panelDesc.detail":
-    "右侧详情与动作保持围绕当前部门，不在主区重复堆叠编辑入口。",
+  "app.department.panelDesc.detail": "详情与动作保持围绕当前部门。",
   "app.department.meta.parent": "上级部门",
   "app.department.meta.userCount": "关联用户数",
   "app.department.meta.userIds": "关联用户 ID",

@@ -10,7 +10,7 @@ export const enUSTenantLocaleMessages: VueLocaleMessages = {
   "app.tenant.workspaceEyebrow": "Real module workspace",
   "app.tenant.workspaceTitle": "System tenants",
   "app.tenant.workspaceDescription":
-    "The main area owns tenant query and list views, while the side panel stays focused on detail, basic edit, and status changes.",
+    "Tenant query, list, detail, basic edit, and status changes stay in one operation loop.",
   "app.tenant.emptyTitle": "No tenants match the current filters",
   "app.tenant.emptyDescription":
     "Clear the filters or adjust the search terms.",
@@ -44,5 +44,5 @@ export const enUSTenantLocaleMessages: VueLocaleMessages = {
   "app.tenant.panelDesc.edit":
     "Edit mode reuses the same schema-derived fields instead of adding another governance abstraction layer.",
   "app.tenant.panelDesc.detail":
-    "The side panel stays centered on the current tenant and keeps the status toggle explicit.",
+    "Detail and actions stay focused on the current tenant with an explicit status toggle.",
 }

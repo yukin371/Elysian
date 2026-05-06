@@ -10,7 +10,7 @@ export const enUSRoleLocaleMessages: VueLocaleMessages = {
   "app.role.workspaceEyebrow": "Real module workspace",
   "app.role.workspaceTitle": "System roles",
   "app.role.workspaceDescription":
-    "The main area owns the query bar and role list, while the side panel stays focused on detail and basic edit actions.",
+    "Query, list, detail, and basic edit stay in one operation loop.",
   "app.role.emptyTitle": "No roles match the current filters",
   "app.role.emptyDescription": "Clear the filters or adjust the search terms.",
   "app.role.detailEyebrow": "Role detail",
@@ -52,7 +52,7 @@ export const enUSRoleLocaleMessages: VueLocaleMessages = {
   "app.role.panelDesc.edit":
     "Edit mode reuses the same schema-derived fields while relationship arrays stay read-only in this round.",
   "app.role.panelDesc.detail":
-    "The side panel stays centered on the current role and keeps edit actions out of the main list area.",
+    "Detail and actions stay focused on the current role.",
   "app.role.meta.permissionCount": "Permission Count",
   "app.role.meta.userCount": "Linked Users",
   "app.role.meta.deptCount": "Linked Departments",

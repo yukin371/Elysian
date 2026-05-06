@@ -10,7 +10,7 @@ export const zhCNTenantLocaleMessages: VueLocaleMessages = {
   "app.tenant.workspaceEyebrow": "真实模块工作区",
   "app.tenant.workspaceTitle": "系统租户清单",
   "app.tenant.workspaceDescription":
-    "主区只承接查询与租户列表，右侧聚焦当前租户详情、基础编辑与状态切换，避免把治理动作摊成第二个主区。",
+    "查询、租户列表、详情、基础编辑与状态切换保持同一条操作链路。",
   "app.tenant.emptyTitle": "当前筛选条件下没有租户",
   "app.tenant.emptyDescription": "清空条件或调整关键字后重试。",
   "app.tenant.detailEyebrow": "租户详情",
@@ -42,5 +42,5 @@ export const zhCNTenantLocaleMessages: VueLocaleMessages = {
   "app.tenant.panelDesc.edit":
     "编辑模式继续复用 schema 派生字段，不额外扩出新的治理抽象层。",
   "app.tenant.panelDesc.detail":
-    "右侧详情与动作保持围绕当前租户，并显式保留状态切换入口。",
+    "详情与动作保持围绕当前租户，并保留状态切换入口。",
 }

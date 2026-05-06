@@ -10,7 +10,7 @@ export const zhCNSettingLocaleMessages: VueLocaleMessages = {
   "app.setting.workspaceEyebrow": "真实模块工作区",
   "app.setting.workspaceTitle": "系统配置清单",
   "app.setting.workspaceDescription":
-    "主区只承接查询与配置列表，右侧聚焦当前配置详情与基础编辑，避免在两侧重复堆叠主体信息。",
+    "查询、配置列表、详情与基础编辑保持同一条操作链路。",
   "app.setting.emptyTitle": "当前筛选条件下没有系统配置",
   "app.setting.emptyDescription": "清空条件或调整关键字后重试。",
   "app.setting.detailEyebrow": "配置详情",
@@ -41,6 +41,5 @@ export const zhCNSettingLocaleMessages: VueLocaleMessages = {
     "创建流程直接调用系统配置模块接口，示例页只装配表单状态与交互。",
   "app.setting.panelDesc.edit":
     "编辑模式继续复用 schema 派生字段，不额外引入第二套表单 owner。",
-  "app.setting.panelDesc.detail":
-    "右侧详情与动作保持围绕当前配置，不在主区重复堆叠编辑入口。",
+  "app.setting.panelDesc.detail": "详情与动作保持围绕当前配置。",
 }

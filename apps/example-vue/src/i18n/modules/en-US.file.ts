@@ -10,11 +10,10 @@ export const enUSFileLocaleMessages: VueLocaleMessages = {
   "app.file.workspaceEyebrow": "System files",
   "app.file.workspaceTitle": "File list",
   "app.file.workspaceDescription":
-    "The main area stays focused on filters and list state while the side panel owns detail, upload, download, and delete confirmation.",
+    "Filters, list state, detail, upload, download, and delete confirmation stay in one operation loop.",
   "app.file.loading": "Loading files...",
   "app.file.emptyTitle": "No files in scope",
-  "app.file.emptyDescription":
-    "Adjust the filters or upload a file from the side panel to verify the minimum loop.",
+  "app.file.emptyDescription": "Adjust the filters or upload a file.",
   "app.file.countLabel": "{visible} visible files out of {total}",
   "app.file.tabsHint": "{count} files in view",
   "app.file.statsHint":
@@ -22,7 +21,7 @@ export const enUSFileLocaleMessages: VueLocaleMessages = {
   "app.file.detailEyebrow": "File detail",
   "app.file.detailEmptyTitle": "File detail",
   "app.file.detailEmptyDescription":
-    "Choose a file from the list or upload a new one from the side panel.",
+    "Choose a file from the list or upload a new one.",
   "app.file.detailLoading": "Loading file detail...",
   "app.file.panelTitle.upload": "Upload file",
   "app.file.panelTitle.delete": "Delete file",
@@ -54,8 +53,7 @@ export const enUSFileLocaleMessages: VueLocaleMessages = {
   "app.file.action.confirmDelete": "Confirm delete",
   "app.file.action.cancelDelete": "Cancel",
   "app.file.uploadFieldLabel": "Choose file",
-  "app.file.uploadPrompt":
-    "Choose one file, then submit it from the side panel.",
+  "app.file.uploadPrompt": "Choose one file, then submit it.",
   "app.file.mimeTypeEmpty": "Unknown",
   "app.file.uploaderEmpty": "System",
   "app.file.deleteConfirm":

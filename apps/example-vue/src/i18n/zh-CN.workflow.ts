@@ -130,7 +130,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.workspaceEyebrow": "生成会话预览",
   "app.generatorPreview.workspaceTitle": "Generator 产物清单",
   "app.generatorPreview.workspaceDescription":
-    "选择 schema 与前端目标后，主区展示 preview session 的文件计划、差异摘要与流程状态；下方信息卡片区聚焦当前文件、会话元数据与 apply 证据。",
+    "选择 schema 与前端目标后，展示文件计划、差异摘要、流程状态与 apply 证据。",
   "app.generatorPreview.message.localOnly":
     "当前工作区只做本地预览，不会写入生成目录，也不会替代 CLI 的真实 apply/preview 报告。",
   "app.generatorPreview.message.runtimeBacked":
@@ -398,7 +398,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "`file` 模块尚未注册。请确认服务端已启用系统文件模块后再重试。",
   "app.message.fileSignInToLoad": "请先登录，再加载受保护的文件数据。",
   "app.message.fileNoListPermission":
-    "当前身份没有 `system:file:list` 权限；若仍具备上传权限，可以直接使用下方上传卡片。",
+    "当前身份没有 `system:file:list` 权限；若仍具备上传权限，可以直接上传文件。",
   "app.error.loadFiles": "文件列表加载失败",
   "app.error.loadFileDetail": "文件详情加载失败",
   "app.error.uploadFile": "文件上传失败",

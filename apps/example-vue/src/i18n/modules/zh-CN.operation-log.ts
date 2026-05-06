@@ -10,7 +10,7 @@ export const zhCNOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.workspaceEyebrow": "真实模块工作区",
   "app.operationLog.workspaceTitle": "系统操作日志",
   "app.operationLog.workspaceDescription":
-    "主区只承接真实查询与日志列表，右侧聚焦当前日志详情，避免把同一批审计数据重复铺在两侧。",
+    "查询、日志列表与日志详情保持同一条操作链路。",
   "app.operationLog.emptyTitle": "当前筛选条件下没有操作日志",
   "app.operationLog.emptyDescription": "清空条件或调整关键字后重试。",
   "app.operationLog.detailEyebrow": "日志详情",
@@ -55,7 +55,7 @@ export const zhCNOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.tabsHint": "{count} 条日志",
   "app.operationLog.panelTitle.detailFallback": "日志详情",
   "app.operationLog.panelDesc.detail":
-    "右侧详情保持围绕当前日志，只读展示审计上下文，不在主区重复堆叠明细。",
+    "详情保持围绕当前日志，只读展示审计上下文。",
   "app.operationLog.meta.details": "详情载荷",
   "app.operationLog.meta.empty": "暂无",
 }

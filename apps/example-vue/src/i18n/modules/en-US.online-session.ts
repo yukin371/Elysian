@@ -10,7 +10,7 @@ export const enUSOnlineSessionLocaleMessages: VueLocaleMessages = {
   "app.onlineSession.workspaceEyebrow": "Current user sessions",
   "app.onlineSession.workspaceTitle": "Online session list",
   "app.onlineSession.workspaceDescription":
-    "The main area stays focused on filters and session rows while the side panel owns detail and revoke action.",
+    "Filters, session rows, detail, and revoke action stay in one operation loop.",
   "app.onlineSession.emptyTitle": "No sessions match the current filters",
   "app.onlineSession.emptyDescription":
     "Clear the filters and try again, or wait for the next refresh.",
@@ -22,7 +22,7 @@ export const enUSOnlineSessionLocaleMessages: VueLocaleMessages = {
     "Select a session to inspect its detail, or manage the current signed-in session.",
   "app.onlineSession.panelTitle.detailFallback": "Session detail",
   "app.onlineSession.panelDesc.detail":
-    "The side panel stays centered on the current session instead of growing into a batch revoke console.",
+    "Detail and actions stay focused on the current session.",
   "app.onlineSession.field.keyword": "Keyword",
   "app.onlineSession.field.state": "State",
   "app.onlineSession.field.scope": "Scope",

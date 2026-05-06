@@ -10,7 +10,7 @@ export const zhCNRoleLocaleMessages: VueLocaleMessages = {
   "app.role.workspaceEyebrow": "真实模块工作区",
   "app.role.workspaceTitle": "系统角色清单",
   "app.role.workspaceDescription":
-    "主区只承接查询与角色列表，右侧聚焦当前角色详情与基础编辑，避免在两侧重复堆叠主体信息。",
+    "查询、角色列表、详情与基础编辑保持同一条操作链路。",
   "app.role.emptyTitle": "当前筛选条件下没有角色",
   "app.role.emptyDescription": "清空条件或调整关键字后重试。",
   "app.role.detailEyebrow": "角色详情",
@@ -50,8 +50,7 @@ export const zhCNRoleLocaleMessages: VueLocaleMessages = {
     "创建流程直接调用系统角色模块接口，示例页只装配表单状态与交互。",
   "app.role.panelDesc.edit":
     "编辑模式继续复用 schema 派生字段，并保持关系数据为只读展示。",
-  "app.role.panelDesc.detail":
-    "右侧详情与动作保持围绕当前角色，不在主区重复堆叠编辑入口。",
+  "app.role.panelDesc.detail": "详情与动作保持围绕当前角色。",
   "app.role.meta.permissionCount": "权限数",
   "app.role.meta.userCount": "关联用户数",
   "app.role.meta.deptCount": "关联部门数",

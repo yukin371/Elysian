@@ -6,11 +6,11 @@ export const zhCNDictionaryLocaleMessages: VueLocaleMessages = {
     "字典页先收敛到真实类型列表、详情与基础编辑，字典项先围绕当前类型展示，不提前扩成第二个并列主工作区。",
   "app.dictionary.shellTitle": "字典管理工作区",
   "app.dictionary.shellDescription":
-    "列表与详情直接消费系统字典接口，当前主区聚焦字典类型，右侧围绕当前类型展示字典项。",
+    "列表与详情直接消费系统字典接口，当前聚焦字典类型与同类型字典项。",
   "app.dictionary.workspaceEyebrow": "真实模块工作区",
   "app.dictionary.workspaceTitle": "系统字典类型",
   "app.dictionary.workspaceDescription":
-    "主区只承接字典类型查询与列表，右侧围绕当前类型展示详情和字典项，避免把 type 与 item 并列成两个重复主体。",
+    "字典类型查询、列表、详情和字典项保持同一条操作链路。",
   "app.dictionary.emptyTitle": "当前筛选条件下没有字典类型",
   "app.dictionary.emptyDescription": "清空条件或调整关键字后重试。",
   "app.dictionary.detailEyebrow": "字典详情",
@@ -44,7 +44,7 @@ export const zhCNDictionaryLocaleMessages: VueLocaleMessages = {
   "app.dictionary.panelDesc.edit":
     "编辑模式继续复用 schema 派生字段，不额外扩出第二套 shared owner。",
   "app.dictionary.panelDesc.detail":
-    "右侧详情保持围绕当前字典类型，并附带同类型下的字典项快照。",
+    "详情保持围绕当前字典类型，并附带同类型字典项快照。",
   "app.dictionary.meta.itemCount": "字典项数",
   "app.dictionary.meta.defaultCount": "默认项数",
   "app.dictionary.meta.items": "字典项",

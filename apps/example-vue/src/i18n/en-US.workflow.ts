@@ -14,8 +14,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Workflow definition list and detail.",
   "app.message.customerModuleOffline":
     "`customer` module is not registered yet. Add `DATABASE_URL`, run migrations and seed, then restart the server.",
-  "app.message.signInToLoad":
-    "Sign in from the side panel to load protected customer data.",
+  "app.message.signInToLoad": "Sign in to load protected customer data.",
   "app.message.workspaceNoListPermission":
     "This identity can enter the workspace but does not have `customer:customer:list`.",
   "app.message.departmentModuleOffline":
@@ -86,8 +85,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.empty": "No workflow definitions exist for the current tenant.",
   "app.workflow.listEyebrow": "Real module workspace",
   "app.workflow.listTitle": "Workflow definitions",
-  "app.workflow.listDescription":
-    "Select a list item to inspect the side-panel detail.",
+  "app.workflow.listDescription": "Select a list item to inspect its detail.",
   "app.workflow.filter.searchLabel": "Search definitions",
   "app.workflow.filter.searchPlaceholder": "Search by name, key, or id",
   "app.workflow.filter.statusTitle": "Status filter",
@@ -419,7 +417,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "`file` is not registered on this server yet. Enable the system-file module and try again.",
   "app.message.fileSignInToLoad": "Sign in first to load protected file data.",
   "app.message.fileNoListPermission":
-    "This identity does not have `system:file:list`; if upload permission is still available, use the side-panel upload flow.",
+    "This identity does not have `system:file:list`; if upload permission is still available, upload a file directly.",
   "app.error.loadFiles": "Failed to load files",
   "app.error.loadFileDetail": "Failed to load file detail",
   "app.error.uploadFile": "Failed to upload file",
