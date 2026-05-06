@@ -1,3 +1,7 @@
+import { mkdtemp, readFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+
 import { describe, expect, test } from "bun:test"
 
 import {
@@ -5,6 +9,39 @@ import {
   buildRecommendedActions,
   renderSummaryMarkdown,
 } from "./go-live-report"
+
+const runReportProcess = async (
+  env: Record<string, string | undefined>,
+  reportPath: string,
+) => {
+  const child = Bun.spawn(["bun", "scripts/go-live-report.ts"], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      ...env,
+      ELYSIAN_GO_LIVE_REPORT_PATH: reportPath,
+    },
+    stdout: "pipe",
+    stderr: "pipe",
+  })
+
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ])
+
+  return {
+    stdout,
+    stderr,
+    exitCode,
+  }
+}
+
+const createReportOutputPath = async () => {
+  const outputDir = await mkdtemp(join(tmpdir(), "elysian-go-live-report-"))
+  return join(outputDir, "go-live-report.json")
+}
 
 describe("buildBlockers", () => {
   test("requires tenant post-release evidence when tenant impact is true", () => {
@@ -159,5 +196,61 @@ describe("renderSummaryMarkdown", () => {
     expect(markdown).toContain("- status: `failed`")
     expect(markdown).toContain("- releaseEnvironment: `production`")
     expect(markdown).toContain("database backup / restore evidence 缺失。")
+  })
+})
+
+describe("run", () => {
+  test("writes a passed report when required env is complete", async () => {
+    const reportPath = await createReportOutputPath()
+    const result = await runReportProcess(
+      {
+        ELYSIAN_GO_LIVE_SOURCE_BRANCH: "dev",
+        ELYSIAN_GO_LIVE_TARGET_BRANCH: "main",
+        ELYSIAN_GO_LIVE_RELEASE_COMMIT: "845983b",
+        ELYSIAN_GO_LIVE_RELEASE_TAG: "verify-go-live-report",
+        ELYSIAN_GO_LIVE_ENVIRONMENT: "production",
+        ELYSIAN_GO_LIVE_MIGRATIONS: "001_init",
+        ELYSIAN_GO_LIVE_TENANT_IMPACT: "false",
+        ELYSIAN_GO_LIVE_CHECK_PASSED: "true",
+        ELYSIAN_GO_LIVE_BUILD_VUE_PASSED: "true",
+        ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED: "true",
+        ELYSIAN_GO_LIVE_TENANT_FULL_PASSED: "true",
+        ELYSIAN_GO_LIVE_BACKUP_READY: "true",
+        ELYSIAN_GO_LIVE_RELEASE_ROLES_READY: "true",
+        ELYSIAN_GO_LIVE_PROXY_TLS_OWNER_READY: "true",
+        ELYSIAN_GO_LIVE_HEALTH_VERIFIED: "true",
+        ELYSIAN_GO_LIVE_METRICS_VERIFIED: "true",
+        ELYSIAN_GO_LIVE_ADMIN_LOGIN_VERIFIED: "true",
+        ELYSIAN_GO_LIVE_MENU_PERMISSION_GATE_VERIFIED: "true",
+        ELYSIAN_GO_LIVE_CORE_WORKSPACE_LIST_VERIFIED: "true",
+        ELYSIAN_GO_LIVE_CORE_WRITE_ACTION_VERIFIED: "true",
+      },
+      reportPath,
+    )
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toContain("status=passed blockerCount=0")
+
+    const report = JSON.parse(await readFile(reportPath, "utf8")) as {
+      status: string
+      blockers: string[]
+    }
+    expect(report.status).toBe("passed")
+    expect(report.blockers).toEqual([])
+  })
+
+  test("fails fast when a boolean env is invalid", async () => {
+    const reportPath = await createReportOutputPath()
+    const result = await runReportProcess(
+      {
+        ELYSIAN_GO_LIVE_TENANT_IMPACT: "not-a-boolean",
+      },
+      reportPath,
+    )
+
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toContain(
+      "Invalid boolean env ELYSIAN_GO_LIVE_TENANT_IMPACT",
+    )
   })
 })
