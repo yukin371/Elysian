@@ -56,11 +56,16 @@ export interface PreviewModuleFilesOptions
 
 const getPlannedAction = (
   exists: boolean,
+  hasChanges: boolean,
   isManaged: boolean | null,
   conflictStrategy: GeneratedConflictStrategy,
 ): PreviewPlannedAction => {
   if (!exists) {
     return "create"
+  }
+
+  if (!hasChanges) {
+    return "skip"
   }
 
   if (conflictStrategy === "skip") {
@@ -129,6 +134,7 @@ export const previewModuleFiles = async (
   return targets.map((entry) => {
     const plannedAction = getPlannedAction(
       entry.exists,
+      entry.hasChanges,
       entry.isManaged,
       conflictStrategy,
     )

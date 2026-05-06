@@ -26,8 +26,8 @@ const verifyManagedOverwrite = async (rootDir: string) => {
   })
 
   assert(
-    secondRun.every((item) => item.written),
-    "Expected overwrite-generated-only to rewrite managed files",
+    secondRun.every((item) => item.written === false),
+    "Expected overwrite-generated-only to no-op when managed files already match",
   )
 }
 

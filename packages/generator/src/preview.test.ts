@@ -74,7 +74,7 @@ describe("previewModuleFiles", () => {
     )
   })
 
-  it("returns overwrite actions for managed files with overwrite-generated-only", async () => {
+  it("returns skip actions for files that already match generated output", async () => {
     const directory = await mkdtemp(
       join(tmpdir(), "elysian-generator-preview-"),
     )
@@ -90,9 +90,27 @@ describe("previewModuleFiles", () => {
       conflictStrategy: "overwrite-generated-only",
     })
 
-    expect(preview.every((item) => item.plannedAction === "overwrite")).toBe(
-      true,
+    expect(preview.every((item) => item.plannedAction === "skip")).toBe(true)
+    expect(preview.every((item) => item.hasChanges === false)).toBe(true)
+  })
+
+  it("does not block identical existing files with fail strategy", async () => {
+    const directory = await mkdtemp(
+      join(tmpdir(), "elysian-generator-preview-"),
     )
+
+    await writeModuleFiles(customerModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+    })
+
+    const preview = await previewModuleFiles(customerModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+      conflictStrategy: "fail",
+    })
+
+    expect(preview.every((item) => item.plannedAction === "skip")).toBe(true)
     expect(preview.every((item) => item.hasChanges === false)).toBe(true)
   })
 

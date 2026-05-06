@@ -132,7 +132,9 @@ const validateConflictStrategy = (
   conflictStrategy: WriteConflictStrategy,
 ) => {
   if (conflictStrategy === "fail") {
-    const conflict = filesToWrite.find((entry) => entry.exists)
+    const conflict = filesToWrite.find(
+      (entry) => entry.exists && entry.hasChanges,
+    )
     if (conflict) {
       throw new PreviewReportApplyError(
         "WRITE_CONFLICT",
@@ -143,7 +145,7 @@ const validateConflictStrategy = (
 
   if (conflictStrategy === "overwrite-generated-only") {
     const conflict = filesToWrite.find(
-      (entry) => entry.exists && !entry.isManaged,
+      (entry) => entry.exists && entry.hasChanges && !entry.isManaged,
     )
     if (conflict) {
       throw new PreviewReportApplyError(
@@ -161,10 +163,10 @@ const writeResolvedTargets = async (
   const results: WrittenModuleFile[] = []
 
   for (const entry of filesToWrite) {
-    const { file, absolutePath, exists } = entry
+    const { file, absolutePath, exists, hasChanges } = entry
     await mkdir(dirname(absolutePath), { recursive: true })
 
-    if (exists && conflictStrategy === "skip") {
+    if (exists && (!hasChanges || conflictStrategy === "skip")) {
       results.push({
         ...file,
         absolutePath,

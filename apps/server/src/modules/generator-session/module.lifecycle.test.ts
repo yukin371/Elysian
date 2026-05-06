@@ -3,6 +3,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { describe, expect, it } from "bun:test"
+import { writeModuleFiles } from "@elysian/generator"
+import { customerModuleSchema } from "@elysian/schema"
 
 import {
   createGeneratorSessionModule,
@@ -195,6 +197,65 @@ describe("generator session module lifecycle", () => {
         "500",
       ),
     ).toBeDefined()
+  })
+
+  it("does not mark identical generated files as blocking conflicts", async () => {
+    const fixture = await createAuthFixture()
+    const repository = createInMemoryGeneratorSessionRepository()
+    const outputDir = await mkdtemp(
+      join(tmpdir(), "elysian-generator-session-output-"),
+    )
+    const reportRootDir = await mkdtemp(
+      join(tmpdir(), "elysian-generator-session-report-"),
+    )
+
+    await writeModuleFiles(customerModuleSchema, {
+      outputDir,
+      frontendTarget: "vue",
+    })
+
+    const app = createTestApp([
+      fixture.authModule,
+      createGeneratorSessionModule(repository, {
+        authGuard: fixture.authGuard,
+        reportRootDir,
+        resolveOutputDir: () => outputDir,
+      }),
+    ])
+    const accessToken = await loginAsAdmin(app)
+    const response = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "customer",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          targetPreset: "staging",
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(201)
+
+    const body = await readJsonRecord(response)
+    const session = readRecord(body, "session")
+    const diff = readRecord(body, "diff")
+    const actionCounts = readRecord(diff, "actionCounts")
+
+    expect(readBoolean(session, "hasBlockingConflicts")).toBe(false)
+    expect(diff).toMatchObject({
+      changedFileCount: 0,
+      unchangedFileCount: 6,
+    })
+    expect(actionCounts).toMatchObject({
+      block: 0,
+      skip: 6,
+    })
   })
 
   it("creates, applies, lists, and gets generator preview sessions", async () => {
