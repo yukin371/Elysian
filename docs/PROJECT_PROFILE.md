@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-05-01`
+更新时间：`2026-05-06`
 
 ## 项目类型
 
@@ -17,6 +17,7 @@
 - 前端当前不绑定单一实现；当前 C 端界面方向已明确为 `Vue` 第一优先级、`uniapp` 第二优先级设计储备，`React` 暂不进入当前 C 端主线。
 - 仓库已建立 `Bun workspaces` 工作区。
 - 仓库根目录已提供 `docker-compose.yml`，可一键拉起 `server + PostgreSQL` 本地容器栈（含 migrate + seed）。
+- `apps/server` 已提供最小生产镜像定义文件 `apps/server/Dockerfile`，当前首个正式生产平台基线已固定为“单 Linux 主机 + Docker Engine + 容器镜像优先”；自动回滚、镜像仓库与监控平台仍未定稿。
 - 根依赖声明文件已存在：[package.json](/E:/Github/Elysian/package.json)。
 - TypeScript 基线配置已存在：[tsconfig.json](/E:/Github/Elysian/tsconfig.json)。
 - 已存在一个可运行的服务端入口：[apps/server/src/index.ts](/E:/Github/Elysian/apps/server/src/index.ts)。
@@ -165,12 +166,14 @@
 
 ## 当前未确认项
 
-- 运行入口：`TBD`
-  确认路径：前端示例与生成器 CLI 建立后补充更多入口。
-- 构建命令：已存在 `bun run build:vue` 与 `bun run build:uniapp`；服务端独立 build 产物命令仍为 `TBD`
-  确认路径：确定 server 首版打包与发布方式后补充。
-- 部署方式：已具备本地容器化启动基线（`docker compose`）；生产发布方式仍为 `TBD`
-  确认路径：确定正式生产镜像与发布流程后补充。
+- 运行入口：本地开发入口已确认 `bun run dev:server` / `bun run server`；容器运行入口已确认 `apps/server/Dockerfile`
+  确认路径：若后续新增 worker、job 或多进程运行面，再补充更多运行入口。
+- 构建命令：已存在 `bun run build:vue`、`bun run build:uniapp` 与 `bun run server:image:build`
+  补充：已存在 `bun run server:image:smoke` 与 `bun run server:image:verify`，用于镜像构建后的本机容器烟测。
+  补充：已存在 `bun run go-live:report`、`bun run go-live:gate` 与 `bun run go-live:finalize`，用于把 go-live 阻断项收敛成统一报告与门禁结论。
+  确认路径：若后续需要 server bundle、签名产物或多架构镜像，再补充更正式的 build matrix。
+- 部署方式：已固定首个正式生产平台基线为“单 Linux 主机 + Docker Engine”；具体镜像仓库、反向代理实现、自动回滚与监控告警平台仍为 `TBD`
+  确认路径：后续按平台化能力逐项补 ADR / runbook。
 
 ## 仓库拓扑
 

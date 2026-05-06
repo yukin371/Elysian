@@ -72,3 +72,9 @@ flowchart LR
 - `src/index.ts` 已确认模块注册是显式装配，且 `DATABASE_URL` 缺失时不会注册业务模块。
 - `src/modules/module.ts` 已确认模块边界契约仅包含 `name + register(app, context)`。
 - `src/modules/system.ts` 已确认 `/health`、`/platform`、`/metrics`、`/metrics/prometheus`、`/system/modules` 属于 server runtime owner。
+
+## Production Baseline
+
+- 当前最小生产镜像定义文件：`apps/server/Dockerfile`
+- 当前决定：server 正式交付基线采用“容器镜像优先”
+- 当前边界：数据库迁移仍在 `packages/persistence` owner 内独立执行，不内嵌进 server runtime startup

@@ -17,6 +17,7 @@
 - 服务端日志入口
 - HTTP 错误映射
 - 模块注册协议与装配
+- server 最小生产镜像定义（`apps/server/Dockerfile`）
 - 首个 `customer` 模块的应用层 service 与 HTTP 路由
 
 ## Must Not Own
@@ -60,3 +61,4 @@
 - 调整 auth 或 config 的 canonical owner
 - 调整模块注册协议
 - 调整错误 envelope 规则
+- 调整 server 交付形态（例如镜像、启动命令、发布基线）

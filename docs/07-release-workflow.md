@@ -1,6 +1,6 @@
 # 发布流转
 
-更新时间：`2026-04-24`
+更新时间：`2026-05-06`
 
 本文档定义 `Elysian` 当前阶段的标准开发与发布流转，目标是让团队在不引入复杂发布平台的前提下，保持：
 
@@ -75,6 +75,18 @@
 2. 按 [release-checklist.md](./release-checklist.md) 执行
 3. 发起 `dev -> main` PR
 4. 合并后记录版本说明
+
+若本次不是单纯“进入 `main`”，而是要对接真实生产环境，还需继续执行 [release-checklist.md](./release-checklist.md) 中的“正式上线附加清单（go-live）”，不能只完成 `dev -> main` 检查。
+
+若希望把 go-live 清单进一步收敛成统一结论，当前可追加：
+
+1. `bun run go-live:report`
+2. 根据 blocker 补齐环境证据
+3. `bun run go-live:gate`
+
+若希望一键执行 report -> gate，可使用：
+
+- `bun run go-live:finalize`
 
 若本次发布触及 tenant 相关能力，补充约束：
 

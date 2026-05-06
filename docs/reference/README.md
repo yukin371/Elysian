@@ -12,6 +12,12 @@
 - [01-system-overview.md](./01-system-overview.md)
 - [02-cli-reference.md](./02-cli-reference.md)
 - [03-ci-gates-and-reports.md](./03-ci-gates-and-reports.md)
+- [04-server-production-baseline.md](./04-server-production-baseline.md)
+- [05-go-live-runbook.md](./05-go-live-runbook.md)
+- [06-observability-and-oncall-baseline.md](./06-observability-and-oncall-baseline.md)
+- [07-database-backup-and-recovery-template.md](./07-database-backup-and-recovery-template.md)
+- [08-release-roles-and-oncall-template.md](./08-release-roles-and-oncall-template.md)
+- [09-go-live-gate-input-template.md](./09-go-live-gate-input-template.md)
 
 ## 维护规则
 

@@ -133,6 +133,7 @@ bun run stack:up
 - `bun run stack:up`
 - `bun run stack:down`
 - `bun run stack:reset`
+- `bun run server:image:build`
 - `bun run e2e:smoke`（仅执行冒烟用例，需先准备数据库）
 - `bun run e2e:smoke:full`（执行 `migrate + seed + smoke`，推荐本地与 CI 使用）
 - `bun --filter @elysian/generator generate --schema customer --out ./generated --frontend vue`
@@ -144,6 +145,7 @@ bun run stack:up
 
 - 健康检查：`GET /health`
 - 运行时指标快照：`GET /metrics`
+- Server 生产镜像基线：`apps/server/Dockerfile`，参考 [docs/reference/04-server-production-baseline.md](./docs/reference/04-server-production-baseline.md)
 - 生产环境默认开启基础限流（可通过 `.env` 的 `RATE_LIMIT_*` 配置调整）
 - 生产环境建议将 `CORS_ALLOWED_ORIGINS` 设置为明确域名列表，避免使用 `*`
 
