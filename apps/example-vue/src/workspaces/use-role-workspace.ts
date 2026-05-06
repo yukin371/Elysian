@@ -274,6 +274,14 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
               : field.key === "status"
                 ? options.t("copy.query.statusPlaceholder")
                 : field.placeholder,
+      readonlyTrueLabel:
+        field.key === "isSystem"
+          ? options.localizeBoolean(true)
+          : field.readonlyTrueLabel,
+      readonlyFalseLabel:
+        field.key === "isSystem"
+          ? options.localizeBoolean(false)
+          : field.readonlyFalseLabel,
     }))
 
     if (rolePanelMode.value !== "detail") {

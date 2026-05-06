@@ -186,6 +186,8 @@ export interface ElyFormField {
   placeholder?: string
   options?: Array<{ label: string; value: string }>
   dictionaryTypeCode?: string
+  readonlyTrueLabel?: string
+  readonlyFalseLabel?: string
   /** Disabled state. */
   disabled?: boolean
 }

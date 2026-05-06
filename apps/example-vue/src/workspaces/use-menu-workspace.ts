@@ -336,6 +336,14 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
                       : field.key === "status"
                         ? options.t("copy.query.statusPlaceholder")
                         : field.placeholder,
+      readonlyTrueLabel:
+        field.key === "isVisible"
+          ? options.localizeBoolean(true)
+          : field.readonlyTrueLabel,
+      readonlyFalseLabel:
+        field.key === "isVisible"
+          ? options.localizeBoolean(false)
+          : field.readonlyFalseLabel,
     }))
 
     if (menuPanelMode.value !== "detail") {

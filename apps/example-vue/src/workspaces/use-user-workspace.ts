@@ -298,6 +298,14 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
                   : field.key === "status"
                     ? options.t("copy.query.statusPlaceholder")
                     : field.placeholder,
+        readonlyTrueLabel:
+          field.key === "isSuperAdmin"
+            ? options.localizeBoolean(true)
+            : field.readonlyTrueLabel,
+        readonlyFalseLabel:
+          field.key === "isSuperAdmin"
+            ? options.localizeBoolean(false)
+            : field.readonlyFalseLabel,
       }))
 
     if (userPanelMode.value !== "detail") {

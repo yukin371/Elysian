@@ -16,6 +16,7 @@ import type {
   ElyFormProps,
   ElyFormValues,
 } from "../contracts"
+import { formatReadonlyFieldValue } from "../form-readonly"
 
 const props = defineProps<ElyFormProps>()
 const emit = defineEmits<ElyFormEmits>()
@@ -42,31 +43,6 @@ const syncFormValues = () => {
   for (const [key, value] of Object.entries(nextValues)) {
     form[key] = value
   }
-}
-
-const formatReadonlyValue = (field: ElyFormField, value: unknown) => {
-  if (value === null || value === undefined || value === "") {
-    return "—"
-  }
-
-  if (field.input === "switch") {
-    return value
-      ? (props.copy?.switchEnabled ?? "启用")
-      : (props.copy?.switchDisabled ?? "停用")
-  }
-
-  if (field.input === "select" && field.options) {
-    return (
-      field.options.find((option) => option.value === value)?.label ??
-      String(value)
-    )
-  }
-
-  if (field.input === "date" || field.input === "datetime") {
-    return new Date(String(value)).toLocaleString()
-  }
-
-  return String(value)
 }
 
 watch(
@@ -101,7 +77,7 @@ const handleCancel = () => emit("cancel")
       >
         <template v-if="readonly">
           <div class="ely-readonly-value">
-            {{ formatReadonlyValue(field, form[field.key]) }}
+            {{ formatReadonlyFieldValue(field, form[field.key], copy) }}
           </div>
         </template>
 

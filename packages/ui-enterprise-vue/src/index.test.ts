@@ -6,6 +6,7 @@ import {
   isElyShellMenuSelectable,
   toggleElyShellExpandedMenuValue,
 } from "./components/ely-shell-navigation"
+import { formatReadonlyFieldValue } from "./form-readonly"
 import { resolveElyShellCopy, useElyCrudPage } from "./index"
 
 const definition: UiCrudPageDefinition = {
@@ -193,6 +194,42 @@ describe("ui-enterprise-vue adapters", () => {
       presetEyebrow: "企业预设",
       fallbackWorkspace: "工作区内容待接入。",
     })
+  })
+
+  it("prefers field-level readonly labels for switch values", () => {
+    expect(
+      formatReadonlyFieldValue(
+        {
+          key: "isSystem",
+          label: "系统角色",
+          input: "switch",
+          readonlyTrueLabel: "是",
+          readonlyFalseLabel: "否",
+        },
+        true,
+        {
+          switchEnabled: "启用",
+          switchDisabled: "停用",
+        },
+      ),
+    ).toBe("是")
+
+    expect(
+      formatReadonlyFieldValue(
+        {
+          key: "isSystem",
+          label: "系统角色",
+          input: "switch",
+          readonlyTrueLabel: "是",
+          readonlyFalseLabel: "否",
+        },
+        false,
+        {
+          switchEnabled: "启用",
+          switchDisabled: "停用",
+        },
+      ),
+    ).toBe("否")
   })
 
   it("treats directory nodes as expand-only shell entries", () => {
