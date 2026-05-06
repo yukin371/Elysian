@@ -170,7 +170,7 @@ describe("example workspace routes", () => {
       "workflow-definitions",
     )
     expect(resolveExampleWorkspaceModuleCode("/workflow/instances")).toBe(
-      "workflow",
+      "workflow-definition",
     )
   })
 

@@ -4,7 +4,14 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.sectionTitle": "Workflow definitions workspace",
   "app.workflow.sectionCopy":
     "This is the first real workflow surface instead of another placeholder. Scope stays tight: definitions list plus detail only.",
+  "app.workflow.shellTitle": "Workflow definitions workspace",
   "app.workflow.shellDescription":
+    "The workspace reads real workflow definition APIs to prove a minimum multi-module page loop.",
+  "app.workflow-definition.sectionTitle": "Workflow definitions workspace",
+  "app.workflow-definition.sectionCopy":
+    "This is the first real workflow surface instead of another placeholder. Scope stays tight: definitions list plus detail only.",
+  "app.workflow-definition.shellTitle": "Workflow definitions workspace",
+  "app.workflow-definition.shellDescription":
     "The workspace reads real workflow definition APIs to prove a minimum multi-module page loop.",
   "app.message.customerModuleOffline":
     "`customer` module is not registered yet. Add `DATABASE_URL`, run migrations and seed, then restart the server.",

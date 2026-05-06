@@ -28,7 +28,7 @@ export interface GeneratedFrontendModuleArtifact {
 }
 
 export const workflowDefinitionFrontendModuleArtifact: GeneratedFrontendModuleArtifact = {
-  moduleCode: "workflow",
+  moduleCode: "workflow-definition",
   frontendTarget: "vue",
   workspaceDomain: "business",
   routePath: "/workflow/definitions",

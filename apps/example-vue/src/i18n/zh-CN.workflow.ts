@@ -4,7 +4,14 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.sectionTitle": "流程定义工作区",
   "app.workflow.sectionCopy":
     "这里开始承接真实 workflow 模块。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
+  "app.workflow.shellTitle": "流程定义工作区",
   "app.workflow.shellDescription":
+    "列表与详情直接消费 workflow definitions 接口，验证多模块工作区的最小真实闭环。",
+  "app.workflow-definition.sectionTitle": "流程定义工作区",
+  "app.workflow-definition.sectionCopy":
+    "这里开始承接真实 workflow 模块。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
+  "app.workflow-definition.shellTitle": "流程定义工作区",
+  "app.workflow-definition.shellDescription":
     "列表与详情直接消费 workflow definitions 接口，验证多模块工作区的最小真实闭环。",
   "app.message.customerModuleOffline":
     "`customer` 模块尚未注册。请配置 `DATABASE_URL`，执行迁移与 seed 后重启服务。",

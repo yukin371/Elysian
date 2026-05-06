@@ -6,7 +6,10 @@ import type {
   PlatformResponse,
 } from "../lib/platform-api"
 import { clearAccessToken, setAccessToken } from "../lib/platform-api"
-import { useExampleSessionOrchestration } from "./use-example-session-orchestration"
+import {
+  isWorkflowModuleRegistered,
+  useExampleSessionOrchestration,
+} from "./use-example-session-orchestration"
 
 const originalFetch = globalThis.fetch
 
@@ -129,6 +132,12 @@ describe("useExampleSessionOrchestration", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("recognizes current and legacy workflow module codes", () => {
+    expect(isWorkflowModuleRegistered(["workflow-definition"])).toBe(true)
+    expect(isWorkflowModuleRegistered(["workflow"])).toBe(true)
+    expect(isWorkflowModuleRegistered(["customer"])).toBe(false)
   })
 
   test("suppresses recoverable logout auth errors while clearing local session state", async () => {

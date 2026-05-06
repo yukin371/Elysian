@@ -611,7 +611,7 @@ export const workflowModuleSchema: ModuleSchema = {
     { key: "updatedAt", label: "Updated At", kind: "datetime", required: true },
   ],
   frontend: {
-    moduleCode: "workflow",
+    moduleCode: "workflow-definition",
     workspaceDomain: "business",
     routePath: "/workflow/definitions",
     permissionPrefix: "workflow:definition",

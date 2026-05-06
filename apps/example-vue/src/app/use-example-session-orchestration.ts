@@ -14,6 +14,9 @@ import { isRecoverableAuthError } from "./example-auth-errors"
 
 type AppTranslate = (key: string, params?: Record<string, unknown>) => string
 
+export const isWorkflowModuleRegistered = (modules: readonly string[]) =>
+  modules.includes("workflow-definition") || modules.includes("workflow")
+
 interface LoginFormState {
   username: string
   password: string
@@ -228,8 +231,9 @@ export const useExampleSessionOrchestration = (
       options.userModuleReady.value = modulePayload.modules.includes("user")
       options.dictionaryModuleReady.value =
         modulePayload.modules.includes("dictionary")
-      options.workflowModuleReady.value =
-        modulePayload.modules.includes("workflow")
+      options.workflowModuleReady.value = isWorkflowModuleRegistered(
+        modulePayload.modules,
+      )
 
       await restoreSession()
       await options.reloadFiles()
