@@ -190,7 +190,8 @@ watch(
   overflow: hidden;
 }
 
-.admin-secondary-dialog-content :deep(.enterprise-copy) {
+.admin-secondary-dialog-content :deep(.enterprise-card > .enterprise-eyebrow),
+.admin-secondary-dialog-content :deep(.enterprise-card > .enterprise-copy) {
   display: none;
 }
 </style>

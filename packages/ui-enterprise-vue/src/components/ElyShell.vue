@@ -150,7 +150,6 @@ const handleDirectoryToggle = (menuKey: string) => {
 
         <div class="ely-sidebar-label">
           <span>{{ resolvedCopy.navigationLabel }}</span>
-          <small>{{ presetLabel }}</small>
         </div>
 
         <TMenu
@@ -365,12 +364,12 @@ const handleDirectoryToggle = (menuKey: string) => {
 .ely-nav :deep(.t-menu__item),
 .ely-nav :deep(.t-submenu__title) {
   border-radius: 6px;
-  min-height: 44px;
+  min-height: 38px;
   height: auto;
   align-items: stretch;
   box-sizing: border-box;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-top: 0.42rem;
+  padding-bottom: 0.42rem;
 }
 
 .ely-nav :deep(.t-menu__item:hover),

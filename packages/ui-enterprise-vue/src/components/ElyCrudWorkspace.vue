@@ -20,7 +20,6 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   <div class="ely-crud-workspace">
     <div class="ely-crud-head">
       <div>
-        <p class="ely-crud-eyebrow">{{ eyebrow }}</p>
         <h3>{{ title }}</h3>
         <p v-if="hasDescription" class="ely-crud-copy">{{ description }}</p>
       </div>
@@ -43,7 +42,6 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
     <section class="ely-crud-card">
       <div class="ely-crud-card-head">
         <div>
-          <p class="ely-crud-card-title">{{ copy?.gridTitle ?? "数据列表" }}</p>
           <span>
             {{
               itemCountLabel ??
@@ -90,7 +88,7 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
 .ely-crud-workspace {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .ely-crud-head {
@@ -100,18 +98,10 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   gap: 1rem;
 }
 
-.ely-crud-eyebrow,
-.ely-crud-card-title {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
 .ely-crud-head h3 {
-  margin: 0.55rem 0 0;
-  font-size: clamp(1.4rem, 1.8vw, 2rem);
+  margin: 0;
+  font-size: clamp(1.12rem, 1.1vw, 1.32rem);
+  line-height: 1.25;
   color: #0f172a;
 }
 
@@ -144,7 +134,6 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
 
 .ely-crud-card-head span {
   display: block;
-  margin-top: 0.4rem;
   font-size: 0.84rem;
   color: #94a3b8;
 }

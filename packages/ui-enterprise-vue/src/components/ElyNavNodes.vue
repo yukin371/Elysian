@@ -35,7 +35,6 @@ const visibleItems = computed(() =>
           @click.stop="emit('directory-toggle', item.id)"
         >
           <span>{{ item.name }}</span>
-          <small>{{ item.code }}</small>
         </div>
       </template>
       <ElyNavNodes
@@ -47,7 +46,6 @@ const visibleItems = computed(() =>
     <TMenuItem v-else :value="item.id">
       <div class="ely-nav-title">
         <span>{{ item.name }}</span>
-        <small>{{ item.path ?? item.code }}</small>
       </div>
     </TMenuItem>
   </template>
@@ -57,7 +55,6 @@ const visibleItems = computed(() =>
 .ely-nav-title {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
   min-width: 0;
   width: 100%;
   line-height: 1.35;
@@ -68,16 +65,6 @@ const visibleItems = computed(() =>
   font-weight: 600;
   line-height: 1.35;
   color: #132238;
-  overflow-wrap: anywhere;
-}
-
-.ely-nav-title small {
-  font-size: 0.66rem;
-  line-height: 1.35;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #6b7280;
-  white-space: normal;
   overflow-wrap: anywhere;
 }
 </style>
