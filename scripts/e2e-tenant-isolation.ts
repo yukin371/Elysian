@@ -305,6 +305,40 @@ const runCommand = async (command: string, args: string[]) => {
   }
 }
 
+const terminateChildProcess = async (child: ReturnType<typeof spawn>) => {
+  if (child.exitCode !== null) {
+    return
+  }
+
+  if (process.platform === "win32") {
+    const pid = child.pid
+    if (!pid) {
+      return
+    }
+
+    const killer = spawn("taskkill", ["/PID", pid.toString(), "/T", "/F"], {
+      stdio: "ignore",
+      windowsHide: true,
+    })
+
+    await once(killer, "exit")
+    return
+  }
+
+  if (!child.killed) {
+    child.kill("SIGTERM")
+  }
+
+  await Promise.race([
+    once(child, "exit"),
+    Bun.sleep(5_000).then(() => {
+      if (!child.killed) {
+        child.kill("SIGKILL")
+      }
+    }),
+  ])
+}
+
 const login = async (input: {
   username: string
   password: string
@@ -452,6 +486,23 @@ const withTenantContext = async <T>(
     return action(tx)
   })
 
+const withDatabaseClient = async <T>(
+  env: Record<string, string | undefined>,
+  action: (db: ReturnType<typeof createDatabaseClient>) => Promise<T>,
+) => {
+  const db = createDatabaseClient(env)
+
+  try {
+    return await action(db)
+  } finally {
+    await db.$client.end()
+  }
+}
+
+const readTenantByCode = async (code: string) => {
+  return withDatabaseClient(process.env, (db) => getTenantByCode(db, code))
+}
+
 const run = async () => {
   const startedAt = Date.now()
   let lastStage = "preflight"
@@ -471,16 +522,11 @@ const run = async () => {
   const defaultAdminUsername = process.env.ELYSIAN_ADMIN_USERNAME ?? "admin"
   const defaultAdminPassword =
     process.env.ELYSIAN_ADMIN_PASSWORD ?? ["admin", "123"].join("")
-  const db = createDatabaseClient()
   const runtimeDatabaseUrl = buildRoleDatabaseUrl(
     process.env.DATABASE_URL ?? "",
     runtimeRoleName,
     runtimeRolePassword,
   )
-  const runtimeDb = createDatabaseClient({
-    ...process.env,
-    DATABASE_URL: runtimeDatabaseUrl,
-  })
   const databaseName =
     new URL(process.env.DATABASE_URL ?? "").pathname.slice(1) || "postgres"
   const bootstrapSpec = createTenantBootstrapSeedSpec({
@@ -503,7 +549,7 @@ const run = async () => {
       tenantAdminPassword,
     ])
 
-    const alphaTenant = await getTenantByCode(db, tenantCodes.alpha)
+    const alphaTenant = await readTenantByCode(tenantCodes.alpha)
     if (!alphaTenant) {
       throw new Error("tenant:init did not create tenant alpha")
     }
@@ -521,7 +567,7 @@ const run = async () => {
       tenantAdminPassword,
     ])
 
-    const alphaTenantAfterRerun = await getTenantByCode(db, tenantCodes.alpha)
+    const alphaTenantAfterRerun = await readTenantByCode(tenantCodes.alpha)
     if (!alphaTenantAfterRerun || alphaTenantAfterRerun.id !== alphaTenant.id) {
       throw new Error(
         "tenant:init rerun did not preserve tenant alpha identity",
@@ -541,72 +587,84 @@ const run = async () => {
       tenantAdminPassword,
     ])
 
-    const betaTenant = await getTenantByCode(db, tenantCodes.beta)
+    const betaTenant = await readTenantByCode(tenantCodes.beta)
     if (!betaTenant) {
       throw new Error("tenant:init did not create tenant beta")
     }
 
-    lastStage = "runtime_role_provision"
-    await provisionRuntimeRole(db, {
-      roleName: runtimeRoleName,
-      rolePassword: runtimeRolePassword,
-      databaseName,
+    await withDatabaseClient(process.env, async (db) => {
+      await provisionRuntimeRole(db, {
+        roleName: runtimeRoleName,
+        rolePassword: runtimeRolePassword,
+        databaseName,
+      })
     })
 
+    const runtimeDbEnv = {
+      ...process.env,
+      DATABASE_URL: runtimeDatabaseUrl,
+    }
+
     lastStage = "tenant_bootstrap_verification"
-    await withTenantContext(runtimeDb, alphaTenant.id, async (scopedDb) => {
-      const alphaRoles = await scopedDb.select().from(roles)
-      const alphaPermissions = await scopedDb.select().from(permissions)
-      const alphaMenus = await scopedDb.select().from(menus)
-      const alphaDictionaryTypes = await scopedDb.select().from(dictionaryTypes)
-      const alphaDictionaryItems = await scopedDb.select().from(dictionaryItems)
-      const alphaAdminUsers = (await scopedDb.select().from(users)).filter(
-        (user) => user.username === defaultAdminUsername,
-      )
-
-      if (alphaRoles.length !== bootstrapSpec.roles.length) {
-        throw new Error(
-          `Tenant alpha role bootstrap drifted (expected=${bootstrapSpec.roles.length}, received=${alphaRoles.length})`,
+    await withDatabaseClient(runtimeDbEnv, async (runtimeDb) => {
+      await withTenantContext(runtimeDb, alphaTenant.id, async (scopedDb) => {
+        const alphaRoles = await scopedDb.select().from(roles)
+        const alphaPermissions = await scopedDb.select().from(permissions)
+        const alphaMenus = await scopedDb.select().from(menus)
+        const alphaDictionaryTypes = await scopedDb
+          .select()
+          .from(dictionaryTypes)
+        const alphaDictionaryItems = await scopedDb
+          .select()
+          .from(dictionaryItems)
+        const alphaAdminUsers = (await scopedDb.select().from(users)).filter(
+          (user) => user.username === defaultAdminUsername,
         )
-      }
 
-      if (alphaPermissions.length !== bootstrapSpec.permissions.length) {
-        throw new Error(
-          `Tenant alpha permission bootstrap drifted (expected=${bootstrapSpec.permissions.length}, received=${alphaPermissions.length})`,
-        )
-      }
+        if (alphaRoles.length !== bootstrapSpec.roles.length) {
+          throw new Error(
+            `Tenant alpha role bootstrap drifted (expected=${bootstrapSpec.roles.length}, received=${alphaRoles.length})`,
+          )
+        }
 
-      if (alphaMenus.length !== bootstrapSpec.menus.length) {
-        throw new Error(
-          `Tenant alpha menu bootstrap drifted (expected=${bootstrapSpec.menus.length}, received=${alphaMenus.length})`,
-        )
-      }
+        if (alphaPermissions.length !== bootstrapSpec.permissions.length) {
+          throw new Error(
+            `Tenant alpha permission bootstrap drifted (expected=${bootstrapSpec.permissions.length}, received=${alphaPermissions.length})`,
+          )
+        }
 
-      if (
-        alphaDictionaryTypes.length !== bootstrapSpec.dictionaryTypes.length
-      ) {
-        throw new Error(
-          `Tenant alpha dictionary type bootstrap drifted (expected=${bootstrapSpec.dictionaryTypes.length}, received=${alphaDictionaryTypes.length})`,
-        )
-      }
+        if (alphaMenus.length !== bootstrapSpec.menus.length) {
+          throw new Error(
+            `Tenant alpha menu bootstrap drifted (expected=${bootstrapSpec.menus.length}, received=${alphaMenus.length})`,
+          )
+        }
 
-      if (
-        alphaDictionaryItems.length !== bootstrapSpec.dictionaryItems.length
-      ) {
-        throw new Error(
-          `Tenant alpha dictionary item bootstrap drifted (expected=${bootstrapSpec.dictionaryItems.length}, received=${alphaDictionaryItems.length})`,
-        )
-      }
+        if (
+          alphaDictionaryTypes.length !== bootstrapSpec.dictionaryTypes.length
+        ) {
+          throw new Error(
+            `Tenant alpha dictionary type bootstrap drifted (expected=${bootstrapSpec.dictionaryTypes.length}, received=${alphaDictionaryTypes.length})`,
+          )
+        }
 
-      if (alphaAdminUsers.length !== 1) {
-        throw new Error(
-          `Tenant alpha admin bootstrap is not idempotent (expected=1, received=${alphaAdminUsers.length})`,
-        )
-      }
+        if (
+          alphaDictionaryItems.length !== bootstrapSpec.dictionaryItems.length
+        ) {
+          throw new Error(
+            `Tenant alpha dictionary item bootstrap drifted (expected=${bootstrapSpec.dictionaryItems.length}, received=${alphaDictionaryItems.length})`,
+          )
+        }
 
-      if (alphaAdminUsers[0]?.isSuperAdmin !== false) {
-        throw new Error("Tenant alpha admin must not be a super admin")
-      }
+        if (alphaAdminUsers.length !== 1) {
+          throw new Error(
+            `Tenant alpha admin bootstrap is not idempotent (expected=1, received=${alphaAdminUsers.length})`,
+          )
+        }
+
+        if (alphaAdminUsers[0]?.isSuperAdmin !== false) {
+          throw new Error("Tenant alpha admin must not be a super admin")
+        }
+      })
     })
 
     server = spawn("bun", ["run", "server"], {
@@ -759,20 +817,25 @@ const run = async () => {
     await assertStatus(betaGetAlphaCustomer, 404)
 
     lastStage = "db_rls_isolation"
-    const defaultRows = await withTenantContext(
-      runtimeDb,
-      DEFAULT_TENANT_ID,
-      (scopedDb) => listCustomers(scopedDb),
-    )
-    const alphaRows = await withTenantContext(
-      runtimeDb,
-      alphaTenant.id,
-      (scopedDb) => listCustomers(scopedDb),
-    )
-    const betaRows = await withTenantContext(
-      runtimeDb,
-      betaTenant.id,
-      (scopedDb) => listCustomers(scopedDb),
+    const [defaultRows, alphaRows, betaRows] = await withDatabaseClient(
+      runtimeDbEnv,
+      async (runtimeDb) => [
+        await withTenantContext(
+          runtimeDb,
+          DEFAULT_TENANT_ID,
+          async (scopedDb) => (await listCustomers(scopedDb)).items,
+        ),
+        await withTenantContext(
+          runtimeDb,
+          alphaTenant.id,
+          async (scopedDb) => (await listCustomers(scopedDb)).items,
+        ),
+        await withTenantContext(
+          runtimeDb,
+          betaTenant.id,
+          async (scopedDb) => (await listCustomers(scopedDb)).items,
+        ),
+      ],
     )
 
     if (
@@ -804,12 +867,14 @@ const run = async () => {
 
     let fkFailureMessage = ""
     try {
-      await withTenantContext(runtimeDb, invalidTenantId, (scopedDb) =>
-        insertCustomer(scopedDb, {
-          name: `invalid-fk-${runId}`,
-          tenantId: invalidTenantId,
-          status: "active",
-        }),
+      await withDatabaseClient(runtimeDbEnv, (runtimeDb) =>
+        withTenantContext(runtimeDb, invalidTenantId, (scopedDb) =>
+          insertCustomer(scopedDb, {
+            name: `invalid-fk-${runId}`,
+            tenantId: invalidTenantId,
+            status: "active",
+          }),
+        ),
       )
     } catch (error) {
       fkFailureMessage = describeError(error)
@@ -847,38 +912,29 @@ const run = async () => {
     console.error(`[e2e-tenant] report: ${reportPath}`)
     throw error
   } finally {
-    for (const item of createdCustomerIds) {
+    await withDatabaseClient(process.env, async (db) => {
+      for (const item of createdCustomerIds) {
+        try {
+          await withTenantContext(db, item.tenantId, (scopedDb) =>
+            deleteCustomer(scopedDb, item.customerId),
+          )
+        } catch {
+          // noop
+        }
+      }
+
       try {
-        await withTenantContext(db, item.tenantId, (scopedDb) =>
-          deleteCustomer(scopedDb, item.customerId),
-        )
+        await dropRuntimeRole(db, runtimeRoleName)
       } catch {
         // noop
       }
-    }
+    }).catch(() => {
+      // noop
+    })
 
     if (server && !server.killed) {
-      server.kill("SIGTERM")
+      await terminateChildProcess(server)
     }
-
-    if (server) {
-      await Promise.race([
-        once(server, "exit"),
-        Bun.sleep(5_000).then(() => {
-          if (!server.killed) {
-            server.kill("SIGKILL")
-          }
-        }),
-      ])
-    }
-
-    try {
-      await dropRuntimeRole(db, runtimeRoleName)
-    } catch {
-      // noop
-    }
-
-    await Promise.allSettled([db.$client.end(), runtimeDb.$client.end()])
   }
 }
 
