@@ -6,8 +6,8 @@ export const userRecordResponseSchema = t.Object({
   id: t.String(),
   username: t.String(),
   displayName: t.String(),
-  email: t.String(),
-  phone: t.String(),
+  email: t.Optional(t.String()),
+  phone: t.Optional(t.String()),
   status: userStatusSchema,
   isSuperAdmin: t.Boolean(),
   lastLoginAt: t.Nullable(

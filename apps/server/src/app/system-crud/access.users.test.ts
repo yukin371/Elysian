@@ -234,6 +234,86 @@ describe("createServerApp system user access", () => {
     })
   })
 
+  it("allows users without email or phone to pass response validation", async () => {
+    const fixture = await createAuthTestFixture({
+      permissions: ["system:user:list"],
+      isSuperAdmin: false,
+    })
+    const userRepository = createInMemoryUserRepository([
+      {
+        id: "user_admin_1",
+        username: "admin",
+        displayName: "Administrator",
+        status: "active",
+        isSuperAdmin: true,
+        lastLoginAt: "2026-04-21T08:00:00.000Z",
+        createdAt: "2026-04-21T00:00:00.000Z",
+        updatedAt: "2026-04-21T08:00:00.000Z",
+      },
+      {
+        id: "user_ops_1",
+        username: "operator",
+        displayName: "Operator",
+        email: "operator@example.com",
+        phone: "13900000000",
+        status: "active",
+        isSuperAdmin: false,
+        lastLoginAt: null,
+        createdAt: "2026-04-20T00:00:00.000Z",
+        updatedAt: "2026-04-20T00:00:00.000Z",
+      },
+    ])
+    const app = createTestApp({
+      modules: [
+        fixture.authModule,
+        createUserModule(userRepository, {
+          authGuard: fixture.authGuard,
+        }),
+      ],
+    })
+    const accessToken = await loginAsAdmin(app)
+
+    const listResponse = await app.handle(
+      new Request("http://localhost/system/users", {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    )
+
+    expect(listResponse.status).toBe(200)
+    expect(await listResponse.json()).toEqual({
+      items: [
+        {
+          id: "user_admin_1",
+          username: "admin",
+          displayName: "Administrator",
+          status: "active",
+          isSuperAdmin: true,
+          lastLoginAt: "2026-04-21T08:00:00.000Z",
+          createdAt: "2026-04-21T00:00:00.000Z",
+          updatedAt: "2026-04-21T08:00:00.000Z",
+        },
+        {
+          id: "user_ops_1",
+          username: "operator",
+          displayName: "Operator",
+          email: "operator@example.com",
+          phone: "13900000000",
+          status: "active",
+          isSuperAdmin: false,
+          lastLoginAt: null,
+          createdAt: "2026-04-20T00:00:00.000Z",
+          updatedAt: "2026-04-20T00:00:00.000Z",
+        },
+      ],
+      total: 2,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+    })
+  })
+
   it("exports system users as csv when the access token has user-list permission", async () => {
     const fixture = await createAuthTestFixture({
       permissions: ["system:user:list"],

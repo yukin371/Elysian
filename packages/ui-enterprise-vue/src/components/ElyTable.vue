@@ -30,6 +30,12 @@ const formatCell = (value: unknown): string => {
   return String(value)
 }
 
+const isActiveStatus = (value: unknown, activeLabel: string) =>
+  value === "active" || value === activeLabel
+
+const isInactiveStatus = (value: unknown, inactiveLabel: string) =>
+  value === "inactive" || value === "disabled" || value === inactiveLabel
+
 const handleRowClick = (row: Record<string, unknown>) => {
   emit("row-click", row)
 }
@@ -41,17 +47,22 @@ const resolvedColumns = computed(() => {
     width: col.width,
     cell: (_h: typeof h, { row }: { row: Record<string, unknown> }) => {
       if (col.key === "status") {
+        const activeLabel = props.copy?.statusActive ?? "启用"
+        const inactiveLabel = props.copy?.statusInactive ?? "停用"
+
         return h(
           TTag,
           {
-            theme: row.status === "active" ? "success" : "default",
+            theme: isActiveStatus(row.status, activeLabel)
+              ? "success"
+              : "default",
             variant: "light",
           },
           () =>
-            row.status === "active"
-              ? (props.copy?.statusActive ?? "启用")
-              : row.status === "inactive"
-                ? (props.copy?.statusInactive ?? "停用")
+            isActiveStatus(row.status, activeLabel)
+              ? activeLabel
+              : isInactiveStatus(row.status, inactiveLabel)
+                ? inactiveLabel
                 : (props.copy?.statusUnknown ?? "未知"),
         )
       }

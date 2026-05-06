@@ -2275,8 +2275,8 @@ export interface operations {
                             id: string;
                             username: string;
                             displayName: string;
-                            email: string;
-                            phone: string;
+                            email?: string;
+                            phone?: string;
                             /** @enum {string} */
                             status: "active" | "disabled";
                             isSuperAdmin: boolean;
@@ -2379,8 +2379,8 @@ export interface operations {
                         id: string;
                         username: string;
                         displayName: string;
-                        email: string;
-                        phone: string;
+                        email?: string;
+                        phone?: string;
                         /** @enum {string} */
                         status: "active" | "disabled";
                         isSuperAdmin: boolean;
@@ -2522,8 +2522,8 @@ export interface operations {
                         id: string;
                         username: string;
                         displayName: string;
-                        email: string;
-                        phone: string;
+                        email?: string;
+                        phone?: string;
                         /** @enum {string} */
                         status: "active" | "disabled";
                         isSuperAdmin: boolean;
@@ -2636,8 +2636,8 @@ export interface operations {
                         id: string;
                         username: string;
                         displayName: string;
-                        email: string;
-                        phone: string;
+                        email?: string;
+                        phone?: string;
                         /** @enum {string} */
                         status: "active" | "disabled";
                         isSuperAdmin: boolean;
