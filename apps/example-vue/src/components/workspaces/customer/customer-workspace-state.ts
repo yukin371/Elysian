@@ -9,6 +9,8 @@ export interface CustomerWorkspaceMainInjectedState {
   customerLoading: { value: boolean }
 }
 
+export type CustomerPanelMode = "create" | "detail" | "edit" | "delete-confirm"
+
 export interface CustomerWorkspacePanelInjectedState
   extends CustomerWorkspaceMainInjectedState {
   customerFormMode: { value: "create" | "detail" | "edit" }
@@ -16,8 +18,10 @@ export interface CustomerWorkspacePanelInjectedState
   formFields: { value: unknown[] }
   formValues: { value: Record<string, unknown> }
   panelDescription: { value: string }
+  panelMode: { value: CustomerPanelMode }
   panelTitle: { value: string }
   selectedCustomer: { value: CustomerRecord | null }
+  selectedRow: { value: Record<string, unknown> | null }
 }
 
 const resolveCustomerWorkspaceState = <TState>(

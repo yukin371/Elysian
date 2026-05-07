@@ -21,12 +21,6 @@ type CustomerWorkspaceTranslation = (
 
 interface CustomerWorkspacePanelProps {
   t: CustomerWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canCreateCustomers: boolean
-  canUpdateCustomers: boolean
-  canDeleteCustomers: boolean
   formCopy: ElyFormCopy
   workspaceStateInjected?: boolean
 }
@@ -34,11 +28,6 @@ interface CustomerWorkspacePanelProps {
 const props = defineProps<CustomerWorkspacePanelProps>()
 
 const emit = defineEmits<{
-  (e: "confirm-delete"): void
-  (e: "cancel-delete"): void
-  (e: "start-edit", row: CustomerRecord): void
-  (e: "request-delete", row: CustomerRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-form"): void
 }>()
@@ -65,20 +54,6 @@ const resolvedPanelMode = readInjectedValue(
   ),
   "detail" as "detail" | "create" | "edit",
 )
-const resolvedPanelTitle = readInjectedValue(
-  computed(() => resolvedCustomerWorkspaceState.value?.panelTitle ?? null),
-  "",
-)
-const resolvedPanelDescription = readInjectedValue(
-  computed(
-    () => resolvedCustomerWorkspaceState.value?.panelDescription ?? null,
-  ),
-  "",
-)
-const resolvedDeleteConfirmId = readInjectedValue(
-  computed(() => resolvedCustomerWorkspaceState.value?.deleteConfirmId ?? null),
-  null as string | null,
-)
 const resolvedSelectedCustomer = readInjectedValue(
   computed(
     () => resolvedCustomerWorkspaceState.value?.selectedCustomer ?? null,
@@ -93,120 +68,81 @@ const resolvedFormValues = readInjectedValue(
   computed(() => resolvedCustomerWorkspaceState.value?.formValues ?? null),
   {} as ElyFormValues,
 )
+
+const showIdentity = computed(
+  () => resolvedSelectedCustomer.value && resolvedPanelMode.value !== "create",
+)
+
+const handleFormSubmit = (values: ElyFormValues) => {
+  emit("submit-form", values)
+}
+
+const handleFormCancel = () => {
+  emit("cancel-form")
+}
 </script>
 
 <template>
-  <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.panel.formDetail") }}</p>
-    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
-
-    <div v-if="!moduleReady" class="enterprise-inline-warning">
-      {{ t("app.panel.customerModulePreview") }}
-    </div>
-
-    <div v-else-if="authModuleReady && !isAuthenticated" class="enterprise-inline-warning">
-      {{ t("app.panel.signInToUnlock") }}
-    </div>
-
+  <div class="customer-panel-content">
+    <!-- Identity section -->
     <div
-      v-else-if="resolvedDeleteConfirmId && resolvedSelectedCustomer"
-      class="enterprise-danger-zone"
+      class="ely-context-panel__identity"
+      v-if="showIdentity && resolvedSelectedCustomer"
     >
-      <p>
-        {{
-          t("app.panel.deletePrompt", {
-            name: resolvedSelectedCustomer.name,
-          })
-        }}
-      </p>
-      <div class="enterprise-button-row">
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-danger"
-          :disabled="resolvedLoading"
-          @click="emit('confirm-delete')"
-        >
-          {{ t("app.panel.deleteConfirm") }}
-        </button>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('cancel-delete')"
-        >
-          {{ t("app.panel.cancel") }}
-        </button>
+      <div>
+        <div class="ely-context-panel__identity-name">
+          {{ resolvedSelectedCustomer.name }}
+        </div>
+        <div class="ely-context-panel__identity-sub">
+          {{ resolvedSelectedCustomer.id }}
+        </div>
       </div>
     </div>
 
-    <div
-      v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedCustomer"
-      class="enterprise-button-row"
-    >
-      <button
-        v-if="canUpdateCustomers"
-        type="button"
-        class="enterprise-button"
-        :disabled="resolvedLoading"
-        @click="emit('start-edit', resolvedSelectedCustomer)"
-      >
-        {{ t("app.panel.editCustomer") }}
-      </button>
-      <button
-        v-if="canDeleteCustomers"
-        type="button"
-        class="enterprise-button enterprise-button-danger"
-        :disabled="resolvedLoading"
-        @click="emit('request-delete', resolvedSelectedCustomer)"
-      >
-        {{ t("app.panel.deleteCustomer") }}
-      </button>
-      <button
-        v-if="canCreateCustomers"
-        type="button"
-        class="enterprise-button enterprise-button-ghost"
-        @click="emit('open-create')"
-      >
-        {{ t("app.panel.newCustomer") }}
-      </button>
-    </div>
-
-    <div
-      v-else-if="resolvedPanelMode === 'create' && !canCreateCustomers"
-      class="enterprise-inline-warning"
-    >
-      {{ t("app.panel.noCreatePermission") }}
-    </div>
-
-    <div
-      v-if="
-        moduleReady &&
-        (!authModuleReady || isAuthenticated) &&
-        !(resolvedPanelMode === 'detail' && !resolvedSelectedCustomer)
-      "
-    >
-      <ElyForm
-        class="mt-5"
-        :fields="resolvedFormFields"
-        :values="resolvedFormValues"
-        :readonly="resolvedPanelMode === 'detail'"
-        :loading="resolvedLoading"
-        :copy="formCopy"
-        @submit="emit('submit-form', $event)"
-        @cancel="emit('cancel-form')"
-      />
-    </div>
-
-    <div
-      v-else-if="
-        moduleReady &&
-        (!authModuleReady || isAuthenticated) &&
-        resolvedPanelMode === 'detail' &&
-        !resolvedSelectedCustomer
-      "
-      class="enterprise-inline-warning mt-5"
-    >
-      {{ t("app.panel.selectRowHint") }}
-    </div>
-  </section>
+    <!-- Form -->
+    <ElyForm
+      class="customer-panel-form"
+      :fields="resolvedFormFields"
+      :values="resolvedFormValues"
+      :loading="resolvedLoading"
+      :readonly="resolvedPanelMode === 'detail'"
+      :copy="formCopy"
+      @submit="handleFormSubmit"
+      @cancel="handleFormCancel"
+    />
+  </div>
 </template>
+
+<style scoped>
+.customer-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ely-context-panel__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.ely-context-panel__identity-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 22px;
+}
+
+.ely-context-panel__identity-sub {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 18px;
+  margin-top: 2px;
+}
+
+.customer-panel-form {
+  margin-top: 4px;
+}
+</style>
