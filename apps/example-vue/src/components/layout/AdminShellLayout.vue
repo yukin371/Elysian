@@ -7,6 +7,7 @@ import {
 import { computed, ref, watch } from "vue"
 
 import type { AppTranslate } from "../../app/app-shell-helpers"
+import { useWorkbenchShortcuts } from "../../composables/use-workbench-shortcuts"
 import ShellWorkspaceHeaderActions from "../workspaces/shell/ShellWorkspaceHeaderActions.vue"
 import ShellWorkspaceMainSwitch from "../workspaces/shell/ShellWorkspaceMainSwitch.vue"
 import ShellWorkspaceSecondarySwitch from "../workspaces/shell/ShellWorkspaceSecondarySwitch.vue"
@@ -125,6 +126,30 @@ watch(
     closeContextPanel()
   },
 )
+
+useWorkbenchShortcuts({
+  onSearch: () => {
+    // Focus the global search input in the workbench header
+    const searchInput = document.querySelector<HTMLInputElement>(
+      ".ely-workbench__search input",
+    )
+    searchInput?.focus()
+  },
+  onClosePanel: closeContextPanel,
+  onNavigateUp: () => {
+    // TODO: implement table row navigation
+  },
+  onNavigateDown: () => {
+    // TODO: implement table row navigation
+  },
+  onEdit: () => {
+    // TODO: trigger edit on selected row
+  },
+  onCreate: openContextPanel,
+  onDelete: () => {
+    // TODO: trigger delete on selected row
+  },
+})
 </script>
 
 <template>
