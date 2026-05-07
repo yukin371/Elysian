@@ -6,6 +6,9 @@ import type {
   ElyContextPanelCopy,
   ElyContextPanelEmits,
   ElyContextPanelProps,
+  ElyCrudWorkbenchEmits,
+  ElyCrudWorkbenchProps,
+  ElyCrudWorkspaceCopy,
   ElyCrudWorkspaceEmits,
   ElyCrudWorkspaceProps,
   ElyFormEmits,
@@ -42,6 +45,7 @@ import { resolveElyShellCopy, resolveElyWorkbenchShellCopy } from "./contracts"
 export { default as ElyForm } from "./components/ElyForm.vue"
 export { default as ElyContextPanel } from "./components/ElyContextPanel.vue"
 export { default as ElyCrudWorkspace } from "./components/ElyCrudWorkspace.vue"
+export { default as ElyCrudWorkbench } from "./components/ElyCrudWorkbench.vue"
 export { default as ElyNavNodes } from "./components/ElyNavNodes.vue"
 export { default as ElyPreviewSkeleton } from "./components/ElyPreviewSkeleton.vue"
 export { default as ElyQueryBar } from "./components/ElyQueryBar.vue"
@@ -54,6 +58,9 @@ export type {
   ElyContextPanelCopy,
   ElyContextPanelEmits,
   ElyContextPanelProps,
+  ElyCrudWorkbenchEmits,
+  ElyCrudWorkbenchProps,
+  ElyCrudWorkspaceCopy,
   ElyCrudWorkspaceEmits,
   ElyCrudWorkspaceProps,
   ElyFormEmits,

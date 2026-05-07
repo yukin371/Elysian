@@ -250,6 +250,16 @@ export interface ElyContextPanelEmits {
 
 // ─── Ely CRUD workspace ───────────────────────────────────────────────────────
 
+export interface ElyCrudWorkspaceCopy {
+  gridTitle?: string
+  liveContractLabel?: string
+  rowsInScopeSuffix?: string
+  emptyTitle?: string
+  emptyDescription?: string
+  queryBarCopy?: ElyQueryBarCopy
+  tableCopy?: ElyTableCopy
+}
+
 export interface ElyCrudWorkspaceProps {
   eyebrow: string
   title: string
@@ -264,20 +274,36 @@ export interface ElyCrudWorkspaceProps {
   itemCountLabel?: string
   emptyTitle?: string
   emptyDescription?: string
-  copy?: {
-    gridTitle?: string
-    liveContractLabel?: string
-    rowsInScopeSuffix?: string
-    emptyTitle?: string
-    emptyDescription?: string
-    queryBarCopy?: ElyQueryBarCopy
-    tableCopy?: ElyTableCopy
-  }
+  copy?: ElyCrudWorkspaceCopy
 }
 
 export interface ElyCrudWorkspaceEmits {
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
+  (e: "action", key: string, row: Record<string, unknown>): void
+  (e: "row-click", row: Record<string, unknown>): void
+}
+
+// ─── Ely CRUD workbench ────────────────────────────────────────────────────────
+
+export interface ElyCrudWorkbenchProps {
+  title: string
+  description?: string
+  queryFields?: ElyQueryField[]
+  queryLoading?: boolean
+  tableColumns: ElyTableColumn[]
+  items: Record<string, unknown>[]
+  tableLoading?: boolean
+  tableActions?: ElyTableAction[]
+  rowKey?: string
+  searchPlaceholder?: string
+  emptyTitle?: string
+  emptyDescription?: string
+  copy?: ElyCrudWorkspaceCopy
+}
+
+export interface ElyCrudWorkbenchEmits {
+  (e: "search", value: string): void
   (e: "action", key: string, row: Record<string, unknown>): void
   (e: "row-click", row: Record<string, unknown>): void
 }
