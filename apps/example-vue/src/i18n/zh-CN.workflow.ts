@@ -1,16 +1,16 @@
 import type { VueLocaleMessages } from "@elysian/frontend-vue"
 
 export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
-  "app.workflow.sectionTitle": "流程定义工作区",
+  "app.workflow.sectionTitle": "流程定义管理",
   "app.workflow.sectionCopy":
-    "这里开始承接真实 workflow 模块。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
-  "app.workflow.shellTitle": "流程定义工作区",
-  "app.workflow.shellDescription": "流程定义列表与详情。",
-  "app.workflow-definition.sectionTitle": "流程定义工作区",
+    "用于查看、筛选和追踪当前租户的流程定义版本。它不是流程发起页，也不是流程设计器。",
+  "app.workflow.shellTitle": "流程定义管理",
+  "app.workflow.shellDescription": "查看、筛选和追踪流程定义版本。",
+  "app.workflow-definition.sectionTitle": "流程定义管理",
   "app.workflow-definition.sectionCopy":
-    "这里开始承接真实 workflow 模块。当前范围只做 definitions 列表与详情，避免把示例应用扩写成第二套平台。",
-  "app.workflow-definition.shellTitle": "流程定义工作区",
-  "app.workflow-definition.shellDescription": "流程定义列表与详情。",
+    "用于查看、筛选和追踪当前租户的流程定义版本。它不是流程发起页，也不是流程设计器。",
+  "app.workflow-definition.shellTitle": "流程定义管理",
+  "app.workflow-definition.shellDescription": "查看、筛选和追踪流程定义版本。",
   "app.message.customerModuleOffline":
     "`customer` 模块尚未注册。请配置 `DATABASE_URL`，执行迁移与 seed 后重启服务。",
   "app.message.signInToLoad": "请先从侧栏登录，再加载受保护的客户数据。",
@@ -77,12 +77,10 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "当前身份可以进入工作区，但没有 `workflow:definition:list` 权限。",
   "app.workflow.loading": "正在加载流程定义...",
   "app.workflow.empty": "当前租户下还没有流程定义。",
-  "app.workflow.listEyebrow": "真实模块工作区",
+  "app.workflow.listEyebrow": "流程定义管理",
   "app.workflow.listTitle": "流程定义清单",
-  "app.workflow.listDescription": "点击列表项打开详情弹窗。",
   "app.workflow.filter.searchLabel": "搜索定义",
   "app.workflow.filter.searchPlaceholder": "按名称、编码或 ID 搜索",
-  "app.workflow.filter.statusTitle": "状态筛选",
   "app.workflow.filter.all": "全部",
   "app.workflow.filter.active": "启用",
   "app.workflow.filter.disabled": "停用",
@@ -95,7 +93,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "第 {page}/{totalPages} 页，{start}-{end} / {total} 条",
   "app.workflow.pagination.previous": "上一页",
   "app.workflow.pagination.next": "下一页",
-  "app.workflow.detailEyebrow": "流程详情",
+  "app.workflow.detailEyebrow": "流程定义详情",
   "app.workflow.detailDescription":
     "详情弹窗保持聚焦，只展示当前定义的结构、状态与版本元数据。",
   "app.workflow.detailEmpty": "请选择一条流程定义查看结构详情。",
@@ -187,6 +185,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.loading": "正在生成最新 preview session，请稍候。",
   "app.generatorPreview.action.refresh": "刷新预览",
   "app.generatorPreview.action.refreshing": "刷新中",
+  "app.generatorPreview.action.loadCurrentSchemaDraft": "填充当前 Schema JSON",
   "app.generatorPreview.action.approve": "审核通过",
   "app.generatorPreview.action.reject": "拒绝",
   "app.generatorPreview.action.confirmReject": "确认拒绝",
@@ -304,6 +303,25 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.manifestPath": "Manifest 路径",
   "app.generatorPreview.meta.requestId": "请求 ID",
   "app.generatorPreview.sourceType.registeredSchema": "已注册 Schema",
+  "app.generatorPreview.sourceType.manualSchemaJson": "前端 JSON 输入",
+  "app.generatorPreview.inputTitle": "生成输入",
+  "app.generatorPreview.inputModeLabel": "输入方式",
+  "app.generatorPreview.inputSchemaLabel": "Schema 模板",
+  "app.generatorPreview.inputMode.registeredSchema": "人类边界模式",
+  "app.generatorPreview.inputMode.manualSchemaJson": "前端 JSON 输入",
+  "app.generatorPreview.input.manualSchemaDraftLabel": "Schema JSON 草稿",
+  "app.generatorPreview.input.manualSchemaDraftPlaceholder":
+    "在这里粘贴或编辑 ModuleSchema JSON，保存后会进入同一条生成预览链路。",
+  "app.generatorPreview.input.manualSchemaDraftHelper":
+    "注册 schema 适合边界模式；前端 JSON 输入适合 AI 编辑后直接提交。",
+  "app.generatorPreview.input.manualSchemaDraftEmpty":
+    "请先填写 Schema JSON 草稿。",
+  "app.generatorPreview.input.manualSchemaDraftInvalidJson":
+    "Schema JSON 不是有效的 JSON。",
+  "app.generatorPreview.input.manualSchemaDraftInvalid":
+    "Schema JSON 校验失败：{value}",
+  "app.generatorPreview.input.manualSchemaDraftSummary":
+    "当前草稿：{schemaName} / {fieldCount} 个字段",
   "app.generatorPreview.conflictStrategy.skip": "跳过",
   "app.generatorPreview.conflictStrategy.overwrite": "覆盖",
   "app.generatorPreview.conflictStrategy.overwrite-generated-only":

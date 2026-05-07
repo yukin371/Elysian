@@ -1,17 +1,18 @@
 import type { VueLocaleMessages } from "@elysian/frontend-vue"
 
 export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
-  "app.workflow.sectionTitle": "Workflow definitions workspace",
+  "app.workflow.sectionTitle": "Workflow definition management",
   "app.workflow.sectionCopy":
-    "This is the first real workflow surface instead of another placeholder. Scope stays tight: definitions list plus detail only.",
-  "app.workflow.shellTitle": "Workflow definitions workspace",
-  "app.workflow.shellDescription": "Workflow definition list and detail.",
-  "app.workflow-definition.sectionTitle": "Workflow definitions workspace",
+    "Use this page to inspect, filter, and track workflow definition versions. It is not a start-flow page or a workflow designer.",
+  "app.workflow.shellTitle": "Workflow definition management",
+  "app.workflow.shellDescription":
+    "Inspect, filter, and track workflow definition versions.",
+  "app.workflow-definition.sectionTitle": "Workflow definition management",
   "app.workflow-definition.sectionCopy":
-    "This is the first real workflow surface instead of another placeholder. Scope stays tight: definitions list plus detail only.",
-  "app.workflow-definition.shellTitle": "Workflow definitions workspace",
+    "Use this page to inspect, filter, and track workflow definition versions. It is not a start-flow page or a workflow designer.",
+  "app.workflow-definition.shellTitle": "Workflow definition management",
   "app.workflow-definition.shellDescription":
-    "Workflow definition list and detail.",
+    "Inspect, filter, and track workflow definition versions.",
   "app.message.customerModuleOffline":
     "`customer` module is not registered yet. Add `DATABASE_URL`, run migrations and seed, then restart the server.",
   "app.message.signInToLoad": "Sign in to load protected customer data.",
@@ -83,12 +84,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "This identity can enter the workspace but does not have `workflow:definition:list`.",
   "app.workflow.loading": "Loading workflow definitions...",
   "app.workflow.empty": "No workflow definitions exist for the current tenant.",
-  "app.workflow.listEyebrow": "Real module workspace",
+  "app.workflow.listEyebrow": "Workflow management",
   "app.workflow.listTitle": "Workflow definitions",
-  "app.workflow.listDescription": "Select a list item to inspect its detail.",
   "app.workflow.filter.searchLabel": "Search definitions",
   "app.workflow.filter.searchPlaceholder": "Search by name, key, or id",
-  "app.workflow.filter.statusTitle": "Status filter",
   "app.workflow.filter.all": "All",
   "app.workflow.filter.active": "Active",
   "app.workflow.filter.disabled": "Disabled",
@@ -101,7 +100,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Page {page}/{totalPages}, {start}-{end} of {total}",
   "app.workflow.pagination.previous": "Previous",
   "app.workflow.pagination.next": "Next",
-  "app.workflow.detailEyebrow": "Definition detail",
+  "app.workflow.detailEyebrow": "Workflow definition detail",
   "app.workflow.detailDescription":
     "The detail dialog stays focused on structure, status, and version metadata for the selected definition.",
   "app.workflow.detailEmpty":
@@ -198,6 +197,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.loading": "Generating the latest preview session.",
   "app.generatorPreview.action.refresh": "Refresh preview",
   "app.generatorPreview.action.refreshing": "Refreshing",
+  "app.generatorPreview.action.loadCurrentSchemaDraft":
+    "Load current schema JSON",
   "app.generatorPreview.action.approve": "Approve",
   "app.generatorPreview.action.reject": "Reject",
   "app.generatorPreview.action.confirmReject": "Confirm reject",
@@ -320,6 +321,25 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.manifestPath": "Manifest path",
   "app.generatorPreview.meta.requestId": "Request ID",
   "app.generatorPreview.sourceType.registeredSchema": "Registered schema",
+  "app.generatorPreview.sourceType.manualSchemaJson": "Front-end JSON input",
+  "app.generatorPreview.inputTitle": "Generation input",
+  "app.generatorPreview.inputModeLabel": "Input mode",
+  "app.generatorPreview.inputSchemaLabel": "Schema template",
+  "app.generatorPreview.inputMode.registeredSchema": "Human boundary mode",
+  "app.generatorPreview.inputMode.manualSchemaJson": "Front-end JSON input",
+  "app.generatorPreview.input.manualSchemaDraftLabel": "Schema JSON draft",
+  "app.generatorPreview.input.manualSchemaDraftPlaceholder":
+    "Paste or edit the ModuleSchema JSON here. The saved draft enters the same preview generation flow.",
+  "app.generatorPreview.input.manualSchemaDraftHelper":
+    "Registered schema is the boundary mode. Front-end JSON input is for AI-edited drafts.",
+  "app.generatorPreview.input.manualSchemaDraftEmpty":
+    "Fill in the schema JSON draft first.",
+  "app.generatorPreview.input.manualSchemaDraftInvalidJson":
+    "The schema JSON is not valid JSON.",
+  "app.generatorPreview.input.manualSchemaDraftInvalid":
+    "Schema JSON validation failed: {value}",
+  "app.generatorPreview.input.manualSchemaDraftSummary":
+    "Current draft: {schemaName} / {fieldCount} fields",
   "app.generatorPreview.conflictStrategy.skip": "Skip",
   "app.generatorPreview.conflictStrategy.overwrite": "Overwrite",
   "app.generatorPreview.conflictStrategy.overwrite-generated-only":

@@ -67,9 +67,7 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 <template>
   <section class="enterprise-card enterprise-main-card">
     <div class="workflow-list-head">
-      <div>
-        <h3 class="enterprise-heading">{{ t("app.workflow.listTitle") }}</h3>
-      </div>
+      <h3 class="enterprise-heading">{{ t("app.workflow.listTitle") }}</h3>
       <span class="enterprise-toolbar-pill">
         {{ paginationSummary }}
       </span>
@@ -123,9 +121,6 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
         </label>
 
         <div class="workflow-filter-panel">
-          <p class="enterprise-subheading">
-            {{ t("app.workflow.filter.statusTitle") }}
-          </p>
           <div class="workflow-filter-pills">
             <button
               type="button"
@@ -157,19 +152,14 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
         </div>
       </div>
 
-      <div class="workflow-filter-summary">
-        <span class="enterprise-toolbar-pill">
-          {{ filterSummary }}
-        </span>
-        <button
-          v-if="query.trim().length > 0 || statusFilter !== 'all'"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('reset-filters')"
-        >
-          {{ t("app.workflow.filter.reset") }}
-        </button>
-      </div>
+      <button
+        v-if="query.trim().length > 0 || statusFilter !== 'all'"
+        type="button"
+        class="enterprise-button enterprise-button-ghost workflow-filter-reset"
+        @click="emit('reset-filters')"
+      >
+        {{ t("app.workflow.filter.reset") }}
+      </button>
 
       <div
         v-if="definitionCards.length === 0"
@@ -370,12 +360,15 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
   margin: 0;
 }
 
-.workflow-filter-panel,
-.workflow-filter-summary {
+.workflow-filter-panel {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+}
+
+.workflow-filter-reset {
+  width: fit-content;
 }
 
 .workflow-filter-pills {
