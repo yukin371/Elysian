@@ -61,13 +61,28 @@ const closeContextPanel = () => {
   contextPanelOpen.value = false
 }
 
+/**
+ * Determines whether a workspace event should open the context panel.
+ *
+ * Convention: workspace events follow "{entity}-{verb}" naming.
+ * - *-row-click: table row selection (e.g. "dictionary-row-click")
+ * - *-action:    action button click  (e.g. "customer-action")
+ * - open-*:      create flows        (e.g. "open-dictionary-create")
+ * - start-*:     edit flows          (e.g. "start-role-edit")
+ * - select-*:    detail selection     (e.g. "select-workflow-definition")
+ */
 const shouldOpenContextPanelForEvent = (eventName: string) =>
-  eventName.endsWith("row-click") ||
+  eventName.endsWith("-row-click") ||
+  eventName.endsWith("-action") ||
   eventName.startsWith("open-") ||
   eventName.startsWith("start-") ||
-  eventName.startsWith("select-") ||
-  eventName === "customer-action"
+  eventName.startsWith("select-")
 
+/**
+ * Determines whether a workspace event should close the context panel.
+ * - cancel-*: panel dismissals (e.g. "cancel-role-panel")
+ * - close-*:  detail dismissals  (e.g. "close-workflow-definition-detail")
+ */
 const shouldCloseContextPanelForEvent = (eventName: string) =>
   eventName.startsWith("cancel-") || eventName.startsWith("close-")
 

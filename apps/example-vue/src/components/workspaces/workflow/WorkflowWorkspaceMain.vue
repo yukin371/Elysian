@@ -44,52 +44,85 @@ const handleQueryInput = (value: string | number) => {
   emit("update:query", String(value))
 }
 
+const totalDefinitionCount = computed(() =>
+  props.definitionCount > 0 ? props.definitionCount : props.definitionCards.length,
+)
+
+const workspaceStateMessage = computed(() => {
+  if (!props.moduleReady) {
+    return {
+      tone: "warning" as const,
+      text: props.t("app.message.workflowModuleOffline"),
+    }
+  }
+
+  if (props.authModuleReady && !props.isAuthenticated) {
+    return {
+      tone: "info" as const,
+      text: props.t("app.message.workflowSignInToLoad"),
+    }
+  }
+
+  if (props.canEnterWorkspace && !props.canViewDefinitions) {
+    return {
+      tone: "warning" as const,
+      text: props.t("app.message.workflowNoListPermission"),
+    }
+  }
+
+  if (props.errorMessage) {
+    return {
+      tone: "danger" as const,
+      text: props.errorMessage,
+    }
+  }
+
+  if (props.loading) {
+    return {
+      tone: "info" as const,
+      text: props.t("app.workflow.loading"),
+    }
+  }
+
+  return null
+})
+
 const selectedDefinitionUpdatedAtLabel = computed(() =>
   props.selectedDefinition
     ? new Date(props.selectedDefinition.updatedAt).toLocaleString()
     : "",
 )
+
+const selectedNodeTypeSummary = computed(() => {
+  const nodes = props.selectedDefinition?.definition.nodes ?? []
+
+  return ["start", "approval", "condition", "end"].map((type) => ({
+    key: type,
+    label: props.t(`app.workflow.nodeType.${type}`),
+    count: nodes.filter((node) => node.type === type).length,
+  }))
+})
+
+const selectedTotalNodeCount = computed(
+  () => props.selectedDefinition?.definition.nodes.length ?? 0,
+)
+
+const selectedTotalEdgeCount = computed(
+  () => props.selectedDefinition?.definition.edges.length ?? 0,
+)
 </script>
 
 <template>
   <section class="enterprise-card enterprise-main-card">
-    <div class="workflow-list-head">
-      <h3 class="enterprise-heading">{{ t("app.workflow.listTitle") }}</h3>
-    </div>
-
     <div
-      v-if="!moduleReady"
-      class="enterprise-message enterprise-message-warning enterprise-section-gap"
+      v-if="workspaceStateMessage"
+      :class="[
+        'enterprise-message',
+        `enterprise-message-${workspaceStateMessage.tone}`,
+        'workflow-state-note',
+      ]"
     >
-      {{ t("app.message.workflowModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info enterprise-section-gap"
-    >
-      {{ t("app.message.workflowSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewDefinitions"
-      class="enterprise-message enterprise-message-warning enterprise-section-gap"
-    >
-      {{ t("app.message.workflowNoListPermission") }}
-    </div>
-
-    <div
-      v-else-if="errorMessage"
-      class="enterprise-message enterprise-message-danger enterprise-section-gap"
-    >
-      {{ errorMessage }}
-    </div>
-
-    <div
-      v-else-if="loading"
-      class="enterprise-message enterprise-message-info enterprise-section-gap"
-    >
-      {{ t("app.workflow.loading") }}
+      {{ workspaceStateMessage.text }}
     </div>
 
     <div v-else class="enterprise-workspace-stack">
@@ -104,23 +137,23 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
           />
         </label>
 
-      </div>
+        <button
+          v-if="query.trim().length > 0"
+          type="button"
+          class="enterprise-button enterprise-button-ghost workflow-filter-reset"
+          @click="emit('reset-filters')"
+        >
+          {{ t("app.workflow.filter.reset") }}
+        </button>
 
-      <button
-        v-if="query.trim().length > 0"
-        type="button"
-        class="enterprise-button enterprise-button-ghost workflow-filter-reset"
-        @click="emit('reset-filters')"
-      >
-        {{ t("app.workflow.filter.reset") }}
-      </button>
+      </div>
 
       <div
         v-if="definitionCards.length === 0"
         class="enterprise-message enterprise-message-info"
       >
         {{
-          definitionCount === 0
+          totalDefinitionCount === 0
             ? t("app.workflow.empty")
             : t("app.workflow.emptyFiltered")
         }}
@@ -185,6 +218,7 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
       </div>
     </div>
 
+    <!-- TODO: Migrate workflow detail from TDialog to context panel pattern used by other workspaces. -->
     <TDialog
       :visible="detailDialogOpen"
       :header="
@@ -213,31 +247,42 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
           {{ detailErrorMessage }}
         </div>
 
-        <div v-if="selectedDefinition" class="enterprise-metadata">
-          <div>
-            <span>{{ t("app.workflow.meta.status") }}</span>
-            <strong>{{ localizeStatus(selectedDefinition.status) }}</strong>
+        <div v-if="selectedDefinition" class="workflow-detail-structure">
+          <div class="workflow-detail-rail" aria-label="workflow structure">
+            <span
+              v-for="segment in selectedNodeTypeSummary"
+              :key="segment.key"
+              class="workflow-detail-segment"
+            >
+              <strong>{{ segment.count }}</strong>
+              <span>{{ segment.label }}</span>
+            </span>
           </div>
-          <div>
-            <span>{{ t("app.workflow.meta.key") }}</span>
-            <strong>{{ selectedDefinition.key }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.workflow.meta.version") }}</span>
-            <strong>v{{ selectedDefinition.version }}</strong>
-          </div>
-          <div>
-            <span>{{ t("app.workflow.meta.structure") }}</span>
-            <strong>
-              {{ selectedDefinition.definition.nodes.length }}
-              {{ t("app.workflow.meta.nodes") }}
-              / {{ selectedDefinition.definition.edges.length }}
-              {{ t("app.workflow.meta.edges") }}
-            </strong>
-          </div>
-          <div>
-            <span>{{ t("app.workflow.meta.updatedAt") }}</span>
-            <strong>{{ selectedDefinitionUpdatedAtLabel }}</strong>
+
+          <div class="workflow-detail-strip">
+            <div>
+              <span>{{ t("app.workflow.meta.status") }}</span>
+              <strong>{{ localizeStatus(selectedDefinition.status) }}</strong>
+            </div>
+            <div>
+              <span>{{ t("app.workflow.meta.key") }}</span>
+              <strong>{{ selectedDefinition.key }}</strong>
+            </div>
+            <div>
+              <span>{{ t("app.workflow.meta.version") }}</span>
+              <strong>v{{ selectedDefinition.version }}</strong>
+            </div>
+            <div>
+              <span>{{ t("app.workflow.meta.structure") }}</span>
+              <strong>
+                {{ selectedTotalNodeCount }} {{ t("app.workflow.meta.nodes") }} /
+                {{ selectedTotalEdgeCount }} {{ t("app.workflow.meta.edges") }}
+              </strong>
+            </div>
+            <div>
+              <span>{{ t("app.workflow.meta.updatedAt") }}</span>
+              <strong>{{ selectedDefinitionUpdatedAtLabel }}</strong>
+            </div>
           </div>
         </div>
 
@@ -250,21 +295,20 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
 </template>
 
 <style scoped>
-.workflow-list-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
+.workflow-state-note {
+  margin-top: 0.2rem;
 }
 
 .workflow-filter-bar {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
   gap: 0.75rem;
 }
 
 .workflow-filter-search {
   margin: 0;
+  flex: 1 1 20rem;
 }
 
 .workflow-filter-reset {
@@ -349,8 +393,80 @@ const selectedDefinitionUpdatedAtLabel = computed(() =>
   font-size: 0.82rem;
 }
 
+.workflow-detail-structure {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.workflow-detail-rail {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.workflow-detail-segment {
+  display: grid;
+  gap: 0.2rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.92);
+  padding: 0.65rem 0.75rem;
+  min-width: 0;
+}
+
+.workflow-detail-segment strong {
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.workflow-detail-segment span {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.workflow-detail-strip {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 0.75rem 0;
+}
+
+.workflow-detail-strip > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.workflow-detail-strip span,
+.workflow-detail-strip strong {
+  min-width: 0;
+}
+
+.workflow-detail-strip span {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.workflow-detail-strip strong {
+  color: #0f172a;
+  font-size: 0.92rem;
+}
+
 .workflow-detail-dialog {
   display: grid;
   gap: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .workflow-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .workflow-detail-rail,
+  .workflow-detail-strip {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

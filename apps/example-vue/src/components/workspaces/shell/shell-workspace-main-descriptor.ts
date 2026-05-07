@@ -46,6 +46,7 @@ export interface ShellWorkspaceMainSwitchProps {
   workflowPaginationSummary: string
   workflowCanGoToPreviousPage: boolean
   workflowCanGoToNextPage: boolean
+  /** TODO: Migrate workflow detail from TDialog to context panel, then remove this prop. */
   workflowDetailDialogOpen: boolean
   selectedWorkflowDefinitionId: string | null
   workflowDetailLoading: boolean
@@ -392,8 +393,6 @@ const placeholderResolver: ShellWorkspaceMainResolver = (props, emit) => ({
   props: {
     mode: "placeholder",
     title: props.selectedNavigationItemName,
-    badge: props.currentModuleStatusLabel,
-    currentPage: props.selectedNavigationItemName,
     currentPath: props.currentNavigationPath,
     moduleStatusLabel: props.currentModuleStatusLabel,
     authStatusLabel: props.authStatusLabel,
