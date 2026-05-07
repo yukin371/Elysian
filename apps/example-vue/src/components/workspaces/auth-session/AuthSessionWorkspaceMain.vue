@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  ElyCrudWorkspace,
-  type ElyCrudWorkspaceProps,
-  type ElyQueryField,
-  type ElyQueryValues,
+  ElyCrudWorkbench,
+  type ElyCrudWorkspaceCopy,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, ref, watch } from "vue"
@@ -15,28 +13,19 @@ type AuthSessionWorkspaceTranslation = (
 
 interface AuthSessionWorkspaceMainProps {
   t: AuthSessionWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canEnterWorkspace: boolean
   loading: boolean
-  errorMessage: string
-  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   items: ReadonlyArray<Record<string, unknown>>
-  itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
-  copy: ElyCrudWorkspaceProps["copy"]
+  copy: ElyCrudWorkspaceCopy
 }
 
 const props = defineProps<AuthSessionWorkspaceMainProps>()
 
 const emit = defineEmits<{
-  (e: "search", values: ElyQueryValues): void
-  (e: "reset"): void
   (e: "row-click", row: Record<string, unknown>): void
+  (e: "search", value: string): void
 }>()
 
 const pageSizeOptions = [20, 50, 100]
@@ -95,129 +84,70 @@ watch(
     currentPage.value = Math.min(currentPage.value, totalPages.value)
   },
 )
+
+const panelTitle = computed(() => props.t("app.onlineSession.workspaceTitle"))
+
+const handleSearch = (value: string) => {
+  emit("search", value)
+}
+
+const handleRowClick = (row: Record<string, unknown>) => {
+  emit("row-click", row)
+}
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.onlineSessionModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.onlineSessionSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="!canEnterWorkspace"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.onlineSessionNoAccess") }}
-    </div>
-
-    <div v-else-if="errorMessage" class="enterprise-message enterprise-message-danger">
-      {{ errorMessage }}
-    </div>
-
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.onlineSession.workspaceEyebrow')"
-      :title="t('app.onlineSession.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="loading"
-      :table-columns="tableColumns"
-      :items="paginatedItems"
-      :table-loading="loading"
-      :table-actions="[]"
-      :item-count-label="paginatedCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as Record<string, unknown>)"
-    >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
-      <template #footer>
-        <div class="online-session-pagination">
-          <span>{{ paginationSummary }}</span>
-          <label>
-            <small>{{ t("app.pagination.pageSize") }}</small>
-            <select :value="pageSize" @change="updatePageSize">
-              <option
-                v-for="option in pageSizeOptions"
-                :key="option"
-                :value="option"
-              >
-                {{ option }}
-              </option>
-            </select>
-          </label>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="currentPage <= 1"
-            @click="goPreviousPage"
-          >
-            {{ t("app.pagination.previous") }}
-          </button>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="currentPage >= totalPages"
-            @click="goNextPage"
-          >
-            {{ t("app.pagination.next") }}
-          </button>
-        </div>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
+  <ElyCrudWorkbench
+    :title="panelTitle"
+    :table-columns="tableColumns"
+    :items="paginatedItems"
+    :table-loading="loading"
+    :table-actions="[]"
+    :item-count-label="paginatedCountLabel"
+    :search-placeholder="t('app.onlineSession.searchPlaceholder', '搜索会话...')"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    @search="handleSearch"
+    @row-click="handleRowClick"
+  >
+    <template #footer>
+      <div class="online-session-pagination">
+        <span>{{ paginationSummary }}</span>
+        <label>
+          <small>{{ t("app.pagination.pageSize") }}</small>
+          <select :value="pageSize" @change="updatePageSize">
+            <option
+              v-for="option in pageSizeOptions"
+              :key="option"
+              :value="option"
+            >
+              {{ option }}
+            </option>
+          </select>
+        </label>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="currentPage <= 1"
+          @click="goPreviousPage"
+        >
+          {{ t("app.pagination.previous") }}
+        </button>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="currentPage >= totalPages"
+          @click="goNextPage"
+        >
+          {{ t("app.pagination.next") }}
+        </button>
+      </div>
+    </template>
+  </ElyCrudWorkbench>
 </template>
 
 <style scoped>
-.enterprise-message {
-  border-radius: 12px;
-  padding: 1rem 1.1rem;
-  line-height: 1.75;
-}
-
-.enterprise-message-info {
-  border: 1px solid rgba(14, 165, 233, 0.18);
-  background: rgba(14, 165, 233, 0.08);
-  color: #0c4a6e;
-}
-
-.enterprise-message-warning {
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  background: rgba(245, 158, 11, 0.1);
-  color: #92400e;
-}
-
-.enterprise-message-danger {
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  background: rgba(239, 68, 68, 0.08);
-  color: #991b1b;
-}
-
-.enterprise-toolbar-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.78rem;
-  color: #475569;
-}
-
 .online-session-pagination {
   display: flex;
   flex-wrap: wrap;

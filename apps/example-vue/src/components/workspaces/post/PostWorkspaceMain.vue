@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  ElyCrudWorkspace,
-  type ElyCrudWorkspaceProps,
-  type ElyQueryField,
-  type ElyQueryValues,
+  ElyCrudWorkbench,
+  type ElyCrudWorkspaceCopy,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject } from "vue"
@@ -19,27 +17,18 @@ type PostWorkspaceTranslation = (
 
 interface PostWorkspaceMainProps {
   t: PostWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canEnterWorkspace: boolean
-  canViewPosts: boolean
-  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
-  copy: ElyCrudWorkspaceProps["copy"]
+  copy: ElyCrudWorkspaceCopy
   workspaceStateInjected?: boolean
 }
 
 const props = defineProps<PostWorkspaceMainProps>()
 
 const emit = defineEmits<{
-  (e: "search", values: ElyQueryValues): void
-  (e: "reset"): void
   (e: "row-click", row: PostRecord): void
+  (e: "search", value: string): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -57,65 +46,40 @@ const resolvedPostWorkspaceState = computed(() =>
 const resolvedLoading = computed(
   () => resolvedPostWorkspaceState.value?.postLoading.value ?? false,
 )
-const resolvedErrorMessage = computed(
-  () => resolvedPostWorkspaceState.value?.postErrorMessage.value ?? "",
-)
 const resolvedItems = computed(
   () => resolvedPostWorkspaceState.value?.tableItems.value ?? [],
 )
+
+const panelTitle = computed(() => props.t("app.post.workspaceTitle"))
+
+const handleSearch = (value: string) => {
+  emit("search", value)
+}
+
+const handleRowClick = (row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const post = resolvedItems.value.find(
+    (item: PostRecord) => item.id === rowId,
+  )
+  if (post) {
+    emit("row-click", post)
+  }
+}
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.postModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.postSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewPosts"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.postNoListPermission") }}
-    </div>
-
-    <div
-      v-else-if="resolvedErrorMessage"
-      class="enterprise-message enterprise-message-danger"
-    >
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.post.workspaceEyebrow')"
-      :title="t('app.post.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="resolvedLoading"
-      :table-columns="tableColumns"
-      :items="resolvedItems"
-      :table-loading="resolvedLoading"
-      :table-actions="[]"
-      :item-count-label="itemCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as PostRecord)"
-    >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
+  <ElyCrudWorkbench
+    :title="panelTitle"
+    :table-columns="tableColumns"
+    :items="resolvedItems"
+    :table-loading="resolvedLoading"
+    :table-actions="[]"
+    :search-placeholder="t('app.post.searchPlaceholder', '搜索文章...')"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    row-key="id"
+    @search="handleSearch"
+    @row-click="handleRowClick"
+  />
 </template>

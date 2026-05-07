@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  ElyCrudWorkspace,
-  type ElyCrudWorkspaceProps,
-  type ElyQueryField,
-  type ElyQueryValues,
+  ElyCrudWorkbench,
+  type ElyCrudWorkspaceCopy,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject } from "vue"
@@ -18,27 +16,18 @@ type DictionaryWorkspaceTranslation = (
 
 interface DictionaryWorkspaceMainProps {
   t: DictionaryWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canEnterWorkspace: boolean
-  canViewDictionaries: boolean
-  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
-  copy: ElyCrudWorkspaceProps["copy"]
+  copy: ElyCrudWorkspaceCopy
   workspaceStateInjected?: boolean
 }
 
 const props = defineProps<DictionaryWorkspaceMainProps>()
 
 const emit = defineEmits<{
-  (e: "search", values: ElyQueryValues): void
-  (e: "reset"): void
   (e: "row-click", row: DictionaryTypeRecord): void
+  (e: "search", value: string): void
 }>()
 
 interface DictionaryWorkspaceInjectedState {
@@ -67,66 +56,40 @@ const resolvedLoading = computed(
   () =>
     resolvedDictionaryWorkspaceState.value?.dictionaryLoading.value ?? false,
 )
-const resolvedErrorMessage = computed(
-  () =>
-    resolvedDictionaryWorkspaceState.value?.dictionaryErrorMessage.value ?? "",
-)
 const resolvedItems = computed(
   () => resolvedDictionaryWorkspaceState.value?.tableItems.value ?? [],
 )
+
+const panelTitle = computed(() => props.t("app.dictionary.workspaceTitle"))
+
+const handleSearch = (value: string) => {
+  emit("search", value)
+}
+
+const handleRowClick = (row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const dict = resolvedItems.value.find(
+    (item: DictionaryTypeRecord) => item.id === rowId,
+  )
+  if (dict) {
+    emit("row-click", dict)
+  }
+}
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.dictionaryModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.dictionarySignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewDictionaries"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.dictionaryNoListPermission") }}
-    </div>
-
-    <div
-      v-else-if="resolvedErrorMessage"
-      class="enterprise-message enterprise-message-danger"
-    >
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.dictionary.workspaceEyebrow')"
-      :title="t('app.dictionary.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="resolvedLoading"
-      :table-columns="tableColumns"
-      :items="resolvedItems"
-      :table-loading="resolvedLoading"
-      :table-actions="[]"
-      :item-count-label="itemCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as DictionaryTypeRecord)"
-    >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
+  <ElyCrudWorkbench
+    :title="panelTitle"
+    :table-columns="tableColumns"
+    :items="resolvedItems"
+    :table-loading="resolvedLoading"
+    :table-actions="[]"
+    :search-placeholder="t('app.dictionary.searchPlaceholder', '搜索字典...')"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    row-key="id"
+    @search="handleSearch"
+    @row-click="handleRowClick"
+  />
 </template>

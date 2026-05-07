@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  ElyCrudWorkspace,
-  type ElyCrudWorkspaceProps,
-  type ElyQueryField,
-  type ElyQueryValues,
+  ElyCrudWorkbench,
+  type ElyCrudWorkspaceCopy,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject } from "vue"
@@ -22,28 +20,18 @@ type TenantWorkspaceTranslation = (
 
 interface TenantWorkspaceMainProps {
   t: TenantWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  isSuperAdmin: boolean
-  canEnterWorkspace: boolean
-  canViewTenants: boolean
-  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
-  copy: ElyCrudWorkspaceProps["copy"]
+  copy: ElyCrudWorkspaceCopy
   workspaceStateInjected?: boolean
 }
 
 const props = defineProps<TenantWorkspaceMainProps>()
 
 const emit = defineEmits<{
-  (e: "search", values: ElyQueryValues): void
-  (e: "reset"): void
   (e: "row-click", row: TenantRecord): void
+  (e: "search", value: string): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -62,76 +50,41 @@ const resolvedLoading = readInjectedValue(
   computed(() => resolvedTenantWorkspaceState.value?.tenantLoading ?? null),
   false,
 )
-const resolvedErrorMessage = readInjectedValue(
-  computed(
-    () => resolvedTenantWorkspaceState.value?.tenantErrorMessage ?? null,
-  ),
-  "",
-)
 const resolvedItems = readInjectedValue(
   computed(() => resolvedTenantWorkspaceState.value?.tableItems ?? null),
   [] as TenantRecord[],
 )
+
+const panelTitle = computed(() => props.t("app.tenant.workspaceTitle"))
+
+const handleSearch = (value: string) => {
+  emit("search", value)
+}
+
+const handleRowClick = (row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const tenant = resolvedItems.value.find(
+    (item: TenantRecord) => item.id === rowId,
+  )
+  if (tenant) {
+    emit("row-click", tenant)
+  }
+}
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.tenantModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.tenantSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && isAuthenticated && !isSuperAdmin"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.tenantSuperAdminRequired") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewTenants"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.tenantNoListPermission") }}
-    </div>
-
-    <div
-      v-else-if="resolvedErrorMessage"
-      class="enterprise-message enterprise-message-danger"
-    >
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.tenant.workspaceEyebrow')"
-      :title="t('app.tenant.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="resolvedLoading"
-      :table-columns="tableColumns"
-      :items="resolvedItems"
-      :table-loading="resolvedLoading"
-      :table-actions="[]"
-      :item-count-label="itemCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as TenantRecord)"
-    >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
+  <ElyCrudWorkbench
+    :title="panelTitle"
+    :table-columns="tableColumns"
+    :items="resolvedItems"
+    :table-loading="resolvedLoading"
+    :table-actions="[]"
+    :search-placeholder="t('app.tenant.searchPlaceholder', '搜索租户...')"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    row-key="id"
+    @search="handleSearch"
+    @row-click="handleRowClick"
+  />
 </template>

@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  ElyCrudWorkspace,
-  type ElyCrudWorkspaceProps,
-  type ElyQueryField,
-  type ElyQueryValues,
+  ElyCrudWorkbench,
+  type ElyCrudWorkspaceCopy,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 
@@ -16,117 +14,43 @@ type OperationLogWorkspaceTranslation = (
 
 interface OperationLogWorkspaceMainProps {
   t: OperationLogWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canEnterWorkspace: boolean
-  canViewOperationLogs: boolean
   loading: boolean
-  errorMessage: string
-  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   items: OperationLogRecord[]
-  itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
-  copy: ElyCrudWorkspaceProps["copy"]
+  copy: ElyCrudWorkspaceCopy
 }
 
 defineProps<OperationLogWorkspaceMainProps>()
 
 const emit = defineEmits<{
-  (e: "search", values: ElyQueryValues): void
-  (e: "reset"): void
   (e: "row-click", row: OperationLogRecord): void
+  (e: "search", value: string): void
 }>()
+
+const handleSearch = (value: string) => {
+  emit("search", value)
+}
+
+const handleRowClick = (row: Record<string, unknown>) => {
+  emit("row-click", row as unknown as OperationLogRecord)
+}
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.operationLogModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.operationLogSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewOperationLogs"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.operationLogNoListPermission") }}
-    </div>
-
-    <div v-else-if="errorMessage" class="enterprise-message enterprise-message-danger">
-      {{ errorMessage }}
-    </div>
-
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.operationLog.workspaceEyebrow')"
-      :title="t('app.operationLog.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="loading"
-      :table-columns="tableColumns"
-      :items="items"
-      :table-loading="loading"
-      :table-actions="[]"
-      :item-count-label="itemCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as OperationLogRecord)"
-    >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
+  <ElyCrudWorkbench
+    :title="t('app.operationLog.workspaceTitle')"
+    :table-columns="tableColumns"
+    :items="items"
+    :table-loading="loading"
+    :table-actions="[]"
+    :search-placeholder="t('app.operationLog.searchPlaceholder', '搜索操作日志...')"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    row-key="id"
+    @search="handleSearch"
+    @row-click="handleRowClick"
+  />
 </template>
-
-<style scoped>
-.enterprise-message {
-  border-radius: 12px;
-  padding: 1rem 1.1rem;
-  line-height: 1.75;
-}
-
-.enterprise-message-info {
-  border: 1px solid rgba(14, 165, 233, 0.18);
-  background: rgba(14, 165, 233, 0.08);
-  color: #0c4a6e;
-}
-
-.enterprise-message-warning {
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  background: rgba(245, 158, 11, 0.1);
-  color: #92400e;
-}
-
-.enterprise-message-danger {
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  background: rgba(239, 68, 68, 0.08);
-  color: #991b1b;
-}
-
-.enterprise-toolbar-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.78rem;
-  color: #475569;
-}
-</style>

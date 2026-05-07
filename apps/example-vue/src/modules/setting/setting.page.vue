@@ -8,13 +8,11 @@
 
 <script setup lang="ts">
 import {
-  ElyCrudWorkspace,
-  type ElyCrudWorkspaceProps,
-  type ElyQueryField,
-  type ElyQueryValues,
+  ElyCrudWorkbench,
+  type ElyCrudWorkspaceCopy,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
-import { computed, inject, ref, watch } from "vue"
+import { computed, inject } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "@elysian/frontend-vue"
 import {
@@ -30,27 +28,18 @@ type SettingWorkspaceTranslation = (
 
 interface SettingWorkspaceMainProps {
   t: SettingWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canEnterWorkspace: boolean
-  canViewSettings: boolean
-  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
-  copy: ElyCrudWorkspaceProps["copy"]
+  copy: ElyCrudWorkspaceCopy
   workspaceStateInjected?: boolean
 }
 
 const props = defineProps<SettingWorkspaceMainProps>()
 
 const emit = defineEmits<{
-  (e: "search", values: ElyQueryValues): void
-  (e: "reset"): void
   (e: "row-click", row: SettingRecord): void
+  (e: "search", value: string): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -69,181 +58,41 @@ const resolvedLoading = readInjectedValue(
   computed(() => resolvedSettingWorkspaceState.value?.settingLoading ?? null),
   false,
 )
-const resolvedErrorMessage = readInjectedValue(
-  computed(
-    () => resolvedSettingWorkspaceState.value?.settingErrorMessage ?? null,
-  ),
-  "",
-)
 const resolvedItems = readInjectedValue(
   computed(() => resolvedSettingWorkspaceState.value?.tableItems ?? null),
   [] as SettingRecord[],
 )
 
-const pageSizeOptions = [20, 50, 100]
-const currentPage = ref(1)
-const pageSize = ref(20)
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(resolvedItems.value.length / pageSize.value)),
-)
-const pageStart = computed(() =>
-  resolvedItems.value.length === 0
-    ? 0
-    : (currentPage.value - 1) * pageSize.value + 1,
-)
-const pageEnd = computed(() =>
-  Math.min(resolvedItems.value.length, currentPage.value * pageSize.value),
-)
-const paginatedItems = computed(() =>
-  resolvedItems.value.slice(
-    (currentPage.value - 1) * pageSize.value,
-    currentPage.value * pageSize.value,
-  ),
-)
-const paginationSummary = computed(() =>
-  props.t("app.pagination.summary", {
-    page: currentPage.value,
-    totalPages: totalPages.value,
-    start: pageStart.value,
-    end: pageEnd.value,
-    total: resolvedItems.value.length,
-  }),
-)
+const panelTitle = computed(() => props.t("app.setting.workspaceTitle"))
 
-const goPreviousPage = () => {
-  currentPage.value = Math.max(1, currentPage.value - 1)
+const handleSearch = (value: string) => {
+  emit("search", value)
 }
 
-const goNextPage = () => {
-  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
+const handleRowClick = (row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const setting = resolvedItems.value.find(
+    (item: SettingRecord) => item.id === rowId,
+  )
+  if (setting) {
+    emit("row-click", setting)
+  }
 }
-
-const updatePageSize = (event: Event) => {
-  const nextValue = Number((event.target as HTMLSelectElement).value)
-
-  pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
-  currentPage.value = 1
-}
-
-watch(resolvedItems, () => {
-  currentPage.value = Math.min(currentPage.value, totalPages.value)
-})
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.settingModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.settingSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewSettings"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.settingNoListPermission") }}
-    </div>
-
-    <div
-      v-else-if="resolvedErrorMessage"
-      class="enterprise-message enterprise-message-danger"
-    >
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.setting.workspaceEyebrow')"
-      :title="t('app.setting.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="resolvedLoading"
-      :table-columns="tableColumns"
-      :items="paginatedItems"
-      :table-loading="resolvedLoading"
-      :table-actions="[]"
-      :item-count-label="itemCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as SettingRecord)"
-    >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
-      <template #footer>
-        <div class="setting-pagination">
-          <span>{{ paginationSummary }}</span>
-          <label>
-            <small>{{ t("app.pagination.pageSize") }}</small>
-            <select :value="pageSize" @change="updatePageSize">
-              <option
-                v-for="option in pageSizeOptions"
-                :key="option"
-                :value="option"
-              >
-                {{ option }}
-              </option>
-            </select>
-          </label>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="currentPage <= 1"
-            @click="goPreviousPage"
-          >
-            {{ t("app.pagination.previous") }}
-          </button>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="currentPage >= totalPages"
-            @click="goNextPage"
-          >
-            {{ t("app.pagination.next") }}
-          </button>
-        </div>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
-  </template>
-
-<style scoped>
-.setting-pagination {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.65rem;
-  color: #475569;
-  font-size: 0.82rem;
-}
-
-.setting-pagination label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.setting-pagination small {
-  color: #64748b;
-}
-
-.setting-pagination select {
-  height: 2rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 4px;
-  background: white;
-  color: #0f172a;
-}
-</style>
+  <ElyCrudWorkbench
+    :title="panelTitle"
+    :table-columns="tableColumns"
+    :items="resolvedItems"
+    :table-loading="resolvedLoading"
+    :table-actions="[]"
+    :search-placeholder="t('app.setting.searchPlaceholder', '搜索设置...')"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    row-key="id"
+    @search="handleSearch"
+    @row-click="handleRowClick"
+  />
+</template>
