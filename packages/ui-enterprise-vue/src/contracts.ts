@@ -305,3 +305,59 @@ export interface ElyWorkbenchToolbarEmits {
   (e: "action", key: string): void
   (e: "more-action", key: string): void
 }
+
+// ─── Ely workbench shell ───────────────────────────────────────────────────────
+
+export interface ElyWorkbenchStatusBar {
+  moduleStatus?: { label: string; tone: "success" | "warning" | "error" | "default" }
+  recordCount?: number
+  selectedInfo?: string
+}
+
+export interface ElyWorkbenchShellCopy {
+  navigationLabel?: string
+  searchPlaceholder?: string
+  closePanelLabel?: string
+}
+
+export interface ElyWorkbenchShellProps {
+  navigation: UiNavigationNode[]
+  selectedMenuKey?: string | null
+  tabs?: ElyShellTab[]
+  selectedTabKey?: string | null
+  user?: ElyShellUserSummary | null
+  searchPlaceholder?: string
+  contextPanelVisible?: boolean
+  contextPanelTitle?: string
+  contextPanelMode?: "detail" | "edit" | "create" | "delete-confirm"
+  statusBar?: ElyWorkbenchStatusBar
+  copy?: ElyWorkbenchShellCopy
+}
+
+export interface ElyWorkbenchShellEmits {
+  (e: "menu-select", key: string): void
+  (e: "tab-select", key: string): void
+  (e: "global-search", query: string): void
+  (e: "panel-close"): void
+  (e: "user-click"): void
+}
+
+export interface ResolvedElyWorkbenchShellCopy {
+  navigationLabel: string
+  searchPlaceholder: string
+  closePanelLabel: string
+}
+
+export const resolveElyWorkbenchShellCopy = (options: {
+  navigationLabel?: string
+  searchPlaceholder?: string
+  closePanelLabel?: string
+  copy?: ElyWorkbenchShellCopy
+}): ResolvedElyWorkbenchShellCopy => ({
+  navigationLabel:
+    options.navigationLabel ?? options.copy?.navigationLabel ?? "导航",
+  searchPlaceholder:
+    options.searchPlaceholder ?? options.copy?.searchPlaceholder ?? "全局搜索...",
+  closePanelLabel:
+    options.closePanelLabel ?? options.copy?.closePanelLabel ?? "关闭",
+})

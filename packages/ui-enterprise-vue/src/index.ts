@@ -27,12 +27,17 @@ import type {
   ElyTableColumn,
   ElyTableEmits,
   ElyTableProps,
+  ElyWorkbenchShellCopy,
+  ElyWorkbenchShellEmits,
+  ElyWorkbenchShellProps,
+  ElyWorkbenchStatusBar,
   ElyWorkbenchToolbarAction,
   ElyWorkbenchToolbarEmits,
   ElyWorkbenchToolbarProps,
   ResolvedElyShellCopy,
+  ResolvedElyWorkbenchShellCopy,
 } from "./contracts"
-import { resolveElyShellCopy } from "./contracts"
+import { resolveElyShellCopy, resolveElyWorkbenchShellCopy } from "./contracts"
 
 export { default as ElyForm } from "./components/ElyForm.vue"
 export { default as ElyContextPanel } from "./components/ElyContextPanel.vue"
@@ -44,6 +49,7 @@ export { default as ElyShell } from "./components/ElyShell.vue"
 export { default as ElyShellTabs } from "./components/ElyShellTabs.vue"
 export { default as ElyTable } from "./components/ElyTable.vue"
 export { default as ElyWorkbenchToolbar } from "./components/ElyWorkbenchToolbar.vue"
+export { default as ElyWorkbenchShell } from "./components/ElyWorkbenchShell.vue"
 export type {
   ElyContextPanelCopy,
   ElyContextPanelEmits,
@@ -69,13 +75,18 @@ export type {
   ElyTableColumn,
   ElyTableEmits,
   ElyTableProps,
+  ElyWorkbenchShellCopy,
+  ElyWorkbenchShellEmits,
+  ElyWorkbenchShellProps,
+  ElyWorkbenchStatusBar,
   ElyWorkbenchToolbarAction,
   ElyWorkbenchToolbarEmits,
   ElyWorkbenchToolbarProps,
   ResolvedElyShellCopy,
+  ResolvedElyWorkbenchShellCopy,
 }
 
-export { resolveElyShellCopy }
+export { resolveElyShellCopy, resolveElyWorkbenchShellCopy }
 
 export const vueEnterprisePresetManifest: UiPresetManifest = {
   key: "vue-enterprise",
