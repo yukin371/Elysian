@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { UiNavigationNode } from "@elysian/ui-core"
-import { ElyShell } from "@elysian/ui-enterprise-vue"
-import { Dialog as TDialog } from "tdesign-vue-next/es/dialog"
+import {
+  ElyContextPanel,
+  ElyWorkbenchShell,
+} from "@elysian/ui-enterprise-vue"
 import { computed, ref, watch } from "vue"
 
 import type { AppTranslate } from "../../app/app-shell-helpers"
@@ -36,7 +38,7 @@ interface AdminShellLayoutProps {
 }
 
 const props = defineProps<AdminShellLayoutProps>()
-const secondaryDialogOpen = ref(false)
+const contextPanelOpen = ref(false)
 
 const shouldRenderSecondary = computed(
   () =>
@@ -49,24 +51,24 @@ const emit = defineEmits<{
   (event: "user-click"): void
 }>()
 
-const openSecondaryDialog = () => {
+const openContextPanel = () => {
   if (shouldRenderSecondary.value) {
-    secondaryDialogOpen.value = true
+    contextPanelOpen.value = true
   }
 }
 
-const closeSecondaryDialog = () => {
-  secondaryDialogOpen.value = false
+const closeContextPanel = () => {
+  contextPanelOpen.value = false
 }
 
-const shouldOpenSecondaryForEvent = (eventName: string) =>
+const shouldOpenContextPanelForEvent = (eventName: string) =>
   eventName.endsWith("row-click") ||
   eventName.startsWith("open-") ||
   eventName.startsWith("start-") ||
   eventName.startsWith("select-") ||
   eventName === "customer-action"
 
-const shouldCloseSecondaryForEvent = (eventName: string) =>
+const shouldCloseContextPanelForEvent = (eventName: string) =>
   eventName.startsWith("cancel-") || eventName.startsWith("close-")
 
 const wrapListeners = (listeners: ListenerMap) =>
@@ -76,13 +78,13 @@ const wrapListeners = (listeners: ListenerMap) =>
       async (...args: unknown[]) => {
         await Promise.resolve(listener(...args))
 
-        if (shouldCloseSecondaryForEvent(eventName)) {
-          closeSecondaryDialog()
+        if (shouldCloseContextPanelForEvent(eventName)) {
+          closeContextPanel()
           return
         }
 
-        if (shouldOpenSecondaryForEvent(eventName)) {
-          openSecondaryDialog()
+        if (shouldOpenContextPanelForEvent(eventName)) {
+          openContextPanel()
         }
       },
     ]),
@@ -105,93 +107,47 @@ watch(
     props.workspaceMainProps.currentWorkspaceKind,
   ],
   () => {
-    closeSecondaryDialog()
+    closeContextPanel()
   },
 )
 </script>
 
 <template>
-  <section class="content-panel">
-    <ElyShell
-      :key="locale"
-      :title="title"
-      :subtitle="subtitle"
-      :workspace-title="workspaceTitle"
-      :workspace-description="workspaceDescription"
-      :preset-label="presetLabel"
-      :environment="environment"
-      :status="status"
-      :copy="copy"
-      :navigation="navigation"
-      :stats="[]"
-      :selected-menu-key="selectedMenuKey"
-      :tabs="tabs"
-      :selected-tab-key="selectedTabKey"
-      :user="user"
-      @menu-select="$emit('menu-select', $event)"
-      @tab-select="$emit('tab-select', $event)"
-      @user-click="$emit('user-click')"
-    >
-      <template #header-actions>
-        <ShellWorkspaceHeaderActions
-          v-bind="headerActionProps"
-          v-on="wrappedHeaderActionListeners"
-        />
-      </template>
+  <ElyWorkbenchShell
+    :key="locale"
+    :navigation="navigation"
+    :selected-menu-key="selectedMenuKey"
+    :tabs="tabs"
+    :selected-tab-key="selectedTabKey"
+    :user="user"
+    :context-panel-visible="contextPanelOpen && shouldRenderSecondary"
+    :context-panel-title="workspaceTitle"
+    context-panel-mode="detail"
+    @menu-select="$emit('menu-select', $event)"
+    @tab-select="$emit('tab-select', $event)"
+    @user-click="$emit('user-click')"
+    @panel-close="closeContextPanel"
+  >
+    <template #workspace>
+      <ShellWorkspaceMainSwitch
+        v-bind="workspaceMainProps"
+        v-on="wrappedWorkspaceMainListeners"
+      />
+    </template>
 
-      <template #workspace>
-        <ShellWorkspaceMainSwitch
-          v-bind="workspaceMainProps"
-          v-on="wrappedWorkspaceMainListeners"
-        />
-      </template>
-    </ElyShell>
-
-    <TDialog
-      v-if="shouldRenderSecondary"
-      :visible="secondaryDialogOpen"
-      :header="workspaceTitle"
-      width="760px"
-      placement="center"
-      dialog-class-name="admin-secondary-dialog"
-      :close-on-esc-keydown="true"
-      :footer="false"
-      destroy-on-close
-      @close="closeSecondaryDialog"
-      @update:visible="
-        (visible) => {
-          if (!visible) closeSecondaryDialog()
-        }
-      "
-    >
-      <div class="admin-secondary-dialog-content">
+    <template #context>
+      <ElyContextPanel
+        :visible="contextPanelOpen && shouldRenderSecondary"
+        :title="workspaceTitle"
+        mode="detail"
+        @close="closeContextPanel"
+      >
         <ShellWorkspaceSecondarySwitch
           v-bind="workspaceSecondaryProps"
           hide-session-card
           v-on="wrappedWorkspaceSecondaryListeners"
         />
-      </div>
-    </TDialog>
-  </section>
+      </ElyContextPanel>
+    </template>
+  </ElyWorkbenchShell>
 </template>
-
-<style scoped>
-:global(.admin-secondary-dialog .t-form) {
-  max-width: 100%;
-}
-
-:global(.admin-secondary-dialog .t-dialog__body) {
-  max-height: calc(82vh - 96px);
-  overflow: auto;
-}
-
-:global(.admin-secondary-dialog) {
-  max-height: 82vh;
-  overflow: hidden;
-}
-
-.admin-secondary-dialog-content :deep(.enterprise-card > .enterprise-eyebrow),
-.admin-secondary-dialog-content :deep(.enterprise-card > .enterprise-copy) {
-  display: none;
-}
-</style>
