@@ -281,3 +281,27 @@ export interface ElyCrudWorkspaceEmits {
   (e: "action", key: string, row: Record<string, unknown>): void
   (e: "row-click", row: Record<string, unknown>): void
 }
+
+// ─── Ely workbench toolbar ────────────────────────────────────────────────────
+
+export interface ElyWorkbenchToolbarAction {
+  key: string
+  label: string
+  tone?: "primary" | "secondary" | "danger"
+  icon?: string
+  disabled?: boolean
+}
+
+export interface ElyWorkbenchToolbarProps {
+  searchPlaceholder?: string
+  searchValue?: string
+  actions?: ElyWorkbenchToolbarAction[]
+  moreActions?: ElyWorkbenchToolbarAction[]
+  loading?: boolean
+}
+
+export interface ElyWorkbenchToolbarEmits {
+  (e: "search", value: string): void
+  (e: "action", key: string): void
+  (e: "more-action", key: string): void
+}

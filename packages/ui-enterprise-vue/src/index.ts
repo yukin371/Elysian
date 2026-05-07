@@ -27,6 +27,9 @@ import type {
   ElyTableColumn,
   ElyTableEmits,
   ElyTableProps,
+  ElyWorkbenchToolbarAction,
+  ElyWorkbenchToolbarEmits,
+  ElyWorkbenchToolbarProps,
   ResolvedElyShellCopy,
 } from "./contracts"
 import { resolveElyShellCopy } from "./contracts"
@@ -40,6 +43,7 @@ export { default as ElyQueryBar } from "./components/ElyQueryBar.vue"
 export { default as ElyShell } from "./components/ElyShell.vue"
 export { default as ElyShellTabs } from "./components/ElyShellTabs.vue"
 export { default as ElyTable } from "./components/ElyTable.vue"
+export { default as ElyWorkbenchToolbar } from "./components/ElyWorkbenchToolbar.vue"
 export type {
   ElyContextPanelCopy,
   ElyContextPanelEmits,
@@ -65,6 +69,9 @@ export type {
   ElyTableColumn,
   ElyTableEmits,
   ElyTableProps,
+  ElyWorkbenchToolbarAction,
+  ElyWorkbenchToolbarEmits,
+  ElyWorkbenchToolbarProps,
   ResolvedElyShellCopy,
 }
 
