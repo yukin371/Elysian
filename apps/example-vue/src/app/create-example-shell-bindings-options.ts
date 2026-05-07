@@ -592,10 +592,6 @@ export const createExampleShellBindingsOptions = (
     workflowErrorMessage:
       input.workflowWorkspace.workspace.workflowErrorMessage,
     workflowQuery: input.workflowWorkspace.workspace.workflowQuery,
-    workflowStatusFilter:
-      input.workflowWorkspace.workspace.workflowStatusFilter,
-    workflowFilterSummary:
-      input.workflowWorkspace.workspace.workflowFilterSummary,
     workflowDefinitionCards:
       input.workflowWorkspace.workspace.workflowDefinitionCards,
     workflowDefinitions: input.workflowWorkspace.workspace.workflowDefinitions,
@@ -615,18 +611,12 @@ export const createExampleShellBindingsOptions = (
       input.workflowWorkspace.workspace.workflowDetailErrorMessage,
     selectedWorkflowDefinition:
       input.workflowWorkspace.workspace.selectedWorkflowDefinition,
-    workflowVersionHistoryCards:
-      input.workflowWorkspace.workspace.workflowVersionHistoryCards,
-    workflowDefinitionDetailCards:
-      input.workflowWorkspace.workspace.workflowDefinitionDetailCards,
     localizeWorkflowStatus: input.workflowWorkspace.localizeWorkflowStatus,
     handleWorkflowDefinitionSelect:
       input.workflowWorkspace.workspace.handleWorkflowDefinitionSelect,
     closeWorkflowDefinitionDetail:
       input.workflowWorkspace.workspace.closeWorkflowDefinitionDetail,
     setWorkflowQuery: input.workflowWorkspace.workspace.setWorkflowQuery,
-    setWorkflowStatusFilter:
-      input.workflowWorkspace.workspace.setWorkflowStatusFilter,
     resetWorkflowFilters:
       input.workflowWorkspace.workspace.resetWorkflowFilters,
     goToPreviousWorkflowPage:

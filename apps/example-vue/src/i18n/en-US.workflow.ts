@@ -92,9 +92,6 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.filter.active": "Active",
   "app.workflow.filter.disabled": "Disabled",
   "app.workflow.filter.reset": "Clear filters",
-  "app.workflow.filter.none": "No active filters",
-  "app.workflow.filter.querySummary": "Query: {value}",
-  "app.workflow.filter.statusSummary": "Status: {value}",
   "app.workflow.pagination.empty": "0 total",
   "app.workflow.pagination.summary":
     "Page {page}/{totalPages}, {start}-{end} of {total}",
@@ -338,8 +335,6 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "The schema JSON is not valid JSON.",
   "app.generatorPreview.input.manualSchemaDraftInvalid":
     "Schema JSON validation failed: {value}",
-  "app.generatorPreview.input.manualSchemaDraftSummary":
-    "Current draft: {schemaName} / {fieldCount} fields",
   "app.generatorPreview.conflictStrategy.skip": "Skip",
   "app.generatorPreview.conflictStrategy.overwrite": "Overwrite",
   "app.generatorPreview.conflictStrategy.overwrite-generated-only":

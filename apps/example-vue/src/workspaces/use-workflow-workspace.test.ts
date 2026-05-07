@@ -50,10 +50,8 @@ const createWorkspace = (options?: {
 }) =>
   useWorkflowWorkspace({
     canView: computed(() => true),
-    currentShellTabKey: ref("runtime"),
-    describeNode: (node) => `node:${node.name}`,
+    currentShellTabKey: ref("workspace"),
     locale: ref("zh-CN"),
-    localizeNodeType: (type) => `type:${type}`,
     localizeStatus: (status) => `status:${status}`,
     onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
     t: (key, params) =>
@@ -105,7 +103,6 @@ describe("useWorkflowWorkspace", () => {
     })
 
     workspace.workflowQuery.value = " expense "
-    workspace.workflowStatusFilter.value = "active"
     await workspace.reloadWorkflowDefinitions()
 
     expect(recoverableErrors).toHaveLength(1)
@@ -113,10 +110,6 @@ describe("useWorkflowWorkspace", () => {
     expect(workspace.workflowDefinitions.value).toEqual([])
     expect(workspace.selectedWorkflowDefinition.value).toBeNull()
     expect(workspace.workflowQuery.value).toBe(" expense ")
-    expect(workspace.workflowStatusFilter.value).toBe("active")
-    expect(workspace.workflowFilterSummary.value).toBe(
-      "app.workflow.filter.querySummary:value=expense / app.workflow.filter.statusSummary:value=status:active",
-    )
   })
 
   test("reports recoverable auth errors when loading workflow definition detail fails", async () => {
@@ -161,115 +154,5 @@ describe("useWorkflowWorkspace", () => {
       "workflow-definition-1",
     )
     expect(workspace.workflowDetailLoading.value).toBe(false)
-  })
-
-  test("preserves cached workflow context when reloading definitions fails", async () => {
-    const primary = createWorkflowDefinition()
-    const archived = createWorkflowDefinition({
-      id: "workflow-definition-2",
-      key: "expense-approval",
-      name: "Expense Approval v1",
-      status: "disabled",
-      version: 1,
-    })
-    const recoverableErrors: unknown[] = []
-    let failReload = false
-
-    globalThis.fetch = (async (input, init) => {
-      const url = String(input)
-      const method = init?.method ?? "GET"
-
-      if (
-        url.endsWith("/workflow/definitions/workflow-definition-1") &&
-        method === "GET"
-      ) {
-        return new Response(JSON.stringify(primary), {
-          headers: { "content-type": "application/json" },
-          status: 200,
-        })
-      }
-
-      if (
-        url.endsWith("/workflow/definitions?page=1&pageSize=20") &&
-        method === "GET"
-      ) {
-        if (failReload) {
-          return new Response(JSON.stringify({ message: "unavailable" }), {
-            headers: { "content-type": "application/json" },
-            status: 503,
-          })
-        }
-
-        return new Response(
-          JSON.stringify({
-            items: [primary, archived],
-            page: 1,
-            pageSize: 20,
-            total: 2,
-            totalPages: 1,
-          }),
-          {
-            headers: { "content-type": "application/json" },
-            status: 200,
-          },
-        )
-      }
-
-      if (
-        url.endsWith(
-          "/workflow/definitions?q=expense&status=active&page=1&pageSize=20",
-        ) &&
-        method === "GET"
-      ) {
-        if (failReload) {
-          return new Response(JSON.stringify({ message: "unavailable" }), {
-            headers: { "content-type": "application/json" },
-            status: 503,
-          })
-        }
-
-        return new Response(
-          JSON.stringify({
-            items: [primary],
-            page: 1,
-            pageSize: 20,
-            total: 1,
-            totalPages: 1,
-          }),
-          {
-            headers: { "content-type": "application/json" },
-            status: 200,
-          },
-        )
-      }
-
-      return new Response("not found", { status: 404 })
-    }) as typeof fetch
-
-    const workspace = createWorkspace({
-      onRecoverableAuthError: (error) => {
-        recoverableErrors.push(error)
-      },
-    })
-
-    await workspace.reloadWorkflowDefinitions()
-    workspace.workflowQuery.value = " expense "
-    workspace.workflowStatusFilter.value = "active"
-    failReload = true
-
-    await workspace.reloadWorkflowDefinitions()
-
-    expect(recoverableErrors).toHaveLength(1)
-    expect(workspace.workflowErrorMessage.value).toContain("unavailable")
-    expect(workspace.workflowDefinitions.value).toEqual([primary, archived])
-    expect(workspace.selectedWorkflowDefinitionId.value).toBe(
-      "workflow-definition-1",
-    )
-    expect(workspace.selectedWorkflowDefinition.value?.id).toBe(
-      "workflow-definition-1",
-    )
-    expect(workspace.workflowDefinitionDetailCards.value).toHaveLength(3)
-    expect(workspace.workflowQuery.value).toBe(" expense ")
-    expect(workspace.workflowStatusFilter.value).toBe("active")
   })
 })

@@ -12,10 +12,6 @@ import GeneratorPreviewWorkspaceMain from "../generator/GeneratorPreviewWorkspac
 import type { GeneratorPreviewDiffSummary } from "../generator/types"
 import OperationLogWorkspaceMain from "../operation-log/OperationLogWorkspaceMain.vue"
 import WorkflowWorkspaceMain from "../workflow/WorkflowWorkspaceMain.vue"
-import type {
-  WorkflowDefinitionDetailCard,
-  WorkflowStatusFilter,
-} from "../workflow/types"
 import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 
 interface GeneratorPreviewSessionSummary {
@@ -45,8 +41,6 @@ export interface ShellWorkspaceMainSwitchProps {
   workflowErrorMessage: string
   workflowLoading: boolean
   workflowQuery: string
-  workflowStatusFilter: WorkflowStatusFilter
-  workflowFilterSummary: string
   workflowDefinitionCards: ReadonlyArray<unknown>
   workflowDefinitionCount: number
   workflowPaginationSummary: string
@@ -57,8 +51,6 @@ export interface ShellWorkspaceMainSwitchProps {
   workflowDetailLoading: boolean
   workflowDetailErrorMessage: string
   selectedWorkflowDefinition: Record<string, unknown> | null
-  workflowVersionHistoryCards: ReadonlyArray<unknown>
-  workflowDefinitionDetailCards: ReadonlyArray<unknown>
   localizeWorkflowStatus: (status: string) => string
   fileModuleReady: boolean
   canEnterFileWorkspace: boolean
@@ -75,15 +67,18 @@ export interface ShellWorkspaceMainSwitchProps {
   generatorPreviewReviewLoading: boolean
   generatorPreviewApplyLoading: boolean
   generatorPreviewErrorMessage: string
+  generatorPreviewInputModeOptions: ReadonlyArray<unknown>
   generatorPreviewSchemaOptions: ReadonlyArray<unknown>
   generatorPreviewConflictStrategyOptions: ReadonlyArray<unknown>
   generatorPreviewRecentSessionOptions: ReadonlyArray<unknown>
+  selectedGeneratorPreviewInputMode: string
   selectedGeneratorPreviewConflictStrategy: string
   selectedGeneratorPreviewRecentSessionId: string
   selectedGeneratorPreviewSchemaName: string
   selectedGeneratorPreviewFrontendTarget: string
+  generatorPreviewManualSchemaDraft: string
+  generatorPreviewManualSchemaDraftError: string | null
   generatorPreviewQuery: string
-  generatorPreviewFilterSummary: string
   generatorPreviewFiles: ReadonlyArray<unknown>
   selectedGeneratorPreviewFilePath: string | null
   canApproveGeneratorPreview: boolean
@@ -248,7 +243,6 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "workflow-update-query", value: string): void
   (event: "select-workflow-definition", definitionId: string): void
   (event: "close-workflow-definition-detail"): void
-  (event: "select-workflow-status-filter", status: WorkflowStatusFilter): void
   (event: "reset-workflow-filters"): void
   (event: "go-previous-workflow-page"): void
   (event: "go-next-workflow-page"): void
@@ -257,9 +251,12 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "select-file", fileId: string): void
   (event: "open-file-upload"): void
   (event: "update-generator-schema-name", schemaName: string): void
+  (event: "update-generator-input-mode", inputMode: string): void
   (event: "update-generator-conflict-strategy", strategy: string): void
   (event: "update-generator-frontend-target", frontendTarget: string): void
+  (event: "update-generator-manual-schema-draft", value: string): void
   (event: "update-generator-query", value: string): void
+  (event: "load-generator-current-schema-draft"): void
   (event: "restore-generator-session", sessionId: string): void
   (event: "select-generator-file", filePath: string): void
   (event: "reset-generator-filters"): void
@@ -390,30 +387,11 @@ const workspaceListListeners = (
     emitMainListPayloadEvent(emit, rowClickEvent, payload),
 })
 
-const runtimeResolver: ShellWorkspaceMainResolver = (props) => ({
-  component: ShellWorkspaceStatusMain,
-  props: {
-    mode: "runtime",
-    title: props.selectedNavigationItemName,
-    subtitle: props.currentNavigationPath,
-    badge: props.authStatusLabel,
-    currentPage: props.selectedNavigationItemName,
-    currentPath: props.currentNavigationPath,
-    moduleStatusLabel: props.currentModuleStatusLabel,
-    authStatusLabel: props.authStatusLabel,
-    permissionCount: props.permissionCount,
-    moduleCodeLabel: props.currentModuleCodeLabel,
-    backButtonLabel: props.t("app.placeholder.backToCustomer"),
-    showBackButton: false,
-  },
-})
-
 const placeholderResolver: ShellWorkspaceMainResolver = (props, emit) => ({
   component: ShellWorkspaceStatusMain,
   props: {
     mode: "placeholder",
     title: props.selectedNavigationItemName,
-    subtitle: props.placeholderWorkspaceCopy,
     badge: props.currentModuleStatusLabel,
     currentPage: props.selectedNavigationItemName,
     currentPath: props.currentNavigationPath,
@@ -507,8 +485,6 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       errorMessage: props.workflowErrorMessage,
       loading: props.workflowLoading,
       query: props.workflowQuery,
-      statusFilter: props.workflowStatusFilter,
-      filterSummary: props.workflowFilterSummary,
       definitionCards: props.workflowDefinitionCards,
       definitionCount: props.workflowDefinitionCount,
       paginationSummary: props.workflowPaginationSummary,
@@ -520,9 +496,6 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       detailErrorMessage: props.workflowDetailErrorMessage,
       selectedDefinition:
         props.selectedWorkflowDefinition as WorkflowDefinitionRecord | null,
-      versionHistoryCards: props.workflowVersionHistoryCards,
-      detailCards:
-        props.workflowDefinitionDetailCards as WorkflowDefinitionDetailCard[],
       localizeStatus: props.localizeWorkflowStatus,
     },
     listeners: {
@@ -531,8 +504,6 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       "select-definition": (definitionId: unknown) =>
         emit("select-workflow-definition", definitionId as string),
       "close-detail": () => emit("close-workflow-definition-detail"),
-      "select-status-filter": (status: unknown) =>
-        emit("select-workflow-status-filter", status as WorkflowStatusFilter),
       "reset-filters": () => emit("reset-workflow-filters"),
       "go-previous-page": () => emit("go-previous-workflow-page"),
       "go-next-page": () => emit("go-next-workflow-page"),
@@ -572,6 +543,10 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       reviewLoading: props.generatorPreviewReviewLoading,
       applyLoading: props.generatorPreviewApplyLoading,
       errorMessage: props.generatorPreviewErrorMessage,
+      inputModeOptions: props.generatorPreviewInputModeOptions as Array<{
+        label: string
+        value: string
+      }>,
       schemaOptions: props.generatorPreviewSchemaOptions,
       conflictStrategyOptions:
         props.generatorPreviewConflictStrategyOptions as Array<{
@@ -583,12 +558,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
           label: string
           value: string
         }>,
+      selectedInputMode: props.selectedGeneratorPreviewInputMode,
       selectedConflictStrategy: props.selectedGeneratorPreviewConflictStrategy,
       selectedRecentSessionId: props.selectedGeneratorPreviewRecentSessionId,
       selectedSchemaName: props.selectedGeneratorPreviewSchemaName,
       selectedFrontendTarget: props.selectedGeneratorPreviewFrontendTarget,
+      manualSchemaDraft: props.generatorPreviewManualSchemaDraft,
+      manualSchemaDraftError: props.generatorPreviewManualSchemaDraftError,
       query: props.generatorPreviewQuery,
-      filterSummary: props.generatorPreviewFilterSummary,
       files: props.generatorPreviewFiles,
       selectedFilePath: props.selectedGeneratorPreviewFilePath,
       canApprove: props.canApproveGeneratorPreview,
@@ -603,14 +580,20 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
         props.generatorPreviewSession?.hasBlockingConflicts ?? false,
     },
     listeners: {
+      "update:selected-input-mode": (value: unknown) =>
+        emit("update-generator-input-mode", value as string),
       "update:selected-schema-name": (schemaName: unknown) =>
         emit("update-generator-schema-name", schemaName as string),
       "update:selected-conflict-strategy": (strategy: unknown) =>
         emit("update-generator-conflict-strategy", strategy as string),
       "update:selected-frontend-target": (frontendTarget: unknown) =>
         emit("update-generator-frontend-target", frontendTarget as string),
+      "update:manual-schema-draft": (value: unknown) =>
+        emit("update-generator-manual-schema-draft", value as string),
       "update:query": (value: unknown) =>
         emit("update-generator-query", value as string),
+      "load-current-schema-draft": () =>
+        emit("load-generator-current-schema-draft"),
       "restore-session": (sessionId: unknown) =>
         emit("restore-generator-session", sessionId as string),
       "select-file": (filePath: unknown) =>
@@ -930,10 +913,6 @@ export const resolveShellWorkspaceMainDescriptor = (
   props: ShellWorkspaceMainSwitchProps,
   emit: ShellWorkspaceMainSwitchEmitFn,
 ): ShellWorkspaceMainDescriptor => {
-  if (props.enterpriseSelectedTabKey === "runtime") {
-    return runtimeResolver(props, emit)
-  }
-
   assertShellWorkspaceMainResolverCoverage(props.currentWorkspaceKind)
 
   return (workspaceResolvers[props.currentWorkspaceKind] ?? customerResolver)(

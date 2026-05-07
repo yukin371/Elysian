@@ -305,8 +305,6 @@ export const useExampleWorkspaces = ({
     locale,
     t,
     localizeStatus: localizers.localizeWorkflowStatus,
-    localizeNodeType: localizers.localizeWorkflowNodeType,
-    describeNode: localizers.describeWorkflowNode,
     canView: workspaceGates.canViewWorkflowDefinitions,
     onRecoverableAuthError,
   })

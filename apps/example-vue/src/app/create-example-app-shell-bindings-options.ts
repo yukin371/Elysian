@@ -136,7 +136,7 @@ export const createExampleAppShellBindingsOptions = (
   const selectedNavigationItemName = computed(
     () =>
       input.navigation.selectedNavigationItem.value?.name ??
-      input.t("app.runtime.title"),
+      input.t("app.tabs.workspace"),
   )
 
   return createExampleShellBindingsOptions({
@@ -152,7 +152,6 @@ export const createExampleAppShellBindingsOptions = (
       currentNavigationPath: input.navigation.currentNavigationPath,
       enterpriseSelectedTabKey: input.navigation.enterpriseSelectedTabKey,
       currentWorkspaceKind: input.navigation.currentWorkspaceKind,
-      isRuntimeShellTab: input.navigation.isRuntimeShellTab,
       authStatusLabel: input.shellMeta.authStatusLabel,
       currentModuleStatusLabel: input.navigation.currentModuleStatusLabel,
       currentModuleCodeLabel: input.navigation.currentModuleCodeLabel,
@@ -162,7 +161,6 @@ export const createExampleAppShellBindingsOptions = (
       authModuleReady: input.moduleReady.authModuleReady,
       isAuthenticated: input.isAuthenticated,
       authLoading: input.authLoading,
-      openCurrentWorkspaceTab: input.navigation.openCurrentWorkspaceTab,
       submitLogout: input.submitLogout,
       submitLogin: input.submitLogin,
       vueEnterprisePresetStatus: input.vueEnterprisePresetStatus,
@@ -338,12 +336,16 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.applyLoading,
       generatorPreviewErrorMessage:
         input.workspaces.generatorPreviewWorkspace.errorMessage,
+      generatorPreviewInputModeOptions:
+        input.workspaces.generatorPreviewWorkspace.inputModeOptions,
       generatorPreviewSchemaOptions:
         input.workspaces.generatorPreviewWorkspace.schemaOptions,
       generatorPreviewConflictStrategyOptions:
         input.workspaces.generatorPreviewWorkspace.conflictStrategyOptions,
       generatorPreviewRecentSessionOptions:
         input.workspaces.generatorPreviewWorkspace.recentSessionOptions,
+      selectedGeneratorPreviewInputMode:
+        input.workspaces.generatorPreviewWorkspace.selectedInputMode,
       selectedGeneratorPreviewConflictStrategy:
         input.workspaces.generatorPreviewWorkspace.selectedConflictStrategy,
       selectedGeneratorPreviewRecentSessionId:
@@ -352,10 +354,14 @@ export const createExampleAppShellBindingsOptions = (
         input.workspaces.generatorPreviewWorkspace.selectedSchemaName,
       selectedGeneratorPreviewFrontendTarget:
         input.workspaces.generatorPreviewWorkspace.selectedFrontendTarget,
+      generatorPreviewManualSchemaDraft:
+        input.workspaces.generatorPreviewWorkspace.manualSchemaDraft,
+      generatorPreviewManualSchemaDraftError:
+        input.workspaces.generatorPreviewWorkspace.manualSchemaDraftError,
+      loadSelectedSchemaDraft:
+        input.workspaces.generatorPreviewWorkspace.loadSelectedSchemaDraft,
       generatorPreviewQuery:
         input.workspaces.generatorPreviewWorkspace.previewQuery,
-      generatorPreviewFilterSummary:
-        input.workspaces.generatorPreviewWorkspace.filterSummary,
       generatorPreviewFiles:
         input.workspaces.generatorPreviewWorkspace.filteredPreviewFiles,
       selectedGeneratorPreviewFilePath:

@@ -12,7 +12,6 @@ import type {
   GeneratorPreviewSqlProposalHandoff,
   PlatformResponse,
 } from "../lib/platform-api"
-import type { WorkflowStatusFilter } from "../lib/workflow-workspace"
 import type { AppTranslate } from "./app-shell-helpers"
 
 export type ValueSource<T> = Ref<T> | ComputedRef<T>
@@ -37,7 +36,6 @@ export interface UseExampleShellBindingsOptions {
   currentNavigationPath: ComputedRef<string>
   enterpriseSelectedTabKey: ComputedRef<string>
   currentWorkspaceKind: ComputedRef<string>
-  isRuntimeShellTab: ComputedRef<boolean>
   authStatusLabel: ComputedRef<string>
   currentModuleStatusLabel: ComputedRef<string>
   currentModuleCodeLabel: ComputedRef<string>
@@ -130,8 +128,6 @@ export interface UseExampleShellBindingsOptions {
   canEnterWorkflowWorkspace: ValueSource<boolean>
   workflowErrorMessage: ValueSource<string>
   workflowQuery: Ref<string>
-  workflowStatusFilter: ValueSource<string>
-  workflowFilterSummary: ValueSource<string>
   workflowDefinitionCards: ValueSource<unknown[]>
   workflowDefinitions: ValueSource<unknown[]>
   workflowPaginationSummary: ValueSource<string>
@@ -153,15 +149,19 @@ export interface UseExampleShellBindingsOptions {
   generatorPreviewReviewLoading: ValueSource<boolean>
   generatorPreviewApplyLoading: ValueSource<boolean>
   generatorPreviewErrorMessage: ValueSource<string>
+  generatorPreviewInputModeOptions: ValueSource<unknown[]>
   generatorPreviewSchemaOptions: ValueSource<unknown[]>
   generatorPreviewConflictStrategyOptions: ValueSource<unknown[]>
   generatorPreviewRecentSessionOptions: ValueSource<unknown[]>
+  selectedGeneratorPreviewInputMode: Ref<string>
   selectedGeneratorPreviewConflictStrategy: Ref<string>
   selectedGeneratorPreviewSchemaName: Ref<string>
   selectedGeneratorPreviewRecentSessionId: Ref<string>
   selectedGeneratorPreviewFrontendTarget: Ref<string>
+  generatorPreviewManualSchemaDraft: Ref<string>
+  generatorPreviewManualSchemaDraftError: ValueSource<string | null>
+  loadSelectedSchemaDraft: () => void
   generatorPreviewQuery: Ref<string>
-  generatorPreviewFilterSummary: ValueSource<string>
   generatorPreviewFiles: ValueSource<unknown[]>
   selectedGeneratorPreviewFilePath: Ref<string | null>
   canApproveGeneratorPreview: ValueSource<boolean>
@@ -328,8 +328,6 @@ export interface UseExampleShellBindingsOptions {
   workflowDetailLoading: ValueSource<boolean>
   workflowDetailErrorMessage: ValueSource<string>
   selectedWorkflowDefinition: ValueSource<Record<string, unknown> | null>
-  workflowVersionHistoryCards: ValueSource<unknown[]>
-  workflowDefinitionDetailCards: ValueSource<unknown[]>
   localizeWorkflowStatus: (status: string) => string
   fileDetailLoading: ValueSource<boolean>
   fileActionLoading: ValueSource<boolean>
@@ -353,7 +351,6 @@ export interface UseExampleShellBindingsOptions {
   handleWorkflowDefinitionSelect: (definitionId: string) => void
   closeWorkflowDefinitionDetail: () => void
   setWorkflowQuery: (query: string) => void
-  setWorkflowStatusFilter: (status: WorkflowStatusFilter) => void
   resetWorkflowFilters: () => void
   goToPreviousWorkflowPage: () => void
   goToNextWorkflowPage: () => void
@@ -452,7 +449,6 @@ export interface UseExampleShellBindingsOptions {
   handleExportFiles: () => void
   deleteVisibleFiles: () => void
   reloadWorkflowDefinitions: () => void
-  openCurrentWorkspaceTab: () => void
   submitLogout: () => void
   startDictionaryEdit: () => void
   submitDictionaryForm: (payload: Record<string, unknown>) => void

@@ -1,4 +1,4 @@
-import type { WorkflowDefinitionRecord, WorkflowNode } from "@elysian/schema"
+import type { WorkflowDefinitionRecord } from "@elysian/schema"
 import { type ComputedRef, type Ref, computed, ref } from "vue"
 
 import {
@@ -6,10 +6,6 @@ import {
   fetchWorkflowDefinitionById,
   fetchWorkflowDefinitions,
 } from "../lib/platform-api"
-import {
-  type WorkflowStatusFilter,
-  listWorkflowDefinitionVersions,
-} from "../lib/workflow-workspace"
 
 interface WorkflowDefinitionCard extends WorkflowDefinitionRecord {
   updatedAtLabel: string
@@ -18,20 +14,11 @@ interface WorkflowDefinitionCard extends WorkflowDefinitionRecord {
   edgeCount: number
 }
 
-interface WorkflowDefinitionDetailCard {
-  id: string
-  name: string
-  typeLabel: string
-  description: string
-}
-
 interface UseWorkflowWorkspaceOptions {
   currentShellTabKey: Ref<string>
   locale: Ref<string>
   t: (key: string, params?: Record<string, unknown>) => string
   localizeStatus: (status: WorkflowDefinitionRecord["status"]) => string
-  localizeNodeType: (type: WorkflowNode["type"]) => string
-  describeNode: (node: WorkflowNode) => string
   canView: ComputedRef<boolean>
   onRecoverableAuthError: (error: unknown) => void
 }
@@ -46,7 +33,6 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
   const workflowDefinitionDetail = ref<WorkflowDefinitionRecord | null>(null)
   const workflowDetailDialogOpen = ref(false)
   const workflowQuery = ref("")
-  const workflowStatusFilter = ref<WorkflowStatusFilter>("all")
   const workflowPage = ref(1)
   const workflowPageSize = ref(20)
   const workflowTotal = ref(0)
@@ -62,12 +48,6 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
 
   const selectedWorkflowDefinition = computed(
     () => workflowDefinitionDetail.value ?? selectedWorkflowListItem.value,
-  )
-
-  const filteredWorkflowDefinitions = computed(() => workflowDefinitions.value)
-
-  const workflowVisibleDefinitionCards = computed<WorkflowDefinitionCard[]>(
-    () => workflowDefinitionCards.value,
   )
 
   const workflowCanGoToPreviousPage = computed(() => workflowPage.value > 1)
@@ -107,59 +87,6 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
       }),
     ),
   )
-
-  const workflowDefinitionDetailCards = computed<
-    WorkflowDefinitionDetailCard[]
-  >(
-    () =>
-      selectedWorkflowDefinition.value?.definition.nodes.map(
-        (node: WorkflowNode) => ({
-          id: node.id,
-          name: node.name,
-          typeLabel: options.localizeNodeType(node.type),
-          description: options.describeNode(node),
-        }),
-      ) ?? [],
-  )
-
-  const workflowVersionHistoryCards = computed<WorkflowDefinitionCard[]>(() =>
-    listWorkflowDefinitionVersions(
-      workflowDefinitions.value,
-      selectedWorkflowDefinition.value?.key,
-    ).map((definition) => ({
-      ...definition,
-      updatedAtLabel: new Date(definition.updatedAt).toLocaleString(
-        options.locale.value,
-      ),
-      statusLabel: options.localizeStatus(definition.status),
-      nodeCount: definition.definition.nodes.length,
-      edgeCount: definition.definition.edges.length,
-    })),
-  )
-
-  const workflowFilterSummary = computed(() => {
-    const fragments: string[] = []
-
-    if (workflowQuery.value.trim().length > 0) {
-      fragments.push(
-        options.t("app.workflow.filter.querySummary", {
-          value: workflowQuery.value.trim(),
-        }),
-      )
-    }
-
-    if (workflowStatusFilter.value !== "all") {
-      fragments.push(
-        options.t("app.workflow.filter.statusSummary", {
-          value: options.localizeStatus(workflowStatusFilter.value),
-        }),
-      )
-    }
-
-    return fragments.length > 0
-      ? fragments.join(" / ")
-      : options.t("app.workflow.filter.none")
-  })
 
   const clearWorkflowDefinitions = () => {
     workflowDefinitions.value = []
@@ -266,15 +193,8 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
     await reloadWorkflowDefinitions()
   }
 
-  const setWorkflowStatusFilter = async (filter: WorkflowStatusFilter) => {
-    workflowStatusFilter.value = filter
-    workflowPage.value = 1
-    await reloadWorkflowDefinitions()
-  }
-
   const resetWorkflowFilters = async () => {
     workflowQuery.value = ""
-    workflowStatusFilter.value = "all"
     workflowPage.value = 1
     await reloadWorkflowDefinitions()
   }
@@ -299,10 +219,6 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
 
   const buildWorkflowDefinitionListQuery = (): WorkflowDefinitionListQuery => ({
     q: workflowQuery.value,
-    status:
-      workflowStatusFilter.value === "all"
-        ? undefined
-        : workflowStatusFilter.value,
     page: workflowPage.value,
     pageSize: workflowPageSize.value,
   })
@@ -317,7 +233,6 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
     changeWorkflowPageSize,
     clearWorkflowDefinitions,
     closeWorkflowDefinitionDetail,
-    filteredWorkflowDefinitions,
     goToNextWorkflowPage,
     goToPreviousWorkflowPage,
     handleWorkflowDefinitionSelect,
@@ -327,27 +242,21 @@ export const useWorkflowWorkspace = (options: UseWorkflowWorkspaceOptions) => {
     selectedWorkflowDefinition,
     selectedWorkflowDefinitionId,
     setWorkflowQuery,
-    setWorkflowStatusFilter,
     workflowCanGoToNextPage,
     workflowCanGoToPreviousPage,
     workflowDefinitionCards,
     workflowDefinitionDetail,
-    workflowDefinitionDetailCards,
     workflowDefinitions,
     workflowDetailErrorMessage,
     workflowDetailDialogOpen,
     workflowDetailLoading,
     workflowErrorMessage,
-    workflowFilterSummary,
     workflowLoading,
     workflowPage,
     workflowPageSize,
     workflowPaginationSummary,
     workflowQuery,
-    workflowStatusFilter,
     workflowTotal,
     workflowTotalPages,
-    workflowVisibleDefinitionCards,
-    workflowVersionHistoryCards,
   }
 }

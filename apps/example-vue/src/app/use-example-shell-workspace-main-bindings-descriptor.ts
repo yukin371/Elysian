@@ -25,8 +25,6 @@ export const createExampleShellWorkspaceMainBindings = ({
   workflowErrorMessage,
   workflowLoading,
   workflowQuery,
-  workflowStatusFilter,
-  workflowFilterSummary,
   workflowDefinitionCards,
   workflowDefinitions,
   workflowPaginationSummary,
@@ -37,8 +35,6 @@ export const createExampleShellWorkspaceMainBindings = ({
   workflowDetailLoading,
   workflowDetailErrorMessage,
   selectedWorkflowDefinition,
-  workflowVersionHistoryCards,
-  workflowDefinitionDetailCards,
   localizeWorkflowStatus,
   fileModuleReady,
   canEnterFileWorkspace,
@@ -55,15 +51,19 @@ export const createExampleShellWorkspaceMainBindings = ({
   generatorPreviewReviewLoading,
   generatorPreviewApplyLoading,
   generatorPreviewErrorMessage,
+  generatorPreviewInputModeOptions,
   generatorPreviewSchemaOptions,
   generatorPreviewConflictStrategyOptions,
   generatorPreviewRecentSessionOptions,
+  loadSelectedSchemaDraft,
+  selectedGeneratorPreviewInputMode,
   selectedGeneratorPreviewConflictStrategy,
   selectedGeneratorPreviewRecentSessionId,
   selectedGeneratorPreviewSchemaName,
   selectedGeneratorPreviewFrontendTarget,
+  generatorPreviewManualSchemaDraft,
+  generatorPreviewManualSchemaDraftError,
   generatorPreviewQuery,
-  generatorPreviewFilterSummary,
   generatorPreviewFiles,
   selectedGeneratorPreviewFilePath,
   canApproveGeneratorPreview,
@@ -189,7 +189,6 @@ export const createExampleShellWorkspaceMainBindings = ({
   handleWorkflowDefinitionSelect,
   closeWorkflowDefinitionDetail,
   setWorkflowQuery,
-  setWorkflowStatusFilter,
   resetWorkflowFilters,
   goToPreviousWorkflowPage,
   goToNextWorkflowPage,
@@ -272,8 +271,6 @@ export const createExampleShellWorkspaceMainBindings = ({
     workflowErrorMessage: read(workflowErrorMessage),
     workflowLoading: read(workflowLoading),
     workflowQuery: workflowQuery.value,
-    workflowStatusFilter: read(workflowStatusFilter),
-    workflowFilterSummary: read(workflowFilterSummary),
     workflowDefinitionCards: read(workflowDefinitionCards),
     workflowDefinitionCount: read(workflowDefinitions).length,
     workflowPaginationSummary: read(workflowPaginationSummary),
@@ -284,8 +281,6 @@ export const createExampleShellWorkspaceMainBindings = ({
     workflowDetailLoading: read(workflowDetailLoading),
     workflowDetailErrorMessage: read(workflowDetailErrorMessage),
     selectedWorkflowDefinition: read(selectedWorkflowDefinition),
-    workflowVersionHistoryCards: read(workflowVersionHistoryCards),
-    workflowDefinitionDetailCards: read(workflowDefinitionDetailCards),
     localizeWorkflowStatus,
     fileModuleReady: read(fileModuleReady),
     canEnterFileWorkspace: read(canEnterFileWorkspace),
@@ -302,6 +297,7 @@ export const createExampleShellWorkspaceMainBindings = ({
     generatorPreviewReviewLoading: read(generatorPreviewReviewLoading),
     generatorPreviewApplyLoading: read(generatorPreviewApplyLoading),
     generatorPreviewErrorMessage: read(generatorPreviewErrorMessage),
+    generatorPreviewInputModeOptions: read(generatorPreviewInputModeOptions),
     generatorPreviewSchemaOptions: read(generatorPreviewSchemaOptions),
     generatorPreviewConflictStrategyOptions: read(
       generatorPreviewConflictStrategyOptions,
@@ -309,6 +305,7 @@ export const createExampleShellWorkspaceMainBindings = ({
     generatorPreviewRecentSessionOptions: read(
       generatorPreviewRecentSessionOptions,
     ),
+    selectedGeneratorPreviewInputMode: selectedGeneratorPreviewInputMode.value,
     selectedGeneratorPreviewConflictStrategy:
       selectedGeneratorPreviewConflictStrategy.value,
     selectedGeneratorPreviewRecentSessionId:
@@ -317,8 +314,12 @@ export const createExampleShellWorkspaceMainBindings = ({
       selectedGeneratorPreviewSchemaName.value,
     selectedGeneratorPreviewFrontendTarget:
       selectedGeneratorPreviewFrontendTarget.value,
+    generatorPreviewManualSchemaDraft: generatorPreviewManualSchemaDraft.value,
+    generatorPreviewManualSchemaDraftError: read(
+      generatorPreviewManualSchemaDraftError,
+    ),
+    loadSelectedSchemaDraft,
     generatorPreviewQuery: generatorPreviewQuery.value,
-    generatorPreviewFilterSummary: read(generatorPreviewFilterSummary),
     generatorPreviewFiles: read(generatorPreviewFiles),
     selectedGeneratorPreviewFilePath: selectedGeneratorPreviewFilePath.value,
     canApproveGeneratorPreview: read(canApproveGeneratorPreview),
@@ -456,7 +457,6 @@ export const createExampleShellWorkspaceMainBindings = ({
     },
     "select-workflow-definition": handleWorkflowDefinitionSelect,
     "close-workflow-definition-detail": closeWorkflowDefinitionDetail,
-    "select-workflow-status-filter": setWorkflowStatusFilter,
     "reset-workflow-filters": resetWorkflowFilters,
     "go-previous-workflow-page": goToPreviousWorkflowPage,
     "go-next-workflow-page": goToNextWorkflowPage,
@@ -470,6 +470,11 @@ export const createExampleShellWorkspaceMainBindings = ({
       }
     },
     "open-file-upload": openFileUploadPanel,
+    "update-generator-input-mode": (value: string) => {
+      selectedGeneratorPreviewInputMode.value = value as
+        | "registered-schema"
+        | "manual-schema-json"
+    },
     "update-generator-schema-name": (value: string) => {
       selectedGeneratorPreviewSchemaName.value = value
     },
@@ -479,9 +484,13 @@ export const createExampleShellWorkspaceMainBindings = ({
     "update-generator-frontend-target": (value: string) => {
       selectedGeneratorPreviewFrontendTarget.value = value
     },
+    "update-generator-manual-schema-draft": (value: string) => {
+      generatorPreviewManualSchemaDraft.value = value
+    },
     "update-generator-query": (value: string) => {
       generatorPreviewQuery.value = value
     },
+    "load-generator-current-schema-draft": loadSelectedSchemaDraft,
     "restore-generator-session": restoreGeneratorPreviewSession,
     "select-generator-file": (value: string) => {
       selectedGeneratorPreviewFilePath.value = value

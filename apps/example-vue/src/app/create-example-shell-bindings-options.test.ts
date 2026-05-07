@@ -219,7 +219,6 @@ describe("createExampleShellBindingsOptions", () => {
         selectedGeneratorPreviewSchemaName: "",
         selectedGeneratorPreviewFrontendTarget: "vue",
         generatorPreviewQuery: "",
-        generatorPreviewFilterSummary: "",
         generatorPreviewFiles: [],
         selectedGeneratorPreviewFilePath: null,
         canApproveGeneratorPreview: false,

@@ -4,7 +4,6 @@ import type { WorkflowDefinitionRecord } from "@elysian/schema"
 
 import {
   filterWorkflowDefinitions,
-  listWorkflowDefinitionVersions,
   resolveWorkflowDefinitionSelection,
 } from "./workflow-workspace"
 
@@ -69,13 +68,13 @@ describe("workflow workspace helpers", () => {
 
   test("filters workflow definitions by query across name, key, and id", () => {
     expect(
-      filterWorkflowDefinitions(definitions, "condition", "all").map(
+      filterWorkflowDefinitions(definitions, "condition").map(
         (definition) => definition.id,
       ),
     ).toEqual(["workflow_definition_condition_v1"])
 
     expect(
-      filterWorkflowDefinitions(definitions, "expense-approval", "all").map(
+      filterWorkflowDefinitions(definitions, "expense-approval").map(
         (definition) => definition.id,
       ),
     ).toEqual([
@@ -85,40 +84,10 @@ describe("workflow workspace helpers", () => {
     ])
 
     expect(
-      filterWorkflowDefinitions(definitions, "expense_v2", "all").map(
+      filterWorkflowDefinitions(definitions, "expense_v2").map(
         (definition) => definition.id,
       ),
     ).toEqual(["workflow_definition_expense_v2"])
-  })
-
-  test("filters workflow definitions by status", () => {
-    expect(
-      filterWorkflowDefinitions(definitions, "", "active").map(
-        (definition) => definition.id,
-      ),
-    ).toEqual([
-      "workflow_definition_expense_v1",
-      "workflow_definition_expense_v2",
-    ])
-
-    expect(
-      filterWorkflowDefinitions(definitions, "", "disabled").map(
-        (definition) => definition.id,
-      ),
-    ).toEqual(["workflow_definition_condition_v1"])
-  })
-
-  test("lists version history for the selected workflow key in descending order", () => {
-    expect(
-      listWorkflowDefinitionVersions(definitions, "expense-approval").map(
-        (definition) => definition.id,
-      ),
-    ).toEqual([
-      "workflow_definition_expense_v2",
-      "workflow_definition_expense_v1",
-    ])
-
-    expect(listWorkflowDefinitionVersions(definitions, null)).toEqual([])
   })
 
   test("resolves workflow selection against the currently visible list", () => {

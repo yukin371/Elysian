@@ -23,7 +23,6 @@ export interface ShellWorkspaceSecondarySwitchProps {
   t: AppTranslate
   locale: string
   currentWorkspaceKind: string
-  isRuntimeShellTab: boolean
   selectedNavigationItemName: string
   currentNavigationPath: string
   authStatusLabel: string
@@ -170,9 +169,6 @@ export interface ShellWorkspaceSecondarySwitchProps {
   workflowDetailLoading: boolean
   workflowDetailErrorMessage: string
   selectedWorkflowDefinition: Record<string, unknown> | null
-  selectedWorkflowDefinitionId: string | null
-  workflowVersionHistoryCards: ReadonlyArray<unknown>
-  workflowDefinitionDetailCards: ReadonlyArray<unknown>
   localizeWorkflowStatus: (status: string) => string
   fileModuleReady: boolean
   canViewFiles: boolean
@@ -680,9 +676,6 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       detailLoading: props.workflowDetailLoading,
       detailErrorMessage: props.workflowDetailErrorMessage,
       selectedDefinition: props.selectedWorkflowDefinition,
-      selectedDefinitionId: props.selectedWorkflowDefinitionId,
-      versionHistoryCards: props.workflowVersionHistoryCards,
-      detailCards: props.workflowDefinitionDetailCards,
       localizeStatus: props.localizeWorkflowStatus,
     },
     listeners: {
@@ -760,7 +753,7 @@ export const resolveShellWorkspaceSecondaryDescriptor = (
   props: ShellWorkspaceSecondarySwitchProps,
   emit: ShellWorkspaceSecondarySwitchEmitFn,
 ): ShellWorkspaceSecondaryDescriptor => {
-  if (props.isRuntimeShellTab || props.currentWorkspaceKind === "placeholder") {
+  if (props.currentWorkspaceKind === "placeholder") {
     return statusResolver(props, emit)
   }
 

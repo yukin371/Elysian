@@ -85,9 +85,6 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.filter.active": "启用",
   "app.workflow.filter.disabled": "停用",
   "app.workflow.filter.reset": "清空筛选",
-  "app.workflow.filter.none": "当前未启用筛选条件",
-  "app.workflow.filter.querySummary": "关键词: {value}",
-  "app.workflow.filter.statusSummary": "状态: {value}",
   "app.workflow.pagination.empty": "共 0 条",
   "app.workflow.pagination.summary":
     "第 {page}/{totalPages} 页，{start}-{end} / {total} 条",
@@ -320,8 +317,6 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "Schema JSON 不是有效的 JSON。",
   "app.generatorPreview.input.manualSchemaDraftInvalid":
     "Schema JSON 校验失败：{value}",
-  "app.generatorPreview.input.manualSchemaDraftSummary":
-    "当前草稿：{schemaName} / {fieldCount} 个字段",
   "app.generatorPreview.conflictStrategy.skip": "跳过",
   "app.generatorPreview.conflictStrategy.overwrite": "覆盖",
   "app.generatorPreview.conflictStrategy.overwrite-generated-only":
