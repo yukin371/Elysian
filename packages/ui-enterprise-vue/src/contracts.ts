@@ -218,6 +218,36 @@ export interface ElyFormEmits {
   (e: "cancel"): void
 }
 
+// ─── Ely context panel ────────────────────────────────────────────────────────
+
+export interface ElyContextPanelCopy {
+  closeLabel?: string
+  editLabel?: string
+  deleteLabel?: string
+  saveLabel?: string
+  cancelLabel?: string
+  confirmDeleteLabel?: string
+  cancelDeleteLabel?: string
+  deleteWarning?: string
+}
+
+export interface ElyContextPanelProps {
+  visible: boolean
+  title: string
+  mode: "detail" | "edit" | "create" | "delete-confirm"
+  width?: number
+  loading?: boolean
+  copy?: ElyContextPanelCopy
+}
+
+export interface ElyContextPanelEmits {
+  (e: "close"): void
+  (e: "edit"): void
+  (e: "delete"): void
+  (e: "save"): void
+  (e: "cancel"): void
+}
+
 // ─── Ely CRUD workspace ───────────────────────────────────────────────────────
 
 export interface ElyCrudWorkspaceProps {

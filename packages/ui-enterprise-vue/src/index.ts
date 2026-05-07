@@ -3,6 +3,9 @@ import "./styles/workspace-base.css"
 import type { UiCrudPageDefinition, UiPresetManifest } from "@elysian/ui-core"
 import { computed } from "vue"
 import type {
+  ElyContextPanelCopy,
+  ElyContextPanelEmits,
+  ElyContextPanelProps,
   ElyCrudWorkspaceEmits,
   ElyCrudWorkspaceProps,
   ElyFormEmits,
@@ -29,6 +32,7 @@ import type {
 import { resolveElyShellCopy } from "./contracts"
 
 export { default as ElyForm } from "./components/ElyForm.vue"
+export { default as ElyContextPanel } from "./components/ElyContextPanel.vue"
 export { default as ElyCrudWorkspace } from "./components/ElyCrudWorkspace.vue"
 export { default as ElyNavNodes } from "./components/ElyNavNodes.vue"
 export { default as ElyPreviewSkeleton } from "./components/ElyPreviewSkeleton.vue"
@@ -37,6 +41,9 @@ export { default as ElyShell } from "./components/ElyShell.vue"
 export { default as ElyShellTabs } from "./components/ElyShellTabs.vue"
 export { default as ElyTable } from "./components/ElyTable.vue"
 export type {
+  ElyContextPanelCopy,
+  ElyContextPanelEmits,
+  ElyContextPanelProps,
   ElyCrudWorkspaceEmits,
   ElyCrudWorkspaceProps,
   ElyFormEmits,
