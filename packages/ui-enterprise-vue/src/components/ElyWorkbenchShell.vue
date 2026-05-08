@@ -192,6 +192,7 @@ const handleGlobalSearch = (value: string | number) => {
       >
         <ElyNavNodes
           :items="navigation"
+          :expanded-values="expandedMenuValues"
           @directory-toggle="handleDirectoryToggle"
         />
       </TMenu>
@@ -365,9 +366,10 @@ const handleGlobalSearch = (value: string | number) => {
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   background: var(--ely-surface);
   border-right: 1px solid var(--ely-border);
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .ely-workbench__nav {
@@ -376,6 +378,7 @@ const handleGlobalSearch = (value: string | number) => {
   background: transparent;
   border: 0;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .ely-workbench__nav :deep(.t-default-menu),
@@ -386,6 +389,8 @@ const handleGlobalSearch = (value: string | number) => {
 .ely-workbench__nav :deep(.t-menu__item),
 .ely-workbench__nav :deep(.t-submenu__title) {
   border-radius: 6px;
+  width: 100%;
+  min-width: 0;
   min-height: 36px;
   height: auto;
   align-items: stretch;
@@ -399,11 +404,32 @@ const handleGlobalSearch = (value: string | number) => {
   background: rgba(36, 87, 214, 0.05);
 }
 
+.ely-workbench__nav :deep(.t-menu__item.t-is-opened:not(.t-menu__item--plain)),
+.ely-workbench__nav :deep(.t-menu__item.t-is-active:not(.t-menu__item--plain)),
+.ely-workbench__nav :deep(.t-is-opened > .t-submenu__title),
+.ely-workbench__nav :deep(.t-submenu__title.t-is-active) {
+  background: transparent;
+  box-shadow: none;
+}
+
 .ely-workbench__nav
   :deep(.t-menu__item.t-is-active.t-menu__item--plain),
 .ely-workbench__nav :deep(.t-submenu__item.t-is-active) {
   background: rgba(36, 87, 214, 0.12);
   box-shadow: inset 3px 0 0 var(--ely-accent);
+}
+
+.ely-workbench__nav :deep(.t-menu__content) {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.ely-workbench__nav :deep(.t-fake-arrow) {
+  display: none;
 }
 
 /* ── Workspace ── */

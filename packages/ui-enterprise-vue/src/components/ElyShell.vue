@@ -161,6 +161,7 @@ const handleDirectoryToggle = (menuKey: string) => {
         >
           <ElyNavNodes
             :items="navigation"
+            :expanded-values="expandedMenuValues"
             @directory-toggle="handleDirectoryToggle"
           />
         </TMenu>
@@ -315,6 +316,7 @@ const handleDirectoryToggle = (menuKey: string) => {
   background: transparent;
   border: 0;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .ely-nav :deep(.t-default-menu),
@@ -325,6 +327,8 @@ const handleDirectoryToggle = (menuKey: string) => {
 .ely-nav :deep(.t-menu__item),
 .ely-nav :deep(.t-submenu__title) {
   border-radius: 6px;
+  width: 100%;
+  min-width: 0;
   min-height: 38px;
   height: auto;
   align-items: stretch;
@@ -342,7 +346,8 @@ const handleDirectoryToggle = (menuKey: string) => {
 .ely-nav :deep(.t-menu__item.t-is-active:not(.t-menu__item--plain)),
 .ely-nav :deep(.t-is-opened > .t-submenu__title),
 .ely-nav :deep(.t-submenu__title.t-is-active) {
-  background: rgba(36, 87, 214, 0.06);
+  background: transparent;
+  box-shadow: none;
 }
 
 .ely-nav :deep(.t-menu__item.t-is-active.t-menu__item--plain),
@@ -361,8 +366,7 @@ const handleDirectoryToggle = (menuKey: string) => {
 }
 
 .ely-nav :deep(.t-fake-arrow) {
-  flex-shrink: 0;
-  margin-top: 0.45rem;
+  display: none;
 }
 
 .ely-shell-main {
