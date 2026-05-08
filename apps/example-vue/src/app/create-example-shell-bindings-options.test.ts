@@ -88,12 +88,13 @@ describe("createExampleShellBindingsOptions", () => {
     const refreshGeneratorPreview = () => Promise.resolve()
     const selectedRole = { id: "role-1", name: "Operator" }
     const selectedCustomer = { id: "customer-1", name: "Acme" }
-    let editedRole: unknown = null
+    const roleEditCalls: unknown[] = []
     let editedCustomer: unknown = null
     let deletedCustomer: unknown = null
     let dictionaryEditCalls = 0
+    let notificationCreateCalls = 0
     const startRoleEdit = (record: unknown) => {
-      editedRole = record
+      roleEditCalls.push(record)
     }
     const startCustomerEdit = (record: unknown) => {
       editedCustomer = record
@@ -168,6 +169,9 @@ describe("createExampleShellBindingsOptions", () => {
         notificationExportLoading: true,
         handleExportNotifications,
         visibleUnreadNotificationCount: 2,
+        "workspace.openCreatePanel": () => {
+          notificationCreateCalls += 1
+        },
         "workspace.markVisibleAsRead": markVisibleNotificationsAsRead,
       }),
       operationLogWorkspace: createWorkspaceInput<
@@ -295,10 +299,13 @@ describe("createExampleShellBindingsOptions", () => {
     result.startEdit()
     result.requestDelete()
     result.startDictionaryEdit()
+    result.handleRoleAction("edit", { id: "role-2" })
+    result.handleNotificationAction("create", {})
 
-    expect(editedRole).toBe(selectedRole)
+    expect(roleEditCalls).toEqual([selectedRole, { id: "role-2" }])
     expect(editedCustomer).toBe(selectedCustomer)
     expect(deletedCustomer).toBe(selectedCustomer)
     expect(dictionaryEditCalls).toBe(0)
+    expect(notificationCreateCalls).toBe(1)
   })
 })

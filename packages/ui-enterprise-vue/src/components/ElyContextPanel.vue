@@ -26,7 +26,15 @@ const copy = computed(() => ({
 
 const resolvedWidth = computed(() => {
   if (props.width !== undefined) return props.width
-  return props.mode === "detail" ? 360 : 480
+  if (props.mode === "delete-confirm") {
+    return 560
+  }
+
+  if (props.mode === "detail") {
+    return 860
+  }
+
+  return 760
 })
 </script>
 
@@ -35,6 +43,8 @@ const resolvedWidth = computed(() => {
     class="ely-context-panel"
     :class="{ 'ely-context-panel--visible': visible }"
     :style="{ width: resolvedWidth + 'px' }"
+    role="dialog"
+    aria-modal="true"
   >
     <div class="ely-context-panel__header">
       <h3 class="ely-context-panel__title">{{ title }}</h3>
@@ -45,7 +55,13 @@ const resolvedWidth = computed(() => {
           }}</TButton>
           <TButton size="small" @click="emit('cancel')">{{ copy.cancelLabel }}</TButton>
         </template>
-        <button class="ely-context-panel__close" @click="emit('close')">&times;</button>
+        <button
+          class="ely-context-panel__close"
+          :aria-label="copy.closeLabel"
+          @click="emit('close')"
+        >
+          &times;
+        </button>
       </div>
     </div>
 
@@ -54,13 +70,6 @@ const resolvedWidth = computed(() => {
     </div>
     <div class="ely-context-panel__body ely-context-panel__body--loading" v-else>
       <TLoading />
-    </div>
-
-    <div class="ely-context-panel__footer" v-if="mode === 'detail'">
-      <TButton @click="emit('edit')">{{ copy.editLabel }}</TButton>
-      <TButton theme="danger" variant="text" @click="emit('delete')">{{
-        copy.deleteLabel
-      }}</TButton>
     </div>
 
     <div
@@ -78,22 +87,18 @@ const resolvedWidth = computed(() => {
 
 <style scoped>
 .ely-context-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border-left: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.08);
-  transform: translateX(100%);
-  transition: transform 0.2s ease;
-}
-
-.ely-context-panel--visible {
-  transform: translateX(0);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(100%, 100%);
+  max-width: calc(100vw - 3rem);
+  max-height: min(calc(100vh - 3rem), 960px);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.18),
+    0 8px 20px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
 }
 
 .ely-context-panel__header {
@@ -140,9 +145,16 @@ const resolvedWidth = computed(() => {
 }
 
 .ely-context-panel__body {
-  flex: 1;
   overflow-y: auto;
   padding: 20px;
+}
+
+.ely-context-panel__body :deep(.enterprise-card) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
 }
 
 .ely-context-panel__body--loading {
@@ -180,5 +192,20 @@ const resolvedWidth = computed(() => {
 .ely-context-panel__danger-actions {
   display: flex;
   gap: 8px;
+}
+
+@media (max-width: 860px) {
+  .ely-context-panel {
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100vh - 1.5rem);
+    border-radius: 8px;
+  }
+
+  .ely-context-panel__header,
+  .ely-context-panel__body,
+  .ely-context-panel__footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 </style>

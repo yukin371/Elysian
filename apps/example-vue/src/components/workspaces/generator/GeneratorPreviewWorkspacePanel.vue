@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount } from "vue"
 
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
+import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
 import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSessionPanel.vue"
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import GeneratorPreviewWorkspaceSqlHandoffPanel from "./GeneratorPreviewWorkspaceSqlHandoffPanel.vue"
@@ -261,6 +262,12 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
       :selected-managed-label="selectedManagedLabel"
     />
 
+    <GeneratorPreviewWorkspaceFileDiffPanel
+      v-if="selectedFile?.diffStats"
+      :t="t"
+      :selected-diff-stats="selectedFile.diffStats"
+    />
+
     <div v-if="session" class="enterprise-panel-stack">
       <GeneratorPreviewWorkspaceSessionPanel
         :t="t"
@@ -311,6 +318,7 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
     <GeneratorPreviewWorkspaceSourcePanel
       v-if="selectedFile"
       :t="t"
+      presentation="overlay"
       :selected-file="selectedFile"
       :sql-preview="sqlPreview"
       :generated-source-copy-label="

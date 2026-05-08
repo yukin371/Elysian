@@ -12,7 +12,19 @@ interface RequestJsonOptions {
 
 const SERVER_URL =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ??
-  "http://localhost:3000"
+  (() => {
+    const browserLocation = globalThis.window?.location
+
+    if (
+      browserLocation &&
+      (browserLocation.hostname === "localhost" ||
+        browserLocation.hostname === "127.0.0.1")
+    ) {
+      return `${browserLocation.protocol}//${browserLocation.hostname}:3000`
+    }
+
+    return "http://localhost:3000"
+  })()
 
 let accessToken: string | null = null
 

@@ -22,6 +22,8 @@ export const renderVueEnterpriseMainTemplate = (schema: ModuleSchema) => {
   const camelName = toCamelCase(schema.name)
   const recordTypeName = `${pascalName}Record`
   const viewPermission = getViewPermissionPropName(schema.name, pascalName)
+  const createPermission = getCreatePermissionPropName(schema.name, pascalName)
+  const updatePermission = getUpdatePermissionPropName(schema.name, pascalName)
 
   return `<script setup lang="ts">
 import {
@@ -29,6 +31,7 @@ import {
   type ElyCrudWorkspaceProps,
   type ElyQueryField,
   type ElyQueryValues,
+  type ElyTableAction,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject, ref, watch } from "vue"
@@ -52,6 +55,8 @@ interface ${pascalName}WorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   ${viewPermission}: boolean
+  ${createPermission}: boolean
+  ${updatePermission}: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -64,6 +69,7 @@ interface ${pascalName}WorkspaceMainProps {
 const props = defineProps<${pascalName}WorkspaceMainProps>()
 
 const emit = defineEmits<{
+  (e: "action", key: string, row: ${recordTypeName}): void
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: ${recordTypeName}): void
@@ -94,6 +100,16 @@ const resolvedErrorMessage = readInjectedValue(
 const resolvedItems = readInjectedValue(
   computed(() => resolved${pascalName}WorkspaceState.value?.tableItems ?? null),
   [] as ${recordTypeName}[],
+)
+const resolvedTableActions = computed<ElyTableAction[]>(() =>
+  props.${updatePermission}
+    ? [
+        {
+          key: "edit",
+          label: props.t("app.${camelName}.action.edit"),
+        },
+      ]
+    : [],
 )
 
 const pageSizeOptions = [20, 50, 100]
@@ -141,6 +157,19 @@ const updatePageSize = (event: Event) => {
   currentPage.value = 1
 }
 
+const handleAction = (key: string, row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const record = resolvedItems.value.find((item) => item.id === rowId)
+
+  if (record) {
+    emit("action", key, record)
+  }
+}
+
+const handleCreate = () => {
+  emit("action", "create", {} as ${recordTypeName})
+}
+
 watch(resolvedItems, () => {
   currentPage.value = Math.min(currentPage.value, totalPages.value)
 })
@@ -183,15 +212,27 @@ watch(resolvedItems, () => {
       :table-columns="tableColumns"
       :items="paginatedItems"
       :table-loading="resolvedLoading"
-      :table-actions="[]"
+      :table-actions="resolvedTableActions"
       :item-count-label="itemCountLabel"
       :empty-title="emptyTitle"
       :empty-description="emptyDescription"
       :copy="copy"
+      @action="handleAction"
       @search="emit('search', $event)"
       @reset="emit('reset')"
       @row-click="emit('row-click', $event as ${recordTypeName})"
     >
+      <template #toolbar>
+        <button
+          v-if="${createPermission}"
+          type="button"
+          class="enterprise-button"
+          :disabled="resolvedLoading"
+          @click="handleCreate"
+        >
+          {{ t("app.${camelName}.action.create") }}
+        </button>
+      </template>
       <template #footer>
         <div class="${camelName}-pagination">
           <span>{{ paginationSummary }}</span>
@@ -317,7 +358,6 @@ const props = defineProps<${pascalName}WorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", ${camelName}: ${recordTypeName}): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -364,10 +404,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolved${pascalName}WorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolved${pascalName}WorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelected${pascalName} = readInjectedValue(
   computed(() => resolved${pascalName}WorkspaceState.value?.${selectedStateProperty} ?? null),
   null as ${recordTypeName} | null,
@@ -384,9 +420,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.${camelName}.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.${camelName}ModuleOffline") }}
@@ -421,26 +455,6 @@ const resolvedFormValues = readInjectedValue(
     <template
       v-else-if="resolvedPanelMode === 'detail' && resolvedSelected${pascalName}"
     >
-      <div class="enterprise-button-row">
-        <button
-          v-if="${updatePermission}"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelected${pascalName})"
-        >
-          {{ t("app.${camelName}.action.edit") }}
-        </button>
-        <button
-          v-if="${createPermission}"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.${camelName}.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

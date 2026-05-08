@@ -368,6 +368,7 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
   const handleReset = roleWorkspace.handleReset
   const handleSearch = roleWorkspace.handleSearch
   const openCreatePanel = roleWorkspace.openCreatePanel
+  const openRecordForEdit = roleWorkspace.openRecordForEdit
   const reloadRoles = roleWorkspace.reloadRecords
   const resetQuery = roleWorkspace.resetQuery
   const selectRole = roleWorkspace.selectRecord
@@ -382,7 +383,7 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
       return
     }
 
-    await selectRole(role)
+    await openRecordForEdit(role)
   }
 
   return {

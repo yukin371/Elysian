@@ -303,6 +303,7 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
   const handleReset = postWorkspace.handleReset
   const handleSearch = postWorkspace.handleSearch
   const openCreatePanel = postWorkspace.openCreatePanel
+  const openRecordForEdit = postWorkspace.openRecordForEdit
   const reloadPosts = postWorkspace.reloadRecords
   const resetQuery = postWorkspace.resetQuery
   const selectPost = postWorkspace.selectRecord
@@ -317,7 +318,7 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
       return
     }
 
-    await selectPost(post)
+    await openRecordForEdit(post)
   }
 
   return {

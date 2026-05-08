@@ -15,7 +15,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Inspect, filter, and track workflow definition versions.",
   "app.message.customerModuleOffline":
     "`customer` module is not registered yet. Add `DATABASE_URL`, run migrations and seed, then restart the server.",
-  "app.message.signInToLoad": "Sign in to load protected customer data.",
+  "app.message.signInToLoad": "Sign in first to load protected customer data.",
   "app.message.workspaceNoListPermission":
     "This identity can enter the workspace but does not have `customer:customer:list`.",
   "app.message.departmentModuleOffline":

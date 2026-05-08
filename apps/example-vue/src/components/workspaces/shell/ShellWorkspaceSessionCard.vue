@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Button as TButton } from "tdesign-vue-next/es/button"
-import { Input as TInput } from "tdesign-vue-next/es/input"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
 
@@ -17,17 +16,10 @@ defineProps<{
   envName: string
   permissionCount: number
   authLoading: boolean
-  loginUsername: string
-  loginPassword: string
   authErrorMessage: string
 }>()
 
-defineEmits<{
-  (event: "submit-logout"): void
-  (event: "update:login-username", value: string): void
-  (event: "update:login-password", value: string): void
-  (event: "submit-login"): void
-}>()
+defineEmits<(event: "submit-logout") => void>()
 </script>
 
 <template>
@@ -38,6 +30,8 @@ defineEmits<{
 
         <div v-if="!authModuleReady" class="enterprise-facts">
           <span>{{ t("app.session.title.offline") }}</span>
+          <span>{{ t("app.platform.status") }} {{ platformStatusLabel }}</span>
+          <span>{{ t("app.platform.version") }} {{ platformVersion }}</span>
         </div>
 
         <div v-else-if="isAuthenticated" class="enterprise-facts">
@@ -47,6 +41,14 @@ defineEmits<{
           <span v-if="permissionCount > 0">
             {{ permissionCount }} {{ t("app.session.permissions") }}
           </span>
+          <span>{{ t("app.platform.status") }} {{ platformStatusLabel }}</span>
+          <span>{{ t("app.platform.version") }} {{ platformVersion }}</span>
+        </div>
+
+        <div v-else class="enterprise-facts">
+          <span>{{ t("app.session.signIn") }}</span>
+          <span>{{ t("app.platform.status") }} {{ platformStatusLabel }}</span>
+          <span>{{ t("app.platform.version") }} {{ platformVersion }}</span>
         </div>
       </div>
 
@@ -66,49 +68,19 @@ defineEmits<{
       {{ authLoading ? t("app.session.working") : t("app.session.signOut") }}
     </TButton>
 
-    <form
-      v-else-if="authModuleReady"
-      class="mt-5 space-y-4"
-      @submit.prevent="$emit('submit-login')"
+    <p
+      v-else-if="!authModuleReady"
+      class="enterprise-message enterprise-message-muted mt-5"
     >
-      <label class="enterprise-field">
-        <span>{{ t("app.session.username") }}</span>
-        <TInput
-          :model-value="loginUsername"
-          :disabled="authLoading"
-          placeholder="admin"
-          clearable
-          @update:model-value="
-            $emit('update:login-username', String($event ?? ''))
-          "
-        />
-      </label>
+      {{ t("app.session.offlineCopy") }}
+    </p>
 
-      <label class="enterprise-field">
-        <span>{{ t("app.session.password") }}</span>
-        <TInput
-          :model-value="loginPassword"
-          :disabled="authLoading"
-          type="password"
-          placeholder="admin123"
-          @update:model-value="
-            $emit('update:login-password', String($event ?? ''))
-          "
-        />
-      </label>
-
-      <TButton
-        type="submit"
-        theme="primary"
-        style="width: 100%"
-        :loading="authLoading"
-        :disabled="
-          loginUsername.trim().length === 0 || loginPassword.trim().length === 0
-        "
-      >
-        {{ authLoading ? t("app.session.signingIn") : t("app.session.signIn") }}
-      </TButton>
-    </form>
+    <p
+      v-else
+      class="enterprise-message enterprise-message-warning mt-5"
+    >
+      {{ t("app.session.loginRequiredCopy") }}
+    </p>
 
     <p
       v-if="authErrorMessage"
@@ -148,13 +120,6 @@ defineEmits<{
   font-size: 0.82rem;
 }
 
-.enterprise-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  color: #334155;
-}
-
 .enterprise-status-header {
   display: flex;
   align-items: center;
@@ -172,6 +137,18 @@ defineEmits<{
   border: 1px solid rgba(239, 68, 68, 0.18);
   background: rgba(239, 68, 68, 0.08);
   color: #991b1b;
+}
+
+.enterprise-message-muted {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(241, 245, 249, 0.82);
+  color: #475569;
+}
+
+.enterprise-message-warning {
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: rgba(255, 247, 237, 0.9);
+  color: #9a3412;
 }
 
 .enterprise-toolbar-pill {

@@ -262,5 +262,5 @@ export const shouldSelectGeneratorPreviewFile = (
   selectedPath: string | null,
   nextPath: string,
 ) => {
-  return nextPath.trim().length > 0 && selectedPath !== nextPath
+  return nextPath.trim().length > 0
 }

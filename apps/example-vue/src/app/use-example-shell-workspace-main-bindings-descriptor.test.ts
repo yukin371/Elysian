@@ -67,4 +67,23 @@ describe("createExampleShellWorkspaceMainBindings", () => {
     shellWorkspaceMainListeners["confirm-generator-preview"]()
     expect(confirmCalls).toBe(1)
   })
+
+  test("routes standard CRUD main actions back into workspace handlers", () => {
+    const actionCalls: Array<[string, Record<string, unknown>]> = []
+    const options = createOptions({
+      handleRoleAction: (key: string, row: Record<string, unknown>) => {
+        actionCalls.push([key, row])
+      },
+    })
+
+    const { shellWorkspaceMainListeners } =
+      createExampleShellWorkspaceMainBindings(options)
+
+    shellWorkspaceMainListeners["role-action"]({
+      key: "edit",
+      row: { id: "role-1" },
+    })
+
+    expect(actionCalls).toEqual([["edit", { id: "role-1" }]])
+  })
 })

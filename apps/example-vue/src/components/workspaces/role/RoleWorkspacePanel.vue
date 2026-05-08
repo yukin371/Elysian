@@ -134,23 +134,14 @@ const resolvedFormValues = computed(
     </div>
 
     <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedRole">
-      <div class="enterprise-button-row">
+      <div v-if="canUpdateRoles" class="enterprise-button-row">
         <button
-          v-if="canUpdateRoles"
           type="button"
           class="enterprise-button"
           :disabled="resolvedLoading || resolvedDetailLoading"
           @click="emit('start-edit', resolvedSelectedRole)"
         >
           {{ t("app.role.action.edit") }}
-        </button>
-        <button
-          v-if="canCreateRoles"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.role.action.create") }}
         </button>
       </div>
 

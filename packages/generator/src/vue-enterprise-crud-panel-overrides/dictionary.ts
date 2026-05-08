@@ -42,7 +42,6 @@ const props = defineProps<DictionaryWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", dictionary: DictionaryRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -97,12 +96,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedDictionaryWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(
-    () => resolvedDictionaryWorkspaceState.value?.panelDescription ?? null,
-  ),
-  "",
-)
 const resolvedSelectedDictionaryType = readInjectedValue(
   computed(
     () =>
@@ -137,9 +130,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.dictionary.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.dictionaryModuleOffline") }}
@@ -176,26 +167,6 @@ const resolvedFormValues = readInjectedValue(
         resolvedPanelMode === 'detail' && resolvedSelectedDictionaryType
       "
     >
-      <div class="enterprise-button-row">
-        <button
-          v-if="${updatePermission}"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelectedDictionaryType)"
-        >
-          {{ t("app.dictionary.action.edit") }}
-        </button>
-        <button
-          v-if="${createPermission}"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.dictionary.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

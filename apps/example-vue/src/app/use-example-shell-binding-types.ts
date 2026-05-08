@@ -182,6 +182,7 @@ export interface UseExampleShellBindingsOptions {
   departmentErrorMessage: ValueSource<string>
   enterpriseDepartmentQueryFields: ValueSource<unknown[]>
   enterpriseDepartmentTableColumns: ValueSource<unknown[]>
+  enterpriseDepartmentTableActions: ValueSource<unknown[]>
   enterpriseDepartmentTableItems: ValueSource<unknown[]>
   departmentCountLabel: ValueSource<string>
   sessionErrorMessage: ValueSource<string>
@@ -370,36 +371,45 @@ export interface UseExampleShellBindingsOptions {
   handleDictionarySearch: (payload: ElyQueryValues) => void
   handleDictionaryReset: () => void
   handleDictionaryRowClick: (payload: Record<string, unknown>) => void
+  handleDictionaryAction: (key: string, row: Record<string, unknown>) => void
   handleDepartmentSearch: (payload: ElyQueryValues) => void
   handleDepartmentReset: () => void
   handleDepartmentRowClick: (payload: Record<string, unknown>) => void
+  handleDepartmentAction: (key: string, row: Record<string, unknown>) => void
   handleSessionSearch: (payload: ElyQueryValues) => void
   handleSessionReset: () => void
   handleSessionRowClick: (payload: Record<string, unknown>) => void
   handlePostSearch: (payload: ElyQueryValues) => void
   handlePostReset: () => void
   handlePostRowClick: (payload: Record<string, unknown>) => void
+  handlePostAction: (key: string, row: Record<string, unknown>) => void
   handleMenuSearch: (payload: ElyQueryValues) => void
   handleMenuReset: () => void
   handleMenuRowClick: (payload: Record<string, unknown>) => void
+  handleMenuAction: (key: string, row: Record<string, unknown>) => void
   handleNotificationSearch: (payload: ElyQueryValues) => void
   handleNotificationReset: () => void
   handleNotificationRowClick: (payload: Record<string, unknown>) => void
+  handleNotificationAction: (key: string, row: Record<string, unknown>) => void
   handleOperationLogSearch: (payload: ElyQueryValues) => void
   handleOperationLogReset: () => void
   handleOperationLogRowClick: (payload: Record<string, unknown>) => void
   handleRoleSearch: (payload: ElyQueryValues) => void
   handleRoleReset: () => void
   handleRoleRowClick: (payload: Record<string, unknown>) => void
+  handleRoleAction: (key: string, row: Record<string, unknown>) => void
   handleSettingSearch: (payload: ElyQueryValues) => void
   handleSettingReset: () => void
   handleSettingRowClick: (payload: Record<string, unknown>) => void
+  handleSettingAction: (key: string, row: Record<string, unknown>) => void
   handleTenantSearch: (payload: ElyQueryValues) => void
   handleTenantReset: () => void
   handleTenantRowClick: (payload: Record<string, unknown>) => void
+  handleTenantAction: (key: string, row: Record<string, unknown>) => void
   handleUserSearch: (payload: ElyQueryValues) => void
   handleUserReset: () => void
   handleUserRowClick: (payload: Record<string, unknown>) => void
+  handleUserAction: (key: string, row: Record<string, unknown>) => void
   openCustomerWorkspace: () => void
   handleEnterpriseSearch: (payload: ElyQueryValues) => void
   handleEnterpriseReset: () => void

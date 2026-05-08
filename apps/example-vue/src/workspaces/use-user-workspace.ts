@@ -423,7 +423,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     selectedUserId.value = user.id
     userErrorMessage.value = ""
     userPasswordInput.value = ""
-    basePanelMode.value = "detail"
+    basePanelMode.value = "edit"
     userPanelMode.value = "reset"
   }
 
@@ -434,7 +434,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
     if (userPanelMode.value === "reset") {
       if (selectedUser.value) {
         resetPanelActive.value = false
-        basePanelMode.value = "detail"
+        basePanelMode.value = "edit"
         return
       }
 
@@ -484,7 +484,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
       await resetUserPassword(selectedUser.value.id, password)
       userPasswordInput.value = ""
       resetPanelActive.value = false
-      basePanelMode.value = "detail"
+      basePanelMode.value = "edit"
       await reloadUsers()
     } catch (error) {
       options.onRecoverableAuthError(error)
@@ -507,7 +507,7 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
 
     resetPanelActive.value = false
     userPasswordInput.value = ""
-    await userWorkspace.selectRecord(user)
+    await userWorkspace.openRecordForEdit(user)
   }
 
   return {

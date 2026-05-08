@@ -12,6 +12,7 @@ import {
   type ElyCrudWorkspaceProps,
   type ElyQueryField,
   type ElyQueryValues,
+  type ElyTableAction,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject, ref, watch } from "vue"
@@ -35,6 +36,8 @@ interface PostWorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewPosts: boolean
+  canCreatePosts: boolean
+  canUpdatePosts: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -47,6 +50,7 @@ interface PostWorkspaceMainProps {
 const props = defineProps<PostWorkspaceMainProps>()
 
 const emit = defineEmits<{
+  (e: "action", key: string, row: PostRecord): void
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: PostRecord): void
@@ -75,6 +79,16 @@ const resolvedErrorMessage = readInjectedValue(
 const resolvedItems = readInjectedValue(
   computed(() => resolvedPostWorkspaceState.value?.tableItems ?? null),
   [] as PostRecord[],
+)
+const resolvedTableActions = computed<ElyTableAction[]>(() =>
+  props.canUpdatePosts
+    ? [
+        {
+          key: "edit",
+          label: props.t("app.post.action.edit"),
+        },
+      ]
+    : [],
 )
 
 const pageSizeOptions = [20, 50, 100]
@@ -122,6 +136,19 @@ const updatePageSize = (event: Event) => {
   currentPage.value = 1
 }
 
+const handleAction = (key: string, row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const record = resolvedItems.value.find((item) => item.id === rowId)
+
+  if (record) {
+    emit("action", key, record)
+  }
+}
+
+const handleCreate = () => {
+  emit("action", "create", {} as PostRecord)
+}
+
 watch(resolvedItems, () => {
   currentPage.value = Math.min(currentPage.value, totalPages.value)
 })
@@ -164,15 +191,27 @@ watch(resolvedItems, () => {
       :table-columns="tableColumns"
       :items="paginatedItems"
       :table-loading="resolvedLoading"
-      :table-actions="[]"
+      :table-actions="resolvedTableActions"
       :item-count-label="itemCountLabel"
       :empty-title="emptyTitle"
       :empty-description="emptyDescription"
       :copy="copy"
+      @action="handleAction"
       @search="emit('search', $event)"
       @reset="emit('reset')"
       @row-click="emit('row-click', $event as PostRecord)"
     >
+      <template #toolbar>
+        <button
+          v-if="canCreatePosts"
+          type="button"
+          class="enterprise-button"
+          :disabled="resolvedLoading"
+          @click="handleCreate"
+        >
+          {{ t("app.post.action.create") }}
+        </button>
+      </template>
       <template #footer>
         <div class="post-pagination">
           <span>{{ paginationSummary }}</span>

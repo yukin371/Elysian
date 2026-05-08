@@ -199,13 +199,13 @@ describe("generator-preview-workspace", () => {
     )
   })
 
-  it("skips redundant file selection emits for the current file", () => {
+  it("allows reopening the current file while still rejecting empty paths", () => {
     expect(
       shouldSelectGeneratorPreviewFile(
         "modules/customer/customer.page.vue",
         "modules/customer/customer.page.vue",
       ),
-    ).toBeFalse()
+    ).toBeTrue()
     expect(
       shouldSelectGeneratorPreviewFile(
         "modules/customer/customer.schema.ts",

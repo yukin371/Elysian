@@ -1,4 +1,6 @@
+import { computed, unref } from "vue"
 import type { CreateExampleShellBindingsOptionsInput } from "./create-example-shell-bindings-options-types"
+
 import type { UseExampleShellBindingsOptions } from "./use-example-shell-binding-types"
 
 export const createExampleShellBindingsOptions = (
@@ -10,6 +12,22 @@ export const createExampleShellBindingsOptions = (
   ) => {
     if (selectedRecord.value) {
       run(selectedRecord.value)
+    }
+  }
+
+  const createCrudActionHandler = <TRecord extends Record<string, unknown>>(
+    openCreatePanel: () => void,
+    startEdit?: (record: TRecord) => void,
+  ) => {
+    return (key: string, row: Record<string, unknown>) => {
+      if (key === "create") {
+        openCreatePanel()
+        return
+      }
+
+      if (key === "edit" && startEdit) {
+        startEdit(row as TRecord)
+      }
     }
   }
 
@@ -40,6 +58,10 @@ export const createExampleShellBindingsOptions = (
     handleRoleSearch: input.roleWorkspace.workspace.handleSearch,
     handleRoleReset: input.roleWorkspace.workspace.handleReset,
     handleRoleRowClick: input.roleWorkspace.workspace.handleRowClick,
+    handleRoleAction: createCrudActionHandler(
+      input.roleWorkspace.workspace.openCreatePanel,
+      input.roleWorkspace.workspace.startEdit,
+    ),
     openRoleCreatePanel: input.roleWorkspace.workspace.openCreatePanel,
     reloadRoles: input.roleWorkspace.workspace.reloadRoles,
     handleExportRoles: input.roleWorkspace.handleExportRoles,
@@ -185,6 +207,10 @@ export const createExampleShellBindingsOptions = (
     handleDictionaryReset: input.dictionaryWorkspace.workspace.handleReset,
     handleDictionaryRowClick:
       input.dictionaryWorkspace.workspace.handleRowClick,
+    handleDictionaryAction: createCrudActionHandler(
+      input.dictionaryWorkspace.workspace.openCreatePanel,
+      input.dictionaryWorkspace.workspace.startEdit,
+    ),
     openDictionaryCreatePanel:
       input.dictionaryWorkspace.workspace.openCreatePanel,
     reloadDictionaries: input.dictionaryWorkspace.workspace.reloadDictionaries,
@@ -217,6 +243,16 @@ export const createExampleShellBindingsOptions = (
       input.departmentWorkspace.workspace.queryFields,
     enterpriseDepartmentTableColumns:
       input.departmentWorkspace.workspace.tableColumns,
+    enterpriseDepartmentTableActions: computed(() =>
+      unref(input.departmentWorkspace.canUpdateDepartments)
+        ? [
+            {
+              key: "edit",
+              label: input.shell.t("app.department.action.edit"),
+            },
+          ]
+        : [],
+    ),
     enterpriseDepartmentTableItems:
       input.departmentWorkspace.workspace.tableItems,
     departmentCountLabel: input.departmentWorkspace.workspace.countLabel,
@@ -242,6 +278,10 @@ export const createExampleShellBindingsOptions = (
     handleDepartmentReset: input.departmentWorkspace.workspace.handleReset,
     handleDepartmentRowClick:
       input.departmentWorkspace.workspace.handleRowClick,
+    handleDepartmentAction: createCrudActionHandler(
+      input.departmentWorkspace.workspace.openCreatePanel,
+      input.departmentWorkspace.workspace.startEdit,
+    ),
     openDepartmentCreatePanel:
       input.departmentWorkspace.workspace.openCreatePanel,
     reloadDepartments: input.departmentWorkspace.workspace.reloadDepartments,
@@ -300,6 +340,10 @@ export const createExampleShellBindingsOptions = (
     handlePostSearch: input.postWorkspace.workspace.handleSearch,
     handlePostReset: input.postWorkspace.workspace.handleReset,
     handlePostRowClick: input.postWorkspace.workspace.handleRowClick,
+    handlePostAction: createCrudActionHandler(
+      input.postWorkspace.workspace.openCreatePanel,
+      input.postWorkspace.workspace.startEdit,
+    ),
     openPostCreatePanel: input.postWorkspace.workspace.openCreatePanel,
     reloadPosts: input.postWorkspace.workspace.reloadPosts,
     handleExportPosts: input.postWorkspace.handleExportPosts,
@@ -340,6 +384,10 @@ export const createExampleShellBindingsOptions = (
     handleMenuSearch: input.menuWorkspace.workspace.handleSearch,
     handleMenuReset: input.menuWorkspace.workspace.handleReset,
     handleMenuRowClick: input.menuWorkspace.workspace.handleRowClick,
+    handleMenuAction: createCrudActionHandler(
+      input.menuWorkspace.workspace.openCreatePanel,
+      input.menuWorkspace.workspace.startEdit,
+    ),
     openMenuCreatePanel: input.menuWorkspace.workspace.openCreatePanel,
     reloadMenus: input.menuWorkspace.workspace.reloadMenus,
     handleExportMenus: input.menuWorkspace.handleExportMenus,
@@ -383,6 +431,9 @@ export const createExampleShellBindingsOptions = (
     handleNotificationReset: input.notificationWorkspace.workspace.handleReset,
     handleNotificationRowClick:
       input.notificationWorkspace.workspace.handleRowClick,
+    handleNotificationAction: createCrudActionHandler(
+      input.notificationWorkspace.workspace.openCreatePanel,
+    ),
     openNotificationCreatePanel:
       input.notificationWorkspace.workspace.openCreatePanel,
     reloadNotifications:
@@ -462,6 +513,10 @@ export const createExampleShellBindingsOptions = (
     handleUserSearch: input.userWorkspace.workspace.handleSearch,
     handleUserReset: input.userWorkspace.workspace.handleReset,
     handleUserRowClick: input.userWorkspace.workspace.handleRowClick,
+    handleUserAction: createCrudActionHandler(
+      input.userWorkspace.workspace.openCreatePanel,
+      input.userWorkspace.workspace.startEdit,
+    ),
     openUserCreatePanel: input.userWorkspace.workspace.openCreatePanel,
     reloadUsers: input.userWorkspace.workspace.reloadUsers,
     handleExportUsers: input.userWorkspace.handleExportUsers,
@@ -497,6 +552,10 @@ export const createExampleShellBindingsOptions = (
     handleSettingSearch: input.settingWorkspace.workspace.handleSearch,
     handleSettingReset: input.settingWorkspace.workspace.handleReset,
     handleSettingRowClick: input.settingWorkspace.workspace.handleRowClick,
+    handleSettingAction: createCrudActionHandler(
+      input.settingWorkspace.workspace.openCreatePanel,
+      input.settingWorkspace.workspace.startEdit,
+    ),
     openSettingCreatePanel: input.settingWorkspace.workspace.openCreatePanel,
     reloadSettings: input.settingWorkspace.workspace.reloadSettings,
     handleExportSettings: input.settingWorkspace.handleExportSettings,
@@ -525,6 +584,10 @@ export const createExampleShellBindingsOptions = (
     handleTenantSearch: input.tenantWorkspace.workspace.handleSearch,
     handleTenantReset: input.tenantWorkspace.workspace.handleReset,
     handleTenantRowClick: input.tenantWorkspace.workspace.handleRowClick,
+    handleTenantAction: createCrudActionHandler(
+      input.tenantWorkspace.workspace.openCreatePanel,
+      input.tenantWorkspace.workspace.startEdit,
+    ),
     openTenantCreatePanel: input.tenantWorkspace.workspace.openCreatePanel,
     reloadTenants: input.tenantWorkspace.workspace.reloadTenants,
     handleExportTenants: input.tenantWorkspace.handleExportTenants,

@@ -185,12 +185,7 @@ provide(WORKSPACE_STATE_KEY, providedWorkspaceState)
     :env-name="envName"
     :permission-count="permissionCount"
     :auth-loading="authLoading"
-    :login-username="loginUsername"
-    v-bind="{ loginPassword }"
     :auth-error-message="authErrorMessage"
     @submit-logout="$emit('submit-logout')"
-    @update:login-username="$emit('update:login-username', $event)"
-    @update:login-password="$emit('update:login-password', $event)"
-    @submit-login="$emit('submit-login')"
   />
 </template>

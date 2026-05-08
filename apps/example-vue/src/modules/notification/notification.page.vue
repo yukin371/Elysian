@@ -12,6 +12,7 @@ import {
   type ElyCrudWorkspaceProps,
   type ElyQueryField,
   type ElyQueryValues,
+  type ElyTableAction,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject, ref, watch } from "vue"
@@ -35,6 +36,8 @@ interface NotificationWorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewNotifications: boolean
+  canCreateNotifications: boolean
+  canUpdateNotifications: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -47,6 +50,7 @@ interface NotificationWorkspaceMainProps {
 const props = defineProps<NotificationWorkspaceMainProps>()
 
 const emit = defineEmits<{
+  (e: "action", key: string, row: NotificationRecord): void
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: NotificationRecord): void
@@ -81,6 +85,16 @@ const resolvedErrorMessage = readInjectedValue(
 const resolvedItems = readInjectedValue(
   computed(() => resolvedNotificationWorkspaceState.value?.tableItems ?? null),
   [] as NotificationRecord[],
+)
+const resolvedTableActions = computed<ElyTableAction[]>(() =>
+  props.canUpdateNotifications
+    ? [
+        {
+          key: "edit",
+          label: props.t("app.notification.action.edit"),
+        },
+      ]
+    : [],
 )
 
 const pageSizeOptions = [20, 50, 100]
@@ -128,6 +142,19 @@ const updatePageSize = (event: Event) => {
   currentPage.value = 1
 }
 
+const handleAction = (key: string, row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const record = resolvedItems.value.find((item) => item.id === rowId)
+
+  if (record) {
+    emit("action", key, record)
+  }
+}
+
+const handleCreate = () => {
+  emit("action", "create", {} as NotificationRecord)
+}
+
 watch(resolvedItems, () => {
   currentPage.value = Math.min(currentPage.value, totalPages.value)
 })
@@ -170,15 +197,27 @@ watch(resolvedItems, () => {
       :table-columns="tableColumns"
       :items="paginatedItems"
       :table-loading="resolvedLoading"
-      :table-actions="[]"
+      :table-actions="resolvedTableActions"
       :item-count-label="itemCountLabel"
       :empty-title="emptyTitle"
       :empty-description="emptyDescription"
       :copy="copy"
+      @action="handleAction"
       @search="emit('search', $event)"
       @reset="emit('reset')"
       @row-click="emit('row-click', $event as NotificationRecord)"
     >
+      <template #toolbar>
+        <button
+          v-if="canCreateNotifications"
+          type="button"
+          class="enterprise-button"
+          :disabled="resolvedLoading"
+          @click="handleCreate"
+        >
+          {{ t("app.notification.action.create") }}
+        </button>
+      </template>
       <template #footer>
         <div class="notification-pagination">
           <span>{{ paginationSummary }}</span>

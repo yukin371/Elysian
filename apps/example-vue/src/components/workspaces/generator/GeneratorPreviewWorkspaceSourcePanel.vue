@@ -9,6 +9,7 @@ import type {
 } from "./types"
 
 type SourceViewKey = "diff" | "generated" | "current" | "sql"
+type SourcePanelPresentation = "panel" | "overlay"
 
 interface GeneratorPreviewWorkspaceSourcePanelProps {
   t: GeneratorPreviewTranslation
@@ -17,6 +18,7 @@ interface GeneratorPreviewWorkspaceSourcePanelProps {
   generatedSourceCopyLabel: string
   currentSourceCopyLabel: string
   sqlPreviewCopyLabel: string
+  presentation?: SourcePanelPresentation
 }
 
 const props = defineProps<GeneratorPreviewWorkspaceSourcePanelProps>()
@@ -28,6 +30,7 @@ const emit = defineEmits<{
 }>()
 
 const activeView = ref<SourceViewKey>("diff")
+const isOverlayPresentation = computed(() => props.presentation === "overlay")
 
 const availableViews = computed(() => {
   const views: Array<{
@@ -105,7 +108,11 @@ const handleCopy = () => {
 }
 
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
-  `generator-diff-line generator-diff-line-${line.kind}`
+  `generator-diff-line generator-diff-line-${line.kind} ${
+    line.kind === "unchanged"
+      ? "generator-diff-line-two-sided"
+      : "generator-diff-line-single-sided"
+  }`
 
 const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   if (line.kind === "added") {
@@ -118,10 +125,22 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 
   return " "
 }
+
+const resolveDiffLineNumber = (line: GeneratorPreviewDiffLine) =>
+  line.kind === "added"
+    ? line.newLineNumber
+    : line.kind === "removed"
+      ? line.oldLineNumber
+      : null
 </script>
 
 <template>
-  <section class="panel-section">
+  <section
+    class="panel-section"
+    :class="{
+      'panel-section-overlay': isOverlayPresentation,
+    }"
+  >
     <div class="generator-source-toolbar">
       <div class="generator-source-switches">
         <button
@@ -159,11 +178,19 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
         :key="`${selectedFile.path}:${index}:${line.kind}`"
         :class="resolveDiffLineClass(line)"
       >
-        <span class="generator-diff-line-number">
-          {{ line.oldLineNumber ?? "" }}
-        </span>
-        <span class="generator-diff-line-number">
-          {{ line.newLineNumber ?? "" }}
+        <template v-if="line.kind === 'unchanged'">
+          <span class="generator-diff-line-number">
+            {{ line.oldLineNumber ?? "" }}
+          </span>
+          <span class="generator-diff-line-number">
+            {{ line.newLineNumber ?? "" }}
+          </span>
+        </template>
+        <span
+          v-else
+          class="generator-diff-line-change-number"
+        >
+          {{ resolveDiffLineNumber(line) ?? "" }}
         </span>
         <span class="generator-diff-line-prefix">
           {{ resolveDiffLinePrefix(line) }}
@@ -197,12 +224,27 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
+.panel-section-overlay {
+  gap: 1rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .generator-source-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+}
+
+.panel-section-overlay .generator-source-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.25rem 0 0.4rem;
+  background: rgba(241, 245, 249, 0.96);
+  backdrop-filter: blur(12px);
 }
 
 .generator-source-switches {
@@ -229,9 +271,15 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 
 .generator-diff-block {
   overflow: auto;
+  max-height: 28rem;
   border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  background: #0b1120;
+  background: #0f172a;
+}
+
+.panel-section-overlay .generator-diff-block {
+  min-height: 60vh;
+  max-height: 72vh;
 }
 
 .generator-diff-line {
@@ -240,6 +288,8 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   align-items: start;
   gap: 0.75rem;
   padding: 0.35rem 0.75rem;
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
   font-family:
     "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
     monospace;
@@ -247,12 +297,27 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   line-height: 1.7;
 }
 
+.panel-section-overlay .generator-diff-line {
+  grid-template-columns: 72px 72px 28px max-content;
+  min-width: max-content;
+}
+
+.generator-diff-line-single-sided {
+  grid-template-columns: 112px 20px minmax(0, 1fr);
+}
+
+.panel-section-overlay .generator-diff-line-single-sided {
+  grid-template-columns: 144px 28px max-content;
+}
+
 .generator-diff-line-added {
-  background: rgba(21, 128, 61, 0.16);
+  border-left-color: #22c55e;
+  background: rgba(34, 197, 94, 0.16);
 }
 
 .generator-diff-line-removed {
-  background: rgba(185, 28, 28, 0.14);
+  border-left-color: #f87171;
+  background: rgba(248, 113, 113, 0.14);
 }
 
 .generator-diff-line-unchanged {
@@ -260,9 +325,26 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 }
 
 .generator-diff-line-number,
+.generator-diff-line-change-number,
 .generator-diff-line-prefix {
   color: rgba(148, 163, 184, 0.9);
   font-variant-numeric: tabular-nums;
+}
+
+.generator-diff-line-change-number {
+  display: inline-flex;
+  align-items: center;
+  grid-column: 1 / 2;
+}
+
+.generator-diff-line-added .generator-diff-line-change-number,
+.generator-diff-line-added .generator-diff-line-prefix {
+  color: #86efac;
+}
+
+.generator-diff-line-removed .generator-diff-line-change-number,
+.generator-diff-line-removed .generator-diff-line-prefix {
+  color: #fca5a5;
 }
 
 .generator-diff-line-value {
@@ -271,8 +353,22 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   word-break: break-word;
 }
 
+.generator-diff-line-added .generator-diff-line-value {
+  color: #dcfce7;
+}
+
+.generator-diff-line-removed .generator-diff-line-value {
+  color: #fee2e2;
+}
+
+.panel-section-overlay .generator-diff-line-value {
+  white-space: pre;
+  word-break: normal;
+}
+
 .generator-code-block {
   overflow: auto;
+  max-height: 28rem;
   margin: 0;
   border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -285,5 +381,10 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   font-size: 0.8rem;
   line-height: 1.7;
   white-space: pre;
+}
+
+.panel-section-overlay .generator-code-block {
+  min-height: 60vh;
+  max-height: 72vh;
 }
 </style>

@@ -118,7 +118,7 @@ describe("useDepartmentWorkspace", () => {
     expect(workspace.departmentQueryValues.value).toEqual({})
   })
 
-  test("normalizes create payload and returns to detail mode after creation", async () => {
+  test("normalizes create payload and keeps edit mode after creation", async () => {
     const existing = createDepartmentRecord()
     const created = createDepartmentDetailRecord({
       code: "audit",
@@ -214,7 +214,7 @@ describe("useDepartmentWorkspace", () => {
       sort: 20,
       status: "disabled",
     })
-    expect(workspace.departmentPanelMode.value).toBe("detail")
+    expect(workspace.departmentPanelMode.value).toBe("edit")
     expect(workspace.selectedDepartment.value?.id).toBe("department-2")
     expect(workspace.departmentErrorMessage.value).toBe("")
   })

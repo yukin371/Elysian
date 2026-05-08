@@ -57,7 +57,7 @@ describe("useUserWorkspace", () => {
     globalThis.fetch = originalFetch
   })
 
-  test("resets the selected user password and returns to detail mode", async () => {
+  test("resets the selected user password and returns to edit mode", async () => {
     const user = createUserRecord()
     const requests: Array<{ method: string; url: string; body?: string }> = []
 
@@ -105,7 +105,7 @@ describe("useUserWorkspace", () => {
 
     await workspace.submitPasswordReset()
 
-    expect(workspace.userPanelMode.value).toBe("detail")
+    expect(workspace.userPanelMode.value).toBe("edit")
     expect(workspace.userPasswordInput.value).toBe("")
     expect(workspace.userErrorMessage.value).toBe("")
     expect(
@@ -219,7 +219,7 @@ describe("useUserWorkspace", () => {
     expect(workspace.userErrorMessage.value).toContain("unauthorized")
   })
 
-  test("returns to detail mode when selecting another user during password reset", async () => {
+  test("returns to edit mode when selecting another user during password reset", async () => {
     const firstUser = createUserRecord()
     const secondUser = createUserRecord({
       displayName: "Editor User",
@@ -269,10 +269,10 @@ describe("useUserWorkspace", () => {
 
     await workspace.handleRowClick({ id: "user-2" })
 
-    expect(workspace.userPanelMode.value).toBe("detail")
+    expect(workspace.userPanelMode.value).toBe("edit")
     expect(workspace.userPasswordInput.value).toBe("")
     expect(workspace.selectedUserId.value).toBe("user-2")
     expect(workspace.selectedUser.value?.id).toBe("user-2")
-    expect(workspace.panelTitle.value).toBe("Editor User")
+    expect(workspace.panelTitle.value).toBe("app.user.panelTitle.edit")
   })
 })

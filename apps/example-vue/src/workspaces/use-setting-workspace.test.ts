@@ -105,7 +105,7 @@ describe("useSettingWorkspace", () => {
     expect(workspace.settingQueryValues.value).toEqual({})
   })
 
-  test("normalizes create payload and returns to detail mode after creation", async () => {
+  test("normalizes create payload and keeps edit mode after creation", async () => {
     const existing = createSettingRecord()
     const created = createSettingRecord({
       description: undefined,
@@ -181,7 +181,7 @@ describe("useSettingWorkspace", () => {
       status: "disabled",
       value: "Console",
     })
-    expect(workspace.settingPanelMode.value).toBe("detail")
+    expect(workspace.settingPanelMode.value).toBe("edit")
     expect(workspace.selectedSetting.value?.id).toBe("setting-2")
     expect(workspace.settingErrorMessage.value).toBe("")
   })

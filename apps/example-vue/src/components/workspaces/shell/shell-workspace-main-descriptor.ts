@@ -108,6 +108,8 @@ export interface ShellWorkspaceMainSwitchProps {
   dictionaryModuleReady: boolean
   canEnterDictionaryWorkspace: boolean
   canViewDictionaries: boolean
+  canCreateDictionaryTypes: boolean
+  canUpdateDictionaryTypes: boolean
   dictionaryWorkspaceState: Record<string, unknown>
   enterpriseDictionaryQueryFields: ReadonlyArray<unknown>
   enterpriseDictionaryTableColumns: ReadonlyArray<unknown>
@@ -115,6 +117,8 @@ export interface ShellWorkspaceMainSwitchProps {
   departmentModuleReady: boolean
   canEnterDepartmentWorkspace: boolean
   canViewDepartments: boolean
+  canCreateDepartments: boolean
+  canUpdateDepartments: boolean
   departmentWorkspaceState: Record<string, unknown>
   departmentLoading: boolean
   departmentErrorMessage: string
@@ -135,6 +139,8 @@ export interface ShellWorkspaceMainSwitchProps {
   postModuleReady: boolean
   canEnterPostWorkspace: boolean
   canViewPosts: boolean
+  canCreatePosts: boolean
+  canUpdatePosts: boolean
   postWorkspaceState: Record<string, unknown>
   postLoading: boolean
   postErrorMessage: string
@@ -144,6 +150,8 @@ export interface ShellWorkspaceMainSwitchProps {
   menuModuleReady: boolean
   canEnterMenuWorkspace: boolean
   canViewMenus: boolean
+  canCreateMenus: boolean
+  canUpdateMenus: boolean
   menuWorkspaceState: Record<string, unknown>
   menuLoading: boolean
   menuErrorMessage: string
@@ -153,6 +161,8 @@ export interface ShellWorkspaceMainSwitchProps {
   notificationModuleReady: boolean
   canEnterNotificationWorkspace: boolean
   canViewNotifications: boolean
+  canCreateNotifications: boolean
+  canUpdateNotifications: boolean
   notificationWorkspaceState: Record<string, unknown>
   enterpriseNotificationQueryFields: ReadonlyArray<unknown>
   enterpriseNotificationTableColumns: ReadonlyArray<unknown>
@@ -169,6 +179,8 @@ export interface ShellWorkspaceMainSwitchProps {
   roleModuleReady: boolean
   canEnterRoleWorkspace: boolean
   canViewRoles: boolean
+  canCreateRoles: boolean
+  canUpdateRoles: boolean
   roleWorkspaceState: Record<string, unknown>
   enterpriseRoleQueryFields: ReadonlyArray<unknown>
   enterpriseRoleTableColumns: ReadonlyArray<unknown>
@@ -176,6 +188,8 @@ export interface ShellWorkspaceMainSwitchProps {
   settingModuleReady: boolean
   canEnterSettingWorkspace: boolean
   canViewSettings: boolean
+  canCreateSettings: boolean
+  canUpdateSettings: boolean
   settingWorkspaceState: Record<string, unknown>
   enterpriseSettingQueryFields: ReadonlyArray<unknown>
   enterpriseSettingTableColumns: ReadonlyArray<unknown>
@@ -184,6 +198,8 @@ export interface ShellWorkspaceMainSwitchProps {
   tenantIsSuperAdmin: boolean
   canEnterTenantWorkspace: boolean
   canViewTenants: boolean
+  canCreateTenants: boolean
+  canUpdateTenants: boolean
   tenantWorkspaceState: Record<string, unknown>
   enterpriseTenantQueryFields: ReadonlyArray<unknown>
   enterpriseTenantTableColumns: ReadonlyArray<unknown>
@@ -191,6 +207,8 @@ export interface ShellWorkspaceMainSwitchProps {
   userModuleReady: boolean
   canEnterUserWorkspace: boolean
   canViewUsers: boolean
+  canCreateUsers: boolean
+  canUpdateUsers: boolean
   userWorkspaceState: Record<string, unknown>
   enterpriseUserQueryFields: ReadonlyArray<unknown>
   enterpriseUserTableColumns: ReadonlyArray<unknown>
@@ -220,26 +238,35 @@ export interface ShellWorkspaceMainSwitchProps {
 }
 
 type ShellWorkspaceMainListPayloadEvent =
+  | "dictionary-action"
   | "dictionary-search"
   | "dictionary-row-click"
+  | "department-action"
   | "department-search"
   | "department-row-click"
   | "session-search"
   | "session-row-click"
+  | "post-action"
   | "post-search"
   | "post-row-click"
+  | "menu-action"
   | "menu-search"
   | "menu-row-click"
+  | "notification-action"
   | "notification-search"
   | "notification-row-click"
   | "operation-log-search"
   | "operation-log-row-click"
+  | "role-action"
   | "role-search"
   | "role-row-click"
+  | "setting-action"
   | "setting-search"
   | "setting-row-click"
+  | "tenant-action"
   | "tenant-search"
   | "tenant-row-click"
+  | "user-action"
   | "user-search"
   | "user-row-click"
 
@@ -398,7 +425,23 @@ const workspaceListListeners = (
     | "setting-row-click"
     | "tenant-row-click"
     | "user-row-click",
+  actionEvent?:
+    | "dictionary-action"
+    | "department-action"
+    | "post-action"
+    | "menu-action"
+    | "notification-action"
+    | "role-action"
+    | "setting-action"
+    | "tenant-action"
+    | "user-action",
 ) => ({
+  ...(actionEvent
+    ? {
+        action: (payload: unknown) =>
+          emitMainListPayloadEvent(emit, actionEvent, payload),
+      }
+    : {}),
   search: (payload: unknown) =>
     emitMainListPayloadEvent(emit, searchEvent, payload),
   reset: () => emitMainListResetEvent(emit, resetEvent),
@@ -603,18 +646,28 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     component: generatedStandardCrudMainComponents.dictionary,
     props: {
       t: props.t,
+      moduleReady: props.dictionaryModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterDictionaryWorkspace,
+      canViewDictionaries: props.canViewDictionaries,
+      canCreateDictionaryTypes: props.canCreateDictionaryTypes,
+      canUpdateDictionaryTypes: props.canUpdateDictionaryTypes,
+      queryFields: props.enterpriseDictionaryQueryFields,
       tableColumns: props.enterpriseDictionaryTableColumns,
+      itemCountLabel: props.dictionaryCountLabel,
       emptyTitle: props.t("app.dictionary.emptyTitle"),
       emptyDescription: props.t("app.dictionary.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "dictionary-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "dictionary-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "dictionary-search",
+      "dictionary-reset",
+      "dictionary-row-click",
+      "dictionary-action",
+    ),
   }),
   department: (props, emit) => ({
     component: DepartmentWorkspaceMain,
@@ -655,52 +708,82 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     component: generatedStandardCrudMainComponents.post,
     props: {
       t: props.t,
+      moduleReady: props.postModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterPostWorkspace,
+      canViewPosts: props.canViewPosts,
+      canCreatePosts: props.canCreatePosts,
+      canUpdatePosts: props.canUpdatePosts,
+      queryFields: props.enterprisePostQueryFields,
       tableColumns: props.enterprisePostTableColumns,
+      itemCountLabel: props.postCountLabel,
       emptyTitle: props.t("app.post.emptyTitle"),
       emptyDescription: props.t("app.post.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "post-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "post-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "post-search",
+      "post-reset",
+      "post-row-click",
+      "post-action",
+    ),
   }),
   menu: (props, emit) => ({
     component: generatedStandardCrudMainComponents.menu,
     props: {
       t: props.t,
+      moduleReady: props.menuModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterMenuWorkspace,
+      canViewMenus: props.canViewMenus,
+      canCreateMenus: props.canCreateMenus,
+      canUpdateMenus: props.canUpdateMenus,
+      queryFields: props.enterpriseMenuQueryFields,
       tableColumns: props.enterpriseMenuTableColumns,
+      itemCountLabel: props.menuCountLabel,
       emptyTitle: props.t("app.menu.emptyTitle"),
       emptyDescription: props.t("app.menu.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "menu-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "menu-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "menu-search",
+      "menu-reset",
+      "menu-row-click",
+      "menu-action",
+    ),
   }),
   notification: (props, emit) => ({
     component: generatedStandardCrudMainComponents.notification,
     props: {
       t: props.t,
+      moduleReady: props.notificationModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterNotificationWorkspace,
+      canViewNotifications: props.canViewNotifications,
+      canCreateNotifications: props.canCreateNotifications,
+      canUpdateNotifications: props.canUpdateNotifications,
+      queryFields: props.enterpriseNotificationQueryFields,
       tableColumns: props.enterpriseNotificationTableColumns,
+      itemCountLabel: props.notificationCountLabel,
       emptyTitle: props.t("app.notification.emptyTitle"),
       emptyDescription: props.t("app.notification.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "notification-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "notification-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "notification-search",
+      "notification-reset",
+      "notification-row-click",
+      "notification-action",
+    ),
   }),
   "operation-log": (props, emit) => ({
     component: OperationLogWorkspaceMain,
@@ -724,69 +807,109 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     component: generatedStandardCrudMainComponents.role,
     props: {
       t: props.t,
+      moduleReady: props.roleModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterRoleWorkspace,
+      canViewRoles: props.canViewRoles,
+      canCreateRoles: props.canCreateRoles,
+      canUpdateRoles: props.canUpdateRoles,
+      queryFields: props.enterpriseRoleQueryFields,
       tableColumns: props.enterpriseRoleTableColumns,
+      itemCountLabel: props.roleCountLabel,
       emptyTitle: props.t("app.role.emptyTitle"),
       emptyDescription: props.t("app.role.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "role-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "role-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "role-search",
+      "role-reset",
+      "role-row-click",
+      "role-action",
+    ),
   }),
   setting: (props, emit) => ({
     component: generatedStandardCrudMainComponents.setting,
     props: {
       t: props.t,
+      moduleReady: props.settingModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterSettingWorkspace,
+      canViewSettings: props.canViewSettings,
+      canCreateSettings: props.canCreateSettings,
+      canUpdateSettings: props.canUpdateSettings,
+      queryFields: props.enterpriseSettingQueryFields,
       tableColumns: props.enterpriseSettingTableColumns,
+      itemCountLabel: props.settingCountLabel,
       emptyTitle: props.t("app.setting.emptyTitle"),
       emptyDescription: props.t("app.setting.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "setting-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "setting-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "setting-search",
+      "setting-reset",
+      "setting-row-click",
+      "setting-action",
+    ),
   }),
   tenant: (props, emit) => ({
     component: generatedStandardCrudMainComponents.tenant,
     props: {
       t: props.t,
+      moduleReady: props.tenantModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterTenantWorkspace,
+      canViewTenants: props.canViewTenants,
+      canCreateTenants: props.canCreateTenants,
+      canUpdateTenants: props.canUpdateTenants,
+      queryFields: props.enterpriseTenantQueryFields,
       tableColumns: props.enterpriseTenantTableColumns,
+      itemCountLabel: props.tenantCountLabel,
       emptyTitle: props.t("app.tenant.emptyTitle"),
       emptyDescription: props.t("app.tenant.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "tenant-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "tenant-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "tenant-search",
+      "tenant-reset",
+      "tenant-row-click",
+      "tenant-action",
+    ),
   }),
   user: (props, emit) => ({
     component: generatedStandardCrudMainComponents.user,
     props: {
       t: props.t,
+      moduleReady: props.userModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterUserWorkspace,
+      canViewUsers: props.canViewUsers,
+      canCreateUsers: props.canCreateUsers,
+      canUpdateUsers: props.canUpdateUsers,
+      queryFields: props.enterpriseUserQueryFields,
       tableColumns: props.enterpriseUserTableColumns,
+      itemCountLabel: props.userCountLabel,
       emptyTitle: props.t("app.user.emptyTitle"),
       emptyDescription: props.t("app.user.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "user-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "user-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "user-search",
+      "user-reset",
+      "user-row-click",
+      "user-action",
+    ),
   }),
   placeholder: placeholderResolver,
 }

@@ -293,6 +293,7 @@ export const useSettingWorkspace = (options: UseSettingWorkspaceOptions) => {
   const handleReset = settingWorkspace.handleReset
   const handleSearch = settingWorkspace.handleSearch
   const openCreatePanel = settingWorkspace.openCreatePanel
+  const openRecordForEdit = settingWorkspace.openRecordForEdit
   const reloadSettings = settingWorkspace.reloadRecords
   const resetQuery = settingWorkspace.resetQuery
   const selectSetting = settingWorkspace.selectRecord
@@ -307,7 +308,7 @@ export const useSettingWorkspace = (options: UseSettingWorkspaceOptions) => {
       return
     }
 
-    await selectSetting(setting)
+    await openRecordForEdit(setting)
   }
 
   return {

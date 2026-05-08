@@ -238,7 +238,7 @@ describe("useMenuWorkspace", () => {
     expect(workspace.panelDescription.value).toBe("")
   })
 
-  test("normalizes create payload and returns to detail mode after creation", async () => {
+  test("normalizes create payload and keeps edit mode after creation", async () => {
     const existing = createMenuRecord()
     const created = createMenuDetailRecord({
       code: "audit",
@@ -337,7 +337,7 @@ describe("useMenuWorkspace", () => {
       status: "disabled",
       type: "directory",
     })
-    expect(workspace.menuPanelMode.value).toBe("detail")
+    expect(workspace.menuPanelMode.value).toBe("edit")
     expect(workspace.selectedMenu.value?.id).toBe("menu-2")
     expect(workspace.menuErrorMessage.value).toBe("")
   })

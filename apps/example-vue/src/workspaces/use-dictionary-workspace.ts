@@ -366,6 +366,7 @@ export const useDictionaryWorkspace = (
   const handleReset = dictionaryWorkspace.handleReset
   const handleSearch = dictionaryWorkspace.handleSearch
   const openCreatePanel = dictionaryWorkspace.openCreatePanel
+  const openRecordForEdit = dictionaryWorkspace.openRecordForEdit
   const resetQuery = dictionaryWorkspace.resetQuery
   const selectDictionaryType = dictionaryWorkspace.selectRecord
   const startEdit = dictionaryWorkspace.startEdit
@@ -381,7 +382,7 @@ export const useDictionaryWorkspace = (
       return
     }
 
-    await selectDictionaryType(dictionaryType)
+    await openRecordForEdit(dictionaryType)
   }
 
   return {

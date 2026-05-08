@@ -44,7 +44,6 @@ const props = defineProps<SettingWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", setting: SettingRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -92,10 +91,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedSettingWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedSettingWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedSetting = readInjectedValue(
   computed(() => resolvedSettingWorkspaceState.value?.selectedSetting ?? null),
   null as SettingRecord | null,
@@ -112,9 +107,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.setting.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.settingModuleOffline") }}
@@ -149,26 +142,6 @@ const resolvedFormValues = readInjectedValue(
     <template
       v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedSetting"
     >
-      <div class="enterprise-button-row">
-        <button
-          v-if="canUpdateSettings"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelectedSetting)"
-        >
-          {{ t("app.setting.action.edit") }}
-        </button>
-        <button
-          v-if="canCreateSettings"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.setting.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

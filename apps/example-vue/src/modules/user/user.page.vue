@@ -12,6 +12,7 @@ import {
   type ElyCrudWorkspaceProps,
   type ElyQueryField,
   type ElyQueryValues,
+  type ElyTableAction,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject, ref, watch } from "vue"
@@ -35,6 +36,8 @@ interface UserWorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewUsers: boolean
+  canCreateUsers: boolean
+  canUpdateUsers: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -47,6 +50,7 @@ interface UserWorkspaceMainProps {
 const props = defineProps<UserWorkspaceMainProps>()
 
 const emit = defineEmits<{
+  (e: "action", key: string, row: UserRecord): void
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: UserRecord): void
@@ -75,6 +79,16 @@ const resolvedErrorMessage = readInjectedValue(
 const resolvedItems = readInjectedValue(
   computed(() => resolvedUserWorkspaceState.value?.tableItems ?? null),
   [] as UserRecord[],
+)
+const resolvedTableActions = computed<ElyTableAction[]>(() =>
+  props.canUpdateUsers
+    ? [
+        {
+          key: "edit",
+          label: props.t("app.user.action.edit"),
+        },
+      ]
+    : [],
 )
 
 const pageSizeOptions = [20, 50, 100]
@@ -122,6 +136,19 @@ const updatePageSize = (event: Event) => {
   currentPage.value = 1
 }
 
+const handleAction = (key: string, row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const record = resolvedItems.value.find((item) => item.id === rowId)
+
+  if (record) {
+    emit("action", key, record)
+  }
+}
+
+const handleCreate = () => {
+  emit("action", "create", {} as UserRecord)
+}
+
 watch(resolvedItems, () => {
   currentPage.value = Math.min(currentPage.value, totalPages.value)
 })
@@ -164,15 +191,27 @@ watch(resolvedItems, () => {
       :table-columns="tableColumns"
       :items="paginatedItems"
       :table-loading="resolvedLoading"
-      :table-actions="[]"
+      :table-actions="resolvedTableActions"
       :item-count-label="itemCountLabel"
       :empty-title="emptyTitle"
       :empty-description="emptyDescription"
       :copy="copy"
+      @action="handleAction"
       @search="emit('search', $event)"
       @reset="emit('reset')"
       @row-click="emit('row-click', $event as UserRecord)"
     >
+      <template #toolbar>
+        <button
+          v-if="canCreateUsers"
+          type="button"
+          class="enterprise-button"
+          :disabled="resolvedLoading"
+          @click="handleCreate"
+        >
+          {{ t("app.user.action.create") }}
+        </button>
+      </template>
       <template #footer>
         <div class="user-pagination">
           <span>{{ paginationSummary }}</span>

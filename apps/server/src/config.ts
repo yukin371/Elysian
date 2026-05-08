@@ -1,3 +1,7 @@
+import { existsSync, readFileSync } from "node:fs"
+import { dirname, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
+
 import { AppError } from "./errors"
 
 export type AppEnv = "development" | "test" | "production"
@@ -16,6 +20,11 @@ export interface ServerConfig {
 const TEST_ACCESS_TOKEN_SECRET = "elysian-test-access-secret"
 const APP_ENV_VALUES = ["development", "test", "production"] as const
 const LOG_LEVEL_VALUES = ["debug", "info", "warn", "error"] as const
+const SERVER_SRC_DIR = dirname(fileURLToPath(import.meta.url))
+const DEFAULT_ENV_FILE_PATHS = [
+  resolve(process.cwd(), ".env"),
+  resolve(SERVER_SRC_DIR, "../../../.env"),
+]
 
 const DEFAULT_SERVER_CONFIG: ServerConfig = {
   env: "development",
@@ -34,21 +43,48 @@ export const createServerConfig = (
   ...overrides,
 })
 
+export const applyServerEnvFiles = (
+  env: Record<string, string | undefined> = process.env,
+  envFilePaths: readonly string[] = DEFAULT_ENV_FILE_PATHS,
+) => {
+  for (const filePath of new Set(envFilePaths)) {
+    if (!existsSync(filePath)) {
+      continue
+    }
+
+    const fileEnv = parseEnvFile(readFileSync(filePath, "utf-8"))
+
+    for (const [key, value] of Object.entries(fileEnv)) {
+      if (env[key] === undefined) {
+        env[key] = value
+      }
+    }
+  }
+
+  return env
+}
+
 export const loadServerConfig = (
   env: Record<string, string | undefined> = process.env,
 ): ServerConfig => {
-  const appEnv = parseAppEnv(env.APP_ENV ?? env.NODE_ENV)
-  const port = parsePort(env.PORT)
-  const logLevel = parseLogLevel(env.LOG_LEVEL)
-  const corsAllowedOrigins = parseCorsAllowedOrigins(env.CORS_ALLOWED_ORIGINS)
-  const rateLimitEnabled = parseRateLimitEnabled(env.RATE_LIMIT_ENABLED, appEnv)
+  const runtimeEnv = env === process.env ? applyServerEnvFiles(env) : env
+  const appEnv = parseAppEnv(runtimeEnv.APP_ENV ?? runtimeEnv.NODE_ENV)
+  const port = parsePort(runtimeEnv.PORT)
+  const logLevel = parseLogLevel(runtimeEnv.LOG_LEVEL)
+  const corsAllowedOrigins = parseCorsAllowedOrigins(
+    runtimeEnv.CORS_ALLOWED_ORIGINS,
+  )
+  const rateLimitEnabled = parseRateLimitEnabled(
+    runtimeEnv.RATE_LIMIT_ENABLED,
+    appEnv,
+  )
   const rateLimitWindowMs = parsePositiveInt(
-    env.RATE_LIMIT_WINDOW_MS,
+    runtimeEnv.RATE_LIMIT_WINDOW_MS,
     "RATE_LIMIT_WINDOW_MS",
     DEFAULT_SERVER_CONFIG.rateLimitWindowMs,
   )
   const rateLimitMaxRequests = parsePositiveInt(
-    env.RATE_LIMIT_MAX_REQUESTS,
+    runtimeEnv.RATE_LIMIT_MAX_REQUESTS,
     "RATE_LIMIT_MAX_REQUESTS",
     DEFAULT_SERVER_CONFIG.rateLimitMaxRequests,
   )
@@ -67,8 +103,9 @@ export const loadServerConfig = (
 export const resolveAccessTokenSecret = (
   env: Record<string, string | undefined> = process.env,
 ): string => {
-  const appEnv = parseAppEnv(env.APP_ENV ?? env.NODE_ENV)
-  const accessTokenSecret = env.ACCESS_TOKEN_SECRET?.trim()
+  const runtimeEnv = env === process.env ? applyServerEnvFiles(env) : env
+  const appEnv = parseAppEnv(runtimeEnv.APP_ENV ?? runtimeEnv.NODE_ENV)
+  const accessTokenSecret = runtimeEnv.ACCESS_TOKEN_SECRET?.trim()
 
   if (accessTokenSecret) {
     return accessTokenSecret
@@ -228,4 +265,47 @@ const parsePositiveInt = (
     expose: true,
     details: { key, value },
   })
+}
+
+const parseEnvFile = (content: string): Record<string, string> => {
+  const parsed: Record<string, string> = {}
+
+  for (const rawLine of content.split(/\r?\n/u)) {
+    const line = rawLine.trim()
+
+    if (line.length === 0 || line.startsWith("#")) {
+      continue
+    }
+
+    const normalized = line.startsWith("export ")
+      ? line.slice("export ".length)
+      : line
+    const separatorIndex = normalized.indexOf("=")
+
+    if (separatorIndex <= 0) {
+      continue
+    }
+
+    const key = normalized.slice(0, separatorIndex).trim()
+    const rawValue = normalized.slice(separatorIndex + 1).trim()
+
+    if (key.length === 0) {
+      continue
+    }
+
+    parsed[key] = stripEnvValueQuotes(rawValue)
+  }
+
+  return parsed
+}
+
+const stripEnvValueQuotes = (value: string) => {
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    return value.slice(1, -1)
+  }
+
+  return value
 }

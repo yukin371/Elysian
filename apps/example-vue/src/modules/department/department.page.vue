@@ -12,6 +12,7 @@ import {
   type ElyCrudWorkspaceProps,
   type ElyQueryField,
   type ElyQueryValues,
+  type ElyTableAction,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, inject, ref, watch } from "vue"
@@ -35,6 +36,8 @@ interface DepartmentWorkspaceMainProps {
   isAuthenticated: boolean
   canEnterWorkspace: boolean
   canViewDepartments: boolean
+  canCreateDepartments: boolean
+  canUpdateDepartments: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -47,6 +50,7 @@ interface DepartmentWorkspaceMainProps {
 const props = defineProps<DepartmentWorkspaceMainProps>()
 
 const emit = defineEmits<{
+  (e: "action", key: string, row: DepartmentRecord): void
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: DepartmentRecord): void
@@ -80,6 +84,16 @@ const resolvedErrorMessage = readInjectedValue(
 const resolvedItems = readInjectedValue(
   computed(() => resolvedDepartmentWorkspaceState.value?.tableItems ?? null),
   [] as DepartmentRecord[],
+)
+const resolvedTableActions = computed<ElyTableAction[]>(() =>
+  props.canUpdateDepartments
+    ? [
+        {
+          key: "edit",
+          label: props.t("app.department.action.edit"),
+        },
+      ]
+    : [],
 )
 
 const pageSizeOptions = [20, 50, 100]
@@ -127,6 +141,19 @@ const updatePageSize = (event: Event) => {
   currentPage.value = 1
 }
 
+const handleAction = (key: string, row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const record = resolvedItems.value.find((item) => item.id === rowId)
+
+  if (record) {
+    emit("action", key, record)
+  }
+}
+
+const handleCreate = () => {
+  emit("action", "create", {} as DepartmentRecord)
+}
+
 watch(resolvedItems, () => {
   currentPage.value = Math.min(currentPage.value, totalPages.value)
 })
@@ -169,15 +196,27 @@ watch(resolvedItems, () => {
       :table-columns="tableColumns"
       :items="paginatedItems"
       :table-loading="resolvedLoading"
-      :table-actions="[]"
+      :table-actions="resolvedTableActions"
       :item-count-label="itemCountLabel"
       :empty-title="emptyTitle"
       :empty-description="emptyDescription"
       :copy="copy"
+      @action="handleAction"
       @search="emit('search', $event)"
       @reset="emit('reset')"
       @row-click="emit('row-click', $event as DepartmentRecord)"
     >
+      <template #toolbar>
+        <button
+          v-if="canCreateDepartments"
+          type="button"
+          class="enterprise-button"
+          :disabled="resolvedLoading"
+          @click="handleCreate"
+        >
+          {{ t("app.department.action.create") }}
+        </button>
+      </template>
       <template #footer>
         <div class="department-pagination">
           <span>{{ paginationSummary }}</span>

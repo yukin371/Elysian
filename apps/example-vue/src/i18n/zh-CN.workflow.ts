@@ -13,7 +13,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow-definition.shellDescription": "查看、筛选和追踪流程定义版本。",
   "app.message.customerModuleOffline":
     "`customer` 模块尚未注册。请配置 `DATABASE_URL`，执行迁移与 seed 后重启服务。",
-  "app.message.signInToLoad": "请先从侧栏登录，再加载受保护的客户数据。",
+  "app.message.signInToLoad": "请先登录，再加载受保护的客户数据。",
   "app.message.workspaceNoListPermission":
     "当前身份可以进入工作区，但没有 `customer:customer:list` 权限。",
   "app.message.departmentModuleOffline":

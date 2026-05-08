@@ -47,6 +47,20 @@ const shouldRenderSecondary = computed(
     props.workspaceMainProps.currentWorkspaceKind !== "workflow-definitions",
 )
 
+const contextPanelWidthByWorkspaceKind: Record<string, number> = {
+  customer: 900,
+  file: 980,
+  "generator-preview": 1280,
+}
+
+const contextPanelWidth = computed(() => {
+  const workspaceKind = String(
+    props.workspaceMainProps.currentWorkspaceKind ?? "",
+  )
+
+  return contextPanelWidthByWorkspaceKind[workspaceKind] ?? 860
+})
+
 const emit = defineEmits<{
   (event: "menu-select", menuKey: string): void
   (event: "tab-select", tabKey: string): void
@@ -180,6 +194,7 @@ useWorkbenchShortcuts({
       <ElyContextPanel
         :visible="contextPanelOpen && shouldRenderSecondary"
         :title="workspaceTitle"
+        :width="contextPanelWidth"
         mode="detail"
         @close="closeContextPanel"
       >

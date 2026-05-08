@@ -105,7 +105,7 @@ describe("usePostWorkspace", () => {
     expect(workspace.postQueryValues.value).toEqual({})
   })
 
-  test("normalizes create payload and returns to detail mode after creation", async () => {
+  test("normalizes create payload and keeps edit mode after creation", async () => {
     const existing = createPostRecord()
     const created = createPostRecord({
       code: "AUDIT",
@@ -185,7 +185,7 @@ describe("usePostWorkspace", () => {
       sort: 20,
       status: "disabled",
     })
-    expect(workspace.postPanelMode.value).toBe("detail")
+    expect(workspace.postPanelMode.value).toBe("edit")
     expect(workspace.selectedPost.value?.id).toBe("post-2")
     expect(workspace.postErrorMessage.value).toBe("")
   })

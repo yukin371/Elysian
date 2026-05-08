@@ -106,15 +106,27 @@ export const createCrudWorkspace = <
 
     try {
       detail.value = await options.fetchDetail(record.id)
+      return detail.value
     } catch (error) {
       options.onRecoverableAuthError(error)
       detailErrorMessage.value =
         error instanceof Error
           ? error.message
           : options.getLoadDetailErrorMessage()
+      return null
     } finally {
       detailLoading.value = false
     }
+  }
+
+  const openRecordForEdit = async (record: TRecord) => {
+    if (!options.canUpdate.value) {
+      await selectRecord(record)
+      return
+    }
+
+    const detailedRecord = await selectRecord(record)
+    startEdit((detailedRecord ?? record) as TRecord | TDetailRecord)
   }
 
   const reloadRecords = async () => {
@@ -242,7 +254,8 @@ export const createCrudWorkspace = <
         )
         selectedId.value = updated.id
         detail.value = updated
-        panelMode.value = "detail"
+        editForm.value = options.toEditDraft(updated)
+        panelMode.value = "edit"
         await reloadRecords()
         return
       }
@@ -254,8 +267,9 @@ export const createCrudWorkspace = <
       const created = await options.createRecord(payloadResult.payload)
       selectedId.value = created.id
       detail.value = created
-      panelMode.value = "detail"
-      resetPanelInputs()
+      createForm.value = options.createDefaultDraft()
+      editForm.value = options.toEditDraft(created)
+      panelMode.value = "edit"
       await reloadRecords()
     } catch (error) {
       options.onRecoverableAuthError(error)
@@ -284,6 +298,7 @@ export const createCrudWorkspace = <
     items,
     loading,
     openCreatePanel,
+    openRecordForEdit,
     panelMode,
     queryValues,
     reloadRecords,

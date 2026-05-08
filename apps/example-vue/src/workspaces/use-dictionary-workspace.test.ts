@@ -156,7 +156,7 @@ describe("useDictionaryWorkspace", () => {
     expect(workspace.dictionaryQueryValues.value).toEqual({})
   })
 
-  test("normalizes create payload and returns to detail mode after creation", async () => {
+  test("normalizes create payload and keeps edit mode after creation", async () => {
     const existing = createDictionaryTypeRecord()
     const created = createDictionaryTypeDetailRecord({
       code: "sys_notice_level",
@@ -262,7 +262,7 @@ describe("useDictionaryWorkspace", () => {
       name: "Notice Level",
       status: "disabled",
     })
-    expect(workspace.dictionaryPanelMode.value).toBe("detail")
+    expect(workspace.dictionaryPanelMode.value).toBe("edit")
     expect(workspace.selectedDictionaryType.value?.id).toBe("dictionary-type-2")
     expect(workspace.dictionaryErrorMessage.value).toBe("")
   })

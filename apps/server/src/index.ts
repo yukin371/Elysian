@@ -1,7 +1,7 @@
 import { createDatabaseClient } from "@elysian/persistence"
 
 import { createServerApp } from "./app"
-import { loadServerConfig } from "./config"
+import { applyServerEnvFiles, loadServerConfig } from "./config"
 import { createServerLogger } from "./logging"
 import {
   composeAuthModules,
@@ -9,6 +9,8 @@ import {
   composeSystemModules,
   systemModule,
 } from "./modules"
+
+applyServerEnvFiles()
 
 const config = loadServerConfig()
 const logger = createServerLogger(config.logLevel)

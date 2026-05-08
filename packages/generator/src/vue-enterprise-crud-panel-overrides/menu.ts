@@ -41,7 +41,6 @@ const props = defineProps<MenuWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", menu: MenuRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -84,10 +83,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedMenuWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedMenu = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.selectedMenu ?? null),
   null as MenuRecord | null,
@@ -104,11 +99,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.menu.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p v-if="resolvedPanelDescription" class="enterprise-copy">
-      {{ resolvedPanelDescription }}
-    </p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.menuModuleOffline") }}
@@ -138,26 +129,6 @@ const resolvedFormValues = readInjectedValue(
     </div>
 
     <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedMenu">
-      <div class="enterprise-button-row">
-        <button
-          v-if="${updatePermission}"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelectedMenu)"
-        >
-          {{ t("app.menu.action.edit") }}
-        </button>
-        <button
-          v-if="${createPermission}"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.menu.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

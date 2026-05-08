@@ -151,8 +151,9 @@ export const useExampleAppShellOrchestration = ({
     dictionaryPanelMode: dictionaryWorkspace.dictionaryPanelMode,
     selectedDictionaryTypeId: dictionaryWorkspace.selectedDictionaryTypeId,
     canCreateDictionaryTypes: gates.canCreateDictionaryTypes,
-    selectDictionaryType: (item) =>
-      dictionaryWorkspace.selectDictionaryType(item as never),
+    selectDictionaryType: async (item) => {
+      await dictionaryWorkspace.selectDictionaryType(item as never)
+    },
     filteredNotificationItems: notificationWorkspace.filteredNotificationItems,
     isNotificationWorkspace: navigation.isNotificationWorkspace,
     notificationLoading: notificationWorkspace.notificationLoading,
@@ -160,8 +161,9 @@ export const useExampleAppShellOrchestration = ({
     selectedNotificationId: notificationWorkspace.selectedNotificationId,
     notificationDetail: notificationWorkspace.notificationDetail,
     canCreateNotifications: gates.canCreateNotifications,
-    selectNotification: (item) =>
-      notificationWorkspace.selectNotification(item as never),
+    selectNotification: async (item) => {
+      await notificationWorkspace.selectNotification(item as never)
+    },
     filteredDepartmentItems: departmentWorkspace.filteredDepartmentItems,
     isDepartmentWorkspace: navigation.isDepartmentWorkspace,
     departmentLoading: departmentWorkspace.departmentLoading,
@@ -169,8 +171,9 @@ export const useExampleAppShellOrchestration = ({
     selectedDepartmentId: departmentWorkspace.selectedDepartmentId,
     departmentDetail: departmentWorkspace.departmentDetail,
     canCreateDepartments: gates.canCreateDepartments,
-    selectDepartment: (item) =>
-      departmentWorkspace.selectDepartment(item as never),
+    selectDepartment: async (item) => {
+      await departmentWorkspace.selectDepartment(item as never)
+    },
     filteredPostItems: postWorkspace.filteredPostItems,
     isPostWorkspace: navigation.isPostWorkspace,
     postLoading: postWorkspace.postLoading,
@@ -178,7 +181,9 @@ export const useExampleAppShellOrchestration = ({
     selectedPostId: postWorkspace.selectedPostId,
     postDetail: postWorkspace.postDetail,
     canCreatePosts: gates.canCreatePosts,
-    selectPost: (item) => postWorkspace.selectPost(item as never),
+    selectPost: async (item) => {
+      await postWorkspace.selectPost(item as never)
+    },
     filteredMenuItems: menuWorkspace.filteredMenuItems,
     isMenuWorkspace: navigation.isMenuWorkspace,
     menuLoading: menuWorkspace.menuLoading,
@@ -186,7 +191,9 @@ export const useExampleAppShellOrchestration = ({
     selectedMenuId: menuWorkspace.selectedMenuId,
     menuDetail: menuWorkspace.menuDetail,
     canCreateMenus: gates.canCreateMenus,
-    selectMenu: (item) => menuWorkspace.selectMenu(item as never),
+    selectMenu: async (item) => {
+      await menuWorkspace.selectMenu(item as never)
+    },
     filteredOperationLogItems: operationLogWorkspace.filteredOperationLogItems,
     isOperationLogWorkspace: navigation.isOperationLogWorkspace,
     operationLogLoading: operationLogWorkspace.operationLogLoading,
@@ -202,7 +209,9 @@ export const useExampleAppShellOrchestration = ({
     selectedRoleId: roleWorkspace.selectedRoleId,
     roleDetail: roleWorkspace.roleDetail,
     canCreateRoles: gates.canCreateRoles,
-    selectRole: (item) => roleWorkspace.selectRole(item as never),
+    selectRole: async (item) => {
+      await roleWorkspace.selectRole(item as never)
+    },
     filteredSettingItems: settingWorkspace.filteredSettingItems,
     isSettingWorkspace: navigation.isSettingWorkspace,
     settingLoading: settingWorkspace.settingLoading,
@@ -210,7 +219,9 @@ export const useExampleAppShellOrchestration = ({
     selectedSettingId: settingWorkspace.selectedSettingId,
     settingDetail: settingWorkspace.settingDetail,
     canCreateSettings: gates.canCreateSettings,
-    selectSetting: (item) => settingWorkspace.selectSetting(item as never),
+    selectSetting: async (item) => {
+      await settingWorkspace.selectSetting(item as never)
+    },
     filteredTenantItems: tenantWorkspace.filteredTenantItems,
     isTenantWorkspace: navigation.isTenantWorkspace,
     tenantLoading: tenantWorkspace.tenantLoading,
@@ -218,7 +229,9 @@ export const useExampleAppShellOrchestration = ({
     selectedTenantId: tenantWorkspace.selectedTenantId,
     tenantDetail: tenantWorkspace.tenantDetail,
     canCreateTenants: gates.canCreateTenants,
-    selectTenant: (item) => tenantWorkspace.selectTenant(item as never),
+    selectTenant: async (item) => {
+      await tenantWorkspace.selectTenant(item as never)
+    },
     filteredUserItems: userWorkspace.filteredUserItems,
     selectedUserId: userWorkspace.selectedUserId,
     userPanelMode: userWorkspace.userPanelMode,

@@ -23,9 +23,7 @@ const visibleItems = computed(() =>
   props.items.filter((item) => item.type !== "button"),
 )
 
-const expandedValueSet = computed(
-  () => new Set(props.expandedValues ?? []),
-)
+const expandedValueSet = computed(() => new Set(props.expandedValues ?? []))
 
 const isExpanded = (menuKey: string) => expandedValueSet.value.has(menuKey)
 </script>

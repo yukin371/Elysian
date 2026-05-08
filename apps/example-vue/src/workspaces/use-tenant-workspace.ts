@@ -283,6 +283,7 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
   const handleReset = tenantWorkspace.handleReset
   const handleSearch = tenantWorkspace.handleSearch
   const openCreatePanel = tenantWorkspace.openCreatePanel
+  const openRecordForEdit = tenantWorkspace.openRecordForEdit
   const reloadTenants = tenantWorkspace.reloadRecords
   const resetQuery = tenantWorkspace.resetQuery
   const selectTenant = tenantWorkspace.selectRecord
@@ -337,7 +338,7 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
       return
     }
 
-    await selectTenant(tenant)
+    await openRecordForEdit(tenant)
   }
 
   return {

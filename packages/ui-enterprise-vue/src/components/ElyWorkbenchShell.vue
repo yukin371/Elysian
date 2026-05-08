@@ -10,6 +10,7 @@ import {
 } from "../contracts"
 import ElyNavNodes from "./ElyNavNodes.vue"
 import ElyShellTabs from "./ElyShellTabs.vue"
+import ElyWorkbenchContextOverlay from "./ElyWorkbenchContextOverlay.vue"
 import {
   isElyShellMenuSelectable,
   toggleElyShellExpandedMenuValue,
@@ -127,10 +128,7 @@ const handleGlobalSearch = (value: string | number) => {
 </script>
 
 <template>
-  <div
-    class="ely-workbench"
-    :class="{ 'ely-workbench--with-panel': contextPanelVisible }"
-  >
+  <div class="ely-workbench" :class="{ 'ely-workbench--context-open': contextPanelVisible }">
     <!-- Header -->
     <header class="ely-workbench__header">
       <div class="ely-workbench__brand">
@@ -215,11 +213,6 @@ const handleGlobalSearch = (value: string | number) => {
       </div>
     </main>
 
-    <!-- Context panel (conditional) -->
-    <aside v-if="contextPanelVisible" class="ely-workbench__context">
-      <slot name="context" />
-    </aside>
-
     <!-- Status bar -->
     <footer class="ely-workbench__status">
       <span class="ely-workbench__status-left">
@@ -244,6 +237,13 @@ const handleGlobalSearch = (value: string | number) => {
       </span>
     </footer>
   </div>
+
+  <ElyWorkbenchContextOverlay
+    :visible="contextPanelVisible"
+    @close="emit('panel-close')"
+  >
+    <slot name="context" />
+  </ElyWorkbenchContextOverlay>
 </template>
 
 <style scoped>
@@ -256,6 +256,8 @@ const handleGlobalSearch = (value: string | number) => {
   --ely-accent-soft: rgba(36, 87, 214, 0.1);
 
   display: grid;
+  position: relative;
+  isolation: isolate;
   grid-template-rows: 48px 1fr 28px;
   grid-template-columns: 200px 1fr;
   grid-template-areas:
@@ -268,12 +270,8 @@ const handleGlobalSearch = (value: string | number) => {
   color: var(--ely-ink);
 }
 
-.ely-workbench--with-panel {
-  grid-template-columns: 200px 1fr auto;
-  grid-template-areas:
-    "header header header"
-    "sidebar workspace context"
-    "status status status";
+.ely-workbench--context-open {
+  user-select: none;
 }
 
 /* ── Header ── */
@@ -462,19 +460,6 @@ const handleGlobalSearch = (value: string | number) => {
   min-height: 0;
   padding: 0.75rem;
   overflow: auto;
-}
-
-/* ── Context panel ── */
-
-.ely-workbench__context {
-  grid-area: context;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  width: 380px;
-  background: var(--ely-surface);
-  border-left: 1px solid var(--ely-border);
-  overflow-y: auto;
 }
 
 /* ── Status bar ── */

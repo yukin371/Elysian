@@ -1,6 +1,13 @@
 import { describe, expect, it } from "bun:test"
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 
-import { loadServerConfig, resolveAccessTokenSecret } from "./config"
+import {
+  applyServerEnvFiles,
+  loadServerConfig,
+  resolveAccessTokenSecret,
+} from "./config"
 
 describe("loadServerConfig", () => {
   it("loads explicit environment values", () => {
@@ -67,6 +74,32 @@ describe("loadServerConfig", () => {
         LOG_LEVEL: "trace",
       }),
     ).toThrow("LOG_LEVEL must be one of: debug, info, warn, error")
+  })
+
+  it("hydrates missing values from .env files without overriding explicit env", () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "elysian-server-config-"))
+    const envFilePath = join(tempDir, ".env")
+
+    writeFileSync(
+      envFilePath,
+      [
+        "PORT=3200",
+        "DATABASE_URL=postgres://demo:demo@localhost:5432/demo",
+      ].join("\n"),
+    )
+
+    const env: Record<string, string | undefined> = {
+      PORT: "4100",
+    }
+
+    try {
+      applyServerEnvFiles(env, [envFilePath])
+    } finally {
+      rmSync(tempDir, { force: true, recursive: true })
+    }
+
+    expect(env.PORT).toBe("4100")
+    expect(env.DATABASE_URL).toBe("postgres://demo:demo@localhost:5432/demo")
   })
 })
 

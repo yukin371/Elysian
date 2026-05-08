@@ -187,7 +187,6 @@ export const createExampleShellWorkspaceSecondaryBindings = ({
   envName,
   permissionCodes,
   authLoading,
-  loginForm,
   authErrorMessage,
   startDictionaryEdit,
   openDictionaryCreatePanel,
@@ -244,7 +243,6 @@ export const createExampleShellWorkspaceSecondaryBindings = ({
   handleEnterpriseFormSubmit,
   handleEnterpriseFormCancel,
   submitLogout,
-  submitLogin,
 }: UseExampleShellBindingsOptions) => {
   const platformStatusLabel = computed(() =>
     localizePlatformStatus(platform.value?.manifest.status),
@@ -450,8 +448,6 @@ export const createExampleShellWorkspaceSecondaryBindings = ({
     envName: envName.value,
     permissionCount: permissionCodes.value.length,
     authLoading: authLoading.value,
-    loginUsername: loginForm.value.username,
-    loginPassword: loginForm.value.password,
     authErrorMessage: authErrorMessage.value,
   }))
 
@@ -514,13 +510,6 @@ export const createExampleShellWorkspaceSecondaryBindings = ({
     "submit-customer-form": handleEnterpriseFormSubmit,
     "cancel-customer-form": handleEnterpriseFormCancel,
     "submit-logout": submitLogout,
-    "update:login-username": (value: string) => {
-      loginForm.value.username = value
-    },
-    "update:login-password": (value: string) => {
-      loginForm.value.password = value
-    },
-    "submit-login": submitLogin,
   }
 
   return {

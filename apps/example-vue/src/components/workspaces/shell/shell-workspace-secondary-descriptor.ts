@@ -224,8 +224,6 @@ export interface ShellWorkspaceSecondarySwitchProps {
   envName: string
   permissionCount: number
   authLoading: boolean
-  loginUsername: string
-  loginPassword: string
   authErrorMessage: string
 }
 
@@ -316,9 +314,6 @@ export type ShellWorkspaceSecondarySwitchEmitFn = {
   (event: "submit-customer-form", payload: unknown): void
   (event: "cancel-customer-form"): void
   (event: "submit-logout"): void
-  (event: "update:login-username", value: string): void
-  (event: "update:login-password", value: string): void
-  (event: "submit-login"): void
 }
 
 interface ShellWorkspaceSecondaryDescriptor {

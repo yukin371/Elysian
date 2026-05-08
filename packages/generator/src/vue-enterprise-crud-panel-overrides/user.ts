@@ -45,7 +45,6 @@ const props = defineProps<UserWorkspacePanelProps>()
 const emit = defineEmits<{
   (e: "start-edit", user: UserRecord): void
   (e: "start-password-reset", user: UserRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
   (e: "update:password-input", value: string): void
@@ -84,10 +83,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedUserWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedUserWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedUser = readInjectedValue(
   computed(() => resolvedUserWorkspaceState.value?.selectedUser ?? null),
   null as UserRecord | null,
@@ -104,9 +99,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.user.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.userModuleOffline") }}
@@ -128,35 +121,6 @@ const resolvedFormValues = readInjectedValue(
     </div>
 
     <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedUser">
-      <div class="enterprise-button-row">
-        <button
-          v-if="${updatePermission}"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading"
-          @click="emit('start-edit', resolvedSelectedUser)"
-        >
-          {{ t("app.user.action.edit") }}
-        </button>
-        <button
-          v-if="canResetUserPasswords"
-          type="button"
-          class="enterprise-button enterprise-button-danger"
-          :disabled="resolvedLoading"
-          @click="emit('start-password-reset', resolvedSelectedUser)"
-        >
-          {{ t("app.user.action.resetPassword") }}
-        </button>
-        <button
-          v-if="${createPermission}"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.user.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"
@@ -170,6 +134,20 @@ const resolvedFormValues = readInjectedValue(
     <template
       v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
     >
+      <div
+        v-if="resolvedPanelMode === 'edit' && canResetUserPasswords && resolvedSelectedUser"
+        class="enterprise-button-row"
+      >
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-danger"
+          :disabled="resolvedLoading"
+          @click="emit('start-password-reset', resolvedSelectedUser)"
+        >
+          {{ t("app.user.action.resetPassword") }}
+        </button>
+      </div>
+
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

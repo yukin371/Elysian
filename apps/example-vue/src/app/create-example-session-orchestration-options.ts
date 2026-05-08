@@ -111,5 +111,6 @@ export const createExampleSessionOrchestrationOptions = (
     resetSettingQuery: workspaces.settingWorkspace.resetQuery,
     resetTenantQuery: workspaces.tenantWorkspace.resetQuery,
     handleUserReset: workspaces.userWorkspace.handleReset,
+    onMountedBehavior: "reload-workspaces",
   }
 }

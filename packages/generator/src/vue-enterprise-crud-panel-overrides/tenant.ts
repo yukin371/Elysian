@@ -43,7 +43,6 @@ const props = defineProps<TenantWorkspacePanelProps>()
 const emit = defineEmits<{
   (e: "start-edit", tenant: TenantRecord): void
   (e: "toggle-status"): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -90,10 +89,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedTenantWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedTenantWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedTenant = readInjectedValue(
   computed(() => resolvedTenantWorkspaceState.value?.selectedTenant ?? null),
   null as TenantRecord | null,
@@ -110,9 +105,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.tenant.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.tenantModuleOffline") }}
@@ -152,39 +145,6 @@ const resolvedFormValues = readInjectedValue(
     </div>
 
     <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedTenant">
-      <div class="enterprise-button-row">
-        <button
-          v-if="${updatePermission}"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelectedTenant)"
-        >
-          {{ t("app.tenant.action.edit") }}
-        </button>
-        <button
-          v-if="${updatePermission}"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('toggle-status')"
-        >
-          {{
-            resolvedSelectedTenant.status === "active"
-              ? t("app.tenant.action.suspend")
-              : t("app.tenant.action.activate")
-          }}
-        </button>
-        <button
-          v-if="${createPermission}"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.tenant.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"
@@ -198,6 +158,24 @@ const resolvedFormValues = readInjectedValue(
     <template
       v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
     >
+      <div
+        v-if="resolvedPanelMode === 'edit' && ${updatePermission} && resolvedSelectedTenant"
+        class="enterprise-button-row"
+      >
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="resolvedLoading || resolvedDetailLoading"
+          @click="emit('toggle-status')"
+        >
+          {{
+            resolvedSelectedTenant.status === "active"
+              ? t("app.tenant.action.suspend")
+              : t("app.tenant.action.activate")
+          }}
+        </button>
+      </div>
+
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

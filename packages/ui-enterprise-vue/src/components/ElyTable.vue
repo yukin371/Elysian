@@ -36,8 +36,27 @@ const isActiveStatus = (value: unknown, activeLabel: string) =>
 const isInactiveStatus = (value: unknown, inactiveLabel: string) =>
   value === "inactive" || value === "disabled" || value === inactiveLabel
 
+const resolvedRowKey = computed(() => props.rowKey ?? "id")
+
 const handleRowClick = (row: Record<string, unknown>) => {
   emit("row-click", row)
+}
+
+const resolveRowAttributes = ({
+  row,
+  type,
+}: {
+  row: Record<string, unknown>
+  type: "body" | "foot"
+}) => {
+  if (type !== "body") {
+    return {}
+  }
+
+  return {
+    "data-row-key": String(row[resolvedRowKey.value] ?? ""),
+    onClick: () => handleRowClick(row),
+  }
 }
 
 const resolvedColumns = computed(() => {
@@ -114,12 +133,12 @@ const resolvedColumns = computed(() => {
       :columns="resolvedColumns"
       :data="props.items"
       :loading="loading"
-      :row-key="rowKey ?? 'id'"
+      :row-key="resolvedRowKey"
+      :row-attributes="resolveRowAttributes"
       :scroll="{ y: 420 }"
       table-layout="fixed"
       hover
       class="ely-table-inner"
-      :on-row-click="({ row }) => handleRowClick(row)"
     />
   </div>
 </template>

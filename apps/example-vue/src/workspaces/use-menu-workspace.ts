@@ -440,6 +440,7 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
   const handleReset = menuWorkspace.handleReset
   const handleSearch = menuWorkspace.handleSearch
   const openCreatePanel = menuWorkspace.openCreatePanel
+  const openRecordForEdit = menuWorkspace.openRecordForEdit
   const reloadMenus = menuWorkspace.reloadRecords
   const resetQuery = menuWorkspace.resetQuery
   const selectMenu = menuWorkspace.selectRecord
@@ -454,7 +455,7 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
       return
     }
 
-    await selectMenu(menu)
+    await openRecordForEdit(menu)
   }
 
   return {

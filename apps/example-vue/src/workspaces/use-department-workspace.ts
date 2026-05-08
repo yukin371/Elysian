@@ -338,6 +338,7 @@ export const useDepartmentWorkspace = (
   const handleReset = departmentWorkspace.handleReset
   const handleSearch = departmentWorkspace.handleSearch
   const openCreatePanel = departmentWorkspace.openCreatePanel
+  const openRecordForEdit = departmentWorkspace.openRecordForEdit
   const reloadDepartments = departmentWorkspace.reloadRecords
   const resetQuery = departmentWorkspace.resetQuery
   const selectDepartment = departmentWorkspace.selectRecord
@@ -354,7 +355,7 @@ export const useDepartmentWorkspace = (
       return
     }
 
-    await selectDepartment(department)
+    await openRecordForEdit(department)
   }
 
   return {

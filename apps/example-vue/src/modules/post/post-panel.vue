@@ -44,7 +44,6 @@ const props = defineProps<PostWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", post: PostRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -87,10 +86,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedPostWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedPostWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedPost = readInjectedValue(
   computed(() => resolvedPostWorkspaceState.value?.selectedPost ?? null),
   null as PostRecord | null,
@@ -107,9 +102,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.post.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.postModuleOffline") }}
@@ -144,26 +137,6 @@ const resolvedFormValues = readInjectedValue(
     <template
       v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedPost"
     >
-      <div class="enterprise-button-row">
-        <button
-          v-if="canUpdatePosts"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelectedPost)"
-        >
-          {{ t("app.post.action.edit") }}
-        </button>
-        <button
-          v-if="canCreatePosts"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.post.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

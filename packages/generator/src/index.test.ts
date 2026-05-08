@@ -238,6 +238,17 @@ describe("enterprise CRUD templates", () => {
     expect(mainFile?.contents).toContain("resolvePostWorkspaceMainState")
     expect(mainFile?.contents).toContain("resolvedPostWorkspaceState")
     expect(mainFile?.contents).toContain('t("app.message.postModuleOffline")')
+    expect(mainFile?.contents).toContain(
+      '(e: "action", key: string, row: PostRecord): void',
+    )
+    expect(mainFile?.contents).toContain(
+      ':table-actions="resolvedTableActions"',
+    )
+    expect(mainFile?.contents).toContain(
+      'emit("action", "create", {} as PostRecord)',
+    )
+    expect(mainFile?.contents).toContain('{{ t("app.post.action.create") }}')
+    expect(mainFile?.contents).not.toContain(':table-actions="[]"')
     expect(mainFile?.contents).not.toContain("enterprise-toolbar-pill")
     expect(mainFile?.contents).not.toContain("currentQuerySummary")
     expect(mainFile?.contents).not.toContain("loading: boolean")
@@ -274,9 +285,9 @@ describe("enterprise CRUD templates", () => {
     expect(panelFile?.contents).not.toContain("formFields: ElyFormField[]")
     expect(panelFile?.contents).not.toContain("formValues: ElyFormValues")
     expect(panelFile?.contents).toContain("start-edit")
-    expect(panelFile?.contents).toContain("open-create")
     expect(panelFile?.contents).toContain("submit-form")
     expect(panelFile?.contents).toContain("cancel-panel")
+    expect(panelFile?.contents).not.toContain("open-create")
   })
 
   it("renders workspace composable with generated helpers", () => {
@@ -355,6 +366,7 @@ describe("enterprise CRUD templates", () => {
     expect(panelFile?.contents).not.toContain(
       `emit('start-edit', resolvedSelectedNotification)`,
     )
+    expect(panelFile?.contents).not.toContain(`emit('open-create')`)
   })
 
   it("renders tenant and user panels with their extra runtime actions", () => {

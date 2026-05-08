@@ -157,7 +157,7 @@ describe("createCrudWorkspace", () => {
     expect(workspace.panelMode.value).toBe("detail")
   })
 
-  test("validates, creates, updates, and returns to detail mode", async () => {
+  test("validates, creates, updates, and keeps the edit form active", async () => {
     const { createdRecords, updatedRecords, workspace } = createWorkspace()
 
     await workspace.submitForm({ name: "   " })
@@ -166,7 +166,7 @@ describe("createCrudWorkspace", () => {
     await workspace.submitForm({ name: "Created" })
     expect(createdRecords).toEqual([{ id: "created-1", name: "Created" }])
     expect(workspace.selectedId.value).toBe("created-1")
-    expect(workspace.panelMode.value).toBe("detail")
+    expect(workspace.panelMode.value).toBe("edit")
 
     workspace.startEdit({ id: "created-1", name: "Created" })
     await workspace.submitForm({ name: "Updated" })
@@ -176,7 +176,7 @@ describe("createCrudWorkspace", () => {
       id: "created-1",
       name: "Updated",
     })
-    expect(workspace.panelMode.value).toBe("detail")
+    expect(workspace.panelMode.value).toBe("edit")
   })
 
   test("reports recoverable auth errors when create or update submission fails", async () => {

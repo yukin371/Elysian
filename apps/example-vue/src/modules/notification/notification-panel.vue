@@ -47,7 +47,6 @@ const props = defineProps<NotificationWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "mark-read"): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -105,12 +104,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedNotificationWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(
-    () => resolvedNotificationWorkspaceState.value?.panelDescription ?? null,
-  ),
-  "",
-)
 const resolvedSelectedNotification = readInjectedValue(
   computed(
     () =>
@@ -130,9 +123,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.notification.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.notificationModuleOffline") }}
@@ -169,26 +160,20 @@ const resolvedFormValues = readInjectedValue(
         resolvedPanelMode === 'detail' && resolvedSelectedNotification
       "
     >
-      <div class="enterprise-button-row">
+      <div
+        v-if="
+          canUpdateNotifications &&
+          resolvedSelectedNotification.status === 'unread'
+        "
+        class="enterprise-button-row"
+      >
         <button
-          v-if="
-            canUpdateNotifications &&
-            resolvedSelectedNotification.status === 'unread'
-          "
           type="button"
           class="enterprise-button"
           :disabled="resolvedLoading || resolvedDetailLoading"
           @click="emit('mark-read')"
         >
           {{ t("app.notification.action.markRead") }}
-        </button>
-        <button
-          v-if="canCreateNotifications"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.notification.action.create") }}
         </button>
       </div>
 
@@ -200,31 +185,6 @@ const resolvedFormValues = readInjectedValue(
         :loading="resolvedLoading || resolvedDetailLoading"
         :copy="formCopy"
       />
-
-      <div class="enterprise-metadata mt-5">
-        <div>
-          <span>{{ t("app.notification.meta.status") }}</span>
-          <strong>{{
-            localizeNotificationStatus(resolvedSelectedNotification.status)
-          }}</strong>
-        </div>
-        <div>
-          <span>{{ t("app.notification.meta.level") }}</span>
-          <strong>{{
-            localizeNotificationLevel(resolvedSelectedNotification.level)
-          }}</strong>
-        </div>
-        <div>
-          <span>{{ t("app.notification.meta.readAt") }}</span>
-          <strong>{{
-            resolvedSelectedNotification.readAt
-              ? new Date(resolvedSelectedNotification.readAt).toLocaleString(
-                  locale,
-                )
-              : t("app.notification.readAtEmpty")
-          }}</strong>
-        </div>
-      </div>
     </template>
 
     <template v-else-if="resolvedPanelMode === 'create'">

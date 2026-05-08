@@ -123,7 +123,7 @@ describe("useRoleWorkspace", () => {
     expect(workspace.roleQueryValues.value).toEqual({})
   })
 
-  test("normalizes create payload and returns to detail mode after creation", async () => {
+  test("normalizes create payload and keeps edit mode after creation", async () => {
     const existing = createRoleRecord()
     const created = createRoleDetailRecord({
       code: "auditor",
@@ -211,7 +211,7 @@ describe("useRoleWorkspace", () => {
       name: "Auditor",
       status: "disabled",
     })
-    expect(workspace.rolePanelMode.value).toBe("detail")
+    expect(workspace.rolePanelMode.value).toBe("edit")
     expect(workspace.selectedRole.value?.id).toBe("role-2")
     expect(workspace.roleErrorMessage.value).toBe("")
   })

@@ -41,7 +41,6 @@ const props = defineProps<DepartmentWorkspacePanelProps>()
 
 const emit = defineEmits<{
   (e: "start-edit", department: DepartmentRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
 }>()
@@ -160,26 +159,6 @@ const resolvedDepartmentParentLookup = readInjectedValue(
     <template
       v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedDepartment"
     >
-      <div class="enterprise-button-row">
-        <button
-          v-if="${updatePermission}"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelectedDepartment)"
-        >
-          {{ t("app.department.action.edit") }}
-        </button>
-        <button
-          v-if="${createPermission}"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.department.action.create") }}
-        </button>
-      </div>
-
       <ElyForm
         class="mt-5"
         :fields="resolvedFormFields"

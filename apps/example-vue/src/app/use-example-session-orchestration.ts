@@ -85,6 +85,7 @@ export interface UseExampleSessionOrchestrationOptions {
   resetSettingQuery: () => void
   resetTenantQuery: () => void
   handleUserReset: () => void
+  onMountedBehavior?: "initialize-app" | "reload-workspaces"
 }
 
 export const useExampleSessionOrchestration = (
@@ -105,6 +106,16 @@ export const useExampleSessionOrchestration = (
     await options.reloadTenants()
     await options.reloadUsers()
     await options.reloadWorkflowDefinitions()
+  }
+
+  const bootstrapAuthenticatedWorkspaces = async () => {
+    if (options.customerModuleReady.value) {
+      options.enterpriseFormMode.value = options.authModuleReady.value
+        ? "detail"
+        : "create"
+    }
+
+    await reloadAllWorkspaces()
   }
 
   const restoreSession = async () => {
@@ -144,7 +155,7 @@ export const useExampleSessionOrchestration = (
 
     try {
       options.authIdentity.value = await login(options.loginForm.value)
-      await reloadAllWorkspaces()
+      await bootstrapAuthenticatedWorkspaces()
     } catch (error) {
       options.authIdentity.value = null
       options.authErrorMessage.value =
@@ -270,10 +281,19 @@ export const useExampleSessionOrchestration = (
   }
 
   onMounted(async () => {
+    if (options.onMountedBehavior === "reload-workspaces") {
+      if (options.authIdentity.value) {
+        await bootstrapAuthenticatedWorkspaces()
+      }
+
+      return
+    }
+
     await initializeApp()
   })
 
   return {
+    bootstrapAuthenticatedWorkspaces,
     isRecoverableAuthError,
     restoreSession,
     submitLogin,
