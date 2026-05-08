@@ -1,41 +1,29 @@
 # 整体实施规划
 
-更新时间：`2026-04-28`
+更新时间：`2026-05-08`
 
-本文档是 `Elysian` 当前阶段的唯一主计划文档，用来定义整体阶段、依赖关系、阶段出口和下一阶段拆分方式。
+本文档定义 Elysian 的整体阶段划分、依赖关系和阶段出口。完整阶段体系只在本文件维护，[roadmap.md](./roadmap.md) 仅记录当前活跃轨道。
 
 ---
 
 ## 文档职责
 
-为避免同一件事在多份文档里被重复定义，后续按下面的职责收敛：
-
-- [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)
-  唯一主计划源。负责定义 `Phase / Subphase`、阶段出口、依赖关系和关键风险。
-- [roadmap.md](./roadmap.md)
-  只记录当前 1 到 3 个活跃工作轨道，以及最近进展和下一步，不重复定义完整阶段体系。
-- `docs/plans/*.md`
-  只承载最近一轮可执行实施计划，粒度下沉到具体交付包和任务顺序。
-- `docs/decisions/ADR-*.md`
-  只记录已经决定且不应在实施中反复摇摆的关键技术决策。
+| 文档 | 职责 |
+|---|---|
+| 本文档 | 唯一主计划源：Phase / Subphase 定义、阶段出口、依赖关系 |
+| [roadmap.md](./roadmap.md) | 当前 1–3 个活跃工作轨道，最近进展与下一步 |
+| `docs/plans/*.md` | 最近一轮可执行实施计划，粒度到具体交付包 |
+| `docs/decisions/ADR-*.md` | 已定型的关键技术决策 |
 
 ---
 
 ## 执行粒度
 
-后续开发按三层粒度推进：
-
 | 层级 | 用途 | 建议周期 | 典型出口 |
 |---|---|---|---|
-| `Phase` | 定义平台里程碑和依赖路径 | 1 到 2 个月 | 进入下一阶段的系统能力门槛 |
-| `Subphase` | 定义一轮可以收尾的能力闭环 | 1 到 2 周 | 一组接口、页面或生成链路可稳定运行 |
-| `Work Package` | 定义具体开发任务 | 1 到 3 天 | 一个模块、一个 ADR、一个脚手架或一组测试完成 |
-
-规则：
-
-- `Phase` 不直接排日常任务，只定义范围和出口。
-- `Subphase` 才是实际排期与多子代理拆分的主要单位。
-- `Work Package` 必须能明确 owner、验证方式和回滚边界。
+| `Phase` | 平台里程碑 | 1–2 个月 | 进入下一阶段的系统能力门槛 |
+| `Subphase` | 可收尾的能力闭环 | 1–2 周 | 接口/页面/生成链路可稳定运行 |
+| `Work Package` | 具体开发任务 | 1–3 天 | 模块、ADR、脚手架或测试完成 |
 
 ---
 
@@ -44,374 +32,211 @@
 ```text
 Phase 1          Phase 2          Phase 3          Phase 4
 垂直切片闭环 ──→ 认证与权限底座 ──→ 标准企业模块 ──→ 代码生成成熟化
-   (已完成)         (内核级)          (业务级)          (工具级)
+   ✅                ✅                ✅                ✅
 
 Phase 5          Phase 6          Phase 7
-AI 辅助开发  ──→ 生产强化  ──→ 平台扩展
-   (智能级)         (运营级)          (生态级)
+AI 辅助开发  ──→ 生产强化     ──→ 企业业务平台
+  ✅ P5A            ✅                ✅ P7A
+
+Phase 8          Phase 9
+AI 智能化    ──→ 平台扩展与生态
+  📋                📋
 ```
 
 ---
 
-## Phase 1：垂直切片闭环
+## Phase 1：垂直切片闭环 ✅
 
-> **状态**：已完成（2026-04-21 收尾验证通过）
-> **目标**：打通 `schema -> server -> persistence -> generator -> frontend` 的第一个完整业务闭环
+> 完成：2026-04-21
 
-### 交付物
+**目标**：打通 `Schema → Server → Persistence → Generator → Frontend` 的第一个完整业务闭环。
 
-| # | 交付物 | 当前状态 | 说明 |
-|---|---|---|---|
-| 1.1 | Server 底座 | ✅ 完成 | config / logging / errors / module registration |
-| 1.2 | Persistence 层 | ✅ 完成 | PostgreSQL + Drizzle ORM + migration |
-| 1.3 | Customer Schema | ✅ 完成 | `packages/schema` 中实体定义 |
-| 1.4 | Customer Server 模块 | ✅ 完成 | repository / service / routes |
-| 1.5 | Generator CLI | ✅ 完成 | 模板渲染、冲突策略、manifest |
-| 1.6 | Vue 前端骨架 | ✅ 完成 | Vite + Vue 3 + Tailwind |
-| 1.7 | Vue CRUD 页面 | ✅ 完成 | customer 列表/新建/编辑/删除已落地 |
-| 1.8 | 端到端联调 | ✅ 完成 | 已用 Docker PostgreSQL + 浏览器 smoke 验证前端 -> API -> 数据库链路 |
-| 1.9 | 开发环境文档 | ✅ 完成 | `.env.example`、README、本地启动与数据库配置说明已补齐 |
+**交付物**：
+- Server 底座（配置、日志、错误映射、模块注册）
+- Persistence 层（PostgreSQL + Drizzle ORM + migration）
+- Customer Schema 与完整 CRUD
+- Generator CLI（模板渲染、冲突策略、manifest）
+- Vue 前端骨架（Vite + Vue 3 + Tailwind）与 Customer CRUD 页面
+- Docker PostgreSQL + 浏览器 smoke 端到端验证
 
-### 完成标准
-
-- [x] 在浏览器中对 customer 执行增删改查，数据持久化到 PostgreSQL
-- [x] Generator 能从 customer schema 输出前后端代码框架
-- [x] `bun run check` 全部通过
-- [x] 新人按照 README 能在 30 分钟内跑通完整流程
+**完成标准**：
+- [x] 浏览器中对 customer 执行增删改查，数据持久化到 PostgreSQL
+- [x] Generator 从 schema 输出前后端代码框架
+- [x] 新人按 README 在 30 分钟内跑通完整流程
 
 ---
 
-## Phase 2：认证与权限底座
+## Phase 2：认证与权限底座 ✅
 
-> **状态**：P2A/P2B/P2C 核心部分已完成（2026-04-22）
-> **目标**：建立统一认证鉴权体系，使后续所有模块运行在权限框架之上
+> 完成：2026-04-22
 
-### 前置条件
+**目标**：建立统一认证鉴权体系，后续所有模块运行在权限框架之上。
 
-- Phase 1 完成 ✅
+**交付物**：
+- JWT + Refresh Session 认证策略（ADR-0007）
+- User / Role / Permission / Menu 数据模型与 CRUD
+- 登录/登出/刷新接口 + Bearer token 校验
+- Vue 登录页面、路由守卫、动态菜单渲染、权限指令
+- Auth 审计基线
 
-### 范围
-
-| # | 交付物 | 状态 | 说明 |
-|---|---|---|---|
-| 2.1 | 认证方案 ADR | ✅ 完成 | ADR-0007 固定 JWT + refresh session 策略 |
-| 2.2 | 用户表与基础 CRUD | ✅ 完成 | `0001_auth_rbac.sql` 落库，persistence helper 就绪 |
-| 2.3 | 登录 / 登出接口 | ✅ 完成 | `POST /auth/login`、`POST /auth/logout`、`POST /auth/refresh` |
-| 2.4 | JWT 中间件 | ✅ 完成 | `service.authorize()` + `guard.authorize()` Bearer token 校验 |
-| 2.5 | 角色表与 RBAC 模型 | ✅ 完成 | `roles/permissions/user_roles/role_permissions` 落库 |
-| 2.6 | 权限校验守卫 | ✅ 完成 | `createAuthGuard` + customer 路由已接入，401/403 语义验证通过 |
-| 2.7 | 菜单表与动态路由 | ✅ 完成 | `menus/role_menus` 落库，seed 有默认菜单 |
-| 2.8 | Vue 登录页面与路由守卫 | ✅ 完成 | `platform-api.ts` access token 管理 + refresh 恢复 |
-| 2.9 | Vue 动态菜单渲染 | ✅ 完成 | `buildVueNavigation` + `filterAccessibleMenus` |
-| 2.10 | Vue 权限指令 | ✅ 完成 | `usePermissions` + `buildPermissionGates` in `frontend-vue` |
-| 2.11 | 审计日志基础 | ✅ 完成 | 已补 auth 登录 / 刷新 / 登出 / 权限拒绝审计基线 |
-
-### 建议拆分
-
-| Subphase | 目标 | 入口条件 | 出口标准 |
-|---|---|---|---|
-| `P2A` 认证协议定稿 | 固定 token 模型、刷新策略、登出语义与前端存储约定 | Phase 1 已完成 | ADR 落定，接口契约和错误语义不再摇摆 |
-| `P2B` 身份与 RBAC 模型 | 落 user / role / permission / menu 的表结构、最小 CRUD 和 seed | `P2A` 完成 | 数据模型与权限点命名稳定，可供后续模块复用 |
-| `P2C` 登录与权限接入 | 打通登录、刷新、路由守卫、动态菜单、权限指令 | `P2A`、`P2B` 完成 | 一个真实账号可登录并看到正确菜单和页面 |
-| `P2D` 审计基线 | 记录当前已落地 auth 关键行为，并为后续权限变更审计预留字段 | `P2C` 基本可用 | 审计记录可查询，关键路径不再“无痕” |
-
-### 完成标准
-
-- [x] 能通过用户名密码登录，获取 JWT token
-- [x] 未认证请求返回 401，无权限请求返回 403
+**完成标准**：
+- [x] 用户名密码登录获取 JWT，未认证返回 401，无权限返回 403
 - [x] 不同角色看到不同菜单和页面
 - [x] 关键操作写入审计日志
-- [x] Vue 前端能根据后端菜单配置动态生成路由
+- [x] Vue 前端根据后端菜单配置动态生成路由
 
-### 暂不纳入
-
-- 单点登录、LDAP、OAuth 第三方登录
-- 复杂组织级数据权限
-- 细粒度审批流权限
+**暂不纳入**：SSO、LDAP、OAuth、复杂组织级数据权限、审批流权限
 
 ---
 
-## Phase 3：标准企业模块
+## Phase 3：标准企业模块 ✅
 
-> **状态**：已完成（`P3A`、`P3B`、`P3C` 后端模块 + `3.10/3.11/3.12` Vue 企业预设首版，2026-04-22）
-> **目标**：实现企业后台的标准通用模块，使平台具备承接真实业务的基础设施
+> 完成：2026-04-22
 
-### 前置条件
+**目标**：实现企业后台标准通用模块，使平台具备承接真实业务的基础设施。
 
-- Phase 2 完成
+**交付物**：
+- **P3A**：用户、角色、菜单、部门四个核心权限管理模块
+- **P3B**：字典类型/字典项、系统配置、操作日志
+- **P3C**：文件上传下载、站内通知
+- **Vue 企业预设首版**：ElyShell 布局、ElyCrudWorkspace 通用组件、TDesign Vue Next 底座
 
-### 范围
-
-| # | 交付物 | 说明 |
-|---|---|---|
-| 3.1 | 用户管理模块 | 用户列表、创建、编辑、禁用、重置密码；`Phase 3A` 已完成后端闭环 |
-| 3.2 | 角色管理模块 | 角色 CRUD、权限分配、角色关联用户；`Phase 3A` 已完成后端闭环 |
-| 3.3 | 菜单管理模块 | 菜单树 CRUD、图标、排序、权限点绑定；`Phase 3A` 已完成后端闭环 |
-| 3.4 | 部门 / 组织模块 | 树形组织结构、部门关联用户；`Phase 3A` 已完成后端闭环 |
-| 3.5 | 字典管理模块 | 字典类型与字典项 CRUD，供其他模块引用；`Phase 3B` 首轮已完成后端闭环 |
-| 3.6 | 系统配置模块 | key-value 配置管理，运行时可读取；`Phase 3B` 第二轮已完成后端闭环 |
-| 3.7 | 操作日志模块 | 审计日志查看、筛选、导出；`Phase 3B` 已完成后端闭环 |
-| 3.8 | 文件管理模块 | 文件上传、下载、存储策略抽象；`Phase 3C` 首轮已完成后端闭环 |
-| 3.9 | 通知模块 | 站内通知、已读未读、基础推送能力；`Phase 3C` 已完成后端闭环 |
-| 3.10 | Vue 管理后台布局 | 已完成：`ElyShell` 具备侧边栏 + 顶栏 + 内容区 + 标签页布局 |
-| 3.11 | Vue 通用组件 | 已完成：`ElyCrudWorkspace`、标准列表页、标准表单页、标准详情页模板 |
-| 3.12 | Vue 企业预设首版 | 已完成：企业预设首版已落地，当前运行时底座已收口到 `TDesign Vue Next`，并由 `apps/example-vue` 实际消费 |
-
-### 建议拆分
-
-| Subphase | 目标 | 入口条件 | 出口标准 |
-|---|---|---|---|
-| `P3A` 权限闭环模块 | 用户、角色、菜单、部门四个核心模块闭环 | Phase 2 完成 | 权限体系从“底座”进入“可管理”状态 |
-| `P3B` 平台支撑模块 | 字典、配置、操作日志 | `P3A` 基本稳定 | 字典、配置、操作日志后端闭环完成，且不形成重复 owner |
-| `P3C` IO 与协作模块 | 文件、通知 | `P3A` 完成 | 文件、通知后端闭环完成，且不提前引入过重基础设施 |
-
-### 完成标准
-
-- [x] 所有标准模块的 CRUD 接口可用且有权限控制
-- [x] Vue 管理后台能展示标准布局和动态菜单
-- [x] Vue 企业预设已跑通首个后台布局与页面模板，并已完成 `Arco -> TDesign Vue Next` 收口
-- [x] 字典、配置可在其他模块中被引用
+**完成标准**：
+- [x] 所有模块 CRUD 接口可用且有权限控制
+- [x] Vue 管理后台展示标准布局和动态菜单
+- [x] 字典、配置可在其他模块中引用
 - [x] 文件上传下载流程跑通
-- [x] 每个模块有基本的测试覆盖
 
 ---
 
-## Phase 4：代码生成成熟化
+## Phase 4：代码生成成熟化 ✅
 
-> **状态**：已完成（P4A 预验证、P4D 安全写入、P4E 回归矩阵已收口，2026-04-24）
-> **目标**：让新增一个标准业务模块的工作量下降 50% 以上，生成代码可直接进入生产迭代
+> 完成：2026-04-24
 
-### 前置条件
+**目标**：让新增标准业务模块的工作量下降 50%+，生成代码可直接进入生产迭代。
 
-- Phase 2 完成 ✅
-- Phase 3 至少 `P3A` 完成
+**交付物**：
+- **P4A**：Entity / Module / Permission Schema 正式化与校验
+- **P4B**：Server 端代码生成（Repository / Service / Routes / Types / OpenAPI）
+- **P4C**：Frontend 代码生成（列表页、表单页、详情页、API Client）
+- **P4D**：Apply / Merge 安全写入（冲突预检 + 原子写入 + 区域保护）
+- **P4E**：多 Schema / 多策略回归验证矩阵
 
-### 范围
+**完成标准**：
+- [x] Schema 驱动生成链路稳定，支持多 schema / 多目标 / 多策略
+- [x] 二次生成安全写入边界固定（`overwrite-generated-only` + 冲突预检）
+- [x] 生成结果纳入 `bun run check`、E2E 回归与 CI 门禁
 
-| # | 交付物 | 说明 |
-|---|---|---|
-| 4.1 | Schema 体系正式化 | entity / page / form / table / permission / module schema 定义与校验 |
-| 4.2 | Server 端代码生成 | 从 entity schema 生成 repository / service / routes / types |
-| 4.3 | API 路由与 OpenAPI 生成 | 自动生成路由注册、参数校验、OpenAPI 文档 |
-| 4.4 | Vue 列表页生成 | 标准表格页：搜索条件、分页、操作列 |
-| 4.5 | Vue 表单页生成 | 新建/编辑表单：校验规则、字典联动、提交逻辑 |
-| 4.6 | Vue 详情页生成 | 只读详情展示 |
-| 4.7 | 权限点生成 | 自动生成 CRUD 对应的权限点与菜单注册 |
-| 4.8 | 测试脚手架生成 | server 测试 + 前端测试的空文件与样例 |
-| 4.9 | 合并策略完善 | 三向合并、区域保护、冲突提示 |
-| 4.10 | Generator 可视化预览 | 生成的文件列表、diff 预览（CLI 或简单 Web UI） |
-| 4.11 | 模块注册自动化 | 生成的模块自动注册到 server 和前端路由 |
-
-### 建议拆分
-
-| Subphase | 目标 | 入口条件 | 出口标准 |
-|---|---|---|---|
-| `P4A` Schema 正式化 | 固定 entity / module / permission schema 与校验器 | Phase 2 完成 | 第二个实体可无歧义描述 |
-| `P4B` Server Generator | 生成 repository / service / route / OpenAPI | `P4A` 完成 | 后端 CRUD 骨架不再手写起步 |
-| `P4C` Frontend Generator | 生成列表页、表单页、详情页和 API client | `P4A`、`P4B` 基本稳定 | 前端 CRUD 骨架可直接运行 |
-| `P4D` Apply / Merge | 固定 `generated/` 到正式模块目录的 apply 流程和冲突保护 | `P4B`、`P4C` 可用 | 二次生成不会默默覆盖手写代码 |
-| `P4E` 回归验证 | 用第二、第三个实体验证模板抽象与升级路径 | `P4D` 完成 | 生成器从“样例可用”进入“可复制” |
-
-### 完成标准
-
-- [x] schema 驱动生成链路已形成稳定入口，支持从已注册 schema 或外部 schema 文件生成前后端骨架
-- [x] 生成结果已纳入 `bun run check`、`e2e:generator:matrix`、`e2e:generator:cli` 与报告门禁回归
-- [x] 二次生成的安全写入边界已固定，`overwrite-generated-only`、冲突预检与原子写入均有测试覆盖
-- [x] 生成器已从“单一样例可用”进入“多 schema / 多目标 / 多策略可复制”状态
-- [x] `P4D/P4E` 收尾文档与 CI 证据已归档
-
-### 暂不纳入
-
-- 可视化拖拽式低代码编排器
-- 复杂所见即所得页面编辑器
-- 跨前端框架的运行时无损切换
+**暂不纳入**：可视化拖拽式低代码编排器、跨前端框架运行时无损切换
 
 ---
 
-## Phase 5：AI 辅助开发
+## Phase 5：AI 辅助开发 ✅ P5A 已完成
 
-> **状态**：P5A 已完成（2026-04-24），P5B/P5C 未开始
-> **目标**：让 AI 参与规格生成和实现补全，而非直接生成最终代码
+> P5A 完成：2026-04-24 | P5B / P5C 未开始
 
-### 前置条件
+**目标**：让 AI 参与规格生成和实现补全，而非直接生成最终代码。
 
-- Phase 4 完成 ✅
+**P5A 已交付**：
+- AI → Schema 转换：自然语言稳定转换为可校验的 `ModuleSchema`
+- 结构化校验网关：`validateModuleSchema` + enum 硬约束
+- Handoff / Replay / Corpus / Acceptance 工具链
+- 6 条验收 case 全绿，CI 自动化验证
 
-### 建议拆分
+**P5B / P5C（未开始）**：AI 建议器、交互式工作流、审计追踪
 
-| Subphase | 目标 | 入口条件 | 出口标准 | 状态 |
-|---|---|---|---|---|
-| `P5A` AI -> Schema | 把自然语言稳定转换为可校验 schema | Phase 4 完成 | AI 输出结构化结果可进入生成流程 | ✅ 已完成 |
-| `P5B` AI 建议器 | 字段、查询项、表单布局、测试数据建议 | `P5A` 可用 | AI 明显减少重复配置工作量 | 未开始 |
-| `P5C` 交互与审计 | `--ai` 工作流、回放、失败兜底 | `P5A`、`P5B` 基本稳定 | AI 交互可追踪、可回退、可人工接管 | 未开始 |
-
-### P5A 已落地产物
-
-- `packages/schema`: `validateModuleSchema`、`isModuleSchema`、enum source 硬约束
-- `packages/generator`: CLI `--schema-file`、外部 schema 内联 `.schema.ts`
-- `docs/ai-playbooks`: 输入模板、输出契约、验收语料、回放与人工接管说明
-- `scripts`: `p5a-schema-handoff`、`p5a-schema-handoff-report`、`p5a-schema-handoff-replay`、`p5a-handoff-corpus`、`p5a-acceptance` / `gate` / `index` / `finalize`
-- CI: `p5a-handoff-corpus` + `p5a-acceptance` 作业
-- 收尾文档：[2026-04-24-phase-5a-completion.md](./plans/2026-04-24-phase-5a-completion.md)
-
-### 完成标准
-
-- [x] 从自然语言描述到可运行模块的链路可跑通（P5A 6 case 全绿）
-- [x] AI 输出的 schema 通过结构化校验（`validateModuleSchema` + enum 硬约束）
-- [x] AI 失败时，人工可直接编辑 schema 继续推进（handoff report + replay）
-- [x] AI 每次交互有审计记录可回放（replay report + corpus + acceptance）
+**完成标准**：
+- [x] 自然语言到可运行模块的链路可跑通（6 case 全绿）
+- [x] AI 输出通过结构化校验
+- [x] AI 失败时人工可直接编辑 schema 继续推进
+- [x] 每次交互有审计记录可回放
 
 ---
 
-## Phase 6：生产强化
+## Phase 6：生产强化 ✅
 
-> **状态**：P6A 与 P6B 已完成（2026-04-25 完成阶段出口复验）
-> **目标**：让平台具备真正的生产部署和运营能力
+> 完成：2026-04-25
 
-### 前置条件
+**目标**：让平台具备真正的生产部署和运营能力。
 
-- Phase 3 完成 ✅
-- Phase 4 完成 ✅
+**交付物**：
+- **P6A**：Docker 部署方案、健康检查、Prometheus 指标、CORS / Rate Limit 安全基线、E2E 测试
+- **P6B1**：多租户模型（共享数据库 + `tenant_id` + PostgreSQL RLS），现有模块零改动
+- **P6B2**：数据权限框架（RuoYi 5 档 data_scope + 部门树过滤）
+- **P6B3**：租户管理 CRUD、一键初始化 CLI、租户配置覆盖、ADR-0009
 
-### 范围
-
-| # | 交付物 | 说明 | 状态 |
-|---|---|---|---|
-| 6.1 | 多租户模型 | 租户隔离策略、租户级配置 | ✅ P6B 已完成 |
-| 6.2 | 数据权限 | 行级数据权限控制（部门、个人、自定义） | ✅ P6B 已完成 |
-| 6.3 | 定时任务 | 任务调度框架、Cron 管理、执行日志 | 后续阶段 |
-| 6.4 | 可观测性 | 健康检查、指标暴露、链路追踪接入点 | ✅ P6A 已完成 |
-| 6.5 | 部署方案 | Docker 镜像、docker-compose、环境配置模板 | ✅ P6A 已完成 |
-| 6.6 | 缓存策略 | Redis 接入、缓存抽象层、热点数据缓存 | 后续阶段 |
-| 6.7 | 安全加固 | CORS、Rate Limit、SQL 注入防护、XSS 防护、CSRF | ✅ P6A 已完成 |
-| 6.8 | 数据导入导出 | Excel/CSV 导入导出通用能力 | 后续阶段 |
-| 6.9 | 灰度与特性开关 | 功能开关框架、灰度发布支持 | 后续阶段 |
-| 6.10 | E2E 测试 | 关键用户流程的端到端自动化测试 | ✅ P6A 已完成 |
-
-### 建议拆分
-
-| Subphase | 目标 | 入口条件 | 出口标准 | 状态 |
-|---|---|---|---|---|
-| `P6A` 生产基线 | Docker、env、健康检查、指标、安全、E2E | Phase 3、Phase 4 完成 | 平台具备可部署、可观测、可回归的最小生产能力 | ✅ 已完成 |
-| `P6B1` 租户模型与查询隔离 | `tenants` 表 + `tenant_id` + PostgreSQL RLS + JWT `tid` | `P6A` 完成 | 所有现有模块自动按租户过滤，现有 helper 零改动 | ✅ 已完成 |
-| `P6B2` 数据权限框架 | 角色 `data_scope` 5 档 + 部门树过滤 + 业务表接入 | `P6B1` 完成 | 全部/自定义/本部门/本部门及下级/仅本人 5 档可通过测试验证 | ✅ 已完成 |
-| `P6B3` 租户管理与治理 | 租户 CRUD + 初始化脚本 + 配置覆盖 + 升级路径 ADR | `P6B1` 完成 | 超级管理员可创建管理租户，一键初始化新租户，并已具备升级/发布演练收尾链路 | ✅ 已完成 |
-
-### P6B 设计文档
-
-- [2026-04-24-phase-6b-enterprise-enhancement-design.md](./plans/2026-04-24-phase-6b-enterprise-enhancement-design.md)
-
-### P6B 设计决策
+**关键设计决策**：
 
 | 决策 | 选择 | 理由 |
 |---|---|---|
-| 租户隔离策略 | 共享数据库 + `tenant_id` 字段 | 与现有 Drizzle ORM + Bun SQL 兼容，保留升级路径 |
-| 租户过滤机制 | PostgreSQL RLS（`current_setting` 会话变量） | 数据库层强制隔离，现有 30+ persistence helper 零改动 |
-| 数据权限模式 | RuoYi `data_scope` 5 档 | 企业后台最成熟的数据权限模式 |
+| 租户隔离 | 共享数据库 + `tenant_id` | 与 Drizzle ORM 兼容，保留升级路径 |
+| 租户过滤 | PostgreSQL RLS | 数据库层强制隔离，现有 helper 零改动 |
+| 数据权限 | RuoYi `data_scope` 5 档 | 企业后台最成熟的模式 |
 | 多角色冲突 | 取最宽松（OR 组合） | 与 RuoYi 一致 |
 
-### 完成标准
-
+**完成标准**：
 - [x] 平台可通过 Docker 部署到生产环境
 - [x] 关键接口有 Rate Limit 和认证保护
 - [x] 健康检查和指标可被监控系统采集
-- [x] 数据权限可按组织 / 角色粒度控制
+- [x] 数据权限按组织/角色粒度控制
 - [x] 核心用户流程有 E2E 测试覆盖
-- [ ] `Tenant 发布 blocker 确认单` 的 `8` 个真实 blocker 证据已收口
+
+**暂不纳入**：定时任务、Redis 缓存、灰度发布、完整数据导入导出
 
 ---
 
-## Phase 7：企业业务平台
+## Phase 7：企业业务平台 ✅ P7A 已完成
 
-> **状态**：`P7A Round-2` 已收口，`P7B/P7C` 未开始；当前不作为仓库第一优先级继续外扩
-> **目标**：让 Elysian 从"开发平台"升级为可承载复杂业务的企业平台
-> **PRD 文档**：[2026-04-24-system-design-v2-prd.md](./plans/2026-04-24-system-design-v2-prd.md)
+> P7A 完成：2026-04-26 | P7B / P7C 未开始
 
-### 前置条件
+**目标**：从"开发平台"升级为可承载复杂业务的企业平台。
 
-- Phase 6B 完成（租户隔离 + 数据权限）
+**P7A 已交付**：
+- 简化工作流引擎：定义、发起、任务、取消、线性审批
+- 最小条件分支（白名单表达式）
+- 任务认领（claim）语义与认领历史保留
+- 独立权限点（`workflow:definition/instance/task` 三组）
+- 审计日志覆盖关键动作
 
-### 范围
+**P7B / P7C（未开始）**：安全合规加固、统一消息中心
 
-| # | 交付物 | 说明 | 子阶段 |
-|---|---|---|---|
-| 7.1 | 简化工作流引擎 | 面向 agent 自编排辅助工具的最小流程能力：定义、发起、任务、取消、线性审批、白名单条件分支 | P7A |
-| 7.2 | 安全合规加固 | 密码策略、登录锁定、IP黑白名单、审计日志完整性（等保） | P7B |
-| 7.3 | 统一消息中心 | 扩展通知模块：站内信+邮件+WebSocket+SSE | P7C |
-
-### 建议拆分
-
-| Subphase | 目标 | 入口条件 | 出口标准 | 状态 |
-|---|---|---|---|---|
-| `P7A` 工作流引擎 | 简化工作流闭环，先服务 agent 自编排辅助工具 | P6B 完成 | 工作流可定义/可执行/可查询，支持线性审批与最小条件分支，不扩成通用 BPM | ✅ `Round-2` 已收口 |
-| `P7B` 安全合规 | 等保基础能力 | P6B 完成 | 满足等保二级核心要求 | 未开始 |
-| `P7C` 统一消息中心 | 多通道消息推送 | P7A 完成 | 站内信+邮件+WebSocket+SSE 4 通道可用 | 未开始 |
+**当前边界**：不扩展为通用 BPM，不进入 transfer / delegate
 
 ---
 
-## Phase 8：AI 智能化与蓝图体系
+## Phase 8：AI 智能化与蓝图体系 📋
 
-> **状态**：未开始（PRD 已定稿）
-> **目标**：让 AI 从"辅助生成"升级为"智能编排"，建立蓝图复用体系
-> **PRD 文档**：[2026-04-24-system-design-v2-prd.md](./plans/2026-04-24-system-design-v2-prd.md)
+> 状态：未开始（PRD 已定稿）
 
-### 前置条件
+**目标**：AI 从"辅助生成"升级为"智能编排"，建立蓝图复用体系。
 
-- Phase 7 完成
-- Phase 5B/C 完成
+| Subphase | 目标 | 说明 |
+|---|---|---|
+| P8A | 蓝图 + Studio | 可复用项目模板 + Web UI 平台管理控制台 |
+| P8B | 多 Agent 编排 | LangGraph 式 DAG：代码生成 + Lint + 测试全自动流水线 |
+| P8C | AI 审计工具 | 版本对比、5 维质量评分、依赖分析、人工审查 |
 
-### 范围
-
-| # | 交付物 | 说明 | 子阶段 |
-|---|---|---|---|
-| 8.1 | 蓝图系统 | 可复用的项目模板，4 个内置蓝图（OA/CRM/资产/项目） | P8A |
-| 8.2 | Studio 控制台 | Web UI 平台管理：仪表盘/模块/蓝图/工作流/消息 | P8A |
-| 8.3 | 多 Agent 编排 | LangGraph 式 DAG：代码生成+Lint+测试全自动流水线 | P8B |
-| 8.4 | AI 审计工具 | 版本对比、质量评分（5维）、依赖分析、人工审查 | P8C |
-
-### 建议拆分
-
-| Subphase | 目标 | 入口条件 | 出口标准 | 状态 |
-|---|---|---|---|---|
-| `P8A` 蓝图 + Studio | 蓝图 CRUD + Studio 控制台 | Phase 7 完成 | 蓝图可生成完整项目，Studio 可管理 | 未开始 |
-| `P8B` 多 Agent 编排 | Agent DAG 执行引擎 + 5 个内置 Agent | P5B/C 完成 | Agent DAG 可定义/可执行/可追踪 | 未开始 |
-| `P8C` AI 审计工具 | 版本对比 + 质量评分 + 依赖分析 | P8B 完成 | AI 产出可追溯/可审查 | 未开始 |
+**前置条件**：Phase 7 完成、Phase 5B/C 完成
 
 ---
 
-## Phase 9：平台扩展与生态
+## Phase 9：平台扩展与生态 📋
 
-> **状态**：未开始（PRD 已定稿）
-> **目标**：扩展技术覆盖面，建立开发者生态护城河
-> **PRD 文档**：[2026-04-24-system-design-v2-prd.md](./plans/2026-04-24-system-design-v2-prd.md)
+> 状态：未开始（PRD 已定稿）
 
-### 前置条件
+**目标**：扩展技术覆盖面，建立开发者生态。
 
-- Phase 8 完成
+| Subphase | 目标 | 说明 |
+|---|---|---|
+| P9A | 多框架适配 | React 正式化 + Angular 预设，同一 schema 生成三套代码 |
+| P9B | 国际化与主题 | i18n + 设计令牌 + 暗色模式 |
+| P9C | 社区生态 | 插件机制、模板市场、贡献者路线图 |
 
-### 范围
-
-| # | 交付物 | 说明 | 子阶段 |
-|---|---|---|---|
-| 9.1 | React 适配层正式化 | 与 Vue 适配层对齐的完整 React 实现 | P9A |
-| 9.2 | Angular 预设 | 新增 Angular 前端适配层 | P9A |
-| 9.3 | 国际化 i18n | 多语言支持框架 | P9B |
-| 9.4 | 主题系统 | 设计令牌、主题切换、暗色模式 | P9B |
-| 9.5 | 插件机制 | 第三方模块标准接入协议 | P9C |
-| 9.6 | 模板市场 | 基于蓝图的共享平台 | P9C |
-| 9.7 | 社区与文档 | 贡献者路线图、开发者教程 | P9C |
-
-### 建议拆分
-
-| Subphase | 目标 | 入口条件 | 出口标准 | 状态 |
-|---|---|---|---|---|
-| `P9A` 多框架适配 | React 正式化 + Angular 预设 | Phase 8 完成 | 同一 schema 生成 Vue/React/Angular 三套代码 | 未开始 |
-| `P9B` 国际化与主题 | i18n + 设计令牌 + 暗色模式 + 响应式 | P9A 完成 | 多语言可用，主题可定制 | 未开始 |
-| `P9C` 社区生态 | 插件/市场/贡献者/文档 | P8A 蓝图完成 | 外部开发者可贡献插件和模板 | 未开始 |
+**前置条件**：Phase 8 完成
 
 ---
 
-## 依赖关系图
+## 依赖关系
 
 ```text
 Phase 1 (垂直切片)
@@ -420,50 +245,33 @@ Phase 1 (垂直切片)
   │      │
   │      ├──→ Phase 3 (标准模块) ──→ Phase 6 (生产强化) ──→ Phase 7 (企业平台)
   │      │                                                     │
-  │      └──→ Phase 4 (生成成熟化) ──→ Phase 5 (AI 辅助) ──→ Phase 8 (智能化+蓝图)
+  │      └──→ Phase 4 (生成成熟化) ──→ Phase 5 (AI 辅助) ──→ Phase 8 (智能化)
   │                                                            │
-  │                                                            └──→ Phase 9 (扩展+生态)
+  │                                                            └──→ Phase 9 (生态)
 ```
 
-关键路径：`Phase 1 → Phase 2 → Phase 3 → Phase 6 → Phase 7`
-
-可并行路径：`Phase 4` 在 `Phase 2` 完成后可与 `Phase 3` 并行；`Phase 5B/C` 可与 `Phase 7` 并行
-
----
-
-## 当前优先行动
-
-### 立即执行
-
-1. ✅ 已完成 `P6A` `WP-1`：容器化启动与环境模板基线（server + db 一键启动）。
-2. ✅ 已完成 `P6A` `WP-2`：关键流程 E2E smoke（登录 + customer CRUD），并已接入 CI。
-3. ✅ 已完成 `P6A` `WP-3`：健康检查/指标与最小安全基线（`/metrics` + CORS 白名单 + 内存限流）。
-4. ✅ 已完成 `Phase 4` 收口（`P4D/P4E`），生成链路已进入”可回归、可门禁”状态。
-5. ✅ 已完成 `P6A` Round-2：指标标准化、smoke 稳定性、分布式限流评估均已达标。
-6. ✅ 已完成 `Phase 5 / P5A`（`AI -> Schema`）：4 项出口条件全部达标，6 case 验收全绿，收尾文档已归档。
-7. ✅ 已完成 `Phase 6B` 收口：多租户、数据权限、租户治理、`ADR-0009`、CI tenant e2e，以及历史功能分支样本、`dev`、`main` 三段 `10/10` 滚动观察均已达标，并已在 2026-04-25 通过本地 `bun run check` + `bun run e2e:tenant:full` 完成阶段出口复验。
-8. ✅ 已完成 `Phase 7 / P7A Round-2`：简化 workflow 已具备当前阶段最小闭环，当前不继续外扩到 `transfer / delegate`。
-9. 🚧 当前即时优先级切换为“若依基础功能对齐”：先补标准后台常用功能矩阵与示例工作区闭环，优先岗位、在线会话治理、登录锁定、登录日志与高频模块导入导出。
-10. 📋 当前优先级矩阵已单独记录为 [2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)；Phase 7–9 系统设计 PRD 仍保留为中长期方向，不等于当前第一优先级。
-
-### 文档产物要求
-
-- 每个活跃 `Subphase` 至少配一份 `docs/plans/*.md`
-- 每个已定型方案必须沉淀 ADR
-- `roadmap.md` 只同步当前活跃 `Subphase`，不再重复整套阶段定义
+关键路径：`Phase 1 → 2 → 3 → 6 → 7`
+可并行路径：`Phase 4` 在 `Phase 2` 后可与 `Phase 3` 并行；`Phase 5B/C` 可与 `Phase 7` 并行
 
 ---
 
-## 风险与关注点
+## 当前优先级
 
-| 风险 | 影响 | 缓解措施 |
-|---|---|---|
-| Schema 体系过早固定 | 后续修改成本高 | `P4A` 开始前至少用 2 到 3 个实体验证 |
-| 前端适配层耦合 | 双框架支持失败 | 严格通过 schema 解耦，适配层不共享框架语义 |
-| 企业预设封装过浅 | generator 难以复用页面模板 | 保持 `ui-core` 中立，继续把第三方组件耦合收敛在预设层 |
-| Auth 方案选择不当 | 影响所有后续模块 | `P2A` 启动前先写 ADR，确认后不动摇 |
-| Generator 合并策略不足 | 二次生成覆盖手写代码 | `P4D` 必须完善 apply / merge 与区域保护 |
-| AI 输出不可控 | 生成错误代码 | schema 校验网关 + 人工确认环节不可省略 |
-| 工作流边界膨胀 | P7A 范围失控 | 固定“agent 自编排辅助工具”定位，只保留最小流程语义 |
-| 多 Agent 产出质量不可控 | P8B 信任问题 | 质量评分 + 人工审查网关不可省略 |
-| Phase 7–9 周期过长 | 整体交付延迟 | 严格按 Exit Gate 控制，每个子阶段独立可用 |
+1. **生成器自举闭环**（主线）：Schema → Preview/Report → Apply/Merge → Frontend Artifact → 正式模块落地
+2. **企业后台基础功能对齐**（验证对象）：系统工作区日常可用性打磨，而非继续拔高平台能力天花板
+3. **Phase 7–9**：保留为中长期方向，不等于当前第一优先级
+
+功能矩阵与执行计划：[ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
+
+---
+
+## 风险与关注
+
+| 风险 | 缓解措施 |
+|---|---|
+| Schema 体系过早固定 | P4A 前用 2–3 个实体验证 |
+| 前端适配层耦合 | 严格通过 schema 解耦，适配层不共享框架语义 |
+| Generator 合并策略不足 | P4D 完善 apply/merge 与区域保护 |
+| AI 输出不可控 | Schema 校验网关 + 人工确认环节 |
+| 工作流边界膨胀 | 固定"agent 自编排辅助工具"定位，只保留最小流程语义 |
+| Phase 7–9 周期过长 | 按 Exit Gate 控制，每个子阶段独立可用 |
