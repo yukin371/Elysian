@@ -1,19 +1,35 @@
 import type { Component } from "vue"
+import { defineAsyncComponent } from "vue"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
 import { generatedStandardCrudWorkspaceKinds } from "../../../app/workspace-registry/generated"
 import type { FileWorkspaceQuery } from "../../../lib/file-workspace"
 import type { WorkflowDefinitionRecord } from "../../../lib/platform-api"
 import { generatedStandardCrudMainComponents } from "../../../modules/generated"
-import AuthSessionWorkspaceMain from "../auth-session/AuthSessionWorkspaceMain.vue"
-import CustomerWorkspaceMain from "../customer/CustomerWorkspaceMain.vue"
-import DepartmentWorkspaceMain from "../department/DepartmentWorkspaceMain.vue"
-import FileWorkspaceMain from "../file/FileWorkspaceMain.vue"
-import GeneratorPreviewWorkspaceMain from "../generator/GeneratorPreviewWorkspaceMain.vue"
 import type { GeneratorPreviewDiffSummary } from "../generator/types"
-import OperationLogWorkspaceMain from "../operation-log/OperationLogWorkspaceMain.vue"
-import WorkflowWorkspaceMain from "../workflow/WorkflowWorkspaceMain.vue"
 import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
+
+const AuthSessionWorkspaceMain = defineAsyncComponent(
+  () => import("../auth-session/AuthSessionWorkspaceMain.vue"),
+)
+const CustomerWorkspaceMain = defineAsyncComponent(
+  () => import("../customer/CustomerWorkspaceMain.vue"),
+)
+const DepartmentWorkspaceMain = defineAsyncComponent(
+  () => import("../department/DepartmentWorkspaceMain.vue"),
+)
+const FileWorkspaceMain = defineAsyncComponent(
+  () => import("../file/FileWorkspaceMain.vue"),
+)
+const GeneratorPreviewWorkspaceMain = defineAsyncComponent(
+  () => import("../generator/GeneratorPreviewWorkspaceMain.vue"),
+)
+const OperationLogWorkspaceMain = defineAsyncComponent(
+  () => import("../operation-log/OperationLogWorkspaceMain.vue"),
+)
+const WorkflowWorkspaceMain = defineAsyncComponent(
+  () => import("../workflow/WorkflowWorkspaceMain.vue"),
+)
 
 interface GeneratorPreviewSessionSummary {
   status?: string | null

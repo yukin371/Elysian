@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import type { UiNavigationNode } from "@elysian/ui-core"
 import { ElyContextPanel, ElyWorkbenchShell } from "@elysian/ui-enterprise-vue"
-import { computed, ref, watch } from "vue"
+import { computed, defineAsyncComponent, ref, watch } from "vue"
 
 import type { AppTranslate } from "../../app/app-shell-helpers"
 import { useWorkbenchShortcuts } from "../../composables/use-workbench-shortcuts"
-import ShellWorkspaceHeaderActions from "../workspaces/shell/ShellWorkspaceHeaderActions.vue"
-import ShellWorkspaceMainSwitch from "../workspaces/shell/ShellWorkspaceMainSwitch.vue"
-import ShellWorkspaceSecondarySwitch from "../workspaces/shell/ShellWorkspaceSecondarySwitch.vue"
+
+const ShellWorkspaceMainSwitch = defineAsyncComponent(
+  () => import("../workspaces/shell/ShellWorkspaceMainSwitch.vue"),
+)
+const ShellWorkspaceSecondarySwitch = defineAsyncComponent(
+  () => import("../workspaces/shell/ShellWorkspaceSecondarySwitch.vue"),
+)
 
 type ListenerMap = Record<string, (...args: unknown[]) => void>
 

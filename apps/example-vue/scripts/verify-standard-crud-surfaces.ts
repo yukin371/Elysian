@@ -50,16 +50,16 @@ const renderGeneratedIndex = () => {
     const workspaceKind = schema.frontend?.workspaceKind ?? schema.name
 
     importLines.push(
-      `import ${moduleName}WorkspaceMain from ${JSON.stringify(
+      `const ${moduleName}WorkspaceMain = defineAsyncComponent(() => import(${JSON.stringify(
         toGeneratedImportPath(`modules/${schema.name}/${schema.name}.page.vue`),
-      )}`,
+      )}))`,
     )
     importLines.push(
-      `import ${moduleName}WorkspacePanel from ${JSON.stringify(
+      `const ${moduleName}WorkspacePanel = defineAsyncComponent(() => import(${JSON.stringify(
         toGeneratedImportPath(
           `modules/${schema.name}/${schema.name}-panel.vue`,
         ),
-      )}`,
+      )}))`,
     )
     mainEntries.push(
       `  ${JSON.stringify(workspaceKind)}: ${moduleName}WorkspaceMain,`,
@@ -69,7 +69,9 @@ const renderGeneratedIndex = () => {
     )
   }
 
-  return withGeneratedHeader(`${importLines.join("\n")}
+  return withGeneratedHeader(`import { defineAsyncComponent } from "vue"
+
+${importLines.join("\n")}
 
 export const generatedStandardCrudMainComponents = {
 ${mainEntries.join("\n")}

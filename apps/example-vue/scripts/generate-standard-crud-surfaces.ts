@@ -77,14 +77,14 @@ const renderGeneratedIndex = () => {
     const panelComponentPath = `modules/${schema.name}/${schema.name}-panel.vue`
 
     importLines.push(
-      `import ${moduleName}WorkspaceMain from ${JSON.stringify(
+      `const ${moduleName}WorkspaceMain = defineAsyncComponent(() => import(${JSON.stringify(
         toGeneratedImportPath(mainComponentPath),
-      )}`,
+      )}))`,
     )
     importLines.push(
-      `import ${moduleName}WorkspacePanel from ${JSON.stringify(
+      `const ${moduleName}WorkspacePanel = defineAsyncComponent(() => import(${JSON.stringify(
         toGeneratedImportPath(panelComponentPath),
-      )}`,
+      )}))`,
     )
 
     mainEntries.push(
@@ -95,7 +95,9 @@ const renderGeneratedIndex = () => {
     )
   }
 
-  return withGeneratedHeader(`${importLines.join("\n")}
+  return withGeneratedHeader(`import { defineAsyncComponent } from "vue"
+
+${importLines.join("\n")}
 
 export const generatedStandardCrudMainComponents = {
 ${mainEntries.join("\n")}

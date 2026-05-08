@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { ConfigProvider as TConfigProvider } from "tdesign-vue-next/es/config-provider"
+import { onMounted } from "vue"
 import { isRecoverableAuthError } from "./app/example-auth-errors"
 import { useExampleAppBootstrap } from "./app/use-example-app-bootstrap"
-import { useExampleAppShellOrchestration } from "./app/use-example-app-shell-orchestration"
 import { useExampleRuntimeState } from "./app/use-example-runtime-state"
-import { useExampleWorkspaces } from "./app/use-example-workspaces"
 import ExampleAppStageGate from "./components/layout/ExampleAppStageGate.vue"
+import {
+  clearAccessToken,
+  fetchPlatform,
+  fetchSystemModules,
+  login,
+  refreshAuth,
+} from "./lib/platform-api"
 
 const { locale, localizers, t, tdesignGlobalConfig } = useExampleAppBootstrap()
 const exampleRuntimeState = useExampleRuntimeState()
-let submitLogout: () => Promise<void> = async () => {}
 
 const {
   authErrorMessage,
@@ -29,51 +34,103 @@ const handleRecoverableAuthError = (error: unknown) => {
   }
 }
 
-const exampleWorkspaces = useExampleWorkspaces({
-  t,
-  locale,
-  localizers,
-  runtimeState: exampleRuntimeState,
-  onCurrentSessionRevoked: async () => {
-    await submitLogout()
-  },
-  onRecoverableAuthError: handleRecoverableAuthError,
+const restoreSession = async () => {
+  if (!authModuleReady.value) {
+    authIdentity.value = null
+    authErrorMessage.value = ""
+    return
+  }
+
+  authLoading.value = true
+  authErrorMessage.value = ""
+
+  try {
+    authIdentity.value = await refreshAuth()
+  } catch (error) {
+    clearAccessToken()
+    authIdentity.value = null
+
+    if (!isRecoverableAuthError(error)) {
+      authErrorMessage.value =
+        error instanceof Error ? error.message : t("app.error.restoreSession")
+    }
+  } finally {
+    authLoading.value = false
+  }
+}
+
+const initializeApp = async () => {
+  try {
+    const [platformPayload, modulePayload] = await Promise.all([
+      fetchPlatform(),
+      fetchSystemModules(),
+    ])
+
+    const registeredModules = modulePayload.modules
+
+    exampleRuntimeState.platform.value = platformPayload
+    envName.value = modulePayload.env
+    exampleRuntimeState.registeredModuleCodes.value = registeredModules
+    authModuleReady.value = registeredModules.includes("auth")
+    exampleRuntimeState.customerModuleReady.value =
+      registeredModules.includes("customer")
+    exampleRuntimeState.departmentModuleReady.value =
+      registeredModules.includes("department")
+    exampleRuntimeState.postModuleReady.value =
+      registeredModules.includes("post")
+    exampleRuntimeState.fileModuleReady.value =
+      registeredModules.includes("file")
+    exampleRuntimeState.menuModuleReady.value =
+      registeredModules.includes("menu")
+    exampleRuntimeState.notificationModuleReady.value =
+      registeredModules.includes("notification")
+    exampleRuntimeState.operationLogModuleReady.value =
+      registeredModules.includes("operation-log")
+    exampleRuntimeState.roleModuleReady.value =
+      registeredModules.includes("role")
+    exampleRuntimeState.settingModuleReady.value =
+      registeredModules.includes("setting")
+    exampleRuntimeState.tenantModuleReady.value =
+      registeredModules.includes("tenant")
+    exampleRuntimeState.userModuleReady.value =
+      registeredModules.includes("user")
+    exampleRuntimeState.dictionaryModuleReady.value =
+      registeredModules.includes("dictionary")
+    exampleRuntimeState.workflowModuleReady.value =
+      registeredModules.includes("workflow-definition") ||
+      registeredModules.includes("workflow")
+
+    await restoreSession()
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? error.message : t("app.error.loadPlatform")
+  } finally {
+    loading.value = false
+  }
+}
+
+const submitLogin = async () => {
+  if (!authModuleReady.value || authLoading.value) {
+    return
+  }
+
+  authLoading.value = true
+  authErrorMessage.value = ""
+
+  try {
+    authIdentity.value = await login(loginForm.value)
+  } catch (error) {
+    authIdentity.value = null
+    authErrorMessage.value =
+      error instanceof Error ? error.message : t("app.error.signIn")
+  } finally {
+    authLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  await initializeApp()
 })
-
-const {
-  enterpriseShellCopy,
-  enterpriseShellTabs,
-  enterpriseShellUser,
-  shellHeaderActionListeners,
-  shellHeaderActionProps,
-  shellWorkspaceDescription,
-  shellWorkspaceMainListeners,
-  shellWorkspaceMainProps,
-  shellWorkspaceSecondaryListeners,
-  shellWorkspaceSecondaryProps,
-  shellWorkspaceTitle,
-  submitLogin,
-  submitLogout: resolvedSubmitLogout,
-} = useExampleAppShellOrchestration({
-  t,
-  locale,
-  localizers,
-  runtimeState: exampleRuntimeState,
-  navigation: exampleWorkspaces.exampleNavigation,
-  gates: exampleWorkspaces.workspaceGates,
-  workspaces: exampleWorkspaces,
-})
-
-submitLogout = resolvedSubmitLogout
-
-const {
-  enterpriseNavigation,
-  enterpriseSelectedMenuKey,
-  enterpriseSelectedTabKey,
-  openSessionWorkspace,
-  selectShellMenu,
-  selectShellTab,
-} = exampleWorkspaces.exampleNavigation
 </script>
 
 <template>
@@ -92,32 +149,12 @@ const {
       :credential="loginForm.password"
       :auth-error-message="authErrorMessage"
       :locale="locale"
-      :workspace-title="shellWorkspaceTitle"
-      :workspace-description="shellWorkspaceDescription"
-      :preset-label="t('app.shell.presetLabel')"
-      :status="
-        authModuleReady
-          ? t('app.shell.status.sessionAware')
-          : t('app.shell.status.preview')
-      "
-      :copy="enterpriseShellCopy"
-      :navigation="enterpriseNavigation"
-      :selected-menu-key="enterpriseSelectedMenuKey"
-      :tabs="enterpriseShellTabs"
-      :selected-tab-key="enterpriseSelectedTabKey"
-      :user="enterpriseShellUser"
-      :header-action-props="shellHeaderActionProps"
-      :header-action-listeners="shellHeaderActionListeners"
-      :workspace-main-props="shellWorkspaceMainProps"
-      :workspace-main-listeners="shellWorkspaceMainListeners"
-      :workspace-secondary-props="shellWorkspaceSecondaryProps"
-      :workspace-secondary-listeners="shellWorkspaceSecondaryListeners"
+      :localizers="localizers"
+      :runtime-state="exampleRuntimeState"
+      :on-recoverable-auth-error="handleRecoverableAuthError"
       @update:username="loginForm.username = $event"
       @update:credential="loginForm.password = $event"
       @submit-login="submitLogin"
-      @menu-select="selectShellMenu"
-      @tab-select="selectShellTab"
-      @user-click="openSessionWorkspace"
     />
   </TConfigProvider>
 </template>

@@ -1,12 +1,20 @@
 <script setup lang="ts">
-import type { UiNavigationNode } from "@elysian/ui-core"
+import { defineAsyncComponent } from "vue"
 
 import type { AppTranslate } from "../../app/app-shell-helpers"
+import type { useExampleAppBootstrap } from "../../app/use-example-app-bootstrap"
+import type { useExampleRuntimeState } from "../../app/use-example-runtime-state"
 import type { ExampleAppLayout } from "../../router/example-router"
 import AdminLoginPage from "../auth/AdminLoginPage.vue"
-import AdminShellLayout from "./AdminShellLayout.vue"
 
-type ListenerMap = Record<string, (...args: unknown[]) => void>
+const ExampleAuthenticatedShell = defineAsyncComponent(
+  () => import("./ExampleAuthenticatedShell.vue"),
+)
+
+type ExampleBootstrapLocalizers = ReturnType<
+  typeof useExampleAppBootstrap
+>["localizers"]
+type ExampleRuntimeState = ReturnType<typeof useExampleRuntimeState>
 
 interface ExampleAppStageGateProps {
   t: AppTranslate
@@ -22,22 +30,9 @@ interface ExampleAppStageGateProps {
   credential: string
   authErrorMessage: string
   locale: string
-  workspaceTitle: string
-  workspaceDescription: string
-  presetLabel: string
-  status: string
-  copy: Record<string, unknown>
-  navigation: ReadonlyArray<UiNavigationNode>
-  selectedMenuKey: string | null
-  tabs: ReadonlyArray<unknown>
-  selectedTabKey: string
-  user: Record<string, unknown> | null
-  headerActionProps: Record<string, unknown>
-  headerActionListeners: ListenerMap
-  workspaceMainProps: Record<string, unknown>
-  workspaceMainListeners: ListenerMap
-  workspaceSecondaryProps: Record<string, unknown>
-  workspaceSecondaryListeners: ListenerMap
+  localizers: ExampleBootstrapLocalizers
+  runtimeState: ExampleRuntimeState
+  onRecoverableAuthError: (error: unknown) => void
 }
 
 defineProps<ExampleAppStageGateProps>()
@@ -46,9 +41,6 @@ defineEmits<{
   (event: "update:username", value: string): void
   (event: "update:credential", value: string): void
   (event: "submit-login"): void
-  (event: "menu-select", menuKey: string): void
-  (event: "tab-select", tabKey: string): void
-  (event: "user-click"): void
 }>()
 </script>
 
@@ -78,32 +70,13 @@ defineEmits<{
           @update:credential="$emit('update:credential', $event)"
           @submit-login="$emit('submit-login')"
         />
-        <AdminShellLayout
+        <ExampleAuthenticatedShell
           v-else
           :t="t"
           :locale="locale"
-          :title="title"
-          :subtitle="subtitle"
-          :workspace-title="workspaceTitle"
-          :workspace-description="workspaceDescription"
-          :preset-label="presetLabel"
-          :environment="envName"
-          :status="status"
-          :copy="copy"
-          :navigation="navigation"
-          :selected-menu-key="selectedMenuKey"
-          :tabs="tabs"
-          :selected-tab-key="selectedTabKey"
-          :user="user"
-          :header-action-props="headerActionProps"
-          :header-action-listeners="headerActionListeners"
-          :workspace-main-props="workspaceMainProps"
-          :workspace-main-listeners="workspaceMainListeners"
-          :workspace-secondary-props="workspaceSecondaryProps"
-          :workspace-secondary-listeners="workspaceSecondaryListeners"
-          @menu-select="$emit('menu-select', $event)"
-          @tab-select="$emit('tab-select', $event)"
-          @user-click="$emit('user-click')"
+          :localizers="localizers"
+          :runtime-state="runtimeState"
+          :on-recoverable-auth-error="onRecoverableAuthError"
         />
       </template>
     </div>

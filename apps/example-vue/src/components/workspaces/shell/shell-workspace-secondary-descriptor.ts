@@ -1,14 +1,10 @@
 import type { Component } from "vue"
+import { defineAsyncComponent } from "vue"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
 import { generatedStandardCrudWorkspaceKinds } from "../../../app/workspace-registry/generated"
 import type { FileRecord } from "../../../lib/platform-api"
 import { generatedStandardCrudPanelComponents } from "../../../modules/generated"
-import AuthSessionWorkspacePanel from "../auth-session/AuthSessionWorkspacePanel.vue"
-import CustomerWorkspacePanel from "../customer/CustomerWorkspacePanel.vue"
-import DepartmentWorkspacePanel from "../department/DepartmentWorkspacePanel.vue"
-import FileWorkspacePanel from "../file/FileWorkspacePanel.vue"
-import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspacePanel.vue"
 import type {
   GeneratorPreviewDiffSummary,
   GeneratorPreviewFileCard,
@@ -16,9 +12,29 @@ import type {
   GeneratorPreviewSqlProposal,
   GeneratorPreviewSqlProposalHandoff,
 } from "../generator/types"
-import OperationLogWorkspacePanel from "../operation-log/OperationLogWorkspacePanel.vue"
-import WorkflowWorkspacePanel from "../workflow/WorkflowWorkspacePanel.vue"
 import ShellWorkspaceStatusPanel from "./ShellWorkspaceStatusPanel.vue"
+
+const AuthSessionWorkspacePanel = defineAsyncComponent(
+  () => import("../auth-session/AuthSessionWorkspacePanel.vue"),
+)
+const CustomerWorkspacePanel = defineAsyncComponent(
+  () => import("../customer/CustomerWorkspacePanel.vue"),
+)
+const DepartmentWorkspacePanel = defineAsyncComponent(
+  () => import("../department/DepartmentWorkspacePanel.vue"),
+)
+const FileWorkspacePanel = defineAsyncComponent(
+  () => import("../file/FileWorkspacePanel.vue"),
+)
+const GeneratorPreviewWorkspacePanel = defineAsyncComponent(
+  () => import("../generator/GeneratorPreviewWorkspacePanel.vue"),
+)
+const OperationLogWorkspacePanel = defineAsyncComponent(
+  () => import("../operation-log/OperationLogWorkspacePanel.vue"),
+)
+const WorkflowWorkspacePanel = defineAsyncComponent(
+  () => import("../workflow/WorkflowWorkspacePanel.vue"),
+)
 
 export interface ShellWorkspaceSecondarySwitchProps {
   t: AppTranslate
