@@ -9717,7 +9717,7 @@ export interface operations {
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
                             /** @constant */
-                            sourceType: "registered-schema";
+                            sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
@@ -9822,7 +9822,7 @@ export interface operations {
                         schemaName: string;
                         skippedFileCount: (number | null) | null;
                         /** @constant */
-                        sourceType: "registered-schema";
+                        sourceType: "registered-schema" | "manual-schema-json";
                         sourceValue: string;
                         /** @enum {string} */
                         status: "pending_review" | "ready" | "rejected" | "applied";
@@ -9993,7 +9993,7 @@ export interface operations {
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
                             /** @constant */
-                            sourceType: "registered-schema";
+                            sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
@@ -10171,7 +10171,7 @@ export interface operations {
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
                             /** @constant */
-                            sourceType: "registered-schema";
+                            sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
@@ -10349,7 +10349,7 @@ export interface operations {
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
                             /** @constant */
-                            sourceType: "registered-schema";
+                            sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
@@ -10504,7 +10504,7 @@ export interface operations {
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
                             /** @constant */
-                            sourceType: "registered-schema";
+                            sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";

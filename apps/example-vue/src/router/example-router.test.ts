@@ -18,13 +18,20 @@ import {
 
 type MockBrowserWindow = ReturnType<typeof createMockWindow>["mockWindow"]
 
-const testGlobal = globalThis as typeof globalThis & {
-  window?: MockBrowserWindow
+const originalWindow = globalThis.window
+
+const setMockWindow = (
+  windowValue: typeof globalThis.window | MockBrowserWindow | undefined,
+) => {
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: windowValue,
+    writable: true,
+  })
 }
-const originalWindow = testGlobal.window
 
 afterEach(() => {
-  testGlobal.window = originalWindow
+  setMockWindow(originalWindow)
 })
 
 const createMockWindow = (hash: string) => {
@@ -140,7 +147,7 @@ describe("example app router", () => {
 
   test("reads the current normalized workspace route from the hash model", () => {
     const { mockWindow } = createMockWindow("#/workflow/tasks/todo")
-    testGlobal.window = mockWindow
+    setMockWindow(mockWindow)
 
     expect(readCurrentWorkspaceRoutePath()).toBe("/workflow/definitions")
     expect(readCurrentExampleWorkspaceRoute()?.kind).toBe(
@@ -150,7 +157,7 @@ describe("example app router", () => {
 
   test("replaces the current hash route only when the target path changes", () => {
     const { mockWindow, replaceState } = createMockWindow("#/customers")
-    testGlobal.window = mockWindow
+    setMockWindow(mockWindow)
 
     replaceCurrentWorkspaceRoute("/customers")
     replaceCurrentWorkspaceRoute("/system/files")
@@ -162,7 +169,7 @@ describe("example app router", () => {
   test("subscribes and unsubscribes to hashchange events", () => {
     const { mockWindow, listeners, addEventListener, removeEventListener } =
       createMockWindow("#/customers")
-    testGlobal.window = mockWindow
+    setMockWindow(mockWindow)
     const listener = mock(() => {})
 
     const cleanup = listenWorkspaceRouteChange(listener)
@@ -191,7 +198,7 @@ describe("example app router", () => {
   test("resolves the selected menu key with explicit selection precedence", () => {
     const items = createNavigationItems()
     const { mockWindow } = createMockWindow("#/system/files")
-    testGlobal.window = mockWindow
+    setMockWindow(mockWindow)
 
     expect(resolveExampleNavigationMenuKey(items, "customer-list")).toBe(
       "customer-list",
@@ -220,7 +227,7 @@ describe("example app router", () => {
   test("resolves the selected navigation selection state with menu and item fallback", () => {
     const items = createNavigationItems()
     const { mockWindow } = createMockWindow("#/system/files")
-    testGlobal.window = mockWindow
+    setMockWindow(mockWindow)
 
     expect(
       resolveExampleNavigationSelectionState(items, "customer-list"),
@@ -267,7 +274,7 @@ describe("example app router", () => {
 
   test("validates example shell tab keys", () => {
     expect(resolveExampleShellTabKey("workspace")).toBe("workspace")
-    expect(resolveExampleShellTabKey("runtime")).toBe("runtime")
+    expect(resolveExampleShellTabKey("runtime")).toBeNull()
     expect(resolveExampleShellTabKey("missing")).toBeNull()
   })
 })

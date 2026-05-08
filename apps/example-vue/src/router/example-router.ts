@@ -209,8 +209,7 @@ export const resolveExampleWorkspaceSelectionIntent = (
 
 export const resolveExampleShellTabKey = (
   tabKey: string,
-): ExampleShellTabKey | null =>
-  tabKey === "workspace" || tabKey === "runtime" ? tabKey : null
+): ExampleShellTabKey | null => (tabKey === "workspace" ? tabKey : null)
 
 export const resolveExampleNavigationMenuKey = (
   items: UiNavigationNode[],

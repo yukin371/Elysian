@@ -184,25 +184,27 @@ export const useDepartmentWorkspace = (
   )
 
   const queryFields = computed(() =>
-    options.page.queryFields.value.map((field) => ({
-      ...field,
-      label: options.localizeFieldLabel(field.key),
-      options:
-        field.key === "status" && field.options
-          ? field.options.map((option) => ({
-              ...option,
-              label: options.localizeStatus(option.value),
-            }))
-          : field.options,
-      placeholder:
-        field.key === "code"
-          ? options.t("app.department.query.codePlaceholder")
-          : field.key === "name"
-            ? options.t("app.department.query.namePlaceholder")
-            : field.key === "status"
-              ? options.t("copy.query.statusPlaceholder")
-              : field.placeholder,
-    })),
+    options.page.queryFields.value
+      .map((field) => ({
+        ...field,
+        label: options.localizeFieldLabel(field.key),
+        options:
+          field.key === "status" && field.options
+            ? field.options.map((option) => ({
+                ...option,
+                label: options.localizeStatus(option.value),
+              }))
+            : field.options,
+        placeholder:
+          field.key === "code"
+            ? options.t("app.department.query.codePlaceholder")
+            : field.key === "name"
+              ? options.t("app.department.query.namePlaceholder")
+              : field.key === "status"
+                ? options.t("copy.query.statusPlaceholder")
+                : field.placeholder,
+      }))
+      .filter((field) => field.key !== "status"),
   )
 
   const tableItems = computed(() =>

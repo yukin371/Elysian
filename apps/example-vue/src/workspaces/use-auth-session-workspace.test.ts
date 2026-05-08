@@ -39,7 +39,7 @@ const createWorkspace = (overrides?: {
 }) =>
   useAuthSessionWorkspace({
     canEnterWorkspace: computed(() => true),
-    currentShellTabKey: ref("runtime"),
+    currentShellTabKey: ref("workspace"),
     locale: ref("zh-CN"),
     onCurrentSessionRevoked:
       overrides?.onCurrentSessionRevoked ?? (async () => {}),

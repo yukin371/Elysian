@@ -1,7 +1,6 @@
 <script setup lang="ts">
 interface ShellWorkspaceStatusPanelProps {
   title: string
-  currentPage: string
   currentPath: string
   authStatusLabel: string
   moduleCodeLabel: string
@@ -13,25 +12,11 @@ defineProps<ShellWorkspaceStatusPanelProps>()
 <template>
   <section class="enterprise-card">
     <h3 class="enterprise-heading">{{ title }}</h3>
-    <p class="enterprise-copy">{{ currentPath }}</p>
+    <code class="enterprise-path">{{ currentPath }}</code>
 
-    <div class="enterprise-metadata mt-5">
-      <div>
-        <span>当前页面</span>
-        <strong>{{ currentPage }}</strong>
-      </div>
-      <div>
-        <span>当前路径</span>
-        <strong>{{ currentPath }}</strong>
-      </div>
-      <div>
-        <span>鉴权状态</span>
-        <strong>{{ authStatusLabel }}</strong>
-      </div>
-      <div>
-        <span>模块编码</span>
-        <strong>{{ moduleCodeLabel }}</strong>
-      </div>
+    <div class="enterprise-facts">
+      <span>{{ moduleCodeLabel }}</span>
+      <span>{{ authStatusLabel }}</span>
     </div>
   </section>
 </template>
@@ -51,37 +36,23 @@ defineProps<ShellWorkspaceStatusPanelProps>()
   color: #0f172a;
 }
 
-.enterprise-copy {
-  margin: 0.55rem 0 0;
-  line-height: 1.75;
-  color: #475569;
-}
-
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  margin-top: 1rem;
-}
-
-.enterprise-metadata div {
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 4px;
-  background: rgba(248, 250, 252, 0.58);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata span {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-metadata strong {
+.enterprise-path {
   display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
+  margin-top: 0.55rem;
+  color: #475569;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.enterprise-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  margin-top: 1rem;
+  color: #64748b;
+  font-size: 0.82rem;
 }
 </style>

@@ -22,6 +22,16 @@
 5. 同步必要文档（`roadmap` / `profile` / `plans` / `MODULE.md`）。
 6. 输出结果摘要（已完成、未验证、残留风险）。
 
+## 生成输入方式
+
+仓库当前提供三条互补路径，分别对应不同边界：
+
+1. `registered-schema`：人类边界模式，直接从已注册 schema 生成，适合边界稳定的标准模块。
+2. 前端 JSON 输入：在 `apps/example-vue` 的 generator 工作区里编辑或粘贴 `ModuleSchema` JSON，再走同一条 preview / apply 链路。
+3. AI 编辑回放：先按 [docs/ai-playbooks/p5a-input-template.md](../ai-playbooks/p5a-input-template.md) 输出 handoff，再用 `p5a:handoff:report` / `p5a:handoff:replay` 复核并进入 generator。
+
+如果你只是想快速开发，优先用前端 JSON 输入；如果你要守住模块边界，优先用 `registered-schema`；如果你是在修正 AI 输出，优先走 P5A 回放。
+
 ## AI 决策顺序
 
 AI 默认按以下顺序决策：

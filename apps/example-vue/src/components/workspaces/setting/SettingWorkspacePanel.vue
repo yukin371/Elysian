@@ -84,10 +84,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedSettingWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedSettingWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedSetting = readInjectedValue(
   computed(() => resolvedSettingWorkspaceState.value?.selectedSetting ?? null),
   null as SettingRecord | null,
@@ -104,9 +100,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.setting.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.settingModuleOffline") }}

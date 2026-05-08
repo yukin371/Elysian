@@ -14,7 +14,9 @@ import {
 
 import { AppError } from "../../errors"
 
-export type GeneratorPreviewSessionSourceType = "registered-schema"
+export type GeneratorPreviewSessionSourceType =
+  | "registered-schema"
+  | "manual-schema-json"
 export type GeneratorPreviewSessionStatus =
   | "pending_review"
   | "ready"
@@ -34,6 +36,7 @@ const generatorPreviewSessionFrontendTargets = [
 ] as const satisfies readonly GeneratorPreviewSessionRecord["frontendTarget"][]
 const generatorPreviewSessionSourceTypes = [
   "registered-schema",
+  "manual-schema-json",
 ] as const satisfies readonly GeneratorPreviewSessionSourceType[]
 const generatorPreviewSessionStatuses = [
   "pending_review",

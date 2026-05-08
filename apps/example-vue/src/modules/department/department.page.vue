@@ -40,7 +40,6 @@ interface DepartmentWorkspaceMainProps {
   itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
   copy: ElyCrudWorkspaceProps["copy"]
   workspaceStateInjected?: boolean
 }
@@ -179,11 +178,6 @@ watch(resolvedItems, () => {
       @reset="emit('reset')"
       @row-click="emit('row-click', $event as DepartmentRecord)"
     >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
       <template #footer>
         <div class="department-pagination">
           <span>{{ paginationSummary }}</span>

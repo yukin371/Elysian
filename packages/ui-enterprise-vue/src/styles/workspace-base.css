@@ -190,52 +190,98 @@
 }
 
 /* ── Section Groups (for ContextPanel content) ── */
-.ely-section-group { border-bottom: 1px solid rgba(15, 23, 42, 0.06); }
+.ely-section-group {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
 .ely-section-group__title {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 0; font-size: 13px; font-weight: 600; color: #0f172a;
-  cursor: pointer; user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  user-select: none;
 }
-.ely-section-group__title:hover { color: #2457d6; }
-.ely-section-group__body { padding-bottom: 12px; }
-.ely-section-group--collapsed .ely-section-group__body { display: none; }
+.ely-section-group__title:hover {
+  color: #2457d6;
+}
+.ely-section-group__body {
+  padding-bottom: 12px;
+}
+.ely-section-group--collapsed .ely-section-group__body {
+  display: none;
+}
 .ely-section-group__toggle {
-  font-size: 12px; color: #64748b; transition: transform 0.15s;
+  font-size: 12px;
+  color: #64748b;
+  transition: transform 0.15s;
 }
-.ely-section-group--collapsed .ely-section-group__toggle { transform: rotate(-90deg); }
+.ely-section-group--collapsed .ely-section-group__toggle {
+  transform: rotate(-90deg);
+}
 
 /* ── Context Panel field styles ── */
 .ely-context-panel__field-group {
-  display: grid; grid-template-columns: 1fr; gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 .ely-context-panel__field {
-  display: flex; flex-direction: column; gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .ely-context-panel__field-label {
-  font-size: 12px; color: #64748b; line-height: 18px;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 18px;
 }
 .ely-context-panel__field-value {
-  font-size: 14px; color: #0f172a; line-height: 22px;
+  font-size: 14px;
+  color: #0f172a;
+  line-height: 22px;
 }
 .ely-context-panel__identity {
-  display: flex; align-items: center; gap: 12px; padding: 16px;
-  background: rgba(15, 23, 42, 0.02); border-radius: 6px; margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.02);
+  border-radius: 6px;
+  margin-bottom: 16px;
 }
 .ely-context-panel__identity-name {
-  font-size: 16px; font-weight: 600; color: #0f172a;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
 }
 .ely-context-panel__identity-sub {
-  font-size: 13px; color: #64748b;
+  font-size: 13px;
+  color: #64748b;
 }
 
 /* ── Status bar dot colors ── */
 .ely-workbench__status-dot {
-  display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
 }
-.ely-workbench__status-dot--success { background: #52c41a; }
-.ely-workbench__status-dot--warning { background: #faad14; }
-.ely-workbench__status-dot--error { background: #ff4d4f; }
-.ely-workbench__status-dot--default { background: #d9d9d9; }
+.ely-workbench__status-dot--success {
+  background: #52c41a;
+}
+.ely-workbench__status-dot--warning {
+  background: #faad14;
+}
+.ely-workbench__status-dot--error {
+  background: #ff4d4f;
+}
+.ely-workbench__status-dot--default {
+  background: #d9d9d9;
+}
 
 /* ── Row selection highlight (for tables in workbench) ── */
 .ely-workbench .t-table__row--selected td,

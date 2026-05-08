@@ -46,10 +46,7 @@ const blockedFiles = computed(() =>
         @click="emit('select-file', file.path)"
       >
         <strong>{{ file.path }}</strong>
-        <p>{{ file.plannedReason }}</p>
-        <span class="generator-blocked-card-hint">
-          {{ t("app.generatorPreview.blockedAction") }}
-        </span>
+        <p v-if="file.plannedReason">{{ file.plannedReason }}</p>
       </button>
     </div>
   </section>
@@ -81,16 +78,11 @@ const blockedFiles = computed(() =>
   padding: 0.85rem 0.95rem;
   text-align: left;
   color: #7c2d12;
-  transition:
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
+  transition: border-color 140ms ease;
 }
 
 .generator-blocked-card:hover {
-  transform: translateY(-1px);
   border-color: rgba(154, 52, 18, 0.38);
-  box-shadow: 0 10px 18px rgba(124, 45, 18, 0.08);
 }
 
 .generator-blocked-card p {
@@ -100,11 +92,5 @@ const blockedFiles = computed(() =>
 
 .generator-blocked-card-active {
   border-color: rgba(194, 65, 12, 0.56);
-  box-shadow: 0 12px 22px rgba(194, 65, 12, 0.12);
-}
-
-.generator-blocked-card-hint {
-  color: #9a3412;
-  font-size: 0.78rem;
 }
 </style>

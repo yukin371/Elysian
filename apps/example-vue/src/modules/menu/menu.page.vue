@@ -8,11 +8,13 @@
 
 <script setup lang="ts">
 import {
-  ElyCrudWorkbench,
-  type ElyCrudWorkspaceCopy,
+  ElyCrudWorkspace,
+  type ElyCrudWorkspaceProps,
+  type ElyQueryField,
+  type ElyQueryValues,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
-import { computed, inject } from "vue"
+import { computed, inject, ref, watch } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "@elysian/frontend-vue"
 import {
@@ -28,18 +30,26 @@ type MenuWorkspaceTranslation = (
 
 interface MenuWorkspaceMainProps {
   t: MenuWorkspaceTranslation
+  moduleReady: boolean
+  authModuleReady: boolean
+  isAuthenticated: boolean
+  canEnterWorkspace: boolean
+  canViewMenus: boolean
+  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
+  itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  copy: ElyCrudWorkspaceCopy
+  copy: ElyCrudWorkspaceProps["copy"]
   workspaceStateInjected?: boolean
 }
 
 const props = defineProps<MenuWorkspaceMainProps>()
 
 const emit = defineEmits<{
+  (e: "search", values: ElyQueryValues): void
+  (e: "reset"): void
   (e: "row-click", row: MenuRecord): void
-  (e: "search", value: string): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -58,41 +68,174 @@ const resolvedLoading = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.menuLoading ?? null),
   false,
 )
+const resolvedErrorMessage = readInjectedValue(
+  computed(() => resolvedMenuWorkspaceState.value?.menuErrorMessage ?? null),
+  "",
+)
 const resolvedItems = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.tableItems ?? null),
   [] as MenuRecord[],
 )
 
-const panelTitle = computed(() => props.t("app.menu.workspaceTitle"))
+const pageSizeOptions = [20, 50, 100]
+const currentPage = ref(1)
+const pageSize = ref(20)
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(resolvedItems.value.length / pageSize.value)),
+)
+const pageStart = computed(() =>
+  resolvedItems.value.length === 0
+    ? 0
+    : (currentPage.value - 1) * pageSize.value + 1,
+)
+const pageEnd = computed(() =>
+  Math.min(resolvedItems.value.length, currentPage.value * pageSize.value),
+)
+const paginatedItems = computed(() =>
+  resolvedItems.value.slice(
+    (currentPage.value - 1) * pageSize.value,
+    currentPage.value * pageSize.value,
+  ),
+)
+const paginationSummary = computed(() =>
+  props.t("app.pagination.summary", {
+    page: currentPage.value,
+    totalPages: totalPages.value,
+    start: pageStart.value,
+    end: pageEnd.value,
+    total: resolvedItems.value.length,
+  }),
+)
 
-const handleSearch = (value: string) => {
-  emit("search", value)
+const goPreviousPage = () => {
+  currentPage.value = Math.max(1, currentPage.value - 1)
 }
 
-const handleRowClick = (row: Record<string, unknown>) => {
-  const rowId = String(row.id ?? "")
-  const menu = resolvedItems.value.find(
-    (item: MenuRecord) => item.id === rowId,
-  )
-  if (menu) {
-    emit("row-click", menu)
-  }
+const goNextPage = () => {
+  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
 }
+
+const updatePageSize = (event: Event) => {
+  const nextValue = Number((event.target as HTMLSelectElement).value)
+
+  pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
+  currentPage.value = 1
+}
+
+watch(resolvedItems, () => {
+  currentPage.value = Math.min(currentPage.value, totalPages.value)
+})
 </script>
 
 <template>
-  <ElyCrudWorkbench
-    :title="panelTitle"
-    :table-columns="tableColumns"
-    :items="resolvedItems"
-    :table-loading="resolvedLoading"
-    :table-actions="[]"
-    :search-placeholder="t('app.menu.searchPlaceholder', '搜索菜单...')"
-    :empty-title="emptyTitle"
-    :empty-description="emptyDescription"
-    :copy="copy"
-    row-key="id"
-    @search="handleSearch"
-    @row-click="handleRowClick"
-  />
-</template>
+  <section class="enterprise-card enterprise-main-card">
+    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
+      {{ t("app.message.menuModuleOffline") }}
+    </div>
+
+    <div
+      v-else-if="authModuleReady && !isAuthenticated"
+      class="enterprise-message enterprise-message-info"
+    >
+      {{ t("app.message.menuSignInToLoad") }}
+    </div>
+
+    <div
+      v-else-if="canEnterWorkspace && !canViewMenus"
+      class="enterprise-message enterprise-message-warning"
+    >
+      {{ t("app.message.menuNoListPermission") }}
+    </div>
+
+    <div
+      v-else-if="resolvedErrorMessage"
+      class="enterprise-message enterprise-message-danger"
+    >
+      {{ resolvedErrorMessage }}
+    </div>
+
+    <ElyCrudWorkspace
+      v-else
+      :eyebrow="t('app.menu.workspaceEyebrow')"
+      :title="t('app.menu.workspaceTitle')"
+      :description="''"
+      :query-fields="queryFields"
+      :query-loading="resolvedLoading"
+      :table-columns="tableColumns"
+      :items="paginatedItems"
+      :table-loading="resolvedLoading"
+      :table-actions="[]"
+      :item-count-label="itemCountLabel"
+      :empty-title="emptyTitle"
+      :empty-description="emptyDescription"
+      :copy="copy"
+      @search="emit('search', $event)"
+      @reset="emit('reset')"
+      @row-click="emit('row-click', $event as MenuRecord)"
+    >
+      <template #footer>
+        <div class="menu-pagination">
+          <span>{{ paginationSummary }}</span>
+          <label>
+            <small>{{ t("app.pagination.pageSize") }}</small>
+            <select :value="pageSize" @change="updatePageSize">
+              <option
+                v-for="option in pageSizeOptions"
+                :key="option"
+                :value="option"
+              >
+                {{ option }}
+              </option>
+            </select>
+          </label>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="currentPage <= 1"
+            @click="goPreviousPage"
+          >
+            {{ t("app.pagination.previous") }}
+          </button>
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            :disabled="currentPage >= totalPages"
+            @click="goNextPage"
+          >
+            {{ t("app.pagination.next") }}
+          </button>
+        </div>
+      </template>
+    </ElyCrudWorkspace>
+  </section>
+  </template>
+
+<style scoped>
+.menu-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.menu-pagination label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.menu-pagination small {
+  color: #64748b;
+}
+
+.menu-pagination select {
+  height: 2rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 4px;
+  background: white;
+  color: #0f172a;
+}
+</style>

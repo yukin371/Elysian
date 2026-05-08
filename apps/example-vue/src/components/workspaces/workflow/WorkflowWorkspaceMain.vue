@@ -45,7 +45,9 @@ const handleQueryInput = (value: string | number) => {
 }
 
 const totalDefinitionCount = computed(() =>
-  props.definitionCount > 0 ? props.definitionCount : props.definitionCards.length,
+  props.definitionCount > 0
+    ? props.definitionCount
+    : props.definitionCards.length,
 )
 
 const workspaceStateMessage = computed(() => {

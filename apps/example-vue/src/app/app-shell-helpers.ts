@@ -24,7 +24,7 @@ export type ExampleWorkspaceKind =
   | "workflow-definitions"
   | "placeholder"
 
-export type ExampleShellTabKey = "workspace" | "runtime"
+export type ExampleShellTabKey = "workspace"
 
 export const flattenNavigation = (
   items: UiNavigationNode[],

@@ -17,8 +17,10 @@ import {
   buildMigrationProposalSnapshot,
   writeMigrationProposalSnapshot,
 } from "@elysian/persistence"
+import { type ModuleSchema, validateModuleSchema } from "@elysian/schema"
 
 import { AppError } from "../../errors"
+import type { AppErrorCodeKey } from "../../errors/registry"
 import type { AuthIdentity } from "../auth"
 import type {
   GeneratorPreviewSessionDetail,
@@ -30,6 +32,8 @@ interface CreateGeneratorPreviewSessionInput {
   conflictStrategy?: WriteConflictStrategy
   frontendTarget?: FrontendTarget
   schemaName: string
+  sourceType?: "registered-schema" | "manual-schema-json"
+  sourceValue?: string
   targetPreset?: GenerationTargetPreset
 }
 
@@ -288,7 +292,68 @@ export const createGeneratorSessionService = (
     async createPreviewSession(
       input: CreateGeneratorPreviewSessionInput,
     ): Promise<GeneratorPreviewSessionDetail> {
-      const schema = getRegisteredSchema(input.schemaName)
+      const sourceType = input.sourceType ?? "registered-schema"
+      const sourceValue = input.sourceValue?.trim() ?? ""
+      let schema: ModuleSchema | null = getRegisteredSchema(input.schemaName)
+
+      if (sourceType === "manual-schema-json") {
+        if (sourceValue.length === 0) {
+          throw new AppError({
+            code: "GENERATOR_MANUAL_SCHEMA_SOURCE_REQUIRED" as AppErrorCodeKey,
+            message: "Generator manual schema source is required",
+            status: 400,
+            expose: true,
+            details: {
+              sourceType,
+            },
+          })
+        }
+
+        let parsedSchema: unknown
+        try {
+          parsedSchema = JSON.parse(sourceValue)
+        } catch {
+          throw new AppError({
+            code: "GENERATOR_MANUAL_SCHEMA_INVALID_JSON" as AppErrorCodeKey,
+            message: "Generator manual schema must be valid JSON",
+            status: 400,
+            expose: true,
+            details: {
+              sourceType,
+            },
+          })
+        }
+
+        const issues = validateModuleSchema(parsedSchema)
+        if (issues.length > 0) {
+          throw new AppError({
+            code: "GENERATOR_MANUAL_SCHEMA_INVALID" as AppErrorCodeKey,
+            message: "Generator manual schema is not a valid ModuleSchema",
+            status: 400,
+            expose: true,
+            details: {
+              issues,
+              sourceType,
+            },
+          })
+        }
+
+        schema = parsedSchema as ModuleSchema
+        if (schema.name !== input.schemaName) {
+          throw new AppError({
+            code: "GENERATOR_MANUAL_SCHEMA_NAME_MISMATCH" as AppErrorCodeKey,
+            message:
+              "Generator manual schema name does not match the requested schema name",
+            status: 400,
+            expose: true,
+            details: {
+              expectedSchemaName: input.schemaName,
+              actualSchemaName: schema.name,
+            },
+          })
+        }
+      }
+
       if (!schema) {
         throw new AppError({
           code: "GENERATOR_SCHEMA_NOT_FOUND",
@@ -344,8 +409,9 @@ export const createGeneratorSessionService = (
         report,
         reportPath,
         schemaName: schema.name,
-        sourceType: "registered-schema",
-        sourceValue: schema.name,
+        sourceType,
+        sourceValue:
+          sourceType === "manual-schema-json" ? sourceValue : schema.name,
         status: "pending_review",
         targetPreset,
         tenantId: input.actor?.user.tenantId ?? null,

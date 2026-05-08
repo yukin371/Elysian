@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {
-  ElyCrudWorkspace,
-  type ElyCrudWorkspaceProps,
-  type ElyQueryField,
-  type ElyQueryValues,
+  ElyCrudWorkbench,
+  type ElyCrudWorkspaceCopy,
+  type ElyTableAction,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
+import { Button as TButton } from "tdesign-vue-next/es/button"
 import { computed, inject } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
@@ -22,29 +22,20 @@ type DepartmentWorkspaceTranslation = (
 
 interface DepartmentWorkspaceMainProps {
   t: DepartmentWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canEnterWorkspace: boolean
-  canViewDepartments: boolean
-  loading: boolean
-  errorMessage: string
-  queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
-  itemCountLabel: string
+  tableActions: ElyTableAction[]
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
-  copy: ElyCrudWorkspaceProps["copy"]
+  copy: ElyCrudWorkspaceCopy
   workspaceStateInjected?: boolean
 }
 
 const props = defineProps<DepartmentWorkspaceMainProps>()
 
 const emit = defineEmits<{
-  (e: "search", values: ElyQueryValues): void
-  (e: "reset"): void
+  (e: "action", key: string, row: DepartmentRecord): void
   (e: "row-click", row: DepartmentRecord): void
+  (e: "search", value: string): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -65,70 +56,62 @@ const resolvedLoading = readInjectedValue(
   ),
   false,
 )
-const resolvedErrorMessage = readInjectedValue(
-  computed(
-    () =>
-      resolvedDepartmentWorkspaceState.value?.departmentErrorMessage ?? null,
-  ),
-  "",
-)
 const resolvedItems = readInjectedValue(
   computed(() => resolvedDepartmentWorkspaceState.value?.tableItems ?? null),
   [] as DepartmentRecord[],
 )
+
+const panelTitle = computed(() => props.t("app.department.workspaceTitle"))
+
+const handleSearch = (value: string) => {
+  emit("search", value)
+}
+
+const handleAction = (key: string, row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const department = resolvedItems.value.find(
+    (item: DepartmentRecord) => item.id === rowId,
+  )
+  if (department) {
+    emit("action", key, department)
+  }
+}
+
+const handleRowClick = (row: Record<string, unknown>) => {
+  const rowId = String(row.id ?? "")
+  const department = resolvedItems.value.find(
+    (item: DepartmentRecord) => item.id === rowId,
+  )
+  if (department) {
+    emit("row-click", department)
+  }
+}
+
+const handleCreate = () => {
+  emit("action", "create", {} as DepartmentRecord)
+}
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.departmentModuleOffline") }}
-    </div>
-
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.departmentSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewDepartments"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.departmentNoListPermission") }}
-    </div>
-
-    <div
-      v-else-if="resolvedErrorMessage"
-      class="enterprise-message enterprise-message-danger"
-    >
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.department.workspaceEyebrow')"
-      :title="t('app.department.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="resolvedLoading"
-      :table-columns="tableColumns"
-      :items="resolvedItems"
-      :table-loading="resolvedLoading"
-      :table-actions="[]"
-      :item-count-label="itemCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as DepartmentRecord)"
-    >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
+  <ElyCrudWorkbench
+    :title="panelTitle"
+    :table-columns="tableColumns"
+    :items="resolvedItems"
+    :table-loading="resolvedLoading"
+    :table-actions="tableActions"
+    :search-placeholder="t('app.department.searchPlaceholder', '搜索部门...')"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    row-key="id"
+    @search="handleSearch"
+    @action="handleAction"
+    @row-click="handleRowClick"
+  >
+    <template #toolbar>
+      <t-button theme="primary" @click="handleCreate">
+        {{ t("app.department.action.create", "新建部门") }}
+      </t-button>
+    </template>
+  </ElyCrudWorkbench>
 </template>

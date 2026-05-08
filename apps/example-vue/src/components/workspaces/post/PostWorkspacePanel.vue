@@ -79,10 +79,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedPostWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedPostWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedPost = readInjectedValue(
   computed(() => resolvedPostWorkspaceState.value?.selectedPost ?? null),
   null as PostRecord | null,
@@ -99,9 +95,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.post.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.postModuleOffline") }}

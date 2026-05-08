@@ -41,6 +41,8 @@ const userInitial = computed(
   () => props.user?.displayName.trim().charAt(0).toUpperCase() ?? "E",
 )
 
+const hasSubtitle = computed(() => props.subtitle.trim().length > 0)
+
 const selectedTabKey = computed(
   () => props.selectedTabKey ?? props.tabs?.[0]?.key ?? null,
 )
@@ -144,12 +146,8 @@ const handleDirectoryToggle = (menuKey: string) => {
           <div class="ely-brand-mark">E</div>
           <div class="ely-brand-copy">
             <p>{{ title }}</p>
-            <span>{{ subtitle }}</span>
+            <span v-if="hasSubtitle">{{ subtitle }}</span>
           </div>
-        </div>
-
-        <div class="ely-sidebar-label">
-          <span>{{ resolvedCopy.navigationLabel }}</span>
         </div>
 
         <TMenu
@@ -167,12 +165,6 @@ const handleDirectoryToggle = (menuKey: string) => {
           />
         </TMenu>
 
-        <div class="ely-sidebar-foot">
-          <p>{{ resolvedCopy.environmentLabel }}</p>
-          <strong>{{ environment }}</strong>
-          <span>{{ status }}</span>
-        </div>
-
         <slot name="sidebar-extra" />
       </TAside>
 
@@ -181,7 +173,7 @@ const handleDirectoryToggle = (menuKey: string) => {
           <div class="ely-header-primary">
             <h2>{{ workspaceTitle }}</h2>
             <ElyShellTabs
-              v-if="tabs && tabs.length > 0"
+              v-if="tabs && tabs.length > 1"
               :tabs="tabs"
               :selected-key="selectedTabKey"
               @select="handleTabSelect"
@@ -204,7 +196,6 @@ const handleDirectoryToggle = (menuKey: string) => {
               </TAvatar>
               <div>
                 <strong>{{ user.displayName }}</strong>
-                <span>{{ user.username }}</span>
               </div>
             </button>
           </div>
@@ -289,7 +280,7 @@ const handleDirectoryToggle = (menuKey: string) => {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  padding: 0.25rem 0.25rem 0.75rem;
+  padding: 0.25rem 0.25rem 0.4rem;
 }
 
 .ely-brand-mark {
@@ -316,36 +307,6 @@ const handleDirectoryToggle = (menuKey: string) => {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--elysian-ely-slate);
-}
-
-.ely-sidebar-label,
-.ely-sidebar-foot {
-  padding: 0 0.45rem;
-}
-
-.ely-sidebar-label span,
-.ely-stat-label,
-.ely-sidebar-foot p {
-  margin: 0;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.ely-sidebar-label small,
-.ely-sidebar-foot span {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.78rem;
-  color: #94a3b8;
-}
-
-.ely-sidebar-foot strong {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 1rem;
-  color: var(--elysian-ely-ink);
 }
 
 .ely-nav {
@@ -541,6 +502,14 @@ const handleDirectoryToggle = (menuKey: string) => {
   border-radius: 6px;
   background: rgba(248, 250, 252, 0.62);
   box-shadow: none;
+}
+
+.ely-stat-label {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
 .ely-stat-value {

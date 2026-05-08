@@ -24,13 +24,6 @@ type DepartmentWorkspaceTranslation = (
 
 interface DepartmentWorkspacePanelProps {
   t: DepartmentWorkspaceTranslation
-  moduleReady: boolean
-  authModuleReady: boolean
-  isAuthenticated: boolean
-  canEnterWorkspace: boolean
-  canViewDepartments: boolean
-  canCreateDepartments: boolean
-  canUpdateDepartments: boolean
   formCopy: ElyFormCopy
   workspaceStateInjected?: boolean
 }
@@ -38,10 +31,8 @@ interface DepartmentWorkspacePanelProps {
 const props = defineProps<DepartmentWorkspacePanelProps>()
 
 const emit = defineEmits<{
-  (e: "start-edit", record: DepartmentRecord): void
-  (e: "open-create"): void
   (e: "submit-form", values: ElyFormValues): void
-  (e: "cancel-panel"): void
+  (e: "cancel-form"): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -69,36 +60,11 @@ const resolvedDetailLoading = readInjectedValue(
   ),
   false,
 )
-const resolvedErrorMessage = readInjectedValue(
-  computed(
-    () =>
-      resolvedDepartmentWorkspaceState.value?.departmentErrorMessage ?? null,
-  ),
-  "",
-)
-const resolvedDetailErrorMessage = readInjectedValue(
-  computed(
-    () =>
-      resolvedDepartmentWorkspaceState.value?.departmentDetailErrorMessage ??
-      null,
-  ),
-  "",
-)
 const resolvedPanelMode = readInjectedValue(
   computed(
     () => resolvedDepartmentWorkspaceState.value?.departmentPanelMode ?? null,
   ),
   "detail" as "detail" | "create" | "edit",
-)
-const resolvedPanelTitle = readInjectedValue(
-  computed(() => resolvedDepartmentWorkspaceState.value?.panelTitle ?? null),
-  "",
-)
-const resolvedPanelDescription = readInjectedValue(
-  computed(
-    () => resolvedDepartmentWorkspaceState.value?.panelDescription ?? null,
-  ),
-  "",
 )
 const resolvedSelectedDepartment = readInjectedValue(
   computed(
@@ -125,125 +91,134 @@ const resolvedDepartmentParentLookup = readInjectedValue(
   computed(() => resolvedDepartmentWorkspaceState.value?.parentLookup ?? null),
   new Map<string, DepartmentRecord>(),
 )
+
+const showIdentity = computed(
+  () =>
+    resolvedSelectedDepartment.value && resolvedPanelMode.value !== "create",
+)
+
+const handleFormSubmit = (values: ElyFormValues) => {
+  emit("submit-form", values)
+}
+
+const handleFormCancel = () => {
+  emit("cancel-form")
+}
 </script>
 
 <template>
-  <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.department.detailEyebrow") }}</p>
-    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
-
-    <div v-if="!moduleReady" class="enterprise-inline-warning">
-      {{ t("app.message.departmentModuleOffline") }}
-    </div>
-
-    <div v-else-if="authModuleReady && !isAuthenticated" class="enterprise-inline-warning">
-      {{ t("app.message.departmentSignInToLoad") }}
-    </div>
-
+  <div class="department-panel-content">
+    <!-- Identity section -->
     <div
-      v-else-if="canEnterWorkspace && !canViewDepartments"
-      class="enterprise-inline-warning"
+      class="ely-context-panel__identity"
+      v-if="showIdentity && resolvedSelectedDepartment"
     >
-      {{ t("app.message.departmentNoListPermission") }}
-    </div>
-
-    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <div
-      v-else-if="resolvedDetailLoading && resolvedSelectedDepartment"
-      class="enterprise-inline-warning"
-    >
-      {{ t("app.department.detailLoading") }}
-    </div>
-
-    <div v-else-if="resolvedDetailErrorMessage" class="enterprise-inline-warning">
-      {{ resolvedDetailErrorMessage }}
-    </div>
-
-    <template
-      v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedDepartment"
-    >
-      <div class="enterprise-button-row">
-        <button
-          v-if="canUpdateDepartments"
-          type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading || resolvedDetailLoading"
-          @click="emit('start-edit', resolvedSelectedDepartment)"
-        >
-          {{ t("app.department.action.edit") }}
-        </button>
-        <button
-          v-if="canCreateDepartments"
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('open-create')"
-        >
-          {{ t("app.department.action.create") }}
-        </button>
-      </div>
-
-      <ElyForm
-        class="mt-5"
-        :fields="resolvedFormFields"
-        :values="resolvedFormValues"
-        readonly
-        :loading="resolvedLoading || resolvedDetailLoading"
-        :copy="formCopy"
-      />
-
-      <div class="enterprise-metadata mt-5">
-        <div>
-          <span>{{ t("app.department.meta.parent") }}</span>
-          <strong>{{
+      <div>
+        <div class="ely-context-panel__identity-name">
+          {{ resolvedSelectedDepartment.name }}
+        </div>
+        <div class="ely-context-panel__identity-sub">
+          {{ resolvedSelectedDepartment.code }}
+        </div>
+        <div class="ely-context-panel__identity-sub">
+          {{
             resolvedSelectedDepartment.parentId
               ? (resolvedDepartmentParentLookup.get(
                   resolvedSelectedDepartment.parentId,
                 )?.name ?? resolvedSelectedDepartment.parentId)
               : t("app.department.parentRoot")
-          }}</strong>
+          }}
         </div>
-        <div v-if="resolvedSelectedDepartmentDetail">
-          <span>{{ t("app.department.meta.userCount") }}</span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <ElyForm
+      class="department-panel-form"
+      :fields="resolvedFormFields"
+      :values="resolvedFormValues"
+      :loading="resolvedLoading || resolvedDetailLoading"
+      :readonly="resolvedPanelMode === 'detail'"
+      :copy="formCopy"
+      @submit="handleFormSubmit"
+      @cancel="handleFormCancel"
+    />
+
+    <!-- Department detail metadata (detail mode only) -->
+    <template
+      v-if="
+        resolvedPanelMode === 'detail' &&
+        resolvedSelectedDepartmentDetail &&
+        resolvedSelectedDepartment
+      "
+    >
+      <div class="department-panel-metadata">
+        <div>
+          <span class="department-panel-metadata__label">{{
+            t("app.department.meta.userCount")
+          }}</span>
           <strong>{{ resolvedSelectedDepartmentDetail.userIds.length }}</strong>
         </div>
-      </div>
-
-      <div v-if="resolvedSelectedDepartmentDetail" class="mt-5 space-y-4">
         <div>
-          <p class="enterprise-subheading">
-            {{ t("app.department.meta.userIds") }}
-          </p>
-          <p class="enterprise-copy">
-            {{
-              resolvedSelectedDepartmentDetail.userIds.length > 0
-                ? resolvedSelectedDepartmentDetail.userIds.join(", ")
-                : t("app.department.meta.empty")
-            }}
-          </p>
+          <span class="department-panel-metadata__label">{{
+            t("app.department.meta.userIds")
+          }}</span>
+          <span>{{
+            resolvedSelectedDepartmentDetail.userIds.length > 0
+              ? resolvedSelectedDepartmentDetail.userIds.join(", ")
+              : t("app.department.meta.empty")
+          }}</span>
         </div>
       </div>
     </template>
-
-    <template
-      v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
-    >
-      <ElyForm
-        class="mt-5"
-        :fields="resolvedFormFields"
-        :values="resolvedFormValues"
-        :loading="resolvedLoading || resolvedDetailLoading"
-        :copy="formCopy"
-        @submit="emit('submit-form', $event)"
-        @cancel="emit('cancel-panel')"
-      />
-    </template>
-
-    <div v-else class="enterprise-inline-warning mt-5">
-      {{ t("app.department.detailEmptyDescription") }}
-    </div>
-  </section>
+  </div>
 </template>
+
+<style scoped>
+.department-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ely-context-panel__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.ely-context-panel__identity-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 22px;
+}
+
+.ely-context-panel__identity-sub {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 18px;
+  margin-top: 2px;
+}
+
+.department-panel-form {
+  margin-top: 4px;
+}
+
+.department-panel-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  font-size: 13px;
+  color: #334155;
+}
+
+.department-panel-metadata__label {
+  color: #64748b;
+  margin-right: 6px;
+}
+</style>

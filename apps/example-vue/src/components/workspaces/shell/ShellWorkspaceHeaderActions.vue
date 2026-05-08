@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { AppTranslate } from "../../../app/app-shell-helpers"
 import ShellHeaderActionButton from "./ShellHeaderActionButton.vue"
+import ShellHeaderActionMenu from "./ShellHeaderActionMenu.vue"
 
 defineProps<{
   t: AppTranslate
-  isRuntimeShellTab: boolean
   isAuthenticated: boolean
   authLoading: boolean
   isRoleWorkspace: boolean
@@ -117,15 +117,13 @@ defineEmits<{
   (event: "export-files"): void
   (event: "delete-visible-files"): void
   (event: "reload-workflow-definitions"): void
-  (event: "open-current-workspace-tab"): void
   (event: "submit-logout"): void
 }>()
 </script>
 
 <template>
-  <template v-if="!isRuntimeShellTab">
-    <ShellHeaderActionButton
-      v-if="isRoleWorkspace"
+  <ShellHeaderActionButton
+    v-if="isRoleWorkspace"
       theme="primary"
       variant="outline"
       :disabled="!canCreateRoles"
@@ -137,21 +135,22 @@ defineEmits<{
       v-if="isRoleWorkspace"
       theme="default"
       variant="outline"
-      :loading="roleExportLoading"
-      :disabled="roleLoading || roleExportLoading || !canViewRoles"
-      @click="$emit('export-roles')"
-    >
-      {{ t("app.action.exportRoles") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isRoleWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="roleLoading || !canViewRoles"
       @click="$emit('reload-roles')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu v-if="isRoleWorkspace" :label="t('app.permission.more')">
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="roleExportLoading"
+        :disabled="roleLoading || roleExportLoading || !canViewRoles"
+        @click="$emit('export-roles')"
+      >
+        {{ t("app.action.exportRoles") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isCustomerWorkspace"
       theme="primary"
@@ -183,35 +182,42 @@ defineEmits<{
       v-if="isDictionaryWorkspace"
       theme="default"
       variant="outline"
-      :loading="dictionaryTypeExportLoading"
-      :disabled="
-        dictionaryLoading || dictionaryTypeExportLoading || !canViewDictionaries
-      "
-      @click="$emit('export-dictionary-types')"
-    >
-      {{ t("app.action.exportDictionaryTypes") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isDictionaryWorkspace"
-      theme="default"
-      variant="outline"
-      :loading="dictionaryItemsExportLoading"
-      :disabled="
-        dictionaryLoading || dictionaryItemsExportLoading || !canViewDictionaries
-      "
-      @click="$emit('export-dictionary-items')"
-    >
-      {{ t("app.action.exportDictionaryItems") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isDictionaryWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="dictionaryLoading || !canViewDictionaries"
       @click="$emit('reload-dictionaries')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu
+      v-if="isDictionaryWorkspace"
+      :label="t('app.permission.more')"
+    >
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="dictionaryTypeExportLoading"
+        :disabled="
+          dictionaryLoading ||
+          dictionaryTypeExportLoading ||
+          !canViewDictionaries
+        "
+        @click="$emit('export-dictionary-types')"
+      >
+        {{ t("app.action.exportDictionaryTypes") }}
+      </ShellHeaderActionButton>
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="dictionaryItemsExportLoading"
+        :disabled="
+          dictionaryLoading ||
+          dictionaryItemsExportLoading ||
+          !canViewDictionaries
+        "
+        @click="$emit('export-dictionary-items')"
+      >
+        {{ t("app.action.exportDictionaryItems") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isDepartmentWorkspace"
       theme="primary"
@@ -225,21 +231,27 @@ defineEmits<{
       v-if="isDepartmentWorkspace"
       theme="default"
       variant="outline"
-      :loading="departmentExportLoading"
-      :disabled="departmentLoading || departmentExportLoading || !canViewDepartments"
-      @click="$emit('export-departments')"
-    >
-      {{ t("app.action.exportDepartments") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isDepartmentWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="departmentLoading || !canViewDepartments"
       @click="$emit('reload-departments')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu
+      v-if="isDepartmentWorkspace"
+      :label="t('app.permission.more')"
+    >
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="departmentExportLoading"
+        :disabled="
+          departmentLoading || departmentExportLoading || !canViewDepartments
+        "
+        @click="$emit('export-departments')"
+      >
+        {{ t("app.action.exportDepartments") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isPostWorkspace"
       theme="primary"
@@ -253,21 +265,22 @@ defineEmits<{
       v-if="isPostWorkspace"
       theme="default"
       variant="outline"
-      :loading="postExportLoading"
-      :disabled="postLoading || postExportLoading || !canViewPosts"
-      @click="$emit('export-posts')"
-    >
-      {{ t("app.action.exportPosts") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isPostWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="postLoading || !canViewPosts"
       @click="$emit('reload-posts')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu v-if="isPostWorkspace" :label="t('app.permission.more')">
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="postExportLoading"
+        :disabled="postLoading || postExportLoading || !canViewPosts"
+        @click="$emit('export-posts')"
+      >
+        {{ t("app.action.exportPosts") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isMenuWorkspace"
       theme="primary"
@@ -281,21 +294,22 @@ defineEmits<{
       v-if="isMenuWorkspace"
       theme="default"
       variant="outline"
-      :loading="menuExportLoading"
-      :disabled="menuLoading || menuExportLoading || !canViewMenus"
-      @click="$emit('export-menus')"
-    >
-      {{ t("app.action.exportMenus") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isMenuWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="menuLoading || !canViewMenus"
       @click="$emit('reload-menus')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu v-if="isMenuWorkspace" :label="t('app.permission.more')">
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="menuExportLoading"
+        :disabled="menuLoading || menuExportLoading || !canViewMenus"
+        @click="$emit('export-menus')"
+      >
+        {{ t("app.action.exportMenus") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isNotificationWorkspace"
       theme="primary"
@@ -309,54 +323,47 @@ defineEmits<{
       v-if="isNotificationWorkspace"
       theme="default"
       variant="outline"
-      :loading="notificationExportLoading"
-      :disabled="
-        notificationLoading || notificationExportLoading || !canViewNotifications
-      "
-      @click="$emit('export-notifications')"
-    >
-      {{ t("app.action.exportNotifications") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isNotificationWorkspace"
-      theme="default"
-      variant="outline"
-      :disabled="
-        notificationLoading ||
-        notificationExportLoading ||
-        !canViewNotifications ||
-        !canUpdateNotifications ||
-        visibleUnreadNotificationCount === 0
-      "
-      @click="$emit('mark-visible-notifications-read')"
-    >
-      {{
-        t("app.action.markVisibleNotificationsRead", {
-          count: visibleUnreadNotificationCount,
-        })
-      }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isNotificationWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="notificationLoading || !canViewNotifications"
       @click="$emit('reload-notifications')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isOperationLogWorkspace"
-      theme="default"
-      variant="outline"
-      :loading="operationLogExportLoading"
-      :disabled="
-        operationLogLoading || operationLogExportLoading || !canExportOperationLogs
-      "
-      @click="$emit('export-operation-logs')"
+    <ShellHeaderActionMenu
+      v-if="isNotificationWorkspace"
+      :label="t('app.permission.more')"
     >
-      {{ t("app.action.exportOperationLogs") }}
-    </ShellHeaderActionButton>
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="notificationExportLoading"
+        :disabled="
+          notificationLoading ||
+          notificationExportLoading ||
+          !canViewNotifications
+        "
+        @click="$emit('export-notifications')"
+      >
+        {{ t("app.action.exportNotifications") }}
+      </ShellHeaderActionButton>
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :disabled="
+          notificationLoading ||
+          notificationExportLoading ||
+          !canViewNotifications ||
+          !canUpdateNotifications ||
+          visibleUnreadNotificationCount === 0
+        "
+        @click="$emit('mark-visible-notifications-read')"
+      >
+        {{
+          t("app.action.markVisibleNotificationsRead", {
+            count: visibleUnreadNotificationCount,
+          })
+        }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isOperationLogWorkspace"
       theme="default"
@@ -366,6 +373,24 @@ defineEmits<{
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu
+      v-if="isOperationLogWorkspace"
+      :label="t('app.permission.more')"
+    >
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="operationLogExportLoading"
+        :disabled="
+          operationLogLoading ||
+          operationLogExportLoading ||
+          !canExportOperationLogs
+        "
+        @click="$emit('export-operation-logs')"
+      >
+        {{ t("app.action.exportOperationLogs") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isUserWorkspace"
       theme="primary"
@@ -388,21 +413,25 @@ defineEmits<{
       v-if="isSettingWorkspace"
       theme="default"
       variant="outline"
-      :loading="settingExportLoading"
-      :disabled="settingLoading || settingExportLoading || !canViewSettings"
-      @click="$emit('export-settings')"
-    >
-      {{ t("app.action.exportSettings") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isSettingWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="settingLoading || !canViewSettings"
       @click="$emit('reload-settings')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu
+      v-if="isSettingWorkspace"
+      :label="t('app.permission.more')"
+    >
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="settingExportLoading"
+        :disabled="settingLoading || settingExportLoading || !canViewSettings"
+        @click="$emit('export-settings')"
+      >
+        {{ t("app.action.exportSettings") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isTenantWorkspace"
       theme="primary"
@@ -416,31 +445,22 @@ defineEmits<{
       v-if="isTenantWorkspace"
       theme="default"
       variant="outline"
-      :loading="tenantExportLoading"
-      :disabled="tenantLoading || tenantExportLoading || !canViewTenants"
-      @click="$emit('export-tenants')"
-    >
-      {{ t("app.action.exportTenants") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isTenantWorkspace"
-      theme="default"
-      variant="outline"
       :disabled="tenantLoading || !canViewTenants"
       @click="$emit('reload-tenants')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isUserWorkspace"
-      theme="default"
-      variant="outline"
-      :loading="userExportLoading"
-      :disabled="userLoading || userExportLoading || !canViewUsers"
-      @click="$emit('export-users')"
-    >
-      {{ t("app.action.exportUsers") }}
-    </ShellHeaderActionButton>
+    <ShellHeaderActionMenu v-if="isTenantWorkspace" :label="t('app.permission.more')">
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="tenantExportLoading"
+        :disabled="tenantLoading || tenantExportLoading || !canViewTenants"
+        @click="$emit('export-tenants')"
+      >
+        {{ t("app.action.exportTenants") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isUserWorkspace"
       theme="default"
@@ -450,6 +470,17 @@ defineEmits<{
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
+    <ShellHeaderActionMenu v-if="isUserWorkspace" :label="t('app.permission.more')">
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="userExportLoading"
+        :disabled="userLoading || userExportLoading || !canViewUsers"
+        @click="$emit('export-users')"
+      >
+        {{ t("app.action.exportUsers") }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
     <ShellHeaderActionButton
       v-if="isFileWorkspace"
       theme="primary"
@@ -463,60 +494,54 @@ defineEmits<{
       v-if="isFileWorkspace"
       theme="default"
       variant="outline"
-      :loading="fileExportLoading"
-      :disabled="
-        fileLoading || fileActionLoading || fileExportLoading || !canViewFiles
-      "
-      @click="$emit('export-files')"
-    >
-      {{ t("app.action.exportFiles") }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isFileWorkspace"
-      theme="danger"
-      variant="outline"
-      :loading="fileActionLoading"
-      :disabled="
-        fileLoading ||
-        fileActionLoading ||
-        fileExportLoading ||
-        !canViewFiles ||
-        !canDeleteFiles ||
-        !hasActiveFileFilters ||
-        visibleFileCount === 0
-      "
-      @click="$emit('delete-visible-files')"
-    >
-      {{ t("app.action.deleteVisibleFiles", { count: visibleFileCount }) }}
-    </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isFileWorkspace"
-      theme="default"
-      variant="outline"
       :loading="fileLoading"
       :disabled="fileLoading || (!canViewFiles && !canUploadFiles)"
       @click="$emit('reload-files')"
     >
       {{ t("app.action.refresh") }}
     </ShellHeaderActionButton>
-    <ShellHeaderActionButton
-      v-if="isWorkflowDefinitionsWorkspace"
-      theme="default"
+    <ShellHeaderActionMenu v-if="isFileWorkspace" :label="t('app.permission.more')">
+      <ShellHeaderActionButton
+        theme="default"
+        variant="text"
+        :loading="fileExportLoading"
+        :disabled="
+          fileLoading ||
+          fileActionLoading ||
+          fileExportLoading ||
+          !canViewFiles
+        "
+        @click="$emit('export-files')"
+      >
+        {{ t("app.action.exportFiles") }}
+      </ShellHeaderActionButton>
+      <ShellHeaderActionButton
+        theme="danger"
+        variant="text"
+        :loading="fileActionLoading"
+        :disabled="
+          fileLoading ||
+          fileActionLoading ||
+          fileExportLoading ||
+          !canViewFiles ||
+          !canDeleteFiles ||
+          !hasActiveFileFilters ||
+          visibleFileCount === 0
+        "
+        @click="$emit('delete-visible-files')"
+      >
+        {{ t("app.action.deleteVisibleFiles", { count: visibleFileCount }) }}
+      </ShellHeaderActionButton>
+    </ShellHeaderActionMenu>
+  <ShellHeaderActionButton
+    v-if="isWorkflowDefinitionsWorkspace"
+    theme="default"
       variant="outline"
       :loading="workflowLoading"
       :disabled="workflowLoading || !canViewWorkflowDefinitions"
       @click="$emit('reload-workflow-definitions')"
-    >
-      {{ t("app.action.refresh") }}
-    </ShellHeaderActionButton>
-  </template>
-  <ShellHeaderActionButton
-    v-if="isRuntimeShellTab"
-    theme="default"
-    variant="outline"
-    @click="$emit('open-current-workspace-tab')"
   >
-    {{ t("app.runtime.backToWorkspace") }}
+    {{ t("app.action.refresh") }}
   </ShellHeaderActionButton>
   <ShellHeaderActionButton
     v-if="isAuthenticated"

@@ -85,10 +85,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedTenantWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedTenantWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedTenant = readInjectedValue(
   computed(() => resolvedTenantWorkspaceState.value?.selectedTenant ?? null),
   null as TenantRecord | null,
@@ -105,9 +101,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.tenant.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.tenantModuleOffline") }}

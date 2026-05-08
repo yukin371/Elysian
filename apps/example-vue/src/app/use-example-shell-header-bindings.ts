@@ -7,7 +7,6 @@ import {
 
 export const useExampleShellHeaderBindings = ({
   t,
-  isRuntimeShellTab,
   isAuthenticated,
   authLoading,
   isRoleWorkspace,
@@ -117,12 +116,10 @@ export const useExampleShellHeaderBindings = ({
   handleExportFiles,
   deleteVisibleFiles,
   reloadWorkflowDefinitions,
-  openCurrentWorkspaceTab,
   submitLogout,
 }: UseExampleShellBindingsOptions) => {
   const shellHeaderActionProps = computed(() => ({
     t,
-    isRuntimeShellTab: read(isRuntimeShellTab),
     isAuthenticated: read(isAuthenticated),
     authLoading: authLoading.value,
     isRoleWorkspace: read(isRoleWorkspace),
@@ -235,7 +232,6 @@ export const useExampleShellHeaderBindings = ({
     "export-files": handleExportFiles,
     "delete-visible-files": deleteVisibleFiles,
     "reload-workflow-definitions": reloadWorkflowDefinitions,
-    "open-current-workspace-tab": openCurrentWorkspaceTab,
     "submit-logout": submitLogout,
   }
 

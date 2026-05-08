@@ -25,7 +25,6 @@ interface OperationLogWorkspacePanelProps {
   errorMessage: string
   detailErrorMessage: string
   panelTitle: string
-  panelDescription: string
   selectedOperationLog: OperationLogRecord | null
   detailFields: ElyFormField[]
   detailValues: ElyFormValues
@@ -38,9 +37,7 @@ defineProps<OperationLogWorkspacePanelProps>()
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.operationLog.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ panelTitle }}</h3>
-    <p class="enterprise-copy">{{ panelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.operationLogModuleOffline") }}

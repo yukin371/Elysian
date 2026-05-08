@@ -246,9 +246,6 @@ export const useExampleNavigation = ({
     () => selectedNavigationItem.value?.id ?? null,
   )
   const enterpriseSelectedTabKey = computed(() => currentShellTabKey.value)
-  const isRuntimeShellTab = computed(
-    () => enterpriseSelectedTabKey.value === "runtime",
-  )
 
   const openCustomerWorkspace = () => {
     if (!customerNavigationItem.value) {
@@ -284,10 +281,6 @@ export const useExampleNavigation = ({
 
     currentMenuKey.value = selectionIntent.selectedMenuKey
     currentShellTabKey.value = selectionIntent.selectedTabKey
-  }
-
-  const openCurrentWorkspaceTab = () => {
-    currentShellTabKey.value = "workspace"
   }
 
   const selectShellMenu = (menuKey: string) => {
@@ -342,13 +335,11 @@ export const useExampleNavigation = ({
     isPostWorkspace,
     isRoleWorkspace,
     isSessionWorkspace,
-    isRuntimeShellTab,
     isSettingWorkspace,
     isTenantWorkspace,
     isUserWorkspace,
     isWorkflowDefinitionsWorkspace,
     navigationItemCount,
-    openCurrentWorkspaceTab,
     openCustomerWorkspace,
     openSessionWorkspace,
     placeholderWorkspaceCopy,

@@ -36,6 +36,7 @@
 - 再生成必须可预测，不能静默破坏手工代码
 - 模板输出必须和当前架构 owner 保持一致，不能把 persistence / server / frontend 边界重新搅乱
 - 标准 CRUD 前端 surface 产物必须可被 `apps/example-vue` 直接提交、校验并消费，不能只停留在预览态
+- 当前生成输入只收两类边界：`registered-schema` 和 `manual-schema-json`；它们可以共享同一条 preview / apply 链路，但不能混成一套隐式输入规则
 
 ## 常见坑
 

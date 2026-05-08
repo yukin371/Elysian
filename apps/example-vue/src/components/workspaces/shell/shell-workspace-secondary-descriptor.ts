@@ -6,6 +6,7 @@ import type { FileRecord } from "../../../lib/platform-api"
 import { generatedStandardCrudPanelComponents } from "../../../modules/generated"
 import AuthSessionWorkspacePanel from "../auth-session/AuthSessionWorkspacePanel.vue"
 import CustomerWorkspacePanel from "../customer/CustomerWorkspacePanel.vue"
+import DepartmentWorkspacePanel from "../department/DepartmentWorkspacePanel.vue"
 import FileWorkspacePanel from "../file/FileWorkspacePanel.vue"
 import GeneratorPreviewWorkspacePanel from "../generator/GeneratorPreviewWorkspacePanel.vue"
 import type {
@@ -372,7 +373,6 @@ const statusResolver: ShellWorkspaceSecondaryResolver = (props) => ({
   component: ShellWorkspaceStatusPanel,
   props: {
     title: props.selectedNavigationItemName,
-    currentPage: props.selectedNavigationItemName,
     currentPath: props.currentNavigationPath,
     authStatusLabel: props.authStatusLabel,
     moduleCodeLabel: props.currentModuleCodeLabel,
@@ -383,21 +383,10 @@ const customerResolver: ShellWorkspaceSecondaryResolver = (props, emit) => ({
   component: CustomerWorkspacePanel,
   props: {
     t: props.t,
-    moduleReady: props.customerModuleReady,
-    authModuleReady: props.authModuleReady,
-    isAuthenticated: props.isAuthenticated,
-    canCreateCustomers: props.canCreateCustomers,
-    canUpdateCustomers: props.canUpdateCustomers,
-    canDeleteCustomers: props.canDeleteCustomers,
     formCopy: props.enterpriseFormCopy,
     workspaceStateInjected: true,
   },
   listeners: {
-    "confirm-delete": () => emit("confirm-delete"),
-    "cancel-delete": () => emit("cancel-delete"),
-    "start-edit": () => emit("start-customer-edit"),
-    "request-delete": () => emit("request-customer-delete"),
-    "open-create": () => emit("open-customer-create"),
     "submit-form": (payload: unknown) => emit("submit-customer-form", payload),
     "cancel-form": () => emit("cancel-customer-form"),
   },
@@ -445,26 +434,17 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     ),
   }),
   department: (props, emit) => ({
-    component: generatedStandardCrudPanelComponents.department,
+    component: DepartmentWorkspacePanel,
     props: {
       t: props.t,
-      moduleReady: props.departmentModuleReady,
-      authModuleReady: props.authModuleReady,
-      isAuthenticated: props.isAuthenticated,
-      canEnterWorkspace: props.canEnterDepartmentWorkspace,
-      canViewDepartments: props.canViewDepartments,
-      canCreateDepartments: props.canCreateDepartments,
-      canUpdateDepartments: props.canUpdateDepartments,
       formCopy: props.enterpriseFormCopy,
       workspaceStateInjected: true,
     },
-    listeners: editPanelListeners(
-      emit,
-      "start-department-edit",
-      "open-department-create",
-      "submit-department-form",
-      "cancel-department-panel",
-    ),
+    listeners: {
+      "submit-form": (payload: unknown) =>
+        emit("submit-department-form", payload),
+      "cancel-form": () => emit("cancel-department-panel"),
+    },
   }),
   session: (props, emit) => ({
     component: AuthSessionWorkspacePanel,

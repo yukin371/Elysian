@@ -33,6 +33,7 @@ type CreateGeneratorPreviewSessionRestoreOptions = {
   resetPreviewState: () => void
   selectedConflictStrategy: Readonly<Ref<GeneratorPreviewConflictStrategy>>
   selectedFrontendTarget: Readonly<Ref<FrontendTarget>>
+  selectedInputMode: Readonly<Ref<"registered-schema" | "manual-schema-json">>
   selectedSchemaName: Readonly<Ref<string>>
   selectionSessionCache: Map<string, GeneratorPreviewSessionDetail>
   sessionDetailCache: Map<string, GeneratorPreviewSessionDetail>
@@ -86,7 +87,8 @@ export const createGeneratorPreviewSessionRestore = (
       if (
         session.schemaName !== options.selectedSchemaName.value ||
         session.frontendTarget !== options.selectedFrontendTarget.value ||
-        session.conflictStrategy !== options.selectedConflictStrategy.value
+        session.conflictStrategy !== options.selectedConflictStrategy.value ||
+        session.sourceType !== options.selectedInputMode.value
       ) {
         return false
       }

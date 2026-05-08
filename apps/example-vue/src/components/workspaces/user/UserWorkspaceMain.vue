@@ -63,9 +63,7 @@ const handleSearch = (value: string) => {
 
 const handleRowClick = (row: Record<string, unknown>) => {
   const rowId = String(row.id ?? "")
-  const user = resolvedItems.value.find(
-    (item: UserRecord) => item.id === rowId,
-  )
+  const user = resolvedItems.value.find((item: UserRecord) => item.id === rowId)
   if (user) {
     emit("row-click", user)
   }

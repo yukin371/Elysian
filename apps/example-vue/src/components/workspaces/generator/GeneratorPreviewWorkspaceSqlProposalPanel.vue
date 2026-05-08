@@ -10,10 +10,6 @@ interface GeneratorPreviewWorkspaceSqlProposalPanelProps {
   sqlProposal: GeneratorPreviewSqlProposal | null
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   proposalStatusLabel: string
-  proposalStatusCopyLabel: string
-  canonicalOwnerCopyLabel: string
-  reviewModeCopyLabel: string
-  unsupportedReasonCopyLabel: string
   sqlDraftCopyLabel: string
   drizzleImportCopyLabel: string
   drizzleSchemaCopyLabel: string
@@ -22,10 +18,6 @@ interface GeneratorPreviewWorkspaceSqlProposalPanelProps {
 defineProps<GeneratorPreviewWorkspaceSqlProposalPanelProps>()
 
 const emit = defineEmits<{
-  (event: "copy-proposal-status"): void
-  (event: "copy-canonical-owner"): void
-  (event: "copy-review-mode"): void
-  (event: "copy-unsupported-reason"): void
   (event: "copy-sql-draft"): void
   (event: "copy-drizzle-import"): void
   (event: "copy-drizzle-schema"): void
@@ -34,77 +26,30 @@ const emit = defineEmits<{
 
 <template>
   <section class="panel-section">
-    <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalTitle") }}</p>
-    <div class="enterprise-metadata">
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.proposalStatus") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="proposalStatusLabel.trim().length === 0 || proposalStatusLabel === '-'"
-            @click="emit('copy-proposal-status')"
-          >
-            {{ proposalStatusCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ proposalStatusLabel }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.canonicalOwner") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="
-              sqlProposalHandoff.canonicalMigrationOwner.trim().length === 0
-            "
-            @click="emit('copy-canonical-owner')"
-          >
-            {{ canonicalOwnerCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ sqlProposalHandoff.canonicalMigrationOwner }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.reviewMode") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="sqlProposalHandoff.reviewMode.trim().length === 0"
-            @click="emit('copy-review-mode')"
-          >
-            {{ reviewModeCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ sqlProposalHandoff.reviewMode }}</strong>
-      </div>
+    <div class="generator-facts">
+      <span>{{ proposalStatusLabel }}</span>
+      <span>{{ sqlProposalHandoff.canonicalMigrationOwner }}</span>
+      <span>{{ sqlProposalHandoff.reviewMode }}</span>
     </div>
-    <div
+
+    <p
       v-if="sqlProposalHandoff.unsupportedReason"
       class="enterprise-message enterprise-message-warning"
     >
-      <button
-        type="button"
-        class="enterprise-button enterprise-button-ghost"
-        @click="emit('copy-unsupported-reason')"
-      >
-        {{ unsupportedReasonCopyLabel }}
-      </button>
       {{ sqlProposalHandoff.unsupportedReason }}
-    </div>
+    </p>
+
     <div v-else-if="sqlProposal" class="enterprise-panel-stack">
       <div v-if="sqlProposal.risks.length > 0" class="generator-risk-list">
-        <div
+        <p
           v-for="risk in sqlProposal.risks"
           :key="risk.code"
-          class="generator-risk-card"
+          class="generator-risk-item"
         >
-          <strong>{{ risk.code }}</strong>
-          <p>{{ risk.message }}</p>
-        </div>
+          {{ risk.code }} · {{ risk.message }}
+        </p>
       </div>
+
       <section class="panel-section">
         <div class="generator-code-toolbar">
           <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlDraftTitle") }}</p>
@@ -119,6 +64,7 @@ const emit = defineEmits<{
         </div>
         <pre class="generator-code-block"><code>{{ sqlProposal.sqlDraft }}</code></pre>
       </section>
+
       <section class="panel-section">
         <div class="generator-code-toolbar">
           <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleImportTitle") }}</p>
@@ -133,6 +79,7 @@ const emit = defineEmits<{
         </div>
         <pre class="generator-code-block"><code>{{ sqlProposal.drizzleImportSnippet }}</code></pre>
       </section>
+
       <section class="panel-section">
         <div class="generator-code-toolbar">
           <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlProposalDrizzleSchemaTitle") }}</p>
@@ -159,14 +106,15 @@ const emit = defineEmits<{
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.generator-code-toolbar {
-  align-items: center;
+.generator-facts {
   display: flex;
-  gap: 0.75rem;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  color: #64748b;
+  font-size: 0.82rem;
 }
 
-.generator-metadata-label {
+.generator-code-toolbar {
   align-items: center;
   display: flex;
   gap: 0.75rem;
@@ -191,24 +139,11 @@ const emit = defineEmits<{
 
 .generator-risk-list {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.45rem;
 }
 
-.generator-risk-card {
-  display: grid;
-  gap: 0.35rem;
-  border-radius: 6px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(248, 250, 252, 0.72);
-  padding: 0.85rem 0.95rem;
-}
-
-.generator-risk-card p {
+.generator-risk-item {
   margin: 0;
-  color: #475569;
-}
-
-.generator-risk-card strong {
   color: #9a3412;
 }
 </style>

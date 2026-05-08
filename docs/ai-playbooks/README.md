@@ -27,3 +27,9 @@
 - Playbook 只定义执行协议，不定义业务事实。
 - 与 CLI 参数不一致时，以 CLI 实现为准并及时同步文档。
 - `P5A` 相关 playbook 以当前 `ModuleSchema` 最小契约为边界，不把权限、菜单、流程、运行时集成直接塞进 generator handoff 文件。
+
+## 输入路径选择
+
+- 人类边界模式：优先用已注册 schema。
+- 前端输入模式：优先在 generator 工作区里编辑 `ModuleSchema` JSON，再进入 preview。
+- AI 编辑模式：优先用 `p5a-input-template` 和 `p5a-replay-and-manual-handoff` 完成交接与回放。

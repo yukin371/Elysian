@@ -5,25 +5,6 @@ import { useGeneratorPreviewCopyFeedback } from "./use-generator-preview-copy-fe
 
 const t = (key: string) => key
 type NavigatorWithClipboard = { clipboard?: GeneratorPreviewClipboard }
-type MockTimerHandle = ReturnType<typeof setTimeout>
-
-const createMockTimerHandle = (
-  id: number,
-  callback: () => void,
-): MockTimerHandle => {
-  const handle: MockTimerHandle = {
-    close: () => handle,
-    ref: () => handle,
-    unref: () => handle,
-    hasRef: () => true,
-    refresh: () => handle,
-    _onTimeout: callback,
-    [Symbol.dispose]: () => {},
-    [Symbol.toPrimitive]: () => id,
-  }
-
-  return handle
-}
 
 describe("useGeneratorPreviewCopyFeedback", () => {
   const originalClipboard = (
@@ -51,27 +32,39 @@ describe("useGeneratorPreviewCopyFeedback", () => {
       },
     })
 
-    globalThis.setTimeout = Object.assign(
-      <TArgs extends unknown[]>(
-        handler: (...args: TArgs) => void,
+    const mockSetTimeout = Object.assign(
+      (
+        handler: TimerHandler,
         _timeout?: number,
-        ...args: TArgs
-      ) => {
+        ...args: unknown[]
+      ): ReturnType<typeof originalSetTimeout> => {
         const id = nextTimerId
         nextTimerId += 1
-        const callback = () => handler(...args)
-        const handle = createMockTimerHandle(id, callback)
+        const callback = () => {
+          if (typeof handler === "function") {
+            handler(...args)
+          }
+        }
         scheduledTimers.push({ callback, id })
-        return handle
+        return id as unknown as ReturnType<typeof originalSetTimeout>
       },
       { __promisify__: originalSetTimeout.__promisify__ },
     )
+    Object.defineProperty(globalThis, "setTimeout", {
+      configurable: true,
+      value: mockSetTimeout,
+      writable: true,
+    })
 
-    globalThis.clearTimeout = (timerId) => {
-      if (timerId !== undefined) {
-        clearedTimerIds.push(Number(timerId))
-      }
-    }
+    Object.defineProperty(globalThis, "clearTimeout", {
+      configurable: true,
+      value: (timerId: ReturnType<typeof originalSetTimeout> | undefined) => {
+        if (timerId !== undefined) {
+          clearedTimerIds.push(Number(timerId))
+        }
+      },
+      writable: true,
+    })
   })
 
   afterEach(() => {
@@ -86,8 +79,16 @@ describe("useGeneratorPreviewCopyFeedback", () => {
             },
     })
 
-    globalThis.setTimeout = originalSetTimeout
-    globalThis.clearTimeout = originalClearTimeout
+    Object.defineProperty(globalThis, "setTimeout", {
+      configurable: true,
+      value: originalSetTimeout,
+      writable: true,
+    })
+    Object.defineProperty(globalThis, "clearTimeout", {
+      configurable: true,
+      value: originalClearTimeout,
+      writable: true,
+    })
   })
 
   test("updates snippet copy label on success and resets after timeout", async () => {

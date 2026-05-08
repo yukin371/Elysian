@@ -107,6 +107,19 @@ flowchart TD
 - `write.ts` 负责冲突策略、漂移校验、原子写入和 manifest 落盘，是“安全 apply”边界所在。
 - `@elysian/generator/browser` 只暴露纯计算能力，故可被 `apps/example-vue` 直接消费；它不包含文件系统写入接口。
 
+## Input Modes
+
+- `registered-schema`
+  - 人类边界模式
+  - 输入是 `@elysian/schema` 里已经注册好的 schema 名称
+  - 适合标准 CRUD、后台常规模块和稳定复用场景
+- `manual-schema-json`
+  - 前端输入 / AI 编辑模式
+  - 输入是外部 `ModuleSchema` JSON
+  - 适合前端工作区里的草稿编辑，以及 P5A 回放后的修正结果
+
+两种模式最终都进入同一条 preview / report / apply 链路；不同点只在于输入来源和校验边界。
+
 ## With Apps
 
 ```mermaid

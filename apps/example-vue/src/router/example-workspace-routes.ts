@@ -257,7 +257,7 @@ export const resolveExampleWorkspaceDisplayText = ({
           }),
     workspaceTitle: routeState.route
       ? translateWorkspaceRouteText(routeState.route, "shellTitleKey", t)
-      : (selectedNavigationItemName ?? t("app.runtime.title")),
+      : (selectedNavigationItemName ?? t("app.tabs.workspace")),
     placeholderWorkspaceCopy,
     workspaceDescription: routeState.route
       ? translateWorkspaceRouteText(routeState.route, "shellDescriptionKey", t)

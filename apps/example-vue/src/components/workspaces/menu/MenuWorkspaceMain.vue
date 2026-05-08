@@ -58,9 +58,7 @@ const handleSearch = (value: string) => {
 
 const handleRowClick = (row: Record<string, unknown>) => {
   const rowId = String(row.id ?? "")
-  const menu = resolvedItems.value.find(
-    (item: MenuRecord) => item.id === rowId,
-  )
+  const menu = resolvedItems.value.find((item: MenuRecord) => item.id === rowId)
   if (menu) {
     emit("row-click", menu)
   }

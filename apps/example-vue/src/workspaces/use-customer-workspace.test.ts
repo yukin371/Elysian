@@ -25,7 +25,7 @@ const createWorkspace = (options?: {
     canDelete: computed(() => true),
     canUpdate: computed(() => true),
     canView: computed(() => true),
-    currentShellTabKey: ref("runtime"),
+    currentShellTabKey: ref("workspace"),
     locale: ref("zh-CN"),
     localizeActionLabel: (_actionKey, fallback) => fallback,
     localizeFieldLabel: (fieldKey) => fieldKey,

@@ -1,4 +1,3 @@
-import type { GeneratorPreviewConflictStrategy } from "../lib/platform-api"
 import type { GeneratorPreviewSessionRecord } from "../lib/platform-api"
 
 import { generatorPreviewSessionStatusPriority } from "./generator-preview-session-helpers"
@@ -23,11 +22,6 @@ export const localizeGeneratorPreviewSessionStatus = (
 
   return t("app.generatorPreview.status.pendingReview")
 }
-
-export const localizeGeneratorPreviewConflictStrategy = (
-  t: Translate,
-  strategy: GeneratorPreviewConflictStrategy,
-) => t(`app.generatorPreview.conflictStrategy.${strategy}`)
 
 export const prioritizeGeneratorPreviewRecentSessions = (
   sessions: GeneratorPreviewSessionRecord[],
@@ -83,28 +77,27 @@ export const buildGeneratorPreviewRecentSessionOptions = (
       label: [
         session.schemaName,
         session.frontendTarget,
-        localizeGeneratorPreviewConflictStrategy(t, session.conflictStrategy),
         localizeGeneratorPreviewSessionStatus(t, session.status),
-        session.createdAt,
+        session.createdAt.slice(5, 16).replace("T", " "),
       ].join(" · "),
       value: session.id,
     }))
 
 export const buildGeneratorPreviewConflictStrategyOptions = (t: Translate) => [
   {
-    label: t("app.generatorPreview.conflictStrategy.skip"),
+    label: t("app.generatorPreview.summary.skip"),
     value: "skip",
   },
   {
-    label: t("app.generatorPreview.conflictStrategy.overwrite"),
+    label: t("app.generatorPreview.summary.overwrite"),
     value: "overwrite",
   },
   {
-    label: t("app.generatorPreview.conflictStrategy.overwrite-generated-only"),
+    label: t("app.generatorPreview.meta.generatedOnly"),
     value: "overwrite-generated-only",
   },
   {
-    label: t("app.generatorPreview.conflictStrategy.fail"),
+    label: t("app.generatorPreview.summary.block"),
     value: "fail",
   },
 ]

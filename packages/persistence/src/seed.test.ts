@@ -117,6 +117,52 @@ describe("createDefaultAuthSeedSpec", () => {
       "customer-root",
       "customer-list",
     ])
+    expect(spec.departments).toEqual([
+      {
+        id: "00000000-0000-0000-0000-000000000801",
+        parentId: null,
+        code: "hq",
+        name: "Headquarters",
+        ancestors: "",
+        sort: 10,
+        status: "active",
+      },
+      {
+        id: "00000000-0000-0000-0000-000000000802",
+        parentId: "00000000-0000-0000-0000-000000000801",
+        code: "ops",
+        name: "Operations",
+        ancestors: "00000000-0000-0000-0000-000000000801",
+        sort: 20,
+        status: "active",
+      },
+    ])
+    expect(spec.posts).toEqual([
+      {
+        id: "00000000-0000-0000-0000-000000000811",
+        code: "director",
+        name: "Director",
+        sort: 10,
+        status: "active",
+        remark: null,
+      },
+      {
+        id: "00000000-0000-0000-0000-000000000812",
+        code: "manager",
+        name: "Manager",
+        sort: 20,
+        status: "active",
+        remark: "General management",
+      },
+      {
+        id: "00000000-0000-0000-0000-000000000813",
+        code: "engineer",
+        name: "Engineer",
+        sort: 30,
+        status: "active",
+        remark: "Delivery owner",
+      },
+    ])
     expect(spec.dictionaryTypes).toEqual([
       {
         id: "00000000-0000-0000-0000-000000000501",

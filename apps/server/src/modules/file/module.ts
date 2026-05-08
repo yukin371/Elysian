@@ -269,8 +269,10 @@ export const createFileModule = (
             file.originalName,
           )
           set.headers["content-length"] = String(bytes.byteLength)
+          const responseBytes = new Uint8Array(bytes.byteLength)
+          responseBytes.set(bytes)
 
-          return new Response(bytes, {
+          return new Response(responseBytes, {
             headers: set.headers,
           })
         },

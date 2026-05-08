@@ -79,10 +79,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedUserWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedUserWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedUser = readInjectedValue(
   computed(() => resolvedUserWorkspaceState.value?.selectedUser ?? null),
   null as UserRecord | null,
@@ -99,9 +95,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.user.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.userModuleOffline") }}

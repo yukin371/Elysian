@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import type { UiNavigationNode } from "@elysian/ui-core"
-import {
-  ElyContextPanel,
-  ElyWorkbenchShell,
-} from "@elysian/ui-enterprise-vue"
+import { ElyContextPanel, ElyWorkbenchShell } from "@elysian/ui-enterprise-vue"
 import { computed, ref, watch } from "vue"
 
 import type { AppTranslate } from "../../app/app-shell-helpers"

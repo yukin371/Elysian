@@ -7,6 +7,7 @@ const GENERATOR_PREVIEW_SELECTION_STORAGE_KEY =
 export type GeneratorPreviewStoredSelection = {
   conflictStrategy: GeneratorPreviewConflictStrategy
   frontendTarget: FrontendTarget
+  inputMode: "registered-schema" | "manual-schema-json"
   schemaName: string
   sessionId: string | null
 }
@@ -23,7 +24,8 @@ export const createGeneratorPreviewSelectionCacheKey = (
   schemaName: string,
   frontendTarget: FrontendTarget,
   conflictStrategy: GeneratorPreviewConflictStrategy,
-) => `${schemaName}::${frontendTarget}::${conflictStrategy}`
+  inputMode: GeneratorPreviewStoredSelection["inputMode"],
+) => `${schemaName}::${frontendTarget}::${conflictStrategy}::${inputMode}`
 
 const isGeneratorPreviewConflictStrategy = (
   value: unknown,
@@ -58,13 +60,16 @@ export const loadStoredGeneratorPreviewSelection = (
       typeof parsed.schemaName !== "string" ||
       !availableSchemaNames.includes(parsed.schemaName) ||
       !isFrontendTarget(parsed.frontendTarget) ||
-      !isGeneratorPreviewConflictStrategy(parsed.conflictStrategy)
+      !isGeneratorPreviewConflictStrategy(parsed.conflictStrategy) ||
+      ((parsed.inputMode ?? "registered-schema") !== "registered-schema" &&
+        parsed.inputMode !== "manual-schema-json")
     ) {
       return null
     }
 
     return {
       conflictStrategy: parsed.conflictStrategy,
+      inputMode: parsed.inputMode ?? "registered-schema",
       frontendTarget: parsed.frontendTarget,
       schemaName: parsed.schemaName,
       sessionId: typeof parsed.sessionId === "string" ? parsed.sessionId : null,

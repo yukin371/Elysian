@@ -19,7 +19,7 @@ const createWorkspace = (options?: {
   onRecoverableAuthError?: (error: unknown) => void
   updateError?: unknown
 }) => {
-  const currentShellTabKey = ref("runtime")
+  const currentShellTabKey = ref("workspace")
   const listItems = ref<TestRecord[]>(options?.initialItems ?? [])
   const createdRecords: TestRecord[] = []
   const updatedRecords: TestRecord[] = []

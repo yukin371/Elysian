@@ -21,10 +21,12 @@
 - 本地路由判断与 hash 同步优先下沉到 `apps/example-vue/src/router/*`。
 - `src/app/use-example-navigation.ts` 优先保留“消费 router 派生结果并绑定 shell 状态”的职责，不再新增 route/path/kind 文案判断。
 - workspace 运行时状态注入优先收口在 `components/workspaces/shell/*`；已迁移工作区应由 shell `provide`、Main/Panel `inject`，不要回退为跨层 props 透传。
+- 运行时状态只作为 shell 内部态和诊断态存在，不再作为用户可见的平级 `runtime` tab。
 - shell descriptor 对标准 CRUD surface 的覆盖关系必须跟随 `workspace-registry/generated/*` 的 artifact 清单校验；新增标准 CRUD 模块后，不允许静默回退到 customer resolver。
 - `@elysian/example-vue` 的 `build` 与仓库根 `check` 必须显式经过 `verify:workspace-registry-artifacts`；artifact 漂移不能只靠人工记得执行脚本。
 - 标准 CRUD 的生成产物当前落在 `src/modules/*`；这些文件属于 generator 输出面，不在示例应用内手工维护，任何修改都应回到 `packages/generator` 模板或 `scripts/generate-standard-crud-surfaces.ts`。
 - shell main / secondary 当前都消费 `src/modules/generated/index.ts` 暴露的生成组件映射；标准 CRUD 的 main/panel 不再保留示例应用本地手写实现。
+- generator preview workspace 负责展示和提交两类生成输入：已注册 schema 的边界模式，以及前端 JSON 草稿输入；它只做输入装配与预览消费，不拥有 generator 引擎。
 - 若是纯展示块，优先拆成 workspace 组件。
 - 若是入口级派生或装配逻辑，优先拆成本地 composable。
 - 不为了压行数把职责推到错误 owner。

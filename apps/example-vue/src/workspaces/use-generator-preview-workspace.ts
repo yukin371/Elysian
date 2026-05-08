@@ -1,5 +1,6 @@
 import { type Ref, computed, ref, watch } from "vue"
 
+import { validateModuleSchema } from "@elysian/schema"
 import {
   type FrontendTarget,
   getRegisteredSchema,
@@ -38,7 +39,6 @@ import {
 import {
   buildGeneratorPreviewConflictStrategyOptions,
   buildGeneratorPreviewRecentSessionOptions,
-  localizeGeneratorPreviewConflictStrategy,
   prioritizeGeneratorPreviewRecentSessions,
 } from "./generator-preview-session-presentation"
 import { createGeneratorPreviewSessionRestore } from "./generator-preview-session-restore"
@@ -48,6 +48,8 @@ export const useGeneratorPreviewWorkspace = (
   enabled: Readonly<Ref<boolean>>,
   onRecoverableAuthError: (error: unknown) => void,
 ) => {
+  type GeneratorPreviewInputMode = "registered-schema" | "manual-schema-json"
+
   const availableSchemas = listRegisteredSchemas()
   const availableSchemaNames = availableSchemas.map((schema) => schema.name)
   const storedSelection =
@@ -58,6 +60,10 @@ export const useGeneratorPreviewWorkspace = (
   const selectedFrontendTarget = ref<FrontendTarget>(
     storedSelection?.frontendTarget ?? "vue",
   )
+  const selectedInputMode = ref<GeneratorPreviewInputMode>(
+    storedSelection?.inputMode ?? "registered-schema",
+  )
+  const manualSchemaDraft = ref("")
   const previewQuery = ref("")
   const selectedFilePath = ref<string | null>(null)
   const loading = ref(false)
@@ -86,11 +92,84 @@ export const useGeneratorPreviewWorkspace = (
     })),
   )
 
+  const inputModeOptions = computed(() => [
+    {
+      label: t("app.generatorPreview.inputMode.registeredSchema"),
+      value: "registered-schema",
+    },
+    {
+      label: t("app.generatorPreview.inputMode.manualSchemaJson"),
+      value: "manual-schema-json",
+    },
+  ])
+
   const selectedSchema = computed(() =>
     selectedSchemaName.value
       ? getRegisteredSchema(selectedSchemaName.value)
       : null,
   )
+
+  const manualSchemaDraftParsed = computed(() => {
+    const raw = manualSchemaDraft.value.trim()
+
+    if (raw.length === 0) {
+      return {
+        error: null as string | null,
+        schema: null as NonNullable<
+          ReturnType<typeof getRegisteredSchema>
+        > | null,
+      }
+    }
+
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      return {
+        error: t("app.generatorPreview.input.manualSchemaDraftInvalidJson"),
+        schema: null as NonNullable<
+          ReturnType<typeof getRegisteredSchema>
+        > | null,
+      }
+    }
+
+    const issues = validateModuleSchema(parsed)
+    if (issues.length > 0) {
+      const issue = issues[0]
+      return {
+        error: t("app.generatorPreview.input.manualSchemaDraftInvalid", {
+          value:
+            issue?.path && issue.path !== "$"
+              ? `${issue.path}: ${issue.message}`
+              : (issue?.message ?? ""),
+        }),
+        schema: null as NonNullable<
+          ReturnType<typeof getRegisteredSchema>
+        > | null,
+      }
+    }
+
+    return {
+      error: null as string | null,
+      schema: parsed as NonNullable<ReturnType<typeof getRegisteredSchema>>,
+    }
+  })
+
+  const manualSchemaDraftError = computed(() =>
+    selectedInputMode.value === "manual-schema-json"
+      ? manualSchemaDraftParsed.value.error
+      : null,
+  )
+
+  const loadSelectedSchemaDraft = () => {
+    if (!selectedSchema.value) {
+      return
+    }
+
+    manualSchemaDraft.value = JSON.stringify(selectedSchema.value, null, 2)
+    selectedSchemaName.value = selectedSchema.value.name
+    selectedInputMode.value = "manual-schema-json"
+  }
 
   const previewFiles = computed(
     () => currentReport.value?.files.map(toGeneratorPreviewFileCard) ?? [],
@@ -112,7 +191,8 @@ export const useGeneratorPreviewWorkspace = (
   const isSessionMatchingSelection = (session: GeneratorPreviewSessionRecord) =>
     session.schemaName === selectedSchemaName.value &&
     session.frontendTarget === selectedFrontendTarget.value &&
-    session.conflictStrategy === selectedConflictStrategy.value
+    session.conflictStrategy === selectedConflictStrategy.value &&
+    session.sourceType === selectedInputMode.value
 
   const recentSessionOptions = computed(() =>
     buildGeneratorPreviewRecentSessionOptions(
@@ -125,33 +205,6 @@ export const useGeneratorPreviewWorkspace = (
   const conflictStrategyOptions = computed(() =>
     buildGeneratorPreviewConflictStrategyOptions(t),
   )
-
-  const filterSummary = computed(() => {
-    const fragments = [
-      t("app.generatorPreview.filter.schemaSummary", {
-        value: selectedSchema.value?.name ?? "-",
-      }),
-      t("app.generatorPreview.filter.frontendSummary", {
-        value: selectedFrontendTarget.value,
-      }),
-      t("app.generatorPreview.filter.conflictSummary", {
-        value: localizeGeneratorPreviewConflictStrategy(
-          t,
-          selectedConflictStrategy.value,
-        ),
-      }),
-    ]
-
-    if (previewQuery.value.trim().length > 0) {
-      fragments.push(
-        t("app.generatorPreview.filter.querySummary", {
-          value: previewQuery.value.trim(),
-        }),
-      )
-    }
-
-    return fragments.join(" / ")
-  })
 
   const canApplyPreview = computed(
     () =>
@@ -207,6 +260,7 @@ export const useGeneratorPreviewWorkspace = (
     currentSession.value?.schemaName === selectedSchemaName.value &&
     currentSession.value?.frontendTarget === selectedFrontendTarget.value &&
     currentSession.value?.conflictStrategy === selectedConflictStrategy.value &&
+    currentSession.value?.sourceType === selectedInputMode.value &&
     currentReport.value?.schemaName === selectedSchemaName.value &&
     currentReport.value?.frontendTarget === selectedFrontendTarget.value
 
@@ -214,6 +268,7 @@ export const useGeneratorPreviewWorkspace = (
     currentSession.value?.schemaName === selectedSchemaName.value &&
     currentSession.value?.frontendTarget === selectedFrontendTarget.value &&
     currentSession.value?.conflictStrategy === selectedConflictStrategy.value &&
+    currentSession.value?.sourceType === selectedInputMode.value &&
     currentReport.value?.schemaName === selectedSchemaName.value &&
     currentReport.value?.frontendTarget === selectedFrontendTarget.value &&
     currentReport.value?.conflictStrategy === selectedConflictStrategy.value
@@ -231,6 +286,7 @@ export const useGeneratorPreviewWorkspace = (
       selectedSchemaName.value,
       selectedFrontendTarget.value,
       selectedConflictStrategy.value,
+      selectedInputMode.value,
     )
 
   const cacheSessionDetail = (session: GeneratorPreviewSessionDetail) => {
@@ -240,6 +296,7 @@ export const useGeneratorPreviewWorkspace = (
         session.schemaName,
         session.frontendTarget,
         session.conflictStrategy,
+        session.sourceType,
       ),
       session,
     )
@@ -261,6 +318,7 @@ export const useGeneratorPreviewWorkspace = (
 
     persistGeneratorPreviewSelection({
       conflictStrategy: selectedConflictStrategy.value,
+      inputMode: selectedInputMode.value,
       frontendTarget: selectedFrontendTarget.value,
       schemaName: selectedSchemaName.value,
       sessionId: currentSelectionMatchesSession()
@@ -280,6 +338,9 @@ export const useGeneratorPreviewWorkspace = (
     selectedSchemaName.value = session.schemaName
     selectedFrontendTarget.value = session.frontendTarget
     selectedConflictStrategy.value = session.conflictStrategy
+    if (session.sourceType === "manual-schema-json") {
+      selectedInputMode.value = session.sourceType
+    }
     currentSession.value = session
     currentDiffSummary.value = session.diffSummary
     currentReport.value = session.report
@@ -307,6 +368,7 @@ export const useGeneratorPreviewWorkspace = (
       resetPreviewState,
       selectedConflictStrategy,
       selectedFrontendTarget,
+      selectedInputMode,
       selectedSchemaName,
       selectionSessionCache,
       sessionDetailCache,
@@ -335,10 +397,37 @@ export const useGeneratorPreviewWorkspace = (
     errorMessage.value = ""
 
     try {
+      const sourceType = selectedInputMode.value
+      const schemaName =
+        sourceType === "manual-schema-json"
+          ? (manualSchemaDraftParsed.value.schema?.name ??
+            selectedSchemaName.value)
+          : selectedSchemaName.value
+      const sourceValue =
+        sourceType === "manual-schema-json"
+          ? manualSchemaDraft.value.trim()
+          : selectedSchemaName.value
+
+      if (sourceType === "manual-schema-json") {
+        if (manualSchemaDraftParsed.value.error) {
+          errorMessage.value = manualSchemaDraftParsed.value.error
+          return false
+        }
+
+        if (!manualSchemaDraftParsed.value.schema) {
+          errorMessage.value = t(
+            "app.generatorPreview.input.manualSchemaDraftEmpty",
+          )
+          return false
+        }
+      }
+
       const response = await createGeneratorPreviewSession({
         conflictStrategy: selectedConflictStrategy.value,
-        schemaName: selectedSchemaName.value,
+        schemaName,
         frontendTarget: selectedFrontendTarget.value,
+        sourceType,
+        sourceValue,
         targetPreset: "staging",
       })
 
@@ -479,7 +568,12 @@ export const useGeneratorPreviewWorkspace = (
   )
 
   watch(
-    [selectedSchemaName, selectedFrontendTarget, selectedConflictStrategy],
+    [
+      selectedSchemaName,
+      selectedFrontendTarget,
+      selectedConflictStrategy,
+      selectedInputMode,
+    ],
     () => {
       resetFilters()
 
@@ -490,14 +584,20 @@ export const useGeneratorPreviewWorkspace = (
   )
 
   watch(
-    [selectedSchemaName, selectedFrontendTarget, selectedConflictStrategy],
-    ([schemaName, frontendTarget, conflictStrategy]) => {
+    [
+      selectedSchemaName,
+      selectedFrontendTarget,
+      selectedConflictStrategy,
+      selectedInputMode,
+    ],
+    ([schemaName, frontendTarget, conflictStrategy, inputMode]) => {
       if (!schemaName) {
         return
       }
 
       persistGeneratorPreviewSelection({
         conflictStrategy,
+        inputMode,
         frontendTarget,
         schemaName,
         sessionId: currentSelectionMatchesSession()
@@ -513,10 +613,26 @@ export const useGeneratorPreviewWorkspace = (
       selectedSchemaName,
       selectedFrontendTarget,
       selectedConflictStrategy,
+      selectedInputMode,
       enabled,
     ],
-    async ([, , , nextEnabled]) => {
+    async ([, , , nextInputMode, nextEnabled]) => {
       if (!nextEnabled) {
+        return
+      }
+
+      if (nextInputMode === "manual-schema-json") {
+        if (
+          manualSchemaDraft.value.trim().length === 0 &&
+          selectedSchema.value
+        ) {
+          manualSchemaDraft.value = JSON.stringify(
+            selectedSchema.value,
+            null,
+            2,
+          )
+        }
+
         return
       }
 
@@ -546,9 +662,12 @@ export const useGeneratorPreviewWorkspace = (
     currentSqlProposalHandoff,
     conflictStrategyOptions,
     errorMessage,
-    filterSummary,
     filteredPreviewFiles,
+    inputModeOptions,
     loading,
+    manualSchemaDraft,
+    manualSchemaDraftError,
+    loadSelectedSchemaDraft,
     previewQuery,
     recentSessionOptions,
     refreshPreview,
@@ -562,6 +681,7 @@ export const useGeneratorPreviewWorkspace = (
     selectedConflictStrategy,
     selectedFilePath,
     selectedFrontendTarget,
+    selectedInputMode,
     selectedPreviewFile,
     selectedSchema,
     selectedSchemaName,

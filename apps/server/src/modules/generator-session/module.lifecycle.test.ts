@@ -864,6 +864,40 @@ describe("generator session module lifecycle", () => {
     expect(secondConfirmEvidence).toEqual(firstConfirmEvidence)
   })
 
+  it("accepts manual schema json as preview input", async () => {
+    const { accessToken, app } =
+      await createGeneratorSessionAuthenticatedContext()
+    const schemaJson = JSON.stringify(customerModuleSchema)
+
+    const response = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: customerModuleSchema.name,
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          sourceType: "manual-schema-json",
+          sourceValue: schemaJson,
+          targetPreset: "staging",
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(201)
+
+    const body = await readJsonRecord(response)
+    const session = readRecord(body, "session")
+
+    expect(session.schemaName).toBe(customerModuleSchema.name)
+    expect(session.sourceType).toBe("manual-schema-json")
+    expect(session.sourceValue).toBe(schemaJson)
+  })
+
   it("requires confirmation before applying a ready generator preview session", async () => {
     const { accessToken, app } =
       await createGeneratorSessionAuthenticatedContext()

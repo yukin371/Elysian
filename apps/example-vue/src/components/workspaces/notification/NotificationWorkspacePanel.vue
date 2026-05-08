@@ -97,12 +97,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedNotificationWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(
-    () => resolvedNotificationWorkspaceState.value?.panelDescription ?? null,
-  ),
-  "",
-)
 const resolvedSelectedNotification = readInjectedValue(
   computed(
     () =>
@@ -122,9 +116,7 @@ const resolvedFormValues = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.notification.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.notificationModuleOffline") }}

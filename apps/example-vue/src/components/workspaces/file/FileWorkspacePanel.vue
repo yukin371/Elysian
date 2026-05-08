@@ -57,20 +57,6 @@ const panelHeading = computed(() => {
   )
 })
 
-const panelCopy = computed(() => {
-  if (props.panelMode === "upload") {
-    return props.t("app.file.panelDesc.upload")
-  }
-
-  if (props.panelMode === "delete") {
-    return props.t("app.file.panelDesc.delete")
-  }
-
-  return props.selectedFile
-    ? props.t("app.file.panelDesc.detail")
-    : props.t("app.file.detailEmptyDescription")
-})
-
 const selectedFileSizeLabel = computed(() =>
   props.selectedFile ? formatFileSize(props.selectedFile.size) : "",
 )
@@ -92,9 +78,7 @@ const handleFileInput = (event: Event) => {
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.file.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ panelHeading }}</h3>
-    <p class="enterprise-copy">{{ panelCopy }}</p>
 
     <div
       v-if="!moduleReady"

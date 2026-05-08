@@ -23,7 +23,6 @@ defineEmits<(e: "revoke-selected-session") => void>()
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.onlineSession.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">
       {{
         selectedSession
@@ -31,13 +30,6 @@ defineEmits<(e: "revoke-selected-session") => void>()
           : t("app.onlineSession.panelTitle.detailFallback")
       }}
     </h3>
-    <p class="enterprise-copy">
-      {{
-        selectedSession
-          ? t("app.onlineSession.panelDesc.detail")
-          : t("app.onlineSession.detailEmptyDescription")
-      }}
-    </p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.onlineSessionModuleOffline") }}

@@ -7,93 +7,34 @@ import type {
 interface GeneratorPreviewWorkspaceDiffSummaryPanelProps {
   t: GeneratorPreviewTranslation
   diffSummary: GeneratorPreviewDiffSummary
-  changedCountCopyLabel: string
-  createCountCopyLabel: string
-  overwriteCountCopyLabel: string
-  skipCountCopyLabel: string
-  blockCountCopyLabel: string
 }
 
 defineProps<GeneratorPreviewWorkspaceDiffSummaryPanelProps>()
-
-const emit = defineEmits<{
-  (event: "copy-changed-count"): void
-  (event: "copy-create-count"): void
-  (event: "copy-overwrite-count"): void
-  (event: "copy-skip-count"): void
-  (event: "copy-block-count"): void
-}>()
 </script>
 
 <template>
   <section class="panel-section">
-    <p class="enterprise-subheading">{{ t("app.generatorPreview.diffTitle") }}</p>
-    <div class="enterprise-metadata">
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.summary.changed") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            @click="emit('copy-changed-count')"
-          >
-            {{ changedCountCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ diffSummary.changedFileCount }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.summary.create") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            @click="emit('copy-create-count')"
-          >
-            {{ createCountCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ diffSummary.actionCounts.create }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.summary.overwrite") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            @click="emit('copy-overwrite-count')"
-          >
-            {{ overwriteCountCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ diffSummary.actionCounts.overwrite }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.summary.skip") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            @click="emit('copy-skip-count')"
-          >
-            {{ skipCountCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ diffSummary.actionCounts.skip }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.summary.block") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            @click="emit('copy-block-count')"
-          >
-            {{ blockCountCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ diffSummary.actionCounts.block }}</strong>
-      </div>
+    <div class="generator-facts">
+      <span>
+        {{ t("app.generatorPreview.summary.changed") }}
+        {{ diffSummary.changedFileCount }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.create") }}
+        {{ diffSummary.actionCounts.create }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.overwrite") }}
+        {{ diffSummary.actionCounts.overwrite }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.skip") }}
+        {{ diffSummary.actionCounts.skip }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.block") }}
+        {{ diffSummary.actionCounts.block }}
+      </span>
     </div>
   </section>
 </template>
@@ -106,10 +47,11 @@ const emit = defineEmits<{
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.generator-metadata-label {
-  align-items: center;
+.generator-facts {
   display: flex;
-  gap: 0.75rem;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  color: #64748b;
+  font-size: 0.82rem;
 }
 </style>

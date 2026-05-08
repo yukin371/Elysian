@@ -68,6 +68,23 @@ export interface DefaultAuthSeedSpec {
     isDefault: boolean
     status: "active" | "disabled"
   }>
+  departments: Array<{
+    id: string
+    parentId: string | null
+    code: string
+    name: string
+    ancestors: string
+    sort: number
+    status: "active" | "disabled"
+  }>
+  posts: Array<{
+    id: string
+    code: string
+    name: string
+    sort: number
+    status: "active" | "disabled"
+    remark: string | null
+  }>
   adminUser: {
     id: string
     username: string
@@ -103,8 +120,73 @@ type DefaultWorkflowDefinitionSeed = Omit<
 type DefaultRoleSeed = DefaultAuthSeedSpec["roles"][number]
 type DefaultPermissionSeed = DefaultAuthSeedSpec["permissions"][number]
 type DefaultMenuSeed = DefaultAuthSeedSpec["menus"][number]
+type DefaultDepartmentSeed = {
+  id: string
+  parentId: string | null
+  code: string
+  name: string
+  ancestors: string
+  sort: number
+  status: "active" | "disabled"
+}
+type DefaultPostSeed = {
+  id: string
+  code: string
+  name: string
+  sort: number
+  status: "active" | "disabled"
+  remark: string | null
+}
 type DefaultDictionaryTypeSeed = DefaultAuthSeedSpec["dictionaryTypes"][number]
 type DefaultDictionaryItemSeed = DefaultAuthSeedSpec["dictionaryItems"][number]
+
+const defaultDepartmentSeedBlueprint: DefaultDepartmentSeed[] = [
+  {
+    id: defaultAuthSeedIds.departments.headquarters,
+    parentId: null,
+    code: "hq",
+    name: "Headquarters",
+    ancestors: "",
+    sort: 10,
+    status: "active",
+  },
+  {
+    id: defaultAuthSeedIds.departments.operations,
+    parentId: defaultAuthSeedIds.departments.headquarters,
+    code: "ops",
+    name: "Operations",
+    ancestors: defaultAuthSeedIds.departments.headquarters,
+    sort: 20,
+    status: "active",
+  },
+]
+
+const defaultPostSeedBlueprint: DefaultPostSeed[] = [
+  {
+    id: defaultAuthSeedIds.posts.director,
+    code: "director",
+    name: "Director",
+    sort: 10,
+    status: "active",
+    remark: null,
+  },
+  {
+    id: defaultAuthSeedIds.posts.manager,
+    code: "manager",
+    name: "Manager",
+    sort: 20,
+    status: "active",
+    remark: "General management",
+  },
+  {
+    id: defaultAuthSeedIds.posts.engineer,
+    code: "engineer",
+    name: "Engineer",
+    sort: 30,
+    status: "active",
+    remark: "Delivery owner",
+  },
+]
 
 export interface TenantBootstrapSeedSpec {
   roles: Array<Omit<DefaultRoleSeed, "id">>
@@ -182,6 +264,8 @@ export const createDefaultAuthSeedSpec = (
     roles: cloneEntries(defaultAuthSeedBlueprint.roles),
     permissions: cloneEntries(defaultAuthSeedBlueprint.permissions),
     menus: cloneEntries(defaultAuthSeedBlueprint.menus),
+    departments: cloneEntries(defaultDepartmentSeedBlueprint),
+    posts: cloneEntries(defaultPostSeedBlueprint),
     dictionaryTypes: cloneEntries(defaultAuthSeedBlueprint.dictionaryTypes),
     dictionaryItems: cloneEntries(defaultAuthSeedBlueprint.dictionaryItems),
     adminUser: {

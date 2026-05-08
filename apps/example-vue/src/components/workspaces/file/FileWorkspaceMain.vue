@@ -52,10 +52,6 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 
 <template>
   <section class="enterprise-card enterprise-main-card">
-    <div class="workspace-header">
-      <h3 class="enterprise-heading">{{ t("app.file.workspaceTitle") }}</h3>
-    </div>
-
     <div
       v-if="!moduleReady"
       class="enterprise-message enterprise-message-warning enterprise-section-gap"
@@ -124,10 +120,8 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
         </label>
       </div>
 
-      <div class="file-summary-row">
-        <span class="enterprise-toolbar-pill">{{ filterSummary }}</span>
+      <div v-if="hasActiveFilters" class="file-summary-row">
         <button
-          v-if="hasActiveFilters"
           type="button"
           class="enterprise-button enterprise-button-ghost"
           @click="emit('reset-filters')"
@@ -192,17 +186,12 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
   margin-top: 0.45rem;
 }
 
-.workspace-header,
 .file-summary-row,
 .file-footer {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.workspace-header {
-  flex-direction: column;
 }
 
 .file-toolbar {
@@ -259,7 +248,6 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
 }
 
 @media (max-width: 900px) {
-  .workspace-header,
   .file-summary-row,
   .file-footer {
     align-items: flex-start;

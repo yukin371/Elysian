@@ -57,7 +57,6 @@ interface ${pascalName}WorkspaceMainProps {
   itemCountLabel: string
   emptyTitle: string
   emptyDescription: string
-  currentQuerySummary: string
   copy: ElyCrudWorkspaceProps["copy"]
   workspaceStateInjected?: boolean
 }
@@ -193,11 +192,6 @@ watch(resolvedItems, () => {
       @reset="emit('reset')"
       @row-click="emit('row-click', $event as ${recordTypeName})"
     >
-      <template #toolbar>
-        <span class="enterprise-toolbar-pill">
-          {{ currentQuerySummary }}
-        </span>
-      </template>
       <template #footer>
         <div class="${camelName}-pagination">
           <span>{{ paginationSummary }}</span>

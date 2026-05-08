@@ -34,109 +34,106 @@ const emit = defineEmits<(event: "select-file", filePath: string) => void>()
       v-for="file in files"
       :key="file.path"
       type="button"
-      class="generator-file-card"
-      :class="selectedFilePath === file.path ? 'generator-file-card-active' : ''"
+      class="generator-file-row"
+      :class="[
+        selectedFilePath === file.path ? 'generator-file-row-active' : '',
+        `generator-file-row-${file.plannedAction}`,
+      ]"
       @click="emit('select-file', file.path)"
     >
-      <div class="generator-file-card-header">
-        <strong>{{ file.path }}</strong>
-        <span>{{ file.lineCount }} {{ t("app.generatorPreview.meta.lines") }}</span>
-      </div>
-      <p>{{ file.reason }}</p>
-      <div class="generator-file-card-meta">
-        <span class="generator-file-card-action">
+      <div class="generator-file-row-main">
+        <strong class="generator-file-row-path">{{ file.path }}</strong>
+        <span class="generator-file-row-action">
           {{ t(`app.generatorPreview.actionLabel.${file.plannedAction}`) }}
         </span>
-        <span>{{ file.mergeStrategy }}</span>
-        <span class="generator-file-card-diff generator-file-card-diff-added">
+      </div>
+      <div class="generator-file-row-meta">
+        <span>{{ file.lineCount }} {{ t("app.generatorPreview.meta.lines") }}</span>
+        <span v-if="file.mergeStrategy">{{ file.mergeStrategy }}</span>
+        <span class="generator-file-row-diff generator-file-row-diff-added">
           +{{ file.diffStats.addedLineCount }}
         </span>
-        <span class="generator-file-card-diff generator-file-card-diff-removed">
+        <span class="generator-file-row-diff generator-file-row-diff-removed">
           -{{ file.diffStats.removedLineCount }}
         </span>
-        <span>{{ file.charCount }} chars</span>
+        <span>{{ file.charCount }}c</span>
       </div>
     </button>
   </div>
 </template>
 
 <style scoped>
-.generator-file-card p,
-.generator-file-card-meta {
-  margin: 0;
-}
-
 .generator-file-list {
   display: grid;
-  gap: 0.85rem;
 }
 
-.generator-file-card {
+.generator-file-row {
+  display: grid;
+  gap: 0.3rem;
   width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.88);
-  padding: 1rem;
+  padding: 0.8rem 0;
   text-align: left;
   color: #0f172a;
-  transition:
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.generator-file-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(36, 87, 214, 0.2);
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
+.generator-file-row:hover,
+.generator-file-row-active {
+  color: #173ea6;
 }
 
-.generator-file-card-active {
-  border-color: rgba(36, 87, 214, 0.45);
-  box-shadow: 0 12px 22px rgba(36, 87, 214, 0.1);
+.generator-file-row-block {
+  color: #9a3412;
 }
 
-.generator-file-card-header,
-.generator-file-card-meta {
+.generator-file-row-main,
+.generator-file-row-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.7rem;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.generator-file-row-main {
   justify-content: space-between;
-  align-items: center;
 }
 
-.generator-file-card p {
-  margin-top: 0.7rem;
-  color: #475569;
-  line-height: 1.65;
+.generator-file-row-path {
+  min-width: 0;
+  line-height: 1.45;
+  word-break: break-all;
 }
 
-.generator-file-card-meta {
-  margin-top: 0.8rem;
-  font-size: 0.78rem;
+.generator-file-row-meta {
   color: #64748b;
+  font-size: 0.78rem;
 }
 
-.generator-file-card-action {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(248, 250, 252, 0.8);
-  padding: 0.2rem 0.55rem;
-  color: #334155;
+.generator-file-row-active .generator-file-row-meta {
+  color: #173ea6;
 }
 
-.generator-file-card-diff {
+.generator-file-row-block .generator-file-row-meta {
+  color: #9a3412;
+}
+
+.generator-file-row-action {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.generator-file-row-diff {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
 
-.generator-file-card-diff-added {
+.generator-file-row-diff-added {
   color: #15803d;
 }
 
-.generator-file-card-diff-removed {
+.generator-file-row-diff-removed {
   color: #b91c1c;
 }
 </style>

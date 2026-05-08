@@ -79,10 +79,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(() => resolvedMenuWorkspaceState.value?.panelDescription ?? null),
-  "",
-)
 const resolvedSelectedMenu = readInjectedValue(
   computed(() => resolvedMenuWorkspaceState.value?.selectedMenu ?? null),
   null as MenuRecord | null,
@@ -107,9 +103,7 @@ const resolvedMenuParentLookup = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.menu.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.menuModuleOffline") }}

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type {
+  GeneratorPreviewApplyEvidence,
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewReviewEvidence,
   GeneratorPreviewSessionRecord,
   GeneratorPreviewTranslation,
 } from "./types"
@@ -7,6 +10,9 @@ import type {
 interface GeneratorPreviewWorkspaceSessionPanelProps {
   t: GeneratorPreviewTranslation
   session: GeneratorPreviewSessionRecord
+  diffSummary: GeneratorPreviewDiffSummary | null
+  reviewEvidence: GeneratorPreviewReviewEvidence | null
+  applyEvidence: GeneratorPreviewApplyEvidence | null
   sessionActorLabel: string
   sessionSourceTypeLabel: string
   sessionConflictStrategyLabel: string
@@ -14,42 +20,57 @@ interface GeneratorPreviewWorkspaceSessionPanelProps {
   sessionConfirmedByLabel: string
   sessionConfirmationNote: string | null
   confirmationEvidenceSummary: string | null
-  reportPathCopyLabel: string
-  sessionIdCopyLabel: string
-  createdAtCopyLabel: string
-  actorCopyLabel: string
-  outputDirCopyLabel: string
-  sourceTypeCopyLabel: string
-  sourceValueCopyLabel: string
-  conflictStrategyCopyLabel: string
 }
 
 defineProps<GeneratorPreviewWorkspaceSessionPanelProps>()
-
-const emit = defineEmits<{
-  (event: "copy-report-path"): void
-  (event: "copy-session-id"): void
-  (event: "copy-created-at"): void
-  (event: "copy-actor"): void
-  (event: "copy-output-dir"): void
-  (event: "copy-source-type"): void
-  (event: "copy-source-value"): void
-  (event: "copy-conflict-strategy"): void
-}>()
 </script>
 
 <template>
   <section class="panel-section">
-    <div class="generator-code-toolbar">
-      <p class="enterprise-subheading">{{ t("app.generatorPreview.sessionTitle") }}</p>
-      <button
-        type="button"
-        class="enterprise-button enterprise-button-ghost"
-        :disabled="session.reportPath.trim().length === 0"
-        @click="emit('copy-report-path')"
-      >
-        {{ reportPathCopyLabel }}
-      </button>
+    <code class="generator-path">{{ session.reportPath }}</code>
+    <div class="generator-facts">
+      <span>{{ session.id }}</span>
+      <span>{{ sessionActorLabel }}</span>
+      <span>{{ session.createdAt }}</span>
+      <span>{{ sessionSourceTypeLabel }}</span>
+      <span>{{ sessionConflictStrategyLabel }}</span>
+      <span v-if="session.confirmedAt">{{ sessionConfirmedAtLabel }}</span>
+      <span v-if="session.confirmedAt">{{ sessionConfirmedByLabel }}</span>
+    </div>
+    <div v-if="diffSummary" class="generator-facts">
+      <span>
+        {{ t("app.generatorPreview.summary.changed") }}
+        {{ diffSummary.changedFileCount }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.create") }}
+        {{ diffSummary.actionCounts.create }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.overwrite") }}
+        {{ diffSummary.actionCounts.overwrite }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.skip") }}
+        {{ diffSummary.actionCounts.skip }}
+      </span>
+      <span>
+        {{ t("app.generatorPreview.summary.block") }}
+        {{ diffSummary.actionCounts.block }}
+      </span>
+    </div>
+    <div v-if="reviewEvidence" class="generator-facts">
+      <span>{{ reviewEvidence.reviewedAt ?? "-" }}</span>
+      <span>{{ reviewEvidence.actorDisplayName ?? reviewEvidence.actorUsername ?? reviewEvidence.actorUserId ?? "-" }}</span>
+      <span>{{ reviewEvidence.decision === "approve" ? t("app.generatorPreview.action.approve") : t("app.generatorPreview.action.reject") }}</span>
+    </div>
+    <p v-if="reviewEvidence?.comment" class="generator-note">
+      {{ reviewEvidence.comment }}
+    </p>
+    <div v-if="applyEvidence" class="generator-facts">
+      <span>{{ applyEvidence.appliedAt ?? "-" }}</span>
+      <span>{{ applyEvidence.actorDisplayName ?? applyEvidence.actorUsername ?? applyEvidence.actorUserId ?? "-" }}</span>
+      <span>{{ applyEvidence.requestId ?? "-" }}</span>
     </div>
     <p
       v-if="sessionConfirmationNote"
@@ -63,124 +84,7 @@ const emit = defineEmits<{
     >
       {{ confirmationEvidenceSummary }}
     </p>
-    <div class="enterprise-metadata">
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.sessionId") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="session.id.trim().length === 0"
-            @click="emit('copy-session-id')"
-          >
-            {{ sessionIdCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ session.id }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.createdAt") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="session.createdAt.trim().length === 0"
-            @click="emit('copy-created-at')"
-          >
-            {{ createdAtCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ session.createdAt }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.actor") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="sessionActorLabel.trim().length === 0 || sessionActorLabel === '-'"
-            @click="emit('copy-actor')"
-          >
-            {{ actorCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ sessionActorLabel }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.generatorPreview.meta.reportPath") }}</span>
-        <strong>{{ session.reportPath }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.outputDir") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="session.outputDir.trim().length === 0"
-            @click="emit('copy-output-dir')"
-          >
-            {{ outputDirCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ session.outputDir }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.sourceType") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="
-              sessionSourceTypeLabel.trim().length === 0 ||
-              sessionSourceTypeLabel === '-'
-            "
-            @click="emit('copy-source-type')"
-          >
-            {{ sourceTypeCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ sessionSourceTypeLabel }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.sourceValue") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="session.sourceValue.trim().length === 0"
-            @click="emit('copy-source-value')"
-          >
-            {{ sourceValueCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ session.sourceValue }}</strong>
-      </div>
-      <div>
-        <div class="generator-metadata-label">
-          <span>{{ t("app.generatorPreview.meta.conflictStrategy") }}</span>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="
-              sessionConflictStrategyLabel.trim().length === 0 ||
-              sessionConflictStrategyLabel === '-'
-            "
-            @click="emit('copy-conflict-strategy')"
-          >
-            {{ conflictStrategyCopyLabel }}
-          </button>
-        </div>
-        <strong>{{ sessionConflictStrategyLabel }}</strong>
-      </div>
-      <div v-if="session.confirmedAt">
-        <span>{{ t("app.generatorPreview.meta.confirmedAt") }}</span>
-        <strong>{{ sessionConfirmedAtLabel }}</strong>
-      </div>
-      <div v-if="session.confirmedAt">
-        <span>{{ t("app.generatorPreview.meta.confirmedBy") }}</span>
-        <strong>{{ sessionConfirmedByLabel }}</strong>
-      </div>
-    </div>
+    <p class="generator-source-value">{{ session.sourceValue }}</p>
   </section>
 </template>
 
@@ -192,11 +96,33 @@ const emit = defineEmits<{
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.generator-code-toolbar,
-.generator-metadata-label {
-  align-items: center;
+.generator-facts {
   display: flex;
-  gap: 0.75rem;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.generator-path {
+  overflow-x: auto;
+  color: #475569;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.generator-source-value {
+  margin: 0;
+  color: #0f172a;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.generator-note {
+  margin: 0;
+  color: #475569;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 </style>

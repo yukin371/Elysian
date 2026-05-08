@@ -40,7 +40,6 @@ const emit = defineEmits<{
 interface RoleWorkspaceInjectedState {
   formFields: { value: ElyFormField[] }
   formValues: { value: ElyFormValues }
-  panelDescription: { value: string }
   panelTitle: { value: string }
   roleDetailErrorMessage: { value: string }
   roleDetailLoading: { value: boolean }
@@ -86,9 +85,6 @@ const resolvedPanelMode = computed(
 const resolvedPanelTitle = computed(
   () => resolvedRoleWorkspaceState.value?.panelTitle.value ?? "",
 )
-const resolvedPanelDescription = computed(
-  () => resolvedRoleWorkspaceState.value?.panelDescription.value ?? "",
-)
 const resolvedSelectedRole = computed(
   () => resolvedRoleWorkspaceState.value?.selectedRole.value ?? null,
 )
@@ -105,9 +101,7 @@ const resolvedFormValues = computed(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.role.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.roleModuleOffline") }}

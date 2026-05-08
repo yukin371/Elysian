@@ -335,7 +335,10 @@ export interface ElyWorkbenchToolbarEmits {
 // ─── Ely workbench shell ───────────────────────────────────────────────────────
 
 export interface ElyWorkbenchStatusBar {
-  moduleStatus?: { label: string; tone: "success" | "warning" | "error" | "default" }
+  moduleStatus?: {
+    label: string
+    tone: "success" | "warning" | "error" | "default"
+  }
   recordCount?: number
   selectedInfo?: string
 }
@@ -383,7 +386,9 @@ export const resolveElyWorkbenchShellCopy = (options: {
   navigationLabel:
     options.navigationLabel ?? options.copy?.navigationLabel ?? "导航",
   searchPlaceholder:
-    options.searchPlaceholder ?? options.copy?.searchPlaceholder ?? "全局搜索...",
+    options.searchPlaceholder ??
+    options.copy?.searchPlaceholder ??
+    "全局搜索...",
   closePanelLabel:
     options.closePanelLabel ?? options.copy?.closePanelLabel ?? "关闭",
 })

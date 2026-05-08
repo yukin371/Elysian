@@ -151,35 +151,6 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.placeholder.fallbackModule": "未识别模块",
   "app.placeholder.backToCustomer": "回到客户工作区",
   "app.placeholder.statsHint": "当前说明页不承载真实业务记录",
-  "app.runtime.eyebrow": "运行时视图",
-  "app.runtime.title": "当前页运行态",
-  "app.runtime.copy":
-    "这个页签用于检查当前页面所处的导航、模块注册与会话状态，不再只是装饰性 tabs。",
-  "app.runtime.currentPage": "当前页面",
-  "app.runtime.currentPath": "页面路径",
-  "app.runtime.moduleStatus": "模块状态",
-  "app.runtime.permissions": "权限数",
-  "app.runtime.nextStep": "下一步",
-  "app.runtime.step.navigation":
-    "继续把更多菜单入口收口为真实可切换页面，而不是静态展示列表。",
-  "app.runtime.step.workspace":
-    "优先补齐 `customer / workflow / system-*` 的最小工作区 contract。",
-  "app.runtime.step.owner":
-    "共享预设层只负责壳层事件与视觉基线，页面切换仍由示例应用装配。",
-  "app.runtime.backToWorkspace": "返回工作区",
-  "app.runtime.sideEyebrow": "运行态边界",
-  "app.runtime.sideTitle": "当前 tab 语义",
-  "app.runtime.sideDescription":
-    "切到运行态后，不再重复显示业务详情或编辑面板，只保留页面诊断与边界说明。",
-  "app.runtime.sideAuthLabel": "会话状态",
-  "app.runtime.sideModuleCodeLabel": "模块代码",
-  "app.runtime.sideDecisionTitle": "当前约束",
-  "app.runtime.sideDecisionTab":
-    "`runtime` tab 只承接诊断信息，不承接 create / edit / detail 动作。",
-  "app.runtime.sideDecisionOwner":
-    "业务工作区 owner 仍在 `apps/example-vue`，共享壳层不反向拥有页面状态。",
-  "app.runtime.sideDecisionFallback":
-    "未闭环模块继续显式保留为说明页，而不是在运行态里伪装成功能可用。",
   "app.panel.formDetail": "标准表单 / 详情",
   "app.panel.customerModulePreview":
     "客户模块离线，标准表单面板当前保持在预览模式。",
@@ -232,9 +203,6 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.tabs.create": "新建",
   "app.tabs.formHintSelection": "当前选中",
   "app.tabs.formHintSchema": "schema 驱动表单",
-  "app.tabs.runtime": "运行时",
-  "app.tabs.runtimePreview": "预览模式",
-  "app.tabs.runtimeSessionAware": "会话感知",
   "app.panelTitle.delete": "删除 {name}",
   "app.panelTitle.edit": "编辑客户",
   "app.panelTitle.detailFallback": "客户详情",
@@ -254,6 +222,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.filter.pageSize": "每页",
   "app.filter.sort": "排序",
   "app.customer.field.id": "ID",
+  "app.customer.shellTitle": "客户管理",
   "app.customer.field.name": "名称",
   "app.customer.field.status": "状态",
   "app.customer.field.createdAt": "创建时间",

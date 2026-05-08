@@ -35,7 +35,6 @@ export interface UseExampleShellMetaOptions {
   isWorkflowDefinitionsWorkspace: ComputedRef<boolean>
   isFileWorkspace: ComputedRef<boolean>
   isGeneratorPreviewWorkspace: ComputedRef<boolean>
-  isRuntimeShellTab: ComputedRef<boolean>
   currentWorkspaceKind: ComputedRef<ExampleWorkspaceKind>
   currentWorkspaceTitle: ComputedRef<string>
   currentWorkspaceDescription: ComputedRef<string>
@@ -79,7 +78,6 @@ export const useExampleShellMeta = ({
   isWorkflowDefinitionsWorkspace,
   isFileWorkspace,
   isGeneratorPreviewWorkspace,
-  isRuntimeShellTab,
   currentWorkspaceKind,
   currentWorkspaceTitle,
   currentWorkspaceDescription,
@@ -348,26 +346,12 @@ export const useExampleShellMeta = ({
                                       })
                                     : currentNavigationPath.value,
     },
-    {
-      key: "runtime",
-      label: t("app.tabs.runtime"),
-      hint:
-        authStatusState.value === "offline"
-          ? t("app.tabs.runtimePreview")
-          : t("app.tabs.runtimeSessionAware"),
-    },
   ])
 
-  const shellWorkspaceTitle = computed(() =>
-    isRuntimeShellTab.value
-      ? t("app.runtime.title")
-      : currentWorkspaceTitle.value,
-  )
+  const shellWorkspaceTitle = computed(() => currentWorkspaceTitle.value)
 
-  const shellWorkspaceDescription = computed(() =>
-    isRuntimeShellTab.value
-      ? t("app.runtime.copy")
-      : currentWorkspaceDescription.value,
+  const shellWorkspaceDescription = computed(
+    () => currentWorkspaceDescription.value,
   )
 
   const enterpriseShellUser = computed<ElyShellUserSummary | null>(() =>

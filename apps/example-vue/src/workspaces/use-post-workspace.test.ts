@@ -24,7 +24,7 @@ const createWorkspace = () =>
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
     canView: computed(() => true),
-    currentShellTabKey: ref("runtime"),
+    currentShellTabKey: ref("workspace"),
     locale: ref("zh-CN"),
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeStatus: (status) => status,

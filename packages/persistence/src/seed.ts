@@ -3,10 +3,12 @@ import { and, eq, inArray } from "drizzle-orm"
 import { updateUserPasswordHash } from "./auth"
 import { type DatabaseClient, createDatabaseClient } from "./client"
 import {
+  departments,
   dictionaryItems,
   dictionaryTypes,
   menus,
   permissions,
+  posts,
   roleMenus,
   rolePermissions,
   roles,
@@ -136,6 +138,19 @@ export const seedDefaultAuthData = async (
       .values(spec.menus.map((menu) => ({ ...menu, tenantId: tid })))
       .onConflictDoNothing({ target: [menus.tenantId, menus.code] })
     await db
+      .insert(departments)
+      .values(
+        spec.departments.map((department) => ({
+          ...department,
+          tenantId: tid,
+        })),
+      )
+      .onConflictDoNothing({ target: [departments.tenantId, departments.code] })
+    await db
+      .insert(posts)
+      .values(spec.posts.map((post) => ({ ...post, tenantId: tid })))
+      .onConflictDoNothing({ target: [posts.tenantId, posts.code] })
+    await db
       .insert(dictionaryTypes)
       .values(spec.dictionaryTypes.map((type) => ({ ...type, tenantId: tid })))
       .onConflictDoNothing({
@@ -200,6 +215,8 @@ export const seedDefaultAuthData = async (
       adminUsername: spec.adminUser.username,
       insertedAdmin: !existingAdmin[0],
       reconciledAdminPassword,
+      departmentCount: spec.departments.length,
+      postCount: spec.posts.length,
     }
   })
 }
@@ -256,7 +273,7 @@ export const runDefaultSeed = async (
     const workflowResult = await seedDefaultWorkflowDefinitionData(db)
 
     console.log(
-      `[elysian] default seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin}, reconciledPassword=${result.reconciledAdminPassword}, workflowDefinitions=${workflowResult.definitionCount})`,
+      `[elysian] default seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin}, reconciledPassword=${result.reconciledAdminPassword}, departments=${result.departmentCount}, posts=${result.postCount}, workflowDefinitions=${workflowResult.definitionCount})`,
     )
   } finally {
     await db.$client.end()

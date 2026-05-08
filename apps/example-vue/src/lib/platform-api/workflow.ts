@@ -189,7 +189,7 @@ export interface GeneratorPreviewSessionRecord {
   confirmationEvidence: Record<string, unknown> | null
   schemaName: string
   skippedFileCount: number | null
-  sourceType: "registered-schema"
+  sourceType: "registered-schema" | "manual-schema-json"
   sourceValue: string
   status: "pending_review" | "ready" | "rejected" | "applied"
   targetPreset: "staging"
@@ -212,6 +212,8 @@ export interface CreateGeneratorPreviewSessionRequest {
   schemaName: string
   frontendTarget?: "vue" | "react"
   conflictStrategy?: GeneratorPreviewConflictStrategy
+  sourceType?: "registered-schema" | "manual-schema-json"
+  sourceValue?: string
   targetPreset?: "staging"
 }
 

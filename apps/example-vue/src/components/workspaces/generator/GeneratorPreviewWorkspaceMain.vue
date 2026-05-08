@@ -6,7 +6,6 @@ import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 
 import { shouldSelectGeneratorPreviewFile } from "../../../lib/generator-preview-workspace"
-import GeneratorPreviewWorkspaceBlockedFiles from "./GeneratorPreviewWorkspaceBlockedFiles.vue"
 import GeneratorPreviewWorkspaceFileList from "./GeneratorPreviewWorkspaceFileList.vue"
 import {
   clearGeneratorPreviewReviewDraft,
@@ -28,15 +27,18 @@ interface GeneratorPreviewWorkspaceMainProps {
   reviewLoading: boolean
   applyLoading: boolean
   errorMessage: string
+  inputModeOptions: Array<{ label: string; value: string }>
   schemaOptions: GeneratorPreviewSchemaOption[]
   conflictStrategyOptions: Array<{ label: string; value: string }>
+  selectedInputMode: string
   selectedConflictStrategy: string
   recentSessionOptions: Array<{ label: string; value: string }>
   selectedRecentSessionId: string
   selectedSchemaName: string
   selectedFrontendTarget: "vue" | "react"
+  manualSchemaDraft: string
+  manualSchemaDraftError: string | null
   query: string
-  filterSummary: string
   files: GeneratorPreviewFileCard[]
   selectedFilePath: string | null
   canApprove: boolean
@@ -56,7 +58,10 @@ const emit = defineEmits<{
   (e: "update:selected-schema-name", value: string): void
   (e: "update:selected-conflict-strategy", value: string): void
   (e: "update:selected-frontend-target", value: "vue" | "react"): void
+  (e: "update:selected-input-mode", value: string): void
+  (e: "update:manual-schema-draft", value: string): void
   (e: "update:query", value: string): void
+  (e: "load-current-schema-draft"): void
   (e: "restore-session", value: string): void
   (e: "select-file", value: string): void
   (e: "reset-filters"): void
@@ -80,192 +85,14 @@ const frontendOptions = [
   { label: "React", value: "react" },
 ] as const
 
-const operationHint = computed<{
-  key: string
-  tone: "info" | "warning" | "success"
-} | null>(() => {
-  if (props.loading) {
-    return {
-      key: "app.generatorPreview.message.operationLoading",
-      tone: "info",
-    }
-  }
-
-  if (props.reviewLoading || props.applyLoading) {
-    return {
-      key: "app.generatorPreview.message.operationBusy",
-      tone: "info",
-    }
-  }
-
-  if (!props.sessionStatus) {
-    return {
-      key: "app.generatorPreview.message.operationNoSession",
-      tone: "info",
-    }
-  }
-
-  if (isRejectConfirming.value) {
-    return {
-      key: "app.generatorPreview.message.confirmReject",
-      tone: "warning",
-    }
-  }
-
-  if (isApplyConfirming.value) {
-    return {
-      key: "app.generatorPreview.message.confirmApply",
-      tone: "warning",
-    }
-  }
-
-  if (props.sessionStatus === "pending_review") {
-    return {
-      key: "app.generatorPreview.message.pendingReview",
-      tone: "info",
-    }
-  }
-
-  if (props.sessionStatus === "rejected") {
-    return {
-      key: "app.generatorPreview.message.rejected",
-      tone: "warning",
-    }
-  }
-
-  if (props.sessionStatus === "applied") {
-    return {
-      key: "app.generatorPreview.message.operationApplied",
-      tone: "success",
-    }
-  }
-
-  if (props.hasBlockingConflicts) {
-    return {
-      key: "app.generatorPreview.message.blockingConflicts",
-      tone: "warning",
-    }
-  }
-
-  if (props.sessionStatus === "ready" && !props.canApply) {
-    return {
-      key: "app.generatorPreview.message.operationApplyUnavailable",
-      tone: "info",
-    }
-  }
-
-  return null
-})
-
-const operationHintClass = computed(() =>
-  operationHint.value
-    ? `enterprise-message enterprise-message-${operationHint.value.tone}`
-    : "",
+const isManualSchemaMode = computed(
+  () => props.selectedInputMode === "manual-schema-json",
 )
 
-const nextOperationKey = computed(() => {
-  if (props.loading) {
-    return "app.generatorPreview.next.refreshing"
-  }
-
-  if (isRejectConfirming.value) {
-    return "app.generatorPreview.next.confirmReject"
-  }
-
-  if (isApplyConfirming.value) {
-    return "app.generatorPreview.next.confirmApply"
-  }
-
-  if (props.reviewLoading) {
-    return "app.generatorPreview.next.reviewing"
-  }
-
-  if (props.applyLoading) {
-    return "app.generatorPreview.next.applying"
-  }
-
-  if (!props.sessionStatus || props.sessionStatus === "rejected") {
-    return "app.generatorPreview.next.refresh"
-  }
-
-  if (props.sessionStatus === "pending_review") {
-    return "app.generatorPreview.next.review"
-  }
-
-  if (props.sessionStatus === "applied") {
-    return "app.generatorPreview.next.done"
-  }
-
-  if (props.hasBlockingConflicts) {
-    return "app.generatorPreview.next.resolveConflicts"
-  }
-
-  if (props.sessionStatus === "ready" && props.canConfirm) {
-    return "app.generatorPreview.next.confirmChecklist"
-  }
-
-  if (props.sessionStatus === "ready" && props.canApply) {
-    return "app.generatorPreview.next.apply"
-  }
-
-  return "app.generatorPreview.next.wait"
-})
-
-const flowSteps = computed(() => [
-  {
-    key: "refresh",
-    labelKey: "app.generatorPreview.flow.refresh",
-    active: props.loading || !props.sessionStatus,
-    done: Boolean(props.sessionStatus),
-  },
-  {
-    key: "review",
-    labelKey: "app.generatorPreview.flow.review",
-    active: props.sessionStatus === "pending_review" || props.reviewLoading,
-    done: props.sessionStatus === "ready" || props.sessionStatus === "applied",
-  },
-  {
-    key: "confirm",
-    labelKey: "app.generatorPreview.flow.confirm",
-    active:
-      props.sessionStatus === "ready" &&
-      props.canConfirm &&
-      !props.hasBlockingConflicts,
-    done:
-      props.sessionStatus === "ready" &&
-      !props.canConfirm &&
-      !props.hasBlockingConflicts,
-  },
-  {
-    key: "apply",
-    labelKey: "app.generatorPreview.flow.apply",
-    active:
-      props.applyLoading ||
-      (props.sessionStatus === "ready" &&
-        props.canApply &&
-        !props.hasBlockingConflicts),
-    done: props.sessionStatus === "applied",
-  },
-  {
-    key: "handoff",
-    labelKey: "app.generatorPreview.flow.handoff",
-    active:
-      props.sessionStatus === "applied" ||
-      (props.sessionStatus === "ready" && props.hasBlockingConflicts),
-    done: props.sessionStatus === "applied",
-  },
-])
-
-const resolveEvidenceActorLabel = (
-  evidence:
-    | GeneratorPreviewReviewEvidence
-    | GeneratorPreviewApplyEvidence
-    | null,
-) =>
-  evidence?.actorDisplayName ??
-  evidence?.actorUsername ??
-  evidence?.actorUserId ??
-  "-"
+const hasRecentSessions = computed(() => props.recentSessionOptions.length > 0)
+const showReviewCommentInput = computed(
+  () => isRejectConfirming.value || Boolean(props.reviewEvidence?.comment),
+)
 
 const handleQueryInput = (value: string | number) => {
   const nextValue = String(value)
@@ -304,6 +131,31 @@ const handleFrontendChange = (
   }
 }
 
+const handleInputModeChange = (
+  value: string | number | Array<string | number>,
+) => {
+  if (
+    (value === "registered-schema" || value === "manual-schema-json") &&
+    value !== props.selectedInputMode
+  ) {
+    emit("update:selected-input-mode", value)
+  }
+}
+
+const handleManualSchemaDraftInput = (value: string | number) => {
+  const nextValue = String(value)
+
+  if (nextValue === props.manualSchemaDraft) {
+    return
+  }
+
+  emit("update:manual-schema-draft", nextValue)
+}
+
+const handleLoadCurrentSchemaDraft = () => {
+  emit("load-current-schema-draft")
+}
+
 const handleRecentSessionChange = (
   value: string | number | Array<string | number>,
 ) => {
@@ -322,24 +174,6 @@ const handleRefreshPreview = () => {
   isApplyConfirming.value = false
   isRejectConfirming.value = false
   emit("refresh-preview")
-}
-
-const resolveStatusLabel = (
-  status: GeneratorPreviewWorkspaceMainProps["sessionStatus"],
-) => {
-  if (status === "applied") {
-    return props.t("app.generatorPreview.status.applied")
-  }
-
-  if (status === "ready") {
-    return props.t("app.generatorPreview.status.ready")
-  }
-
-  if (status === "rejected") {
-    return props.t("app.generatorPreview.status.rejected")
-  }
-
-  return props.t("app.generatorPreview.status.pendingReview")
 }
 
 const handleReviewCommentInput = (value: string | number) => {
@@ -488,82 +322,117 @@ watch(
 <template>
   <section class="enterprise-card enterprise-main-card">
     <div class="enterprise-workspace-stack">
-      <div class="generator-filter-grid">
-        <label class="enterprise-field">
-          <span>{{ t("app.generatorPreview.filter.schemaLabel") }}</span>
+      <section class="panel-section generator-input-section">
+        <div class="generator-input-mode">
+          <button
+            v-for="option in inputModeOptions"
+            :key="option.value"
+            type="button"
+            class="generator-mode-button"
+            :class="
+              selectedInputMode === option.value
+                ? 'generator-mode-button-active'
+                : ''
+            "
+            :disabled="loading || reviewLoading || applyLoading"
+            @click="handleInputModeChange(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+
+        <div class="generator-control-row">
           <TSelect
+            class="generator-schema-select"
             :model-value="selectedSchemaName"
             :options="schemaOptions"
             :disabled="loading || reviewLoading || applyLoading"
             @update:model-value="handleSchemaChange"
           />
-        </label>
 
-        <label class="enterprise-field">
-          <span>{{ t("app.generatorPreview.filter.conflictLabel") }}</span>
+          <div class="generator-option-group">
+            <button
+              v-for="option in frontendOptions"
+              :key="option.value"
+              type="button"
+              class="generator-option-button"
+              :class="
+                selectedFrontendTarget === option.value
+                  ? 'generator-option-button-active'
+                  : ''
+              "
+              :disabled="loading || reviewLoading || applyLoading"
+              @click="handleFrontendChange(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+
+          <div class="generator-option-group">
+            <button
+              v-for="option in conflictStrategyOptions"
+              :key="option.value"
+              type="button"
+              class="generator-option-button"
+              :class="
+                selectedConflictStrategy === option.value
+                  ? 'generator-option-button-active'
+                  : ''
+              "
+              :disabled="loading || reviewLoading || applyLoading"
+              @click="handleConflictStrategyChange(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+
           <TSelect
-            :model-value="selectedConflictStrategy"
-            :options="conflictStrategyOptions"
-            :disabled="loading || reviewLoading || applyLoading"
-            @update:model-value="handleConflictStrategyChange"
-          />
-        </label>
-
-        <label class="enterprise-field">
-          <span>{{ t("app.generatorPreview.filter.frontendLabel") }}</span>
-          <TSelect
-            :model-value="selectedFrontendTarget"
-            :options="frontendOptions"
-            :disabled="loading || reviewLoading || applyLoading"
-            @update:model-value="handleFrontendChange"
-          />
-        </label>
-
-        <label class="enterprise-field generator-filter-search">
-          <span>{{ t("app.generatorPreview.filter.searchLabel") }}</span>
-          <TInput
-            :model-value="query"
-            :placeholder="t('app.generatorPreview.filter.searchPlaceholder')"
-            clearable
-            @update:model-value="handleQueryInput"
-          />
-        </label>
-
-        <label
-          v-if="recentSessionOptions.length > 0"
-          class="enterprise-field generator-filter-search"
-        >
-          <span>{{ t("app.generatorPreview.filter.sessionLabel") }}</span>
-          <TSelect
+            v-if="hasRecentSessions"
+            class="generator-session-select"
             :model-value="selectedRecentSessionId"
             :options="recentSessionOptions"
             :placeholder="t('app.generatorPreview.filter.sessionPlaceholder')"
             :disabled="loading || reviewLoading || applyLoading"
             @update:model-value="handleRecentSessionChange"
           />
-        </label>
-      </div>
-
-      <div class="generator-toolbar">
-        <div class="generator-toolbar-meta">
-          <span class="enterprise-toolbar-pill">{{ filterSummary }}</span>
-          <span v-if="sessionStatus" class="enterprise-toolbar-pill">
-            {{ resolveStatusLabel(sessionStatus) }}
-          </span>
-          <span class="enterprise-toolbar-pill generator-next-action-pill">
-            {{ t(nextOperationKey) }}
-          </span>
         </div>
 
+        <div v-if="isManualSchemaMode" class="generator-toolbar">
+          <div class="generator-toolbar-actions">
+            <button
+              type="button"
+              class="enterprise-button enterprise-button-ghost"
+              :disabled="loading || reviewLoading || applyLoading || !selectedSchemaName"
+              @click="handleLoadCurrentSchemaDraft"
+            >
+              {{ t("app.generatorPreview.action.loadCurrentSchemaDraft") }}
+            </button>
+          </div>
+        </div>
+
+        <label
+          v-if="isManualSchemaMode"
+          class="generator-manual-draft"
+        >
+          <TTextarea
+            :model-value="manualSchemaDraft"
+            :maxlength="12000"
+            :autosize="{ minRows: 10, maxRows: 24 }"
+            :placeholder="t('app.generatorPreview.input.manualSchemaDraftPlaceholder')"
+            @update:model-value="handleManualSchemaDraftInput"
+          />
+        </label>
+
+        <div
+          v-if="manualSchemaDraftError"
+          class="enterprise-message enterprise-message-danger"
+        >
+          {{ manualSchemaDraftError }}
+        </div>
+      </section>
+
+      <div class="generator-toolbar">
         <div class="generator-toolbar-actions">
-          <button
-            v-if="query.trim().length > 0"
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            @click="emit('reset-filters')"
-          >
-            {{ t("app.generatorPreview.filter.reset") }}
-          </button>
           <button
             type="button"
             class="enterprise-button enterprise-button-ghost"
@@ -576,26 +445,7 @@ watch(
                 : t("app.generatorPreview.action.refresh")
             }}
           </button>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="!canReject"
-            @click="handleReviewPreview('reject')"
-          >
-            {{
-              isRejectConfirming
-                ? t("app.generatorPreview.action.confirmReject")
-                : t("app.generatorPreview.action.reject")
-            }}
-          </button>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="!canApprove || isRejectConfirming"
-            @click="handleReviewPreview('approve')"
-          >
-            {{ t("app.generatorPreview.action.approve") }}
-          </button>
+          <span class="generator-toolbar-divider" />
           <button
             v-if="isRejectConfirming"
             type="button"
@@ -604,6 +454,31 @@ watch(
             @click="cancelRejectConfirmation"
           >
             {{ t("app.generatorPreview.action.cancelRejectConfirm") }}
+          </button>
+          <button
+            v-if="isRejectConfirming"
+            type="button"
+            class="enterprise-button"
+            :disabled="reviewLoading"
+            @click="handleReviewPreview('reject')"
+          >
+            {{ t("app.generatorPreview.action.confirmReject") }}
+          </button>
+          <button
+            v-else-if="canReject"
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            @click="handleReviewPreview('reject')"
+          >
+            {{ t("app.generatorPreview.action.reject") }}
+          </button>
+          <button
+            v-if="canApprove && !isRejectConfirming"
+            type="button"
+            class="enterprise-button"
+            @click="handleReviewPreview('approve')"
+          >
+            {{ t("app.generatorPreview.action.approve") }}
           </button>
           <button
             v-if="isApplyConfirming"
@@ -617,13 +492,14 @@ watch(
           <button
             v-if="canConfirm"
             type="button"
-            class="enterprise-button enterprise-button-ghost"
+            class="enterprise-button"
             :disabled="loading || reviewLoading || applyLoading"
             @click="handleConfirmPreview"
           >
             {{ t("app.generatorPreview.action.confirmChecklist") }}
           </button>
           <button
+            v-else
             type="button"
             class="enterprise-button"
             :disabled="!canApply"
@@ -640,18 +516,15 @@ watch(
         </div>
       </div>
 
-      <div class="generator-flow">
-        <article
-          v-for="step in flowSteps"
-          :key="step.key"
-          class="generator-flow-step"
-          :class="{
-            'generator-flow-step-active': step.active,
-            'generator-flow-step-done': step.done,
-          }"
-        >
-          <span>{{ t(step.labelKey) }}</span>
-        </article>
+      <div class="generator-list-tools">
+        <label class="generator-filter-search">
+          <TInput
+            :model-value="query"
+            :placeholder="t('app.generatorPreview.filter.searchPlaceholder')"
+            clearable
+            @update:model-value="handleQueryInput"
+          />
+        </label>
       </div>
 
       <div
@@ -661,26 +534,11 @@ watch(
         {{ errorMessage }}
       </div>
 
-      <div
-        v-else-if="operationHint"
-        :class="operationHintClass"
-      >
-        {{ t(operationHint.key) }}
-      </div>
-
-      <GeneratorPreviewWorkspaceBlockedFiles
-        :t="t"
-        :files="files"
-        :selected-file-path="selectedFilePath"
-        @select-file="handleFileSelection"
-      />
-
       <label
-        v-if="canApprove || canReject"
+        v-if="showReviewCommentInput"
         class="enterprise-field generator-review-comment"
       >
-        <span>{{ t("app.generatorPreview.reviewCommentLabel") }}</span>
-        <TTextarea
+          <TTextarea
           :model-value="reviewComment"
           :maxlength="240"
           :autosize="{ minRows: 2, maxRows: 4 }"
@@ -689,36 +547,7 @@ watch(
         />
       </label>
 
-      <div
-        v-if="diffSummary"
-        class="generator-summary-grid"
-      >
-        <article>
-          <small>{{ t("app.generatorPreview.summary.changed") }}</small>
-          <strong>{{ diffSummary.changedFileCount }}</strong>
-        </article>
-        <article>
-          <small>{{ t("app.generatorPreview.summary.create") }}</small>
-          <strong>{{ diffSummary.actionCounts.create }}</strong>
-        </article>
-        <article>
-          <small>{{ t("app.generatorPreview.summary.overwrite") }}</small>
-          <strong>{{ diffSummary.actionCounts.overwrite }}</strong>
-        </article>
-        <article>
-          <small>{{ t("app.generatorPreview.summary.skip") }}</small>
-          <strong>{{ diffSummary.actionCounts.skip }}</strong>
-        </article>
-        <article>
-          <small>{{ t("app.generatorPreview.summary.block") }}</small>
-          <strong>{{ diffSummary.actionCounts.block }}</strong>
-        </article>
-      </div>
-
-      <div
-        v-if="reviewEvidence"
-        class="enterprise-message enterprise-message-info"
-      >
+      <div v-if="reviewEvidence" class="enterprise-message enterprise-message-info">
         {{
           t(
             reviewEvidence.decision === "approve"
@@ -731,68 +560,13 @@ watch(
         }}
       </div>
 
-      <div
-        v-if="applyEvidence"
-        class="enterprise-message enterprise-message-success"
-      >
+      <div v-if="applyEvidence" class="enterprise-message enterprise-message-success">
         {{
           t("app.generatorPreview.message.applied", {
             value: applyEvidence.appliedAt ?? "-",
           })
         }}
       </div>
-
-      <p
-        v-if="
-          reviewEvidence &&
-          (resolveEvidenceActorLabel(reviewEvidence) !== '-' ||
-            Boolean(reviewEvidence.comment))
-        "
-        class="generator-status-note"
-      >
-        <span v-if="resolveEvidenceActorLabel(reviewEvidence) !== '-'">
-          {{ t("app.generatorPreview.meta.actor") }}:
-          {{ resolveEvidenceActorLabel(reviewEvidence) }}
-        </span>
-        <span
-          v-if="
-            resolveEvidenceActorLabel(reviewEvidence) !== '-' &&
-            reviewEvidence.comment
-          "
-        >
-          ·
-        </span>
-        <span v-if="reviewEvidence.comment">
-          {{ t("app.generatorPreview.meta.reviewComment") }}:
-          {{ reviewEvidence.comment }}
-        </span>
-      </p>
-
-      <p
-        v-if="
-          applyEvidence &&
-          (resolveEvidenceActorLabel(applyEvidence) !== '-' ||
-            Boolean(applyEvidence.requestId))
-        "
-        class="generator-status-note"
-      >
-        <span v-if="resolveEvidenceActorLabel(applyEvidence) !== '-'">
-          {{ t("app.generatorPreview.meta.actor") }}:
-          {{ resolveEvidenceActorLabel(applyEvidence) }}
-        </span>
-        <span
-          v-if="
-            resolveEvidenceActorLabel(applyEvidence) !== '-' &&
-            applyEvidence.requestId
-          "
-        >
-          ·
-        </span>
-        <span v-if="applyEvidence.requestId">
-          {{ t("app.generatorPreview.meta.requestId") }}:
-          {{ applyEvidence.requestId }}
-        </span>
-      </p>
 
       <GeneratorPreviewWorkspaceFileList
         :t="t"
@@ -806,14 +580,76 @@ watch(
 </template>
 
 <style scoped>
-.enterprise-field span {
-  margin: 0;
+.panel-section {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.generator-filter-grid {
+.generator-input-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.generator-mode-button {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.85);
+  color: #334155;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.generator-mode-button-active {
+  border-color: rgba(36, 87, 214, 0.4);
+  background: rgba(36, 87, 214, 0.08);
+  color: #173ea6;
+}
+
+.generator-control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.generator-schema-select {
+  min-width: min(22rem, 100%);
+  flex: 1 1 18rem;
+}
+
+.generator-session-select {
+  min-width: min(18rem, 100%);
+  flex: 1 1 15rem;
+}
+
+.generator-option-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.generator-option-button {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.85);
+  color: #334155;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.generator-option-button-active {
+  border-color: rgba(36, 87, 214, 0.36);
+  background: rgba(36, 87, 214, 0.08);
+  color: #173ea6;
+}
+
+.generator-manual-draft {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .generator-filter-search {
@@ -827,7 +663,6 @@ watch(
   gap: 1rem;
 }
 
-.generator-toolbar-meta,
 .generator-toolbar-actions {
   display: flex;
   flex-wrap: wrap;
@@ -835,38 +670,10 @@ watch(
   align-items: center;
 }
 
-.generator-next-action-pill {
-  border-color: rgba(36, 87, 214, 0.18);
-  background: rgba(239, 246, 255, 0.72);
-  color: #1d4ed8;
-}
-
-.generator-flow {
-  display: grid;
-  gap: 0.55rem;
-  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
-}
-
-.generator-flow-step {
-  border-radius: 6px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(248, 250, 252, 0.68);
-  color: #64748b;
-  padding: 0.65rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.generator-flow-step-active {
-  border-color: rgba(36, 87, 214, 0.22);
-  background: rgba(239, 246, 255, 0.76);
-  color: #1d4ed8;
-}
-
-.generator-flow-step-done {
-  border-color: rgba(22, 163, 74, 0.16);
-  background: rgba(240, 253, 244, 0.72);
-  color: #15803d;
+.generator-toolbar-divider {
+  width: 1px;
+  height: 1.5rem;
+  background: rgba(15, 23, 42, 0.08);
 }
 
 .generator-review-comment {
@@ -874,46 +681,18 @@ watch(
   gap: 0.5rem;
 }
 
-.generator-status-note {
-  margin: 0;
-  color: #475569;
-  font-size: 0.9rem;
-}
-
-.generator-summary-grid {
+.generator-list-tools {
   display: grid;
-  gap: 0.85rem;
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 0.75rem;
 }
 
-.generator-summary-grid article {
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background: rgba(248, 250, 252, 0.56);
-  padding: 0.9rem 1rem;
-}
+@media (max-width: 640px) {
+  .generator-control-row {
+    align-items: stretch;
+  }
 
-.generator-summary-grid small,
-.generator-summary-grid strong {
-  display: block;
-}
-
-.generator-summary-grid small {
-  color: #64748b;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-.generator-summary-grid strong {
-  margin-top: 0.45rem;
-  color: #0f172a;
-  font-size: 1.05rem;
-}
-
-@media (max-width: 900px) {
-  .generator-filter-grid {
-    grid-template-columns: 1fr;
+  .generator-option-group {
+    width: 100%;
   }
 }
 </style>

@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { computed, ref, watch } from "vue"
+
 import type {
   GeneratorPreviewDiffLine,
   GeneratorPreviewFileCard,
   GeneratorPreviewSqlPreview,
   GeneratorPreviewTranslation,
 } from "./types"
+
+type SourceViewKey = "diff" | "generated" | "current" | "sql"
 
 interface GeneratorPreviewWorkspaceSourcePanelProps {
   t: GeneratorPreviewTranslation
@@ -15,13 +19,90 @@ interface GeneratorPreviewWorkspaceSourcePanelProps {
   sqlPreviewCopyLabel: string
 }
 
-defineProps<GeneratorPreviewWorkspaceSourcePanelProps>()
+const props = defineProps<GeneratorPreviewWorkspaceSourcePanelProps>()
 
 const emit = defineEmits<{
   (event: "copy-generated-source"): void
   (event: "copy-current-source"): void
   (event: "copy-sql-preview"): void
 }>()
+
+const activeView = ref<SourceViewKey>("diff")
+
+const availableViews = computed(() => {
+  const views: Array<{
+    key: SourceViewKey
+    copyLabel: string | null
+    label: string
+  }> = [
+    {
+      key: "diff",
+      label: props.t("app.generatorPreview.lineDiffTitle"),
+      copyLabel: null,
+    },
+    {
+      key: "generated",
+      label: props.t("app.generatorPreview.sourceTitle"),
+      copyLabel: props.generatedSourceCopyLabel,
+    },
+  ]
+
+  if (props.selectedFile.currentContents !== null) {
+    views.push({
+      key: "current",
+      label: props.t("app.generatorPreview.currentSourceTitle"),
+      copyLabel: props.currentSourceCopyLabel,
+    })
+  }
+
+  if ((props.sqlPreview?.contents ?? "").trim().length > 0) {
+    views.push({
+      key: "sql",
+      label: props.t("app.generatorPreview.sqlTitle"),
+      copyLabel: props.sqlPreviewCopyLabel,
+    })
+  }
+
+  return views
+})
+
+const currentView = computed(
+  () =>
+    availableViews.value.find((view) => view.key === activeView.value) ??
+    availableViews.value[0],
+)
+
+watch(
+  () => [
+    props.selectedFile.path,
+    props.selectedFile.currentContents,
+    props.sqlPreview?.contents ?? "",
+  ],
+  () => {
+    if (availableViews.value.some((view) => view.key === activeView.value)) {
+      return
+    }
+
+    activeView.value = availableViews.value[0]?.key ?? "diff"
+  },
+  { immediate: true },
+)
+
+const handleCopy = () => {
+  if (activeView.value === "generated") {
+    emit("copy-generated-source")
+    return
+  }
+
+  if (activeView.value === "current") {
+    emit("copy-current-source")
+    return
+  }
+
+  if (activeView.value === "sql") {
+    emit("copy-sql-preview")
+  }
+}
 
 const resolveDiffLineClass = (line: GeneratorPreviewDiffLine) =>
   `generator-diff-line generator-diff-line-${line.kind}`
@@ -40,77 +121,72 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
 </script>
 
 <template>
-  <div class="enterprise-panel-stack">
-    <section class="panel-section">
-      <p class="enterprise-subheading">{{ t("app.generatorPreview.lineDiffTitle") }}</p>
-      <div class="generator-diff-block">
-        <div
-          v-for="(line, index) in selectedFile.diffLines"
-          :key="`${selectedFile.path}:${index}:${line.kind}`"
-          :class="resolveDiffLineClass(line)"
-        >
-          <span class="generator-diff-line-number">
-            {{ line.oldLineNumber ?? "" }}
-          </span>
-          <span class="generator-diff-line-number">
-            {{ line.newLineNumber ?? "" }}
-          </span>
-          <span class="generator-diff-line-prefix">
-            {{ resolveDiffLinePrefix(line) }}
-          </span>
-          <code class="generator-diff-line-value">{{ line.value }}</code>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel-section">
-      <div class="generator-code-toolbar">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sourceTitle") }}</p>
+  <section class="panel-section">
+    <div class="generator-source-toolbar">
+      <div class="generator-source-switches">
         <button
+          v-for="view in availableViews"
+          :key="view.key"
           type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="selectedFile.contents.trim().length === 0"
-          @click="emit('copy-generated-source')"
+          class="generator-source-switch"
+          :class="
+            currentView?.key === view.key
+              ? 'generator-source-switch-active'
+              : ''
+          "
+          @click="activeView = view.key"
         >
-          {{ generatedSourceCopyLabel }}
+          {{ view.label }}
         </button>
       </div>
-      <pre class="generator-code-block"><code>{{ selectedFile.contents }}</code></pre>
-    </section>
 
-    <section
-      v-if="selectedFile.currentContents !== null"
-      class="panel-section"
+      <button
+        v-if="currentView?.copyLabel"
+        type="button"
+        class="enterprise-button enterprise-button-ghost"
+        @click="handleCopy"
+      >
+        {{ currentView.copyLabel }}
+      </button>
+    </div>
+
+    <div
+      v-if="currentView?.key === 'diff'"
+      class="generator-diff-block"
     >
-      <div class="generator-code-toolbar">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.currentSourceTitle") }}</p>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="selectedFile.currentContents.trim().length === 0"
-          @click="emit('copy-current-source')"
-        >
-          {{ currentSourceCopyLabel }}
-        </button>
+      <div
+        v-for="(line, index) in selectedFile.diffLines"
+        :key="`${selectedFile.path}:${index}:${line.kind}`"
+        :class="resolveDiffLineClass(line)"
+      >
+        <span class="generator-diff-line-number">
+          {{ line.oldLineNumber ?? "" }}
+        </span>
+        <span class="generator-diff-line-number">
+          {{ line.newLineNumber ?? "" }}
+        </span>
+        <span class="generator-diff-line-prefix">
+          {{ resolveDiffLinePrefix(line) }}
+        </span>
+        <code class="generator-diff-line-value">{{ line.value }}</code>
       </div>
-      <pre class="generator-code-block"><code>{{ selectedFile.currentContents }}</code></pre>
-    </section>
+    </div>
 
-    <section class="panel-section">
-      <div class="generator-code-toolbar">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlTitle") }}</p>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="(sqlPreview?.contents ?? '').trim().length === 0"
-          @click="emit('copy-sql-preview')"
-        >
-          {{ sqlPreviewCopyLabel }}
-        </button>
-      </div>
-      <pre class="generator-code-block"><code>{{ sqlPreview?.contents ?? "" }}</code></pre>
-    </section>
-  </div>
+    <pre
+      v-else-if="currentView?.key === 'generated'"
+      class="generator-code-block"
+    ><code>{{ selectedFile.contents }}</code></pre>
+
+    <pre
+      v-else-if="currentView?.key === 'current'"
+      class="generator-code-block"
+    ><code>{{ selectedFile.currentContents ?? "" }}</code></pre>
+
+    <pre
+      v-else
+      class="generator-code-block"
+    ><code>{{ sqlPreview?.contents ?? "" }}</code></pre>
+  </section>
 </template>
 
 <style scoped>
@@ -119,6 +195,36 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   gap: 0.75rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.generator-source-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.generator-source-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.generator-source-switch {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.85);
+  color: #334155;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.generator-source-switch-active {
+  border-color: rgba(36, 87, 214, 0.36);
+  background: rgba(36, 87, 214, 0.08);
+  color: #173ea6;
 }
 
 .generator-diff-block {
@@ -163,13 +269,6 @@ const resolveDiffLinePrefix = (line: GeneratorPreviewDiffLine) => {
   color: #dbeafe;
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-.generator-code-toolbar {
-  align-items: center;
-  display: flex;
-  gap: 0.75rem;
-  justify-content: space-between;
 }
 
 .generator-code-block {

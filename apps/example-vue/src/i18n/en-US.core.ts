@@ -152,35 +152,6 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.placeholder.backToCustomer": "Back to customer workspace",
   "app.placeholder.statsHint":
     "This informational page carries no real business rows",
-  "app.runtime.eyebrow": "Runtime view",
-  "app.runtime.title": "Current page runtime",
-  "app.runtime.copy":
-    "This tab now exposes the current page navigation, module registration, and session state instead of acting as decoration only.",
-  "app.runtime.currentPage": "Current page",
-  "app.runtime.currentPath": "Route",
-  "app.runtime.moduleStatus": "Module status",
-  "app.runtime.permissions": "Permissions",
-  "app.runtime.nextStep": "Next step",
-  "app.runtime.step.navigation":
-    "Keep turning more menu entries into real switchable pages instead of static showcase lists.",
-  "app.runtime.step.workspace":
-    "Prioritize the minimum `customer / workflow / system-*` workspace contracts.",
-  "app.runtime.step.owner":
-    "The shared preset owns shell events and visual baselines; page switching still belongs to the example app.",
-  "app.runtime.backToWorkspace": "Back to workspace",
-  "app.runtime.sideEyebrow": "Runtime boundary",
-  "app.runtime.sideTitle": "Current tab semantics",
-  "app.runtime.sideDescription":
-    "When runtime mode is active, the right rail stops showing business detail or edit panels and only keeps diagnostics and boundary notes.",
-  "app.runtime.sideAuthLabel": "Session state",
-  "app.runtime.sideModuleCodeLabel": "Module code",
-  "app.runtime.sideDecisionTitle": "Current constraints",
-  "app.runtime.sideDecisionTab":
-    "The `runtime` tab only carries diagnostics and does not pretend to support create, edit, or detail actions.",
-  "app.runtime.sideDecisionOwner":
-    "Business workspace ownership stays in `apps/example-vue`; the shared shell does not take page state back.",
-  "app.runtime.sideDecisionFallback":
-    "Modules without a closed loop stay as explicit informational pages instead of pretending to be available inside runtime mode.",
   "app.panel.formDetail": "Standard Form / Detail",
   "app.panel.customerModulePreview":
     "Customer module is offline, so the standard form panel stays in preview mode.",
@@ -236,9 +207,6 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.tabs.create": "Create",
   "app.tabs.formHintSelection": "selection",
   "app.tabs.formHintSchema": "schema-driven form",
-  "app.tabs.runtime": "Runtime",
-  "app.tabs.runtimePreview": "preview mode",
-  "app.tabs.runtimeSessionAware": "session-aware",
   "app.panelTitle.delete": "Delete {name}",
   "app.panelTitle.edit": "Edit customer",
   "app.panelTitle.detailFallback": "Customer detail",
@@ -259,6 +227,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.filter.pageSize": "rows",
   "app.filter.sort": "sort",
   "app.customer.field.id": "ID",
+  "app.customer.shellTitle": "Customers",
   "app.customer.field.name": "Name",
   "app.customer.field.status": "Status",
   "app.customer.field.createdAt": "Created At",

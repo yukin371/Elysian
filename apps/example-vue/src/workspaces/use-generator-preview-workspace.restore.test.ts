@@ -1242,10 +1242,11 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
       "preview-session-other",
     )
     expect(workspace.recentSessionOptions.value[0]?.label).toContain(
-      "app.generatorPreview.conflictStrategy.overwrite-generated-only",
+      "app.generatorPreview.status.pendingReview",
     )
+    expect(workspace.recentSessionOptions.value[0]?.label).toContain("vue")
     expect(workspace.recentSessionOptions.value[2]?.label).toContain(
-      "app.generatorPreview.conflictStrategy.fail",
+      "app.generatorPreview.status.ready",
     )
   })
 })

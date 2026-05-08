@@ -99,12 +99,6 @@ const resolvedPanelTitle = readInjectedValue(
   computed(() => resolvedDepartmentWorkspaceState.value?.panelTitle ?? null),
   "",
 )
-const resolvedPanelDescription = readInjectedValue(
-  computed(
-    () => resolvedDepartmentWorkspaceState.value?.panelDescription ?? null,
-  ),
-  "",
-)
 const resolvedSelectedDepartment = readInjectedValue(
   computed(
     () => resolvedDepartmentWorkspaceState.value?.selectedDepartment ?? null,
@@ -134,9 +128,7 @@ const resolvedDepartmentParentLookup = readInjectedValue(
 
 <template>
   <section class="enterprise-card">
-    <p class="enterprise-eyebrow">{{ t("app.department.detailEyebrow") }}</p>
     <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
-    <p class="enterprise-copy">{{ resolvedPanelDescription }}</p>
 
     <div v-if="!moduleReady" class="enterprise-inline-warning">
       {{ t("app.message.departmentModuleOffline") }}

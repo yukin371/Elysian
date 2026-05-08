@@ -8,6 +8,10 @@ const sessionStatusSchema = t.Union([
 ])
 
 const frontendTargetSchema = t.Union([t.Literal("vue"), t.Literal("react")])
+const generatorPreviewSourceTypeSchema = t.Union([
+  t.Literal("registered-schema"),
+  t.Literal("manual-schema-json"),
+])
 
 const conflictStrategySchema = t.Union([
   t.Literal("skip"),
@@ -70,7 +74,7 @@ export const generatorSessionResponseSchema = t.Object({
   confirmationEvidence: t.Nullable(t.Record(t.String(), t.Unknown())),
   schemaName: t.String(),
   skippedFileCount: t.Nullable(t.Number()),
-  sourceType: t.Literal("registered-schema"),
+  sourceType: generatorPreviewSourceTypeSchema,
   sourceValue: t.String(),
   status: sessionStatusSchema,
   targetPreset: targetPresetSchema,

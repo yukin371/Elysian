@@ -17,6 +17,7 @@
 - 服务端日志入口
 - HTTP 错误映射
 - 模块注册协议与装配
+- generator session 预览 / 回放 / apply API
 - server 最小生产镜像定义（`apps/server/Dockerfile`）
 - 首个 `customer` 模块的应用层 service 与 HTTP 路由
 
@@ -40,6 +41,7 @@
 - 新业务模块应通过模块注册协议接入，而不是继续堆到根入口文件
 - 运行时错误响应应保持统一 envelope
 - server 只消费 persistence 暴露的持久化能力，不直接持有关系型 schema owner
+- generator session 只负责把 `registered-schema` 与 `manual-schema-json` 两类输入收敛成同一条预览链路，不在服务端新开第二套生成引擎
 
 ## 文件体量说明
 

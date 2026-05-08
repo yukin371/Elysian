@@ -33,41 +33,26 @@ defineEmits<{
 <template>
   <section class="enterprise-card">
     <div class="enterprise-status-header">
-      <div>
+      <div class="enterprise-status-copy">
         <h3 class="enterprise-heading">{{ platformDisplayName }}</h3>
-        <p v-if="!authModuleReady" class="enterprise-copy">
-          {{ t("app.session.offlineCopy") }}
-        </p>
-        <p v-else-if="isAuthenticated" class="enterprise-copy">
-          {{
-            t("app.session.signedInAs", {
-              displayName: authDisplayName,
-              username: authUsername,
-            })
-          }}
-        </p>
-        <p v-else class="enterprise-copy">
-          {{ t("app.session.title.online") }}
-        </p>
+
+        <div v-if="!authModuleReady" class="enterprise-facts">
+          <span>{{ t("app.session.title.offline") }}</span>
+        </div>
+
+        <div v-else-if="isAuthenticated" class="enterprise-facts">
+          <span>{{ authDisplayName }}</span>
+          <span>{{ authUsername }}</span>
+          <span v-if="authRolesLabel">{{ authRolesLabel }}</span>
+          <span v-if="permissionCount > 0">
+            {{ permissionCount }} {{ t("app.session.permissions") }}
+          </span>
+        </div>
       </div>
 
       <span class="enterprise-toolbar-pill">
         {{ envName }}
       </span>
-    </div>
-
-    <div
-      v-if="authModuleReady && isAuthenticated"
-      class="enterprise-metadata enterprise-status-metadata"
-    >
-      <div>
-        <span>{{ t("app.session.roles") }}</span>
-        <strong>{{ authRolesLabel }}</strong>
-      </div>
-      <div>
-        <span>{{ t("app.session.permissions") }}</span>
-        <strong>{{ permissionCount }}</strong>
-      </div>
     </div>
 
     <TButton
@@ -144,15 +129,23 @@ defineEmits<{
 }
 
 .enterprise-heading {
-  margin: 0.7rem 0 0;
+  margin: 0;
   font-size: 1.35rem;
   color: #0f172a;
 }
 
-.enterprise-copy {
-  margin: 0.75rem 0 0;
-  line-height: 1.75;
+.enterprise-status-copy {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.enterprise-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
   color: #475569;
+  font-size: 0.82rem;
 }
 
 .enterprise-field {
@@ -162,47 +155,11 @@ defineEmits<{
   color: #334155;
 }
 
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  margin-top: 1rem;
-}
-
-.enterprise-metadata div {
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 4px;
-  background: rgba(248, 250, 252, 0.58);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata span {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-metadata strong {
-  display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
-}
-
 .enterprise-status-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.enterprise-status-header .enterprise-copy {
-  margin-top: 0.55rem;
-}
-
-.enterprise-status-metadata {
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
 .enterprise-message {
@@ -235,6 +192,7 @@ defineEmits<{
 @media (max-width: 900px) {
   .enterprise-status-header {
     flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>

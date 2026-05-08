@@ -2,9 +2,6 @@
 interface ShellWorkspaceStatusMainProps {
   mode: "runtime" | "placeholder"
   title: string
-  subtitle: string
-  badge: string
-  currentPage: string
   currentPath: string
   moduleStatusLabel: string
   authStatusLabel: string
@@ -21,48 +18,29 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
 
 <template>
   <section class="enterprise-card enterprise-main-card">
-    <div class="enterprise-status-header">
-      <div>
+    <div class="enterprise-status-bar">
+      <div class="enterprise-status-copy">
         <h3 class="enterprise-heading">{{ title }}</h3>
-        <p class="enterprise-copy">{{ subtitle }}</p>
+        <code class="enterprise-path">{{ currentPath }}</code>
       </div>
 
-      <span class="enterprise-toolbar-pill">
-        {{ badge }}
-      </span>
-    </div>
-
-    <div class="enterprise-metadata mt-5">
-      <div>
-        <span>{{ mode === "runtime" ? "当前页面" : "路由" }}</span>
-        <strong>{{ mode === "runtime" ? currentPage : currentPath }}</strong>
-      </div>
-      <div>
-        <span>{{ mode === "runtime" ? "当前路径" : "模块编码" }}</span>
-        <strong>{{ mode === "runtime" ? currentPath : moduleCodeLabel }}</strong>
-      </div>
-      <div>
-        <span>模块状态</span>
-        <strong>{{ moduleStatusLabel }}</strong>
-      </div>
-      <div v-if="mode === 'runtime'">
-        <span>鉴权状态</span>
-        <strong>{{ authStatusLabel }}</strong>
-      </div>
-      <div v-if="mode === 'runtime'">
-        <span>权限数</span>
-        <strong>{{ permissionCount }}</strong>
-      </div>
-    </div>
-
-    <div v-if="showBackButton" class="enterprise-button-row">
       <button
+        v-if="showBackButton"
         type="button"
         class="enterprise-button enterprise-button-ghost"
         @click="emit('back-to-customer')"
       >
         {{ backButtonLabel }}
       </button>
+    </div>
+
+    <div class="enterprise-facts">
+      <span v-if="mode === 'placeholder'">{{ moduleCodeLabel }}</span>
+      <span>{{ moduleStatusLabel }}</span>
+      <span v-if="mode === 'runtime'">{{ authStatusLabel }}</span>
+      <span v-if="mode === 'runtime' && permissionCount > 0">
+        {{ permissionCount }} 权限
+      </span>
     </div>
   </section>
 </template>
@@ -77,17 +55,22 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
 }
 
 .enterprise-main-card,
-.enterprise-status-header,
-.enterprise-button-row,
-.enterprise-metadata {
+.enterprise-status-bar,
+.enterprise-facts {
   margin: 0;
 }
 
-.enterprise-status-header {
+.enterprise-status-bar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.enterprise-status-copy {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
 }
 
 .enterprise-heading {
@@ -96,56 +79,22 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
   color: #0f172a;
 }
 
-.enterprise-copy {
-  margin: 0.55rem 0 0;
-  line-height: 1.75;
+.enterprise-path {
+  overflow-x: auto;
   color: #475569;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
-.enterprise-toolbar-pill {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.78rem;
-  color: #475569;
-}
-
-.enterprise-metadata {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  margin-top: 1rem;
-}
-
-.enterprise-metadata div {
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 4px;
-  background: rgba(248, 250, 252, 0.58);
-  padding: 0.85rem 0.95rem;
-}
-
-.enterprise-metadata span {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.enterprise-metadata strong {
-  display: block;
-  margin-top: 0.45rem;
-  color: #0f172a;
-}
-
-.enterprise-button-row {
+.enterprise-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.55rem;
   margin-top: 1rem;
+  color: #64748b;
+  font-size: 0.82rem;
 }
 
 .enterprise-button {
@@ -165,8 +114,9 @@ const emit = defineEmits<(e: "back-to-customer") => void>()
 }
 
 @media (max-width: 900px) {
-  .enterprise-status-header {
+  .enterprise-status-bar {
     flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>

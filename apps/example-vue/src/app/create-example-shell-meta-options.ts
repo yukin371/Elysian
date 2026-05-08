@@ -67,7 +67,6 @@ export const createExampleShellMetaOptions = ({
   isWorkflowDefinitionsWorkspace: navigation.isWorkflowDefinitionsWorkspace,
   isFileWorkspace: navigation.isFileWorkspace,
   isGeneratorPreviewWorkspace: navigation.isGeneratorPreviewWorkspace,
-  isRuntimeShellTab: navigation.isRuntimeShellTab,
   currentWorkspaceKind: navigation.currentWorkspaceKind,
   currentWorkspaceTitle: navigation.currentWorkspaceTitle,
   currentWorkspaceDescription: navigation.currentWorkspaceDescription,

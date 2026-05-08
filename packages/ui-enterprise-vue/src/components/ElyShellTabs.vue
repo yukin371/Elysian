@@ -20,7 +20,6 @@ defineEmits<(event: "select", key: string) => void>()
       @click="$emit('select', tab.key)"
     >
       <strong>{{ tab.label }}</strong>
-      <span v-if="tab.hint">{{ tab.hint }}</span>
     </button>
   </nav>
 </template>
@@ -48,20 +47,13 @@ defineEmits<(event: "select", key: string) => void>()
   text-align: left;
 }
 
-.ely-shell-tab strong,
-.ely-shell-tab span {
+.ely-shell-tab strong {
   display: block;
 }
 
 .ely-shell-tab strong {
   font-size: 0.86rem;
   color: #0f172a;
-}
-
-.ely-shell-tab span {
-  margin-top: 0.1rem;
-  font-size: 0.7rem;
-  color: #5b6678;
 }
 
 .ely-shell-tab-active {

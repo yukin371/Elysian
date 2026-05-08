@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Menu as TMenu } from "tdesign-vue-next/es/menu"
 import { Input as TInput } from "tdesign-vue-next/es/input"
+import { Menu as TMenu } from "tdesign-vue-next/es/menu"
 import { computed, ref, watch } from "vue"
 
 import {

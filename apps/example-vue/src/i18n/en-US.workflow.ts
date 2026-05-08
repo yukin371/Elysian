@@ -173,11 +173,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.conflictLabel": "Conflict strategy",
   "app.generatorPreview.filter.frontendLabel": "Frontend target",
   "app.generatorPreview.filter.searchLabel": "Search artifacts",
-  "app.generatorPreview.filter.searchPlaceholder":
-    "Search by file path, reason, generated contents, or current contents",
+  "app.generatorPreview.filter.searchPlaceholder": "Search files",
   "app.generatorPreview.filter.sessionLabel": "Recent sessions",
-  "app.generatorPreview.filter.sessionPlaceholder":
-    "Select an existing preview session",
+  "app.generatorPreview.filter.sessionPlaceholder": "Restore session",
   "app.generatorPreview.filter.reset": "Clear filters",
   "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
   "app.generatorPreview.filter.frontendSummary": "Frontend: {value}",
@@ -194,8 +192,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.loading": "Generating the latest preview session.",
   "app.generatorPreview.action.refresh": "Refresh preview",
   "app.generatorPreview.action.refreshing": "Refreshing",
-  "app.generatorPreview.action.loadCurrentSchemaDraft":
-    "Load current schema JSON",
+  "app.generatorPreview.action.loadCurrentSchemaDraft": "Load current",
   "app.generatorPreview.action.approve": "Approve",
   "app.generatorPreview.action.reject": "Reject",
   "app.generatorPreview.action.confirmReject": "Confirm reject",
@@ -231,8 +228,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.flow.apply": "4. Apply to staging",
   "app.generatorPreview.flow.handoff": "5. Wire into module",
   "app.generatorPreview.reviewCommentLabel": "Review comment",
-  "app.generatorPreview.reviewCommentPlaceholder":
-    "Optional: explain why this preview is approved or rejected",
+  "app.generatorPreview.reviewCommentPlaceholder": "Comment (optional)",
   "app.generatorPreview.status.pendingReview": "Pending review",
   "app.generatorPreview.status.ready": "Ready",
   "app.generatorPreview.status.rejected": "Rejected",
@@ -307,6 +303,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.generatedAt": "Generated at",
   "app.generatorPreview.meta.canonicalOwner": "Canonical owner",
   "app.generatorPreview.meta.reviewMode": "Handoff mode",
+  "app.generatorPreview.meta.generatedOnly": "Generated only",
   "app.generatorPreview.meta.schemaDir": "Schema directory",
   "app.generatorPreview.meta.drizzleDir": "Migration directory",
   "app.generatorPreview.meta.schemaIndexFile": "Schema index",
@@ -318,17 +315,17 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.manifestPath": "Manifest path",
   "app.generatorPreview.meta.requestId": "Request ID",
   "app.generatorPreview.sourceType.registeredSchema": "Registered schema",
-  "app.generatorPreview.sourceType.manualSchemaJson": "Front-end JSON input",
+  "app.generatorPreview.sourceType.manualSchemaJson": "AI editing input",
   "app.generatorPreview.inputTitle": "Generation input",
   "app.generatorPreview.inputModeLabel": "Input mode",
   "app.generatorPreview.inputSchemaLabel": "Schema template",
-  "app.generatorPreview.inputMode.registeredSchema": "Human boundary mode",
-  "app.generatorPreview.inputMode.manualSchemaJson": "Front-end JSON input",
+  "app.generatorPreview.inputMode.registeredSchema": "Human boundary",
+  "app.generatorPreview.inputMode.manualSchemaJson": "AI editing",
   "app.generatorPreview.input.manualSchemaDraftLabel": "Schema JSON draft",
   "app.generatorPreview.input.manualSchemaDraftPlaceholder":
-    "Paste or edit the ModuleSchema JSON here. The saved draft enters the same preview generation flow.",
+    "Paste or edit schema JSON",
   "app.generatorPreview.input.manualSchemaDraftHelper":
-    "Registered schema is the boundary mode. Front-end JSON input is for AI-edited drafts.",
+    "Choose an input mode, then refresh the preview.",
   "app.generatorPreview.input.manualSchemaDraftEmpty":
     "Fill in the schema JSON draft first.",
   "app.generatorPreview.input.manualSchemaDraftInvalidJson":

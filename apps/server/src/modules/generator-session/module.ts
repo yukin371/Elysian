@@ -38,6 +38,10 @@ export interface GeneratorSessionModuleOptions
 }
 
 const frontendTargetSchema = t.Union([t.Literal("vue"), t.Literal("react")])
+const generatorPreviewSourceTypeSchema = t.Union([
+  t.Literal("registered-schema"),
+  t.Literal("manual-schema-json"),
+])
 const conflictStrategySchema = t.Union([
   t.Literal("skip"),
   t.Literal("overwrite"),
@@ -177,6 +181,8 @@ export const createGeneratorSessionModule = (
             conflictStrategy: body.conflictStrategy,
             frontendTarget: body.frontendTarget,
             schemaName: body.schemaName,
+            sourceType: body.sourceType,
+            sourceValue: body.sourceValue,
             targetPreset: body.targetPreset,
           })
 
@@ -212,11 +218,13 @@ export const createGeneratorSessionModule = (
             schemaName: t.String({ minLength: 1 }),
             frontendTarget: t.Optional(frontendTargetSchema),
             conflictStrategy: t.Optional(conflictStrategySchema),
+            sourceType: t.Optional(generatorPreviewSourceTypeSchema),
+            sourceValue: t.Optional(t.String()),
             targetPreset: t.Optional(t.Literal("staging")),
           }),
           response: {
             201: generatorSessionPreviewResponseSchema,
-            ...createErrorResponses(401, 403, 404, 409, 500),
+            ...createErrorResponses(400, 401, 403, 404, 409, 500),
           },
           detail: {
             tags: ["generator"],

@@ -42,12 +42,7 @@ export function useWorkbenchShortcuts(options: WorkbenchShortcutOptions) {
       e.preventDefault()
       options.onEdit()
     }
-    if (
-      e.key === "n" &&
-      !isInputFocused() &&
-      !e.ctrlKey &&
-      !e.metaKey
-    ) {
+    if (e.key === "n" && !isInputFocused() && !e.ctrlKey && !e.metaKey) {
       options.onCreate()
     }
     if (e.key === "Delete" && !isInputFocused()) {
