@@ -43,6 +43,10 @@ const handleRowClick = (row: Record<string, unknown>) => {
       @more-action="handleToolbarAction"
     />
     <div class="ely-crud-workbench__table">
+      <div v-if="itemCountLabel" class="ely-crud-workbench__summary">
+        {{ itemCountLabel }}
+      </div>
+
       <ElyTable
         v-if="props.items.length > 0 || tableLoading"
         :columns="tableColumns"
@@ -76,6 +80,12 @@ const handleRowClick = (row: Record<string, unknown>) => {
   flex: 1;
   overflow: auto;
   padding: 0 16px;
+}
+
+.ely-crud-workbench__summary {
+  padding: 12px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
 }
 
 .ely-crud-workbench__empty {

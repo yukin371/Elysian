@@ -1,36 +1,54 @@
 <script setup lang="ts">
 import {
-  ElyCrudWorkbench,
+  ElyCrudWorkspace,
   type ElyCrudWorkspaceCopy,
+  type ElyQueryField,
+  type ElyQueryValues,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
 import { computed, ref, watch } from "vue"
 
-type AuthSessionWorkspaceTranslation = (
+type SharedWorkspaceTranslation = (
   key: string,
   params?: Record<string, unknown>,
 ) => string
 
-interface AuthSessionWorkspaceMainProps {
-  t: AuthSessionWorkspaceTranslation
-  loading: boolean
+interface ReadonlyListWorkspaceMainProps {
+  t: SharedWorkspaceTranslation
+  queryFields: ElyQueryField[]
+  queryLoading?: boolean
   tableColumns: ElyTableColumn[]
   items: ReadonlyArray<Record<string, unknown>>
+  tableLoading?: boolean
+  rowKey?: string
+  itemCountLabel?: string
+  countLabelKey?: string
   emptyTitle: string
   emptyDescription: string
+  searchPlaceholder?: string
   copy: ElyCrudWorkspaceCopy
+  paginate?: boolean
+  pageSizeOptions?: number[]
 }
 
-const props = defineProps<AuthSessionWorkspaceMainProps>()
+const props = withDefaults(defineProps<ReadonlyListWorkspaceMainProps>(), {
+  queryLoading: false,
+  tableLoading: false,
+  rowKey: "id",
+  searchPlaceholder: "搜索...",
+  paginate: false,
+  pageSizeOptions: () => [20, 50, 100],
+})
 
 const emit = defineEmits<{
+  (e: "search", values: ElyQueryValues): void
+  (e: "reset"): void
   (e: "row-click", row: Record<string, unknown>): void
-  (e: "search", value: string): void
 }>()
 
-const pageSizeOptions = [20, 50, 100]
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(props.pageSizeOptions[0] ?? 20)
+
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(props.items.length / pageSize.value)),
 )
@@ -40,19 +58,28 @@ const pageStart = computed(() =>
 const pageEnd = computed(() =>
   Math.min(props.items.length, currentPage.value * pageSize.value),
 )
-const paginatedItems = computed(
-  () =>
-    props.items.slice(
-      (currentPage.value - 1) * pageSize.value,
-      currentPage.value * pageSize.value,
-    ) as Record<string, unknown>[],
-)
-const paginatedCountLabel = computed(() =>
-  props.t("app.onlineSession.countLabel", {
-    visible: paginatedItems.value.length,
+const displayedItems = computed<Record<string, unknown>[]>(() => {
+  if (!props.paginate) {
+    return [...props.items]
+  }
+
+  return props.items.slice(
+    (currentPage.value - 1) * pageSize.value,
+    currentPage.value * pageSize.value,
+  )
+})
+
+const resolvedItemCountLabel = computed(() => {
+  if (!props.countLabelKey) {
+    return props.itemCountLabel
+  }
+
+  return props.t(props.countLabelKey, {
+    visible: displayedItems.value.length,
     total: props.items.length,
-  }),
-)
+  })
+})
+
 const paginationSummary = computed(() =>
   props.t("app.pagination.summary", {
     page: currentPage.value,
@@ -61,6 +88,14 @@ const paginationSummary = computed(() =>
     end: pageEnd.value,
     total: props.items.length,
   }),
+)
+
+const queryFields = computed<ElyQueryField[]>(() =>
+  props.queryFields.map((field) =>
+    field.kind === "text"
+      ? { ...field, placeholder: field.placeholder ?? props.searchPlaceholder }
+      : field,
+  ),
 )
 
 const goPreviousPage = () => {
@@ -74,7 +109,9 @@ const goNextPage = () => {
 const updatePageSize = (event: Event) => {
   const nextValue = Number((event.target as HTMLSelectElement).value)
 
-  pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
+  pageSize.value = props.pageSizeOptions.includes(nextValue)
+    ? nextValue
+    : (props.pageSizeOptions[0] ?? 20)
   currentPage.value = 1
 }
 
@@ -84,35 +121,30 @@ watch(
     currentPage.value = Math.min(currentPage.value, totalPages.value)
   },
 )
-
-const panelTitle = computed(() => props.t("app.onlineSession.workspaceTitle"))
-
-const handleSearch = (value: string) => {
-  emit("search", value)
-}
-
-const handleRowClick = (row: Record<string, unknown>) => {
-  emit("row-click", row)
-}
 </script>
 
 <template>
-  <ElyCrudWorkbench
-    :title="panelTitle"
+  <ElyCrudWorkspace
+    eyebrow=""
+    title=""
+    description=""
+    :query-fields="queryFields"
+    :query-loading="queryLoading"
     :table-columns="tableColumns"
-    :items="paginatedItems"
-    :table-loading="loading"
+    :items="displayedItems"
+    :table-loading="tableLoading"
     :table-actions="[]"
-    :item-count-label="paginatedCountLabel"
-    :search-placeholder="t('app.onlineSession.searchPlaceholder', '搜索会话...')"
+    :row-key="rowKey"
+    :item-count-label="resolvedItemCountLabel"
     :empty-title="emptyTitle"
     :empty-description="emptyDescription"
     :copy="copy"
-    @search="handleSearch"
-    @row-click="handleRowClick"
+    @search="emit('search', $event)"
+    @reset="emit('reset')"
+    @row-click="emit('row-click', $event)"
   >
-    <template #footer>
-      <div class="online-session-pagination">
+    <template v-if="paginate" #footer>
+      <div class="readonly-list-pagination">
         <span>{{ paginationSummary }}</span>
         <label>
           <small>{{ t("app.pagination.pageSize") }}</small>
@@ -144,11 +176,11 @@ const handleRowClick = (row: Record<string, unknown>) => {
         </button>
       </div>
     </template>
-  </ElyCrudWorkbench>
+  </ElyCrudWorkspace>
 </template>
 
 <style scoped>
-.online-session-pagination {
+.readonly-list-pagination {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -158,17 +190,17 @@ const handleRowClick = (row: Record<string, unknown>) => {
   font-size: 0.82rem;
 }
 
-.online-session-pagination label {
+.readonly-list-pagination label {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-.online-session-pagination small {
+.readonly-list-pagination small {
   color: #64748b;
 }
 
-.online-session-pagination select {
+.readonly-list-pagination select {
   height: 2rem;
   border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 4px;

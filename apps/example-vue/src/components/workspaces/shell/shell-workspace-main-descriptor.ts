@@ -10,25 +10,17 @@ import type {
   GeneratorPreviewDiffSummary,
   GeneratorPreviewStep,
 } from "../generator/types"
+import ReadonlyListWorkspaceMain from "../shared/ReadonlyListWorkspaceMain.vue"
 import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 
-const AuthSessionWorkspaceMain = defineAsyncComponent(
-  () => import("../auth-session/AuthSessionWorkspaceMain.vue"),
-)
 const CustomerWorkspaceMain = defineAsyncComponent(
   () => import("../customer/CustomerWorkspaceMain.vue"),
-)
-const DepartmentWorkspaceMain = defineAsyncComponent(
-  () => import("../department/DepartmentWorkspaceMain.vue"),
 )
 const FileWorkspaceMain = defineAsyncComponent(
   () => import("../file/FileWorkspaceMain.vue"),
 )
 const GeneratorPreviewWorkspaceMain = defineAsyncComponent(
   () => import("../generator/GeneratorPreviewWorkspaceMain.vue"),
-)
-const OperationLogWorkspaceMain = defineAsyncComponent(
-  () => import("../operation-log/OperationLogWorkspaceMain.vue"),
 )
 const WorkflowWorkspaceMain = defineAsyncComponent(
   () => import("../workflow/WorkflowWorkspaceMain.vue"),
@@ -124,15 +116,9 @@ export interface ShellWorkspaceMainSwitchProps {
   canViewDepartments: boolean
   canCreateDepartments: boolean
   canUpdateDepartments: boolean
-  departmentWorkspaceState: Record<string, unknown>
-  departmentLoading: boolean
-  departmentErrorMessage: string
   enterpriseDepartmentQueryFields: ReadonlyArray<unknown>
   enterpriseDepartmentTableColumns: ReadonlyArray<unknown>
-  enterpriseDepartmentTableActions: ReadonlyArray<unknown>
-  enterpriseDepartmentTableItems: ReadonlyArray<unknown>
   departmentCountLabel: string
-  isSessionWorkspace: boolean
   sessionModuleReady: boolean
   canEnterSessionWorkspace: boolean
   sessionLoading: boolean
@@ -140,7 +126,6 @@ export interface ShellWorkspaceMainSwitchProps {
   enterpriseSessionQueryFields: ReadonlyArray<unknown>
   enterpriseSessionTableColumns: ReadonlyArray<unknown>
   enterpriseSessionTableItems: ReadonlyArray<unknown>
-  sessionCountLabel: string
   postModuleReady: boolean
   canEnterPostWorkspace: boolean
   canViewPosts: boolean
@@ -323,7 +308,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "dictionary-search", payload: unknown): void
   (event: "dictionary-reset"): void
   (event: "dictionary-row-click", payload: unknown): void
-  (event: "department-search", value: string): void
+  (event: "department-search", payload: unknown): void
   (event: "department-action", payload: unknown): void
   (event: "department-row-click", payload: unknown): void
   (event: "session-search", payload: unknown): void
@@ -684,39 +669,54 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   department: (props, emit) => ({
-    component: DepartmentWorkspaceMain,
+    component: generatedStandardCrudMainComponents.department,
     props: {
       t: props.t,
+      moduleReady: props.departmentModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterDepartmentWorkspace,
+      canViewDepartments: props.canViewDepartments,
+      canCreateDepartments: props.canCreateDepartments,
+      canUpdateDepartments: props.canUpdateDepartments,
+      queryFields: props.enterpriseDepartmentQueryFields,
       tableColumns: props.enterpriseDepartmentTableColumns,
-      tableActions: props.enterpriseDepartmentTableActions,
+      itemCountLabel: props.departmentCountLabel,
       emptyTitle: props.t("app.department.emptyTitle"),
       emptyDescription: props.t("app.department.emptyDescription"),
       copy: props.enterpriseCrudCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      action: (payload: unknown) => emit("department-action", payload),
-      "row-click": (payload: unknown) => emit("department-row-click", payload),
-      search: (value: unknown) => emit("department-search", value as string),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "department-search",
+      "department-reset",
+      "department-row-click",
+      "department-action",
+    ),
   }),
   session: (props, emit) => ({
-    component: AuthSessionWorkspaceMain,
+    component: ReadonlyListWorkspaceMain,
     props: {
       t: props.t,
-      loading: props.sessionLoading,
+      queryFields: props.enterpriseSessionQueryFields,
+      queryLoading: props.sessionLoading,
       tableColumns: props.enterpriseSessionTableColumns,
       items: props.enterpriseSessionTableItems,
+      tableLoading: props.sessionLoading,
+      countLabelKey: "app.onlineSession.countLabel",
       emptyTitle: props.t("app.onlineSession.emptyTitle"),
       emptyDescription: props.t("app.onlineSession.emptyDescription"),
+      searchPlaceholder: props.t("app.onlineSession.searchPlaceholder"),
       copy: props.enterpriseCrudCopy,
+      paginate: true,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "session-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "session-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "session-search",
+      "session-reset",
+      "session-row-click",
+    ),
   }),
   post: (props, emit) => ({
     component: generatedStandardCrudMainComponents.post,
@@ -800,22 +800,26 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
     ),
   }),
   "operation-log": (props, emit) => ({
-    component: OperationLogWorkspaceMain,
+    component: ReadonlyListWorkspaceMain,
     props: {
       t: props.t,
-      loading: props.operationLogLoading,
+      queryFields: props.enterpriseOperationLogQueryFields,
+      queryLoading: props.operationLogLoading,
       tableColumns: props.enterpriseOperationLogTableColumns,
       items: props.enterpriseOperationLogTableItems,
+      tableLoading: props.operationLogLoading,
+      itemCountLabel: props.operationLogCountLabel,
       emptyTitle: props.t("app.operationLog.emptyTitle"),
       emptyDescription: props.t("app.operationLog.emptyDescription"),
+      searchPlaceholder: props.t("app.operationLog.searchPlaceholder"),
       copy: props.enterpriseCrudCopy,
     },
-    listeners: {
-      search: (value: unknown) =>
-        emitMainListPayloadEvent(emit, "operation-log-search", value),
-      "row-click": (payload: unknown) =>
-        emitMainListPayloadEvent(emit, "operation-log-row-click", payload),
-    },
+    listeners: workspaceListListeners(
+      emit,
+      "operation-log-search",
+      "operation-log-reset",
+      "operation-log-row-click",
+    ),
   }),
   role: (props, emit) => ({
     component: generatedStandardCrudMainComponents.role,

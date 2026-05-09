@@ -296,6 +296,7 @@ export interface ElyCrudWorkbenchProps {
   tableLoading?: boolean
   tableActions?: ElyTableAction[]
   rowKey?: string
+  itemCountLabel?: string
   searchPlaceholder?: string
   emptyTitle?: string
   emptyDescription?: string

@@ -20,9 +20,6 @@ const AuthSessionWorkspacePanel = defineAsyncComponent(
 const CustomerWorkspacePanel = defineAsyncComponent(
   () => import("../customer/CustomerWorkspacePanel.vue"),
 )
-const DepartmentWorkspacePanel = defineAsyncComponent(
-  () => import("../department/DepartmentWorkspacePanel.vue"),
-)
 const FileWorkspacePanel = defineAsyncComponent(
   () => import("../file/FileWorkspacePanel.vue"),
 )
@@ -70,19 +67,6 @@ export interface ShellWorkspaceSecondarySwitchProps {
   canViewDepartments: boolean
   canCreateDepartments: boolean
   canUpdateDepartments: boolean
-  departmentWorkspaceState: Record<string, unknown>
-  departmentLoading: boolean
-  departmentDetailLoading: boolean
-  departmentErrorMessage: string
-  departmentDetailErrorMessage: string
-  departmentPanelMode: string
-  departmentPanelTitle: string
-  departmentPanelDescription: string
-  selectedDepartment: Record<string, unknown> | null
-  selectedDepartmentDetail: Record<string, unknown> | null
-  enterpriseDepartmentFormFields: ReadonlyArray<unknown>
-  enterpriseDepartmentFormValues: Record<string, unknown>
-  departmentParentLookup: Map<string, unknown>
   sessionModuleReady: boolean
   canEnterSessionWorkspace: boolean
   sessionLoading: boolean
@@ -445,17 +429,26 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
     ),
   }),
   department: (props, emit) => ({
-    component: DepartmentWorkspacePanel,
+    component: generatedStandardCrudPanelComponents.department,
     props: {
       t: props.t,
+      moduleReady: props.departmentModuleReady,
+      authModuleReady: props.authModuleReady,
+      isAuthenticated: props.isAuthenticated,
+      canEnterWorkspace: props.canEnterDepartmentWorkspace,
+      canViewDepartments: props.canViewDepartments,
+      canCreateDepartments: props.canCreateDepartments,
+      canUpdateDepartments: props.canUpdateDepartments,
       formCopy: props.enterpriseFormCopy,
       workspaceStateInjected: true,
     },
-    listeners: {
-      "submit-form": (payload: unknown) =>
-        emit("submit-department-form", payload),
-      "cancel-form": () => emit("cancel-department-panel"),
-    },
+    listeners: editPanelListeners(
+      emit,
+      "start-department-edit",
+      "open-department-create",
+      "submit-department-form",
+      "cancel-department-panel",
+    ),
   }),
   session: (props, emit) => ({
     component: AuthSessionWorkspacePanel,

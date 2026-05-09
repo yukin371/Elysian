@@ -30,6 +30,10 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
     </ElyQueryBar>
 
     <section class="ely-crud-card">
+      <div v-if="itemCountLabel" class="ely-crud-card__summary">
+        {{ itemCountLabel }}
+      </div>
+
       <div v-if="props.items.length === 0 && !tableLoading" class="ely-crud-empty">
         <TEmpty
           :title="emptyTitle ?? copy?.emptyTitle ?? '当前工作区为空'"
@@ -74,6 +78,12 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.96);
   padding: 1rem 1rem 0.85rem;
+}
+
+.ely-crud-card__summary {
+  margin-bottom: 0.85rem;
+  color: #64748b;
+  font-size: 0.82rem;
 }
 
 .ely-crud-empty {

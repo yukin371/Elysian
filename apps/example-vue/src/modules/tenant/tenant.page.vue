@@ -157,99 +157,97 @@ watch(resolvedItems, () => {
 </script>
 
 <template>
-  <section class="enterprise-card enterprise-main-card">
-    <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-      {{ t("app.message.tenantModuleOffline") }}
-    </div>
+  <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
+    {{ t("app.message.tenantModuleOffline") }}
+  </div>
 
-    <div
-      v-else-if="authModuleReady && !isAuthenticated"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{ t("app.message.tenantSignInToLoad") }}
-    </div>
+  <div
+    v-else-if="authModuleReady && !isAuthenticated"
+    class="enterprise-message enterprise-message-info"
+  >
+    {{ t("app.message.tenantSignInToLoad") }}
+  </div>
 
-    <div
-      v-else-if="canEnterWorkspace && !canViewTenants"
-      class="enterprise-message enterprise-message-warning"
-    >
-      {{ t("app.message.tenantNoListPermission") }}
-    </div>
+  <div
+    v-else-if="canEnterWorkspace && !canViewTenants"
+    class="enterprise-message enterprise-message-warning"
+  >
+    {{ t("app.message.tenantNoListPermission") }}
+  </div>
 
-    <div
-      v-else-if="resolvedErrorMessage"
-      class="enterprise-message enterprise-message-danger"
-    >
-      {{ resolvedErrorMessage }}
-    </div>
+  <div
+    v-else-if="resolvedErrorMessage"
+    class="enterprise-message enterprise-message-danger"
+  >
+    {{ resolvedErrorMessage }}
+  </div>
 
-    <ElyCrudWorkspace
-      v-else
-      :eyebrow="t('app.tenant.workspaceEyebrow')"
-      :title="t('app.tenant.workspaceTitle')"
-      :description="''"
-      :query-fields="queryFields"
-      :query-loading="resolvedLoading"
-      :table-columns="tableColumns"
-      :items="paginatedItems"
-      :table-loading="resolvedLoading"
-      :table-actions="resolvedTableActions"
-      :item-count-label="itemCountLabel"
-      :empty-title="emptyTitle"
-      :empty-description="emptyDescription"
-      :copy="copy"
-      @action="handleAction"
-      @search="emit('search', $event)"
-      @reset="emit('reset')"
-      @row-click="emit('row-click', $event as TenantRecord)"
-    >
-      <template #toolbar>
+  <ElyCrudWorkspace
+    v-else
+    :eyebrow="t('app.tenant.workspaceEyebrow')"
+    :title="t('app.tenant.workspaceTitle')"
+    :description="''"
+    :query-fields="queryFields"
+    :query-loading="resolvedLoading"
+    :table-columns="tableColumns"
+    :items="paginatedItems"
+    :table-loading="resolvedLoading"
+    :table-actions="resolvedTableActions"
+    :item-count-label="itemCountLabel"
+    :empty-title="emptyTitle"
+    :empty-description="emptyDescription"
+    :copy="copy"
+    @action="handleAction"
+    @search="emit('search', $event)"
+    @reset="emit('reset')"
+    @row-click="emit('row-click', $event as TenantRecord)"
+  >
+    <template #toolbar>
+      <button
+        v-if="canCreateTenants"
+        type="button"
+        class="enterprise-button"
+        :disabled="resolvedLoading"
+        @click="handleCreate"
+      >
+        {{ t("app.tenant.action.create") }}
+      </button>
+    </template>
+    <template #footer>
+      <div class="tenant-pagination">
+        <span>{{ paginationSummary }}</span>
+        <label>
+          <small>{{ t("app.pagination.pageSize") }}</small>
+          <select :value="pageSize" @change="updatePageSize">
+            <option
+              v-for="option in pageSizeOptions"
+              :key="option"
+              :value="option"
+            >
+              {{ option }}
+            </option>
+          </select>
+        </label>
         <button
-          v-if="canCreateTenants"
           type="button"
-          class="enterprise-button"
-          :disabled="resolvedLoading"
-          @click="handleCreate"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="currentPage <= 1"
+          @click="goPreviousPage"
         >
-          {{ t("app.tenant.action.create") }}
+          {{ t("app.pagination.previous") }}
         </button>
-      </template>
-      <template #footer>
-        <div class="tenant-pagination">
-          <span>{{ paginationSummary }}</span>
-          <label>
-            <small>{{ t("app.pagination.pageSize") }}</small>
-            <select :value="pageSize" @change="updatePageSize">
-              <option
-                v-for="option in pageSizeOptions"
-                :key="option"
-                :value="option"
-              >
-                {{ option }}
-              </option>
-            </select>
-          </label>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="currentPage <= 1"
-            @click="goPreviousPage"
-          >
-            {{ t("app.pagination.previous") }}
-          </button>
-          <button
-            type="button"
-            class="enterprise-button enterprise-button-ghost"
-            :disabled="currentPage >= totalPages"
-            @click="goNextPage"
-          >
-            {{ t("app.pagination.next") }}
-          </button>
-        </div>
-      </template>
-    </ElyCrudWorkspace>
-  </section>
-  </template>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="currentPage >= totalPages"
+          @click="goNextPage"
+        >
+          {{ t("app.pagination.next") }}
+        </button>
+      </div>
+    </template>
+  </ElyCrudWorkspace>
+</template>
 
 <style scoped>
 .tenant-pagination {
