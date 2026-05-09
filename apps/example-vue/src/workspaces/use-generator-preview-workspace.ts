@@ -66,7 +66,7 @@ export const useGeneratorPreviewWorkspace = (
     storedSelection?.frontendTarget ?? "vue",
   )
   const selectedInputMode = ref<GeneratorPreviewInputMode>(
-    storedSelection?.inputMode ?? "registered-schema",
+    "manual-schema-json",
   )
   const manualSchemaDraft = ref("")
   const previewQuery = ref("")
@@ -661,21 +661,6 @@ export const useGeneratorPreviewWorkspace = (
         return
       }
 
-      if (nextInputMode === "manual-schema-json") {
-        if (
-          manualSchemaDraft.value.trim().length === 0 &&
-          selectedSchema.value
-        ) {
-          manualSchemaDraft.value = JSON.stringify(
-            selectedSchema.value,
-            null,
-            2,
-          )
-
-          return
-        }
-      }
-
       if (currentSelectionMatchesSession()) {
         return
       }
@@ -683,8 +668,6 @@ export const useGeneratorPreviewWorkspace = (
       if (await restoreLatestMatchingSession()) {
         return
       }
-
-      void refreshPreview()
     },
     { immediate: true },
   )

@@ -85,19 +85,19 @@ export const buildGeneratorPreviewRecentSessionOptions = (
 
 export const buildGeneratorPreviewConflictStrategyOptions = (t: Translate) => [
   {
-    label: t("app.generatorPreview.summary.skip"),
+    label: t("app.generatorPreview.conflictStrategy.skip"),
     value: "skip",
   },
   {
-    label: t("app.generatorPreview.summary.overwrite"),
+    label: t("app.generatorPreview.conflictStrategy.overwrite"),
     value: "overwrite",
   },
   {
-    label: t("app.generatorPreview.meta.generatedOnly"),
+    label: t("app.generatorPreview.conflictStrategy.overwrite-generated-only"),
     value: "overwrite-generated-only",
   },
   {
-    label: t("app.generatorPreview.summary.block"),
+    label: t("app.generatorPreview.conflictStrategy.fail"),
     value: "fail",
   },
 ]

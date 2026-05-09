@@ -304,7 +304,6 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   ): void
   (event: "confirm-generator-preview"): void
   (event: "apply-generator-preview"): void
-  (event: "go-to-generator-step", step: "configure"): void
   (event: "dictionary-search", payload: unknown): void
   (event: "dictionary-reset"): void
   (event: "dictionary-row-click", payload: unknown): void
@@ -637,8 +636,6 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
         ),
       "confirm-preview": () => emit("confirm-generator-preview"),
       "apply-preview": () => emit("apply-generator-preview"),
-      "go-to-step": (step: unknown) =>
-        emit("go-to-generator-step", step as "configure"),
     },
   }),
   dictionary: (props, emit) => ({

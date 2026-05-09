@@ -65,8 +65,7 @@ const isStepCompleted = (step: GeneratorPreviewStep) =>
   flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem 0;
-  padding: 0.2rem 0 0.95rem;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 0.1rem 0 0;
 }
 
 .generator-step {
@@ -131,15 +130,24 @@ const isStepCompleted = (step: GeneratorPreviewStep) =>
 
 @media (max-width: 640px) {
   .generator-step-indicator {
-    gap: 0.7rem;
+    display: grid;
+    gap: 0.75rem;
   }
 
   .generator-step {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1.55rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.55rem;
   }
 
   .generator-step-connector {
     display: none;
+  }
+
+  .generator-step-label {
+    white-space: normal;
+    line-height: 1.4;
   }
 }
 </style>

@@ -224,7 +224,6 @@ export const createExampleShellWorkspaceMainBindings = ({
   openFileUploadPanel,
   resetGeneratorPreviewFilters,
   refreshGeneratorPreview,
-  resetGeneratorPreviewState,
   restoreGeneratorPreviewSession,
   reviewGeneratorPreview,
   confirmGeneratorPreview,
@@ -556,11 +555,6 @@ export const createExampleShellWorkspaceMainBindings = ({
     },
     "reset-generator-filters": resetGeneratorPreviewFilters,
     "refresh-generator-preview": refreshGeneratorPreview,
-    "go-to-generator-step": (step: "configure") => {
-      if (step === "configure") {
-        resetGeneratorPreviewState()
-      }
-    },
     "review-generator-preview": reviewGeneratorPreview,
     "confirm-generator-preview": confirmGeneratorPreview,
     "apply-generator-preview": applyGeneratorPreview,
