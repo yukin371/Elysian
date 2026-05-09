@@ -16,3 +16,15 @@ export const toSnakeCase = (value: string) =>
     .replace(/[^a-zA-Z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .toLowerCase()
+
+export const pluralizeIdentifier = (value: string) => {
+  if (/(s|x|z|ch|sh)$/i.test(value)) {
+    return `${value}es`
+  }
+
+  if (/[^aeiou]y$/i.test(value)) {
+    return `${value.slice(0, -1)}ies`
+  }
+
+  return `${value}s`
+}

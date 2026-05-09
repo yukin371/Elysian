@@ -269,11 +269,12 @@ describe("generator session module lifecycle", () => {
     expect(readBoolean(session, "hasBlockingConflicts")).toBe(false)
     expect(diff).toMatchObject({
       changedFileCount: 0,
-      unchangedFileCount: 6,
+      totalFileCount: 7,
+      unchangedFileCount: 7,
     })
     expect(actionCounts).toMatchObject({
       block: 0,
-      skip: 6,
+      skip: 7,
     })
   })
 
@@ -356,27 +357,27 @@ describe("generator session module lifecycle", () => {
     expect(createSession.schemaName).toBe("customer")
     expect(createSession.sourceType).toBe("registered-schema")
     expect(createSession.actorUsername).toBe("admin")
-    expect(createSession.previewFileCount).toBe(6)
+    expect(createSession.previewFileCount).toBe(7)
     expect(createSession.applyEvidence).toBeNull()
     expect(createSession.reviewEvidence).toBeNull()
     expect(createSession.status).toBe("pending_review")
     expect(createDiff).toEqual({
-      totalFileCount: 6,
-      changedFileCount: 6,
+      totalFileCount: 7,
+      changedFileCount: 7,
       unchangedFileCount: 0,
       actionCounts: {
-        create: 6,
+        create: 7,
         overwrite: 0,
         skip: 0,
         block: 0,
       },
     })
     expect(createReport.schemaName).toBe("customer")
-    expect(createOperations[0]?.tableName).toBe("customer")
-    expect(createSqlPreview.tableName).toBe("customer")
+    expect(createOperations[0]?.tableName).toBe("customers")
+    expect(createSqlPreview.tableName).toBe("customers")
     expect(createSqlProposal).toMatchObject({
       canonicalMigrationOwner: "packages/persistence",
-      tableName: "customer",
+      tableName: "customers",
     })
     expect(
       createSqlProposalRisks.map((risk) => readString(risk, "code")),
@@ -474,8 +475,8 @@ describe("generator session module lifecycle", () => {
       decision: "approve",
     })
     expect(reviewEvidence.reviewedAt).toBe(reviewSession.reviewedAt)
-    expect(reviewDiff.totalFileCount).toBe(6)
-    expect(reviewSqlProposal.tableName).toBe("customer")
+    expect(reviewDiff.totalFileCount).toBe(7)
+    expect(reviewSqlProposal.tableName).toBe("customers")
     expect(reviewSqlProposalHandoff.proposalStatus).toBe("ready")
     expect(reviewMigrationProposalSnapshot).toMatchObject({
       snapshotPath: reviewMigrationProposalSnapshotPath,
@@ -583,7 +584,7 @@ describe("generator session module lifecycle", () => {
     expect(applySessionId).toBe(createSessionId)
     expect(applySession.status).toBe("applied")
     expect(applySessionAppliedAt).toBeTruthy()
-    expect(applySession.appliedFileCount).toBe(6)
+    expect(applySession.appliedFileCount).toBe(7)
     expect(applySessionActorUserId).toBe(createSessionActorUserId)
     expect(applySession.skippedFileCount).toBe(0)
     expect(applySession.applyRequestId).toBe("req-generator-session-apply-1")
@@ -605,7 +606,7 @@ describe("generator session module lifecycle", () => {
     expect(applyEvidence.appliedAt).toBe(applySessionAppliedAt)
     expect(applySession.applyEvidence).toEqual(applyEvidence)
     expect(applyFiles.every((file) => readBoolean(file, "written"))).toBe(true)
-    expect(applySqlProposal.tableName).toBe("customer")
+    expect(applySqlProposal.tableName).toBe("customers")
     expect(applySqlProposalHandoff.proposalStatus).toBe("ready")
     expect(applyMigrationProposalSnapshot).toMatchObject({
       snapshotPath: applyMigrationProposalSnapshotPath,
@@ -682,8 +683,8 @@ describe("generator session module lifecycle", () => {
         schemaName: "customer",
       },
     })
-    expect(detailDiffSummary.totalFileCount).toBe(6)
-    expect(detailDiffActionCounts.create).toBe(6)
+    expect(detailDiffSummary.totalFileCount).toBe(7)
+    expect(detailDiffActionCounts.create).toBe(7)
     expect(detailApplyEvidence).toMatchObject({
       actorUserId: createSessionActorUserId,
       requestId: "req-generator-session-apply-1",
@@ -693,7 +694,7 @@ describe("generator session module lifecycle", () => {
       comment: "Looks good for staging",
       decision: "approve",
     })
-    expect(detailSqlProposal.tableName).toBe("customer")
+    expect(detailSqlProposal.tableName).toBe("customers")
     expect(detailSqlProposalHandoff).toMatchObject({
       proposalStatus: "ready",
       targetPaths: {

@@ -51,18 +51,21 @@ const printModuleIntegrationChecklist = (schemaName: string) => {
   console.log("")
   console.log("Integration Checklist:")
   console.log(
-    `  1. Create persistence schema in packages/persistence/src/schema/${schemaName}.ts`,
+    `  1. Copy ${schemaName}.persistence.ts to packages/persistence/src/schema/${schemaName}.ts`,
   )
-  console.log("  2. Run: bun run db:generate && bun run db:migrate")
   console.log(
-    `  3. Implement repository methods in apps/server/src/modules/${schemaName}/${schemaName}.module.ts`,
+    "  2. Add the schema re-export in packages/persistence/src/schema/index.ts",
   )
+  console.log("  3. Run: bun run db:generate && bun run db:migrate")
   console.log("  4. Wire route details and authorization in the module stub")
   console.log(
-    "  5. Register the module in apps/server/src/modules/compose-business.ts or compose-system.ts",
+    `  5. Implement repository methods in apps/server/src/modules/${schemaName}/${schemaName}.module.ts`,
   )
   console.log(
-    "  6. Register the frontend workspace in apps/example-vue/src/modules/",
+    "  6. Register the module in apps/server/src/modules/compose-business.ts or compose-system.ts",
+  )
+  console.log(
+    "  7. Register the frontend workspace in apps/example-vue/src/modules/",
   )
   console.log(
     "  See docs/plans/2026-05-09-generator-module-apply-path-plan.md for the full handoff checklist.",

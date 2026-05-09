@@ -1,6 +1,13 @@
 import type { ModuleField, ModuleSchema } from "@elysian/schema"
 
-import { toCamelCase, toPascalCase } from "./naming"
+import type { DatabaseColumnPlan } from "./database-change-plan"
+import { buildModuleDatabaseChangePlan } from "./database-change-plan"
+import {
+  pluralizeIdentifier,
+  toCamelCase,
+  toPascalCase,
+  toSnakeCase,
+} from "./naming"
 import type { GenerationTargetPreset } from "./shared-conventions"
 import { isStandardCrudSchema } from "./standard-crud"
 import {
@@ -259,6 +266,7 @@ export const create${pascalName}Service = (repository: ${repositoryName}) => ({
 
 export const renderRoutesTemplate = (schema: ModuleSchema) => {
   const pascalName = toPascalCase(schema.name)
+  const collectionPath = `/${pluralizeIdentifier(schema.name)}`
   const bodyFields = getInputFields(schema)
     .map(renderBodyFieldValidator)
     .join("\n")
@@ -277,11 +285,11 @@ export const create${pascalName}Module = (
     const service = create${pascalName}Service(repository)
 
     return app
-      .get("/${schema.name}s", async () => ({
+      .get("${collectionPath}", async () => ({
         items: await service.list(),
       }))
       .get(
-        "/${schema.name}s/:id",
+        "${collectionPath}/:id",
         async ({ params }) => service.getById(params.id),
         {
           params: t.Object({
@@ -290,7 +298,7 @@ export const create${pascalName}Module = (
         },
       )
       .post(
-        "/${schema.name}s",
+        "${collectionPath}",
         async ({ body, set }) => {
           set.status = 201
           return service.create(body)
@@ -310,7 +318,7 @@ export const renderVuePageTemplate = (schema: ModuleSchema) => {
   const pascalName = toPascalCase(schema.name)
   const recordTypeName = getRecordTypeName(schema)
   const collectionName = `${toCamelCase(schema.name)}Items`
-  const endpoint = `/${schema.name}s`
+  const endpoint = `/${pluralizeIdentifier(schema.name)}`
   const primaryDisplayField = getPrimaryDisplayField(schema)?.key ?? "id"
 
   return `<script setup lang="ts">
@@ -364,7 +372,7 @@ onMounted(loadItems)
 export const renderReactPageTemplate = (schema: ModuleSchema) => {
   const pascalName = toPascalCase(schema.name)
   const recordTypeName = getRecordTypeName(schema)
-  const endpoint = `/${schema.name}s`
+  const endpoint = `/${pluralizeIdentifier(schema.name)}`
   const primaryDisplayField = getPrimaryDisplayField(schema)?.key ?? "id"
 
   return `import { useEffect, useState } from "react"
@@ -564,6 +572,135 @@ export const renderFrontendArtifactModule = (
   ),
 })
 
+const getPersistenceEnumName = (
+  schema: ModuleSchema,
+  column: DatabaseColumnPlan,
+) => `${toCamelCase(schema.name)}${toPascalCase(column.sourceFieldKey)}`
+
+const getPersistenceColumnBase = (
+  schema: ModuleSchema,
+  column: DatabaseColumnPlan,
+) => {
+  switch (column.sqlType) {
+    case "uuid":
+      return `uuid("${column.name}")`
+    case "integer":
+      return `integer("${column.name}")`
+    case "boolean":
+      return `boolean("${column.name}")`
+    case "jsonb":
+      return `jsonb("${column.name}")`
+    case "timestamptz":
+      return `timestamp("${column.name}", { withTimezone: true })`
+    default:
+      if (
+        column.sourceFieldKind === "enum" &&
+        column.dictionaryTypeCode !== null
+      ) {
+        return `text("${column.name}")`
+      }
+
+      if (column.sourceFieldKind === "enum" && column.enumOptions.length > 0) {
+        return `${getPersistenceEnumName(schema, column)}("${column.name}")`
+      }
+
+      return `text("${column.name}")`
+  }
+}
+
+export const renderPersistenceSchemaTemplate = (schema: ModuleSchema) => {
+  const plan = buildModuleDatabaseChangePlan(schema)
+  const operation = plan.operations[0]
+
+  if (!operation) {
+    throw new Error(`No table plan available for schema "${schema.name}".`)
+  }
+
+  const tableName = operation.tableName
+  const tableConstName = toCamelCase(tableName)
+  const pascalName = toPascalCase(schema.name)
+  const requiredImports = new Set(["pgTable"])
+
+  for (const column of operation.columns) {
+    switch (column.sqlType) {
+      case "uuid":
+        requiredImports.add("uuid")
+        break
+      case "integer":
+        requiredImports.add("integer")
+        break
+      case "boolean":
+        requiredImports.add("boolean")
+        break
+      case "jsonb":
+        requiredImports.add("jsonb")
+        break
+      case "timestamptz":
+        requiredImports.add("timestamp")
+        break
+      default:
+        requiredImports.add("text")
+        break
+    }
+
+    if (
+      column.sourceFieldKind === "enum" &&
+      column.enumOptions.length > 0 &&
+      column.dictionaryTypeCode === null
+    ) {
+      requiredImports.add("pgEnum")
+    }
+  }
+
+  const enumLines = operation.columns.flatMap((column) => {
+    if (
+      column.sourceFieldKind !== "enum" ||
+      column.enumOptions.length === 0 ||
+      column.dictionaryTypeCode !== null
+    ) {
+      return []
+    }
+
+    const options = column.enumOptions.map((option) => `"${option}"`).join(", ")
+
+    return [
+      `export const ${getPersistenceEnumName(schema, column)} = pgEnum("${toSnakeCase(schema.name)}_${column.name}", [${options}])`,
+    ]
+  })
+
+  const columnLines = operation.columns.map((column) => {
+    const modifiers: string[] = []
+
+    if (column.defaultExpression === "gen_random_uuid()") {
+      modifiers.push(".defaultRandom()")
+    }
+
+    if (column.primaryKey) {
+      modifiers.push(".primaryKey()")
+    }
+
+    if (column.required && !column.primaryKey) {
+      modifiers.push(".notNull()")
+    }
+
+    return `  ${column.sourceFieldKey}: ${getPersistenceColumnBase(schema, column)}${modifiers.join("")},`
+  })
+
+  return [
+    'import type { InferInsertModel, InferSelectModel } from "drizzle-orm"',
+    `import { ${[...requiredImports].sort().join(", ")} } from "drizzle-orm/pg-core"`,
+    "",
+    ...(enumLines.length > 0 ? [...enumLines, ""] : []),
+    `export const ${tableConstName} = pgTable("${tableName}", {`,
+    ...columnLines,
+    "})",
+    "",
+    `export type ${pascalName}Row = InferSelectModel<typeof ${tableConstName}>`,
+    `export type New${pascalName}Row = InferInsertModel<typeof ${tableConstName}>`,
+    "",
+  ].join("\n")
+}
+
 export const renderModuleRegistrationTemplate = (schema: ModuleSchema) => {
   const pascalName = toPascalCase(schema.name)
 
@@ -613,6 +750,10 @@ export const getTemplateReason = (
 ) => {
   if (path.endsWith(".schema.ts")) {
     return "Persist the module schema alongside generated module artifacts."
+  }
+
+  if (path.endsWith(".persistence.ts")) {
+    return "Emit a Drizzle persistence schema template for manual integration into packages/persistence."
   }
 
   if (path.endsWith(".repository.ts")) {

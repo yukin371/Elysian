@@ -1,6 +1,6 @@
 import type { ModuleField, ModuleSchema } from "@elysian/schema"
 
-import { toSnakeCase } from "./naming"
+import { pluralizeIdentifier, toSnakeCase } from "./naming"
 
 export type DatabaseChangeDialect = "postgresql"
 
@@ -103,7 +103,7 @@ export const buildModuleDatabaseChangePlan = (
         notes: buildTableNotes(columns),
         operation: "create-table",
         sourceSchemaName: schema.name,
-        tableName: toSnakeCase(schema.name),
+        tableName: pluralizeIdentifier(toSnakeCase(schema.name)),
       },
     ],
     reviewRequired: true,

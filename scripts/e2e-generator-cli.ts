@@ -316,7 +316,9 @@ const run = async (): Promise<CliCheckResult[]> => {
           "Expected preview report to classify missing files as create actions",
         )
         assert(
-          previewReport.sqlPreview.contents.includes("CREATE TABLE customer ("),
+          previewReport.sqlPreview.contents.includes(
+            "CREATE TABLE customers (",
+          ),
           "Expected preview report to include SQL preview contents",
         )
 

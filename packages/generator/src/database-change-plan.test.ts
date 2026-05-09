@@ -39,7 +39,7 @@ describe("buildModuleDatabaseChangePlan", () => {
     expect(table).toMatchObject({
       operation: "create-table",
       sourceSchemaName: "ticket",
-      tableName: "ticket",
+      tableName: "tickets",
     })
     expect(table?.columns).toEqual([
       {
@@ -124,5 +124,15 @@ describe("buildModuleDatabaseChangePlan", () => {
 
     expect(payloadColumn).toBeDefined()
     expect(payloadColumn?.sqlType).toBe("jsonb")
+  })
+
+  it("pluralizes snake_case table names for schema names ending with s", () => {
+    const plan = buildModuleDatabaseChangePlan({
+      name: "visitorPass",
+      label: "Visitor Pass",
+      fields: [{ key: "id", label: "ID", kind: "id", required: true }],
+    })
+
+    expect(plan.operations[0]?.tableName).toBe("visitor_passes")
   })
 })

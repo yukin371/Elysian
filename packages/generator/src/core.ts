@@ -15,6 +15,7 @@ import {
   renderModuleRegistrationTemplate,
   renderPagePath,
   renderPageTemplate,
+  renderPersistenceSchemaTemplate,
   renderRepositoryTemplate,
   renderRoutesTemplate,
   renderSchemaTemplate,
@@ -60,6 +61,11 @@ export const planModuleFiles = (
     {
       path: `${basePath}/${schema.name}.schema.ts`,
       reason: getTemplateReason(`${basePath}/${schema.name}.schema.ts`),
+      mergeStrategy: DEFAULT_MERGE_STRATEGY,
+    },
+    {
+      path: `${basePath}/${schema.name}.persistence.ts`,
+      reason: getTemplateReason(`${basePath}/${schema.name}.persistence.ts`),
       mergeStrategy: DEFAULT_MERGE_STRATEGY,
     },
     {
@@ -174,6 +180,10 @@ const renderTemplateForPath = (
       frontendTarget,
       schemaArtifactSource,
     })
+  }
+
+  if (path.endsWith(".persistence.ts")) {
+    return renderPersistenceSchemaTemplate(schema)
   }
 
   if (path.endsWith(".repository.ts")) {

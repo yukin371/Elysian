@@ -1,5 +1,6 @@
 import type { ModuleField, ModuleSchema } from "@elysian/schema"
 
+import { pluralizeIdentifier } from "./naming"
 import type { GenerationTargetPreset } from "./shared-conventions"
 
 export const renderModuleBasePath = (
@@ -70,9 +71,6 @@ export const renderFilterBody = (schema: ModuleSchema): string => {
   return `${hasTextFields ? `${normalizeLines}\n\n` : ""}  return items.filter((item) => {\n${filterConditions}\n\n    return true\n  })`
 }
 
-const pluralizePascalName = (value: string) =>
-  /[^aeiou]y$/i.test(value) ? `${value.slice(0, -1)}ies` : `${value}s`
-
 export const getViewPermissionPropName = (
   schemaName: string,
   pascalName: string,
@@ -81,7 +79,7 @@ export const getViewPermissionPropName = (
     return "canViewDictionaries"
   }
 
-  return `canView${pluralizePascalName(pascalName)}`
+  return `canView${pluralizeIdentifier(pascalName)}`
 }
 
 export const getCreatePermissionPropName = (
@@ -92,7 +90,7 @@ export const getCreatePermissionPropName = (
     return "canCreateDictionaryTypes"
   }
 
-  return `canCreate${pluralizePascalName(pascalName)}`
+  return `canCreate${pluralizeIdentifier(pascalName)}`
 }
 
 export const getUpdatePermissionPropName = (
@@ -103,7 +101,7 @@ export const getUpdatePermissionPropName = (
     return "canUpdateDictionaryTypes"
   }
 
-  return `canUpdate${pluralizePascalName(pascalName)}`
+  return `canUpdate${pluralizeIdentifier(pascalName)}`
 }
 
 export const getPanelModeType = (schemaName: string) => {
