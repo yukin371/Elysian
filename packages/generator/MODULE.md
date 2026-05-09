@@ -18,6 +18,8 @@
 - 标准 CRUD 模块的 Main / Panel / Workspace 模板骨架
 - `customer` 模块的首批 server / page 模板渲染入口
 - `example-vue/src/modules/*` 所消费的标准 CRUD 前端 surface 生成产物
+- `DatabaseChangePlan` / SQL preview / `*.persistence.ts` 这类 review-only 与 handoff 模板产物
+- `module` target 下的 server 集成桩与人工集成清单
 
 ## Must Not Own
 
@@ -39,6 +41,7 @@
 - 模板输出必须和当前架构 owner 保持一致，不能把 persistence / server / frontend 边界重新搅乱
 - 标准 CRUD 前端 surface 产物必须可被 `apps/example-vue` 直接提交、校验并消费，不能只停留在预览态
 - 当前生成输入只收两类边界：`registered-schema` 和 `manual-schema-json`；其中 `manual-schema-json` 可为完整 `ModuleSchema` 或 schema owner 内部支持的 simplified 输入，但进入 generator 前必须先展开成标准 `ModuleSchema`
+- `*.persistence.ts` 只是交接模板，不得在 generator owner 内宣称自己已经成为 `packages/persistence` 的 canonical runtime schema
 
 ## 常见坑
 

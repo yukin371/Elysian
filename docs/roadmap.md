@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-06`（generator 自举闭环优先，后台基础能力作为首批验证对象）
+更新时间：`2026-05-09`（generator 自举闭环优先，后台基础能力作为首批验证对象）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -15,6 +15,7 @@
 - 当前范围：优先补齐 generator 产物进入正式模块目录的边界、冲突解释、差异回放、人工确认清单与前端 artifact 消费链路，保证新 schema 能稳定生成并纳入主工程
 - 当前约束：不把 generator 扩成通用低代码平台，不新增第二套 shared owner，不把后台日常功能写成主线叙事
 - 已具备基础：后台常用模块、workflow 最小闭环、generator-session、SQL preview 与标准 CRUD 前端 surface 已可作为验证对象继续打磨
+- 已推进收口：generator 当前已补 `text/json` 字段支持、simplified schema 展开、`validate-schema` 校验入口、`--target module`、`*.persistence.ts` 模板，以及 Studio 步骤引导流与模板化 schema 输入
 - 当前结论：先把生成链路做成平台级主能力，再用企业后台常用模块持续验证生成结果的可用性、可维护性与可扩展性
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)

@@ -26,7 +26,7 @@
 - `@elysian/example-vue` 的 `build` 与仓库根 `check` 必须显式经过 `verify:workspace-registry-artifacts`；artifact 漂移不能只靠人工记得执行脚本。
 - 标准 CRUD 的生成产物当前落在 `src/modules/*`；这些文件属于 generator 输出面，不在示例应用内手工维护，任何修改都应回到 `packages/generator` 模板或 `scripts/generate-standard-crud-surfaces.ts`。
 - shell main / secondary 当前都消费 `src/modules/generated/index.ts` 暴露的生成组件映射；标准 CRUD 的 main/panel 不再保留示例应用本地手写实现。
-- generator preview workspace 负责展示和提交两类生成输入：已注册 schema 的边界模式，以及前端 JSON 草稿输入；它只做输入装配与预览消费，不拥有 generator 引擎。
+- generator preview workspace 负责展示和提交两类生成输入：已注册 schema 的边界模式，以及前端 JSON 草稿输入；当前还承接简化 schema 展开、模板快速填充、结构化校验反馈与步骤引导流，但它只做输入装配与预览消费，不拥有 generator 引擎。
 - 若是纯展示块，优先拆成 workspace 组件。
 - 若是入口级派生或装配逻辑，优先拆成本地 composable。
 - 不为了压行数把职责推到错误 owner。

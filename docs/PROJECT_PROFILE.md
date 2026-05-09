@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-05-06`
+更新时间：`2026-05-09`
 
 ## 项目类型
 
@@ -78,11 +78,13 @@
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
 - `packages/generator` 已新增 preview/report 能力，可在不写入目标目录的前提下输出文件动作预览、内容快照报告与 review-only SQL preview。
 - `packages/generator` 已新增 `DatabaseChangePlan` 中性数据库变更描述，可从 `ModuleSchema` 产出 reviewable create-table 计划，继续保持正式 migration owner 在 `packages/persistence`。
+- `packages/schema` 已支持 `text` / `json` 字段类型，以及 `expandSimplifiedSchema` 简化输入展开，可把轻量 JSON 输入收敛为标准 `ModuleSchema`。
 - `packages/schema` 当前已允许可选 `frontend` 注册元数据（`workspaceDomain`、`routePath`、`permissionPrefix`、`permissionActions`、`workspaceKind`、`moduleCode`），作为 generator 输出前端静态注册 artifact 的完整契约入口。
 - 13 个标准 CRUD `ModuleSchema` 已补 `frontend` 元数据，覆盖 `customer` / `file` / `notification` / `operation-log` / `tenant` / `workflow`（business）和 `dictionary` / `department` / `post` / `menu` / `role` / `setting` / `user`（system）。
 - `packages/frontend-vue` 已提供 `buildWorkspaceRegistration(schema)` 函数，可从 `ModuleSchema` 的 `frontend` 元数据推导出完整的 `WorkspaceRegistration`（domain / path / kind / moduleCode / permissionPrefix / permissions / i18nKeys），无需手写同构记录。
 - `apps/example-vue` 的 `system-registry.ts` 与 `business-registry.ts` 已从手写注册切换为 schema 驱动注册，13 个标准 CRUD 模块通过 `buildWorkspaceRegistration` 生成；`auth-registry`（session 无 schema）与 `generator-preview`（特殊 workspace）仍保持手写。
 - `packages/generator` 当前除 `schema/repository/service/routes/page` 外，还会额外生成 `*.frontend.ts` 静态前端注册 artifact，已包含 `kind`、`permissions`、`surfaceKind` 与页面装配路径；`apps/example-vue` 已开始通过 app-local generated artifact 输入构建 workspace registry，而不是只从 schema 直连注册。
+- `packages/generator` 当前已支持 `--target module` 直接产出模块目录内的 server 集成桩，并会额外生成 `*.persistence.ts` Drizzle schema 模板，供人工复制到 `packages/persistence` 继续完成正式 schema / migration 集成。
 - `apps/example-vue` 当前已把 workspace registry artifact 校验收口进默认工程入口：`@elysian/example-vue` 的 `build` 与仓库根 `bun run check` 都会显式执行 `verify:workspace-registry-artifacts`，标准 CRUD shell descriptor 漏接线或 generated artifact 漂移不会再只依赖人工记忆发现。
 - `apps/example-vue` 当前已把标准 CRUD 前端 surface 落盘到 `src/modules/*`，并由 shell main / secondary 真实消费；`@elysian/example-vue` 的 `build` 与仓库根 `bun run check` 已显式执行 `verify:standard-crud-surfaces`，标准 CRUD 页面骨架与生成器模板漂移不会再静默积累。
 - `packages/persistence` 已新增 migration proposal 草案生成能力，可消费 `DatabaseChangePlan` 形状并输出 review-only SQL draft、Drizzle schema snippet 与风险说明；正式 `db:generate / db:migrate` 仍保持人工确认后进入。
@@ -122,7 +124,8 @@
 - `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace；当前定位仍是“企业预设 + customer 单模块”的最小交互验证页，不视为完整多模块后台。
 - `apps/example-vue` 的 customer workspace 已从“前端拉全量后本地筛选”收敛到服务端列表协议，当前 `GET /customers` 已承接 query、分页与排序参数，并返回 page metadata 供工作区 footer 分页交互消费。
 - `apps/example-vue` 的 generator preview workspace 已接入 `generator-session` 后端运行态，当前由 preview session DTO 驱动文件计划、差异摘要、SQL preview 与 staging apply 证据；schema 选项仍保持在前端注册表内解析。
-- 服务端已落生成会话运行时模块：`generator-session`，并已提供 `GET /studio/generator/sessions`、`GET /studio/generator/sessions/:id`、`POST /studio/generator/sessions/preview`、`POST /studio/generator/sessions/:id/apply` 最小后端闭环。
+- `apps/example-vue` 的 generator preview workspace 当前已补简化 schema 草稿输入、模板快速填充、结构化校验反馈与步骤引导流，降低首次使用门槛。
+- 服务端已落生成会话运行时模块：`generator-session`，并已提供 `GET /studio/generator/sessions`、`GET /studio/generator/sessions/:id`、`POST /studio/generator/sessions/preview`、`POST /studio/generator/sessions/:id/review`、`POST /studio/generator/sessions/:id/confirm`、`POST /studio/generator/sessions/:id/apply` 与 `POST /studio/generator/validate-schema` 最小后端闭环。
 - `generator-session` 当前已落最小持久化回放中心：session 元数据进入 `packages/persistence` 的关系型表，preview report 仍按文件落盘并由 `apps/server` 运行时回放读取，避免把生成内核 owner 迁入数据库层。
 - 生成预览报告中心当前已具备后端最小运行态：可输出 preview report、review-only SQL preview 与 `DatabaseChangePlan`，并按会话落盘到 `generated/reports/generator-sessions/*.preview.json`。
 - generator 当前已支持基于 preview report 的安全 staging apply：apply 前会重验目标文件状态是否漂移，成功后写入 staging manifest，并把 apply 证据回传给 `generator-session`。
