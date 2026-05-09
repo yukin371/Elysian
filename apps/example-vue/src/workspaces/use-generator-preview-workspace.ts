@@ -19,6 +19,7 @@ import {
 } from "../lib/platform-api"
 
 import { getSchemaTemplate } from "../components/workspaces/generator/generator-preview-schema-templates"
+import type { GeneratorPreviewStep } from "../components/workspaces/generator/types"
 import {
   filterGeneratorPreviewFiles,
   resolveGeneratorPreviewSelection,
@@ -254,6 +255,32 @@ export const useGeneratorPreviewWorkspace = (
   )
 
   const canRejectPreview = computed(() => canApprovePreview.value)
+
+  const currentStep = computed<GeneratorPreviewStep>(() => {
+    const session = currentSession.value
+
+    if (!session) {
+      return "configure"
+    }
+
+    if (session.status === "pending_review" || session.status === "rejected") {
+      return "review"
+    }
+
+    if (session.status === "applied") {
+      return "done"
+    }
+
+    if (session.confirmedAt !== null) {
+      return "apply"
+    }
+
+    if (currentSqlProposalHandoff.value?.proposalStatus === "ready") {
+      return "confirm"
+    }
+
+    return "review"
+  })
 
   const resetFilters = () => {
     previewQuery.value = ""
@@ -669,6 +696,7 @@ export const useGeneratorPreviewWorkspace = (
     canApprovePreview,
     canConfirmPreview,
     canRejectPreview,
+    currentStep,
     currentDiffSummary,
     currentSession,
     currentSqlProposal,
@@ -687,6 +715,7 @@ export const useGeneratorPreviewWorkspace = (
     recentSessionOptions,
     refreshPreview,
     resetFilters,
+    resetPreviewState,
     restorePreviewSession,
     confirmPreview,
     reviewLoading,

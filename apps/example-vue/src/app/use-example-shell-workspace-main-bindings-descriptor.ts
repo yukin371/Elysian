@@ -61,6 +61,7 @@ export const createExampleShellWorkspaceMainBindings = ({
   selectedGeneratorPreviewRecentSessionId,
   selectedGeneratorPreviewSchemaName,
   selectedGeneratorPreviewFrontendTarget,
+  generatorPreviewCurrentStep,
   generatorPreviewManualSchemaDraft,
   generatorPreviewManualSchemaDraftError,
   generatorPreviewManualSchemaDraftErrorDetails,
@@ -229,6 +230,7 @@ export const createExampleShellWorkspaceMainBindings = ({
   openFileUploadPanel,
   resetGeneratorPreviewFilters,
   refreshGeneratorPreview,
+  resetGeneratorPreviewState,
   restoreGeneratorPreviewSession,
   reviewGeneratorPreview,
   confirmGeneratorPreview,
@@ -358,6 +360,7 @@ export const createExampleShellWorkspaceMainBindings = ({
       selectedGeneratorPreviewSchemaName.value,
     selectedGeneratorPreviewFrontendTarget:
       selectedGeneratorPreviewFrontendTarget.value,
+    generatorPreviewCurrentStep: read(generatorPreviewCurrentStep),
     generatorPreviewManualSchemaDraft: generatorPreviewManualSchemaDraft.value,
     generatorPreviewManualSchemaDraftError: read(
       generatorPreviewManualSchemaDraftError,
@@ -565,6 +568,11 @@ export const createExampleShellWorkspaceMainBindings = ({
     },
     "reset-generator-filters": resetGeneratorPreviewFilters,
     "refresh-generator-preview": refreshGeneratorPreview,
+    "go-to-generator-step": (step: "configure") => {
+      if (step === "configure") {
+        resetGeneratorPreviewState()
+      }
+    },
     "review-generator-preview": reviewGeneratorPreview,
     "confirm-generator-preview": confirmGeneratorPreview,
     "apply-generator-preview": applyGeneratorPreview,

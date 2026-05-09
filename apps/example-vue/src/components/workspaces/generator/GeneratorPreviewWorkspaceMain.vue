@@ -7,6 +7,7 @@ import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 
 import { shouldSelectGeneratorPreviewFile } from "../../../lib/generator-preview-workspace"
 import GeneratorPreviewWorkspaceFileList from "./GeneratorPreviewWorkspaceFileList.vue"
+import GeneratorPreviewWorkspaceStepIndicator from "./GeneratorPreviewWorkspaceStepIndicator.vue"
 import {
   clearGeneratorPreviewReviewDraft,
   loadGeneratorPreviewReviewDraft,
@@ -19,6 +20,7 @@ import type {
   GeneratorPreviewFileCard,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSchemaOption,
+  GeneratorPreviewStep,
   GeneratorPreviewTranslation,
 } from "./types"
 
@@ -37,6 +39,7 @@ interface GeneratorPreviewWorkspaceMainProps {
   selectedRecentSessionId: string
   selectedSchemaName: string
   selectedFrontendTarget: "vue" | "react"
+  currentStep: GeneratorPreviewStep
   manualSchemaDraft: string
   manualSchemaDraftError: string | null
   manualSchemaDraftErrorDetails: string | null
@@ -75,6 +78,7 @@ const emit = defineEmits<{
   ): void
   (e: "confirm-preview"): void
   (e: "apply-preview"): void
+  (e: "go-to-step", value: "configure"): void
 }>()
 
 const reviewComment = ref("")
@@ -92,6 +96,17 @@ const schemaTemplates = listSchemaTemplates()
 const isManualSchemaMode = computed(
   () => props.selectedInputMode === "manual-schema-json",
 )
+const isConfigureStep = computed(() => props.currentStep === "configure")
+const showReviewActions = computed(() => props.currentStep === "review")
+const showConfirmAction = computed(() => props.currentStep === "confirm")
+const showApplyAction = computed(() => props.currentStep === "apply")
+const showDoneState = computed(() => props.currentStep === "done")
+const showFileTools = computed(
+  () => props.files.length > 0 && !isConfigureStep.value,
+)
+const showFileList = computed(
+  () => props.files.length > 0 || !isConfigureStep.value,
+)
 const showSchemaTemplates = computed(
   () => isManualSchemaMode.value && props.manualSchemaDraft.trim().length === 0,
 )
@@ -102,6 +117,13 @@ const showReviewCommentInput = computed(
 )
 const hasManualSchemaDraftErrorDetails = computed(() =>
   Boolean(props.manualSchemaDraftErrorDetails?.trim()),
+)
+const selectedFrontendTargetLabel = computed(() =>
+  props.selectedFrontendTarget === "react" ? "React" : "Vue",
+)
+const generatorConfigSummary = computed(
+  () =>
+    `${props.selectedSchemaName || "-"} / ${selectedFrontendTargetLabel.value}`,
 )
 
 const handleQueryInput = (value: string | number) => {
@@ -188,6 +210,21 @@ const handleRefreshPreview = () => {
   isApplyConfirming.value = false
   isRejectConfirming.value = false
   emit("refresh-preview")
+}
+
+const handleGoToConfigure = () => {
+  if (
+    isConfigureStep.value ||
+    props.loading ||
+    props.reviewLoading ||
+    props.applyLoading
+  ) {
+    return
+  }
+
+  isApplyConfirming.value = false
+  isRejectConfirming.value = false
+  emit("go-to-step", "configure")
 }
 
 const handleReviewCommentInput = (value: string | number) => {
@@ -335,8 +372,18 @@ watch(
 
 <template>
   <section class="enterprise-card enterprise-main-card">
+    <GeneratorPreviewWorkspaceStepIndicator
+      :t="t"
+      :current-step="currentStep"
+    />
+
     <div class="enterprise-workspace-stack">
-      <section class="panel-section generator-input-section">
+      <section
+        class="panel-section generator-input-section"
+        :class="{
+          'generator-input-section-collapsed': !isConfigureStep,
+        }"
+      >
         <div class="generator-input-mode">
           <button
             v-for="option in inputModeOptions"
@@ -473,9 +520,26 @@ watch(
 {{ manualSchemaDraftErrorDetails }}</pre>
       </section>
 
-      <div class="generator-toolbar">
+      <button
+        v-if="!isConfigureStep"
+        type="button"
+        class="generator-config-summary"
+        :disabled="loading || reviewLoading || applyLoading"
+        @click="handleGoToConfigure"
+      >
+        <span class="generator-config-summary-value">{{ generatorConfigSummary }}</span>
+        <span class="generator-config-summary-action">
+          {{ t("app.generatorPreview.action.editConfig") }}
+        </span>
+      </button>
+
+      <div
+        class="generator-toolbar"
+        :class="{ 'generator-toolbar-configure': isConfigureStep }"
+      >
         <div class="generator-toolbar-actions">
           <button
+            v-if="isConfigureStep"
             type="button"
             class="enterprise-button enterprise-button-ghost"
             :disabled="loading || reviewLoading || applyLoading"
@@ -487,9 +551,12 @@ watch(
                 : t("app.generatorPreview.action.refresh")
             }}
           </button>
-          <span class="generator-toolbar-divider" />
+          <span
+            v-if="showReviewActions || showConfirmAction || showApplyAction"
+            class="generator-toolbar-divider"
+          />
           <button
-            v-if="isRejectConfirming"
+            v-if="showReviewActions && isRejectConfirming"
             type="button"
             class="enterprise-button enterprise-button-ghost"
             :disabled="reviewLoading"
@@ -498,7 +565,7 @@ watch(
             {{ t("app.generatorPreview.action.cancelRejectConfirm") }}
           </button>
           <button
-            v-if="isRejectConfirming"
+            v-if="showReviewActions && isRejectConfirming"
             type="button"
             class="enterprise-button"
             :disabled="reviewLoading"
@@ -507,7 +574,7 @@ watch(
             {{ t("app.generatorPreview.action.confirmReject") }}
           </button>
           <button
-            v-else-if="canReject"
+            v-else-if="showReviewActions && canReject"
             type="button"
             class="enterprise-button enterprise-button-ghost"
             @click="handleReviewPreview('reject')"
@@ -515,7 +582,7 @@ watch(
             {{ t("app.generatorPreview.action.reject") }}
           </button>
           <button
-            v-if="canApprove && !isRejectConfirming"
+            v-if="showReviewActions && canApprove && !isRejectConfirming"
             type="button"
             class="enterprise-button"
             @click="handleReviewPreview('approve')"
@@ -523,7 +590,7 @@ watch(
             {{ t("app.generatorPreview.action.approve") }}
           </button>
           <button
-            v-if="isApplyConfirming"
+            v-if="showApplyAction && isApplyConfirming"
             type="button"
             class="enterprise-button enterprise-button-ghost"
             :disabled="applyLoading"
@@ -532,7 +599,7 @@ watch(
             {{ t("app.generatorPreview.action.cancelApplyConfirm") }}
           </button>
           <button
-            v-if="canConfirm"
+            v-if="showConfirmAction && canConfirm"
             type="button"
             class="enterprise-button"
             :disabled="loading || reviewLoading || applyLoading"
@@ -541,7 +608,7 @@ watch(
             {{ t("app.generatorPreview.action.confirmChecklist") }}
           </button>
           <button
-            v-else
+            v-else-if="showApplyAction"
             type="button"
             class="enterprise-button"
             :disabled="!canApply"
@@ -556,9 +623,13 @@ watch(
             }}
           </button>
         </div>
+
+        <div v-if="showDoneState" class="generator-step-state">
+          {{ t("app.generatorPreview.flow.done") }}
+        </div>
       </div>
 
-      <div class="generator-list-tools">
+      <div v-if="showFileTools" class="generator-list-tools">
         <label class="generator-filter-search">
           <TInput
             :model-value="query"
@@ -611,6 +682,7 @@ watch(
       </div>
 
       <GeneratorPreviewWorkspaceFileList
+        v-if="showFileList"
         :t="t"
         :loading="loading"
         :files="files"
@@ -627,6 +699,10 @@ watch(
   gap: 0.75rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.generator-input-section-collapsed {
+  display: none;
 }
 
 .generator-input-mode {
@@ -745,6 +821,10 @@ watch(
   gap: 1rem;
 }
 
+.generator-toolbar-configure {
+  justify-content: flex-start;
+}
+
 .generator-toolbar-actions {
   display: flex;
   flex-wrap: wrap;
@@ -766,6 +846,40 @@ watch(
 .generator-list-tools {
   display: grid;
   gap: 0.75rem;
+}
+
+.generator-config-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.72);
+  color: #475569;
+  text-align: left;
+}
+
+.generator-config-summary-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.generator-config-summary-action {
+  color: #2457d6;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.generator-step-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  color: #0f766e;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .generator-validation-details {

@@ -19,6 +19,13 @@ export type GeneratorPreviewTranslation = (
   params?: Record<string, unknown>,
 ) => string
 
+export type GeneratorPreviewStep =
+  | "configure"
+  | "review"
+  | "confirm"
+  | "apply"
+  | "done"
+
 export interface GeneratorPreviewSchemaOption {
   label: string
   value: string

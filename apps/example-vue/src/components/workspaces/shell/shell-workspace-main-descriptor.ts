@@ -6,7 +6,10 @@ import { generatedStandardCrudWorkspaceKinds } from "../../../app/workspace-regi
 import type { FileWorkspaceQuery } from "../../../lib/file-workspace"
 import type { WorkflowDefinitionRecord } from "../../../lib/platform-api"
 import { generatedStandardCrudMainComponents } from "../../../modules/generated"
-import type { GeneratorPreviewDiffSummary } from "../generator/types"
+import type {
+  GeneratorPreviewDiffSummary,
+  GeneratorPreviewStep,
+} from "../generator/types"
 import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 
 const AuthSessionWorkspaceMain = defineAsyncComponent(
@@ -94,6 +97,7 @@ export interface ShellWorkspaceMainSwitchProps {
   selectedGeneratorPreviewRecentSessionId: string
   selectedGeneratorPreviewSchemaName: string
   selectedGeneratorPreviewFrontendTarget: string
+  generatorPreviewCurrentStep: GeneratorPreviewStep
   generatorPreviewManualSchemaDraft: string
   generatorPreviewManualSchemaDraftError: string | null
   generatorPreviewManualSchemaDraftErrorDetails: string | null
@@ -315,6 +319,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   ): void
   (event: "confirm-generator-preview"): void
   (event: "apply-generator-preview"): void
+  (event: "go-to-generator-step", step: "configure"): void
   (event: "dictionary-search", payload: unknown): void
   (event: "dictionary-reset"): void
   (event: "dictionary-row-click", payload: unknown): void
@@ -595,6 +600,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       selectedRecentSessionId: props.selectedGeneratorPreviewRecentSessionId,
       selectedSchemaName: props.selectedGeneratorPreviewSchemaName,
       selectedFrontendTarget: props.selectedGeneratorPreviewFrontendTarget,
+      currentStep: props.generatorPreviewCurrentStep,
       manualSchemaDraft: props.generatorPreviewManualSchemaDraft,
       manualSchemaDraftError: props.generatorPreviewManualSchemaDraftError,
       manualSchemaDraftErrorDetails:
@@ -646,6 +652,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
         ),
       "confirm-preview": () => emit("confirm-generator-preview"),
       "apply-preview": () => emit("apply-generator-preview"),
+      "go-to-step": (step: unknown) =>
+        emit("go-to-generator-step", step as "configure"),
     },
   }),
   dictionary: (props, emit) => ({
