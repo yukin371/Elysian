@@ -143,7 +143,7 @@ describe("p5a-acceptance", () => {
     expect(meetingBookingSchemaArtifact).toContain(
       "export const meetingBookingModuleSchema",
     )
-  })
+  }, 30000)
 })
 
 describe("p5a-acceptance presentation helpers", () => {

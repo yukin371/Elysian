@@ -247,8 +247,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.status.rejected": "Rejected",
   "app.generatorPreview.status.applied": "Applied",
   "app.generatorPreview.status.notGenerated": "Not generated",
-  "app.generatorPreview.message.confirmedReady":
-    "Ready to apply to staging.",
+  "app.generatorPreview.message.confirmedReady": "Ready to apply to staging.",
   "app.generatorPreview.message.confirmationEvidenceCaptured":
     "Confirmation evidence captured with {count} checklist items.",
   "app.generatorPreview.message.confirmationEvidenceDetailed":

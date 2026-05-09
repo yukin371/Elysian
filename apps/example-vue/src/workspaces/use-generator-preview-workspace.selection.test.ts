@@ -795,7 +795,7 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
     ).toEqual({
       conflictStrategy: "overwrite-generated-only",
       frontendTarget: "react",
-      inputMode: "registered-schema",
+      inputMode: "manual-schema-json",
       schemaName: "customer",
       sessionId: "preview-session-4",
     })
@@ -818,7 +818,7 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
     ).toEqual({
       conflictStrategy: "overwrite",
       frontendTarget: "react",
-      inputMode: "registered-schema",
+      inputMode: "manual-schema-json",
       schemaName: "customer",
       sessionId: null,
     })

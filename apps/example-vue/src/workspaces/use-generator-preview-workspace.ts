@@ -65,9 +65,7 @@ export const useGeneratorPreviewWorkspace = (
   const selectedFrontendTarget = ref<FrontendTarget>(
     storedSelection?.frontendTarget ?? "vue",
   )
-  const selectedInputMode = ref<GeneratorPreviewInputMode>(
-    "manual-schema-json",
-  )
+  const selectedInputMode = ref<GeneratorPreviewInputMode>("manual-schema-json")
   const manualSchemaDraft = ref("")
   const previewQuery = ref("")
   const selectedFilePath = ref<string | null>(null)
@@ -668,6 +666,8 @@ export const useGeneratorPreviewWorkspace = (
       if (await restoreLatestMatchingSession()) {
         return
       }
+
+      await refreshPreview()
     },
     { immediate: true },
   )

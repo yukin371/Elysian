@@ -204,8 +204,9 @@ export const createSession = (
   confirmationEvidence: null,
   schemaName: "customer",
   skippedFileCount: null,
-  sourceType: "registered-schema",
-  sourceValue: "customer",
+  sourceType: "manual-schema-json",
+  sourceValue:
+    '{"name":"customer","label":"客户","fields":[{"key":"id","label":"ID","kind":"id","required":true}]}',
   status: "pending_review",
   targetPreset: "staging",
   tenantId: null,
@@ -251,6 +252,8 @@ export const createWorkspace = (options?: {
     enabled,
     options?.onRecoverableAuthError ?? (() => {}),
   )
+
+  workspace.loadSelectedSchemaDraft()
 
   return { enabled, workspace }
 }

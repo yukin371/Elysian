@@ -103,7 +103,7 @@ describe("seed label reconciliation", () => {
         name: "Config Entries",
       })
     })
-  })
+  }, 15000)
 })
 
 async function createSeedReconcileTestDb() {

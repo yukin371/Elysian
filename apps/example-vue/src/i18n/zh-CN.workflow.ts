@@ -135,8 +135,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.blockedTitle": "阻塞冲突明细",
   "app.generatorPreview.blockedCount": "{count} 个文件当前无法直接应用",
   "app.generatorPreview.blockedAction": "查看该文件差异",
-  "app.generatorPreview.message.pendingReview":
-    "先审核，再应用到 staging。",
+  "app.generatorPreview.message.pendingReview": "先审核，再应用到 staging。",
   "app.generatorPreview.message.operationNoSession":
     "请先刷新生成 preview session，再执行审核或 staging apply。",
   "app.generatorPreview.message.operationLoading":
@@ -155,8 +154,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "本次预览已完成审核通过，审核时间：{value}。",
   "app.generatorPreview.message.reviewRejected":
     "本次预览已被审核拒绝，审核时间：{value}。",
-  "app.generatorPreview.message.rejected":
-    "本次预览已拒绝，请重新生成。",
+  "app.generatorPreview.message.rejected": "本次预览已拒绝，请重新生成。",
   "app.generatorPreview.message.applied":
     "本次预览已完成 staging apply，应用时间：{value}。",
   "app.generatorPreview.filter.schemaLabel": "模块",
@@ -233,8 +231,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.status.rejected": "已拒绝",
   "app.generatorPreview.status.applied": "已应用",
   "app.generatorPreview.status.notGenerated": "未生成",
-  "app.generatorPreview.message.confirmedReady":
-    "可以应用到 staging。",
+  "app.generatorPreview.message.confirmedReady": "可以应用到 staging。",
   "app.generatorPreview.message.confirmationEvidenceCaptured":
     "已记录确认凭据，包含 {count} 条确认清单项。",
   "app.generatorPreview.message.confirmationEvidenceDetailed":
@@ -324,7 +321,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.draftSource.json": "高级 JSON",
   "app.generatorPreview.referenceSearchPlaceholder": "搜索要克隆的模块",
   "app.generatorPreview.referenceSearchEmpty": "没有匹配的模块",
-  "app.generatorPreview.referenceSearchMore": "还有 {count} 个模块，继续搜索可缩小范围",
+  "app.generatorPreview.referenceSearchMore":
+    "还有 {count} 个模块，继续搜索可缩小范围",
   "app.generatorPreview.input.moduleNameLabel": "模块标识",
   "app.generatorPreview.input.moduleNamePlaceholder": "例如 supplier",
   "app.generatorPreview.input.moduleLabelLabel": "模块名称",

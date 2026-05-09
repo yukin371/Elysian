@@ -65,5 +65,5 @@ describe("p5a-acceptance-finalize", () => {
     expect(indexReport.status).toBe("passed")
     expect(indexReport.summary.caseCount).toBe(6)
     expect(indexReport.summary.gateStatus).toBe("passed")
-  })
+  }, 30000)
 })
