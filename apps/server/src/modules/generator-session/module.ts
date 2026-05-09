@@ -7,6 +7,7 @@ import {
   resolveMigrationProposalSnapshotPath,
   writeMigrationProposalSnapshot,
 } from "@elysian/persistence"
+import { expandSimplifiedSchema } from "@elysian/schema"
 import { t } from "elysia"
 
 import { AppError } from "../../errors"
@@ -15,6 +16,7 @@ import type { AuthGuard, AuthIdentity } from "../auth"
 import type { ServerModule } from "../module"
 import type { AuditLogWriter } from "../shared/audit-log"
 import {
+  generatorSchemaValidationResponseSchema,
   generatorSessionApplyResponseSchema,
   generatorSessionConfirmResponseSchema,
   generatorSessionDetailResponseSchema,
@@ -118,6 +120,46 @@ export const createGeneratorSessionModule = (
     context.logger.info("Registering generator session module")
 
     return app
+      .post(
+        "/studio/generator/validate-schema",
+        async ({ body }) => {
+          try {
+            return {
+              valid: true as const,
+              expandedSchema: expandSimplifiedSchema(body.schema),
+            }
+          } catch (error) {
+            const formattedMessage =
+              error instanceof Error
+                ? error.message
+                : "Schema validation failed."
+
+            return {
+              valid: false as const,
+              issues: [
+                {
+                  path: "$",
+                  message: formattedMessage,
+                },
+              ],
+              formattedMessage,
+            }
+          }
+        },
+        {
+          body: t.Object({
+            schema: t.Unknown(),
+          }),
+          response: {
+            200: generatorSchemaValidationResponseSchema,
+            ...createErrorResponses(400),
+          },
+          detail: {
+            tags: ["generator"],
+            summary: "Validate and expand generator schema input",
+          },
+        },
+      )
       .get(
         "/studio/generator/sessions",
         async ({ request }) => {

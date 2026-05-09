@@ -160,7 +160,9 @@ export interface UseExampleShellBindingsOptions {
   selectedGeneratorPreviewFrontendTarget: Ref<string>
   generatorPreviewManualSchemaDraft: Ref<string>
   generatorPreviewManualSchemaDraftError: ValueSource<string | null>
+  generatorPreviewManualSchemaDraftErrorDetails: ValueSource<string | null>
   loadSelectedSchemaDraft: () => void
+  loadGeneratorSchemaTemplate: (templateId: string) => void
   generatorPreviewQuery: Ref<string>
   generatorPreviewFiles: ValueSource<unknown[]>
   selectedGeneratorPreviewFilePath: Ref<string | null>

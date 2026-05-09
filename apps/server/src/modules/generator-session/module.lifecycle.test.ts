@@ -917,6 +917,84 @@ describe("generator session module lifecycle", () => {
     expect(session.sourceValue).toBe(schemaJson)
   })
 
+  it("validates a simplified schema and returns expanded result", async () => {
+    const app = createTestApp([
+      createGeneratorSessionModule(createInMemoryGeneratorSessionRepository()),
+    ])
+
+    const response = await app.handle(
+      new Request("http://localhost/studio/generator/validate-schema", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          schema: {
+            name: "product",
+            fields: [
+              { key: "name", kind: "string", required: true },
+              { key: "price", kind: "number" },
+            ],
+          },
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(200)
+
+    const body = await readJsonRecord(response)
+    expect(body.valid).toBe(true)
+    expect(readRecord(body, "expandedSchema").name).toBe("product")
+    expect(readRecord(body, "expandedSchema").label).toBe("Product")
+    expect(
+      readRecordArray(readRecord(body, "expandedSchema"), "fields"),
+    ).toHaveLength(3)
+    expect(readRecord(body, "expandedSchema").frontend).toBeDefined()
+  })
+
+  it("returns validation issues for invalid schema", async () => {
+    const app = createTestApp([
+      createGeneratorSessionModule(createInMemoryGeneratorSessionRepository()),
+    ])
+
+    const response = await app.handle(
+      new Request("http://localhost/studio/generator/validate-schema", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          schema: {
+            name: "",
+            fields: [],
+          },
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(200)
+
+    const body = await readJsonRecord(response)
+    expect(body.valid).toBe(false)
+    expect(readRecordArray(body, "issues").length).toBeGreaterThan(0)
+    expect(readString(body, "formattedMessage")).toBeDefined()
+  })
+
+  it("rejects malformed json when validating schema", async () => {
+    const app = createTestApp([
+      createGeneratorSessionModule(createInMemoryGeneratorSessionRepository()),
+    ])
+
+    const response = await app.handle(
+      new Request("http://localhost/studio/generator/validate-schema", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: '{"schema":',
+      }),
+    )
+
+    expect(response.status).toBe(400)
+
+    const error = await readErrorResponse(response)
+    expect(error.code).toBe(errorCodes.REQUEST_BODY_INVALID)
+  })
+
   it("accepts simplified manual schema json as preview input", async () => {
     const { accessToken, app } =
       await createGeneratorSessionAuthenticatedContext()

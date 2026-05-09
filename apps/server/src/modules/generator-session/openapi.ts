@@ -119,3 +119,20 @@ export const generatorSessionApplyResponseSchema = t.Object({
   sqlProposalHandoff: t.Any(),
   apply: t.Any(),
 })
+
+const generatorSchemaValidationIssueSchema = t.Object({
+  path: t.String(),
+  message: t.String(),
+})
+
+export const generatorSchemaValidationResponseSchema = t.Union([
+  t.Object({
+    valid: t.Literal(true),
+    expandedSchema: t.Any(),
+  }),
+  t.Object({
+    valid: t.Literal(false),
+    issues: t.Array(generatorSchemaValidationIssueSchema),
+    formattedMessage: t.String(),
+  }),
+])

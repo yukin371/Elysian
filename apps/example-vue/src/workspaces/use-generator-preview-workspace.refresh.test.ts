@@ -169,6 +169,110 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     )
   })
 
+  test("accepts simplified manual schema when refreshing preview", async () => {
+    let submittedSchemaName: string | undefined
+    let submittedSourceValue: string | undefined
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+        return new Response(JSON.stringify({ items: [] }), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      if (
+        url.endsWith("/studio/generator/sessions/preview") &&
+        method === "POST"
+      ) {
+        const body = JSON.parse(String(init?.body ?? "{}")) as {
+          schemaName?: string
+          sourceValue?: string
+        }
+
+        submittedSchemaName = body.schemaName
+        submittedSourceValue = body.sourceValue
+
+        return new Response(
+          JSON.stringify({
+            diff: createDiffSummary(),
+            report: createReport({
+              schemaName: submittedSchemaName ?? "supplier",
+            }),
+            session: createSession({
+              id: "preview-session-simplified",
+              schemaName: submittedSchemaName ?? "supplier",
+              sourceType: "manual-schema-json",
+              sourceValue: submittedSourceValue ?? "",
+            }),
+            sqlProposal: createSqlProposal(),
+            sqlProposalHandoff: createSqlProposalHandoff(),
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const { enabled, workspace } = createWorkspace()
+    workspace.selectedInputMode.value = "manual-schema-json"
+    workspace.manualSchemaDraft.value = JSON.stringify({
+      name: "supplier",
+      fields: [
+        { key: "name", kind: "string", required: true },
+        { key: "status", kind: "enum", options: ["active", "inactive"] },
+      ],
+    })
+    enabled.value = true
+
+    await waitForAsyncWork()
+
+    expect(submittedSchemaName).toBe("supplier")
+    expect(submittedSourceValue).toContain('"name":"supplier"')
+    expect(workspace.manualSchemaDraftError.value).toBeNull()
+    expect(workspace.currentSession.value?.schemaName).toBe("supplier")
+  })
+
+  test("loads schema templates into the manual draft", async () => {
+    const { workspace } = createWorkspace()
+
+    workspace.loadSchemaTemplate("with-status")
+
+    expect(workspace.selectedInputMode.value).toBe("manual-schema-json")
+    expect(workspace.manualSchemaDraft.value).toContain('"key": "status"')
+    expect(workspace.manualSchemaDraft.value).toContain('"kind": "enum"')
+  })
+
+  test("exposes detailed validation guidance for invalid manual schema", async () => {
+    const { workspace } = createWorkspace()
+
+    workspace.selectedInputMode.value = "manual-schema-json"
+    workspace.manualSchemaDraft.value = JSON.stringify({
+      name: "supplier",
+      fields: [
+        {
+          key: "status",
+          kind: "enum",
+        },
+      ],
+    })
+
+    expect(workspace.manualSchemaDraftError.value).toContain(
+      "app.generatorPreview.input.manualSchemaDraftInvalid",
+    )
+    expect(workspace.manualSchemaDraftErrorDetails.value).toContain(
+      "Schema validation failed with",
+    )
+    expect(workspace.manualSchemaDraftErrorDetails.value).toContain("options")
+  })
+
   test("does not apply inconsistent preview response", async () => {
     globalThis.fetch = (async (input, init) => {
       const url = String(input)

@@ -96,6 +96,7 @@ export interface ShellWorkspaceMainSwitchProps {
   selectedGeneratorPreviewFrontendTarget: string
   generatorPreviewManualSchemaDraft: string
   generatorPreviewManualSchemaDraftError: string | null
+  generatorPreviewManualSchemaDraftErrorDetails: string | null
   generatorPreviewQuery: string
   generatorPreviewFiles: ReadonlyArray<unknown>
   selectedGeneratorPreviewFilePath: string | null
@@ -303,6 +304,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "update-generator-manual-schema-draft", value: string): void
   (event: "update-generator-query", value: string): void
   (event: "load-generator-current-schema-draft"): void
+  (event: "load-generator-schema-template", templateId: string): void
   (event: "restore-generator-session", sessionId: string): void
   (event: "select-generator-file", filePath: string): void
   (event: "reset-generator-filters"): void
@@ -595,6 +597,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       selectedFrontendTarget: props.selectedGeneratorPreviewFrontendTarget,
       manualSchemaDraft: props.generatorPreviewManualSchemaDraft,
       manualSchemaDraftError: props.generatorPreviewManualSchemaDraftError,
+      manualSchemaDraftErrorDetails:
+        props.generatorPreviewManualSchemaDraftErrorDetails,
       query: props.generatorPreviewQuery,
       files: props.generatorPreviewFiles,
       selectedFilePath: props.selectedGeneratorPreviewFilePath,
@@ -624,6 +628,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
         emit("update-generator-query", value as string),
       "load-current-schema-draft": () =>
         emit("load-generator-current-schema-draft"),
+      "load-template": (templateId: unknown) =>
+        emit("load-generator-schema-template", templateId as string),
       "restore-session": (sessionId: unknown) =>
         emit("restore-generator-session", sessionId as string),
       "select-file": (filePath: unknown) =>

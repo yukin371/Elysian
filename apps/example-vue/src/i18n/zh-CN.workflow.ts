@@ -182,6 +182,10 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.refresh": "刷新预览",
   "app.generatorPreview.action.refreshing": "刷新中",
   "app.generatorPreview.action.loadCurrentSchemaDraft": "填充当前",
+  "app.generatorPreview.input.templateLabel": "快速模板",
+  "app.generatorPreview.input.templateHint":
+    "从简化 schema 模板起步，再替换 module_name 和字段定义。",
+  "app.generatorPreview.input.validationDetails": "校验详情",
   "app.generatorPreview.action.approve": "审核通过",
   "app.generatorPreview.action.reject": "拒绝",
   "app.generatorPreview.action.confirmReject": "确认拒绝",

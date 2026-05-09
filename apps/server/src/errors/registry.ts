@@ -128,6 +128,7 @@ export const errorCodes = {
   CONFIG_INVALID: 9004,
   MODULE_REGISTRATION_FAILED: 9005,
   MODULE_FAILURE: 9006,
+  REQUEST_BODY_INVALID: 9007,
 } as const
 
 export type AppErrorCodeKey = keyof typeof errorCodes

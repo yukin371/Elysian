@@ -1,4 +1,9 @@
 export {
+  expandSimplifiedSchema,
+  formatValidationIssues,
+} from "@elysian/schema"
+
+export {
   getRegisteredSchema,
   listRegisteredSchemas,
   listRegisteredSchemaNames,

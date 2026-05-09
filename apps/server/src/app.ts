@@ -106,6 +106,24 @@ export const createServerApp = (options: CreateServerAppOptions = {}) => {
         )
       }
 
+      if (code === "PARSE") {
+        return toErrorResponse(
+          new AppError({
+            code: "REQUEST_BODY_INVALID",
+            message: "Bad Request",
+            status: 400,
+            expose: true,
+            details: {
+              method: request.method,
+              path,
+            },
+            cause: error,
+          }),
+          config,
+          400,
+        )
+      }
+
       logger.error("Unhandled server error", {
         code,
         path,

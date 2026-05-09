@@ -1,8 +1,8 @@
 import { type Ref, computed, ref, watch } from "vue"
 
-import { validateModuleSchema } from "@elysian/schema"
 import {
   type FrontendTarget,
+  expandSimplifiedSchema,
   getRegisteredSchema,
   listRegisteredSchemas,
 } from "../lib/generator-preview-browser"
@@ -18,6 +18,7 @@ import {
   fetchGeneratorPreviewSession,
 } from "../lib/platform-api"
 
+import { getSchemaTemplate } from "../components/workspaces/generator/generator-preview-schema-templates"
 import {
   filterGeneratorPreviewFiles,
   resolveGeneratorPreviewSelection,
@@ -49,6 +50,9 @@ export const useGeneratorPreviewWorkspace = (
   onRecoverableAuthError: (error: unknown) => void,
 ) => {
   type GeneratorPreviewInputMode = "registered-schema" | "manual-schema-json"
+  type GeneratorPreviewSchema = NonNullable<
+    ReturnType<typeof getRegisteredSchema>
+  >
 
   const availableSchemas = listRegisteredSchemas()
   const availableSchemaNames = availableSchemas.map((schema) => schema.name)
@@ -115,9 +119,8 @@ export const useGeneratorPreviewWorkspace = (
     if (raw.length === 0) {
       return {
         error: null as string | null,
-        schema: null as NonNullable<
-          ReturnType<typeof getRegisteredSchema>
-        > | null,
+        errorDetails: null as string | null,
+        schema: null as GeneratorPreviewSchema | null,
       }
     }
 
@@ -127,37 +130,41 @@ export const useGeneratorPreviewWorkspace = (
     } catch {
       return {
         error: t("app.generatorPreview.input.manualSchemaDraftInvalidJson"),
-        schema: null as NonNullable<
-          ReturnType<typeof getRegisteredSchema>
-        > | null,
+        errorDetails: null as string | null,
+        schema: null as GeneratorPreviewSchema | null,
       }
     }
 
-    const issues = validateModuleSchema(parsed)
-    if (issues.length > 0) {
-      const issue = issues[0]
+    try {
+      return {
+        error: null as string | null,
+        errorDetails: null as string | null,
+        schema: expandSimplifiedSchema(parsed),
+      }
+    } catch (error) {
+      const details =
+        error instanceof Error ? error.message : "Schema validation failed."
+      const summaryLine = details.split("\n")[0]?.trim() || details
+
       return {
         error: t("app.generatorPreview.input.manualSchemaDraftInvalid", {
-          value:
-            issue?.path && issue.path !== "$"
-              ? `${issue.path}: ${issue.message}`
-              : (issue?.message ?? ""),
+          value: summaryLine,
         }),
-        schema: null as NonNullable<
-          ReturnType<typeof getRegisteredSchema>
-        > | null,
+        errorDetails: details,
+        schema: null as GeneratorPreviewSchema | null,
       }
-    }
-
-    return {
-      error: null as string | null,
-      schema: parsed as NonNullable<ReturnType<typeof getRegisteredSchema>>,
     }
   })
 
   const manualSchemaDraftError = computed(() =>
     selectedInputMode.value === "manual-schema-json"
       ? manualSchemaDraftParsed.value.error
+      : null,
+  )
+
+  const manualSchemaDraftErrorDetails = computed(() =>
+    selectedInputMode.value === "manual-schema-json"
+      ? manualSchemaDraftParsed.value.errorDetails
       : null,
   )
 
@@ -168,6 +175,11 @@ export const useGeneratorPreviewWorkspace = (
 
     manualSchemaDraft.value = JSON.stringify(selectedSchema.value, null, 2)
     selectedSchemaName.value = selectedSchema.value.name
+    selectedInputMode.value = "manual-schema-json"
+  }
+
+  const loadSchemaTemplate = (templateId: string) => {
+    manualSchemaDraft.value = getSchemaTemplate(templateId)
     selectedInputMode.value = "manual-schema-json"
   }
 
@@ -386,7 +398,8 @@ export const useGeneratorPreviewWorkspace = (
       (!options?.ignoreApplyLoading && applyLoading.value) ||
       reviewLoading.value ||
       !enabled.value ||
-      !selectedSchemaName.value
+      (selectedInputMode.value !== "manual-schema-json" &&
+        !selectedSchemaName.value)
     ) {
       return false
     }
@@ -631,9 +644,9 @@ export const useGeneratorPreviewWorkspace = (
             null,
             2,
           )
-        }
 
-        return
+          return
+        }
       }
 
       if (currentSelectionMatchesSession()) {
@@ -667,6 +680,8 @@ export const useGeneratorPreviewWorkspace = (
     loading,
     manualSchemaDraft,
     manualSchemaDraftError,
+    manualSchemaDraftErrorDetails,
+    loadSchemaTemplate,
     loadSelectedSchemaDraft,
     previewQuery,
     recentSessionOptions,

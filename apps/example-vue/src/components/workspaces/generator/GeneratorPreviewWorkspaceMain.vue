@@ -12,6 +12,7 @@ import {
   loadGeneratorPreviewReviewDraft,
   persistGeneratorPreviewReviewDraft,
 } from "./generator-preview-review-draft"
+import { listSchemaTemplates } from "./generator-preview-schema-templates"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
@@ -38,6 +39,7 @@ interface GeneratorPreviewWorkspaceMainProps {
   selectedFrontendTarget: "vue" | "react"
   manualSchemaDraft: string
   manualSchemaDraftError: string | null
+  manualSchemaDraftErrorDetails: string | null
   query: string
   files: GeneratorPreviewFileCard[]
   selectedFilePath: string | null
@@ -62,6 +64,7 @@ const emit = defineEmits<{
   (e: "update:manual-schema-draft", value: string): void
   (e: "update:query", value: string): void
   (e: "load-current-schema-draft"): void
+  (e: "load-template", value: string): void
   (e: "restore-session", value: string): void
   (e: "select-file", value: string): void
   (e: "reset-filters"): void
@@ -84,14 +87,21 @@ const frontendOptions = [
   { label: "Vue", value: "vue" },
   { label: "React", value: "react" },
 ] as const
+const schemaTemplates = listSchemaTemplates()
 
 const isManualSchemaMode = computed(
   () => props.selectedInputMode === "manual-schema-json",
+)
+const showSchemaTemplates = computed(
+  () => isManualSchemaMode.value && props.manualSchemaDraft.trim().length === 0,
 )
 
 const hasRecentSessions = computed(() => props.recentSessionOptions.length > 0)
 const showReviewCommentInput = computed(
   () => isRejectConfirming.value || Boolean(props.reviewEvidence?.comment),
+)
+const hasManualSchemaDraftErrorDetails = computed(() =>
+  Boolean(props.manualSchemaDraftErrorDetails?.trim()),
 )
 
 const handleQueryInput = (value: string | number) => {
@@ -154,6 +164,10 @@ const handleManualSchemaDraftInput = (value: string | number) => {
 
 const handleLoadCurrentSchemaDraft = () => {
   emit("load-current-schema-draft")
+}
+
+const handleLoadSchemaTemplate = (templateId: string) => {
+  emit("load-template", templateId)
 }
 
 const handleRecentSessionChange = (
@@ -410,6 +424,28 @@ watch(
           </div>
         </div>
 
+        <div v-if="showSchemaTemplates" class="generator-template-strip">
+          <span class="generator-template-label">
+            {{ t("app.generatorPreview.input.templateLabel") }}
+          </span>
+          <div class="generator-template-actions">
+            <button
+              v-for="template in schemaTemplates"
+              :key="template.id"
+              type="button"
+              class="generator-template-button"
+              :title="template.description"
+              :disabled="loading || reviewLoading || applyLoading"
+              @click="handleLoadSchemaTemplate(template.id)"
+            >
+              {{ template.label }}
+            </button>
+          </div>
+          <p class="generator-template-hint">
+            {{ t("app.generatorPreview.input.templateHint") }}
+          </p>
+        </div>
+
         <label
           v-if="isManualSchemaMode"
           class="generator-manual-draft"
@@ -429,6 +465,12 @@ watch(
         >
           {{ manualSchemaDraftError }}
         </div>
+
+        <pre
+          v-if="hasManualSchemaDraftErrorDetails"
+          class="generator-validation-details"
+        ><strong>{{ t("app.generatorPreview.input.validationDetails") }}</strong>
+{{ manualSchemaDraftErrorDetails }}</pre>
       </section>
 
       <div class="generator-toolbar">
@@ -652,6 +694,46 @@ watch(
   display: grid;
 }
 
+.generator-template-strip {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px dashed rgba(36, 87, 214, 0.24);
+  border-radius: 10px;
+  background: rgba(36, 87, 214, 0.04);
+}
+
+.generator-template-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #173ea6;
+}
+
+.generator-template-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.generator-template-button {
+  border: 1px solid rgba(36, 87, 214, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #173ea6;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.generator-template-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
 .generator-filter-search {
   grid-column: 1 / -1;
 }
@@ -684,6 +766,17 @@ watch(
 .generator-list-tools {
   display: grid;
   gap: 0.75rem;
+}
+
+.generator-validation-details {
+  margin: 0;
+  padding: 0.85rem 0.95rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.04);
+  color: #334155;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 @media (max-width: 640px) {

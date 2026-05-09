@@ -193,6 +193,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.refresh": "Refresh preview",
   "app.generatorPreview.action.refreshing": "Refreshing",
   "app.generatorPreview.action.loadCurrentSchemaDraft": "Load current",
+  "app.generatorPreview.input.templateLabel": "Quick templates",
+  "app.generatorPreview.input.templateHint":
+    "Start from a simplified schema template, then replace module_name and fields.",
+  "app.generatorPreview.input.validationDetails": "Validation details",
   "app.generatorPreview.action.approve": "Approve",
   "app.generatorPreview.action.reject": "Reject",
   "app.generatorPreview.action.confirmReject": "Confirm reject",

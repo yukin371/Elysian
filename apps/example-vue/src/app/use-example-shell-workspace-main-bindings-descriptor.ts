@@ -63,6 +63,8 @@ export const createExampleShellWorkspaceMainBindings = ({
   selectedGeneratorPreviewFrontendTarget,
   generatorPreviewManualSchemaDraft,
   generatorPreviewManualSchemaDraftError,
+  generatorPreviewManualSchemaDraftErrorDetails,
+  loadGeneratorSchemaTemplate,
   generatorPreviewQuery,
   generatorPreviewFiles,
   selectedGeneratorPreviewFilePath,
@@ -360,7 +362,11 @@ export const createExampleShellWorkspaceMainBindings = ({
     generatorPreviewManualSchemaDraftError: read(
       generatorPreviewManualSchemaDraftError,
     ),
+    generatorPreviewManualSchemaDraftErrorDetails: read(
+      generatorPreviewManualSchemaDraftErrorDetails,
+    ),
     loadSelectedSchemaDraft,
+    loadGeneratorSchemaTemplate,
     generatorPreviewQuery: generatorPreviewQuery.value,
     generatorPreviewFiles: read(generatorPreviewFiles),
     selectedGeneratorPreviewFilePath: selectedGeneratorPreviewFilePath.value,
@@ -552,6 +558,7 @@ export const createExampleShellWorkspaceMainBindings = ({
       generatorPreviewQuery.value = value
     },
     "load-generator-current-schema-draft": loadSelectedSchemaDraft,
+    "load-generator-schema-template": loadGeneratorSchemaTemplate,
     "restore-generator-session": restoreGeneratorPreviewSession,
     "select-generator-file": (value: string) => {
       selectedGeneratorPreviewFilePath.value = value
