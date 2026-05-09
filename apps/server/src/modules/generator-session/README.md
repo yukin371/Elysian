@@ -2,7 +2,7 @@
 
 `generator-session` 负责把 generator preview/review/apply 过程包装成可查询的后端 session 运行时。
 
-> 当前简化边界：只支持已注册 schema、`staging` 目标目录和 `vue/react` 前端目标；它是“生成预览与应用记录中心”，不是通用低代码 studio 编排平台。
+> 当前简化边界：只支持 `registered-schema` 与 `manual-schema-json` 两类输入、`staging` 目标目录和 `vue/react` 前端目标；`manual-schema-json` 可提交完整 `ModuleSchema` 或 schema owner 内部支持的 simplified 输入，但在 session 内会先统一展开成标准 `ModuleSchema`。它是“生成预览与应用记录中心”，不是通用低代码 studio 编排平台。
 
 ## Owns
 
@@ -71,6 +71,7 @@ flowchart TD
 ## Validation
 
 - `service.ts` 已确认 preview 前必须在 generator registry 中找到 schema，否则返回 `GENERATOR_SCHEMA_NOT_FOUND`。
+- `service.ts` 已确认 `manual-schema-json` 会先走 schema owner 的展开与校验；非法 simplified/full schema 会返回 `GENERATOR_MANUAL_SCHEMA_INVALID`，并在错误详情里附带格式化后的修复指引。
 - `service.ts` 已确认新建 preview session 默认进入 `pending_review`。
 - `service.ts` 已确认 review 只允许在 `status=pending_review` 时执行，通过后进入 `ready`，拒绝后进入 `rejected`。
 - `service.ts` 已确认 confirm 只允许在 `status=ready` 时执行，并会持久化确认人、确认时间和确认清单。

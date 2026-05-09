@@ -87,6 +87,32 @@ describe("parseCliArgs", () => {
     })
   })
 
+  it("parses init mode without schema input", () => {
+    const result = parseCliArgs(["--init", "product"])
+
+    expect(result).toEqual({
+      initModule: "product",
+      outputDir: resolveTargetPresetOutputDir("staging"),
+      targetPreset: "staging",
+      frontendTarget: "vue",
+      conflictStrategy: "skip",
+      preview: false,
+    })
+  })
+
+  it("parses list-schemas mode without schema input", () => {
+    const result = parseCliArgs(["--list-schemas"])
+
+    expect(result).toEqual({
+      listSchemas: true,
+      outputDir: resolveTargetPresetOutputDir("staging"),
+      targetPreset: "staging",
+      frontendTarget: "vue",
+      conflictStrategy: "skip",
+      preview: false,
+    })
+  })
+
   it("lets --conflict override --overwrite shortcut", () => {
     const result = parseCliArgs([
       "--schema",
@@ -126,6 +152,19 @@ describe("parseCliArgs", () => {
       "customer",
       "--schema-file",
       "./schema.json",
+      "--target",
+      "staging",
+    ])
+
+    expect(result).toBeNull()
+  })
+
+  it("returns null when init is mixed with schema input", () => {
+    const result = parseCliArgs([
+      "--init",
+      "product",
+      "--schema",
+      "customer",
       "--target",
       "staging",
     ])

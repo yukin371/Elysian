@@ -2,34 +2,44 @@
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 
-import { type ModuleSchema, validateModuleSchema } from "@elysian/schema"
+import { type ModuleSchema, expandSimplifiedSchema } from "@elysian/schema"
 
 import { parseCliArgs } from "./cli-args"
 import { DEFAULT_GENERATION_TARGET, listTargetPresets } from "./conventions"
+import { generateScaffoldSchema } from "./init"
 import {
   buildGenerationPreviewReport,
   writeGenerationPreviewReport,
 } from "./preview"
-import { getRegisteredSchema, listRegisteredSchemaNames } from "./schemas"
+import {
+  getRegisteredSchema,
+  listRegisteredSchemaNames,
+  listRegisteredSchemas,
+} from "./schemas"
 import { writeModuleFiles } from "./write"
 
 const loadSchemaFromFile = async (
   schemaFilePath: string,
 ): Promise<ModuleSchema> => {
   const rawContents = await readFile(schemaFilePath, "utf8")
-  const parsed = JSON.parse(rawContents.replace(/^\uFEFF/, "")) as unknown
-  const issues = validateModuleSchema(parsed)
+  const normalizedContents = rawContents.replace(/^\uFEFF/, "")
+  let parsed: unknown
 
-  if (issues.length > 0) {
+  try {
+    parsed = JSON.parse(normalizedContents) as unknown
+  } catch {
     throw new Error(
-      [
-        `Invalid module schema file "${schemaFilePath}":`,
-        ...issues.map((issue) => `- ${issue.path}: ${issue.message}`),
-      ].join("\n"),
+      `Invalid module schema file "${schemaFilePath}": file must contain valid JSON.`,
     )
   }
 
-  return parsed as ModuleSchema
+  try {
+    return expandSimplifiedSchema(parsed)
+  } catch (error) {
+    throw new Error(
+      `Invalid module schema file "${schemaFilePath}":\n${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
 }
 
 const WORKSPACE_ROOT = resolve(import.meta.dir, "..", "..", "..")
@@ -48,6 +58,23 @@ const main = async () => {
 
   let schema: ModuleSchema | null = null
   let schemaArtifactSource: "package" | "inline" = "package"
+
+  if (options.listSchemas) {
+    printSchemaList()
+    return
+  }
+
+  if (options.initModule) {
+    const moduleName = options.initModule.trim()
+    const outPath = resolveCliPath(`./${moduleName}.module-schema.json`)
+    await Bun.write(outPath, generateScaffoldSchema(moduleName))
+    console.log(`[generator] scaffold written to ${outPath}`)
+    console.log("[generator] edit the file, then run:")
+    console.log(
+      `  bun --filter @elysian/generator generate --schema-file ./${moduleName}.module-schema.json --target staging --frontend vue --preview`,
+    )
+    return
+  }
 
   if (options.schemaName) {
     schema = getRegisteredSchema(options.schemaName)
@@ -129,21 +156,50 @@ const main = async () => {
 }
 
 const printUsage = () => {
+  const schemas = listRegisteredSchemaNames()
+  const targets = listTargetPresets()
+
   console.log(
-    [
-      "Usage:",
-      "  bun --filter @elysian/generator generate --schema customer --target staging --frontend vue [--conflict skip|overwrite|overwrite-generated-only|fail]",
-      "  bun --filter @elysian/generator generate --schema-file ./docs/ai-playbooks/examples/supplier.module-schema.json --target staging --frontend vue [--conflict skip|overwrite|overwrite-generated-only|fail]",
-      "  bun --filter @elysian/generator generate --schema customer --out ./custom/generated --frontend vue [--conflict skip|overwrite|overwrite-generated-only|fail]",
-      "  bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --preview [--report ./generated/reports/customer.preview.json]",
-      "  Exactly one of --schema or --schema-file must be provided.",
-      "  --report requires --preview.",
-      "  --overwrite is kept as a shortcut for --conflict overwrite",
-      "",
-      `Target presets: ${listTargetPresets().join(", ")}`,
-      `Available schemas: ${listRegisteredSchemaNames().join(", ")}`,
-    ].join("\n"),
+    `
+Elysian Code Generator
+
+Usage:
+  bun --filter @elysian/generator generate <input> [options]
+
+Input (choose one):
+  --schema <name>          Use a registered schema: ${schemas.join(", ")}
+  --schema-file <path>     Use a JSON schema file
+  --init <module-name>     Create a starter simplified schema file
+  --list-schemas           Show registered schemas with labels and domains
+
+Output:
+  --target <preset>        Target preset: ${targets.join(", ")}
+  --out <dir>              Custom output directory
+
+Options:
+  --frontend <vue|react>   Frontend framework (default: vue)
+  --conflict <strategy>    skip | overwrite | overwrite-generated-only | fail
+  --overwrite              Shortcut for --conflict overwrite
+  --preview                Preview only, do not write files
+  --report <path>          Save preview report to file (requires --preview)
+
+Quick Start:
+  bun --filter @elysian/generator generate --init supplier
+  bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.json --target staging --frontend vue --preview
+  bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --conflict overwrite
+`.trim(),
   )
+}
+
+const printSchemaList = () => {
+  console.log("Available schemas:\n")
+
+  for (const schema of listRegisteredSchemas()) {
+    const domain = schema.frontend?.workspaceDomain ?? "business"
+    console.log(
+      `  ${schema.name.padEnd(20)} ${schema.label} (${schema.fields.length} fields, ${domain})`,
+    )
+  }
 }
 
 void main()

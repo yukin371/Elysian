@@ -5,6 +5,8 @@ import {
 } from "./conventions"
 
 export interface CliOptions {
+  initModule?: string
+  listSchemas?: boolean
   schemaName?: string
   schemaFilePath?: string
   outputDir: string
@@ -16,6 +18,8 @@ export interface CliOptions {
 }
 
 export const parseCliArgs = (args: string[]): CliOptions | null => {
+  let initModule = ""
+  let listSchemas = false
   let schemaName = ""
   let schemaFilePath = ""
   let outputDir = resolveTargetPresetOutputDir(DEFAULT_GENERATION_TARGET)
@@ -42,6 +46,17 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
     if (current === "--schema-file") {
       schemaFilePath = args[index + 1] ?? ""
       index += 1
+      continue
+    }
+
+    if (current === "--init") {
+      initModule = args[index + 1] ?? ""
+      index += 1
+      continue
+    }
+
+    if (current === "--list-schemas") {
+      listSchemas = true
       continue
     }
 
@@ -113,8 +128,15 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
 
   const hasSchemaName = schemaName.length > 0
   const hasSchemaFilePath = schemaFilePath.length > 0
+  const hasInitModule = initModule.length > 0
+  const activeInputModes = [
+    hasSchemaName,
+    hasSchemaFilePath,
+    hasInitModule,
+    listSchemas,
+  ].filter(Boolean).length
 
-  if (hasSchemaName === hasSchemaFilePath || !outputDir) {
+  if (activeInputModes !== 1 || !outputDir) {
     return null
   }
 
@@ -123,6 +145,8 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
   }
 
   return {
+    ...(listSchemas ? { listSchemas: true } : {}),
+    ...(hasInitModule ? { initModule } : {}),
     ...(hasSchemaName ? { schemaName } : {}),
     ...(hasSchemaFilePath ? { schemaFilePath } : {}),
     outputDir,

@@ -50,10 +50,16 @@
 ### 代码生成器
 
 ```bash
+# 列出当前可用的已注册 schema
+bun --filter @elysian/generator generate --list-schemas
+
+# 从零初始化一个简化 schema 文件
+bun --filter @elysian/generator generate --init supplier
+
 # 从已注册 schema 生成前后端骨架
 bun --filter @elysian/generator generate --schema customer --out ./generated --frontend vue
 
-# 从外部 JSON schema 文件生成
+# 从外部 JSON schema 文件生成（支持 simplified schema）
 bun --filter @elysian/generator generate --schema-file ./my-module.json --out ./generated --frontend vue
 
 # 预览生成结果（不写入磁盘）
@@ -61,10 +67,38 @@ bun --filter @elysian/generator generate --schema customer --target staging --fr
 ```
 
 生成器特性：
+- 支持 `SimplifiedModuleSchema`：缺省补 `id`、`label`、`frontend` 元数据
 - 支持 `skip / overwrite / overwrite-generated-only / fail` 四种冲突策略
 - 原子写入（temp + rename），避免部分写入损坏
 - 每次生成输出 manifest，支持二次生成安全覆盖
 - Preview 模式：预览文件计划、diff、SQL 变更，确认后再 Apply
+
+最小 simplified schema 示例：
+
+```json
+{
+  "name": "supplier",
+  "fields": [
+    { "key": "name", "kind": "string", "required": true, "searchable": true },
+    { "key": "status", "kind": "enum", "options": ["active", "inactive"] }
+  ]
+}
+```
+
+从零开始的推荐流程：
+
+```bash
+# 1. 初始化脚手架（文件固定写到仓库根目录）
+bun --filter @elysian/generator generate --init supplier
+
+# 2. 编辑 supplier.module-schema.json
+
+# 3. 先 preview
+bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.json --target staging --frontend vue --preview
+
+# 4. 再正式生成
+bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.json --out ./generated --frontend vue
+```
 
 ## 快速开始
 

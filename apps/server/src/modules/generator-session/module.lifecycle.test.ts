@@ -76,6 +76,16 @@ const readString = (value: Record<string, unknown>, key: string) => {
   return property
 }
 
+const readNumber = (value: Record<string, unknown>, key: string) => {
+  const property = value[key]
+
+  if (typeof property !== "number") {
+    throw new Error(`Expected number field: ${key}`)
+  }
+
+  return property
+}
+
 const readBoolean = (value: Record<string, unknown>, key: string) => {
   const property = value[key]
 
@@ -84,6 +94,15 @@ const readBoolean = (value: Record<string, unknown>, key: string) => {
   }
 
   return property
+}
+
+const readErrorResponse = async (response: { json(): Promise<unknown> }) => {
+  const body = await readJsonRecord(response)
+
+  return {
+    code: readNumber(body, "code"),
+    details: readRecord(body, "details"),
+  }
 }
 
 const getOpenApiResponse = (
@@ -896,6 +915,90 @@ describe("generator session module lifecycle", () => {
     expect(session.schemaName).toBe(customerModuleSchema.name)
     expect(session.sourceType).toBe("manual-schema-json")
     expect(session.sourceValue).toBe(schemaJson)
+  })
+
+  it("accepts simplified manual schema json as preview input", async () => {
+    const { accessToken, app } =
+      await createGeneratorSessionAuthenticatedContext()
+    const schemaJson = JSON.stringify({
+      name: "supplier",
+      fields: [
+        { key: "name", kind: "string", required: true, searchable: true },
+        {
+          key: "status",
+          kind: "enum",
+          options: ["active", "inactive"],
+        },
+      ],
+    })
+
+    const response = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "supplier",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          sourceType: "manual-schema-json",
+          sourceValue: schemaJson,
+          targetPreset: "staging",
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(201)
+
+    const body = await readJsonRecord(response)
+    const session = readRecord(body, "session")
+
+    expect(session.schemaName).toBe("supplier")
+    expect(session.sourceType).toBe("manual-schema-json")
+    expect(session.sourceValue).toBe(schemaJson)
+  })
+
+  it("returns formatted validation guidance for invalid simplified manual schema", async () => {
+    const { accessToken, app } =
+      await createGeneratorSessionAuthenticatedContext()
+    const schemaJson = JSON.stringify({
+      name: "supplier",
+      fields: [{ key: "status", kind: "enum" }],
+    })
+
+    const response = await app.handle(
+      new Request("http://localhost/studio/generator/sessions/preview", {
+        method: "POST",
+        headers: {
+          ...createAuthorizedHeaders(accessToken, {
+            "content-type": "application/json",
+          }),
+        },
+        body: JSON.stringify({
+          schemaName: "supplier",
+          frontendTarget: "vue",
+          conflictStrategy: "fail",
+          sourceType: "manual-schema-json",
+          sourceValue: schemaJson,
+          targetPreset: "staging",
+        }),
+      }),
+    )
+
+    expect(response.status).toBe(400)
+
+    const errorBody = await readErrorResponse(response)
+
+    expect(errorBody.code).toBe(errorCodes.GENERATOR_MANUAL_SCHEMA_INVALID)
+    expect(errorBody.details).toMatchObject({
+      sourceType: "manual-schema-json",
+    })
+    expect(readString(errorBody.details, "formattedIssues")).toContain(
+      "Suggestion: Add 'options' array or 'dictionaryTypeCode'",
+    )
   })
 
   it("requires confirmation before applying a ready generator preview session", async () => {

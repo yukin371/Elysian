@@ -11,6 +11,7 @@
 
 - 字段定义
 - 校验约束元数据
+- 简化 schema 输入到 `ModuleSchema` 的展开与默认值补齐
 - 从 `ModuleSchema` 派生的最小运行时校验桥接（如 server body schema）
 - 页面元数据
 - 权限点元数据
@@ -31,6 +32,7 @@
 ## 不变量
 
 - schema 必须可序列化、可校验、可供 AI 结构化输出约束使用
+- 简化输入层只能展开成既有 `ModuleSchema`，不能形成第二套并行 canonical contract
 - schema 必须保持框架中立，不嵌入 Vue 或 React 特有实现细节
 - 运行时桥接只能消费既有 schema 元数据，不反向成为业务规则或手写 body 的第二事实来源
 

@@ -17,7 +17,7 @@ import {
   buildMigrationProposalSnapshot,
   writeMigrationProposalSnapshot,
 } from "@elysian/persistence"
-import { type ModuleSchema, validateModuleSchema } from "@elysian/schema"
+import { type ModuleSchema, expandSimplifiedSchema } from "@elysian/schema"
 
 import { AppError } from "../../errors"
 import type { AppErrorCodeKey } from "../../errors/registry"
@@ -324,21 +324,21 @@ export const createGeneratorSessionService = (
           })
         }
 
-        const issues = validateModuleSchema(parsedSchema)
-        if (issues.length > 0) {
+        try {
+          schema = expandSimplifiedSchema(parsedSchema)
+        } catch (error) {
           throw new AppError({
             code: "GENERATOR_MANUAL_SCHEMA_INVALID" as AppErrorCodeKey,
             message: "Generator manual schema is not a valid ModuleSchema",
             status: 400,
             expose: true,
             details: {
-              issues,
+              formattedIssues:
+                error instanceof Error ? error.message : String(error),
               sourceType,
             },
           })
         }
-
-        schema = parsedSchema as ModuleSchema
         if (schema.name !== input.schemaName) {
           throw new AppError({
             code: "GENERATOR_MANUAL_SCHEMA_NAME_MISMATCH" as AppErrorCodeKey,
