@@ -90,11 +90,19 @@ const handleReset = () => {
         </TButton>
       </div>
     </div>
+
+    <div v-if="$slots.actions" class="ely-query-extra-actions">
+      <slot name="actions" />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .ely-query-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
   padding: 16px 20px;
   background: rgba(248, 250, 252, 0.92);
   border-radius: 6px;
@@ -106,10 +114,31 @@ const handleReset = () => {
   flex-wrap: wrap;
   gap: 0.85rem;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .ely-query-field,
 .ely-query-actions {
   flex-shrink: 0;
+}
+
+.ely-query-extra-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 960px) {
+  .ely-query-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ely-query-extra-actions {
+    justify-content: flex-start;
+  }
 }
 </style>

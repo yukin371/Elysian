@@ -199,7 +199,7 @@ const handleGlobalSearch = (value: string | number) => {
     <!-- Main workspace -->
     <main class="ely-workbench__workspace">
       <div
-        v-if="tabs && tabs.length > 0"
+        v-if="tabs && tabs.length > 1"
         class="ely-workbench__workspace-header"
       >
         <ElyShellTabs

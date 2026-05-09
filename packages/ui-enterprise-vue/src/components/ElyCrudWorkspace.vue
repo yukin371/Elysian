@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Empty as TEmpty } from "tdesign-vue-next/es/empty"
 
-import { computed, useSlots } from "vue"
+import { useSlots } from "vue"
 import type { ElyCrudWorkspaceEmits, ElyCrudWorkspaceProps } from "../contracts"
 import ElyQueryBar from "./ElyQueryBar.vue"
 import ElyTable from "./ElyTable.vue"
@@ -9,7 +9,6 @@ import ElyTable from "./ElyTable.vue"
 const props = defineProps<ElyCrudWorkspaceProps>()
 const emit = defineEmits<ElyCrudWorkspaceEmits>()
 const slots = useSlots()
-const hasToolbar = computed(() => Boolean(slots.toolbar))
 
 const handleAction = (key: string, row: Record<string, unknown>) => {
   emit("action", key, row)
@@ -24,13 +23,13 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
       :copy="copy?.queryBarCopy"
       @search="emit('search', $event)"
       @reset="emit('reset')"
-    />
+    >
+      <template v-if="slots.toolbar" #actions>
+        <slot name="toolbar" />
+      </template>
+    </ElyQueryBar>
 
     <section class="ely-crud-card">
-      <div v-if="hasToolbar" class="ely-crud-tools">
-        <slot name="toolbar" />
-      </div>
-
       <div v-if="props.items.length === 0 && !tableLoading" class="ely-crud-empty">
         <TEmpty
           :title="emptyTitle ?? copy?.emptyTitle ?? '当前工作区为空'"
@@ -77,15 +76,6 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   padding: 1rem 1rem 0.85rem;
 }
 
-.ely-crud-tools {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding-bottom: 0.9rem;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-}
-
 .ely-crud-empty {
   display: grid;
   place-items: center;
@@ -108,10 +98,4 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
   color: #0f172a;
 }
 
-@media (max-width: 960px) {
-  .ely-crud-tools {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
 </style>
