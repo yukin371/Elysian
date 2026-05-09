@@ -15,6 +15,7 @@ export interface DefaultAuthSeedConfig {
 
 export interface DefaultSeedCliOptions {
   reconcileAdminPassword: boolean
+  reconcileSeedLabels: boolean
 }
 
 const defaultAdminPassword = ["admin", "123"].join("")

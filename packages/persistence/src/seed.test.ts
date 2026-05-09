@@ -117,6 +117,21 @@ describe("createDefaultAuthSeedSpec", () => {
       "customer-root",
       "customer-list",
     ])
+    expect(
+      spec.permissions.find(
+        (permission) => permission.code === "system:setting:list",
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        name: "List config entries",
+        description: "View configuration entries",
+      }),
+    )
+    expect(spec.menus.find((menu) => menu.code === "system-settings")).toEqual(
+      expect.objectContaining({
+        name: "Config Entries",
+      }),
+    )
     expect(spec.departments).toEqual([
       {
         id: "00000000-0000-0000-0000-000000000801",
@@ -359,12 +374,21 @@ describe("parseDefaultSeedCliArgs", () => {
   it("defaults to conservative seed behavior", () => {
     expect(parseDefaultSeedCliArgs([])).toEqual({
       reconcileAdminPassword: false,
+      reconcileSeedLabels: false,
     })
   })
 
   it("enables admin password reconciliation when explicitly requested", () => {
     expect(parseDefaultSeedCliArgs(["--reconcile-admin-password"])).toEqual({
       reconcileAdminPassword: true,
+      reconcileSeedLabels: false,
+    })
+  })
+
+  it("enables seed label reconciliation when explicitly requested", () => {
+    expect(parseDefaultSeedCliArgs(["--reconcile-seed-labels"])).toEqual({
+      reconcileAdminPassword: false,
+      reconcileSeedLabels: true,
     })
   })
 })

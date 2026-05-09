@@ -104,7 +104,7 @@ export const createSettingModule = (
         },
         detail: {
           tags: ["setting"],
-          summary: "List settings",
+          summary: "List config entries",
         },
       },
     )
@@ -123,7 +123,7 @@ export const createSettingModule = (
         },
         detail: {
           tags: ["setting"],
-          summary: "Export settings as CSV",
+          summary: "Export config entries as CSV",
         },
       },
     )
@@ -151,7 +151,7 @@ export const createSettingModule = (
         },
         detail: {
           tags: ["setting"],
-          summary: "Get setting by id",
+          summary: "Get config entry by id",
         },
       },
     )
@@ -180,7 +180,7 @@ export const createSettingModule = (
         },
         detail: {
           tags: ["setting"],
-          summary: "Create setting",
+          summary: "Create config entry",
         },
       },
     )
@@ -211,7 +211,7 @@ export const createSettingModule = (
         },
         detail: {
           tags: ["setting"],
-          summary: "Update setting",
+          summary: "Update config entry",
         },
       },
     )

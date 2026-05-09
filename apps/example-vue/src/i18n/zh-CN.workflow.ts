@@ -43,8 +43,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.message.roleNoListPermission":
     "当前身份可以进入工作区，但没有 `system:role:list` 权限。",
   "app.message.settingModuleOffline":
-    "`setting` 模块尚未注册。请确认服务端已启用系统配置模块后再重试。",
-  "app.message.settingSignInToLoad": "请先登录，再加载受保护的系统配置数据。",
+    "`setting` 模块尚未注册。请确认服务端已启用配置项模块后再重试。",
+  "app.message.settingSignInToLoad": "请先登录，再加载受保护的配置项数据。",
   "app.message.settingNoListPermission":
     "当前身份可以进入工作区，但没有 `system:setting:list` 权限。",
   "app.message.tenantModuleOffline":
@@ -342,9 +342,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadRoles": "加载角色列表失败",
   "app.error.loadRoleDetail": "加载角色详情失败",
   "app.error.exportRoles": "导出角色列表失败",
-  "app.error.loadSettings": "加载系统配置列表失败",
-  "app.error.exportSettings": "导出系统配置失败",
-  "app.error.loadSettingDetail": "加载系统配置详情失败",
+  "app.error.loadSettings": "加载配置项列表失败",
+  "app.error.exportSettings": "导出配置项失败",
+  "app.error.loadSettingDetail": "加载配置项详情失败",
   "app.error.loadTenants": "加载租户列表失败",
   "app.error.loadTenantDetail": "加载租户详情失败",
   "app.error.exportTenants": "导出租户列表失败",
@@ -364,7 +364,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.createDepartment": "创建部门失败",
   "app.error.createMenu": "创建菜单失败",
   "app.error.createRole": "创建角色失败",
-  "app.error.createSetting": "创建系统配置失败",
+  "app.error.createSetting": "创建配置项失败",
   "app.error.createTenant": "创建租户失败",
   "app.error.createDictionary": "创建字典类型失败",
   "app.error.createUser": "创建用户失败",
@@ -372,7 +372,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.updateDepartment": "更新部门失败",
   "app.error.updateMenu": "更新菜单失败",
   "app.error.updateRole": "更新角色失败",
-  "app.error.updateSetting": "更新系统配置失败",
+  "app.error.updateSetting": "更新配置项失败",
   "app.error.updateTenant": "更新租户失败",
   "app.error.updateTenantStatus": "切换租户状态失败",
   "app.error.updateDictionary": "更新字典类型失败",

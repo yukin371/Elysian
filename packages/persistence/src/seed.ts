@@ -47,7 +47,13 @@ interface NormalizedTenantInitOptions {
 
 const defaultSeedCliOptions: DefaultSeedCliOptions = {
   reconcileAdminPassword: false,
+  reconcileSeedLabels: false,
 }
+
+type PermissionSeedPresentation = Pick<
+  DefaultAuthSeedSpec["permissions"][number],
+  "code" | "module" | "resource" | "action" | "name" | "description"
+>
 
 export {
   createDefaultAuthSeedConfig,
@@ -163,6 +169,14 @@ export const seedDefaultAuthData = async (
         target: [dictionaryItems.typeId, dictionaryItems.value],
       })
 
+    let reconciledSeedLabels = false
+
+    if (resolvedOptions.reconcileSeedLabels) {
+      await reconcilePermissionSeedLabels(db, tid, spec.permissions)
+      await reconcileDefaultMenuSeedLabels(db, tid, spec.menus)
+      reconciledSeedLabels = true
+    }
+
     const existingAdmin = await db
       .select({ id: users.id })
       .from(users)
@@ -215,6 +229,7 @@ export const seedDefaultAuthData = async (
       adminUsername: spec.adminUser.username,
       insertedAdmin: !existingAdmin[0],
       reconciledAdminPassword,
+      reconciledSeedLabels,
       departmentCount: spec.departments.length,
       postCount: spec.posts.length,
     }
@@ -273,7 +288,7 @@ export const runDefaultSeed = async (
     const workflowResult = await seedDefaultWorkflowDefinitionData(db)
 
     console.log(
-      `[elysian] default seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin}, reconciledPassword=${result.reconciledAdminPassword}, departments=${result.departmentCount}, posts=${result.postCount}, workflowDefinitions=${workflowResult.definitionCount})`,
+      `[elysian] default seed complete (admin=${result.adminUsername}, inserted=${result.insertedAdmin}, reconciledPassword=${result.reconciledAdminPassword}, reconciledSeedLabels=${result.reconciledSeedLabels}, departments=${result.departmentCount}, posts=${result.postCount}, workflowDefinitions=${workflowResult.definitionCount})`,
     )
   } finally {
     await db.$client.end()
@@ -284,7 +299,98 @@ export const parseDefaultSeedCliArgs = (
   args: string[],
 ): DefaultSeedCliOptions => ({
   reconcileAdminPassword: args.includes("--reconcile-admin-password"),
+  reconcileSeedLabels: args.includes("--reconcile-seed-labels"),
 })
+
+const reconcilePermissionSeedLabels = async (
+  db: DatabaseClient,
+  tenantId: string,
+  entries: PermissionSeedPresentation[],
+) => {
+  for (const entry of entries) {
+    await db
+      .update(permissions)
+      .set({
+        module: entry.module,
+        resource: entry.resource,
+        action: entry.action,
+        name: entry.name,
+        description: entry.description,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(permissions.tenantId, tenantId),
+          eq(permissions.code, entry.code),
+        ),
+      )
+  }
+}
+
+const reconcileDefaultMenuSeedLabels = async (
+  db: DatabaseClient,
+  tenantId: string,
+  entries: DefaultAuthSeedSpec["menus"],
+) => {
+  for (const entry of entries) {
+    await db
+      .update(menus)
+      .set({
+        parentId: entry.parentId,
+        type: entry.type,
+        name: entry.name,
+        path: entry.path,
+        component: entry.component,
+        icon: entry.icon,
+        sort: entry.sort,
+        isVisible: entry.isVisible,
+        status: entry.status,
+        permissionCode: entry.permissionCode,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(menus.tenantId, tenantId), eq(menus.code, entry.code)))
+  }
+}
+
+const reconcileTenantBootstrapMenuSeedLabels = async (
+  db: DatabaseClient,
+  tenantId: string,
+  entries: TenantBootstrapSeedSpec["menus"],
+) => {
+  const resolvedMenuIds = new Map<string, string>()
+
+  for (const entry of entries) {
+    const menuId = await resolveTenantMenuIdByCode(db, tenantId, entry.code)
+
+    if (menuId) {
+      resolvedMenuIds.set(entry.code, menuId)
+    }
+  }
+
+  for (const entry of entries) {
+    const parentId = entry.parentCode
+      ? (resolvedMenuIds.get(entry.parentCode) ??
+        (await resolveTenantMenuIdByCode(db, tenantId, entry.parentCode)))
+      : null
+
+    await db
+      .update(menus)
+      .set({
+        parentId,
+        type: entry.type,
+        name: entry.name,
+        path: entry.path,
+        component: entry.component,
+        icon: entry.icon,
+        sort: entry.sort,
+        isVisible: entry.isVisible,
+        status: entry.status,
+        permissionCode: entry.permissionCode,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(menus.tenantId, tenantId), eq(menus.code, entry.code)))
+  }
+}
 
 const seedTenantBootstrapData = async (
   db: DatabaseClient,
@@ -307,7 +413,9 @@ const seedTenantBootstrapData = async (
       .onConflictDoNothing({
         target: [permissions.tenantId, permissions.code],
       })
+    await reconcilePermissionSeedLabels(db, tenantId, spec.permissions)
     await insertTenantBootstrapMenus(db, tenantId, spec.menus)
+    await reconcileTenantBootstrapMenuSeedLabels(db, tenantId, spec.menus)
     await db
       .insert(dictionaryTypes)
       .values(spec.dictionaryTypes.map((type) => ({ ...type, tenantId })))

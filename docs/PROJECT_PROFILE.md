@@ -34,7 +34,7 @@
 - 服务端已落部门管理模块：`department`，并已提供 `GET /system/departments`、`GET /system/departments/:id`、`GET /system/departments/export`、`POST /system/departments`、`PUT /system/departments/:id`。
 - 服务端已落岗位管理模块：`post`，并已提供 `GET /system/posts`、`GET /system/posts/:id`、`GET /system/posts/export`、`POST /system/posts`、`PUT /system/posts/:id`。
 - 服务端已落字典管理模块：`dictionary`，并已提供 `GET /system/dictionaries/types`、`GET /system/dictionaries/types/:id`、`POST /system/dictionaries/types`、`PUT /system/dictionaries/types/:id`、`GET /system/dictionaries/items`、`GET /system/dictionaries/items/:id`、`POST /system/dictionaries/items`、`PUT /system/dictionaries/items/:id`。
-- 服务端已落系统配置模块：`setting`，并已提供 `GET /system/settings`、`GET /system/settings/:id`、`POST /system/settings`、`PUT /system/settings/:id`。
+- 服务端已落配置项管理模块：`setting`，并已提供 `GET /system/settings`、`GET /system/settings/:id`、`POST /system/settings`、`PUT /system/settings/:id`。
 - 服务端已落租户管理模块：`tenant`，并已提供 `GET /system/tenants`、`GET /system/tenants/:id`、`GET /system/tenants/export`、`POST /system/tenants`、`PUT /system/tenants/:id`、`PUT /system/tenants/:id/status`。
 - 服务端已落操作日志模块：`operation-log`，并已提供 `GET /system/operation-logs`、`GET /system/operation-logs/:id`、`GET /system/operation-logs/export`。
 - 服务端已落文件管理模块：`file`，并已提供 `GET /system/files`、`GET /system/files/:id`、`GET /system/files/export`、`POST /system/files`、`POST /system/files/delete`、`GET /system/files/:id/download`、`DELETE /system/files/:id`。
@@ -61,10 +61,11 @@
 - `packages/persistence` 已补 menus 列表、创建、更新、菜单角色关联替换等菜单管理 helper，并保持在既有 auth/persistence owner 内。
 - `packages/persistence` 已补 `departments / user_departments` 关系型 schema、migration 与部门 CRUD / 用户关联 helper，并保持在既有 auth/persistence owner 内。
 - `packages/persistence` 已补 `dictionary_types / dictionary_items` 关系型 schema、migration 与字典类型 / 字典项 CRUD helper，并保持在 `packages/persistence` owner 内。
-- `packages/persistence` 已补 `system_settings` 关系型 schema、migration 与系统配置 CRUD / key 查询 helper，并保持在 `packages/persistence` owner 内。
+- `packages/persistence` 已补 `system_settings` 关系型 schema、migration 与配置项 CRUD / key 查询 helper，并保持在 `packages/persistence` owner 内。
 - `packages/persistence` 已补 `tenants` 查询/创建/更新 helper、请求级 tenant context SQL helper，以及“当前 tenant 优先 + 默认 tenant 回退”的 setting 查询 helper，并保持在 `packages/persistence` owner 内。
 - `packages/persistence` 已补 `tenant:init` CLI，可在 persistence owner 内完成“创建 tenant + 幂等补齐租户级角色/权限/菜单/字典/tenant admin”。
 - `packages/persistence` 已把默认 `db:seed` 收紧为 tenant-aware 执行路径，显式设置 tenant context，并按 tenant 组合键处理 conflict。
+- `packages/persistence` 的 `db:seed` 当前已支持 `--reconcile-seed-labels`，用于显式对齐默认租户既有 seed 菜单/权限的显示文案，而不改变 `setting` / route / permission code 契约。
 - `packages/persistence` 已为 `db:seed` 与 `tenant:init` CLI 补显式数据库连接回收，降低真实 PostgreSQL 下重复执行时的连接泄漏与 `too many clients` 风险。
 - `packages/persistence` 已沿用既有 `audit_logs` owner 补充操作日志按条件查询、详情读取能力，未引入第二套日志表或重复 owner。
 - `packages/persistence` 已补 `files` 关系型 schema、migration 与文件元数据 CRUD helper；文件二进制存储仍保持在 `apps/server` runtime owner，不侵入 persistence。
@@ -313,6 +314,8 @@
 - Generator 报告门禁：`bun run e2e:generator:reports:gate`
 - 生成数据库迁移：`bun run db:generate`
 - 执行数据库迁移：`bun run db:migrate`
+- 默认租户 seed：`bun run db:seed`
+- 默认租户 seed 文案对齐：`bun run db:seed -- --reconcile-seed-labels`
 - 初始化非默认租户：`bun run tenant:init -- --code tenant-alpha --name "Tenant Alpha" --admin-password "replace-me"`
 - 启动本地容器栈：`bun run stack:up`
 - 停止本地容器栈：`bun run stack:down`

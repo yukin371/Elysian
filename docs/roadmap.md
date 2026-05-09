@@ -44,7 +44,7 @@
 ### 3. Phase 3: 标准企业模块 ✅ 归档
 
 - 已完成：`Phase 3A` 用户 / 角色 / 菜单 / 部门四个系统模块的最小后端闭环
-- 已完成：`Phase 3B` 字典 / 系统配置 / 操作日志模块后端闭环，保持既有 canonical owner 不漂移
+- 已完成：`Phase 3B` 字典 / 配置项管理 / 操作日志模块后端闭环，保持既有 canonical owner 不漂移
 - 已完成：`Phase 3C` 文件 / 通知模块后端闭环，保持 metadata owner 与 runtime storage owner 分离
 - 已完成：`3.10` Vue 管理后台布局，`ElyShell` 已具备侧边栏 + 顶栏 + 内容区 + 标签页布局
 - 已完成：`3.11` Vue 通用组件，`ui-enterprise-vue` 已落 `ElyCrudWorkspace`、标准列表页、标准表单页与只读详情视图
@@ -289,10 +289,10 @@
 - `apps/server/src/modules/dictionary` 已提供 `GET /system/dictionaries/types`、`GET /system/dictionaries/types/:id`、`POST /system/dictionaries/types`、`PUT /system/dictionaries/types/:id`、`GET /system/dictionaries/items`、`GET /system/dictionaries/items/:id`、`POST /system/dictionaries/items`、`PUT /system/dictionaries/items/:id`
 - 默认 auth seed 已补 `system:dictionary:list`、`system:dictionary:create`、`system:dictionary:update` 权限点，并新增 `/system/dictionaries` 系统菜单；`example-vue` 的系统导航占位已与之对齐
 - `apps/server/src/app.test.ts` 已覆盖字典类型 / 字典项列表、详情、创建、更新及 type relation 校验；`P3B` 首轮字典模块后端闭环已完成
-- `packages/schema` 已新增 `settingModuleSchema`，`packages/persistence/src/schema/setting.ts` 与 `packages/persistence/src/setting.ts` 已补 `system_settings`、系统配置 CRUD 和按 key 查询 helper，并新增 `0005_setting.sql`
+- `packages/schema` 已新增 `settingModuleSchema`，`packages/persistence/src/schema/setting.ts` 与 `packages/persistence/src/setting.ts` 已补 `system_settings`、配置项 CRUD 和按 key 查询 helper，并新增 `0005_setting.sql`
 - `apps/server/src/modules/setting` 已提供 `GET /system/settings`、`GET /system/settings/:id`、`POST /system/settings`、`PUT /system/settings/:id`
 - 默认 auth seed 已补 `system:setting:list`、`system:setting:create`、`system:setting:update` 权限点，并新增 `/system/settings` 系统菜单；`example-vue` 的系统导航占位已与之对齐
-- `apps/server/src/app.test.ts` 已覆盖系统配置列表、详情、创建、更新与 key 冲突校验；`P3B` 第二轮系统配置模块后端闭环已完成
+- `apps/server/src/app.test.ts` 已覆盖配置项列表、详情、创建、更新与 key 冲突校验；`P3B` 第二轮配置项模块后端闭环已完成
 - `packages/schema` 已新增 `operationLogModuleSchema`，`packages/persistence/src/auth.ts` 已沿用 `audit_logs` owner 补 `getAuditLogById`、`listAuditLogsByFilter` 查询能力，`apps/server/src/modules/operation-log` 已提供 `GET /system/operation-logs`、`GET /system/operation-logs/:id`、`GET /system/operation-logs/export`
 - 默认 auth seed 已补 `system:operation-log:list`、`system:operation-log:export` 权限点，并新增 `/system/operation-logs` 系统菜单；`example-vue` 的系统导航占位已与之对齐
 - `apps/server/src/app.test.ts` 已覆盖操作日志列表、筛选、详情、导出与 not-found 语义；`P3B` 操作日志模块只读闭环已完成
@@ -320,7 +320,7 @@
 - `Arco` 主题 token 与 `ui-core` 页面协议之间的映射粒度应收敛到哪一层
 - 用户管理模块后端闭环是否已经足够稳定到可供角色 / 菜单模块复用
 - 字典模块契约是否已经足够稳定到可供后续配置模块、表单字典联动和 generator 消费
-- 系统配置模块是否需要在后续补“按 key 批量读取 / 缓存”能力，但不反向侵入 runtime `config` owner
+- 配置项模块是否需要在后续补“按 key 批量读取 / 缓存”能力，但不反向侵入 runtime `config` owner
 - 文件模块是否需要在后续补对象存储适配器、预览/缩略图与生命周期清理，但不改变当前 metadata/storage owner 拆分
 - 通知模块是否需要在后续补模板化发送、多通道投递和用户侧收件箱视图，但不把站内通知 owner 和外部投递 owner 混在一起
 

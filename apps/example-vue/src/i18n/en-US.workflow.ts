@@ -46,9 +46,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.message.roleNoListPermission":
     "This identity can enter the workspace but does not have `system:role:list`.",
   "app.message.settingModuleOffline":
-    "`setting` is not registered on this server yet. Enable the system-setting module and try again.",
+    "`setting` is not registered on this server yet. Enable the config-entry module and try again.",
   "app.message.settingSignInToLoad":
-    "Sign in first to load protected setting data.",
+    "Sign in first to load protected config-entry data.",
   "app.message.settingNoListPermission":
     "This identity can enter the workspace but does not have `system:setting:list`.",
   "app.message.tenantModuleOffline":
@@ -359,9 +359,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.loadRoles": "Failed to load roles",
   "app.error.loadRoleDetail": "Failed to load role detail",
   "app.error.exportRoles": "Failed to export roles",
-  "app.error.loadSettings": "Failed to load settings",
-  "app.error.exportSettings": "Failed to export settings",
-  "app.error.loadSettingDetail": "Failed to load setting detail",
+  "app.error.loadSettings": "Failed to load config entries",
+  "app.error.exportSettings": "Failed to export config entries",
+  "app.error.loadSettingDetail": "Failed to load config-entry detail",
   "app.error.loadTenants": "Failed to load tenants",
   "app.error.loadTenantDetail": "Failed to load tenant detail",
   "app.error.exportTenants": "Failed to export tenants",
@@ -381,7 +381,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.createDepartment": "Failed to create department",
   "app.error.createMenu": "Failed to create menu",
   "app.error.createRole": "Failed to create role",
-  "app.error.createSetting": "Failed to create setting",
+  "app.error.createSetting": "Failed to create config entry",
   "app.error.createTenant": "Failed to create tenant",
   "app.error.createDictionary": "Failed to create dictionary type",
   "app.error.createUser": "Failed to create user",
@@ -389,7 +389,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.error.updateDepartment": "Failed to update department",
   "app.error.updateMenu": "Failed to update menu",
   "app.error.updateRole": "Failed to update role",
-  "app.error.updateSetting": "Failed to update setting",
+  "app.error.updateSetting": "Failed to update config entry",
   "app.error.updateTenant": "Failed to update tenant",
   "app.error.updateTenantStatus": "Failed to update tenant status",
   "app.error.updateDictionary": "Failed to update dictionary type",
