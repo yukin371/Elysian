@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises"
+import { constants } from "node:fs"
+import { access, readFile } from "node:fs/promises"
 
 import type { GenerationPreviewReport } from "@elysian/generator"
 import {
@@ -273,11 +274,31 @@ export const createGeneratorSessionRepository = (
       return null
     }
 
-    return mapPreviewSessionDetailRow(row)
+    try {
+      return await mapPreviewSessionDetailRow(row)
+    } catch (error) {
+      if (isMissingPreviewReportError(error)) {
+        return null
+      }
+
+      throw error
+    }
   },
   async listPreviewSessions() {
     const rows = await listGeneratorPreviewSessions(db)
-    return rows.map(mapPreviewSessionRow)
+    const sessions = await Promise.all(
+      rows.map(async (row) => {
+        if (!(await hasPreviewReportFile(row.reportPath))) {
+          return null
+        }
+
+        return mapPreviewSessionRow(row)
+      }),
+    )
+
+    return sessions.filter(
+      (session): session is GeneratorPreviewSessionRecord => session !== null,
+    )
   },
   async markPreviewSessionApplied(id, input) {
     const row = await markGeneratorPreviewSessionApplied(db, id, {
@@ -553,6 +574,33 @@ const mapPreviewSessionDetailRow = async (
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
+
+export const isMissingPreviewReportError = (error: unknown): boolean => {
+  if (error instanceof AppError) {
+    return (
+      error.codeKey === "GENERATOR_SESSION_REPORT_READ_FAILED" &&
+      typeof error.details?.reason === "string" &&
+      error.details.reason.includes("ENOENT")
+    )
+  }
+
+  return (
+    isRecord(error) && error.code === "ENOENT" && typeof error.path === "string"
+  )
+}
+
+const hasPreviewReportFile = async (reportPath: string): Promise<boolean> => {
+  try {
+    await access(reportPath, constants.F_OK)
+    return true
+  } catch (error) {
+    if (isMissingPreviewReportError(error)) {
+      return false
+    }
+
+    throw error
+  }
+}
 
 const isSqlPreview = (value: unknown) =>
   isRecord(value) &&

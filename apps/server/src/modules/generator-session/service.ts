@@ -26,6 +26,7 @@ import type {
   GeneratorPreviewSessionDetail,
   GeneratorSessionRepository,
 } from "./repository"
+import { isMissingPreviewReportError } from "./repository"
 
 interface CreateGeneratorPreviewSessionInput {
   actor: AuthIdentity | null
@@ -119,6 +120,10 @@ export const createGeneratorSessionService = (
     try {
       return await repository.getPreviewSessionById(id)
     } catch (error) {
+      if (isMissingPreviewReportError(error)) {
+        return null
+      }
+
       if (error instanceof AppError) {
         throw error
       }
