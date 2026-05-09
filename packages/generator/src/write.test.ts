@@ -345,6 +345,29 @@ describe("writeModuleFiles", () => {
     expect(schemaEntry?.written).toBe(false)
     expect(schemaFile).toBe("")
   })
+
+  it("preserves existing module registration files even with overwrite strategy", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "elysian-generator-"))
+    const existingPath = join(directory, "customer/customer.module.ts")
+    const manualContents = "export const handWiredCustomerModule = true\n"
+
+    await mkdir(dirname(existingPath), { recursive: true })
+    await writeFile(existingPath, manualContents, "utf8")
+
+    const result = await writeModuleFiles(customerModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+      targetPreset: "module",
+      conflictStrategy: "overwrite",
+    })
+    const moduleEntry = result.find(
+      (item) => item.path === "customer/customer.module.ts",
+    )
+    const moduleFile = await readFile(existingPath, "utf8")
+
+    expect(moduleEntry?.written).toBe(false)
+    expect(moduleFile).toBe(manualContents)
+  })
 })
 
 describe("applyGenerationPreviewReport", () => {

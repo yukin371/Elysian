@@ -262,7 +262,9 @@ export const createGeneratorSessionModule = (
             conflictStrategy: t.Optional(conflictStrategySchema),
             sourceType: t.Optional(generatorPreviewSourceTypeSchema),
             sourceValue: t.Optional(t.String()),
-            targetPreset: t.Optional(t.Literal("staging")),
+            targetPreset: t.Optional(
+              t.Union([t.Literal("staging"), t.Literal("module")]),
+            ),
           }),
           response: {
             201: generatorSessionPreviewResponseSchema,

@@ -26,6 +26,26 @@ describe("parseCliArgs", () => {
     })
   })
 
+  it("accepts module target preset", () => {
+    const result = parseCliArgs([
+      "--schema",
+      "customer",
+      "--target",
+      "module",
+      "--frontend",
+      "vue",
+    ])
+
+    expect(result).toEqual({
+      schemaName: "customer",
+      outputDir: resolveTargetPresetOutputDir("module"),
+      targetPreset: "module",
+      frontendTarget: "vue",
+      conflictStrategy: "skip",
+      preview: false,
+    })
+  })
+
   it("keeps custom output dir and parses frontend target", () => {
     const result = parseCliArgs([
       "--schema",

@@ -13,6 +13,7 @@ import {
   renderFilterBody,
 } from "./vue-enterprise-crud-template-shared"
 export {
+  renderModuleBasePath,
   renderPagePanelPath,
   renderWorkspaceTemplatePath,
 } from "./vue-enterprise-crud-template-shared"

@@ -70,7 +70,7 @@ export const parseCliArgs = (args: string[]): CliOptions | null => {
     if (current === "--target") {
       const value = args[index + 1]
 
-      if (value === "staging") {
+      if (value === "staging" || value === "module") {
         targetPreset = value
         outputDir = resolveTargetPresetOutputDir(value)
         index += 1

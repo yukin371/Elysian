@@ -24,8 +24,8 @@ export const resolveRepositoryRoot = () =>
 export const resolveTargetPresetOutputDir = (
   target: GenerationTargetPreset,
 ): string => {
-  if (target === "staging") {
-    return resolve(resolveRepositoryRoot(), DEFAULT_OUTPUT_DIR)
+  if (target === "module") {
+    return resolve(resolveRepositoryRoot(), "apps", "server", "src", "modules")
   }
 
   return resolve(resolveRepositoryRoot(), DEFAULT_OUTPUT_DIR)

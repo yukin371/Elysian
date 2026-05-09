@@ -18,6 +18,7 @@ export {
 export { isStandardCrudSchema } from "./standard-crud"
 export {
   renderFrontendArtifactModule,
+  renderModuleRegistrationTemplate,
   type RenderedFrontendArtifactModule,
 } from "./templates"
 export {

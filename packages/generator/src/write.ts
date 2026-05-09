@@ -133,7 +133,10 @@ const validateConflictStrategy = (
 ) => {
   if (conflictStrategy === "fail") {
     const conflict = filesToWrite.find(
-      (entry) => entry.exists && entry.hasChanges,
+      (entry) =>
+        entry.file.mergeStrategy !== "preserve-existing" &&
+        entry.exists &&
+        entry.hasChanges,
     )
     if (conflict) {
       throw new PreviewReportApplyError(
@@ -145,7 +148,11 @@ const validateConflictStrategy = (
 
   if (conflictStrategy === "overwrite-generated-only") {
     const conflict = filesToWrite.find(
-      (entry) => entry.exists && entry.hasChanges && !entry.isManaged,
+      (entry) =>
+        entry.file.mergeStrategy !== "preserve-existing" &&
+        entry.exists &&
+        entry.hasChanges &&
+        !entry.isManaged,
     )
     if (conflict) {
       throw new PreviewReportApplyError(
@@ -166,7 +173,12 @@ const writeResolvedTargets = async (
     const { file, absolutePath, exists, hasChanges } = entry
     await mkdir(dirname(absolutePath), { recursive: true })
 
-    if (exists && (!hasChanges || conflictStrategy === "skip")) {
+    if (
+      exists &&
+      (file.mergeStrategy === "preserve-existing" ||
+        !hasChanges ||
+        conflictStrategy === "skip")
+    ) {
       results.push({
         ...file,
         absolutePath,
@@ -311,6 +323,7 @@ export const writeModuleFiles = async (
   const renderedFiles = renderModuleFiles(schema, {
     frontendTarget,
     schemaArtifactSource: options.schemaArtifactSource,
+    targetPreset: options.targetPreset,
   })
   const filesToWrite = await collectGeneratedFileTargets(
     renderedFiles,

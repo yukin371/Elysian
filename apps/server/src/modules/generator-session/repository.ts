@@ -46,6 +46,9 @@ const generatorPreviewSessionStatuses = [
 ] as const satisfies readonly GeneratorPreviewSessionStatus[]
 const generatorPreviewSessionTargetPresets = [
   "staging",
+  "module",
+  // Legacy sessions created before the staging-only preset was enforced.
+  "default",
 ] as const satisfies readonly GeneratorPreviewSessionRecord["targetPreset"][]
 
 export interface GeneratorPreviewSessionRecord {
@@ -84,7 +87,7 @@ export interface GeneratorPreviewSessionRecord {
   sourceType: GeneratorPreviewSessionSourceType
   sourceValue: string
   status: GeneratorPreviewSessionStatus
-  targetPreset: "staging"
+  targetPreset: "staging" | "module" | "default"
   tenantId: string | null
 }
 

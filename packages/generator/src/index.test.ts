@@ -12,7 +12,11 @@ import {
   userModuleSchema,
 } from "@elysian/schema"
 
-import { planModuleFiles, renderModuleFiles } from "./index"
+import {
+  planModuleFiles,
+  renderModuleFiles,
+  renderModuleRegistrationTemplate,
+} from "./index"
 
 const ticketModuleSchema: ModuleSchema = {
   name: "ticket",
@@ -63,6 +67,28 @@ describe("planModuleFiles", () => {
         mergeStrategy: "replace-whole-file",
       },
     ])
+  })
+
+  it("uses module-relative paths and includes module registration when target is module", () => {
+    const plans = planModuleFiles(customerModuleSchema, {
+      targetPreset: "module",
+    })
+
+    expect(plans.map((plan) => plan.path)).toEqual([
+      "customer/customer.schema.ts",
+      "customer/customer.repository.ts",
+      "customer/customer.service.ts",
+      "customer/customer.routes.ts",
+      "customer/customer.frontend.ts",
+      "customer/customer.module.ts",
+      "customer/customer.page.vue",
+    ])
+    expect(plans[5]).toEqual({
+      path: "customer/customer.module.ts",
+      reason:
+        "Emit a server module assembly stub that bridges repository wiring into generated routes.",
+      mergeStrategy: "preserve-existing",
+    })
   })
 })
 
@@ -118,6 +144,19 @@ describe("renderModuleFiles", () => {
     expect(pageFile?.path).toBe("modules/customer/customer.page.tsx")
     expect(pageFile?.contents).toContain("CustomerPage")
     expect(frontendFile?.contents).toContain('frontendTarget: "react"')
+  })
+
+  it("renders module registration file when target is module", () => {
+    const files = renderModuleFiles(customerModuleSchema, {
+      frontendTarget: "vue",
+      targetPreset: "module",
+    })
+    const moduleFile = files.find((file) => file.path.endsWith(".module.ts"))
+
+    expect(moduleFile?.path).toBe("customer/customer.module.ts")
+    expect(moduleFile?.contents).toContain("createCustomerRepository")
+    expect(moduleFile?.contents).toContain("createCustomerModule")
+    expect(moduleFile?.contents).toContain("createCustomerRoutesModule")
   })
 
   it("inlines schema artifacts when the source is an external schema file", () => {
@@ -357,6 +396,27 @@ describe("renderModuleFiles", () => {
     expect(workspaceFile?.contents).toContain(
       "payload: stringifyJsonValue(record.payload)",
     )
+  })
+})
+
+describe("renderModuleRegistrationTemplate", () => {
+  it("renders module registration template", () => {
+    const schema: ModuleSchema = {
+      name: "supplier",
+      label: "Supplier",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "name", label: "Name", kind: "string", required: true },
+      ],
+    }
+
+    const result = renderModuleRegistrationTemplate(schema)
+
+    expect(result).toContain("createSupplierModule")
+    expect(result).toContain("createSupplierRepository")
+    expect(result).toContain("AuthGuard")
+    expect(result).toContain("ServerModule")
+    expect(result).toContain("supplier")
   })
 })
 

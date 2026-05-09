@@ -22,6 +22,7 @@ const conflictStrategySchema = t.Union([
 
 const targetPresetSchema = t.Union([
   t.Literal("staging"),
+  t.Literal("module"),
   // Legacy sessions created before the staging-only preset was enforced
   // can still be replayed and surfaced by the detail/list endpoints.
   t.Literal("default"),

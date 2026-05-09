@@ -1,9 +1,21 @@
 import type { ModuleField, ModuleSchema } from "@elysian/schema"
-export const renderPagePanelPath = (schema: ModuleSchema) =>
-  `modules/${schema.name}/${schema.name}-panel.vue`
 
-export const renderWorkspaceTemplatePath = (schema: ModuleSchema) =>
-  `modules/${schema.name}/${schema.name}-workspace.ts`
+import type { GenerationTargetPreset } from "./shared-conventions"
+
+export const renderModuleBasePath = (
+  schema: ModuleSchema,
+  targetPreset?: GenerationTargetPreset,
+) => (targetPreset === "module" ? schema.name : `modules/${schema.name}`)
+
+export const renderPagePanelPath = (
+  schema: ModuleSchema,
+  targetPreset?: GenerationTargetPreset,
+) => `${renderModuleBasePath(schema, targetPreset)}/${schema.name}-panel.vue`
+
+export const renderWorkspaceTemplatePath = (
+  schema: ModuleSchema,
+  targetPreset?: GenerationTargetPreset,
+) => `${renderModuleBasePath(schema, targetPreset)}/${schema.name}-workspace.ts`
 
 export const SYSTEM_FIELD_KEYS = new Set(["id", "createdAt", "updatedAt"])
 

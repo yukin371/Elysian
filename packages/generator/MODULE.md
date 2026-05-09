@@ -11,6 +11,7 @@
 
 - 模板组织
 - 输出目录约定
+- `staging` / `module` target preset 及其输出边界
 - 文件覆盖策略
 - 生成日志与元数据
 - 标准模块的文件计划与模块边界约定
@@ -34,6 +35,7 @@
 - 生成结果必须进入版本控制
 - 生成结果必须支持二次维护
 - 再生成必须可预测，不能静默破坏手工代码
+- `module` target 只能补集成桩，不能覆盖已有 `*.module.ts` 手写装配代码
 - 模板输出必须和当前架构 owner 保持一致，不能把 persistence / server / frontend 边界重新搅乱
 - 标准 CRUD 前端 surface 产物必须可被 `apps/example-vue` 直接提交、校验并消费，不能只停留在预览态
 - 当前生成输入只收两类边界：`registered-schema` 和 `manual-schema-json`；其中 `manual-schema-json` 可为完整 `ModuleSchema` 或 schema owner 内部支持的 simplified 输入，但进入 generator 前必须先展开成标准 `ModuleSchema`

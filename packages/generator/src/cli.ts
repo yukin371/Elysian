@@ -47,6 +47,28 @@ const WORKSPACE_ROOT = resolve(import.meta.dir, "..", "..", "..")
 const resolveCliPath = (targetPath: string) =>
   resolve(WORKSPACE_ROOT, targetPath)
 
+const printModuleIntegrationChecklist = (schemaName: string) => {
+  console.log("")
+  console.log("Integration Checklist:")
+  console.log(
+    `  1. Create persistence schema in packages/persistence/src/schema/${schemaName}.ts`,
+  )
+  console.log("  2. Run: bun run db:generate && bun run db:migrate")
+  console.log(
+    `  3. Implement repository methods in apps/server/src/modules/${schemaName}/${schemaName}.module.ts`,
+  )
+  console.log("  4. Wire route details and authorization in the module stub")
+  console.log(
+    "  5. Register the module in apps/server/src/modules/compose-business.ts or compose-system.ts",
+  )
+  console.log(
+    "  6. Register the frontend workspace in apps/example-vue/src/modules/",
+  )
+  console.log(
+    "  See docs/plans/2026-05-09-generator-module-apply-path-plan.md for the full handoff checklist.",
+  )
+}
+
 const main = async () => {
   const options = parseCliArgs(Bun.argv.slice(2))
 
@@ -131,6 +153,10 @@ const main = async () => {
 
       console.log("[generator] sql-preview")
       console.log(previewReport.sqlPreview.contents)
+
+      if (options.targetPreset === "module") {
+        printModuleIntegrationChecklist(schema.name)
+      }
       return
     }
 
@@ -146,6 +172,10 @@ const main = async () => {
     for (const file of result) {
       const status = file.written ? "written" : "skipped"
       console.log(`[generator] ${status} ${file.absolutePath}`)
+    }
+
+    if (options.targetPreset === "module") {
+      printModuleIntegrationChecklist(schema.name)
     }
   } catch (error) {
     console.error(
@@ -174,6 +204,8 @@ Input (choose one):
 
 Output:
   --target <preset>        Target preset: ${targets.join(", ")}
+                           staging  - Generate into ./generated for safe review
+                           module   - Generate into apps/server/src/modules for integration stubs
   --out <dir>              Custom output directory
 
 Options:
@@ -186,6 +218,7 @@ Options:
 Quick Start:
   bun --filter @elysian/generator generate --init supplier
   bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.json --target staging --frontend vue --preview
+  bun --filter @elysian/generator generate --schema customer --target module --frontend vue --preview
   bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --conflict overwrite
 `.trim(),
   )

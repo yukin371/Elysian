@@ -1,8 +1,10 @@
 import type { ModuleField, ModuleSchema } from "@elysian/schema"
 
 import { toCamelCase, toPascalCase } from "./naming"
+import type { GenerationTargetPreset } from "./shared-conventions"
 import { isStandardCrudSchema } from "./standard-crud"
 import {
+  renderModuleBasePath,
   renderPagePanelPath,
   renderWorkspaceTemplatePath,
 } from "./vue-enterprise-crud-templates"
@@ -12,6 +14,7 @@ export type FrontendTarget = "vue" | "react"
 export interface RenderModuleTemplatesOptions {
   frontendTarget?: FrontendTarget
   schemaArtifactSource?: "package" | "inline"
+  targetPreset?: GenerationTargetPreset
 }
 
 export interface GeneratedFrontendModuleArtifact {
@@ -424,11 +427,19 @@ export const renderPageTemplate = (
 export const renderPagePath = (
   schema: ModuleSchema,
   frontendTarget: FrontendTarget,
+  targetPreset?: GenerationTargetPreset,
 ) =>
-  `modules/${schema.name}/${schema.name}.page.${getPageExtension(frontendTarget)}`
+  `${renderModuleBasePath(schema, targetPreset)}/${schema.name}.page.${getPageExtension(frontendTarget)}`
 
-export const renderFrontendArtifactPath = (schema: ModuleSchema) =>
-  `modules/${schema.name}/${schema.name}.frontend.ts`
+export const renderFrontendArtifactPath = (
+  schema: ModuleSchema,
+  targetPreset?: GenerationTargetPreset,
+) => `${renderModuleBasePath(schema, targetPreset)}/${schema.name}.frontend.ts`
+
+export const renderModuleRegistrationPath = (
+  schema: ModuleSchema,
+  targetPreset?: GenerationTargetPreset,
+) => `${renderModuleBasePath(schema, targetPreset)}/${schema.name}.module.ts`
 
 export const renderFrontendArtifactName = (schema: ModuleSchema) =>
   `${toCamelCase(schema.name)}FrontendModuleArtifact`
@@ -463,9 +474,10 @@ const deriveArtifactI18nKeys = (moduleName: string) => ({
 export const renderFrontendArtifactTemplate = (
   schema: ModuleSchema,
   frontendTarget: FrontendTarget,
+  targetPreset?: GenerationTargetPreset,
 ) => {
   const artifactName = renderFrontendArtifactName(schema)
-  const pageComponentPath = renderPagePath(schema, frontendTarget)
+  const pageComponentPath = renderPagePath(schema, frontendTarget, targetPreset)
   const standardCrudSurface =
     frontendTarget === "vue" && isStandardCrudSchema(schema)
   const primaryFieldKey = getPrimaryDisplayField(schema)?.key ?? "id"
@@ -511,10 +523,12 @@ export const ${artifactName}: GeneratedFrontendModuleArtifact = {
   )},
   pageComponentPath: ${JSON.stringify(pageComponentPath)},
   panelComponentPath: ${JSON.stringify(
-    standardCrudSurface ? renderPagePanelPath(schema) : null,
+    standardCrudSurface ? renderPagePanelPath(schema, targetPreset) : null,
   )},
   workspaceComponentPath: ${JSON.stringify(
-    standardCrudSurface ? renderWorkspaceTemplatePath(schema) : null,
+    standardCrudSurface
+      ? renderWorkspaceTemplatePath(schema, targetPreset)
+      : null,
   )},
   primaryFieldKey: ${JSON.stringify(primaryFieldKey)},
   fieldKeys: ${JSON.stringify(
@@ -539,11 +553,59 @@ export interface RenderedFrontendArtifactModule {
 export const renderFrontendArtifactModule = (
   schema: ModuleSchema,
   frontendTarget: FrontendTarget,
+  targetPreset?: GenerationTargetPreset,
 ): RenderedFrontendArtifactModule => ({
   artifactName: renderFrontendArtifactName(schema),
-  path: renderFrontendArtifactPath(schema),
-  contents: renderFrontendArtifactTemplate(schema, frontendTarget),
+  path: renderFrontendArtifactPath(schema, targetPreset),
+  contents: renderFrontendArtifactTemplate(
+    schema,
+    frontendTarget,
+    targetPreset,
+  ),
 })
+
+export const renderModuleRegistrationTemplate = (schema: ModuleSchema) => {
+  const pascalName = toPascalCase(schema.name)
+
+  return `import type { DatabaseClient } from "@elysian/persistence"
+
+import type { AuthGuard } from "../auth"
+import type { ServerModule } from "../module"
+import type { ${pascalName}Repository, Create${pascalName}Input } from "./${schema.name}.repository"
+import type { ${pascalName}Record } from "./${schema.name}.schema"
+import { create${pascalName}Module as create${pascalName}RoutesModule } from "./${schema.name}.routes"
+
+export interface ${pascalName}ModuleOptions {
+  authGuard?: AuthGuard
+}
+
+export const create${pascalName}Repository = (
+  _db: DatabaseClient,
+): ${pascalName}Repository => ({
+  list: async () => {
+    // TODO: implement list query with the canonical persistence owner.
+    return [] as ${pascalName}Record[]
+  },
+  getById: async (_id: string) => {
+    // TODO: implement detail query with the canonical persistence owner.
+    return null
+  },
+  create: async (_input: Create${pascalName}Input) => {
+    // TODO: implement create mutation with the canonical persistence owner.
+    throw new Error("TODO: implement create${pascalName}Repository.create")
+  },
+})
+
+export const create${pascalName}Module = (
+  db: DatabaseClient,
+  options: ${pascalName}ModuleOptions = {},
+): ServerModule => {
+  const repository = create${pascalName}Repository(db)
+
+  return create${pascalName}RoutesModule(repository, options)
+}
+`
+}
 
 export const getTemplateReason = (
   path: string,
@@ -567,6 +629,10 @@ export const getTemplateReason = (
 
   if (path.endsWith(".frontend.ts")) {
     return "Emit a static frontend registration artifact for generated module integration."
+  }
+
+  if (path.endsWith(".module.ts")) {
+    return "Emit a server module assembly stub that bridges repository wiring into generated routes."
   }
 
   if (path.endsWith("-panel.vue")) {

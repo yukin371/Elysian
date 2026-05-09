@@ -55,6 +55,7 @@ export interface PreviewModuleFilesOptions
 }
 
 const getPlannedAction = (
+  mergeStrategy: MergeStrategy,
   exists: boolean,
   hasChanges: boolean,
   isManaged: boolean | null,
@@ -65,6 +66,10 @@ const getPlannedAction = (
   }
 
   if (!hasChanges) {
+    return "skip"
+  }
+
+  if (mergeStrategy === "preserve-existing") {
     return "skip"
   }
 
@@ -85,6 +90,7 @@ const getPlannedAction = (
 
 const getPlannedReason = (
   action: PreviewPlannedAction,
+  mergeStrategy: MergeStrategy,
   hasChanges: boolean,
   isManaged: boolean | null,
   conflictStrategy: GeneratedConflictStrategy,
@@ -98,6 +104,10 @@ const getPlannedReason = (
   }
 
   if (action === "skip") {
+    if (mergeStrategy === "preserve-existing" && hasChanges) {
+      return "File merge strategy preserves the existing file for manual follow-up."
+    }
+
     return "Conflict strategy is skip, so the existing file would be preserved."
   }
 
@@ -125,6 +135,7 @@ export const previewModuleFiles = async (
   const renderedFiles = renderModuleFiles(schema, {
     frontendTarget,
     schemaArtifactSource: options.schemaArtifactSource,
+    targetPreset: options.targetPreset,
   })
   const targets = await collectGeneratedFileTargets(
     renderedFiles,
@@ -133,6 +144,7 @@ export const previewModuleFiles = async (
 
   return targets.map((entry) => {
     const plannedAction = getPlannedAction(
+      entry.file.mergeStrategy,
       entry.exists,
       entry.hasChanges,
       entry.isManaged,
@@ -150,6 +162,7 @@ export const previewModuleFiles = async (
       plannedAction,
       plannedReason: getPlannedReason(
         plannedAction,
+        entry.file.mergeStrategy,
         entry.hasChanges,
         entry.isManaged,
         conflictStrategy,

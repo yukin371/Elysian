@@ -11,6 +11,8 @@ import {
   getTemplateReason,
   renderFrontendArtifactPath,
   renderFrontendArtifactTemplate,
+  renderModuleRegistrationPath,
+  renderModuleRegistrationTemplate,
   renderPagePath,
   renderPageTemplate,
   renderRepositoryTemplate,
@@ -49,8 +51,9 @@ export const planModuleFiles = (
   options: RenderModuleTemplatesOptions = {},
 ): GeneratedFilePlan[] => {
   const frontendTarget = getFrontendTarget(options)
-  const basePath = `modules/${schema.name}`
-  const pagePath = renderPagePath(schema, frontendTarget)
+  const basePath =
+    options.targetPreset === "module" ? schema.name : `modules/${schema.name}`
+  const pagePath = renderPagePath(schema, frontendTarget, options.targetPreset)
   const standardCrud = isStandardCrudSchema(schema) && frontendTarget === "vue"
 
   const baseFiles: GeneratedFilePlan[] = [
@@ -75,15 +78,30 @@ export const planModuleFiles = (
       mergeStrategy: DEFAULT_MERGE_STRATEGY,
     },
     {
-      path: renderFrontendArtifactPath(schema),
-      reason: getTemplateReason(renderFrontendArtifactPath(schema)),
+      path: renderFrontendArtifactPath(schema, options.targetPreset),
+      reason: getTemplateReason(
+        renderFrontendArtifactPath(schema, options.targetPreset),
+      ),
       mergeStrategy: DEFAULT_MERGE_STRATEGY,
     },
   ]
 
+  if (options.targetPreset === "module") {
+    baseFiles.push({
+      path: renderModuleRegistrationPath(schema, options.targetPreset),
+      reason: getTemplateReason(
+        renderModuleRegistrationPath(schema, options.targetPreset),
+      ),
+      mergeStrategy: "preserve-existing",
+    })
+  }
+
   if (standardCrud) {
-    const panelPath = renderPagePanelPath(schema)
-    const workspacePath = renderWorkspaceTemplatePath(schema)
+    const panelPath = renderPagePanelPath(schema, options.targetPreset)
+    const workspacePath = renderWorkspaceTemplatePath(
+      schema,
+      options.targetPreset,
+    )
 
     return [
       ...baseFiles,
@@ -124,6 +142,7 @@ export const renderModuleFiles = (
   const plans = planModuleFiles(schema, {
     frontendTarget,
     schemaArtifactSource,
+    targetPreset: options.targetPreset,
   })
 
   return plans.map((plan) => ({
@@ -136,6 +155,7 @@ export const renderModuleFiles = (
         plan.path,
         frontendTarget,
         schemaArtifactSource,
+        options.targetPreset,
       ),
       plan.mergeStrategy,
     ),
@@ -147,6 +167,7 @@ const renderTemplateForPath = (
   path: string,
   frontendTarget: FrontendTarget,
   schemaArtifactSource: "package" | "inline",
+  targetPreset?: RenderModuleTemplatesOptions["targetPreset"],
 ) => {
   if (path.endsWith(".schema.ts")) {
     return renderSchemaTemplate(schema, {
@@ -168,7 +189,11 @@ const renderTemplateForPath = (
   }
 
   if (path.endsWith(".frontend.ts")) {
-    return renderFrontendArtifactTemplate(schema, frontendTarget)
+    return renderFrontendArtifactTemplate(schema, frontendTarget, targetPreset)
+  }
+
+  if (path.endsWith(".module.ts")) {
+    return renderModuleRegistrationTemplate(schema)
   }
 
   if (

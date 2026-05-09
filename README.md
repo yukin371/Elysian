@@ -64,15 +64,21 @@ bun --filter @elysian/generator generate --schema-file ./my-module.json --out ./
 
 # 预览生成结果（不写入磁盘）
 bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --preview
+
+# 直接生成到服务端模块目录，并输出集成清单
+bun --filter @elysian/generator generate --schema customer --target module --frontend vue --preview
 ```
 
 生成器特性：
 - 支持 `SimplifiedModuleSchema`：缺省补 `id`、`label`、`frontend` 元数据
 - 支持字段类型：`id`、`string`、`text`、`number`、`boolean`、`enum`、`json`、`datetime`
 - 支持 `skip / overwrite / overwrite-generated-only / fail` 四种冲突策略
+- 支持 `staging / module` 两种目标预设：`staging` 用于安全预览，`module` 用于服务端模块集成桩
 - 原子写入（temp + rename），避免部分写入损坏
 - 每次生成输出 manifest，支持二次生成安全覆盖
 - Preview 模式：预览文件计划、diff、SQL 变更，确认后再 Apply
+
+`--target module` 会把生成目标切到 `apps/server/src/modules`，额外产出 `*.module.ts` 装配桩，并在 CLI 末尾输出集成清单，提示后续需要完成的 persistence schema、compose 注册和前端注册步骤。为避免覆盖手写装配代码，生成器会保留已有的 `*.module.ts`。
 
 最小 simplified schema 示例：
 
@@ -99,8 +105,11 @@ bun --filter @elysian/generator generate --init supplier
 # 3. 先 preview
 bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.json --target staging --frontend vue --preview
 
-# 4. 再正式生成
+# 4. 再正式生成到 staging 目录
 bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.json --out ./generated --frontend vue
+
+# 5. 需要直接落到服务端模块目录时，先看 module target checklist
+bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.json --target module --frontend vue --preview
 ```
 
 ## 快速开始
