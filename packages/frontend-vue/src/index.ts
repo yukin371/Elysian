@@ -49,6 +49,9 @@ const toInputKind = (kind: ModuleSchema["fields"][number]["kind"]) => {
       return "select"
     case "number":
       return "number"
+    case "text":
+    case "json":
+      return "textarea"
     default:
       return "text"
   }

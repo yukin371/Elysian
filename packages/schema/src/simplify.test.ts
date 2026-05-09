@@ -88,6 +88,24 @@ describe("expandSimplifiedSchema", () => {
     expect(result).toEqual(full)
   })
 
+  it("expands schema with text and json fields", () => {
+    const result = expandSimplifiedSchema({
+      name: "article",
+      fields: [
+        { key: "title", kind: "string", required: true },
+        { key: "body", kind: "text" },
+        { key: "metadata", kind: "json" },
+      ],
+    })
+
+    expect(result.fields.find((field) => field.key === "body")?.kind).toBe(
+      "text",
+    )
+    expect(result.fields.find((field) => field.key === "metadata")?.kind).toBe(
+      "json",
+    )
+  })
+
   it("throws on missing name", () => {
     expect(() => expandSimplifiedSchema({ fields: [] } as unknown)).toThrow(
       /name/,

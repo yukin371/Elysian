@@ -232,6 +232,24 @@ describe("ui-enterprise-vue adapters", () => {
     ).toBe("否")
   })
 
+  it("formats textarea objects as pretty JSON in readonly mode", () => {
+    expect(
+      formatReadonlyFieldValue(
+        {
+          key: "metadata",
+          label: "Metadata",
+          input: "textarea",
+        },
+        {
+          foo: "bar",
+          nested: {
+            enabled: true,
+          },
+        },
+      ),
+    ).toBe('{\n  "foo": "bar",\n  "nested": {\n    "enabled": true\n  }\n}')
+  })
+
   it("treats directory nodes as expand-only shell entries", () => {
     const navigation = [
       {

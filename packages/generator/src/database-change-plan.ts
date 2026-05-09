@@ -9,6 +9,7 @@ export type DatabaseChangeOperationType = "create-table"
 export type DatabaseColumnSqlType =
   | "boolean"
   | "integer"
+  | "jsonb"
   | "text"
   | "timestamptz"
   | "uuid"
@@ -49,6 +50,8 @@ const getSqlType = (field: ModuleField): DatabaseColumnSqlType => {
       return "integer"
     case "boolean":
       return "boolean"
+    case "json":
+      return "jsonb"
     case "datetime":
       return "timestamptz"
     default:

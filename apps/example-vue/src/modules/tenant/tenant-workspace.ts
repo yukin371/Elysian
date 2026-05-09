@@ -80,6 +80,60 @@ const normalizeNumber = (value: unknown, fallback = 0) => {
   return Number.isFinite(normalized) ? normalized : fallback
 }
 
+const normalizeJsonInput = (
+  value: unknown,
+):
+  | { status: "valid"; value: Record<string, unknown> | null }
+  | { status: "invalid" } => {
+  if (value === null || value === undefined) {
+    return { status: "valid", value: null }
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim()
+
+    if (normalized.length === 0) {
+      return { status: "valid", value: null }
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(normalized)
+
+      if (
+        typeof parsed === "object" &&
+        parsed !== null &&
+        !Array.isArray(parsed)
+      ) {
+        return {
+          status: "valid",
+          value: parsed as Record<string, unknown>,
+        }
+      }
+
+      return { status: "invalid" }
+    } catch {
+      return { status: "invalid" }
+    }
+  }
+
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return {
+      status: "valid",
+      value: value as Record<string, unknown>,
+    }
+  }
+
+  return { status: "invalid" }
+}
+
+const stringifyJsonValue = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return ""
+  }
+
+  return JSON.stringify(value, null, 2)
+}
+
 export const createDefaultTenantDraft = () => ({
   code: "",
   name: "",

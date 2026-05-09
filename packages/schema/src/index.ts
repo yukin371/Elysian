@@ -18,9 +18,11 @@ import { workflowModuleSchema } from "./workflow"
 export const moduleFieldKinds = [
   "id",
   "string",
+  "text",
   "number",
   "boolean",
   "enum",
+  "json",
   "datetime",
 ] as const
 

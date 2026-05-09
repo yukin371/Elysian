@@ -75,7 +75,20 @@ describe("formatValidationIssues", () => {
     const result = formatValidationIssues(issues)
 
     expect(result).toContain(
-      "Supported kinds: id, string, number, boolean, enum, datetime",
+      "Supported kinds: id, string, text, number, boolean, enum, json, datetime",
     )
+  })
+
+  it("includes text and json in supported kinds suggestion", () => {
+    const result = formatValidationIssues([
+      {
+        path: "fields[0].kind",
+        message:
+          "Field kind must be one of: id, string, text, number, boolean, enum, json, datetime.",
+      },
+    ])
+
+    expect(result).toContain("text")
+    expect(result).toContain("json")
   })
 })

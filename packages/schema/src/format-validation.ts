@@ -16,7 +16,7 @@ const getIssueSuggestion = (
   }
 
   if (issue.message.startsWith("Field kind must be one of:")) {
-    return "Suggestion: Supported kinds: id, string, number, boolean, enum, datetime."
+    return "Suggestion: Supported kinds: id, string, text, number, boolean, enum, json, datetime."
   }
 
   return null

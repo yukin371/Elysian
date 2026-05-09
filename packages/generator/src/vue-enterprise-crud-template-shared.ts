@@ -10,6 +10,7 @@ export const SYSTEM_FIELD_KEYS = new Set(["id", "createdAt", "updatedAt"])
 export const renderFieldDefaultValue = (field: ModuleField): string => {
   if (field.kind === "boolean") return "false"
   if (field.kind === "number") return "0"
+  if (field.kind === "json") return "null"
   if (field.kind === "enum") {
     const firstOption = field.options?.[0]
 

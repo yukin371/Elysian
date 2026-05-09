@@ -56,6 +56,8 @@ const getFieldTypeAnnotation = (schema: ModuleSchema, field: ModuleField) => {
       return "number"
     case "enum":
       return getEnumTypeName(schema, field)
+    case "json":
+      return "Record<string, unknown>"
     default:
       return "string"
   }
@@ -74,6 +76,8 @@ const renderBodyFieldValidator = (field: ModuleField) => {
     switch (field.kind) {
       case "boolean":
         return "t.Boolean()"
+      case "json":
+        return "t.Record(t.String(), t.Unknown())"
       case "number":
         return "t.Number()"
       default:

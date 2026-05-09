@@ -26,5 +26,13 @@ export const formatReadonlyFieldValue = (
     return new Date(String(value)).toLocaleString()
   }
 
+  if (
+    field.input === "textarea" &&
+    typeof value === "object" &&
+    value !== null
+  ) {
+    return JSON.stringify(value, null, 2)
+  }
+
   return String(value)
 }

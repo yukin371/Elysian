@@ -1,6 +1,6 @@
 type ScaffoldField = {
   key: string
-  kind: "string" | "number" | "boolean" | "enum" | "datetime"
+  kind: "string" | "text" | "number" | "boolean" | "enum" | "json" | "datetime"
   options?: string[]
   required?: boolean
   searchable?: boolean
@@ -18,6 +18,8 @@ export function generateScaffoldSchema(moduleName: string): string {
     fields: [
       { key: "name", kind: "string", required: true, searchable: true },
       { key: "code", kind: "string", searchable: true },
+      { key: "description", kind: "text" },
+      { key: "metadata", kind: "json" },
       { key: "sort", kind: "number" },
       { key: "enabled", kind: "boolean" },
       {

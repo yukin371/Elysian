@@ -91,4 +91,38 @@ describe("buildModuleDatabaseChangePlan", () => {
       "Enum fields remain review-only at this stage; packages/persistence chooses the final enum/check/dictionary persistence strategy.",
     ])
   })
+
+  it("maps text kind to text sql type", () => {
+    const plan = buildModuleDatabaseChangePlan({
+      name: "article",
+      label: "Article",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "body", label: "Body", kind: "text" },
+      ],
+    })
+    const bodyColumn = plan.operations[0]?.columns.find(
+      (column) => column.name === "body",
+    )
+
+    expect(bodyColumn).toBeDefined()
+    expect(bodyColumn?.sqlType).toBe("text")
+  })
+
+  it("maps json kind to jsonb sql type", () => {
+    const plan = buildModuleDatabaseChangePlan({
+      name: "config",
+      label: "Config",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "payload", label: "Payload", kind: "json" },
+      ],
+    })
+    const payloadColumn = plan.operations[0]?.columns.find(
+      (column) => column.name === "payload",
+    )
+
+    expect(payloadColumn).toBeDefined()
+    expect(payloadColumn?.sqlType).toBe("jsonb")
+  })
 })

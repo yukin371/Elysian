@@ -3,6 +3,7 @@ const supportedOperations = ["create-table"] as const
 const supportedSqlTypes = [
   "boolean",
   "integer",
+  "jsonb",
   "text",
   "timestamptz",
   "uuid",
@@ -102,9 +103,11 @@ const getDrizzleColumnDefinition = (column: DatabaseColumnPlanLike) => {
         ? `integer("${column.name}")`
         : column.sqlType === "boolean"
           ? `boolean("${column.name}")`
-          : column.sqlType === "timestamptz"
-            ? `timestamp("${column.name}", { withTimezone: true })`
-            : `text("${column.name}")`
+          : column.sqlType === "jsonb"
+            ? `jsonb("${column.name}")`
+            : column.sqlType === "timestamptz"
+              ? `timestamp("${column.name}", { withTimezone: true })`
+              : `text("${column.name}")`
 
   const parts = [base]
 
@@ -213,6 +216,8 @@ export const buildMigrationProposalFromChangePlan = (
       requiredImports.add("integer")
     } else if (column.sqlType === "boolean") {
       requiredImports.add("boolean")
+    } else if (column.sqlType === "jsonb") {
+      requiredImports.add("jsonb")
     } else if (column.sqlType === "timestamptz") {
       requiredImports.add("timestamp")
     } else {

@@ -68,6 +68,7 @@ bun --filter @elysian/generator generate --schema customer --target staging --fr
 
 生成器特性：
 - 支持 `SimplifiedModuleSchema`：缺省补 `id`、`label`、`frontend` 元数据
+- 支持字段类型：`id`、`string`、`text`、`number`、`boolean`、`enum`、`json`、`datetime`
 - 支持 `skip / overwrite / overwrite-generated-only / fail` 四种冲突策略
 - 原子写入（temp + rename），避免部分写入损坏
 - 每次生成输出 manifest，支持二次生成安全覆盖
@@ -80,6 +81,8 @@ bun --filter @elysian/generator generate --schema customer --target staging --fr
   "name": "supplier",
   "fields": [
     { "key": "name", "kind": "string", "required": true, "searchable": true },
+    { "key": "description", "kind": "text" },
+    { "key": "metadata", "kind": "json" },
     { "key": "status", "kind": "enum", "options": ["active", "inactive"] }
   ]
 }

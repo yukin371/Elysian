@@ -511,8 +511,9 @@ export const renderVueWorkspaceComposableTemplate = (schema: ModuleSchema) => {
     (field) =>
       field.required && (field.kind === "string" || field.kind === "id"),
   )
+  const jsonFields = inputFields.filter((field) => field.kind === "json")
 
-  const normalizeBlock =
+  const requiredStringBlock =
     requiredStringFields.length > 0
       ? requiredStringFields
           .map((field) => {
@@ -525,6 +526,31 @@ export const renderVueWorkspaceComposableTemplate = (schema: ModuleSchema) => {
           })
           .join("\n\n")
       : ""
+
+  const jsonNormalizationBlock =
+    jsonFields.length > 0
+      ? jsonFields
+          .map((field) => {
+            const resultName = `${field.key}ValueResult`
+            const valueName = `${field.key}Value`
+
+            return `  const ${resultName} = normalizeJsonInput(values.${field.key})
+
+  if (${resultName}.status === "invalid") {
+    return {
+      status: "invalid" as const,
+      message: "${pascalName} ${field.key} must be a valid JSON object",
+    }
+  }
+
+  const ${valueName} = ${resultName}.value`
+          })
+          .join("\n\n")
+      : ""
+
+  const normalizeBlock = [requiredStringBlock, jsonNormalizationBlock]
+    .filter((block) => block.length > 0)
+    .join("\n\n")
 
   const payloadFields = inputFields
     .map((field) => {
@@ -540,15 +566,21 @@ export const renderVueWorkspaceComposableTemplate = (schema: ModuleSchema) => {
       if (field.kind === "datetime") {
         return `    ${field.key}: normalizeText(values.${field.key}),`
       }
+      if (field.kind === "json") {
+        return `    ${field.key}: ${field.key}Value,`
+      }
       return `    ${field.key}: values.${field.key} ?? ${renderFieldDefaultValue(field)},`
     })
     .join("\n")
 
   const toEditDraftFields = inputFields
-    .map(
-      (field) =>
-        `  ${field.key}: record.${field.key} ?? ${renderFieldDefaultValue(field)}`,
-    )
+    .map((field) => {
+      if (field.kind === "json") {
+        return `  ${field.key}: stringifyJsonValue(record.${field.key})`
+      }
+
+      return `  ${field.key}: record.${field.key} ?? ${renderFieldDefaultValue(field)}`
+    })
     .join(",\n")
 
   return `import type { FrontendWorkspaceStateContext } from "@elysian/frontend-vue"
@@ -618,6 +650,56 @@ const normalizeNumber = (value: unknown, fallback = 0) => {
   return Number.isFinite(normalized) ? normalized : fallback
 }
 
+const normalizeJsonInput = (
+  value: unknown,
+):
+  | { status: "valid"; value: Record<string, unknown> | null }
+  | { status: "invalid" } => {
+  if (value === null || value === undefined) {
+    return { status: "valid", value: null }
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim()
+
+    if (normalized.length === 0) {
+      return { status: "valid", value: null }
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(normalized)
+
+      if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+        return {
+          status: "valid",
+          value: parsed as Record<string, unknown>,
+        }
+      }
+
+      return { status: "invalid" }
+    } catch {
+      return { status: "invalid" }
+    }
+  }
+
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return {
+      status: "valid",
+      value: value as Record<string, unknown>,
+    }
+  }
+
+  return { status: "invalid" }
+}
+
+const stringifyJsonValue = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return ""
+  }
+
+  return JSON.stringify(value, null, 2)
+}
+
 export const createDefault${pascalName}Draft = () => ({
 ${defaultDraftFields},
 })
@@ -647,8 +729,8 @@ export const normalize${pascalName}Payload = (
 ):
   | { status: "valid"; payload: Record<string, unknown> }
   | { status: "invalid"; message: string } => {
-${normalizeBlock}${normalizeBlock ? "\n\n" : ""}${requiredStringFields.length > 0 ? '  return {\n    status: "valid" as const,\n    payload: {\n' : '  return { status: "valid" as const, payload: {\n'}${payloadFields}
-  ${requiredStringFields.length > 0 ? "  },\n}" : "  }"}
+${normalizeBlock}${normalizeBlock ? "\n\n" : ""}${normalizeBlock ? '  return {\n    status: "valid" as const,\n    payload: {\n' : '  return { status: "valid" as const, payload: {\n'}${payloadFields}
+  ${normalizeBlock ? "  },\n}" : "  }"}
 }
 
 export const to${pascalName}EditDraft = (

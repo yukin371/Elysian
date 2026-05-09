@@ -149,6 +149,32 @@ describe("validateModuleSchema", () => {
     expect(issues).toEqual([])
   })
 
+  it("accepts text field kind", () => {
+    const issues = validateModuleSchema({
+      name: "article",
+      label: "Article",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "content", label: "Content", kind: "text" },
+      ],
+    })
+
+    expect(issues).toEqual([])
+  })
+
+  it("accepts json field kind", () => {
+    const issues = validateModuleSchema({
+      name: "config",
+      label: "Config",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "payload", label: "Payload", kind: "json" },
+      ],
+    })
+
+    expect(issues).toEqual([])
+  })
+
   it("rejects malformed frontend registration metadata", () => {
     const issues = validateModuleSchema({
       name: "supplier",

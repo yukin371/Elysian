@@ -180,6 +180,184 @@ describe("renderModuleFiles", () => {
     expect(pageFile?.contents).not.toContain("item.name")
     expect(frontendFile?.contents).toContain('primaryFieldKey: "title"')
   })
+
+  it("renders text field as string type in record", () => {
+    const schema: ModuleSchema = {
+      name: "article",
+      label: "Article",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "title", label: "Title", kind: "string", required: true },
+        { key: "body", label: "Body", kind: "text" },
+      ],
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const schemaFile = files.find((file) =>
+      file.contents.includes("interface ArticleRecord"),
+    )
+
+    expect(schemaFile).toBeDefined()
+    expect(schemaFile?.contents).toContain("body: string")
+  })
+
+  it("renders json field as Record type in record", () => {
+    const schema: ModuleSchema = {
+      name: "config",
+      label: "Config",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "payload", label: "Payload", kind: "json" },
+      ],
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const schemaFile = files.find((file) =>
+      file.contents.includes("interface ConfigRecord"),
+    )
+
+    expect(schemaFile).toBeDefined()
+    expect(schemaFile?.contents).toContain("payload: Record<string, unknown>")
+  })
+
+  it("does not trim text fields in service template", () => {
+    const schema: ModuleSchema = {
+      name: "article",
+      label: "Article",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "title", label: "Title", kind: "string", required: true },
+        { key: "body", label: "Body", kind: "text" },
+      ],
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const serviceFile = files.find((file) =>
+      file.contents.includes("createArticleService"),
+    )
+
+    expect(serviceFile).toBeDefined()
+    expect(serviceFile?.contents).toContain("input.title.trim()")
+    expect(serviceFile?.contents).toContain("body: input.body")
+  })
+
+  it("renders text field default as empty string in workspace draft", () => {
+    const schema: ModuleSchema = {
+      name: "article",
+      label: "Article",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "body", label: "Body", kind: "text" },
+      ],
+      frontend: {
+        workspaceDomain: "business",
+        routePath: "/business/article",
+        permissionPrefix: "business:article",
+        workspaceKind: "standard-crud",
+      },
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const workspaceFile = files.find((file) =>
+      file.path.endsWith("article-workspace.ts"),
+    )
+
+    expect(workspaceFile).toBeDefined()
+    expect(workspaceFile?.contents).toContain('body: ""')
+  })
+
+  it("renders json field default as null in workspace draft", () => {
+    const schema: ModuleSchema = {
+      name: "config",
+      label: "Config",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "payload", label: "Payload", kind: "json" },
+      ],
+      frontend: {
+        workspaceDomain: "business",
+        routePath: "/business/config",
+        permissionPrefix: "business:config",
+        workspaceKind: "standard-crud",
+      },
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const workspaceFile = files.find((file) =>
+      file.path.endsWith("config-workspace.ts"),
+    )
+
+    expect(workspaceFile).toBeDefined()
+    expect(workspaceFile?.contents).toContain("payload: null")
+  })
+
+  it("renders json field validator as an object in routes", () => {
+    const schema: ModuleSchema = {
+      name: "config",
+      label: "Config",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "payload", label: "Payload", kind: "json" },
+      ],
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const routeFile = files.find((file) =>
+      file.path.endsWith("config.routes.ts"),
+    )
+
+    expect(routeFile).toBeDefined()
+    expect(routeFile?.contents).toContain(
+      "payload: t.Optional(t.Record(t.String(), t.Unknown()))",
+    )
+  })
+
+  it("parses json textarea values in workspace payload normalization", () => {
+    const schema: ModuleSchema = {
+      name: "config",
+      label: "Config",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "payload", label: "Payload", kind: "json" },
+      ],
+      frontend: {
+        workspaceDomain: "business",
+        routePath: "/business/config",
+        permissionPrefix: "business:config",
+        workspaceKind: "standard-crud",
+      },
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const workspaceFile = files.find((file) =>
+      file.path.endsWith("config-workspace.ts"),
+    )
+
+    expect(workspaceFile).toBeDefined()
+    expect(workspaceFile?.contents).toContain(
+      "const payloadValueResult = normalizeJsonInput(values.payload)",
+    )
+    expect(workspaceFile?.contents).toContain("payload: payloadValue,")
+  })
+
+  it("stringifies json record values in workspace edit drafts", () => {
+    const schema: ModuleSchema = {
+      name: "config",
+      label: "Config",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "payload", label: "Payload", kind: "json" },
+      ],
+      frontend: {
+        workspaceDomain: "business",
+        routePath: "/business/config",
+        permissionPrefix: "business:config",
+        workspaceKind: "standard-crud",
+      },
+    }
+    const files = renderModuleFiles(schema, { frontendTarget: "vue" })
+    const workspaceFile = files.find((file) =>
+      file.path.endsWith("config-workspace.ts"),
+    )
+
+    expect(workspaceFile).toBeDefined()
+    expect(workspaceFile?.contents).toContain(
+      "payload: stringifyJsonValue(record.payload)",
+    )
+  })
 })
 
 describe("enterprise CRUD templates", () => {

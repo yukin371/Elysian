@@ -92,6 +92,37 @@ describe("frontend-vue preset helpers", () => {
     ])
   })
 
+  it("maps text and json schema fields to textarea inputs", () => {
+    const page = buildVueCustomCrudPage({
+      name: "article",
+      label: "Article",
+      fields: [
+        { key: "id", label: "ID", kind: "id", required: true },
+        { key: "summary", label: "Summary", kind: "text" },
+        { key: "metadata", label: "Metadata", kind: "json" },
+      ],
+    })
+
+    expect(page.formFields).toEqual([
+      {
+        key: "summary",
+        label: "Summary",
+        input: "textarea",
+        required: false,
+        options: undefined,
+        dictionaryTypeCode: undefined,
+      },
+      {
+        key: "metadata",
+        label: "Metadata",
+        input: "textarea",
+        required: false,
+        options: undefined,
+        dictionaryTypeCode: undefined,
+      },
+    ])
+  })
+
   it("extracts and applies runtime dictionary options with static fallback", () => {
     const page = buildVueCustomCrudPage(ticketModuleSchema)
 

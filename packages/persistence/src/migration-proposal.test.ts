@@ -107,6 +107,55 @@ describe("buildMigrationProposalFromChangePlan", () => {
     ])
   })
 
+  it("renders jsonb columns in sql draft and drizzle snippet", () => {
+    const proposal = buildMigrationProposalFromChangePlan({
+      canonicalMigrationOwner: "packages/persistence",
+      dialect: "postgresql",
+      operations: [
+        {
+          columns: [
+            {
+              defaultExpression: "gen_random_uuid()",
+              dictionaryTypeCode: null,
+              enumOptions: [],
+              name: "id",
+              primaryKey: true,
+              required: true,
+              sourceFieldKey: "id",
+              sourceFieldKind: "id",
+              sqlType: "uuid",
+            },
+            {
+              defaultExpression: null,
+              dictionaryTypeCode: null,
+              enumOptions: [],
+              name: "metadata",
+              primaryKey: false,
+              required: false,
+              sourceFieldKey: "metadata",
+              sourceFieldKind: "json",
+              sqlType: "jsonb",
+            },
+          ],
+          notes: [],
+          operation: "create-table",
+          sourceSchemaName: "config",
+          tableName: "config",
+        },
+      ],
+      reviewRequired: true,
+      sourceSchemaName: "config",
+    })
+
+    expect(proposal.sqlDraft).toContain("metadata jsonb")
+    expect(proposal.drizzleImportSnippet).toContain(
+      'import { jsonb, pgTable, uuid } from "drizzle-orm/pg-core"',
+    )
+    expect(proposal.drizzleSchemaSnippet).toContain(
+      'metadata: jsonb("metadata"),',
+    )
+  })
+
   it("rejects unsupported operation shapes", () => {
     const firstOperation = ticketChangePlan.operations[0]
     if (!firstOperation) {
