@@ -491,6 +491,66 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Unsupported for auto proposal",
   "app.generatorPreview.statsHint": "File count",
   "app.generatorPreview.tabsHint": "{count} preview artifacts",
+  "app.demoHub.sectionTitle": "Demo Hub prototypes",
+  "app.demoHub.sectionCopy":
+    "This workspace hosts page prototypes and interaction drafts only. It does not call real APIs or change real modules, so flows can be simplified before implementation.",
+  "app.demoHub.shellTitle": "Demo Hub",
+  "app.demoHub.shellDescription":
+    "Validate information architecture, form steps, feedback copy, and next-action guidance with local-only prototypes.",
+  "app.demoHub.statsHint": "Prototype count",
+  "app.demoHub.tabsHint": "{count} prototype scenarios",
+  "app.demoHub.badge.prototypeOnly": "Prototype only",
+  "app.demoHub.badge.formFirst": "Form first",
+  "app.demoHub.badge.noApi": "No live API",
+  "app.demoHub.heroEyebrow": "Page prototype bus",
+  "app.demoHub.heroTitle":
+    "Make the flow obvious in Demo Hub first, then move into real implementation.",
+  "app.demoHub.heroDescription":
+    "Each prototype should answer three things quickly: what users see first, what they click next, and what feedback they get after submitting. Advanced setup stays secondary.",
+  "app.demoHub.scenarioLabel": "Prototype scenario",
+  "app.demoHub.prototypeTitle": "Current draft",
+  "app.demoHub.prototypeDescription":
+    "The main area shows the recommended primary flow. All inputs stay local so you can compare density, order, and wording without touching runtime state.",
+  "app.demoHub.prototypeAudience": "Audience",
+  "app.demoHub.prototypeEntry": "Entry",
+  "app.demoHub.prototypeGoal": "Single-pass goal",
+  "app.demoHub.prototypePrimaryAction": "Primary action",
+  "app.demoHub.prototypeFields": "Fill these first",
+  "app.demoHub.prototypeFeedback": "Submission feedback",
+  "app.demoHub.prototypeChecklist": "Before real implementation",
+  "app.demoHub.formSectionTitle": "Form-first flow draft",
+  "app.demoHub.formSectionDescription":
+    "Use forms to capture what the user wants first. Keep JSON, schema draft, and derived configuration behind a secondary entry so the first screen stays plain.",
+  "app.demoHub.formModuleCode": "Module code",
+  "app.demoHub.formModuleLabel": "Module name",
+  "app.demoHub.formScenario": "Page goal",
+  "app.demoHub.formVariant": "Starting mode",
+  "app.demoHub.formVariant.reference": "Copy existing module",
+  "app.demoHub.formVariant.template": "Start from template",
+  "app.demoHub.formVariant.manual": "Open advanced JSON later",
+  "app.demoHub.formNextAction": "Next step",
+  "app.demoHub.formNextActionValue":
+    "Field confirmation and page preview, instead of switching straight into advanced JSON.",
+  "app.demoHub.formLocalHint":
+    "These inputs exist for prototype review only. They do not write routes, modules, or generation records.",
+  "app.demoHub.ruleTitle": "Demo Hub rules",
+  "app.demoHub.ruleDescription":
+    "Future page optimization should land here first and move to real workspaces only after review, so live modules stop drifting during UX exploration.",
+  "app.demoHub.rule1":
+    "No server calls, no persistence, and no real generator or CRUD actions.",
+  "app.demoHub.rule2":
+    "The prototype must surface the main flow directly; secondary and advanced capabilities should stay collapsed by default.",
+  "app.demoHub.rule3":
+    "If the draft needs cross-route, cross-permission, or cross-module coordination, validate the information architecture here before changing the real owner.",
+  "app.demoHub.handoffTitle": "Prototype to implementation",
+  "app.demoHub.handoffDescription":
+    "Only move conclusions into a real workspace after the main flow, field order, feedback copy, and empty states are stable.",
+  "app.demoHub.handoffStep1": "Draft the single-page primary flow in Demo Hub first.",
+  "app.demoHub.handoffStep2": "Capture the required boundary notes and acceptance checks.",
+  "app.demoHub.handoffStep3": "Confirm the canonical owner, then edit the real page.",
+  "app.demoHub.panelTitle": "Prototype boundary",
+  "app.demoHub.panelDescription":
+    "This side panel explains scope, review criteria, and handoff rules only. It does not hold runtime detail or live diagnostics.",
   "app.error.restoreSession": "Failed to restore session",
   "app.error.loadCustomers": "Failed to load customers",
   "app.error.loadDepartments": "Failed to load departments",

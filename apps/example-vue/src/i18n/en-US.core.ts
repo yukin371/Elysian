@@ -265,6 +265,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.fallback.workflowTodo": "Todo",
   "app.fallback.workflowDone": "Done",
   "app.fallback.studio": "Studio tools",
+  "app.fallback.demoHub": "Demo Hub",
   "app.fallback.generatorPreview": "Generator preview",
   "copy.shell.navigation": "Navigation",
   "copy.shell.environment": "Environment",

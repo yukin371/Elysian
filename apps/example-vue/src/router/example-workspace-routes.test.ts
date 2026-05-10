@@ -21,9 +21,10 @@ const t = (key: string, params?: Record<string, unknown>) =>
 
 describe("example workspace routes", () => {
   test("derives route metadata from the workspace registry", () => {
-    expect(exampleWorkspaceRoutes).toHaveLength(15)
+    expect(exampleWorkspaceRoutes).toHaveLength(16)
     expect(exampleWorkspaceRoutes.map((route) => route.kind).sort()).toEqual([
       "customer",
+      "demohub",
       "department",
       "dictionary",
       "file",
@@ -65,6 +66,9 @@ describe("example workspace routes", () => {
     expect(
       createExampleWorkspaceKindState("customer").isCustomerWorkspace,
     ).toBe(true)
+    expect(createExampleWorkspaceKindState("demohub").isDemoHubWorkspace).toBe(
+      true,
+    )
     expect(
       resolveExampleWorkspaceKindState("#/workflow/tasks/todo")
         .isWorkflowDefinitionsWorkspace,
@@ -130,6 +134,20 @@ describe("example workspace routes", () => {
     ).toEqual({
       currentNavigationPath: "/system/files",
       currentModuleCodeLabel: "file",
+      currentModuleReady: true,
+      currentModuleStatusLabel: "app.placeholder.ready",
+    })
+
+    expect(
+      resolveExampleWorkspaceModuleStatus({
+        routeState: resolveExampleWorkspaceRouteState("/studio/demo-hub"),
+        registeredModuleCodes: [],
+        selectedNavigationPath: "/studio/demo-hub",
+        t,
+      }),
+    ).toEqual({
+      currentNavigationPath: "/studio/demo-hub",
+      currentModuleCodeLabel: "demohub",
       currentModuleReady: true,
       currentModuleStatusLabel: "app.placeholder.ready",
     })

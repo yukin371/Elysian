@@ -190,12 +190,20 @@ export const useExampleShellMeta = ({
       return generatorPreviewFiles.value.length
     }
 
+    if (currentWorkspaceKind.value === "demohub") {
+      return 3
+    }
+
     return 0
   })
 
   const currentWorkspaceItemHint = computed(() => {
     if (isGeneratorPreviewWorkspace.value) {
       return t("app.generatorPreview.statsHint")
+    }
+
+    if (currentWorkspaceKind.value === "demohub") {
+      return t("app.demoHub.statsHint")
     }
 
     if (isWorkflowDefinitionsWorkspace.value) {
@@ -340,6 +348,10 @@ export const useExampleShellMeta = ({
                                   ? t("app.generatorPreview.tabsHint", {
                                       count: generatorPreviewFiles.value.length,
                                     })
+                                  : currentWorkspaceKind.value === "demohub"
+                                    ? t("app.demoHub.tabsHint", {
+                                        count: 3,
+                                      })
                                   : isWorkflowDefinitionsWorkspace.value
                                     ? t("app.workflow.tabsHint", {
                                         count: workflowDefinitionTotal.value,

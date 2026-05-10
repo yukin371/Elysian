@@ -8,6 +8,7 @@ export type AppTranslate = (
 
 export type ExampleWorkspaceKind =
   | "customer"
+  | "demohub"
   | "dictionary"
   | "department"
   | "file"
@@ -614,6 +615,8 @@ export const createAppShellLocalization = (t: AppTranslate) => {
         return t("app.fallback.studio")
       case "studio-generator-preview":
         return t("app.fallback.generatorPreview")
+      case "studio-demohub":
+        return t("app.fallback.demoHub")
       default:
         return fallbackName
     }

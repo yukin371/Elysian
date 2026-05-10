@@ -33,6 +33,7 @@ describe("shell workspace descriptor coverage", () => {
     expect(sortValues(shellWorkspaceMainResolverKinds)).toEqual(
       sortValues([
         ...generatedStandardCrudWorkspaceKinds,
+        "demohub",
         "file",
         "generator-preview",
         "operation-log",
@@ -44,6 +45,7 @@ describe("shell workspace descriptor coverage", () => {
     expect(sortValues(shellWorkspaceSecondaryResolverKinds)).toEqual(
       sortValues([
         ...generatedStandardCrudWorkspaceKinds,
+        "demohub",
         "file",
         "generator-preview",
         "operation-log",
@@ -179,5 +181,34 @@ describe("shell workspace descriptor coverage", () => {
       queryFields: [{ key: "action", kind: "text" }],
     })
     expect(operationLogDescriptor.listeners).toHaveProperty("reset")
+  })
+
+  test("routes demohub through prototype-only main and panel components", () => {
+    const mainDescriptor = resolveShellWorkspaceMainDescriptor(
+      {
+        t: (key: string) => key,
+        currentWorkspaceKind: "demohub",
+      } as unknown as ShellWorkspaceMainSwitchProps,
+      (() => undefined) as never,
+    )
+
+    const secondaryDescriptor = resolveShellWorkspaceSecondaryDescriptor(
+      {
+        t: (key: string) => key,
+        locale: "zh-CN",
+        currentWorkspaceKind: "demohub",
+        currentNavigationPath: "/studio/demo-hub",
+        currentModuleCodeLabel: "demohub",
+      } as unknown as ShellWorkspaceSecondarySwitchProps,
+      (() => undefined) as never,
+    )
+
+    expect(mainDescriptor.props).toMatchObject({
+      t: expect.any(Function),
+    })
+    expect(secondaryDescriptor.props).toMatchObject({
+      currentPath: "/studio/demo-hub",
+      moduleCodeLabel: "demohub",
+    })
   })
 })

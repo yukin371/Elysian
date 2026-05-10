@@ -19,6 +19,7 @@ export interface ExampleWorkspaceRouteDefinition {
 export interface ExampleWorkspaceKindState {
   currentWorkspaceKind: ExampleWorkspaceKind
   isCustomerWorkspace: boolean
+  isDemoHubWorkspace: boolean
   isDepartmentWorkspace: boolean
   isDictionaryWorkspace: boolean
   isFileWorkspace: boolean
@@ -117,6 +118,7 @@ export const createExampleWorkspaceKindState = (
 ): ExampleWorkspaceKindState => ({
   currentWorkspaceKind: kind,
   isCustomerWorkspace: kind === "customer",
+  isDemoHubWorkspace: kind === "demohub",
   isDepartmentWorkspace: kind === "department",
   isDictionaryWorkspace: kind === "dictionary",
   isFileWorkspace: kind === "file",
@@ -168,6 +170,7 @@ export const resolveExampleWorkspaceModuleStatus = ({
     selectedNavigationPath ?? t("app.placeholder.pathMissing")
   const currentModuleReady =
     routeState.moduleCode === "generator-preview" ||
+    routeState.moduleCode === "demohub" ||
     (routeState.moduleCode !== null &&
       registeredModuleCodes.includes(routeState.moduleCode))
 

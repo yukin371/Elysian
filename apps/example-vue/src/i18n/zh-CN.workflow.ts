@@ -461,6 +461,64 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sqlProposal.status.unsupported": "暂不支持自动提案",
   "app.generatorPreview.statsHint": "文件数",
   "app.generatorPreview.tabsHint": "预览 {count} 个产物",
+  "app.demoHub.sectionTitle": "Demo Hub 原型页",
+  "app.demoHub.sectionCopy":
+    "这里专门承载页面原型与交互试稿，不接真实接口、不改真实模块，先把用户流程打磨清楚再进入正式实现。",
+  "app.demoHub.shellTitle": "Demo Hub",
+  "app.demoHub.shellDescription":
+    "集中验证页面信息架构、表单步骤、反馈文案和下一步引导，只保留本地原型交互。",
+  "app.demoHub.statsHint": "原型稿数",
+  "app.demoHub.tabsHint": "{count} 个原型场景",
+  "app.demoHub.badge.prototypeOnly": "仅原型",
+  "app.demoHub.badge.formFirst": "表单优先",
+  "app.demoHub.badge.noApi": "无真实接口",
+  "app.demoHub.heroEyebrow": "页面原型总线",
+  "app.demoHub.heroTitle": "先在 Demo Hub 把流程讲清楚，再进入真实实现。",
+  "app.demoHub.heroDescription":
+    "每个原型都只回答三件事：用户先看见什么、下一步点什么、提交后得到什么反馈。复杂设置收在次级层，不把用户一开始就推进高级配置。",
+  "app.demoHub.scenarioLabel": "原型场景",
+  "app.demoHub.prototypeTitle": "当前试稿",
+  "app.demoHub.prototypeDescription":
+    "主区展示目标页面的推荐主流程，所有输入只在本地内存里变化，用来快速比较信息密度与步骤顺序。",
+  "app.demoHub.prototypeAudience": "目标用户",
+  "app.demoHub.prototypeEntry": "进入方式",
+  "app.demoHub.prototypeGoal": "一次完成目标",
+  "app.demoHub.prototypePrimaryAction": "主动作",
+  "app.demoHub.prototypeFields": "先填这些",
+  "app.demoHub.prototypeFeedback": "提交后反馈",
+  "app.demoHub.prototypeChecklist": "进入正式开发前确认",
+  "app.demoHub.formSectionTitle": "表单主流程试稿",
+  "app.demoHub.formSectionDescription":
+    "默认用表单承接“我要做什么”，把高级 JSON、结构草稿和派生配置降到次级入口，避免用户一开始就遇到技术表述。",
+  "app.demoHub.formModuleCode": "模块标识",
+  "app.demoHub.formModuleLabel": "模块名称",
+  "app.demoHub.formScenario": "页面目标",
+  "app.demoHub.formVariant": "起稿方式",
+  "app.demoHub.formVariant.reference": "复制现有模块",
+  "app.demoHub.formVariant.template": "从模板开始",
+  "app.demoHub.formVariant.manual": "稍后再开高级 JSON",
+  "app.demoHub.formNextAction": "下一步会进入",
+  "app.demoHub.formNextActionValue": "字段确认与页面预览，而不是直接切到高级 JSON。",
+  "app.demoHub.formLocalHint":
+    "这些字段只用于原型体验，不会写入模块、路由或生成记录。",
+  "app.demoHub.ruleTitle": "Demo Hub 使用规则",
+  "app.demoHub.ruleDescription":
+    "后续页面优化先落到这里，通过评审后再改真实 workspace，避免边看边改真实模块导致交互回退。",
+  "app.demoHub.rule1":
+    "不接 server、不落持久化、不调用真实生成或 CRUD 接口。",
+  "app.demoHub.rule2":
+    "原型应直接表达主流程，次级和高级能力默认折叠，不抢第一屏注意力。",
+  "app.demoHub.rule3":
+    "如果原型需要跨路由、跨权限或跨模块协调，先在这里验证信息架构，再决定真实 owner。",
+  "app.demoHub.handoffTitle": "从原型到实现",
+  "app.demoHub.handoffDescription":
+    "只有当主流程、字段顺序、反馈文案和空态都稳定后，才允许把结论迁移到真实 workspace。",
+  "app.demoHub.handoffStep1": "在 Demo Hub 先形成单页主流程。",
+  "app.demoHub.handoffStep2": "补齐需要保留的边界说明与验收点。",
+  "app.demoHub.handoffStep3": "确认 canonical owner 后，再改真实页面。",
+  "app.demoHub.panelTitle": "原型边界",
+  "app.demoHub.panelDescription":
+    "这个侧栏只说明边界、评审标准和移交规则，不承载任何真实详情或运行时诊断。",
   "app.error.restoreSession": "恢复会话失败",
   "app.error.loadCustomers": "加载客户列表失败",
   "app.error.loadDepartments": "加载部门列表失败",

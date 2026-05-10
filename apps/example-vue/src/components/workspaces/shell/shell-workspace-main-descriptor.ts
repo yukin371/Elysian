@@ -16,6 +16,9 @@ import ShellWorkspaceStatusMain from "./ShellWorkspaceStatusMain.vue"
 const CustomerWorkspaceMain = defineAsyncComponent(
   () => import("../customer/CustomerWorkspaceMain.vue"),
 )
+const DemoHubWorkspaceMain = defineAsyncComponent(
+  () => import("../demohub/DemoHubWorkspaceMain.vue"),
+)
 const FileWorkspaceMain = defineAsyncComponent(
   () => import("../file/FileWorkspaceMain.vue"),
 )
@@ -481,6 +484,7 @@ const customerResolver: ShellWorkspaceMainResolver = (props, emit) => ({
 })
 
 export const shellWorkspaceMainResolverKinds = [
+  "demohub",
   "workflow-definitions",
   "file",
   "generator-preview",
@@ -498,6 +502,12 @@ export const shellWorkspaceMainResolverKinds = [
 ] as const
 
 const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
+  demohub: (props) => ({
+    component: DemoHubWorkspaceMain,
+    props: {
+      t: props.t,
+    },
+  }),
   "workflow-definitions": (props, emit) => ({
     component: WorkflowWorkspaceMain,
     props: {

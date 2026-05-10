@@ -42,6 +42,7 @@ export const createWorkspaceModuleReadyMap = ({
 }: CreateWorkspaceModuleReadyMapOptions): WorkspaceModuleReadyMap =>
   new Map<RegisteredWorkspaceKind, Ref<boolean>>([
     ["customer", customerModuleReady],
+    ["demohub", authModuleReady],
     ["department", departmentModuleReady],
     ["dictionary", dictionaryModuleReady],
     ["file", fileModuleReady],

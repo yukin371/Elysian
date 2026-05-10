@@ -20,6 +20,9 @@ const AuthSessionWorkspacePanel = defineAsyncComponent(
 const CustomerWorkspacePanel = defineAsyncComponent(
   () => import("../customer/CustomerWorkspacePanel.vue"),
 )
+const DemoHubWorkspacePanel = defineAsyncComponent(
+  () => import("../demohub/DemoHubWorkspacePanel.vue"),
+)
 const FileWorkspacePanel = defineAsyncComponent(
   () => import("../file/FileWorkspacePanel.vue"),
 )
@@ -389,6 +392,7 @@ const customerResolver: ShellWorkspaceSecondaryResolver = (props, emit) => ({
 })
 
 export const shellWorkspaceSecondaryResolverKinds = [
+  "demohub",
   "dictionary",
   "department",
   "session",
@@ -406,6 +410,14 @@ export const shellWorkspaceSecondaryResolverKinds = [
 ] as const
 
 const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
+  demohub: (props) => ({
+    component: DemoHubWorkspacePanel,
+    props: {
+      t: props.t,
+      currentPath: props.currentNavigationPath,
+      moduleCodeLabel: props.currentModuleCodeLabel,
+    },
+  }),
   dictionary: (props, emit) => ({
     component: generatedStandardCrudPanelComponents.dictionary,
     props: {

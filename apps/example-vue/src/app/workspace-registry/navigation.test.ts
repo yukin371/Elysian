@@ -32,6 +32,7 @@ describe("workspace registry navigation", () => {
       "/system/sessions",
     )
     expect(studio?.children.map((item) => item.path)).toEqual([
+      "/studio/demo-hub",
       "/studio/generator-preview",
     ])
   })

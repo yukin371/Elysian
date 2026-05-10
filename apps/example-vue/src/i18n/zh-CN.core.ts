@@ -260,6 +260,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.fallback.workflowTodo": "待办任务",
   "app.fallback.workflowDone": "已办任务",
   "app.fallback.studio": "开发工具",
+  "app.fallback.demoHub": "Demo Hub",
   "app.fallback.generatorPreview": "生成预览",
   "copy.shell.navigation": "导航",
   "copy.shell.environment": "环境",
