@@ -3,6 +3,7 @@ import type {
   GeneratorPreviewFileCard,
   GeneratorPreviewFileDiffStats,
 } from "../../../lib/generator-preview-workspace"
+import type { GeneratorPreviewFrontendImpact } from "./generator-preview-frontend-impact"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
@@ -35,6 +36,7 @@ export type {
   GeneratorPreviewDiffLine,
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
+  GeneratorPreviewFrontendImpact,
   GeneratorPreviewFileCard,
   GeneratorPreviewFileDiffStats,
   GeneratorPreviewReviewEvidence,

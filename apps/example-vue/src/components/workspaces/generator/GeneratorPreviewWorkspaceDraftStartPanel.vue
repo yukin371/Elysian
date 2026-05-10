@@ -29,6 +29,7 @@ interface GeneratorPreviewWorkspaceDraftStartPanelProps {
   manualSchemaDraft: string
   manualSchemaDraftError: string | null
   manualSchemaDraftErrorDetails: string | null
+  manualSchemaDraftErrorSuggestion: string | null
   draftModuleName: string
   draftModuleLabel: string
   canPatchDraftMeta: boolean
@@ -45,8 +46,10 @@ interface GeneratorPreviewWorkspaceDraftStartPanelProps {
   }>
   schemaTemplates: GeneratorPreviewSchemaTemplate[]
   configPrimaryActionLabel: string
+  configErrorRecoverySteps: string[]
   showSchemaEditor: boolean
   schemaEditorFacts: Array<{ label: string; value: string }>
+  draftSummaryFacts: Array<{ label: string; value: string }>
 }
 
 const props = defineProps<GeneratorPreviewWorkspaceDraftStartPanelProps>()
@@ -87,6 +90,9 @@ const showConfigError = () => props.errorMessage.trim().length > 0
           :placeholder="t('app.generatorPreview.input.moduleNamePlaceholder')"
           @update:model-value="emit('module-name-input', $event)"
         />
+        <span class="generator-config-helper">
+          {{ t("app.generatorPreview.input.moduleNameHelper") }}
+        </span>
       </label>
 
       <label class="generator-config-field">
@@ -99,7 +105,21 @@ const showConfigError = () => props.errorMessage.trim().length > 0
           :placeholder="t('app.generatorPreview.input.moduleLabelPlaceholder')"
           @update:model-value="emit('module-label-input', $event)"
         />
+        <span class="generator-config-helper">
+          {{ t("app.generatorPreview.input.moduleLabelHelper") }}
+        </span>
       </label>
+    </div>
+
+    <div class="generator-draft-summary">
+      <div
+        v-for="fact in draftSummaryFacts"
+        :key="fact.label"
+        class="generator-draft-summary-item"
+      >
+        <span>{{ fact.label }}</span>
+        <strong>{{ fact.value }}</strong>
+      </div>
     </div>
 
     <GeneratorPreviewWorkspaceDraftOptionsSection
@@ -134,6 +154,7 @@ const showConfigError = () => props.errorMessage.trim().length > 0
       :manual-schema-draft="manualSchemaDraft"
       :manual-schema-draft-error="manualSchemaDraftError"
       :manual-schema-draft-error-details="manualSchemaDraftErrorDetails"
+      :manual-schema-draft-error-suggestion="manualSchemaDraftErrorSuggestion"
       :show-schema-editor="showSchemaEditor"
       :schema-editor-facts="schemaEditorFacts"
       @schema-editor-toggle="emit('schema-editor-toggle')"
@@ -142,9 +163,25 @@ const showConfigError = () => props.errorMessage.trim().length > 0
 
     <div
       v-if="showConfigError"
-      class="enterprise-message enterprise-message-danger"
+      class="generator-config-error"
     >
-      {{ errorMessage }}
+      <div class="enterprise-message enterprise-message-danger">
+        {{ errorMessage }}
+      </div>
+      <section
+        v-if="configErrorRecoverySteps.length > 0"
+        class="generator-config-recovery"
+      >
+        <strong>{{ t("app.generatorPreview.errorRecoveryTitle") }}</strong>
+        <ol>
+          <li
+            v-for="step in configErrorRecoverySteps"
+            :key="step"
+          >
+            {{ step }}
+          </li>
+        </ol>
+      </section>
     </div>
   </section>
 </template>
@@ -192,10 +229,80 @@ const showConfigError = () => props.errorMessage.trim().length > 0
   font-weight: 700;
 }
 
+.generator-config-helper {
+  color: #64748b;
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+.generator-draft-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.generator-draft-summary-item {
+  display: grid;
+  gap: 0.22rem;
+  min-width: 0;
+  padding: 0.7rem 0.78rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.68);
+}
+
+.generator-draft-summary-item span {
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.generator-draft-summary-item strong {
+  color: #0f172a;
+  font-size: 0.83rem;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.generator-config-error {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.generator-config-recovery {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.generator-config-recovery strong {
+  color: #0f172a;
+  font-size: 0.81rem;
+  font-weight: 700;
+}
+
+.generator-config-recovery ol {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 640px) {
   .generator-config-grid {
     grid-template-columns: 1fr;
   }
+
+  .generator-draft-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .generator-panel-head {
     align-items: stretch;
   }

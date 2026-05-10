@@ -35,18 +35,20 @@ const handleAction = (key: string, row: Record<string, unknown>) => {
       </div>
 
       <div v-if="props.items.length === 0 && !tableLoading" class="ely-crud-empty">
-        <TEmpty
-          :title="emptyTitle ?? copy?.emptyTitle ?? '当前工作区为空'"
-          :description="
-            emptyDescription ??
-            copy?.emptyDescription ??
-            '当前筛选条件下没有匹配数据。'
-          "
-        >
-          <template #image>
-            <div class="ely-empty-orbit">∿</div>
-          </template>
-        </TEmpty>
+        <slot name="empty">
+          <TEmpty
+            :title="emptyTitle ?? copy?.emptyTitle ?? '当前工作区为空'"
+            :description="
+              emptyDescription ??
+              copy?.emptyDescription ??
+              '当前筛选条件下没有匹配数据。'
+            "
+          >
+            <template #image>
+              <div class="ely-empty-orbit">∿</div>
+            </template>
+          </TEmpty>
+        </slot>
       </div>
 
       <ElyTable

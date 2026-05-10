@@ -227,6 +227,10 @@ describe("useOperationLogWorkspace", () => {
       authFailureReason: "invalid_password",
       result: "failure",
     })
+    expect(workspace.currentQuerySummary.value).toBe(
+      "app.operationLog.field.action: login / app.operationLog.field.authEventType: app.operationLog.authEventType.login / app.operationLog.field.authFailureReason: app.operationLog.authFailureReason.invalid_password / app.operationLog.field.result: result:failure",
+    )
+    expect(workspace.hasActiveFilters.value).toBe(true)
   })
 
   test("preserves cached operation log context when reloading fails", async () => {
@@ -310,5 +314,8 @@ describe("useOperationLogWorkspace", () => {
       authFailureReason: "invalid_password",
       result: "failure",
     })
+    expect(workspace.currentQuerySummary.value).toBe(
+      "app.operationLog.field.action: login / app.operationLog.field.authEventType: app.operationLog.authEventType.login / app.operationLog.field.authFailureReason: app.operationLog.authFailureReason.invalid_password / app.operationLog.field.result: result:failure",
+    )
   })
 })

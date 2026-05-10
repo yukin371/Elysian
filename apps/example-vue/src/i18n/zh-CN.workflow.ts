@@ -118,38 +118,59 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.tabsHint": "{count} 条流程定义",
   "app.generatorPreview.sectionTitle": "生成预览工作区",
   "app.generatorPreview.sectionCopy":
-    "这里消费 generator 的纯渲染入口，预览文件列表、源码片段与 SQL 草案，不直接落盘到目标目录。",
+    "从模块草稿开始生成预览，先审查文件、权限和 SQL 提案，再决定是否应用到 staging。",
   "app.generatorPreview.shellTitle": "生成预览工作区",
   "app.generatorPreview.shellDescription":
-    "示例页当前通过 server preview session 装配生成预览、差异摘要与 staging apply 证据，不直接拥有生成运行时。",
-  "app.generatorPreview.workspaceEyebrow": "生成会话预览",
+    "从新建生成、最近结果到生成结果形成一条可审查、可回放、可应用的操作路径。",
+  "app.generatorPreview.workspaceEyebrow": "生成预览",
   "app.generatorPreview.workspaceTitle": "生成结果",
   "app.generatorPreview.workspaceDescription":
-    "选择 schema 与前端目标后，展示文件计划、差异摘要、流程状态与 apply 证据。",
+    "先配置模块草稿和前端目标，再查看文件计划、差异摘要、SQL 提案与应用证据。",
+  "app.generatorPreview.resultListSummary": "当前结果共 {count} 个产物。",
+  "app.generatorPreview.resultListHint":
+    "下一步：从列表里选择一份文件，查看差异、源码和 SQL 证据。",
+  "app.generatorPreview.resultListKeyboardHint":
+    "支持 / 聚焦文件搜索；聚焦结果列表后，可用 ↑ ↓ 快速切换文件。",
   "app.generatorPreview.message.localOnly":
     "当前工作区只做本地预览，不会写入生成目录，也不会替代 CLI 的真实 apply/preview 报告。",
   "app.generatorPreview.message.runtimeBacked":
-    "当前工作区由 server preview session 驱动；你看到的是后端返回的预览报告、冲突状态与 apply 证据。",
+    "当前工作区由后端生成记录驱动；你看到的是预览报告、冲突状态与应用证据。",
   "app.generatorPreview.message.blockingConflicts":
     "存在阻塞冲突，先处理冲突再应用到 staging。",
   "app.generatorPreview.blockedTitle": "阻塞冲突明细",
   "app.generatorPreview.blockedCount": "{count} 个文件当前无法直接应用",
+  "app.generatorPreview.blockedDescription":
+    "先打开这些阻塞文件，确认冲突原因和差异后，再决定是否重新生成或调整已有文件处理方式。",
   "app.generatorPreview.blockedAction": "查看该文件差异",
+  "app.generatorPreview.blockedRecoverySummary":
+    "当前还有 {count} 个阻塞文件，先从第一份开始处理。",
+  "app.generatorPreview.blockedPrimaryAction": "查看第一个阻塞文件",
   "app.generatorPreview.message.pendingReview": "先审核，再应用到 staging。",
   "app.generatorPreview.message.operationNoSession":
-    "请先刷新生成 preview session，再执行审核或 staging apply。",
+    "请先生成预览结果，再执行审核或应用到 staging。",
   "app.generatorPreview.message.operationLoading":
-    "正在生成 preview session，当前操作会在刷新完成后可用。",
+    "正在生成预览结果，当前操作会在生成完成后可用。",
   "app.generatorPreview.message.operationBusy":
     "当前已有审核或 apply 操作在执行，请等待操作完成。",
   "app.generatorPreview.message.confirmReject":
     "再次点击确认拒绝会结束本次会话；如需继续审核，可取消本次确认。",
   "app.generatorPreview.message.confirmApply":
     "再次点击确认应用会写入 staging；请先确认文件差异与 SQL 草案已完成审核。",
+  "app.generatorPreview.message.rejectCommentRequired":
+    "请填写拒绝原因，便于后续重新生成时明确要调整什么。",
   "app.generatorPreview.message.operationApplied":
-    "当前 preview session 已完成 staging apply，无需重复应用。",
+    "当前结果已应用到 staging，无需重复应用。",
   "app.generatorPreview.message.operationApplyUnavailable":
-    "当前 preview session 暂不可应用，请先确认清单，再确认没有阻塞冲突。",
+    "当前结果暂不可应用，请先确认清单，再确认没有阻塞冲突。",
+  "app.generatorPreview.errorRecoveryTitle": "下一步建议",
+  "app.generatorPreview.errorRecoveryStep.fixSchema":
+    "先检查 Schema JSON、模块标识和模块名称，修正字段结构后再重新生成预览。",
+  "app.generatorPreview.errorRecoveryStep.changeConflictStrategy":
+    "检查已有文件处理方式；如果冲突是预期的，改用更合适的冲突策略后再试。",
+  "app.generatorPreview.errorRecoveryStep.retryPreview":
+    "确认输入无误后，再次点击“生成预览”重试当前操作。",
+  "app.generatorPreview.errorRecoveryStep.manualReview":
+    "如果仍然失败，保留当前草稿和最近结果，再交给开发排查生成器或目标文件状态。",
   "app.generatorPreview.message.reviewApproved":
     "本次预览已完成审核通过，审核时间：{value}。",
   "app.generatorPreview.message.reviewRejected":
@@ -157,6 +178,30 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.rejected": "本次预览已拒绝，请重新生成。",
   "app.generatorPreview.message.applied":
     "本次预览已完成 staging apply，应用时间：{value}。",
+  "app.generatorPreview.progress.generatingTitle": "正在生成预览",
+  "app.generatorPreview.progress.regeneratingTitle": "正在重新生成预览",
+  "app.generatorPreview.progress.generatingDescription":
+    "当前阶段会刷新最近结果和文件计划。你可以留在页面等待，也可以稍后回来从“最近结果”继续查看。",
+  "app.generatorPreview.progress.reviewingTitle": "正在提交审核结果",
+  "app.generatorPreview.progress.reviewingDescription":
+    "当前阶段会更新审核状态和后续动作。可以稍后回到“最近结果”继续处理。",
+  "app.generatorPreview.progress.confirmingTitle": "正在记录确认清单",
+  "app.generatorPreview.progress.confirmingDescription":
+    "当前阶段会写入确认凭据并切换到 apply 前状态。可以稍后回来继续。",
+  "app.generatorPreview.progress.applyingTitle": "正在应用到 staging",
+  "app.generatorPreview.progress.applyingDescription":
+    "当前阶段会写入 staging 并更新应用证据。请等待状态刷新，或稍后从“最近结果”回看结果。",
+  "app.generatorPreview.resultRecoveryTitle": "当前结果的下一步建议",
+  "app.generatorPreview.resultRecoveryStep.refreshDrift":
+    "目标文件可能已经变化。先重新生成预览，再重新审核或应用，避免沿用过期结果。",
+  "app.generatorPreview.resultRecoveryStep.reviewBlockedFiles":
+    "先查看阻塞文件和冲突原因，再决定是否调整已有文件处理方式。",
+  "app.generatorPreview.resultRecoveryStep.recheckChecklist":
+    "回到确认清单，重新核对目标目录、文件数量、SQL proposal 和人工确认项。",
+  "app.generatorPreview.resultRecoveryStep.restoreSession":
+    "如果你离开过当前路径，可以先从“最近结果”恢复同一次会话，再继续处理。",
+  "app.generatorPreview.resultRecoveryStep.regenerate":
+    "如果当前结果已经不可信，直接重新生成预览，避免在旧证据上继续推进。",
   "app.generatorPreview.filter.schemaLabel": "模块",
   "app.generatorPreview.filter.conflictLabel": "已有文件处理方式",
   "app.generatorPreview.filter.frontendLabel": "前端目标",
@@ -164,6 +209,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.searchPlaceholder": "搜索文件",
   "app.generatorPreview.filter.sessionLabel": "查看最近结果",
   "app.generatorPreview.filter.sessionPlaceholder": "恢复会话",
+  "app.generatorPreview.recentSessionBadge.current": "当前配置",
+  "app.generatorPreview.recentSessionBadge.blocking": "阻塞冲突",
   "app.generatorPreview.filter.reset": "清空筛选",
   "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
   "app.generatorPreview.filter.frontendSummary": "前端: {value}",
@@ -171,16 +218,25 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.querySummary": "关键词: {value}",
   "app.generatorPreview.detailEyebrow": "预览详情",
   "app.generatorPreview.detailDescription":
-    "详情卡片保持聚焦，只展示当前文件、preview session 元数据与 SQL preview，避免重复铺开文件列表。",
+    "详情卡片保持聚焦，只展示当前文件、生成记录元数据与 SQL preview，避免重复铺开文件列表。",
   "app.generatorPreview.detailEmptyTitle": "尚未选择生成文件",
   "app.generatorPreview.detailEmptyDescription":
     "从左侧产物列表中选择一项，查看源码、会话信息与 SQL preview。",
+  "app.generatorPreview.action.closeFileDetail": "返回结果列表",
+  "app.generatorPreview.detailCloseHint": "按 Esc 也可以关闭当前文件详情。",
+  "app.generatorPreview.emptyDetailArtifactCount": "当前结果共 {count} 个产物",
+  "app.generatorPreview.emptyDetailNextStep":
+    "下一步：先从生成结果里选择一份文件查看证据。",
   "app.generatorPreview.emptyFiltered": "当前筛选条件下没有匹配的生成文件。",
-  "app.generatorPreview.loading": "正在生成最新 preview session，请稍候。",
-  "app.generatorPreview.action.refresh": "刷新预览",
-  "app.generatorPreview.action.refreshing": "刷新中",
+  "app.generatorPreview.emptyFilteredHint":
+    "可以清空文件搜索，回到完整结果列表后再选择要查看的产物。",
+  "app.generatorPreview.action.clearFileSearch": "清空文件搜索",
+  "app.generatorPreview.loading": "正在生成最新预览，请稍候。",
+  "app.generatorPreview.action.refresh": "生成预览",
+  "app.generatorPreview.action.refreshing": "生成中",
   "app.generatorPreview.action.generatePreview": "生成预览",
   "app.generatorPreview.action.generatingPreview": "生成中",
+  "app.generatorPreview.action.restoreCurrentResult": "恢复当前结果",
   "app.generatorPreview.action.regeneratePreview": "重新生成预览",
   "app.generatorPreview.action.regeneratingPreview": "重新生成中",
   "app.generatorPreview.action.loadCurrentSchemaDraft": "复制结构到当前草稿",
@@ -188,7 +244,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.collapseSchemaEditor": "收起编辑",
   "app.generatorPreview.input.templateLabel": "公共模板",
   "app.generatorPreview.input.templateHint":
-    "先载入一个基础模板，再直接改下面的 Schema JSON。",
+    "先载入一个基础模板，再按需要展开 Schema JSON。",
   "app.generatorPreview.input.validationDetails": "校验详情",
   "app.generatorPreview.action.approve": "审核通过",
   "app.generatorPreview.action.reject": "拒绝",
@@ -205,8 +261,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.copySnippet": "复制片段",
   "app.generatorPreview.action.copySnippetDone": "已复制",
   "app.generatorPreview.action.copySnippetFailed": "复制失败",
-  "app.generatorPreview.next.refresh": "下一步：刷新预览",
-  "app.generatorPreview.next.refreshing": "下一步：等待刷新完成",
+  "app.generatorPreview.next.refresh": "下一步：生成预览",
+  "app.generatorPreview.next.refreshing": "下一步：等待生成完成",
   "app.generatorPreview.next.review": "下一步：审核通过或拒绝",
   "app.generatorPreview.next.reviewing": "下一步：等待审核完成",
   "app.generatorPreview.next.confirmReject": "下一步：确认拒绝或取消",
@@ -217,7 +273,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.next.resolveConflicts": "下一步：处理阻塞冲突",
   "app.generatorPreview.next.done": "下一步：已完成",
   "app.generatorPreview.next.wait": "下一步：等待状态更新",
-  "app.generatorPreview.flow.configure": "配置 Schema",
+  "app.generatorPreview.flow.configure": "新建生成",
   "app.generatorPreview.flow.review": "审核差异",
   "app.generatorPreview.flow.confirm": "确认清单",
   "app.generatorPreview.flow.apply": "应用到 staging",
@@ -231,11 +287,33 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.status.rejected": "已拒绝",
   "app.generatorPreview.status.applied": "已应用",
   "app.generatorPreview.status.notGenerated": "未生成",
-  "app.generatorPreview.message.confirmedReady": "可以应用到 staging。",
+  "app.generatorPreview.message.confirmedReady":
+    "已审核通过，尚未应用到 staging。请确认目标、已有文件处理方式和文件数量后再应用。",
   "app.generatorPreview.message.confirmationEvidenceCaptured":
     "已记录确认凭据，包含 {count} 条确认清单项。",
   "app.generatorPreview.message.confirmationEvidenceDetailed":
     "已记录确认凭据：{count} 条清单，report={reportPath}，snapshot={snapshotPath}，恢复状态={recoveryStatus}。",
+  "app.generatorPreview.confirmationChecklistTitle": "应用前确认清单",
+  "app.generatorPreview.checklist.fileActions":
+    "文件动作：共 {total} 个产物，{changed} 个有变更；新增 {create}、覆盖 {overwrite}、跳过 {skip}、阻塞 {block}。",
+  "app.generatorPreview.checklist.fileActionsMissing":
+    "文件动作：当前没有可用的差异摘要，请先重新生成预览。",
+  "app.generatorPreview.checklist.conflictClear":
+    "冲突状态：当前没有阻塞冲突。",
+  "app.generatorPreview.checklist.conflictBlocking":
+    "冲突状态：仍存在阻塞冲突，不能直接应用。",
+  "app.generatorPreview.checklist.targetStaging":
+    "目标位置：本次只应用到 staging。",
+  "app.generatorPreview.checklist.conflictStrategy":
+    "已有文件处理方式：{value}。",
+  "app.generatorPreview.checklist.sqlProposalReady":
+    "SQL proposal：已生成 review-only 提案，需要人工确认后再正式接入。",
+  "app.generatorPreview.checklist.sqlProposalUnsupported":
+    "SQL proposal：当前模块暂不支持自动提案，请按 handoff 说明人工处理。",
+  "app.generatorPreview.checklist.sqlProposalMissing":
+    "SQL proposal：当前结果没有可用提案，请确认是否需要人工数据库变更。",
+  "app.generatorPreview.checklist.manualConfirmation":
+    "人工确认：确认文件差异、SQL proposal、权限与菜单影响都已审查。",
   "app.generatorPreview.summary.changed": "变更文件",
   "app.generatorPreview.summary.create": "新增",
   "app.generatorPreview.summary.overwrite": "覆盖",
@@ -246,6 +324,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.actionLabel.skip": "跳过",
   "app.generatorPreview.actionLabel.block": "阻塞",
   "app.generatorPreview.sessionTitle": "最近结果",
+  "app.generatorPreview.emptyResultTitle": "这里会显示最新一次生成结果",
+  "app.generatorPreview.emptyResultDescription":
+    "点击“生成预览”后，这里会出现文件状态、审核进度和应用到 staging 的后续动作。",
   "app.generatorPreview.fileDecisionTitle": "文件说明",
   "app.generatorPreview.diffTitle": "差异摘要",
   "app.generatorPreview.fileDiffTitle": "当前文件差异",
@@ -266,6 +347,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sourceTitle": "生成源码",
   "app.generatorPreview.currentSourceTitle": "目标目录当前内容",
   "app.generatorPreview.sqlTitle": "SQL Preview",
+  "app.generatorPreview.frontendImpactTitle": "前端注册与权限影响",
   "app.generatorPreview.meta.schemaName": "Schema",
   "app.generatorPreview.meta.frontendTarget": "前端目标",
   "app.generatorPreview.meta.status": "当前状态",
@@ -275,12 +357,17 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.changedYes": "是",
   "app.generatorPreview.meta.changedNo": "否",
   "app.generatorPreview.meta.lines": "行数",
+  "app.generatorPreview.meta.moduleCode": "模块标识",
+  "app.generatorPreview.meta.routePath": "路由路径",
+  "app.generatorPreview.meta.permissionPrefix": "权限前缀",
+  "app.generatorPreview.meta.surfaceKind": "页面形态",
   "app.generatorPreview.meta.sessionId": "Session ID",
   "app.generatorPreview.meta.absolutePath": "绝对路径",
   "app.generatorPreview.meta.exists": "目标文件已存在",
   "app.generatorPreview.meta.managed": "目标文件受管",
   "app.generatorPreview.meta.reportPath": "预览报告路径",
   "app.generatorPreview.meta.outputDir": "输出目录",
+  "app.generatorPreview.meta.targetPreset": "目标位置",
   "app.generatorPreview.meta.addedLines": "新增行",
   "app.generatorPreview.meta.removedLines": "删除行",
   "app.generatorPreview.meta.unchangedLines": "未变更行",
@@ -312,21 +399,29 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sourceType.manualSchemaJson": "Schema JSON",
   "app.generatorPreview.inputTitle": "新建生成",
   "app.generatorPreview.inputModeLabel": "起稿方式",
-  "app.generatorPreview.inputTemplateLabel": "克隆现有模块",
+  "app.generatorPreview.inputTemplateLabel": "复制现有模块结构",
   "app.generatorPreview.inputSchemaLabel": "Schema 模板",
   "app.generatorPreview.inputMode.registeredSchema": "选择已注册 Schema",
   "app.generatorPreview.inputMode.manualSchemaJson": "粘贴 Schema JSON",
   "app.generatorPreview.draftSource.template": "公共模板",
-  "app.generatorPreview.draftSource.reference": "克隆现有模块",
+  "app.generatorPreview.draftSource.reference": "复制现有模块结构",
   "app.generatorPreview.draftSource.json": "高级 JSON",
-  "app.generatorPreview.referenceSearchPlaceholder": "搜索要克隆的模块",
+  "app.generatorPreview.referenceSearchPlaceholder": "搜索要复制结构的模块",
   "app.generatorPreview.referenceSearchEmpty": "没有匹配的模块",
+  "app.generatorPreview.referenceSearchEmptyHint":
+    "可以改用公共模板开始，或展开 Schema JSON 直接编辑当前草稿。",
   "app.generatorPreview.referenceSearchMore":
     "还有 {count} 个模块，继续搜索可缩小范围",
+  "app.generatorPreview.referenceCopyHint":
+    "只把已有模块结构复制到当前草稿，不会重新生成或覆盖原模块。",
   "app.generatorPreview.input.moduleNameLabel": "模块标识",
   "app.generatorPreview.input.moduleNamePlaceholder": "例如 supplier",
+  "app.generatorPreview.input.moduleNameHelper":
+    "用于生成目录名、模块代码，以及默认的路由和权限前缀。",
   "app.generatorPreview.input.moduleLabelLabel": "模块名称",
   "app.generatorPreview.input.moduleLabelPlaceholder": "例如 供应商",
+  "app.generatorPreview.input.moduleLabelHelper":
+    "用于页面标题、列表文案和默认表单标题，尽量直接写业务名称。",
   "app.generatorPreview.input.manualSchemaDraftLabel": "Schema JSON",
   "app.generatorPreview.input.manualSchemaDraftPlaceholder":
     "需要时再展开并直接修改完整 Schema JSON",
@@ -338,6 +433,12 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "Schema JSON 不是有效的 JSON。",
   "app.generatorPreview.input.manualSchemaDraftInvalid":
     "Schema JSON 校验失败：{value}",
+  "app.generatorPreview.input.manualSchemaDraftSuggestionEnum":
+    "下一步建议：给 enum 字段补 `options` 数组，或填写 `dictionaryTypeCode`。",
+  "app.generatorPreview.input.manualSchemaDraftSuggestionId":
+    "下一步建议：补一个 `id` 字段，并设置 `kind: \"id\"`、`required: true`。",
+  "app.generatorPreview.input.manualSchemaDraftSuggestionKind":
+    "下一步建议：把字段类型改成支持的 kind，例如 `string`、`number`、`enum` 或 `datetime`。",
   "app.generatorPreview.conflictStrategy.skip": "跳过已有文件",
   "app.generatorPreview.conflictStrategy.overwrite": "覆盖已有文件",
   "app.generatorPreview.conflictStrategy.overwrite-generated-only":

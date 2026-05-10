@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount } from "vue"
+import { computed, onBeforeUnmount, onMounted, onUnmounted } from "vue"
 
 import GeneratorPreviewWorkspaceFileDecisionPanel from "./GeneratorPreviewWorkspaceFileDecisionPanel.vue"
 import GeneratorPreviewWorkspaceFileDiffPanel from "./GeneratorPreviewWorkspaceFileDiffPanel.vue"
@@ -8,6 +8,7 @@ import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSou
 import GeneratorPreviewWorkspaceSqlHandoffPanel from "./GeneratorPreviewWorkspaceSqlHandoffPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
 import { resolveGeneratorPreviewConfirmationEvidenceSummary } from "./generator-preview-confirmation-evidence"
+import { resolveGeneratorPreviewFrontendImpact } from "./generator-preview-frontend-impact"
 import { joinGeneratorPreviewSuggestedCommands } from "./generator-preview-handoff"
 import { resolveGeneratorPreviewRecoveryNote } from "./generator-preview-recovery-note"
 import type {
@@ -39,6 +40,9 @@ interface GeneratorPreviewWorkspacePanelProps {
 }
 
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
+const emit = defineEmits<{
+  (e: "clear-selection"): void
+}>()
 
 const {
   copySuggestedCommandsByKey,
@@ -49,6 +53,16 @@ const {
 
 const selectedSourceLineCount = computed(
   () => props.selectedFile?.lineCount ?? 0,
+)
+const previewArtifactCount = computed(
+  () => props.diffSummary?.totalFileCount ?? 0,
+)
+
+const frontendImpact = computed(() =>
+  resolveGeneratorPreviewFrontendImpact(
+    props.selectedFile?.path,
+    props.selectedFile?.contents,
+  ),
 )
 
 const selectedActionLabel = computed(() =>
@@ -236,20 +250,57 @@ const copyCurrentSource = async () => {
 const copySqlPreview = async () =>
   copyPanelValue("sqlPreview", props.sqlPreview?.contents)
 
+const clearSelection = () => {
+  if (!props.selectedFile) {
+    return
+  }
+
+  emit("clear-selection")
+}
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key !== "Escape" || !props.selectedFile) {
+    return
+  }
+
+  event.preventDefault()
+  clearSelection()
+}
+
+onMounted(() => document.addEventListener("keydown", handleKeydown))
 onBeforeUnmount(disposeCopyFeedbackTimers)
+onUnmounted(() => document.removeEventListener("keydown", handleKeydown))
 </script>
 
 <template>
   <section class="enterprise-card">
+    <div
+      v-if="selectedFile"
+      class="generator-detail-toolbar"
+    >
+      <button
+        type="button"
+        class="enterprise-button enterprise-button-ghost"
+        @click="clearSelection"
+      >
+        {{ t("app.generatorPreview.action.closeFileDetail") }}
+      </button>
+      <span class="generator-detail-toolbar-hint">
+        {{ t("app.generatorPreview.detailCloseHint") }}
+      </span>
+    </div>
+
     <GeneratorPreviewWorkspaceSummaryPanel
       :t="t"
       :selected-file="selectedFile"
       :selected-schema-name="selectedSchemaName"
       :selected-frontend-target="selectedFrontendTarget"
       :session-status-label="sessionStatusLabel"
+      :preview-artifact-count="previewArtifactCount"
       :selected-source-line-count="selectedSourceLineCount"
       :selected-action-label="selectedActionLabel"
       :selected-change-label="selectedChangeLabel"
+      :frontend-impact="frontendImpact"
       :recovery-note-text="recoveryNote?.text ?? null"
       :recovery-note-tone="recoveryNote?.tone ?? null"
     />
@@ -343,9 +394,22 @@ onBeforeUnmount(disposeCopyFeedbackTimers)
       @copy-current-source="copyCurrentSource"
       @copy-sql-preview="copySqlPreview"
     />
-
-    <div v-else class="enterprise-inline-warning mt-5">
-      {{ t("app.generatorPreview.detailEmptyDescription") }}
-    </div>
   </section>
 </template>
+
+<style scoped>
+.generator-detail-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.generator-detail-toolbar-hint {
+  color: #64748b;
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+</style>

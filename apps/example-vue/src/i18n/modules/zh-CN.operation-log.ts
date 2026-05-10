@@ -11,11 +11,21 @@ export const zhCNOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.workspaceTitle": "系统操作日志",
   "app.operationLog.workspaceDescription":
     "查询、日志列表与日志详情保持同一条操作链路。",
-  "app.operationLog.emptyTitle": "当前筛选条件下没有操作日志",
-  "app.operationLog.emptyDescription": "清空条件或调整关键字后重试。",
+  "app.operationLog.emptyTitle": "暂时还没有新的操作日志",
+  "app.operationLog.emptyDescription":
+    "等下一次真实登录、修改、下线或流程动作发生后，再回来查看最新审计记录。",
+  "app.operationLog.filteredEmptyTitle": "当前筛选条件下没有操作日志",
+  "app.operationLog.filteredEmptyDescription":
+    "当前查询条件过窄，没有命中对应的审计事件。",
+  "app.operationLog.filteredRecoveryHint":
+    "先放宽分类、请求 ID、操作人或结果条件，再打开一条最接近的日志继续排查。",
+  "app.operationLog.searchPlaceholder": "搜索操作日志",
   "app.operationLog.detailEyebrow": "日志详情",
   "app.operationLog.detailEmptyTitle": "尚未选择日志",
-  "app.operationLog.detailEmptyDescription": "请选择一条操作日志记录查看详情。",
+  "app.operationLog.detailEmptyDescription":
+    "选择一条操作日志后，这里会显示操作人、目标、请求 ID 和原始载荷。",
+  "app.operationLog.detailEmptyNextStep":
+    "下一步：先把查询收敛到一个分类、请求 ID、操作人或结果，再打开最接近的一条日志。",
   "app.operationLog.detailLoading": "正在刷新当前日志详情...",
   "app.operationLog.field.id": "ID",
   "app.operationLog.field.category": "分类",
@@ -55,7 +65,10 @@ export const zhCNOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.tabsHint": "{count} 条日志",
   "app.operationLog.panelTitle.detailFallback": "日志详情",
   "app.operationLog.panelDesc.detail":
-    "详情保持围绕当前日志，只读展示审计上下文。",
+    "先用当前日志确认请求归属、执行结果、目标对象和原始证据，再继续下一步排查。",
   "app.operationLog.meta.details": "详情载荷",
   "app.operationLog.meta.empty": "暂无",
+  "app.operationLog.meta.missing": "缺失",
+  "app.operationLog.meta.target": "目标对象",
+  "app.operationLog.action.clearFilters": "清空筛选",
 }

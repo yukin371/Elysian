@@ -267,10 +267,16 @@ describe("useGeneratorPreviewWorkspace refresh flows", () => {
     expect(workspace.manualSchemaDraftError.value).toContain(
       "app.generatorPreview.input.manualSchemaDraftInvalid",
     )
+    expect(workspace.manualSchemaDraftError.value).toContain(
+      "fields[1]: Enum field must provide non-empty options or dictionaryTypeCode.",
+    )
     expect(workspace.manualSchemaDraftErrorDetails.value).toContain(
       "Schema validation failed with",
     )
     expect(workspace.manualSchemaDraftErrorDetails.value).toContain("options")
+    expect(workspace.manualSchemaDraftErrorSuggestion.value).toBe(
+      "app.generatorPreview.input.manualSchemaDraftSuggestionEnum",
+    )
   })
 
   test("does not apply inconsistent preview response", async () => {

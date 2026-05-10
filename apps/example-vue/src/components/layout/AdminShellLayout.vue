@@ -77,6 +77,58 @@ const closeContextPanel = () => {
   contextPanelOpen.value = false
 }
 
+const isGeneratorPreviewWorkspace = computed(
+  () => props.workspaceMainProps.currentWorkspaceKind === "generator-preview",
+)
+
+const getGeneratorPreviewFilePaths = () => {
+  const files = props.workspaceMainProps.generatorPreviewFiles
+
+  if (!Array.isArray(files)) {
+    return []
+  }
+
+  return files
+    .map((file) =>
+      file && typeof file === "object" && "path" in file
+        ? String(file.path ?? "")
+        : "",
+    )
+    .filter((path) => path.length > 0)
+}
+
+const navigateGeneratorPreviewFileSelection = (delta: -1 | 1) => {
+  if (!isGeneratorPreviewWorkspace.value) {
+    return
+  }
+
+  const filePaths = getGeneratorPreviewFilePaths()
+
+  if (filePaths.length === 0) {
+    return
+  }
+
+  const selectedFilePath =
+    typeof props.workspaceMainProps.selectedGeneratorPreviewFilePath === "string"
+      ? props.workspaceMainProps.selectedGeneratorPreviewFilePath
+      : null
+  const currentIndex = selectedFilePath
+    ? filePaths.indexOf(selectedFilePath)
+    : -1
+  const fallbackIndex = delta > 0 ? 0 : filePaths.length - 1
+  const nextIndex =
+    currentIndex === -1
+      ? fallbackIndex
+      : Math.min(Math.max(currentIndex + delta, 0), filePaths.length - 1)
+  const nextFilePath = filePaths[nextIndex]
+
+  if (!nextFilePath || nextFilePath === selectedFilePath) {
+    return
+  }
+
+  props.workspaceMainListeners["select-generator-file"]?.(nextFilePath)
+}
+
 /**
  * Determines whether a workspace event should open the context panel.
  *
@@ -152,10 +204,10 @@ useWorkbenchShortcuts({
   },
   onClosePanel: closeContextPanel,
   onNavigateUp: () => {
-    // TODO: implement table row navigation
+    navigateGeneratorPreviewFileSelection(-1)
   },
   onNavigateDown: () => {
-    // TODO: implement table row navigation
+    navigateGeneratorPreviewFileSelection(1)
   },
   onEdit: () => {
     // TODO: trigger edit on selected row

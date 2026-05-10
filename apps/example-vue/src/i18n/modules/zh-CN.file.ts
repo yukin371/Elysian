@@ -14,6 +14,9 @@ export const zhCNFileLocaleMessages: VueLocaleMessages = {
   "app.file.loading": "正在加载文件列表...",
   "app.file.emptyTitle": "当前没有文件",
   "app.file.emptyDescription": "调整筛选条件，或上传一个文件。",
+  "app.file.emptyFilteredTitle": "当前筛选没有匹配文件",
+  "app.file.emptyFilteredDescription":
+    "先清空筛选回到完整列表，或直接上传一个新文件。",
   "app.file.countLabel": "当前显示 {visible} 个文件，共 {total} 个文件",
   "app.file.tabsHint": "当前可见 {count} 个文件",
   "app.file.statsHint": "文件工作区保持列表、详情、上传、下载与删除闭环。",
@@ -45,6 +48,7 @@ export const zhCNFileLocaleMessages: VueLocaleMessages = {
   "app.file.meta.uploaderUserId": "上传用户",
   "app.file.meta.createdAt": "上传时间",
   "app.file.action.upload": "上传文件",
+  "app.file.action.clearFilters": "清空筛选",
   "app.file.action.submitUpload": "确认上传",
   "app.file.action.download": "下载文件",
   "app.file.action.delete": "删除文件",

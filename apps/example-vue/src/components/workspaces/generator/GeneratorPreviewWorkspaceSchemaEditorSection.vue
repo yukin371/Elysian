@@ -10,6 +10,7 @@ interface GeneratorPreviewWorkspaceSchemaEditorSectionProps {
   manualSchemaDraft: string
   manualSchemaDraftError: string | null
   manualSchemaDraftErrorDetails: string | null
+  manualSchemaDraftErrorSuggestion: string | null
   showSchemaEditor: boolean
   schemaEditorFacts: Array<{ label: string; value: string }>
 }
@@ -74,6 +75,13 @@ const hasManualSchemaDraftErrorDetails = computed(() =>
       class="enterprise-message enterprise-message-danger"
     >
       {{ manualSchemaDraftError }}
+    </div>
+
+    <div
+      v-if="manualSchemaDraftErrorSuggestion"
+      class="enterprise-message enterprise-message-info"
+    >
+      {{ manualSchemaDraftErrorSuggestion }}
     </div>
 
     <pre

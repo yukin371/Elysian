@@ -13,17 +13,23 @@ const emit = defineEmits<GeneratorPreviewWorkspaceMainEmit>()
 
 const {
   canPatchDraftMeta,
+  canSubmitReject,
+  confirmationChecklist,
   cancelApplyConfirmation,
   cancelRejectConfirmation,
+  blockedFileCount,
   configPrimaryActionLabel,
+  configErrorRecoverySteps,
   conflictStrategyCards,
   currentStateMessage,
   draftModuleLabel,
   draftModuleName,
   draftSourceMode,
   draftSourceModeOptions,
+  draftSummaryFacts,
   filteredReferenceSchemaOptions,
   frontendOptionCards,
+  firstBlockedFilePath,
   handleApplyPreview,
   handleConflictStrategyChange,
   handleConfirmPreview,
@@ -39,6 +45,7 @@ const {
   handleRecentSessionChange,
   handleReferenceSchemaQueryInput,
   handleRefreshPreview,
+  handleRestoreCurrentResult,
   handleReviewCommentInput,
   handleReviewPreview,
   handleSchemaEditorToggle,
@@ -47,7 +54,10 @@ const {
   hiddenReferenceSchemaCount,
   isApplyConfirming,
   isRejectConfirming,
+  operationProgressMessage,
   referenceSchemaQuery,
+  rejectCommentRequired,
+  resultErrorRecoverySteps,
   resultPrimaryActionLabel,
   reviewComment,
   schemaEditorFacts,
@@ -77,6 +87,7 @@ const {
     :manual-schema-draft="manualSchemaDraft"
     :manual-schema-draft-error="manualSchemaDraftError"
     :manual-schema-draft-error-details="manualSchemaDraftErrorDetails"
+    :manual-schema-draft-error-suggestion="manualSchemaDraftErrorSuggestion"
     :draft-module-name="draftModuleName"
     :draft-module-label="draftModuleLabel"
     :can-patch-draft-meta="canPatchDraftMeta"
@@ -90,8 +101,10 @@ const {
     :draft-source-mode-options="draftSourceModeOptions"
     :schema-templates="schemaTemplates"
     :config-primary-action-label="configPrimaryActionLabel"
+    :config-error-recovery-steps="configErrorRecoverySteps"
     :show-schema-editor="showSchemaEditor"
     :schema-editor-facts="schemaEditorFacts"
+    :draft-summary-facts="draftSummaryFacts"
     @module-name-input="handleModuleNameInput"
     @module-label-input="handleModuleLabelInput"
     @draft-source-mode-change="handleDraftSourceModeChange"
@@ -106,23 +119,30 @@ const {
   />
 
   <GeneratorPreviewWorkspaceCurrentResultPanel
-    v-if="hasCurrentResult"
     :t="t"
     :loading="loading"
     :review-loading="reviewLoading"
     :apply-loading="applyLoading"
+    :has-current-result="hasCurrentResult"
     :has-recent-sessions="hasRecentSessions"
     :recent-session-options="recentSessionOptions"
     :selected-recent-session-id="selectedRecentSessionId"
     :status-facts="statusFacts"
     :current-state-message="currentStateMessage"
+    :operation-progress-message="operationProgressMessage"
+    :blocked-file-count="blockedFileCount"
+    :first-blocked-file-path="firstBlockedFilePath"
+    :result-error-recovery-steps="resultErrorRecoverySteps"
+    :confirmation-checklist="confirmationChecklist"
     :show-review-comment-input="showReviewCommentInput"
     :review-comment="reviewComment"
+    :reject-comment-required="rejectCommentRequired"
     :review-evidence="reviewEvidence"
     :apply-evidence="applyEvidence"
     :show-review-actions="showReviewActions"
     :is-reject-confirming="isRejectConfirming"
     :can-reject="canReject"
+    :can-submit-reject="canSubmitReject"
     :can-approve="canApprove"
     :show-confirm-action="showConfirmAction"
     :can-confirm="canConfirm"
@@ -131,12 +151,15 @@ const {
     :can-apply="canApply"
     :result-primary-action-label="resultPrimaryActionLabel"
     @recent-session-change="handleRecentSessionChange"
+    @restore-current-result="handleRestoreCurrentResult"
+    @refresh-preview="handleRefreshPreview"
     @review-comment-input="handleReviewCommentInput"
     @cancel-reject-confirm="cancelRejectConfirmation"
     @review-preview="handleReviewPreview"
     @cancel-apply-confirm="cancelApplyConfirmation"
     @confirm-preview="handleConfirmPreview"
     @apply-preview="handleApplyPreview"
+    @select-file="handleFileSelection"
   />
 
   <GeneratorPreviewWorkspaceResultListSection

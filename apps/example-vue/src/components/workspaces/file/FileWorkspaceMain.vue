@@ -42,6 +42,14 @@ const hasActiveFilters = computed(() =>
   ),
 )
 
+const showUploadAction = computed(() => props.canUploadFiles)
+const showFilteredEmptyState = computed(
+  () => props.tableItems.length === 0 && hasActiveFilters.value,
+)
+const showInitialEmptyState = computed(
+  () => props.tableItems.length === 0 && !hasActiveFilters.value,
+)
+
 const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
   emit("update:query", {
     ...props.query,
@@ -88,6 +96,33 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
     </div>
 
     <div v-else class="enterprise-workspace-stack">
+      <div class="file-summary-row">
+        <div class="file-summary-copy">
+          <span class="enterprise-copy file-count">{{ countLabel }}</span>
+          <span v-if="hasActiveFilters" class="enterprise-copy file-filter-summary">
+            {{ filterSummary }}
+          </span>
+        </div>
+        <div class="file-summary-actions">
+          <button
+            v-if="showUploadAction"
+            type="button"
+            class="enterprise-button"
+            @click="emit('open-upload')"
+          >
+            {{ t("app.file.action.upload") }}
+          </button>
+          <button
+            v-if="hasActiveFilters"
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            @click="emit('reset-filters')"
+          >
+            {{ t("app.file.filter.reset") }}
+          </button>
+        </div>
+      </div>
+
       <div class="file-toolbar">
         <label class="enterprise-field">
           <span>{{ t("app.file.field.originalName") }}</span>
@@ -120,22 +155,43 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
         </label>
       </div>
 
-      <div v-if="hasActiveFilters" class="file-summary-row">
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          @click="emit('reset-filters')"
-        >
-          {{ t("app.file.filter.reset") }}
-        </button>
+      <div v-if="showFilteredEmptyState" class="enterprise-message enterprise-message-info">
+        <strong>{{ t("app.file.emptyFilteredTitle") }}</strong>
+        <p class="empty-copy">{{ t("app.file.emptyFilteredDescription") }}</p>
+        <div class="file-empty-actions">
+          <button
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            @click="emit('reset-filters')"
+          >
+            {{ t("app.file.action.clearFilters") }}
+          </button>
+          <button
+            v-if="showUploadAction"
+            type="button"
+            class="enterprise-button"
+            @click="emit('open-upload')"
+          >
+            {{ t("app.file.action.upload") }}
+          </button>
+        </div>
       </div>
 
       <div
-        v-if="tableItems.length === 0"
+        v-else-if="showInitialEmptyState"
         class="enterprise-message enterprise-message-info"
       >
         <strong>{{ t("app.file.emptyTitle") }}</strong>
         <p class="empty-copy">{{ t("app.file.emptyDescription") }}</p>
+        <div v-if="showUploadAction" class="file-empty-actions">
+          <button
+            type="button"
+            class="enterprise-button"
+            @click="emit('open-upload')"
+          >
+            {{ t("app.file.action.upload") }}
+          </button>
+        </div>
       </div>
 
       <div v-else class="file-table-shell">
@@ -168,10 +224,6 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
           </tbody>
         </table>
       </div>
-
-      <div class="file-footer">
-        <span class="enterprise-copy file-count">{{ countLabel }}</span>
-      </div>
     </div>
   </section>
 </template>
@@ -192,6 +244,27 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.file-summary-copy,
+.file-summary-actions,
+.file-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.file-summary-copy {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.file-filter-summary {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .file-toolbar {

@@ -298,6 +298,7 @@ export type ShellWorkspaceSecondarySwitchEmitFn = {
   (event: "submit-customer-form", payload: unknown): void
   (event: "cancel-customer-form"): void
   (event: "submit-logout"): void
+  (event: "clear-generator-file-selection"): void
 }
 
 interface ShellWorkspaceSecondaryDescriptor {
@@ -712,6 +713,9 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       diffSummary: props.generatorPreviewDiffSummary,
       reviewEvidence: props.generatorPreviewReviewEvidence,
       applyEvidence: props.generatorPreviewApplyEvidence,
+    },
+    listeners: {
+      "clear-selection": () => emit("clear-generator-file-selection"),
     },
   }),
 }

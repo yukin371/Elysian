@@ -107,6 +107,7 @@ describe("useAuthSessionWorkspace", () => {
     expect(workspace.currentQuerySummary.value).toBe(
       "app.onlineSession.field.keyword: safari / app.onlineSession.field.state: app.onlineSession.state.rotated / app.onlineSession.field.scope: app.onlineSession.scope.history",
     )
+    expect(workspace.hasActiveFilters.value).toBe(true)
 
     workspace.handleReset()
 
@@ -115,6 +116,7 @@ describe("useAuthSessionWorkspace", () => {
     )
     expect(workspace.sessionQueryValues.value).toEqual({})
     expect(workspace.currentQuerySummary.value).toBe("app.filter.none")
+    expect(workspace.hasActiveFilters.value).toBe(false)
   })
 
   test("revokes the current session and delegates sign-out without reloading", async () => {
@@ -281,6 +283,7 @@ describe("useAuthSessionWorkspace", () => {
     expect(workspace.currentQuerySummary.value).toBe(
       "app.onlineSession.field.keyword: safari / app.onlineSession.field.state: app.onlineSession.state.rotated / app.onlineSession.field.scope: app.onlineSession.scope.history",
     )
+    expect(workspace.hasActiveFilters.value).toBe(true)
   })
 
   test("preserves cached session context when reloading sessions fails", async () => {

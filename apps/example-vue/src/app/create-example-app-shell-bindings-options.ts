@@ -363,6 +363,9 @@ export const createExampleAppShellBindingsOptions = (
       generatorPreviewManualSchemaDraftErrorDetails:
         input.workspaces.generatorPreviewWorkspace
           .manualSchemaDraftErrorDetails,
+      generatorPreviewManualSchemaDraftErrorSuggestion:
+        input.workspaces.generatorPreviewWorkspace
+          .manualSchemaDraftErrorSuggestion,
       loadSelectedSchemaDraft:
         input.workspaces.generatorPreviewWorkspace.loadSelectedSchemaDraft,
       loadGeneratorSchemaTemplate:

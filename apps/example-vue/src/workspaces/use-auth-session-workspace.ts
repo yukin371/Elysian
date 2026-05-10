@@ -217,6 +217,10 @@ export const useAuthSessionWorkspace = (
       : options.t("app.filter.none")
   })
 
+  const hasActiveFilters = computed(
+    () => currentQuerySummary.value !== options.t("app.filter.none"),
+  )
+
   const clearWorkspace = () => {
     sessionItems.value = []
     selectedSessionId.value = null
@@ -307,6 +311,7 @@ export const useAuthSessionWorkspace = (
     handleReset,
     handleRowClick,
     handleSearch,
+    hasActiveFilters,
     queryFields,
     reloadSessions,
     revokeSelectedSession,

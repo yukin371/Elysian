@@ -127,40 +127,62 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.workflow.tabsHint": "{count} workflow definitions",
   "app.generatorPreview.sectionTitle": "Generator preview workspace",
   "app.generatorPreview.sectionCopy":
-    "This surface consumes the pure generator renderer to preview file artifacts, source output, and a SQL draft without writing into the target directory.",
+    "Start from a module draft, generate a preview, review files, permissions, and SQL proposals, then decide whether to apply to staging.",
   "app.generatorPreview.shellTitle": "Generator preview workspace",
   "app.generatorPreview.shellDescription":
-    "The example app now assembles server-backed preview sessions, diff summaries, and staging apply evidence without owning generator runtime behavior.",
-  "app.generatorPreview.workspaceEyebrow": "Preview session",
+    "New generation, latest result, and generated files form one reviewable and replayable operation path.",
+  "app.generatorPreview.workspaceEyebrow": "Generator preview",
   "app.generatorPreview.workspaceTitle": "Generated files",
   "app.generatorPreview.workspaceDescription":
-    "Pick a schema and frontend target on the left, review the preview session plan and diff summary in the main area, and inspect file/session details plus SQL preview on the right.",
+    "Configure the module draft and frontend target first, then review file plans, diff summaries, SQL proposals, and apply evidence.",
+  "app.generatorPreview.resultListSummary":
+    "{count} artifacts are included in the current result.",
+  "app.generatorPreview.resultListHint":
+    "Next: select one file from the list to review diff, source, and SQL evidence.",
+  "app.generatorPreview.resultListKeyboardHint":
+    "Use / to focus file search. Once the result list is focused, use ↑ ↓ to move between files.",
   "app.generatorPreview.message.localOnly":
     "This workspace is preview-only. It does not write to the generation directory and does not replace the CLI apply or preview reports.",
   "app.generatorPreview.message.runtimeBacked":
-    "This workspace is driven by server preview sessions, so the file plan, conflict status, and apply evidence all come from backend preview reports.",
+    "This workspace is driven by backend generation records, so the file plan, conflict status, and apply evidence come from preview reports.",
   "app.generatorPreview.message.blockingConflicts":
     "Blocking conflicts found. Resolve them before applying to staging.",
   "app.generatorPreview.blockedTitle": "Blocking conflicts",
   "app.generatorPreview.blockedCount":
     "{count} files cannot be applied directly right now",
+  "app.generatorPreview.blockedDescription":
+    "Open these blocked files first, confirm why they conflict, then decide whether to regenerate or change the existing-file handling.",
   "app.generatorPreview.blockedAction": "Open this file diff",
+  "app.generatorPreview.blockedRecoverySummary":
+    "{count} blocked files still need review. Start with the first one.",
+  "app.generatorPreview.blockedPrimaryAction": "Review first blocked file",
   "app.generatorPreview.message.pendingReview":
     "Approve this preview before applying to staging.",
   "app.generatorPreview.message.operationNoSession":
-    "Refresh a preview session before reviewing or applying to staging.",
+    "Generate a preview result before reviewing or applying to staging.",
   "app.generatorPreview.message.operationLoading":
-    "A preview session is being generated. Actions will be available after refresh finishes.",
+    "A preview result is being generated. Actions will be available after generation finishes.",
   "app.generatorPreview.message.operationBusy":
     "A review or apply operation is already running. Wait for it to finish.",
   "app.generatorPreview.message.confirmReject":
     "Click confirm reject again to close this session, or cancel to continue reviewing.",
   "app.generatorPreview.message.confirmApply":
     "Click confirm apply again to write to staging after reviewing file diffs and the SQL draft.",
+  "app.generatorPreview.message.rejectCommentRequired":
+    "Add a rejection reason so the next preview has a clear correction target.",
   "app.generatorPreview.message.operationApplied":
-    "This preview session has already been applied to staging. It does not need to be applied again.",
+    "This result has already been applied to staging. It does not need to be applied again.",
   "app.generatorPreview.message.operationApplyUnavailable":
-    "This preview session cannot be applied yet. Confirm the checklist first and make sure there are no blocking conflicts.",
+    "This result cannot be applied yet. Confirm the checklist first and make sure there are no blocking conflicts.",
+  "app.generatorPreview.errorRecoveryTitle": "Suggested next steps",
+  "app.generatorPreview.errorRecoveryStep.fixSchema":
+    "Check the Schema JSON, module code, and module name first, then regenerate the preview after fixing the field structure.",
+  "app.generatorPreview.errorRecoveryStep.changeConflictStrategy":
+    "Review how existing files are handled. If the conflict is expected, switch to a more suitable conflict strategy and try again.",
+  "app.generatorPreview.errorRecoveryStep.retryPreview":
+    "After confirming the input is correct, click Generate preview again to retry the current operation.",
+  "app.generatorPreview.errorRecoveryStep.manualReview":
+    "If it still fails, keep the current draft and latest result, then hand it to engineering to inspect the generator or target-file state.",
   "app.generatorPreview.message.reviewApproved":
     "This preview passed review at {value}.",
   "app.generatorPreview.message.reviewRejected":
@@ -169,6 +191,32 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "This preview was rejected. Generate a new one to continue.",
   "app.generatorPreview.message.applied":
     "This preview has already been applied to staging at {value}.",
+  "app.generatorPreview.progress.generatingTitle": "Generating preview",
+  "app.generatorPreview.progress.regeneratingTitle": "Regenerating preview",
+  "app.generatorPreview.progress.generatingDescription":
+    "This stage refreshes the latest result and file plan. You can stay on the page or come back later and continue from Latest result.",
+  "app.generatorPreview.progress.reviewingTitle": "Submitting review decision",
+  "app.generatorPreview.progress.reviewingDescription":
+    "This stage updates the review status and next actions. You can come back later and continue from Latest result.",
+  "app.generatorPreview.progress.confirmingTitle":
+    "Recording the confirmation checklist",
+  "app.generatorPreview.progress.confirmingDescription":
+    "This stage stores the confirmation evidence and moves the session into the pre-apply state. You can come back later and continue.",
+  "app.generatorPreview.progress.applyingTitle": "Applying to staging",
+  "app.generatorPreview.progress.applyingDescription":
+    "This stage writes to staging and updates apply evidence. Wait for the status refresh, or come back later and review it from Latest result.",
+  "app.generatorPreview.resultRecoveryTitle":
+    "Suggested next steps for the current result",
+  "app.generatorPreview.resultRecoveryStep.refreshDrift":
+    "The target files may have changed. Regenerate the preview first, then review or apply again instead of relying on stale evidence.",
+  "app.generatorPreview.resultRecoveryStep.reviewBlockedFiles":
+    "Review the blocked files and conflict reasons first, then decide whether the existing-file handling should change.",
+  "app.generatorPreview.resultRecoveryStep.recheckChecklist":
+    "Go back to the checklist and verify the target directory, file count, SQL proposal, and manual confirmation items again.",
+  "app.generatorPreview.resultRecoveryStep.restoreSession":
+    "If you left the flow, restore the same run from Latest result before continuing.",
+  "app.generatorPreview.resultRecoveryStep.regenerate":
+    "If the current result is no longer trustworthy, regenerate the preview instead of pushing forward on old evidence.",
   "app.generatorPreview.filter.schemaLabel": "Module",
   "app.generatorPreview.filter.conflictLabel": "How to handle existing files",
   "app.generatorPreview.filter.frontendLabel": "Frontend target",
@@ -176,6 +224,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.searchPlaceholder": "Search files",
   "app.generatorPreview.filter.sessionLabel": "View recent results",
   "app.generatorPreview.filter.sessionPlaceholder": "Restore session",
+  "app.generatorPreview.recentSessionBadge.current": "Current setup",
+  "app.generatorPreview.recentSessionBadge.blocking": "Blocking conflict",
   "app.generatorPreview.filter.reset": "Clear filters",
   "app.generatorPreview.filter.schemaSummary": "Schema: {value}",
   "app.generatorPreview.filter.frontendSummary": "Frontend: {value}",
@@ -183,17 +233,28 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.filter.querySummary": "Query: {value}",
   "app.generatorPreview.detailEyebrow": "Preview detail",
   "app.generatorPreview.detailDescription":
-    "The detail cards stay focused on the selected file, preview session metadata, and SQL preview instead of duplicating the file list.",
+    "The detail cards stay focused on the selected file, generation record metadata, and SQL preview instead of duplicating the file list.",
   "app.generatorPreview.detailEmptyTitle": "No generated file selected",
   "app.generatorPreview.detailEmptyDescription":
     "Pick an artifact from the list to inspect source, session details, and SQL preview.",
+  "app.generatorPreview.action.closeFileDetail": "Back to result list",
+  "app.generatorPreview.detailCloseHint":
+    "Press Esc to close the current file detail too.",
+  "app.generatorPreview.emptyDetailArtifactCount":
+    "{count} artifacts are included in the current result",
+  "app.generatorPreview.emptyDetailNextStep":
+    "Next: select one generated file to review the evidence.",
   "app.generatorPreview.emptyFiltered":
     "No generated files match the current filter.",
-  "app.generatorPreview.loading": "Generating the latest preview session.",
-  "app.generatorPreview.action.refresh": "Refresh preview",
-  "app.generatorPreview.action.refreshing": "Refreshing",
+  "app.generatorPreview.emptyFilteredHint":
+    "Clear the file search to return to the full result list, then choose the artifact you want to inspect.",
+  "app.generatorPreview.action.clearFileSearch": "Clear file search",
+  "app.generatorPreview.loading": "Generating the latest preview.",
+  "app.generatorPreview.action.refresh": "Generate preview",
+  "app.generatorPreview.action.refreshing": "Generating",
   "app.generatorPreview.action.generatePreview": "Generate preview",
   "app.generatorPreview.action.generatingPreview": "Generating",
+  "app.generatorPreview.action.restoreCurrentResult": "Restore current result",
   "app.generatorPreview.action.regeneratePreview": "Regenerate preview",
   "app.generatorPreview.action.regeneratingPreview": "Regenerating",
   "app.generatorPreview.action.loadCurrentSchemaDraft":
@@ -202,7 +263,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.collapseSchemaEditor": "Hide JSON",
   "app.generatorPreview.input.templateLabel": "Public templates",
   "app.generatorPreview.input.templateHint":
-    "Load a base template first, then edit the Schema JSON below.",
+    "Load a base template first, then expand Schema JSON only when needed.",
   "app.generatorPreview.input.validationDetails": "Validation details",
   "app.generatorPreview.action.approve": "Approve",
   "app.generatorPreview.action.reject": "Reject",
@@ -219,8 +280,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.copySnippet": "Copy snippet",
   "app.generatorPreview.action.copySnippetDone": "Copied",
   "app.generatorPreview.action.copySnippetFailed": "Copy failed",
-  "app.generatorPreview.next.refresh": "Next: refresh preview",
-  "app.generatorPreview.next.refreshing": "Next: wait for refresh",
+  "app.generatorPreview.next.refresh": "Next: generate preview",
+  "app.generatorPreview.next.refreshing": "Next: wait for generation",
   "app.generatorPreview.next.review": "Next: approve or reject",
   "app.generatorPreview.next.reviewing": "Next: wait for review",
   "app.generatorPreview.next.confirmReject": "Next: confirm reject or cancel",
@@ -233,7 +294,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Next: resolve blocking conflicts",
   "app.generatorPreview.next.done": "Next: complete",
   "app.generatorPreview.next.wait": "Next: wait for status update",
-  "app.generatorPreview.flow.configure": "Configure schema",
+  "app.generatorPreview.flow.configure": "New generation",
   "app.generatorPreview.flow.review": "Review diff",
   "app.generatorPreview.flow.confirm": "Confirm checklist",
   "app.generatorPreview.flow.apply": "Apply to staging",
@@ -247,11 +308,34 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.status.rejected": "Rejected",
   "app.generatorPreview.status.applied": "Applied",
   "app.generatorPreview.status.notGenerated": "Not generated",
-  "app.generatorPreview.message.confirmedReady": "Ready to apply to staging.",
+  "app.generatorPreview.message.confirmedReady":
+    "Review is approved, but this result has not been applied to staging yet. Confirm the target, existing-file handling, and file count before applying.",
   "app.generatorPreview.message.confirmationEvidenceCaptured":
     "Confirmation evidence captured with {count} checklist items.",
   "app.generatorPreview.message.confirmationEvidenceDetailed":
     "Confirmation evidence captured: {count} checklist items, report={reportPath}, snapshot={snapshotPath}, recovery={recoveryStatus}.",
+  "app.generatorPreview.confirmationChecklistTitle":
+    "Pre-apply confirmation checklist",
+  "app.generatorPreview.checklist.fileActions":
+    "File actions: {total} artifacts, {changed} changed; create {create}, overwrite {overwrite}, skip {skip}, block {block}.",
+  "app.generatorPreview.checklist.fileActionsMissing":
+    "File actions: no diff summary is available. Regenerate the preview first.",
+  "app.generatorPreview.checklist.conflictClear":
+    "Conflict status: no blocking conflicts are present.",
+  "app.generatorPreview.checklist.conflictBlocking":
+    "Conflict status: blocking conflicts are still present and cannot be applied directly.",
+  "app.generatorPreview.checklist.targetStaging":
+    "Target: this result applies only to staging.",
+  "app.generatorPreview.checklist.conflictStrategy":
+    "Existing-file handling: {value}.",
+  "app.generatorPreview.checklist.sqlProposalReady":
+    "SQL proposal: a review-only proposal is available and still needs manual confirmation before formal integration.",
+  "app.generatorPreview.checklist.sqlProposalUnsupported":
+    "SQL proposal: automatic proposal is unsupported for this module; handle it manually from the handoff guide.",
+  "app.generatorPreview.checklist.sqlProposalMissing":
+    "SQL proposal: no proposal is available for this result; confirm whether a manual database change is required.",
+  "app.generatorPreview.checklist.manualConfirmation":
+    "Manual confirmation: file diffs, SQL proposal, permissions, and menu impact have been reviewed.",
   "app.generatorPreview.summary.changed": "Changed files",
   "app.generatorPreview.summary.create": "Create",
   "app.generatorPreview.summary.overwrite": "Overwrite",
@@ -262,6 +346,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.actionLabel.skip": "Skip",
   "app.generatorPreview.actionLabel.block": "Block",
   "app.generatorPreview.sessionTitle": "Latest result",
+  "app.generatorPreview.emptyResultTitle":
+    "The latest generation result will appear here",
+  "app.generatorPreview.emptyResultDescription":
+    "After you click Generate preview, this area shows file status, review progress, and the next apply-to-staging actions.",
   "app.generatorPreview.fileDecisionTitle": "File rationale",
   "app.generatorPreview.diffTitle": "Diff summary",
   "app.generatorPreview.fileDiffTitle": "Current file diff",
@@ -285,6 +373,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sourceTitle": "Generated source",
   "app.generatorPreview.currentSourceTitle": "Current target contents",
   "app.generatorPreview.sqlTitle": "SQL preview",
+  "app.generatorPreview.frontendImpactTitle":
+    "Frontend registration and permission impact",
   "app.generatorPreview.meta.schemaName": "Schema",
   "app.generatorPreview.meta.frontendTarget": "Frontend target",
   "app.generatorPreview.meta.status": "Current status",
@@ -294,12 +384,17 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.changedYes": "Yes",
   "app.generatorPreview.meta.changedNo": "No",
   "app.generatorPreview.meta.lines": "lines",
+  "app.generatorPreview.meta.moduleCode": "Module code",
+  "app.generatorPreview.meta.routePath": "Route path",
+  "app.generatorPreview.meta.permissionPrefix": "Permission prefix",
+  "app.generatorPreview.meta.surfaceKind": "Surface kind",
   "app.generatorPreview.meta.sessionId": "Session ID",
   "app.generatorPreview.meta.absolutePath": "Absolute path",
   "app.generatorPreview.meta.exists": "Target file exists",
   "app.generatorPreview.meta.managed": "Target file is managed",
   "app.generatorPreview.meta.reportPath": "Preview report path",
   "app.generatorPreview.meta.outputDir": "Output directory",
+  "app.generatorPreview.meta.targetPreset": "Target",
   "app.generatorPreview.meta.addedLines": "Added lines",
   "app.generatorPreview.meta.removedLines": "Removed lines",
   "app.generatorPreview.meta.unchangedLines": "Unchanged lines",
@@ -332,21 +427,30 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sourceType.manualSchemaJson": "Schema JSON",
   "app.generatorPreview.inputTitle": "New generation",
   "app.generatorPreview.inputModeLabel": "Starting point",
-  "app.generatorPreview.inputTemplateLabel": "Clone existing modules",
+  "app.generatorPreview.inputTemplateLabel": "Copy existing module structure",
   "app.generatorPreview.inputSchemaLabel": "Schema template",
   "app.generatorPreview.inputMode.registeredSchema": "Use registered schema",
   "app.generatorPreview.inputMode.manualSchemaJson": "Paste schema JSON",
   "app.generatorPreview.draftSource.template": "Public templates",
-  "app.generatorPreview.draftSource.reference": "Clone existing modules",
+  "app.generatorPreview.draftSource.reference": "Copy existing module structure",
   "app.generatorPreview.draftSource.json": "Advanced JSON",
-  "app.generatorPreview.referenceSearchPlaceholder": "Search modules to clone",
+  "app.generatorPreview.referenceSearchPlaceholder":
+    "Search modules whose structure should be copied",
   "app.generatorPreview.referenceSearchEmpty": "No matching modules",
+  "app.generatorPreview.referenceSearchEmptyHint":
+    "Switch to a public template, or expand Schema JSON to edit the current draft directly.",
   "app.generatorPreview.referenceSearchMore":
     "{count} more modules are hidden. Keep searching to narrow them down",
+  "app.generatorPreview.referenceCopyHint":
+    "This only copies the existing module structure into the current draft. It does not regenerate or overwrite the source module.",
   "app.generatorPreview.input.moduleNameLabel": "Module code",
   "app.generatorPreview.input.moduleNamePlaceholder": "For example supplier",
+  "app.generatorPreview.input.moduleNameHelper":
+    "Used for generated directories, module code, and the default route and permission prefix.",
   "app.generatorPreview.input.moduleLabelLabel": "Module name",
   "app.generatorPreview.input.moduleLabelPlaceholder": "For example Supplier",
+  "app.generatorPreview.input.moduleLabelHelper":
+    "Used for page titles, list copy, and default form titles. Keep it as the business-facing name.",
   "app.generatorPreview.input.manualSchemaDraftLabel": "Schema JSON",
   "app.generatorPreview.input.manualSchemaDraftPlaceholder":
     "Expand this section only when you need to edit the full Schema JSON",
@@ -358,6 +462,12 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "The schema JSON is not valid JSON.",
   "app.generatorPreview.input.manualSchemaDraftInvalid":
     "Schema JSON validation failed: {value}",
+  "app.generatorPreview.input.manualSchemaDraftSuggestionEnum":
+    "Next step: add an `options` array for the enum field, or fill in `dictionaryTypeCode`.",
+  "app.generatorPreview.input.manualSchemaDraftSuggestionId":
+    "Next step: add an `id` field and set `kind: \"id\"` with `required: true`.",
+  "app.generatorPreview.input.manualSchemaDraftSuggestionKind":
+    "Next step: change the field kind to a supported value such as `string`, `number`, `enum`, or `datetime`.",
   "app.generatorPreview.conflictStrategy.skip": "Skip existing files",
   "app.generatorPreview.conflictStrategy.overwrite": "Overwrite existing files",
   "app.generatorPreview.conflictStrategy.overwrite-generated-only":

@@ -4,6 +4,11 @@ import { generatorPreviewSessionStatusPriority } from "./generator-preview-sessi
 
 type Translate = (key: string, params?: Record<string, unknown>) => string
 
+const localizeGeneratorPreviewFrontendTarget = (
+  t: Translate,
+  frontendTarget: GeneratorPreviewSessionRecord["frontendTarget"],
+) => (frontendTarget === "react" ? "React" : "Vue")
+
 export const localizeGeneratorPreviewSessionStatus = (
   t: Translate,
   status: GeneratorPreviewSessionRecord["status"],
@@ -73,15 +78,28 @@ export const buildGeneratorPreviewRecentSessionOptions = (
 ) =>
   prioritizeGeneratorPreviewRecentSessions(sessions, isMatchingSelection)
     .slice(0, 8)
-    .map((session) => ({
-      label: [
-        session.schemaName,
-        session.frontendTarget,
-        localizeGeneratorPreviewSessionStatus(t, session.status),
-        session.createdAt.slice(5, 16).replace("T", " "),
-      ].join(" · "),
-      value: session.id,
-    }))
+    .map((session) => {
+      const badges: string[] = []
+
+      if (isMatchingSelection(session)) {
+        badges.push(t("app.generatorPreview.recentSessionBadge.current"))
+      }
+
+      if (session.hasBlockingConflicts) {
+        badges.push(t("app.generatorPreview.recentSessionBadge.blocking"))
+      }
+
+      return {
+        label: [
+          ...badges,
+          session.schemaName,
+          localizeGeneratorPreviewFrontendTarget(t, session.frontendTarget),
+          localizeGeneratorPreviewSessionStatus(t, session.status),
+          session.createdAt.slice(5, 16).replace("T", " "),
+        ].join(" · "),
+        value: session.id,
+      }
+    })
 
 export const buildGeneratorPreviewConflictStrategyOptions = (t: Translate) => [
   {

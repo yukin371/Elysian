@@ -1242,9 +1242,12 @@ describe("useGeneratorPreviewWorkspace restore flows", () => {
       "preview-session-other",
     )
     expect(workspace.recentSessionOptions.value[0]?.label).toContain(
+      "app.generatorPreview.recentSessionBadge.current",
+    )
+    expect(workspace.recentSessionOptions.value[0]?.label).toContain(
       "app.generatorPreview.status.pendingReview",
     )
-    expect(workspace.recentSessionOptions.value[0]?.label).toContain("vue")
+    expect(workspace.recentSessionOptions.value[0]?.label).toContain("Vue")
     expect(workspace.recentSessionOptions.value[2]?.label).toContain(
       "app.generatorPreview.status.ready",
     )

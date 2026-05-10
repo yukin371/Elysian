@@ -103,6 +103,8 @@ export const createExampleShellWorkspaceMainBindings = ({
   enterpriseSessionQueryFields,
   enterpriseSessionTableColumns,
   enterpriseSessionTableItems,
+  sessionCurrentQuerySummary,
+  sessionHasActiveFilters,
   postModuleReady,
   canEnterPostWorkspace,
   canViewPosts,
@@ -146,6 +148,8 @@ export const createExampleShellWorkspaceMainBindings = ({
   enterpriseOperationLogTableColumns,
   enterpriseOperationLogTableItems,
   operationLogCountLabel,
+  operationLogCurrentQuerySummary,
+  operationLogHasActiveFilters,
   roleModuleReady,
   canEnterRoleWorkspace,
   canViewRoles,
@@ -224,6 +228,7 @@ export const createExampleShellWorkspaceMainBindings = ({
   openFileUploadPanel,
   resetGeneratorPreviewFilters,
   refreshGeneratorPreview,
+  resetGeneratorPreviewState,
   restoreGeneratorPreviewSession,
   reviewGeneratorPreview,
   confirmGeneratorPreview,
@@ -399,6 +404,8 @@ export const createExampleShellWorkspaceMainBindings = ({
     enterpriseSessionQueryFields: read(enterpriseSessionQueryFields),
     enterpriseSessionTableColumns: read(enterpriseSessionTableColumns),
     enterpriseSessionTableItems: read(enterpriseSessionTableItems),
+    sessionCurrentQuerySummary: read(sessionCurrentQuerySummary),
+    sessionHasActiveFilters: read(sessionHasActiveFilters),
     postModuleReady: read(postModuleReady),
     canEnterPostWorkspace: read(canEnterPostWorkspace),
     canViewPosts: read(canViewPosts),
@@ -443,6 +450,8 @@ export const createExampleShellWorkspaceMainBindings = ({
     ),
     enterpriseOperationLogTableItems: read(enterpriseOperationLogTableItems),
     operationLogCountLabel: read(operationLogCountLabel),
+    operationLogCurrentQuerySummary: read(operationLogCurrentQuerySummary),
+    operationLogHasActiveFilters: read(operationLogHasActiveFilters),
     roleModuleReady: read(roleModuleReady),
     canEnterRoleWorkspace: read(canEnterRoleWorkspace),
     canViewRoles: read(canViewRoles),
@@ -550,8 +559,21 @@ export const createExampleShellWorkspaceMainBindings = ({
     "load-generator-current-schema-draft": loadSelectedSchemaDraft,
     "load-generator-schema-template": loadGeneratorSchemaTemplate,
     "restore-generator-session": restoreGeneratorPreviewSession,
+    "restore-current-generator-session": () => {
+      const sessionId = String(read(generatorPreviewSession)?.id ?? "").trim()
+
+      if (sessionId.length === 0) {
+        return
+      }
+
+      resetGeneratorPreviewState()
+      restoreGeneratorPreviewSession(sessionId)
+    },
     "select-generator-file": (value: string) => {
       selectedGeneratorPreviewFilePath.value = value
+    },
+    "clear-generator-file-selection": () => {
+      selectedGeneratorPreviewFilePath.value = null
     },
     "reset-generator-filters": resetGeneratorPreviewFilters,
     "refresh-generator-preview": refreshGeneratorPreview,

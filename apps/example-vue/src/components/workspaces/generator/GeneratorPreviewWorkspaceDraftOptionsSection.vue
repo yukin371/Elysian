@@ -85,6 +85,9 @@ const emit = defineEmits<{
         </h4>
       </div>
       <div class="generator-option-values generator-option-values-templates">
+        <div class="generator-option-meta generator-option-meta-full">
+          {{ t("app.generatorPreview.input.templateHint") }}
+        </div>
         <button
           v-for="template in schemaTemplates"
           :key="template.id"
@@ -111,6 +114,9 @@ const emit = defineEmits<{
         </h4>
       </div>
       <div class="generator-reference-picker">
+        <div class="generator-option-meta">
+          {{ t("app.generatorPreview.referenceCopyHint") }}
+        </div>
         <TInput
           :model-value="referenceSchemaQuery"
           clearable
@@ -139,7 +145,8 @@ const emit = defineEmits<{
           v-if="filteredReferenceSchemaOptions.length === 0"
           class="generator-option-empty"
         >
-          {{ t("app.generatorPreview.referenceSearchEmpty") }}
+          <strong>{{ t("app.generatorPreview.referenceSearchEmpty") }}</strong>
+          <span>{{ t("app.generatorPreview.referenceSearchEmptyHint") }}</span>
         </div>
         <div
           v-else-if="hiddenReferenceSchemaCount > 0"
@@ -350,6 +357,24 @@ const emit = defineEmits<{
   color: #64748b;
   font-size: 0.74rem;
   line-height: 1.4;
+}
+
+.generator-option-empty {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.generator-option-empty strong {
+  color: #334155;
+  font-size: 0.76rem;
+}
+
+.generator-option-empty span {
+  color: #64748b;
+}
+
+.generator-option-meta-full {
+  grid-column: 1 / -1;
 }
 
 .generator-toolbar-actions {

@@ -263,6 +263,125 @@ export const useOperationLogWorkspace = (
     }),
   )
 
+  const currentQuerySummary = computed(() => {
+    const fragments: string[] = []
+
+    if (
+      typeof operationLogQueryValues.value.category === "string" &&
+      operationLogQueryValues.value.category.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.category")}: ${operationLogQueryValues.value.category.trim()}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.action === "string" &&
+      operationLogQueryValues.value.action.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.action")}: ${operationLogQueryValues.value.action.trim()}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.actorUserId === "string" &&
+      operationLogQueryValues.value.actorUserId.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.actorUserId")}: ${operationLogQueryValues.value.actorUserId.trim()}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.authEventType === "string" &&
+      operationLogQueryValues.value.authEventType.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.authEventType")}: ${localizeAuthEventType(
+          operationLogQueryValues.value.authEventType as NonNullable<
+            OperationLogRecord["authEventType"]
+          >,
+        )}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.authFailureReason === "string" &&
+      operationLogQueryValues.value.authFailureReason.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.authFailureReason")}: ${localizeAuthFailureReason(
+          operationLogQueryValues.value.authFailureReason.trim(),
+        )}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.result === "string" &&
+      operationLogQueryValues.value.result
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.result")}: ${options.localizeResult(
+          operationLogQueryValues.value.result,
+        )}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.requestId === "string" &&
+      operationLogQueryValues.value.requestId.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.requestId")}: ${operationLogQueryValues.value.requestId.trim()}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.targetType === "string" &&
+      operationLogQueryValues.value.targetType.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.targetType")}: ${operationLogQueryValues.value.targetType.trim()}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.targetId === "string" &&
+      operationLogQueryValues.value.targetId.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.targetId")}: ${operationLogQueryValues.value.targetId.trim()}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.ip === "string" &&
+      operationLogQueryValues.value.ip.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.ip")}: ${operationLogQueryValues.value.ip.trim()}`,
+      )
+    }
+
+    if (
+      typeof operationLogQueryValues.value.userAgent === "string" &&
+      operationLogQueryValues.value.userAgent.trim()
+    ) {
+      fragments.push(
+        `${options.t("app.operationLog.field.userAgent")}: ${operationLogQueryValues.value.userAgent.trim()}`,
+      )
+    }
+
+    return fragments.length > 0
+      ? fragments.join(" / ")
+      : options.t("app.filter.none")
+  })
+
+  const hasActiveFilters = computed(
+    () => currentQuerySummary.value !== options.t("app.filter.none"),
+  )
+
   const detailFields = computed<ElyFormField[]>(() => [
     {
       key: "category",
@@ -466,6 +585,7 @@ export const useOperationLogWorkspace = (
   return {
     clearWorkspace,
     countLabel,
+    currentQuerySummary,
     detailFields,
     detailValues,
     detailsText,
@@ -473,6 +593,7 @@ export const useOperationLogWorkspace = (
     handleReset,
     handleRowClick,
     handleSearch,
+    hasActiveFilters,
     operationLogDetail,
     operationLogDetailErrorMessage,
     operationLogDetailLoading,

@@ -11,13 +11,22 @@ export const enUSOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.workspaceTitle": "System operation logs",
   "app.operationLog.workspaceDescription":
     "Query, log list, and audit detail stay in one operation loop.",
-  "app.operationLog.emptyTitle": "No operation logs match the current filters",
+  "app.operationLog.emptyTitle": "No operation logs have been recorded yet",
   "app.operationLog.emptyDescription":
-    "Clear the filters or adjust the search terms.",
+    "Return after a real login, update, revoke, or workflow action to inspect the next recorded event.",
+  "app.operationLog.filteredEmptyTitle":
+    "No operation logs match the current filters",
+  "app.operationLog.filteredEmptyDescription":
+    "The current query is too narrow to show a matching audit event.",
+  "app.operationLog.filteredRecoveryHint":
+    "Widen the time-adjacent fields first, then inspect one log row and follow its request ID through the detail panel.",
+  "app.operationLog.searchPlaceholder": "Search operation logs",
   "app.operationLog.detailEyebrow": "Log detail",
   "app.operationLog.detailEmptyTitle": "No log selected",
   "app.operationLog.detailEmptyDescription":
-    "Select an operation log row to inspect the detail panel.",
+    "Select one operation log row to inspect actor, target, request ID, and raw payload.",
+  "app.operationLog.detailEmptyNextStep":
+    "Next: shrink the query to one category, request ID, actor, or result, then open the closest matching log row.",
   "app.operationLog.detailLoading": "Refreshing operation log detail...",
   "app.operationLog.field.id": "ID",
   "app.operationLog.field.category": "Category",
@@ -58,7 +67,10 @@ export const enUSOperationLogLocaleMessages: VueLocaleMessages = {
   "app.operationLog.tabsHint": "{count} logs",
   "app.operationLog.panelTitle.detailFallback": "Log detail",
   "app.operationLog.panelDesc.detail":
-    "Detail stays focused on the current log and audit context.",
+    "Use the selected log to confirm request ownership, result, target, and the raw evidence payload before moving on.",
   "app.operationLog.meta.details": "Detail Payload",
   "app.operationLog.meta.empty": "None",
+  "app.operationLog.meta.missing": "Missing",
+  "app.operationLog.meta.target": "Target",
+  "app.operationLog.action.clearFilters": "Clear filters",
 }

@@ -17,6 +17,7 @@ import type {
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSchemaOption,
   GeneratorPreviewStep,
+  GeneratorPreviewSqlProposalHandoff,
   GeneratorPreviewTranslation,
 } from "./types"
 
@@ -38,6 +39,7 @@ export interface GeneratorPreviewWorkspaceMainProps {
   manualSchemaDraft: string
   manualSchemaDraftError: string | null
   manualSchemaDraftErrorDetails: string | null
+  manualSchemaDraftErrorSuggestion: string | null
   query: string
   files: GeneratorPreviewFileCard[]
   selectedFilePath: string | null
@@ -46,10 +48,21 @@ export interface GeneratorPreviewWorkspaceMainProps {
   canApply: boolean
   canConfirm: boolean
   diffSummary: GeneratorPreviewDiffSummary | null
+  sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff | null
   sessionStatus: "pending_review" | "ready" | "rejected" | "applied" | null
   reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
   hasBlockingConflicts: boolean
+}
+
+interface GeneratorDraftSummaryFact {
+  label: string
+  value: string
+}
+
+interface GeneratorOperationProgressMessage {
+  description: string
+  title: string
 }
 
 export type GeneratorPreviewWorkspaceMainEmit = {
@@ -65,6 +78,7 @@ export type GeneratorPreviewWorkspaceMainEmit = {
   (e: "load-current-schema-draft"): void
   (e: "load-template", value: string): void
   (e: "restore-session", value: string): void
+  (e: "restore-current-result"): void
   (e: "select-file", value: string): void
   (e: "reset-filters"): void
   (e: "refresh-preview"): void
@@ -160,11 +174,24 @@ export const useGeneratorPreviewWorkspaceMainState = (
     () => props.files.length > 0 && hasCurrentResult.value,
   )
   const showFileList = computed(() => hasCurrentResult.value)
+  const blockedFiles = computed(() =>
+    props.files.filter((file) => file.plannedAction === "block"),
+  )
+  const blockedFileCount = computed(() => blockedFiles.value.length)
+  const firstBlockedFilePath = computed(
+    () => blockedFiles.value[0]?.path ?? null,
+  )
   const hasRecentSessions = computed(
     () => props.recentSessionOptions.length > 0,
   )
   const showReviewCommentInput = computed(
     () => isRejectConfirming.value || Boolean(props.reviewEvidence?.comment),
+  )
+  const rejectCommentRequired = computed(
+    () => isRejectConfirming.value && reviewComment.value.trim().length === 0,
+  )
+  const canSubmitReject = computed(
+    () => !isRejectConfirming.value || !rejectCommentRequired.value,
   )
   const selectedFrontendTargetLabel = computed(() =>
     props.selectedFrontendTarget === "react" ? "React" : "Vue",
@@ -190,6 +217,12 @@ export const useGeneratorPreviewWorkspaceMainState = (
   })
   const previewArtifactCount = computed(
     () => props.diffSummary?.totalFileCount ?? props.files.length,
+  )
+  const selectedConflictStrategyLabel = computed(
+    () =>
+      props.conflictStrategyOptions.find(
+        (option) => option.value === props.selectedConflictStrategy,
+      )?.label ?? props.selectedConflictStrategy,
   )
   const editableSchemaDraft = computed(() =>
     parseManualSchemaDraft(props.manualSchemaDraft),
@@ -222,6 +255,27 @@ export const useGeneratorPreviewWorkspaceMainState = (
       value: String(draftFieldCount.value),
     },
   ])
+  const draftSummaryFacts = computed<GeneratorDraftSummaryFact[]>(() => [
+    {
+      label: props.t("app.generatorPreview.inputModeLabel"),
+      value:
+        draftSourceModeOptions.value.find(
+          (option) => option.value === draftSourceMode.value,
+        )?.label ?? "-",
+    },
+    {
+      label: props.t("app.generatorPreview.input.schemaFieldCountLabel"),
+      value: String(draftFieldCount.value),
+    },
+    {
+      label: props.t("app.generatorPreview.filter.frontendLabel"),
+      value: selectedFrontendTargetLabel.value,
+    },
+    {
+      label: props.t("app.generatorPreview.filter.conflictLabel"),
+      value: selectedConflictStrategyLabel.value || "-",
+    },
+  ])
   const statusFacts = computed(() => [
     {
       label: props.t("app.generatorPreview.filter.schemaLabel"),
@@ -239,7 +293,53 @@ export const useGeneratorPreviewWorkspaceMainState = (
       label: props.t("app.generatorPreview.statsHint"),
       value: String(previewArtifactCount.value),
     },
+    {
+      label: props.t("app.generatorPreview.filter.conflictLabel"),
+      value: selectedConflictStrategyLabel.value || "-",
+    },
+    {
+      label: props.t("app.generatorPreview.meta.targetPreset"),
+      value: "staging",
+    },
   ])
+  const confirmationChecklist = computed(() => {
+    if (!showConfirmAction.value && !showApplyAction.value) {
+      return []
+    }
+
+    const diff = props.diffSummary
+    const fileSummary = diff
+      ? props.t("app.generatorPreview.checklist.fileActions", {
+          block: diff.actionCounts.block,
+          changed: diff.changedFileCount,
+          create: diff.actionCounts.create,
+          overwrite: diff.actionCounts.overwrite,
+          skip: diff.actionCounts.skip,
+          total: diff.totalFileCount,
+        })
+      : props.t("app.generatorPreview.checklist.fileActionsMissing")
+
+    const conflictSummary = props.hasBlockingConflicts
+      ? props.t("app.generatorPreview.checklist.conflictBlocking")
+      : props.t("app.generatorPreview.checklist.conflictClear")
+
+    const sqlProposalSummary = props.sqlProposalHandoff
+      ? props.sqlProposalHandoff.proposalStatus === "ready"
+        ? props.t("app.generatorPreview.checklist.sqlProposalReady")
+        : props.t("app.generatorPreview.checklist.sqlProposalUnsupported")
+      : props.t("app.generatorPreview.checklist.sqlProposalMissing")
+
+    return [
+      fileSummary,
+      conflictSummary,
+      props.t("app.generatorPreview.checklist.targetStaging"),
+      props.t("app.generatorPreview.checklist.conflictStrategy", {
+        value: selectedConflictStrategyLabel.value || "-",
+      }),
+      sqlProposalSummary,
+      props.t("app.generatorPreview.checklist.manualConfirmation"),
+    ]
+  })
   const currentStateMessage = computed(() => {
     if (props.hasBlockingConflicts) {
       return {
@@ -271,6 +371,44 @@ export const useGeneratorPreviewWorkspaceMainState = (
 
     return null
   })
+  const operationProgressMessage =
+    computed<GeneratorOperationProgressMessage | null>(() => {
+      if (props.loading) {
+        return {
+          title: hasCurrentResult.value
+            ? props.t("app.generatorPreview.progress.regeneratingTitle")
+            : props.t("app.generatorPreview.progress.generatingTitle"),
+          description: props.t(
+            "app.generatorPreview.progress.generatingDescription",
+          ),
+        }
+      }
+
+      if (props.reviewLoading) {
+        return {
+          title:
+            props.currentStep === "confirm"
+              ? props.t("app.generatorPreview.progress.confirmingTitle")
+              : props.t("app.generatorPreview.progress.reviewingTitle"),
+          description: props.t(
+            props.currentStep === "confirm"
+              ? "app.generatorPreview.progress.confirmingDescription"
+              : "app.generatorPreview.progress.reviewingDescription",
+          ),
+        }
+      }
+
+      if (props.applyLoading) {
+        return {
+          title: props.t("app.generatorPreview.progress.applyingTitle"),
+          description: props.t(
+            "app.generatorPreview.progress.applyingDescription",
+          ),
+        }
+      }
+
+      return null
+    })
   const resultPrimaryActionLabel = computed(() => {
     if (showReviewActions.value && isRejectConfirming.value) {
       return props.t("app.generatorPreview.action.confirmReject")
@@ -307,6 +445,78 @@ export const useGeneratorPreviewWorkspaceMainState = (
         ? props.t("app.generatorPreview.action.regeneratePreview")
         : props.t("app.generatorPreview.action.generatePreview"),
   )
+  const configErrorRecoverySteps = computed(() => {
+    if (props.errorMessage.trim().length === 0) {
+      return []
+    }
+
+    const steps = new Set<string>()
+    const normalizedError = props.errorMessage.toLowerCase()
+
+    if (
+      props.manualSchemaDraftError ||
+      normalizedError.includes("schema") ||
+      normalizedError.includes("json")
+    ) {
+      steps.add(props.t("app.generatorPreview.errorRecoveryStep.fixSchema"))
+    }
+
+    if (
+      props.hasBlockingConflicts ||
+      normalizedError.includes("conflict") ||
+      normalizedError.includes("already exists")
+    ) {
+      steps.add(
+        props.t("app.generatorPreview.errorRecoveryStep.changeConflictStrategy"),
+      )
+    }
+
+    steps.add(props.t("app.generatorPreview.errorRecoveryStep.retryPreview"))
+    steps.add(props.t("app.generatorPreview.errorRecoveryStep.manualReview"))
+
+    return Array.from(steps)
+  })
+  const resultErrorRecoverySteps = computed(() => {
+    if (props.errorMessage.trim().length === 0 || !hasCurrentResult.value) {
+      return []
+    }
+
+    const steps = new Set<string>()
+    const normalizedError = props.errorMessage.toLowerCase()
+
+    if (
+      normalizedError.includes("stale") ||
+      normalizedError.includes("drift") ||
+      normalizedError.includes("apply conflict")
+    ) {
+      steps.add(props.t("app.generatorPreview.resultRecoveryStep.refreshDrift"))
+    }
+
+    if (
+      props.hasBlockingConflicts ||
+      normalizedError.includes("blocking conflict") ||
+      normalizedError.includes("cannot be applied directly")
+    ) {
+      steps.add(
+        props.t("app.generatorPreview.resultRecoveryStep.reviewBlockedFiles"),
+      )
+    }
+
+    if (
+      props.currentStep === "apply" ||
+      normalizedError.includes("apply") ||
+      normalizedError.includes("confirmation")
+    ) {
+      steps.add(
+        props.t("app.generatorPreview.resultRecoveryStep.recheckChecklist"),
+      )
+    }
+
+    steps.add(props.t("app.generatorPreview.resultRecoveryStep.restoreSession"))
+    steps.add(props.t("app.generatorPreview.resultRecoveryStep.regenerate"))
+
+    return Array.from(steps)
+  })
   const conflictStrategyCards = computed(() =>
     props.conflictStrategyOptions.map((option) => ({
       ...option,
@@ -493,6 +703,21 @@ export const useGeneratorPreviewWorkspaceMainState = (
     }
   }
 
+  const handleRestoreCurrentResult = () => {
+    if (
+      props.loading ||
+      props.reviewLoading ||
+      props.applyLoading ||
+      props.selectedRecentSessionId.trim().length === 0
+    ) {
+      return
+    }
+
+    isApplyConfirming.value = false
+    isRejectConfirming.value = false
+    emit("restore-current-result")
+  }
+
   const handleRefreshPreview = () => {
     isApplyConfirming.value = false
     isRejectConfirming.value = false
@@ -531,6 +756,10 @@ export const useGeneratorPreviewWorkspaceMainState = (
     if (decision === "reject" && !isRejectConfirming.value) {
       isApplyConfirming.value = false
       isRejectConfirming.value = true
+      return
+    }
+
+    if (decision === "reject" && rejectCommentRequired.value) {
       return
     }
 
@@ -710,17 +939,23 @@ export const useGeneratorPreviewWorkspaceMainState = (
 
   return {
     canPatchDraftMeta,
+    canSubmitReject,
+    confirmationChecklist,
     cancelApplyConfirmation,
     cancelRejectConfirmation,
+    blockedFileCount,
     configPrimaryActionLabel,
+    configErrorRecoverySteps,
     conflictStrategyCards,
     currentStateMessage,
     draftModuleLabel,
     draftModuleName,
     draftSourceMode,
     draftSourceModeOptions,
+    draftSummaryFacts,
     filteredReferenceSchemaOptions,
     frontendOptionCards,
+    firstBlockedFilePath,
     handleApplyPreview,
     handleConflictStrategyChange,
     handleDraftSourceModeChange,
@@ -735,6 +970,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
     handleRecentSessionChange,
     handleReferenceSchemaQueryInput,
     handleRefreshPreview,
+    handleRestoreCurrentResult,
     handleReviewCommentInput,
     handleReviewPreview,
     handleSchemaEditorToggle,
@@ -744,7 +980,10 @@ export const useGeneratorPreviewWorkspaceMainState = (
     hiddenReferenceSchemaCount,
     isApplyConfirming,
     isRejectConfirming,
+    operationProgressMessage,
     referenceSchemaQuery,
+    rejectCommentRequired,
+    resultErrorRecoverySteps,
     resultPrimaryActionLabel,
     reviewComment,
     schemaEditorFacts,

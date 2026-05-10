@@ -162,6 +162,7 @@ export interface UseExampleShellBindingsOptions {
   generatorPreviewManualSchemaDraft: Ref<string>
   generatorPreviewManualSchemaDraftError: ValueSource<string | null>
   generatorPreviewManualSchemaDraftErrorDetails: ValueSource<string | null>
+  generatorPreviewManualSchemaDraftErrorSuggestion: ValueSource<string | null>
   loadSelectedSchemaDraft: () => void
   loadGeneratorSchemaTemplate: (templateId: string) => void
   generatorPreviewQuery: Ref<string>
@@ -193,6 +194,8 @@ export interface UseExampleShellBindingsOptions {
   enterpriseSessionTableColumns: ValueSource<unknown[]>
   enterpriseSessionTableItems: ValueSource<unknown[]>
   sessionCountLabel: ValueSource<string>
+  sessionCurrentQuerySummary: ValueSource<string>
+  sessionHasActiveFilters: ValueSource<boolean>
   postModuleReady: ValueSource<boolean>
   canEnterPostWorkspace: ValueSource<boolean>
   postErrorMessage: ValueSource<string>
@@ -217,6 +220,8 @@ export interface UseExampleShellBindingsOptions {
   enterpriseOperationLogTableColumns: ValueSource<unknown[]>
   enterpriseOperationLogTableItems: ValueSource<unknown[]>
   operationLogCountLabel: ValueSource<string>
+  operationLogCurrentQuerySummary: ValueSource<string>
+  operationLogHasActiveFilters: ValueSource<boolean>
   roleModuleReady: ValueSource<boolean>
   canEnterRoleWorkspace: ValueSource<boolean>
   roleWorkspaceState: Record<string, unknown>

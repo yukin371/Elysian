@@ -305,6 +305,10 @@ export const createExampleShellBindingsOptions = (
       input.sessionWorkspace.workspace.tableColumns,
     enterpriseSessionTableItems: input.sessionWorkspace.workspace.tableItems,
     sessionCountLabel: input.sessionWorkspace.workspace.countLabel,
+    sessionCurrentQuerySummary:
+      input.sessionWorkspace.workspace.currentQuerySummary,
+    sessionHasActiveFilters:
+      input.sessionWorkspace.workspace.hasActiveFilters,
     sessionActionLoading: input.sessionWorkspace.workspace.sessionActionLoading,
     selectedSession: input.sessionWorkspace.workspace.selectedSession,
     handleSessionSearch: input.sessionWorkspace.workspace.handleSearch,
@@ -470,6 +474,10 @@ export const createExampleShellBindingsOptions = (
     enterpriseOperationLogTableItems:
       input.operationLogWorkspace.workspace.tableItems,
     operationLogCountLabel: input.operationLogWorkspace.workspace.countLabel,
+    operationLogCurrentQuerySummary:
+      input.operationLogWorkspace.workspace.currentQuerySummary,
+    operationLogHasActiveFilters:
+      input.operationLogWorkspace.workspace.hasActiveFilters,
     operationLogDetailLoading:
       input.operationLogWorkspace.workspace.operationLogDetailLoading,
     operationLogDetailErrorMessage:

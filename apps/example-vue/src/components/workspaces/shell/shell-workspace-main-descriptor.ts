@@ -126,6 +126,8 @@ export interface ShellWorkspaceMainSwitchProps {
   enterpriseSessionQueryFields: ReadonlyArray<unknown>
   enterpriseSessionTableColumns: ReadonlyArray<unknown>
   enterpriseSessionTableItems: ReadonlyArray<unknown>
+  sessionCurrentQuerySummary: string
+  sessionHasActiveFilters: boolean
   postModuleReady: boolean
   canEnterPostWorkspace: boolean
   canViewPosts: boolean
@@ -166,6 +168,8 @@ export interface ShellWorkspaceMainSwitchProps {
   enterpriseOperationLogTableColumns: ReadonlyArray<unknown>
   enterpriseOperationLogTableItems: ReadonlyArray<unknown>
   operationLogCountLabel: string
+  operationLogCurrentQuerySummary: string
+  operationLogHasActiveFilters: boolean
   roleModuleReady: boolean
   canEnterRoleWorkspace: boolean
   canViewRoles: boolean
@@ -589,6 +593,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       manualSchemaDraftError: props.generatorPreviewManualSchemaDraftError,
       manualSchemaDraftErrorDetails:
         props.generatorPreviewManualSchemaDraftErrorDetails,
+      manualSchemaDraftErrorSuggestion:
+        props.generatorPreviewManualSchemaDraftErrorSuggestion,
       query: props.generatorPreviewQuery,
       files: props.generatorPreviewFiles,
       selectedFilePath: props.selectedGeneratorPreviewFilePath,
@@ -597,6 +603,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       canApply: props.canApplyGeneratorPreview,
       canConfirm: props.canConfirmGeneratorPreview,
       diffSummary: props.generatorPreviewDiffSummary,
+      sqlProposalHandoff: props.generatorPreviewSqlProposalHandoff,
       sessionStatus: props.generatorPreviewSession?.status ?? null,
       reviewEvidence: props.generatorPreviewSession?.reviewEvidence ?? null,
       applyEvidence: props.generatorPreviewSession?.applyEvidence ?? null,
@@ -704,6 +711,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       countLabelKey: "app.onlineSession.countLabel",
       emptyTitle: props.t("app.onlineSession.emptyTitle"),
       emptyDescription: props.t("app.onlineSession.emptyDescription"),
+      filteredEmptyTitle: props.t("app.onlineSession.filteredEmptyTitle"),
+      filteredEmptyDescription: props.t(
+        "app.onlineSession.filteredEmptyDescription",
+      ),
+      filterSummary: props.sessionCurrentQuerySummary,
+      hasActiveFilters: props.sessionHasActiveFilters,
+      recoveryHint: props.t("app.onlineSession.filteredRecoveryHint"),
+      clearFiltersLabel: props.t("app.onlineSession.action.clearFilters"),
       searchPlaceholder: props.t("app.onlineSession.searchPlaceholder"),
       copy: props.enterpriseCrudCopy,
       paginate: true,
@@ -808,6 +823,14 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       itemCountLabel: props.operationLogCountLabel,
       emptyTitle: props.t("app.operationLog.emptyTitle"),
       emptyDescription: props.t("app.operationLog.emptyDescription"),
+      filteredEmptyTitle: props.t("app.operationLog.filteredEmptyTitle"),
+      filteredEmptyDescription: props.t(
+        "app.operationLog.filteredEmptyDescription",
+      ),
+      filterSummary: props.operationLogCurrentQuerySummary,
+      hasActiveFilters: props.operationLogHasActiveFilters,
+      recoveryHint: props.t("app.operationLog.filteredRecoveryHint"),
+      clearFiltersLabel: props.t("app.operationLog.action.clearFilters"),
       searchPlaceholder: props.t("app.operationLog.searchPlaceholder"),
       copy: props.enterpriseCrudCopy,
     },

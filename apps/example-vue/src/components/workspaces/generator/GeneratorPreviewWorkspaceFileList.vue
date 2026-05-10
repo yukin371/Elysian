@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type {
-  GeneratorPreviewFileCard,
-  GeneratorPreviewTranslation,
-} from "./types"
+import { nextTick, ref } from "vue"
 
-defineProps<{
+import type { GeneratorPreviewFileCard, GeneratorPreviewTranslation } from "./types"
+
+const props = defineProps<{
   t: GeneratorPreviewTranslation
   loading: boolean
   files: GeneratorPreviewFileCard[]
@@ -12,6 +11,45 @@ defineProps<{
 }>()
 
 const emit = defineEmits<(event: "select-file", filePath: string) => void>()
+
+const listRef = ref<HTMLElement | null>(null)
+
+const focusRow = async (path: string) => {
+  await nextTick()
+  const button = Array.from(
+    listRef.value?.querySelectorAll<HTMLButtonElement>(
+      "[data-generator-file-path]",
+    ) ?? [],
+  ).find((candidate) => candidate.dataset.generatorFilePath === path)
+  button?.focus()
+}
+
+const handleRowKeydown = async (
+  event: KeyboardEvent,
+  currentIndex: number,
+  currentPath: string,
+) => {
+  if (event.key === "Enter") {
+    emit("select-file", currentPath)
+    return
+  }
+
+  if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+    return
+  }
+
+  event.preventDefault()
+
+  const delta = event.key === "ArrowDown" ? 1 : -1
+  const nextFile = props.files[currentIndex + delta]
+
+  if (!nextFile) {
+    return
+  }
+
+  emit("select-file", nextFile.path)
+  await focusRow(nextFile.path)
+}
 </script>
 
 <template>
@@ -24,15 +62,21 @@ const emit = defineEmits<(event: "select-file", filePath: string) => void>()
 
   <div
     v-else-if="files.length === 0"
-    class="enterprise-message enterprise-message-warning"
+    class="generator-file-empty"
   >
-    {{ t("app.generatorPreview.emptyFiltered") }}
+    <strong>{{ t("app.generatorPreview.emptyFiltered") }}</strong>
+    <span>{{ t("app.generatorPreview.emptyFilteredHint") }}</span>
   </div>
 
-  <div v-else class="generator-file-list">
+  <div
+    v-else
+    ref="listRef"
+    class="generator-file-list"
+  >
     <button
-      v-for="file in files"
+      v-for="(file, index) in files"
       :key="file.path"
+      :data-generator-file-path="file.path"
       type="button"
       class="generator-file-row"
       :class="[
@@ -40,6 +84,7 @@ const emit = defineEmits<(event: "select-file", filePath: string) => void>()
         `generator-file-row-${file.plannedAction}`,
       ]"
       @click="emit('select-file', file.path)"
+      @keydown="handleRowKeydown($event, index, file.path)"
     >
       <div class="generator-file-row-main">
         <strong class="generator-file-row-path">{{ file.path }}</strong>
@@ -65,6 +110,27 @@ const emit = defineEmits<(event: "select-file", filePath: string) => void>()
 <style scoped>
 .generator-file-list {
   display: grid;
+}
+
+.generator-file-empty {
+  display: grid;
+  gap: 0.24rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px dashed rgba(15, 23, 42, 0.14);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.generator-file-empty strong {
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.generator-file-empty span {
+  color: #64748b;
+  font-size: 0.77rem;
+  line-height: 1.45;
 }
 
 .generator-file-row {

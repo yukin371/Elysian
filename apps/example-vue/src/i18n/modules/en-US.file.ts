@@ -14,6 +14,9 @@ export const enUSFileLocaleMessages: VueLocaleMessages = {
   "app.file.loading": "Loading files...",
   "app.file.emptyTitle": "No files in scope",
   "app.file.emptyDescription": "Adjust the filters or upload a file.",
+  "app.file.emptyFilteredTitle": "No files match the current filters",
+  "app.file.emptyFilteredDescription":
+    "Clear the filters to return to the full list, or upload a new file now.",
   "app.file.countLabel": "{visible} visible files out of {total}",
   "app.file.tabsHint": "{count} files in view",
   "app.file.statsHint":
@@ -47,6 +50,7 @@ export const enUSFileLocaleMessages: VueLocaleMessages = {
   "app.file.meta.uploaderUserId": "Uploader",
   "app.file.meta.createdAt": "Uploaded at",
   "app.file.action.upload": "Upload file",
+  "app.file.action.clearFilters": "Clear filters",
   "app.file.action.submitUpload": "Submit upload",
   "app.file.action.download": "Download file",
   "app.file.action.delete": "Delete file",

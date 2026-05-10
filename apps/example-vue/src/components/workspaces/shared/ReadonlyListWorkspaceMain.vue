@@ -6,6 +6,7 @@ import {
   type ElyQueryValues,
   type ElyTableColumn,
 } from "@elysian/ui-enterprise-vue"
+import { Empty as TEmpty } from "tdesign-vue-next/es/empty"
 import { computed, ref, watch } from "vue"
 
 type SharedWorkspaceTranslation = (
@@ -25,6 +26,12 @@ interface ReadonlyListWorkspaceMainProps {
   countLabelKey?: string
   emptyTitle: string
   emptyDescription: string
+  filteredEmptyTitle?: string
+  filteredEmptyDescription?: string
+  filterSummary?: string
+  hasActiveFilters?: boolean
+  recoveryHint?: string
+  clearFiltersLabel?: string
   searchPlaceholder?: string
   copy: ElyCrudWorkspaceCopy
   paginate?: boolean
@@ -79,6 +86,18 @@ const resolvedItemCountLabel = computed(() => {
     total: props.items.length,
   })
 })
+
+const emptyTitle = computed(() =>
+  props.hasActiveFilters
+    ? props.filteredEmptyTitle ?? props.emptyTitle
+    : props.emptyTitle,
+)
+
+const emptyDescription = computed(() =>
+  props.hasActiveFilters
+    ? props.filteredEmptyDescription ?? props.emptyDescription
+    : props.emptyDescription,
+)
 
 const paginationSummary = computed(() =>
   props.t("app.pagination.summary", {
@@ -143,6 +162,36 @@ watch(
     @reset="emit('reset')"
     @row-click="emit('row-click', $event)"
   >
+    <template #empty>
+      <div v-if="items.length === 0 && !tableLoading" class="readonly-list-empty">
+        <TEmpty :title="emptyTitle" :description="emptyDescription">
+          <template #image>
+            <div class="readonly-list-empty__orbit">∿</div>
+          </template>
+        </TEmpty>
+
+        <div
+          v-if="hasActiveFilters || recoveryHint"
+          class="readonly-list-empty__recovery"
+        >
+          <p v-if="hasActiveFilters && filterSummary" class="readonly-list-empty__summary">
+            {{ filterSummary }}
+          </p>
+          <p v-if="recoveryHint" class="readonly-list-empty__hint">
+            {{ recoveryHint }}
+          </p>
+          <button
+            v-if="hasActiveFilters"
+            type="button"
+            class="enterprise-button enterprise-button-ghost"
+            @click="emit('reset')"
+          >
+            {{ clearFiltersLabel ?? t("copy.query.resetButton") }}
+          </button>
+        </div>
+      </div>
+    </template>
+
     <template v-if="paginate" #footer>
       <div class="readonly-list-pagination">
         <span>{{ paginationSummary }}</span>
@@ -206,5 +255,47 @@ watch(
   border-radius: 4px;
   background: white;
   color: #0f172a;
+}
+
+.readonly-list-empty {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  padding: 1.25rem 0;
+}
+
+.readonly-list-empty__orbit {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  background: rgba(36, 87, 214, 0.1);
+  color: #2457d6;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.readonly-list-empty__recovery {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: center;
+  max-width: 38rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.readonly-list-empty__summary {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.readonly-list-empty__hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.6;
 }
 </style>

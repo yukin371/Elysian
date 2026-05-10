@@ -112,6 +112,35 @@ export const useGeneratorPreviewWorkspace = (
       : null,
   )
 
+  const resolveSchemaValidationSummaryLine = (details: string) => {
+    const issueLine = details
+      .split(/\r?\n/u)
+      .map((line) => line.trim())
+      .find((line) => line.startsWith("- "))
+
+    return issueLine ? issueLine.slice(2) : details.split(/\r?\n/u)[0]?.trim()
+  }
+
+  const resolveSchemaValidationSuggestion = (details: string) => {
+    if (
+      details.includes(
+        "Enum field must provide non-empty options or dictionaryTypeCode.",
+      )
+    ) {
+      return t("app.generatorPreview.input.manualSchemaDraftSuggestionEnum")
+    }
+
+    if (details.includes('must contain exactly one "id" field')) {
+      return t("app.generatorPreview.input.manualSchemaDraftSuggestionId")
+    }
+
+    if (details.includes("Field kind must be one of:")) {
+      return t("app.generatorPreview.input.manualSchemaDraftSuggestionKind")
+    }
+
+    return null
+  }
+
   const manualSchemaDraftParsed = computed(() => {
     const raw = manualSchemaDraft.value.trim()
 
@@ -138,18 +167,20 @@ export const useGeneratorPreviewWorkspace = (
       return {
         error: null as string | null,
         errorDetails: null as string | null,
+        errorSuggestion: null as string | null,
         schema: expandSimplifiedSchema(parsed),
       }
     } catch (error) {
       const details =
         error instanceof Error ? error.message : "Schema validation failed."
-      const summaryLine = details.split("\n")[0]?.trim() || details
+      const summaryLine = resolveSchemaValidationSummaryLine(details) || details
 
       return {
         error: t("app.generatorPreview.input.manualSchemaDraftInvalid", {
           value: summaryLine,
         }),
         errorDetails: details,
+        errorSuggestion: resolveSchemaValidationSuggestion(details),
         schema: null as GeneratorPreviewSchema | null,
       }
     }
@@ -164,6 +195,12 @@ export const useGeneratorPreviewWorkspace = (
   const manualSchemaDraftErrorDetails = computed(() =>
     selectedInputMode.value === "manual-schema-json"
       ? manualSchemaDraftParsed.value.errorDetails
+      : null,
+  )
+
+  const manualSchemaDraftErrorSuggestion = computed(() =>
+    selectedInputMode.value === "manual-schema-json"
+      ? manualSchemaDraftParsed.value.errorSuggestion
       : null,
   )
 
@@ -692,6 +729,7 @@ export const useGeneratorPreviewWorkspace = (
     manualSchemaDraft,
     manualSchemaDraftError,
     manualSchemaDraftErrorDetails,
+    manualSchemaDraftErrorSuggestion,
     loadSchemaTemplate,
     loadSelectedSchemaDraft,
     previewQuery,

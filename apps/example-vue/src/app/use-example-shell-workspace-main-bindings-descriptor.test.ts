@@ -86,4 +86,24 @@ describe("createExampleShellWorkspaceMainBindings", () => {
 
     expect(actionCalls).toEqual([["edit", { id: "role-1" }]])
   })
+
+  test("restores the current generator result by resetting local state first", () => {
+    const calls: string[] = []
+    const options = createOptions({
+      generatorPreviewSession: { id: "session-9" },
+      resetGeneratorPreviewState: () => {
+        calls.push("reset")
+      },
+      restoreGeneratorPreviewSession: (sessionId: string) => {
+        calls.push(`restore:${sessionId}`)
+      },
+    })
+
+    const { shellWorkspaceMainListeners } =
+      createExampleShellWorkspaceMainBindings(options)
+
+    shellWorkspaceMainListeners["restore-current-generator-session"]()
+
+    expect(calls).toEqual(["reset", "restore:session-9"])
+  })
 })

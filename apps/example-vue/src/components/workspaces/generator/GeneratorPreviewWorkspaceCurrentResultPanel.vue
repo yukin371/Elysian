@@ -18,23 +18,36 @@ interface GeneratorCurrentStateMessage {
   tone: "warning" | "info" | "success"
 }
 
+interface GeneratorOperationProgressMessage {
+  description: string
+  title: string
+}
+
 interface GeneratorPreviewWorkspaceCurrentResultPanelProps {
   t: GeneratorPreviewTranslation
   loading: boolean
   reviewLoading: boolean
   applyLoading: boolean
+  hasCurrentResult: boolean
   hasRecentSessions: boolean
   recentSessionOptions: Array<{ label: string; value: string }>
   selectedRecentSessionId: string
   statusFacts: GeneratorStatusFact[]
   currentStateMessage: GeneratorCurrentStateMessage | null
+  operationProgressMessage: GeneratorOperationProgressMessage | null
+  blockedFileCount: number
+  firstBlockedFilePath: string | null
+  resultErrorRecoverySteps: string[]
+  confirmationChecklist: string[]
   showReviewCommentInput: boolean
   reviewComment: string
+  rejectCommentRequired: boolean
   reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
   showReviewActions: boolean
   isRejectConfirming: boolean
   canReject: boolean
+  canSubmitReject: boolean
   canApprove: boolean
   showConfirmAction: boolean
   canConfirm: boolean
@@ -48,12 +61,15 @@ defineProps<GeneratorPreviewWorkspaceCurrentResultPanelProps>()
 
 const emit = defineEmits<{
   (e: "recent-session-change", value: string | number | string[]): void
+  (e: "restore-current-result"): void
+  (e: "refresh-preview"): void
   (e: "review-comment-input", value: string | number): void
   (e: "cancel-reject-confirm"): void
   (e: "review-preview", decision: "approve" | "reject"): void
   (e: "cancel-apply-confirm"): void
   (e: "confirm-preview"): void
   (e: "apply-preview"): void
+  (e: "select-file", value: string): void
 }>()
 </script>
 
@@ -80,7 +96,18 @@ const emit = defineEmits<{
       </label>
     </div>
 
-    <div class="generator-status-facts">
+    <div
+      v-if="!hasCurrentResult"
+      class="generator-empty-result"
+    >
+      <strong>{{ t("app.generatorPreview.emptyResultTitle") }}</strong>
+      <span>{{ t("app.generatorPreview.emptyResultDescription") }}</span>
+    </div>
+
+    <div
+      v-else
+      class="generator-status-facts"
+    >
       <div
         v-for="fact in statusFacts"
         :key="fact.label"
@@ -101,6 +128,87 @@ const emit = defineEmits<{
       {{ currentStateMessage.text }}
     </div>
 
+    <section
+      v-if="resultErrorRecoverySteps.length > 0"
+      class="generator-result-recovery"
+    >
+      <strong>{{ t("app.generatorPreview.resultRecoveryTitle") }}</strong>
+      <ol>
+        <li
+          v-for="step in resultErrorRecoverySteps"
+          :key="step"
+        >
+          {{ step }}
+        </li>
+      </ol>
+      <div class="generator-result-recovery-actions">
+        <button
+          v-if="selectedRecentSessionId"
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="loading || reviewLoading || applyLoading"
+          @click="emit('restore-current-result')"
+        >
+          {{ t("app.generatorPreview.action.restoreCurrentResult") }}
+        </button>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="loading || reviewLoading || applyLoading"
+          @click="emit('refresh-preview')"
+        >
+          {{ t("app.generatorPreview.action.regeneratePreview") }}
+        </button>
+      </div>
+    </section>
+
+    <section
+      v-if="operationProgressMessage"
+      class="generator-progress-message"
+    >
+      <strong>{{ operationProgressMessage.title }}</strong>
+      <span>{{ operationProgressMessage.description }}</span>
+    </section>
+
+    <div
+      v-if="blockedFileCount > 0 && firstBlockedFilePath"
+      class="generator-blocked-recovery"
+    >
+      <div class="generator-blocked-recovery-copy">
+        <strong>
+          {{
+            t("app.generatorPreview.blockedRecoverySummary", {
+              count: blockedFileCount,
+            })
+          }}
+        </strong>
+        <span>{{ firstBlockedFilePath }}</span>
+      </div>
+      <button
+        type="button"
+        class="enterprise-button enterprise-button-ghost"
+        :disabled="loading || reviewLoading || applyLoading"
+        @click="emit('select-file', firstBlockedFilePath)"
+      >
+        {{ t("app.generatorPreview.blockedPrimaryAction") }}
+      </button>
+    </div>
+
+    <section
+      v-if="confirmationChecklist.length > 0"
+      class="generator-confirmation-checklist"
+    >
+      <h4>{{ t("app.generatorPreview.confirmationChecklistTitle") }}</h4>
+      <ol>
+        <li
+          v-for="item in confirmationChecklist"
+          :key="item"
+        >
+          {{ item }}
+        </li>
+      </ol>
+    </section>
+
     <label
       v-if="showReviewCommentInput"
       class="enterprise-field generator-review-comment"
@@ -113,6 +221,13 @@ const emit = defineEmits<{
         @update:model-value="emit('review-comment-input', $event)"
       />
     </label>
+
+    <div
+      v-if="rejectCommentRequired"
+      class="enterprise-message enterprise-message-warning"
+    >
+      {{ t("app.generatorPreview.message.rejectCommentRequired") }}
+    </div>
 
     <div
       v-if="reviewEvidence"
@@ -152,7 +267,7 @@ const emit = defineEmits<{
         v-if="showReviewActions && canReject"
         type="button"
         class="enterprise-button enterprise-button-ghost"
-        :disabled="reviewLoading"
+        :disabled="reviewLoading || !canSubmitReject"
         @click="emit('review-preview', 'reject')"
       >
         {{
@@ -268,6 +383,136 @@ const emit = defineEmits<{
   word-break: break-word;
 }
 
+.generator-empty-result {
+  display: grid;
+  gap: 0.28rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px dashed rgba(15, 23, 42, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.generator-empty-result strong {
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.generator-empty-result span {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.generator-confirmation-checklist {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(36, 87, 214, 0.14);
+  border-radius: 6px;
+  background: rgba(36, 87, 214, 0.05);
+}
+
+.generator-blocked-recovery {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(180, 83, 9, 0.18);
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.generator-progress-message {
+  display: grid;
+  gap: 0.28rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(36, 87, 214, 0.14);
+  border-radius: 6px;
+  background: rgba(36, 87, 214, 0.05);
+}
+
+.generator-progress-message strong {
+  color: #173ea6;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.generator-progress-message span {
+  color: #475569;
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+
+.generator-result-recovery {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.82);
+}
+
+.generator-result-recovery strong {
+  color: #0f172a;
+  font-size: 0.81rem;
+  font-weight: 700;
+}
+
+.generator-result-recovery ol {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.generator-result-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.generator-blocked-recovery-copy {
+  display: grid;
+  gap: 0.22rem;
+  min-width: 0;
+}
+
+.generator-blocked-recovery-copy strong {
+  color: #92400e;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.generator-blocked-recovery-copy span {
+  color: #78350f;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.generator-confirmation-checklist h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.generator-confirmation-checklist ol {
+  display: grid;
+  gap: 0.38rem;
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
 .generator-status-session {
   min-width: min(17rem, 100%);
   color: #64748b;
@@ -306,6 +551,10 @@ const emit = defineEmits<{
 
   .generator-toolbar-actions {
     width: 100%;
+  }
+
+  .generator-blocked-recovery {
+    align-items: stretch;
   }
 
   .generator-session-select {
