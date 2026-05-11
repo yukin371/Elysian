@@ -1,6 +1,6 @@
 # ARCHITECTURE_GUARDRAILS
 
-更新时间：`2026-04-20`
+更新时间：`2026-05-11`
 
 本文件定义仓库初始化阶段的目标边界。若实际工程实现偏离这些边界，必须先更新本文件或补 ADR，再继续实现。
 
@@ -74,6 +74,7 @@
 - 任何通用能力先找 canonical owner，再实现
 - 若某能力同时影响 server、schema、generator，优先通过 schema 契约解耦
 - 若某能力要跨前端适配层共享，必须先证明它不携带框架绑定语义
+- 前端页面的信息架构试错、表单主流程试稿与交互文案打磨，默认先落到应用内的 prototype-only owner（当前为 `apps/example-vue` 的 `demohub` workspace）验证；稳定后再迁回真实业务 workspace，避免把原型试错直接混入正式运行时 owner
 
 ## 文档同步触发条件
 
