@@ -79,15 +79,14 @@ onUnmounted(() => document.removeEventListener("keydown", handleKeydown))
   <section class="generator-block generator-results-panel">
     <div class="generator-panel-head">
       <div class="generator-panel-copy">
-        <h3 class="generator-panel-title">
+        <p class="generator-panel-eyebrow">
           {{ t("app.generatorPreview.workspaceTitle") }}
+        </p>
+        <h3 class="generator-panel-title">
+          {{ t("app.generatorPreview.resultListHeadline") }}
         </h3>
         <p class="generator-panel-description">
-          {{
-            t("app.generatorPreview.resultListSummary", {
-              count: files.length,
-            })
-          }}
+          {{ t("app.generatorPreview.resultListSummary", { count: files.length }) }}
         </p>
       </div>
     </div>
@@ -170,13 +169,22 @@ onUnmounted(() => document.removeEventListener("keydown", handleKeydown))
 .generator-panel-title {
   margin: 0;
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
 .generator-panel-copy {
   display: grid;
   gap: 0.28rem;
+}
+
+.generator-panel-eyebrow {
+  margin: 0;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .generator-panel-description,

@@ -135,8 +135,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.workspaceTitle": "Generated files",
   "app.generatorPreview.workspaceDescription":
     "Configure the module draft and frontend target first, then review file plans, diff summaries, SQL proposals, and apply evidence.",
+  "app.generatorPreview.resultListHeadline": "Open the file that needs attention first",
   "app.generatorPreview.resultListSummary":
-    "{count} artifacts are included in the current result.",
+    "{count} artifacts are included in the current result. Start with the one that matters most.",
   "app.generatorPreview.resultListHint":
     "Next: select one file from the list to review diff, source, and SQL evidence.",
   "app.generatorPreview.resultListKeyboardHint":
@@ -191,6 +192,23 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "This preview was rejected. Generate a new one to continue.",
   "app.generatorPreview.message.applied":
     "This preview has already been applied to staging at {value}.",
+  "app.generatorPreview.verdict.label": "Current verdict",
+  "app.generatorPreview.verdict.idleTitle":
+    "There is no result ready for a decision yet",
+  "app.generatorPreview.verdict.idleDescription":
+    "Generate a preview first so the page can tell you whether review, confirmation, or apply can continue.",
+  "app.generatorPreview.verdict.blockedTitle":
+    "This result cannot move forward yet",
+  "app.generatorPreview.verdict.blockedDescription":
+    "{count} blocked files still need attention. Review the conflicts first, then decide whether to change existing-file handling or regenerate.",
+  "app.generatorPreview.verdict.reviewTitle":
+    "The result is ready for review",
+  "app.generatorPreview.verdict.confirmTitle":
+    "Review passed. Finish the pre-apply confirmation next",
+  "app.generatorPreview.verdict.applyTitle":
+    "The checklist is complete and apply can be decided next",
+  "app.generatorPreview.verdict.doneTitle":
+    "This result has already been applied",
   "app.generatorPreview.progress.generatingTitle": "Generating preview",
   "app.generatorPreview.progress.regeneratingTitle": "Regenerating preview",
   "app.generatorPreview.progress.generatingDescription":
@@ -296,6 +314,20 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Next: resolve blocking conflicts",
   "app.generatorPreview.next.done": "Next: complete",
   "app.generatorPreview.next.wait": "Next: wait for status update",
+  "app.generatorPreview.nextSummary.review":
+    "Decide whether this result is good enough to continue. If it is not, reject it and leave a correction reason.",
+  "app.generatorPreview.nextSummary.confirmChecklist":
+    "Before apply, verify the target, file count, conflict strategy, and SQL proposal one more time.",
+  "app.generatorPreview.nextSummary.apply":
+    "The current result now meets the prerequisites for staging apply.",
+  "app.generatorPreview.nextSummary.confirmApply":
+    "This is the final confirmation. Continuing will write the current result to staging.",
+  "app.generatorPreview.nextSummary.resolveConflicts":
+    "Open the blocked files first, understand why they are blocked, then decide whether to revise the draft or regenerate.",
+  "app.generatorPreview.nextSummary.done":
+    "This run is already in staging, so the next practical step is validation or a new iteration.",
+  "app.generatorPreview.nextSummary.wait":
+    "There is no new primary action right now. Wait for the status to refresh or restore the same run from Latest result.",
   "app.generatorPreview.flow.configure": "New generation",
   "app.generatorPreview.flow.review": "Review diff",
   "app.generatorPreview.flow.confirm": "Confirm checklist",
@@ -348,6 +380,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.actionLabel.skip": "Skip",
   "app.generatorPreview.actionLabel.block": "Block",
   "app.generatorPreview.sessionTitle": "Latest result",
+  "app.generatorPreview.reviewHeadline":
+    "Decide whether this result can move forward",
+  "app.generatorPreview.reviewDescription":
+    "Start with the verdict and next-step guidance here, then dig into file evidence only when needed.",
   "app.generatorPreview.emptyResultTitle":
     "The latest generation result will appear here",
   "app.generatorPreview.emptyResultDescription":

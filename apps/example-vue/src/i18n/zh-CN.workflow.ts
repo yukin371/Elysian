@@ -126,7 +126,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.workspaceTitle": "生成结果",
   "app.generatorPreview.workspaceDescription":
     "先配置模块草稿和前端目标，再查看文件计划、差异摘要、SQL 提案与应用证据。",
-  "app.generatorPreview.resultListSummary": "当前结果共 {count} 个产物。",
+  "app.generatorPreview.resultListHeadline": "先看最值得处理的文件",
+  "app.generatorPreview.resultListSummary":
+    "当前结果共 {count} 个产物，先从列表里打开最需要优先判断的一份。",
   "app.generatorPreview.resultListHint":
     "下一步：从列表里选择一份文件，查看差异、源码和 SQL 证据。",
   "app.generatorPreview.resultListKeyboardHint":
@@ -178,6 +180,17 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.rejected": "本次预览已拒绝，请重新生成。",
   "app.generatorPreview.message.applied":
     "本次预览已完成 staging apply，应用时间：{value}。",
+  "app.generatorPreview.verdict.label": "当前结论",
+  "app.generatorPreview.verdict.idleTitle": "当前还没有可继续判断的结果",
+  "app.generatorPreview.verdict.idleDescription":
+    "先生成一份预览结果，页面才会给出是否可继续审核、确认或 apply 的明确判断。",
+  "app.generatorPreview.verdict.blockedTitle": "当前不能继续推进，先处理阻塞冲突",
+  "app.generatorPreview.verdict.blockedDescription":
+    "当前还有 {count} 个阻塞文件。先看阻塞原因，再决定是否调整已有文件处理方式或重新生成。",
+  "app.generatorPreview.verdict.reviewTitle": "结果已生成，可以先进入审核判断",
+  "app.generatorPreview.verdict.confirmTitle": "审核已通过，先完成应用前确认",
+  "app.generatorPreview.verdict.applyTitle": "确认项已齐，可以决定是否应用到 staging",
+  "app.generatorPreview.verdict.doneTitle": "本次结果已完成应用",
   "app.generatorPreview.progress.generatingTitle": "正在生成预览",
   "app.generatorPreview.progress.regeneratingTitle": "正在重新生成预览",
   "app.generatorPreview.progress.generatingDescription":
@@ -275,6 +288,20 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.next.resolveConflicts": "下一步：处理阻塞冲突",
   "app.generatorPreview.next.done": "下一步：已完成",
   "app.generatorPreview.next.wait": "下一步：等待状态更新",
+  "app.generatorPreview.nextSummary.review":
+    "先确认这次生成结果是否值得继续推进；如果不合适，就直接拒绝并留下原因。",
+  "app.generatorPreview.nextSummary.confirmChecklist":
+    "在真正 apply 前，再核对目标、文件数量、冲突策略和 SQL 提案。",
+  "app.generatorPreview.nextSummary.apply":
+    "当前已经满足继续 apply 的前置条件，确认后会写入 staging。",
+  "app.generatorPreview.nextSummary.confirmApply":
+    "这是最后一次确认；继续后会把当前结果正式应用到 staging。",
+  "app.generatorPreview.nextSummary.resolveConflicts":
+    "先打开阻塞文件，看清为什么被拦住，再决定回改草稿还是重新生成。",
+  "app.generatorPreview.nextSummary.done":
+    "这一轮结果已经落到 staging，接下来更适合转去做验证或开始下一轮调整。",
+  "app.generatorPreview.nextSummary.wait":
+    "当前没有新的主动作，先等待状态刷新，或从最近结果恢复同一轮继续查看。",
   "app.generatorPreview.flow.configure": "新建生成",
   "app.generatorPreview.flow.review": "审核差异",
   "app.generatorPreview.flow.confirm": "确认清单",
@@ -326,6 +353,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.actionLabel.skip": "跳过",
   "app.generatorPreview.actionLabel.block": "阻塞",
   "app.generatorPreview.sessionTitle": "最近结果",
+  "app.generatorPreview.reviewHeadline": "先判断这次结果能不能继续推进",
+  "app.generatorPreview.reviewDescription":
+    "这里先给出当前结论和下一步建议；更细的文件证据放到后面再看。",
   "app.generatorPreview.emptyResultTitle": "这里会显示最新一次生成结果",
   "app.generatorPreview.emptyResultDescription":
     "点击“生成预览”后，这里会出现文件状态、审核进度和应用到 staging 的后续动作。",

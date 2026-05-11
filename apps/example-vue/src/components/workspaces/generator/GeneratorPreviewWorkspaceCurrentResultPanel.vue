@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue"
+
 import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 
@@ -57,7 +59,7 @@ interface GeneratorPreviewWorkspaceCurrentResultPanelProps {
   resultPrimaryActionLabel: string
 }
 
-defineProps<GeneratorPreviewWorkspaceCurrentResultPanelProps>()
+const props = defineProps<GeneratorPreviewWorkspaceCurrentResultPanelProps>()
 
 const emit = defineEmits<{
   (e: "recent-session-change", value: string | number | string[]): void
@@ -71,14 +73,176 @@ const emit = defineEmits<{
   (e: "apply-preview"): void
   (e: "select-file", value: string): void
 }>()
+
+const verdictTone = computed<"warning" | "info" | "success">(() => {
+  if (props.blockedFileCount > 0) {
+    return "warning"
+  }
+
+  if (props.applyEvidence) {
+    return "success"
+  }
+
+  return props.currentStateMessage?.tone ?? "info"
+})
+
+const verdictTitle = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.verdict.blockedTitle")
+  }
+
+  if (props.showReviewActions) {
+    return props.t("app.generatorPreview.verdict.reviewTitle")
+  }
+
+  if (props.showConfirmAction) {
+    return props.t("app.generatorPreview.verdict.confirmTitle")
+  }
+
+  if (props.showApplyAction) {
+    return props.t("app.generatorPreview.verdict.applyTitle")
+  }
+
+  if (props.applyEvidence) {
+    return props.t("app.generatorPreview.verdict.doneTitle")
+  }
+
+  return props.t("app.generatorPreview.verdict.idleTitle")
+})
+
+const verdictDescription = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.verdict.blockedDescription", {
+      count: props.blockedFileCount,
+    })
+  }
+
+  if (props.currentStateMessage) {
+    return props.currentStateMessage.text
+  }
+
+  if (props.reviewEvidence) {
+    return props.t(
+      props.reviewEvidence.decision === "approve"
+        ? "app.generatorPreview.message.reviewApproved"
+        : "app.generatorPreview.message.reviewRejected",
+      {
+        value: props.reviewEvidence.reviewedAt ?? "-",
+      },
+    )
+  }
+
+  if (props.applyEvidence) {
+    return props.t("app.generatorPreview.message.applied", {
+      value: props.applyEvidence.appliedAt ?? "-",
+    })
+  }
+
+  return props.t("app.generatorPreview.verdict.idleDescription")
+})
+
+const nextStepTitle = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.next.resolveConflicts")
+  }
+
+  if (props.showReviewActions) {
+    return props.t("app.generatorPreview.next.review")
+  }
+
+  if (props.showConfirmAction) {
+    return props.t("app.generatorPreview.next.confirmChecklist")
+  }
+
+  if (props.showApplyAction && props.isApplyConfirming) {
+    return props.t("app.generatorPreview.next.confirmApply")
+  }
+
+  if (props.showApplyAction) {
+    return props.t("app.generatorPreview.next.apply")
+  }
+
+  if (props.applyEvidence) {
+    return props.t("app.generatorPreview.next.done")
+  }
+
+  return props.t("app.generatorPreview.next.wait")
+})
+
+const nextStepDescription = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.nextSummary.resolveConflicts")
+  }
+
+  if (props.showReviewActions) {
+    return props.t("app.generatorPreview.nextSummary.review")
+  }
+
+  if (props.showConfirmAction) {
+    return props.t("app.generatorPreview.nextSummary.confirmChecklist")
+  }
+
+  if (props.showApplyAction && props.isApplyConfirming) {
+    return props.t("app.generatorPreview.nextSummary.confirmApply")
+  }
+
+  if (props.showApplyAction) {
+    return props.t("app.generatorPreview.nextSummary.apply")
+  }
+
+  if (props.applyEvidence) {
+    return props.t("app.generatorPreview.nextSummary.done")
+  }
+
+  return props.t("app.generatorPreview.nextSummary.wait")
+})
+
+const showPrimaryBlockedAction = computed(
+  () => props.blockedFileCount > 0 && Boolean(props.firstBlockedFilePath),
+)
+
+const showPrimaryReviewAction = computed(
+  () =>
+    !showPrimaryBlockedAction.value &&
+    props.showReviewActions &&
+    props.canApprove &&
+    !props.isRejectConfirming,
+)
+
+const showPrimaryConfirmAction = computed(
+  () =>
+    !showPrimaryBlockedAction.value &&
+    props.showConfirmAction &&
+    props.canConfirm,
+)
+
+const showPrimaryApplyAction = computed(
+  () => !showPrimaryBlockedAction.value && props.showApplyAction,
+)
+
+const showAnyPrimaryAction = computed(
+  () =>
+    showPrimaryBlockedAction.value ||
+    showPrimaryReviewAction.value ||
+    showPrimaryConfirmAction.value ||
+    showPrimaryApplyAction.value,
+)
 </script>
 
 <template>
   <section class="generator-block generator-session-panel">
     <div class="generator-panel-head">
-      <h3 class="generator-panel-title">
-        {{ t("app.generatorPreview.sessionTitle") }}
-      </h3>
+      <div class="generator-panel-copy">
+        <p class="generator-panel-eyebrow">
+          {{ t("app.generatorPreview.sessionTitle") }}
+        </p>
+        <h3 class="generator-panel-title">
+          {{ t("app.generatorPreview.reviewHeadline") }}
+        </h3>
+        <p class="generator-panel-description">
+          {{ t("app.generatorPreview.reviewDescription") }}
+        </p>
+      </div>
 
       <label
         v-if="hasRecentSessions"
@@ -106,26 +270,80 @@ const emit = defineEmits<{
 
     <div
       v-else
-      class="generator-status-facts"
+      class="generator-result-summary"
     >
-      <div
-        v-for="fact in statusFacts"
-        :key="fact.label"
-        class="generator-status-fact"
+      <section
+        :class="[
+          'generator-result-verdict',
+          `generator-result-verdict-${verdictTone}`,
+        ]"
       >
-        <span>{{ fact.label }}</span>
-        <strong>{{ fact.value }}</strong>
-      </div>
-    </div>
+        <span class="generator-result-verdict-label">
+          {{ t("app.generatorPreview.verdict.label") }}
+        </span>
+        <strong>{{ verdictTitle }}</strong>
+        <p>{{ verdictDescription }}</p>
+      </section>
 
-    <div
-      v-if="currentStateMessage"
-      :class="[
-        'enterprise-message',
-        `enterprise-message-${currentStateMessage.tone}`,
-      ]"
-    >
-      {{ currentStateMessage.text }}
+      <section class="generator-next-step-card">
+        <div class="generator-next-step-copy">
+          <span>{{ nextStepTitle }}</span>
+          <strong>{{ nextStepDescription }}</strong>
+        </div>
+
+        <div
+          v-if="showAnyPrimaryAction"
+          class="generator-next-step-actions"
+        >
+          <button
+            v-if="showPrimaryBlockedAction && firstBlockedFilePath"
+            type="button"
+            class="enterprise-button"
+            :disabled="loading || reviewLoading || applyLoading"
+            @click="emit('select-file', firstBlockedFilePath)"
+          >
+            {{ t("app.generatorPreview.blockedPrimaryAction") }}
+          </button>
+          <button
+            v-else-if="showPrimaryReviewAction"
+            type="button"
+            class="enterprise-button"
+            :disabled="reviewLoading"
+            @click="emit('review-preview', 'approve')"
+          >
+            {{ resultPrimaryActionLabel }}
+          </button>
+          <button
+            v-else-if="showPrimaryConfirmAction"
+            type="button"
+            class="enterprise-button"
+            :disabled="loading || reviewLoading || applyLoading"
+            @click="emit('confirm-preview')"
+          >
+            {{ resultPrimaryActionLabel }}
+          </button>
+          <button
+            v-else-if="showPrimaryApplyAction"
+            type="button"
+            class="enterprise-button"
+            :disabled="!canApply"
+            @click="emit('apply-preview')"
+          >
+            {{ resultPrimaryActionLabel }}
+          </button>
+        </div>
+      </section>
+
+      <div class="generator-status-facts">
+        <div
+          v-for="fact in statusFacts"
+          :key="fact.label"
+          class="generator-status-fact"
+        >
+          <span>{{ fact.label }}</span>
+          <strong>{{ fact.value }}</strong>
+        </div>
+      </div>
     </div>
 
     <section
@@ -169,30 +387,6 @@ const emit = defineEmits<{
       <strong>{{ operationProgressMessage.title }}</strong>
       <span>{{ operationProgressMessage.description }}</span>
     </section>
-
-    <div
-      v-if="blockedFileCount > 0 && firstBlockedFilePath"
-      class="generator-blocked-recovery"
-    >
-      <div class="generator-blocked-recovery-copy">
-        <strong>
-          {{
-            t("app.generatorPreview.blockedRecoverySummary", {
-              count: blockedFileCount,
-            })
-          }}
-        </strong>
-        <span>{{ firstBlockedFilePath }}</span>
-      </div>
-      <button
-        type="button"
-        class="enterprise-button enterprise-button-ghost"
-        :disabled="loading || reviewLoading || applyLoading"
-        @click="emit('select-file', firstBlockedFilePath)"
-      >
-        {{ t("app.generatorPreview.blockedPrimaryAction") }}
-      </button>
-    </div>
 
     <section
       v-if="confirmationChecklist.length > 0"
@@ -277,15 +471,6 @@ const emit = defineEmits<{
         }}
       </button>
       <button
-        v-if="showReviewActions && canApprove && !isRejectConfirming"
-        type="button"
-        class="enterprise-button"
-        :disabled="reviewLoading"
-        @click="emit('review-preview', 'approve')"
-      >
-        {{ resultPrimaryActionLabel }}
-      </button>
-      <button
         v-if="showApplyAction && isApplyConfirming"
         type="button"
         class="enterprise-button enterprise-button-ghost"
@@ -295,22 +480,21 @@ const emit = defineEmits<{
         {{ t("app.generatorPreview.action.cancelApplyConfirm") }}
       </button>
       <button
-        v-if="showConfirmAction && canConfirm"
+        v-if="selectedRecentSessionId"
         type="button"
-        class="enterprise-button"
+        class="enterprise-button enterprise-button-ghost"
         :disabled="loading || reviewLoading || applyLoading"
-        @click="emit('confirm-preview')"
+        @click="emit('restore-current-result')"
       >
-        {{ resultPrimaryActionLabel }}
+        {{ t("app.generatorPreview.action.restoreCurrentResult") }}
       </button>
       <button
-        v-else-if="showApplyAction"
         type="button"
-        class="enterprise-button"
-        :disabled="!canApply"
-        @click="emit('apply-preview')"
+        class="enterprise-button enterprise-button-ghost"
+        :disabled="loading || reviewLoading || applyLoading"
+        @click="emit('refresh-preview')"
       >
-        {{ resultPrimaryActionLabel }}
+        {{ t("app.generatorPreview.action.regeneratePreview") }}
       </button>
     </div>
   </section>
@@ -338,11 +522,32 @@ const emit = defineEmits<{
   gap: 0.75rem 1rem;
 }
 
+.generator-panel-copy {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.generator-panel-eyebrow {
+  margin: 0;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .generator-panel-title {
   margin: 0;
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
+}
+
+.generator-panel-description {
+  margin: 0;
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.55;
 }
 
 .generator-inline-field {
@@ -353,6 +558,82 @@ const emit = defineEmits<{
 .generator-session-select {
   min-width: min(18rem, 100%);
   flex: 1 1 15rem;
+}
+
+.generator-result-summary {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.generator-result-verdict,
+.generator-next-step-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.generator-result-verdict {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.generator-result-verdict-warning {
+  border-color: rgba(180, 83, 9, 0.22);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.generator-result-verdict-info {
+  border-color: rgba(36, 87, 214, 0.18);
+  background: rgba(36, 87, 214, 0.05);
+}
+
+.generator-result-verdict-success {
+  border-color: rgba(5, 150, 105, 0.2);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.generator-result-verdict-label,
+.generator-next-step-copy span {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.generator-result-verdict strong,
+.generator-next-step-copy strong {
+  color: #0f172a;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.generator-result-verdict p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.generator-next-step-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem 1rem;
+  border: 1px dashed rgba(36, 87, 214, 0.24);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.generator-next-step-copy {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.generator-next-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
 }
 
 .generator-status-facts {
@@ -413,18 +694,6 @@ const emit = defineEmits<{
   background: rgba(36, 87, 214, 0.05);
 }
 
-.generator-blocked-recovery {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid rgba(180, 83, 9, 0.18);
-  border-radius: 6px;
-  background: rgba(245, 158, 11, 0.08);
-}
-
 .generator-progress-message {
   display: grid;
   gap: 0.28rem;
@@ -477,25 +746,6 @@ const emit = defineEmits<{
   gap: 0.65rem;
 }
 
-.generator-blocked-recovery-copy {
-  display: grid;
-  gap: 0.22rem;
-  min-width: 0;
-}
-
-.generator-blocked-recovery-copy strong {
-  color: #92400e;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.generator-blocked-recovery-copy span {
-  color: #78350f;
-  font-size: 0.76rem;
-  line-height: 1.45;
-  word-break: break-all;
-}
-
 .generator-confirmation-checklist h4 {
   margin: 0;
   color: #0f172a;
@@ -525,6 +775,7 @@ const emit = defineEmits<{
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+  justify-content: flex-end;
 }
 
 .generator-review-comment {
@@ -545,16 +796,20 @@ const emit = defineEmits<{
     min-width: 100%;
   }
 
+  .generator-next-step-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .generator-next-step-actions {
+    justify-content: stretch;
+  }
+
   .generator-panel-head {
     align-items: stretch;
   }
 
   .generator-toolbar-actions {
     width: 100%;
-  }
-
-  .generator-blocked-recovery {
-    align-items: stretch;
   }
 
   .generator-session-select {
