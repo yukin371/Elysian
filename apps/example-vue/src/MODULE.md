@@ -28,6 +28,7 @@
 - shell main / secondary 当前都消费 `src/modules/generated/index.ts` 暴露的生成组件映射；标准 CRUD 的 main/panel 不再保留示例应用本地手写实现。
 - generator preview workspace 负责展示和提交两类生成输入：已注册 schema 的边界模式，以及前端 JSON 草稿输入；当前还承接简化 schema 展开、模板快速填充、结构化校验反馈与步骤引导流，但它只做输入装配与预览消费，不拥有 generator 引擎。
 - `demohub` workspace 只承载本地页面原型与交互试稿，用来先验证信息架构、表单主流程和反馈文案；它不接真实接口、不改真实模块、不替代正式 workspace owner。
+- 任何面向用户流程的页面优化，默认先落到 `demohub` 验证，再迁回真实 workspace；当前 `generator preview` 的起稿、结果判断、apply 前确认三段主流程原型都以 `demohub` 为唯一试稿 owner。
 - 若是纯展示块，优先拆成 workspace 组件。
 - 若是入口级派生或装配逻辑，优先拆成本地 composable。
 - 不为了压行数把职责推到错误 owner。
