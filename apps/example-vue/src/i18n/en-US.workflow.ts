@@ -429,7 +429,11 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.emptyResultDescription":
     "After you click Generate preview, this area shows file status, review progress, and the next apply-to-staging actions.",
   "app.generatorPreview.fileDecisionTitle": "File rationale",
+  "app.generatorPreview.fileDecisionDescription":
+    "Start with why this file is being created, skipped, overwritten, or blocked before digging into source and SQL evidence.",
   "app.generatorPreview.diffTitle": "Diff summary",
+  "app.generatorPreview.diffDescription":
+    "Use the size of the change to decide whether this file needs a deeper read before opening full source and line diff.",
   "app.generatorPreview.fileDiffTitle": "Current file diff",
   "app.generatorPreview.lineDiffTitle": "Line diff",
   "app.generatorPreview.reviewTitle": "Review evidence",
@@ -485,6 +489,27 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.confirmedBy": "Confirmed by",
   "app.generatorPreview.meta.templateReason": "Template purpose",
   "app.generatorPreview.meta.plannedReason": "Decision reason",
+  "app.generatorPreview.fileVerdict.label": "Current file verdict",
+  "app.generatorPreview.fileVerdict.idleTitle":
+    "Pick a file from the result list first",
+  "app.generatorPreview.fileVerdict.idleDescription":
+    "Once a file is selected, this area explains why it deserves attention before you move into diffs and source evidence.",
+  "app.generatorPreview.fileVerdict.create.title":
+    "This file will be added to the target directory",
+  "app.generatorPreview.fileVerdict.create.description":
+    "Confirm that it truly belongs in this generation scope and that the default generated content matches expectations.",
+  "app.generatorPreview.fileVerdict.overwrite.title":
+    "This file is planned to overwrite existing content",
+  "app.generatorPreview.fileVerdict.overwrite.description":
+    "Review whether overwrite is safe, especially when the current file may contain manual edits that should not be replaced automatically.",
+  "app.generatorPreview.fileVerdict.skip.title":
+    "This file will stay unchanged for now",
+  "app.generatorPreview.fileVerdict.skip.description":
+    "Skipping is still a decision. Check whether the skip reason matches what you expected from this run.",
+  "app.generatorPreview.fileVerdict.block.title":
+    "This file is the current blocker",
+  "app.generatorPreview.fileVerdict.block.description":
+    "Treat it as the first thing to resolve. Understand the conflict before deciding whether to revise the draft or change existing-file handling.",
   "app.generatorPreview.meta.proposalStatus": "Proposal status",
   "app.generatorPreview.meta.generatedAt": "Generated at",
   "app.generatorPreview.meta.canonicalOwner": "Canonical owner",

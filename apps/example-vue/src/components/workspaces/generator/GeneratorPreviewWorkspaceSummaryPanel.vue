@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue"
+
 import type {
   GeneratorPreviewFrontendImpact,
   GeneratorPreviewFileCard,
@@ -20,10 +22,60 @@ interface GeneratorPreviewWorkspaceSummaryPanelProps {
   recoveryNoteTone: "info" | "warning" | null
 }
 
-defineProps<GeneratorPreviewWorkspaceSummaryPanelProps>()
+const props = defineProps<GeneratorPreviewWorkspaceSummaryPanelProps>()
+
+const fileVerdictTone = computed<"warning" | "info" | "success">(() => {
+  if (!props.selectedFile) {
+    return "info"
+  }
+
+  if (props.selectedFile.plannedAction === "block") {
+    return "warning"
+  }
+
+  if (props.selectedFile.plannedAction === "create") {
+    return "success"
+  }
+
+  return "info"
+})
+
+const fileVerdictTitle = computed(() => {
+  if (!props.selectedFile) {
+    return props.t("app.generatorPreview.fileVerdict.idleTitle")
+  }
+
+  return props.t(
+    `app.generatorPreview.fileVerdict.${props.selectedFile.plannedAction}.title`,
+  )
+})
+
+const fileVerdictDescription = computed(() => {
+  if (!props.selectedFile) {
+    return props.t("app.generatorPreview.fileVerdict.idleDescription")
+  }
+
+  return props.t(
+    `app.generatorPreview.fileVerdict.${props.selectedFile.plannedAction}.description`,
+  )
+})
 </script>
 
 <template>
+  <div
+    v-if="selectedFile"
+    :class="[
+      'generator-file-verdict',
+      `generator-file-verdict-${fileVerdictTone}`,
+    ]"
+  >
+    <span class="generator-file-verdict-label">
+      {{ t("app.generatorPreview.fileVerdict.label") }}
+    </span>
+    <strong>{{ fileVerdictTitle }}</strong>
+    <p>{{ fileVerdictDescription }}</p>
+  </div>
+
   <h3 class="enterprise-heading">
     {{ selectedFile?.path ?? t("app.generatorPreview.detailEmptyTitle") }}
   </h3>
@@ -109,6 +161,50 @@ defineProps<GeneratorPreviewWorkspaceSummaryPanelProps>()
   gap: 0.55rem;
   color: #64748b;
   font-size: 0.82rem;
+}
+
+.generator-file-verdict {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.generator-file-verdict-info {
+  border: 1px solid rgba(36, 87, 214, 0.18);
+  background: rgba(36, 87, 214, 0.05);
+}
+
+.generator-file-verdict-warning {
+  border: 1px solid rgba(180, 83, 9, 0.22);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.generator-file-verdict-success {
+  border: 1px solid rgba(5, 150, 105, 0.18);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.generator-file-verdict-label {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.generator-file-verdict strong {
+  color: #0f172a;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.generator-file-verdict p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.79rem;
+  line-height: 1.55;
 }
 
 .generator-impact {

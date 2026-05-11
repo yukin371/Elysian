@@ -18,6 +18,10 @@ defineProps<GeneratorPreviewWorkspaceFileDiffPanelProps>()
 
 <template>
   <section class="panel-section">
+    <div class="generator-section-head">
+      <h4>{{ t("app.generatorPreview.diffTitle") }}</h4>
+      <p>{{ t("app.generatorPreview.diffDescription") }}</p>
+    </div>
     <div class="generator-facts">
       <span>
         {{ t("app.generatorPreview.meta.addedLines") }}
@@ -41,6 +45,25 @@ defineProps<GeneratorPreviewWorkspaceFileDiffPanelProps>()
   gap: 0.75rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.generator-section-head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.generator-section-head h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.generator-section-head p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.77rem;
+  line-height: 1.5;
 }
 
 .generator-facts {

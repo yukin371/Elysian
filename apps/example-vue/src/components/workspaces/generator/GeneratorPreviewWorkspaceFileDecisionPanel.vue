@@ -28,7 +28,15 @@ const decisionNote = computed(() => {
 
 <template>
   <section class="panel-section mt-5">
-    <code class="generator-path">{{ selectedFile.absolutePath }}</code>
+    <div class="generator-section-head">
+      <h4>{{ t("app.generatorPreview.fileDecisionTitle") }}</h4>
+      <p>{{ t("app.generatorPreview.fileDecisionDescription") }}</p>
+    </div>
+
+    <p v-if="decisionNote" class="generator-note">
+      {{ decisionNote }}
+    </p>
+
     <div class="generator-facts">
       <span>
         {{ t("app.generatorPreview.meta.exists") }}
@@ -38,10 +46,15 @@ const decisionNote = computed(() => {
         {{ t("app.generatorPreview.meta.managed") }}
         {{ selectedManagedLabel }}
       </span>
+      <span v-if="selectedFile.mergeStrategy">
+        {{ t("app.generatorPreview.meta.mergeStrategy") }}
+        {{ selectedFile.mergeStrategy }}
+      </span>
     </div>
-    <p v-if="decisionNote" class="generator-note">
-      {{ decisionNote }}
-    </p>
+    <div class="generator-path-block">
+      <span>{{ t("app.generatorPreview.meta.absolutePath") }}</span>
+      <code class="generator-path">{{ selectedFile.absolutePath }}</code>
+    </div>
   </section>
 </template>
 
@@ -53,12 +66,44 @@ const decisionNote = computed(() => {
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
+.generator-section-head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.generator-section-head h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.generator-section-head p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
 .generator-facts {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
   color: #64748b;
   font-size: 0.82rem;
+}
+
+.generator-path-block {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.generator-path-block span {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .generator-path {

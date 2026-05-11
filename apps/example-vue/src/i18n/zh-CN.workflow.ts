@@ -389,7 +389,11 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.emptyResultDescription":
     "点击“生成预览”后，这里会出现文件状态、审核进度和应用到 staging 的后续动作。",
   "app.generatorPreview.fileDecisionTitle": "文件说明",
+  "app.generatorPreview.fileDecisionDescription":
+    "先看这份文件为什么会被新增、跳过、覆盖或阻塞，再决定是否继续深入看源码和 SQL 证据。",
   "app.generatorPreview.diffTitle": "差异摘要",
+  "app.generatorPreview.diffDescription":
+    "先用变更规模判断这份文件值不值得细看，再进入完整源码与行级 diff。",
   "app.generatorPreview.fileDiffTitle": "当前文件差异",
   "app.generatorPreview.lineDiffTitle": "行级 Diff",
   "app.generatorPreview.reviewTitle": "审核证据",
@@ -441,6 +445,22 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.confirmedBy": "确认人",
   "app.generatorPreview.meta.templateReason": "模板用途",
   "app.generatorPreview.meta.plannedReason": "本次决策原因",
+  "app.generatorPreview.fileVerdict.label": "当前文件结论",
+  "app.generatorPreview.fileVerdict.idleTitle": "先从结果列表里选中一份文件",
+  "app.generatorPreview.fileVerdict.idleDescription":
+    "选择一份文件后，这里会先解释它为什么值得优先看，再带你进入差异和源码证据。",
+  "app.generatorPreview.fileVerdict.create.title": "这份文件会作为新增内容写入目标目录",
+  "app.generatorPreview.fileVerdict.create.description":
+    "重点确认它是否真的属于这次生成范围，以及默认生成内容是否符合预期。",
+  "app.generatorPreview.fileVerdict.overwrite.title": "这份文件计划覆盖现有内容",
+  "app.generatorPreview.fileVerdict.overwrite.description":
+    "优先确认覆盖是否安全，尤其要看现有内容是否包含不能被自动替换的人工修改。",
+  "app.generatorPreview.fileVerdict.skip.title": "这份文件当前不会被改动",
+  "app.generatorPreview.fileVerdict.skip.description":
+    "它被保留下来是一个有意判断；重点看跳过原因是否和你的预期一致。",
+  "app.generatorPreview.fileVerdict.block.title": "这份文件当前阻止继续推进",
+  "app.generatorPreview.fileVerdict.block.description":
+    "它就是你应该优先处理的阻塞点，先看冲突原因，再决定回改草稿还是调整已有文件处理方式。",
   "app.generatorPreview.meta.proposalStatus": "提案状态",
   "app.generatorPreview.meta.generatedAt": "生成时间",
   "app.generatorPreview.meta.canonicalOwner": "规范 owner",
