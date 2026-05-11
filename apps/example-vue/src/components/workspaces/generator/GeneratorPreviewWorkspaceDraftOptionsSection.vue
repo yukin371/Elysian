@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, watch } from "vue"
+
 import { Input as TInput } from "tdesign-vue-next/es/input"
 
 import type { GeneratorPreviewSchemaTemplate } from "./generator-preview-schema-templates"
@@ -38,7 +40,7 @@ interface GeneratorPreviewWorkspaceDraftOptionsSectionProps {
   configPrimaryActionLabel: string
 }
 
-defineProps<GeneratorPreviewWorkspaceDraftOptionsSectionProps>()
+const props = defineProps<GeneratorPreviewWorkspaceDraftOptionsSectionProps>()
 
 const emit = defineEmits<{
   (e: "draft-source-mode-change", value: GeneratorDraftSourceMode): void
@@ -49,6 +51,18 @@ const emit = defineEmits<{
   (e: "conflict-strategy-change", value: string): void
   (e: "refresh-preview"): void
 }>()
+
+const showAdvancedOptions = ref(false)
+
+watch(
+  () => props.draftSourceMode,
+  (mode) => {
+    if (mode === "json") {
+      showAdvancedOptions.value = true
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -190,6 +204,34 @@ const emit = defineEmits<{
     <div class="generator-option-row">
       <div class="generator-option-label">
         <h4 class="generator-group-title">
+          {{ t("app.generatorPreview.advancedTitle") }}
+        </h4>
+      </div>
+      <div class="generator-advanced-entry">
+        <div class="generator-option-meta">
+          {{ t("app.generatorPreview.advancedDescription") }}
+        </div>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost generator-advanced-toggle"
+          :disabled="loading || reviewLoading || applyLoading"
+          @click="showAdvancedOptions = !showAdvancedOptions"
+        >
+          {{
+            showAdvancedOptions
+              ? t("app.generatorPreview.action.hideAdvancedOptions")
+              : t("app.generatorPreview.action.showAdvancedOptions")
+          }}
+        </button>
+      </div>
+    </div>
+
+    <div
+      v-if="showAdvancedOptions"
+      class="generator-option-row"
+    >
+      <div class="generator-option-label">
+        <h4 class="generator-group-title">
           {{ t("app.generatorPreview.filter.conflictLabel") }}
         </h4>
       </div>
@@ -214,16 +256,6 @@ const emit = defineEmits<{
     </div>
   </div>
 
-  <div class="generator-toolbar-actions">
-    <button
-      type="button"
-      class="enterprise-button"
-      :disabled="loading || reviewLoading || applyLoading"
-      @click="emit('refresh-preview')"
-    >
-      {{ configPrimaryActionLabel }}
-    </button>
-  </div>
 </template>
 
 <style scoped>
@@ -291,6 +323,14 @@ const emit = defineEmits<{
 .generator-option-values-inline {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.generator-advanced-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
 }
 
 .generator-option-item {
@@ -377,13 +417,6 @@ const emit = defineEmits<{
   grid-column: 1 / -1;
 }
 
-.generator-toolbar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
-
 @media (max-width: 640px) {
   .generator-option-row,
   .generator-option-values-mode,
@@ -400,8 +433,8 @@ const emit = defineEmits<{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .generator-toolbar-actions {
-    width: 100%;
+  .generator-advanced-entry {
+    align-items: stretch;
   }
 }
 </style>

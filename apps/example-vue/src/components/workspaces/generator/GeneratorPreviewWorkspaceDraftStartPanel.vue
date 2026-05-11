@@ -74,9 +74,17 @@ const showConfigError = () => props.errorMessage.trim().length > 0
 <template>
   <section class="generator-block generator-config-block">
     <div class="generator-panel-head">
-      <h3 class="generator-panel-title">
-        {{ t("app.generatorPreview.inputTitle") }}
-      </h3>
+      <div class="generator-panel-copy">
+        <p class="generator-panel-eyebrow">
+          {{ t("app.generatorPreview.inputTitle") }}
+        </p>
+        <h3 class="generator-panel-title">
+          {{ t("app.generatorPreview.startHeadline") }}
+        </h3>
+        <p class="generator-panel-description">
+          {{ t("app.generatorPreview.startDescription") }}
+        </p>
+      </div>
     </div>
 
     <div class="generator-config-grid">
@@ -149,6 +157,21 @@ const showConfigError = () => props.errorMessage.trim().length > 0
       @refresh-preview="emit('refresh-preview')"
     />
 
+    <section class="generator-next-step">
+      <div class="generator-next-step-copy">
+        <span>{{ t("app.generatorPreview.startNextStepLabel") }}</span>
+        <strong>{{ t("app.generatorPreview.startNextStepValue") }}</strong>
+      </div>
+      <button
+        type="button"
+        class="enterprise-button"
+        :disabled="loading || reviewLoading || applyLoading"
+        @click="emit('refresh-preview')"
+      >
+        {{ configPrimaryActionLabel }}
+      </button>
+    </section>
+
     <GeneratorPreviewWorkspaceSchemaEditorSection
       :t="t"
       :manual-schema-draft="manualSchemaDraft"
@@ -204,11 +227,32 @@ const showConfigError = () => props.errorMessage.trim().length > 0
   gap: 0.75rem 1rem;
 }
 
+.generator-panel-copy {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.generator-panel-eyebrow {
+  margin: 0;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .generator-panel-title {
   margin: 0;
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
+}
+
+.generator-panel-description {
+  margin: 0;
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.55;
 }
 
 .generator-config-grid {
@@ -267,6 +311,35 @@ const showConfigError = () => props.errorMessage.trim().length > 0
 .generator-config-error {
   display: grid;
   gap: 0.7rem;
+}
+
+.generator-next-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px dashed rgba(36, 87, 214, 0.26);
+  border-radius: 6px;
+  background: rgba(36, 87, 214, 0.04);
+}
+
+.generator-next-step-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.generator-next-step-copy span {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.generator-next-step-copy strong {
+  color: #0f172a;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .generator-config-recovery {

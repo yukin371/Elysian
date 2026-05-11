@@ -873,7 +873,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
         return
       }
 
-      draftSourceMode.value = "json"
+      draftSourceMode.value = "template"
     },
     { immediate: true },
   )

@@ -261,6 +261,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Copy structure into draft",
   "app.generatorPreview.action.expandSchemaEditor": "Edit JSON",
   "app.generatorPreview.action.collapseSchemaEditor": "Hide JSON",
+  "app.generatorPreview.action.showAdvancedOptions": "Show advanced options",
+  "app.generatorPreview.action.hideAdvancedOptions": "Hide advanced options",
   "app.generatorPreview.input.templateLabel": "Public templates",
   "app.generatorPreview.input.templateHint":
     "Load a base template first, then expand Schema JSON only when needed.",
@@ -426,6 +428,12 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Existing module structure",
   "app.generatorPreview.sourceType.manualSchemaJson": "Schema JSON",
   "app.generatorPreview.inputTitle": "New generation",
+  "app.generatorPreview.startHeadline": "Answer “what are we generating?” first",
+  "app.generatorPreview.startDescription":
+    "Start with the minimum required fields, then expand advanced JSON and existing-file handling only when needed so the first screen stays focused.",
+  "app.generatorPreview.startNextStepLabel": "Next step",
+  "app.generatorPreview.startNextStepValue":
+    "Review the result and decide what to do next, instead of dropping straight into advanced configuration.",
   "app.generatorPreview.inputModeLabel": "Starting point",
   "app.generatorPreview.inputTemplateLabel": "Copy existing module structure",
   "app.generatorPreview.inputSchemaLabel": "Schema template",
@@ -443,6 +451,9 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "{count} more modules are hidden. Keep searching to narrow them down",
   "app.generatorPreview.referenceCopyHint":
     "This only copies the existing module structure into the current draft. It does not regenerate or overwrite the source module.",
+  "app.generatorPreview.advancedTitle": "Advanced options",
+  "app.generatorPreview.advancedDescription":
+    "Existing-file handling and full JSON stay behind a secondary entry until they are actually needed.",
   "app.generatorPreview.input.moduleNameLabel": "Module code",
   "app.generatorPreview.input.moduleNamePlaceholder": "For example supplier",
   "app.generatorPreview.input.moduleNameHelper":

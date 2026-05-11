@@ -242,6 +242,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.loadCurrentSchemaDraft": "复制结构到当前草稿",
   "app.generatorPreview.action.expandSchemaEditor": "展开编辑",
   "app.generatorPreview.action.collapseSchemaEditor": "收起编辑",
+  "app.generatorPreview.action.showAdvancedOptions": "展开高级项",
+  "app.generatorPreview.action.hideAdvancedOptions": "收起高级项",
   "app.generatorPreview.input.templateLabel": "公共模板",
   "app.generatorPreview.input.templateHint":
     "先载入一个基础模板，再按需要展开 Schema JSON。",
@@ -398,6 +400,12 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sourceType.registeredSchema": "现有模块结构",
   "app.generatorPreview.sourceType.manualSchemaJson": "Schema JSON",
   "app.generatorPreview.inputTitle": "新建生成",
+  "app.generatorPreview.startHeadline": "先回答“这次要生成什么”",
+  "app.generatorPreview.startDescription":
+    "先用最少必要字段完成起稿，再按需展开高级 JSON 和已有文件处理方式，不让首屏被技术项抢走。",
+  "app.generatorPreview.startNextStepLabel": "下一步会进入",
+  "app.generatorPreview.startNextStepValue":
+    "生成结果检查与下一步判断，而不是直接把你推进高级配置。",
   "app.generatorPreview.inputModeLabel": "起稿方式",
   "app.generatorPreview.inputTemplateLabel": "复制现有模块结构",
   "app.generatorPreview.inputSchemaLabel": "Schema 模板",
@@ -414,6 +422,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "还有 {count} 个模块，继续搜索可缩小范围",
   "app.generatorPreview.referenceCopyHint":
     "只把已有模块结构复制到当前草稿，不会重新生成或覆盖原模块。",
+  "app.generatorPreview.advancedTitle": "高级项",
+  "app.generatorPreview.advancedDescription":
+    "已有文件处理方式和完整 JSON 保持次级入口，只有需要时再展开。",
   "app.generatorPreview.input.moduleNameLabel": "模块标识",
   "app.generatorPreview.input.moduleNamePlaceholder": "例如 supplier",
   "app.generatorPreview.input.moduleNameHelper":
