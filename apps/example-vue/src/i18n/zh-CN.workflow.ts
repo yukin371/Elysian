@@ -519,6 +519,136 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.panelTitle": "原型边界",
   "app.demoHub.panelDescription":
     "这个侧栏只说明边界、评审标准和移交规则，不承载任何真实详情或运行时诊断。",
+  "app.demoHub.prototype.stage.start": "起稿原型",
+  "app.demoHub.prototype.stage.review": "结果原型",
+  "app.demoHub.prototype.stage.apply": "确认原型",
+  "app.demoHub.prototype.start.title": "Generator Start",
+  "app.demoHub.prototype.start.summary":
+    "把起稿第一页收成目标明确的表单，不让用户一上来就落进高级 JSON。",
+  "app.demoHub.prototype.review.title": "Generator Review",
+  "app.demoHub.prototype.review.summary":
+    "先展示结果结论、阻塞判断和下一步，而不是先铺技术证据。",
+  "app.demoHub.prototype.apply.title": "Apply Checklist",
+  "app.demoHub.prototype.apply.summary":
+    "把 apply 前判断做成短确认页，只回答能否继续和还差什么。",
+  "app.demoHub.start.headline": "先回答“这次要生成什么”",
+  "app.demoHub.start.goal.default": "标准列表管理",
+  "app.demoHub.formFrontendTarget": "前端目标",
+  "app.demoHub.start.mode.reference":
+    "适合结构相近的模块，先选参考对象，再确认字段差异。",
+  "app.demoHub.start.mode.template":
+    "从基础模板开始，先把页面目标讲清楚，再补字段。",
+  "app.demoHub.start.mode.manual":
+    "仍从表单主流程开始，需要时再展开高级 JSON。",
+  "app.demoHub.start.primaryAction": "继续下一步",
+  "app.demoHub.start.highlight.first": "首屏只保留最少必要字段和一个主动作。",
+  "app.demoHub.start.highlight.second":
+    "复制现有模块后停留在表单主流程，不自动切进高级 JSON。",
+  "app.demoHub.start.highlight.third":
+    "当前页只整理草稿，下一步进入字段确认或页面预览。",
+  "app.demoHub.start.checklist.first": "起稿方式是否一眼能选",
+  "app.demoHub.start.checklist.second": "首屏是否没有技术噪音",
+  "app.demoHub.start.checklist.third": "继续下一步是否是唯一强动作",
+  "app.demoHub.review.stateLabel": "结果判断",
+  "app.demoHub.review.headline": "先回答“结果值不值得继续推进”",
+  "app.demoHub.review.description":
+    "结果页先给状态结论、阻塞判断和主动作，再让用户按需查看文件级细节。",
+  "app.demoHub.review.toggle.blocking": "存在阻塞",
+  "app.demoHub.review.toggle.ready": "待审核",
+  "app.demoHub.review.toggle.failed": "结果不可用",
+  "app.demoHub.review.summaryLabel": "当前结论",
+  "app.demoHub.review.summary.blocking.title": "当前不能继续 apply",
+  "app.demoHub.review.summary.blocking.description":
+    "还有阻塞文件未处理，当前页应优先把用户带到第一个阻塞点，而不是继续确认清单。",
+  "app.demoHub.review.summary.blocking.next": "下一步：先看阻塞文件",
+  "app.demoHub.review.summary.ready.title": "结果已准备好进入审核",
+  "app.demoHub.review.summary.ready.description":
+    "没有阻塞冲突时，主任务应切到审核判断，而不是立刻 apply。",
+  "app.demoHub.review.summary.ready.next": "下一步：进入审核",
+  "app.demoHub.review.summary.failed.title": "当前结果不可继续",
+  "app.demoHub.review.summary.failed.description":
+    "失败时页面应明确建议回到草稿或重新生成，不继续停留在审核心智里。",
+  "app.demoHub.review.summary.failed.next": "下一步：返回修改草稿",
+  "app.demoHub.review.action.inspectBlocked": "查看第一个阻塞文件",
+  "app.demoHub.review.action.enterReview": "进入审核",
+  "app.demoHub.review.action.retry": "重新生成预览",
+  "app.demoHub.review.listTitle": "生成结果列表",
+  "app.demoHub.review.detailTitle": "当前文件详情",
+  "app.demoHub.review.diffTitle": "差异摘要",
+  "app.demoHub.review.hasChanges": "当前文件有变更",
+  "app.demoHub.review.noChanges": "当前文件没有变更",
+  "app.demoHub.review.reason.blocked":
+    "当前文件已存在人工改动，若继续覆盖会丢失非生成内容，因此先阻断并要求人工判断。",
+  "app.demoHub.review.reason.overwrite":
+    "当前文件属于生成面，可在确认范围后直接覆盖到新结构。",
+  "app.demoHub.review.reason.create":
+    "当前文件还不存在，属于新模块接入所需产物，可以直接新增。",
+  "app.demoHub.review.reason.skip":
+    "当前文件没有有效差异，结果页只需要说明跳过原因，不要抢占用户注意力。",
+  "app.demoHub.review.reason.retry":
+    "当前结果已过期或失败，建议直接回到起稿重新生成，而不是继续读旧结果。",
+  "app.demoHub.review.diff.blocked":
+    "- 发现已存在人工字段映射\n- 当前模板会覆盖现有动作列\n- 应先决定保留还是迁移旧实现",
+  "app.demoHub.review.diff.overwrite":
+    "+ 新增 query summary 区块\n- 删除旧版双栏说明\n~ 调整主动作顺序为“查询 -> 选择 -> 编辑”",
+  "app.demoHub.review.diff.create":
+    "+ 注册 supplier workspace kind\n+ 写入 route / moduleCode / permissionPrefix\n+ 同步 workspace 标题文案",
+  "app.demoHub.review.diff.skip":
+    "当前文件与目标结构一致，页面只需保留“为什么没动”的解释。",
+  "app.demoHub.review.diff.retry":
+    "当前结果不可继续，结果区应收起证据，把用户带回更安全的重生成入口。",
+  "app.demoHub.review.checklist.first": "结果列表默认选中最需要先看的文件。",
+  "app.demoHub.review.checklist.second": "阻塞状态下只有一个强主动作：先处理阻塞。",
+  "app.demoHub.review.checklist.third": "详情区先解释处理原因，再展示 diff 和源码。",
+  "app.demoHub.review.actionLabel.block": "阻塞",
+  "app.demoHub.review.actionLabel.overwrite": "覆盖",
+  "app.demoHub.review.actionLabel.create": "新增",
+  "app.demoHub.review.actionLabel.skip": "跳过",
+  "app.demoHub.apply.stateLabel": "应用前确认",
+  "app.demoHub.apply.headline": "先回答“为什么现在能继续 apply”",
+  "app.demoHub.apply.description":
+    "确认页只保留短结论、短清单和唯一主动作，不把它做成第二份技术报告。",
+  "app.demoHub.apply.toggle.ready": "可继续 apply",
+  "app.demoHub.apply.toggle.missing": "仍有未完成项",
+  "app.demoHub.apply.toggle.stale": "结果可能过期",
+  "app.demoHub.apply.summaryLabel": "当前是否可继续",
+  "app.demoHub.apply.summaryHint": "确认页只服务当前决策",
+  "app.demoHub.apply.summary.ready.title": "当前结果满足 apply 前条件",
+  "app.demoHub.apply.summary.ready.description":
+    "页面应直接告诉用户“现在可以继续”，而不是让用户自己从长说明里推断。",
+  "app.demoHub.apply.summary.missing.title": "当前还不能继续 apply",
+  "app.demoHub.apply.summary.missing.description":
+    "页面应明确缺哪一项，例如仍有阻塞、审核未完成或确认项未勾齐。",
+  "app.demoHub.apply.summary.stale.title": "当前结果可能已经过期",
+  "app.demoHub.apply.summary.stale.description":
+    "当目标文件可能已变化时，应先建议重新生成，而不是继续推进旧结果。",
+  "app.demoHub.apply.action.confirm": "确认并继续 apply",
+  "app.demoHub.apply.action.backToReview": "返回结果检查",
+  "app.demoHub.apply.action.regenerate": "重新生成预览",
+  "app.demoHub.apply.checklistTitle": "确认清单",
+  "app.demoHub.apply.item.files": "文件动作已经确认",
+  "app.demoHub.apply.item.blocking": "当前没有阻塞冲突",
+  "app.demoHub.apply.item.staging": "本次只 apply 到 staging",
+  "app.demoHub.apply.item.sql": "SQL proposal 已确认处理方式",
+  "app.demoHub.apply.item.permission": "权限和菜单影响已审查",
+  "app.demoHub.apply.item.fresh": "当前结果不是过期结果",
+  "app.demoHub.apply.riskTitle": "风险摘要",
+  "app.demoHub.apply.risk.first": "阻塞风险要在结果页先处理，不留到确认页再解释。",
+  "app.demoHub.apply.risk.second": "SQL proposal 只提示是否需要人工处理，不在这里铺全文。",
+  "app.demoHub.apply.risk.third": "结果一旦可能过期，应优先回到重新生成，而不是继续 apply。",
+  "app.demoHub.panelPrototypeTitle": "本轮原型范围",
+  "app.demoHub.panelPrototypeStart": "Generator Start：起稿第一页怎么更轻松开始。",
+  "app.demoHub.panelPrototypeReview":
+    "Generator Review：结果页先给结论，再给文件级证据。",
+  "app.demoHub.panelPrototypeApply":
+    "Apply Checklist：只回答能不能继续和还差什么。",
+  "app.demoHub.panelMigrationTitle": "回落到真实实现前",
+  "app.demoHub.panelMigrationFirst":
+    "先确认哪些按钮主次、折叠规则和状态文案已经稳定。",
+  "app.demoHub.panelMigrationSecond":
+    "再判断哪些 mock 状态只是原型辅助，不能直接搬进真实 workspace。",
+  "app.demoHub.panelMigrationThird":
+    "最后才把稳定结论迁回 generator preview 正式页。",
   "app.error.restoreSession": "恢复会话失败",
   "app.error.loadCustomers": "加载客户列表失败",
   "app.error.loadDepartments": "加载部门列表失败",

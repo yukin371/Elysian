@@ -551,6 +551,157 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.panelTitle": "Prototype boundary",
   "app.demoHub.panelDescription":
     "This side panel explains scope, review criteria, and handoff rules only. It does not hold runtime detail or live diagnostics.",
+  "app.demoHub.prototype.stage.start": "Start prototype",
+  "app.demoHub.prototype.stage.review": "Review prototype",
+  "app.demoHub.prototype.stage.apply": "Apply prototype",
+  "app.demoHub.prototype.start.title": "Generator Start",
+  "app.demoHub.prototype.start.summary":
+    "Reduce the first screen to a clear start form instead of dropping users into advanced JSON immediately.",
+  "app.demoHub.prototype.review.title": "Generator Review",
+  "app.demoHub.prototype.review.summary":
+    "Show result verdict, blocking status, and next action before technical evidence.",
+  "app.demoHub.prototype.apply.title": "Apply Checklist",
+  "app.demoHub.prototype.apply.summary":
+    "Turn pre-apply judgment into a short confirmation page that only answers whether the user can continue.",
+  "app.demoHub.start.headline": "Answer “what are we generating?” first",
+  "app.demoHub.start.goal.default": "Standard list management",
+  "app.demoHub.formFrontendTarget": "Frontend target",
+  "app.demoHub.start.mode.reference":
+    "Best for a similar module. Pick a reference first, then confirm field differences.",
+  "app.demoHub.start.mode.template":
+    "Start from a base template and clarify the page goal before expanding fields.",
+  "app.demoHub.start.mode.manual":
+    "Stay in the form-first flow and open advanced JSON only when needed.",
+  "app.demoHub.start.primaryAction": "Continue",
+  "app.demoHub.start.highlight.first":
+    "The first screen keeps only the minimum fields and one strong primary action.",
+  "app.demoHub.start.highlight.second":
+    "Copying an existing module must not auto-switch the user into advanced JSON.",
+  "app.demoHub.start.highlight.third":
+    "This page only shapes a draft. The next step is field confirmation or page preview.",
+  "app.demoHub.start.checklist.first":
+    "Can the user choose a starting mode at a glance?",
+  "app.demoHub.start.checklist.second":
+    "Does the first screen stay free of technical noise?",
+  "app.demoHub.start.checklist.third":
+    "Is continue the only strong next action?",
+  "app.demoHub.review.stateLabel": "Result judgment",
+  "app.demoHub.review.headline": "Answer “is this result worth pushing forward?” first",
+  "app.demoHub.review.description":
+    "The result page should lead with status, blocking verdict, and next action before asking the user to read file-level detail.",
+  "app.demoHub.review.toggle.blocking": "Blocking files",
+  "app.demoHub.review.toggle.ready": "Ready for review",
+  "app.demoHub.review.toggle.failed": "Result unavailable",
+  "app.demoHub.review.summaryLabel": "Current verdict",
+  "app.demoHub.review.summary.blocking.title":
+    "This result cannot continue to apply yet",
+  "app.demoHub.review.summary.blocking.description":
+    "Blocking files still need decisions. The page should send the user to the first blocked file instead of moving into confirmation.",
+  "app.demoHub.review.summary.blocking.next":
+    "Next: inspect the blocked file first",
+  "app.demoHub.review.summary.ready.title":
+    "This result is ready to enter review",
+  "app.demoHub.review.summary.ready.description":
+    "When there are no blocking conflicts, the main task becomes review, not immediate apply.",
+  "app.demoHub.review.summary.ready.next": "Next: enter review",
+  "app.demoHub.review.summary.failed.title":
+    "This result should not continue",
+  "app.demoHub.review.summary.failed.description":
+    "On failure, the page should move the user back to the draft or regeneration path instead of keeping them in review mode.",
+  "app.demoHub.review.summary.failed.next":
+    "Next: go back and revise the draft",
+  "app.demoHub.review.action.inspectBlocked": "Open first blocked file",
+  "app.demoHub.review.action.enterReview": "Enter review",
+  "app.demoHub.review.action.retry": "Regenerate preview",
+  "app.demoHub.review.listTitle": "Generated files",
+  "app.demoHub.review.detailTitle": "Current file detail",
+  "app.demoHub.review.diffTitle": "Diff summary",
+  "app.demoHub.review.hasChanges": "This file contains changes",
+  "app.demoHub.review.noChanges": "This file has no effective changes",
+  "app.demoHub.review.reason.blocked":
+    "This file already contains manual edits. Replacing it would remove non-generated content, so the flow should stop here first.",
+  "app.demoHub.review.reason.overwrite":
+    "This file belongs to the generated surface and can be replaced once the review scope is clear.",
+  "app.demoHub.review.reason.create":
+    "This file does not exist yet and can be created as part of the new module handoff.",
+  "app.demoHub.review.reason.skip":
+    "There is no meaningful diff. The result page only needs to explain why the file was skipped.",
+  "app.demoHub.review.reason.retry":
+    "The result is stale or failed. The safest next step is regeneration instead of reading outdated evidence.",
+  "app.demoHub.review.diff.blocked":
+    "- Manual field mapping already exists\n- The new template would replace the current action column\n- A human decision is needed before merge direction is clear",
+  "app.demoHub.review.diff.overwrite":
+    "+ Add a query summary block\n- Remove the legacy two-column explanation\n~ Reorder main actions to “search -> select -> edit”",
+  "app.demoHub.review.diff.create":
+    "+ Register the supplier workspace kind\n+ Write route / moduleCode / permissionPrefix\n+ Sync workspace title copy",
+  "app.demoHub.review.diff.skip":
+    "The target already matches the expected structure. The UI should explain why nothing changed.",
+  "app.demoHub.review.diff.retry":
+    "This result should not continue. The page should stop showing review actions and guide the user back to regeneration.",
+  "app.demoHub.review.checklist.first":
+    "The page auto-selects the file that should be reviewed first.",
+  "app.demoHub.review.checklist.second":
+    "Blocking state keeps exactly one strong primary action: resolve the block first.",
+  "app.demoHub.review.checklist.third":
+    "The detail area explains the decision before showing diff and source.",
+  "app.demoHub.review.actionLabel.block": "Block",
+  "app.demoHub.review.actionLabel.overwrite": "Overwrite",
+  "app.demoHub.review.actionLabel.create": "Create",
+  "app.demoHub.review.actionLabel.skip": "Skip",
+  "app.demoHub.apply.stateLabel": "Pre-apply confirmation",
+  "app.demoHub.apply.headline": "Answer “why can I continue to apply?” first",
+  "app.demoHub.apply.description":
+    "The checklist page keeps only a short verdict, a short checklist, and one strong action instead of behaving like a second technical report.",
+  "app.demoHub.apply.toggle.ready": "Can continue",
+  "app.demoHub.apply.toggle.missing": "Missing checks",
+  "app.demoHub.apply.toggle.stale": "Result may be stale",
+  "app.demoHub.apply.summaryLabel": "Can this continue?",
+  "app.demoHub.apply.summaryHint":
+    "The confirmation page only serves the current decision",
+  "app.demoHub.apply.summary.ready.title":
+    "This result meets the pre-apply conditions",
+  "app.demoHub.apply.summary.ready.description":
+    "The page should directly tell the user that apply may continue instead of making them infer it from long copy.",
+  "app.demoHub.apply.summary.missing.title":
+    "This result cannot continue to apply yet",
+  "app.demoHub.apply.summary.missing.description":
+    "The page should point to the missing item explicitly, such as blocking files, unfinished review, or unchecked confirmation items.",
+  "app.demoHub.apply.summary.stale.title":
+    "This result may already be outdated",
+  "app.demoHub.apply.summary.stale.description":
+    "When target files may have changed, the safer path is regeneration instead of pushing forward on old evidence.",
+  "app.demoHub.apply.action.confirm": "Confirm and continue apply",
+  "app.demoHub.apply.action.backToReview": "Back to result review",
+  "app.demoHub.apply.action.regenerate": "Regenerate preview",
+  "app.demoHub.apply.checklistTitle": "Confirmation checklist",
+  "app.demoHub.apply.item.files": "File actions are confirmed",
+  "app.demoHub.apply.item.blocking": "No blocking conflicts remain",
+  "app.demoHub.apply.item.staging": "This run applies to staging only",
+  "app.demoHub.apply.item.sql": "SQL proposal handling is acknowledged",
+  "app.demoHub.apply.item.permission":
+    "Permission and menu impact has been reviewed",
+  "app.demoHub.apply.item.fresh": "The result is still fresh",
+  "app.demoHub.apply.riskTitle": "Risk summary",
+  "app.demoHub.apply.risk.first":
+    "Blocking risk must be resolved on the result page, not re-explained here.",
+  "app.demoHub.apply.risk.second":
+    "SQL proposal stays a short judgment signal here instead of full text.",
+  "app.demoHub.apply.risk.third":
+    "If the result may be stale, regeneration should outrank apply.",
+  "app.demoHub.panelPrototypeTitle": "Prototype scope",
+  "app.demoHub.panelPrototypeStart":
+    "Generator Start: make the first page easier to begin from.",
+  "app.demoHub.panelPrototypeReview":
+    "Generator Review: show a verdict first, then file evidence.",
+  "app.demoHub.panelPrototypeApply":
+    "Apply Checklist: only answer whether the user can continue and what is missing.",
+  "app.demoHub.panelMigrationTitle": "Before moving into real implementation",
+  "app.demoHub.panelMigrationFirst":
+    "Confirm which action hierarchy, fold rules, and state copy are stable.",
+  "app.demoHub.panelMigrationSecond":
+    "Separate prototype-only mock states from rules that should move into the real workspace.",
+  "app.demoHub.panelMigrationThird":
+    "Only then move the stable conclusions back into the formal generator preview page.",
   "app.error.restoreSession": "Failed to restore session",
   "app.error.loadCustomers": "Failed to load customers",
   "app.error.loadDepartments": "Failed to load departments",

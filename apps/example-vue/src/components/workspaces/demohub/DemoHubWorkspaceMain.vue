@@ -3,91 +3,291 @@ import { computed, reactive, ref } from "vue"
 
 import type { AppTranslate } from "../../../app/app-shell-helpers"
 
-interface DemoHubScenario {
-  key: string
+type DemoHubPrototypeKey =
+  | "generator-start"
+  | "generator-review"
+  | "generator-apply-checklist"
+
+type StartMode = "reference" | "template" | "manual"
+type ReviewState = "blocking" | "review-ready" | "failed"
+type ApplyState = "ready" | "missing-checks" | "stale"
+
+interface PrototypeCard {
+  key: DemoHubPrototypeKey
   title: string
   summary: string
-  audience: string
-  entry: string
-  goal: string
-  primaryAction: string
-  fields: string[]
-  feedback: string[]
-  checklist: string[]
+  stage: string
+}
+
+interface ReviewFileCard {
+  name: string
+  path: string
+  action: "block" | "overwrite" | "create" | "skip"
+  reason: string
+  diff: string
+  hasChanges: boolean
 }
 
 const props = defineProps<{
   t: AppTranslate
 }>()
 
-const scenarios: DemoHubScenario[] = [
+const prototypeCards = computed<PrototypeCard[]>(() => [
   {
     key: "generator-start",
-    title: "生成起稿简化流",
-    summary: "先用表单收敛模块目标，再进入字段确认与预览。",
-    audience: "配置生成页面的产品或开发同学",
-    entry: "从 Studio 进入，默认落在主表单，不直接展示高级 JSON。",
-    goal: "一次把模块名、页面目标和起稿方式交代清楚。",
-    primaryAction: "继续到字段确认",
-    fields: ["模块标识", "模块名称", "页面目标", "起稿方式"],
-    feedback: ["立即显示下一步去哪", "说明不会触发真实生成", "保留再开高级 JSON 的入口"],
-    checklist: ["是否减少首屏术语", "是否避免强制看 JSON", "是否明确下一步"],
+    title: props.t("app.demoHub.prototype.start.title"),
+    summary: props.t("app.demoHub.prototype.start.summary"),
+    stage: props.t("app.demoHub.prototype.stage.start"),
   },
   {
-    key: "list-detail",
-    title: "列表进入详情简化流",
-    summary: "用单页主列表 + 次级详情面板，减少多跳转。",
-    audience: "高频查看和调整记录的后台操作员",
-    entry: "从导航进入列表后，先给搜索和主动作，再给详情。",
-    goal: "快速找到记录并在同页完成判断。",
-    primaryAction: "查看详情并继续编辑",
-    fields: ["搜索关键词", "状态筛选", "主动作按钮"],
-    feedback: ["空态说明下一步", "选中后面板聚焦详情", "无权限时直接给原因"],
-    checklist: ["列表列是否过多", "详情是否复读主区", "空态是否指导操作"],
+    key: "generator-review",
+    title: props.t("app.demoHub.prototype.review.title"),
+    summary: props.t("app.demoHub.prototype.review.summary"),
+    stage: props.t("app.demoHub.prototype.stage.review"),
   },
   {
-    key: "submit-confirm",
-    title: "提交前确认流",
-    summary: "把风险确认收成一张清单，不打断主任务。",
-    audience: "需要在提交前做人工复核的管理员",
-    entry: "主流程完成后才展开确认卡，不抢首屏注意力。",
-    goal: "让用户清楚知道自己确认了什么。",
-    primaryAction: "确认并提交",
-    fields: ["目标范围", "影响项摘要", "人工确认项"],
-    feedback: ["确认后展示简短成功反馈", "保留回看证据入口", "避免二次解释大段规则"],
-    checklist: ["清单是否够短", "风险词是否易懂", "确认动作是否唯一明确"],
-  },
-]
-
-const activeScenarioKey = ref<DemoHubScenario["key"]>(scenarios[0].key)
-
-const draftForm = reactive({
-  moduleCode: "supplier",
-  moduleLabel: "供应商",
-  pageGoal: "新模块起稿",
-  startMode: "reference",
-})
-
-const activeScenario = computed(
-  () =>
-    scenarios.find((scenario) => scenario.key === activeScenarioKey.value) ??
-    scenarios[0],
-)
-
-const startModeOptions = computed(() => [
-  {
-    value: "reference",
-    label: props.t("app.demoHub.formVariant.reference"),
-  },
-  {
-    value: "template",
-    label: props.t("app.demoHub.formVariant.template"),
-  },
-  {
-    value: "manual",
-    label: props.t("app.demoHub.formVariant.manual"),
+    key: "generator-apply-checklist",
+    title: props.t("app.demoHub.prototype.apply.title"),
+    summary: props.t("app.demoHub.prototype.apply.summary"),
+    stage: props.t("app.demoHub.prototype.stage.apply"),
   },
 ])
+
+const activePrototypeKey = ref<DemoHubPrototypeKey>("generator-start")
+
+const startDraft = reactive({
+  moduleCode: "supplier",
+  moduleLabel: "供应商",
+  pageGoal: props.t("app.demoHub.start.goal.default"),
+  frontendTarget: "Vue",
+  startMode: "reference" as StartMode,
+})
+
+const reviewState = ref<ReviewState>("blocking")
+const applyState = ref<ApplyState>("ready")
+
+const reviewFiles = computed<ReviewFileCard[]>(() => {
+  if (reviewState.value === "blocking") {
+    return [
+      {
+        name: "supplier.page.vue",
+        path: "apps/example-vue/src/modules/supplier/supplier.page.vue",
+        action: "block",
+        reason: props.t("app.demoHub.review.reason.blocked"),
+        diff: props.t("app.demoHub.review.diff.blocked"),
+        hasChanges: true,
+      },
+      {
+        name: "supplier.schema.ts",
+        path: "packages/schema/src/modules/supplier.schema.ts",
+        action: "overwrite",
+        reason: props.t("app.demoHub.review.reason.overwrite"),
+        diff: props.t("app.demoHub.review.diff.overwrite"),
+        hasChanges: true,
+      },
+      {
+        name: "supplier.frontend.generated.ts",
+        path:
+          "apps/example-vue/src/app/workspace-registry/generated/supplier.frontend.generated.ts",
+        action: "create",
+        reason: props.t("app.demoHub.review.reason.create"),
+        diff: props.t("app.demoHub.review.diff.create"),
+        hasChanges: true,
+      },
+    ]
+  }
+
+  if (reviewState.value === "review-ready") {
+    return [
+      {
+        name: "supplier.frontend.generated.ts",
+        path:
+          "apps/example-vue/src/app/workspace-registry/generated/supplier.frontend.generated.ts",
+        action: "create",
+        reason: props.t("app.demoHub.review.reason.create"),
+        diff: props.t("app.demoHub.review.diff.create"),
+        hasChanges: true,
+      },
+      {
+        name: "supplier.page.vue",
+        path: "apps/example-vue/src/modules/supplier/supplier.page.vue",
+        action: "overwrite",
+        reason: props.t("app.demoHub.review.reason.overwrite"),
+        diff: props.t("app.demoHub.review.diff.overwrite"),
+        hasChanges: true,
+      },
+      {
+        name: "supplier.dictionary.ts",
+        path: "apps/example-vue/src/i18n/modules/zh-CN.supplier.ts",
+        action: "skip",
+        reason: props.t("app.demoHub.review.reason.skip"),
+        diff: props.t("app.demoHub.review.diff.skip"),
+        hasChanges: false,
+      },
+    ]
+  }
+
+  return [
+    {
+      name: "supplier.schema.ts",
+      path: "packages/schema/src/modules/supplier.schema.ts",
+      action: "skip",
+      reason: props.t("app.demoHub.review.reason.retry"),
+      diff: props.t("app.demoHub.review.diff.retry"),
+      hasChanges: false,
+    },
+  ]
+})
+
+const selectedReviewFilePath = ref<string | null>(null)
+
+const sortedReviewFiles = computed(() => {
+  const actionRank: Record<ReviewFileCard["action"], number> = {
+    block: 0,
+    overwrite: 1,
+    create: 2,
+    skip: 3,
+  }
+
+  return [...reviewFiles.value].sort(
+    (left, right) => actionRank[left.action] - actionRank[right.action],
+  )
+})
+
+const selectedReviewFile = computed(() => {
+  const selectedPath = selectedReviewFilePath.value
+
+  if (selectedPath) {
+    const matchedFile = sortedReviewFiles.value.find(
+      (file) => file.path === selectedPath,
+    )
+
+    if (matchedFile) {
+      return matchedFile
+    }
+  }
+
+  return sortedReviewFiles.value[0] ?? null
+})
+
+const reviewSummary = computed(() => {
+  if (reviewState.value === "blocking") {
+    return {
+      title: props.t("app.demoHub.review.summary.blocking.title"),
+      description: props.t("app.demoHub.review.summary.blocking.description"),
+      next: props.t("app.demoHub.review.summary.blocking.next"),
+      primaryAction: props.t("app.demoHub.review.action.inspectBlocked"),
+    }
+  }
+
+  if (reviewState.value === "review-ready") {
+    return {
+      title: props.t("app.demoHub.review.summary.ready.title"),
+      description: props.t("app.demoHub.review.summary.ready.description"),
+      next: props.t("app.demoHub.review.summary.ready.next"),
+      primaryAction: props.t("app.demoHub.review.action.enterReview"),
+    }
+  }
+
+  return {
+    title: props.t("app.demoHub.review.summary.failed.title"),
+    description: props.t("app.demoHub.review.summary.failed.description"),
+    next: props.t("app.demoHub.review.summary.failed.next"),
+    primaryAction: props.t("app.demoHub.review.action.retry"),
+  }
+})
+
+const applySummary = computed(() => {
+  if (applyState.value === "ready") {
+    return {
+      title: props.t("app.demoHub.apply.summary.ready.title"),
+      description: props.t("app.demoHub.apply.summary.ready.description"),
+      primaryAction: props.t("app.demoHub.apply.action.confirm"),
+    }
+  }
+
+  if (applyState.value === "missing-checks") {
+    return {
+      title: props.t("app.demoHub.apply.summary.missing.title"),
+      description: props.t("app.demoHub.apply.summary.missing.description"),
+      primaryAction: props.t("app.demoHub.apply.action.backToReview"),
+    }
+  }
+
+  return {
+    title: props.t("app.demoHub.apply.summary.stale.title"),
+    description: props.t("app.demoHub.apply.summary.stale.description"),
+    primaryAction: props.t("app.demoHub.apply.action.regenerate"),
+  }
+})
+
+const startModeCards = computed(() => [
+  {
+    value: "reference" as const,
+    title: props.t("app.demoHub.formVariant.reference"),
+    description: props.t("app.demoHub.start.mode.reference"),
+  },
+  {
+    value: "template" as const,
+    title: props.t("app.demoHub.formVariant.template"),
+    description: props.t("app.demoHub.start.mode.template"),
+  },
+  {
+    value: "manual" as const,
+    title: props.t("app.demoHub.formVariant.manual"),
+    description: props.t("app.demoHub.start.mode.manual"),
+  },
+])
+
+const startHighlights = computed(() => [
+  props.t("app.demoHub.start.highlight.first"),
+  props.t("app.demoHub.start.highlight.second"),
+  props.t("app.demoHub.start.highlight.third"),
+])
+
+const reviewChecklist = computed(() => [
+  props.t("app.demoHub.review.checklist.first"),
+  props.t("app.demoHub.review.checklist.second"),
+  props.t("app.demoHub.review.checklist.third"),
+])
+
+const applyChecklist = computed(() => [
+  {
+    label: props.t("app.demoHub.apply.item.files"),
+    checked: applyState.value === "ready",
+  },
+  {
+    label: props.t("app.demoHub.apply.item.blocking"),
+    checked: applyState.value === "ready",
+  },
+  {
+    label: props.t("app.demoHub.apply.item.staging"),
+    checked: true,
+  },
+  {
+    label: props.t("app.demoHub.apply.item.sql"),
+    checked: applyState.value !== "stale",
+  },
+  {
+    label: props.t("app.demoHub.apply.item.permission"),
+    checked: applyState.value === "ready",
+  },
+  {
+    label: props.t("app.demoHub.apply.item.fresh"),
+    checked: applyState.value !== "stale",
+  },
+])
+
+const currentPrototypeCard = computed(
+  () =>
+    prototypeCards.value.find((card) => card.key === activePrototypeKey.value) ??
+    prototypeCards.value[0],
+)
+
+const setReviewState = (nextState: ReviewState) => {
+  reviewState.value = nextState
+  selectedReviewFilePath.value = null
+}
 </script>
 
 <template>
@@ -101,27 +301,34 @@ const startModeOptions = computed(() => [
         </p>
       </div>
       <div class="demo-hub-badges">
-        <span class="demo-hub-badge">{{ t("app.demoHub.badge.prototypeOnly") }}</span>
-        <span class="demo-hub-badge">{{ t("app.demoHub.badge.formFirst") }}</span>
+        <span class="demo-hub-badge">{{
+          t("app.demoHub.badge.prototypeOnly")
+        }}</span>
+        <span class="demo-hub-badge">{{
+          t("app.demoHub.badge.formFirst")
+        }}</span>
         <span class="demo-hub-badge">{{ t("app.demoHub.badge.noApi") }}</span>
       </div>
     </header>
 
-    <section class="demo-hub-scenario-grid">
-      <aside class="demo-hub-scenario-list">
-        <p class="demo-hub-section-label">{{ t("app.demoHub.scenarioLabel") }}</p>
+    <section class="demo-hub-layout">
+      <aside class="demo-hub-prototype-nav">
+        <p class="demo-hub-section-label">
+          {{ t("app.demoHub.scenarioLabel") }}
+        </p>
         <button
-          v-for="scenario in scenarios"
-          :key="scenario.key"
+          v-for="card in prototypeCards"
+          :key="card.key"
           type="button"
-          class="demo-hub-scenario-card"
+          class="demo-hub-prototype-card"
           :class="{
-            'demo-hub-scenario-card-active': scenario.key === activeScenarioKey,
+            'demo-hub-prototype-card-active': card.key === activePrototypeKey,
           }"
-          @click="activeScenarioKey = scenario.key"
+          @click="activePrototypeKey = card.key"
         >
-          <strong>{{ scenario.title }}</strong>
-          <span>{{ scenario.summary }}</span>
+          <span class="demo-hub-prototype-stage">{{ card.stage }}</span>
+          <strong>{{ card.title }}</strong>
+          <span>{{ card.summary }}</span>
         </button>
       </aside>
 
@@ -132,106 +339,310 @@ const startModeOptions = computed(() => [
               <p class="demo-hub-section-label">
                 {{ t("app.demoHub.prototypeTitle") }}
               </p>
-              <h3>{{ activeScenario.title }}</h3>
+              <h3>{{ currentPrototypeCard.title }}</h3>
             </div>
             <p class="demo-hub-surface-description">
-              {{ t("app.demoHub.prototypeDescription") }}
+              {{ currentPrototypeCard.summary }}
             </p>
           </div>
 
-          <div class="demo-hub-summary-grid">
-            <article class="demo-hub-summary-card">
-              <span>{{ t("app.demoHub.prototypeAudience") }}</span>
-              <strong>{{ activeScenario.audience }}</strong>
-            </article>
-            <article class="demo-hub-summary-card">
-              <span>{{ t("app.demoHub.prototypeEntry") }}</span>
-              <strong>{{ activeScenario.entry }}</strong>
-            </article>
-            <article class="demo-hub-summary-card">
-              <span>{{ t("app.demoHub.prototypeGoal") }}</span>
-              <strong>{{ activeScenario.goal }}</strong>
-            </article>
-            <article class="demo-hub-summary-card">
-              <span>{{ t("app.demoHub.prototypePrimaryAction") }}</span>
-              <strong>{{ activeScenario.primaryAction }}</strong>
-            </article>
-          </div>
-        </section>
+          <article
+            v-if="activePrototypeKey === 'generator-start'"
+            class="demo-hub-flow"
+          >
+            <div class="demo-hub-flow-copy">
+              <p class="demo-hub-section-label">
+                {{ t("app.demoHub.formSectionTitle") }}
+              </p>
+              <h4>{{ t("app.demoHub.start.headline") }}</h4>
+              <p>{{ t("app.demoHub.formSectionDescription") }}</p>
+            </div>
 
-        <section class="demo-hub-form-section">
-          <div class="demo-hub-form-copy">
-            <p class="demo-hub-section-label">
-              {{ t("app.demoHub.formSectionTitle") }}
-            </p>
-            <h3>{{ t("app.demoHub.formSectionDescription") }}</h3>
-          </div>
-
-          <div class="demo-hub-form-grid">
-            <label class="demo-hub-field">
-              <span>{{ t("app.demoHub.formModuleCode") }}</span>
-              <input v-model="draftForm.moduleCode" type="text" />
-            </label>
-            <label class="demo-hub-field">
-              <span>{{ t("app.demoHub.formModuleLabel") }}</span>
-              <input v-model="draftForm.moduleLabel" type="text" />
-            </label>
-            <label class="demo-hub-field">
-              <span>{{ t("app.demoHub.formScenario") }}</span>
-              <input v-model="draftForm.pageGoal" type="text" />
-            </label>
-            <label class="demo-hub-field">
-              <span>{{ t("app.demoHub.formVariant") }}</span>
-              <select v-model="draftForm.startMode">
-                <option
-                  v-for="option in startModeOptions"
-                  :key="option.value"
-                  :value="option.value"
-                >
-                  {{ option.label }}
-                </option>
-              </select>
-            </label>
-          </div>
-
-          <div class="demo-hub-next-step">
-            <strong>{{ t("app.demoHub.formNextAction") }}</strong>
-            <p>{{ t("app.demoHub.formNextActionValue") }}</p>
-            <span>{{ t("app.demoHub.formLocalHint") }}</span>
-          </div>
-        </section>
-
-        <section class="demo-hub-lists">
-          <article class="demo-hub-list-card">
-            <p class="demo-hub-section-label">
-              {{ t("app.demoHub.prototypeFields") }}
-            </p>
-            <ul>
-              <li v-for="field in activeScenario.fields" :key="field">{{ field }}</li>
-            </ul>
-          </article>
-          <article class="demo-hub-list-card">
-            <p class="demo-hub-section-label">
-              {{ t("app.demoHub.prototypeFeedback") }}
-            </p>
-            <ul>
-              <li v-for="feedback in activeScenario.feedback" :key="feedback">
-                {{ feedback }}
-              </li>
-            </ul>
-          </article>
-          <article class="demo-hub-list-card">
-            <p class="demo-hub-section-label">
-              {{ t("app.demoHub.prototypeChecklist") }}
-            </p>
-            <ul>
-              <li
-                v-for="check in activeScenario.checklist"
-                :key="check"
+            <div class="demo-hub-mode-grid">
+              <button
+                v-for="mode in startModeCards"
+                :key="mode.value"
+                type="button"
+                class="demo-hub-mode-card"
+                :class="{
+                  'demo-hub-mode-card-active': startDraft.startMode === mode.value,
+                }"
+                @click="startDraft.startMode = mode.value"
               >
-                {{ check }}
-              </li>
-            </ul>
+                <strong>{{ mode.title }}</strong>
+                <span>{{ mode.description }}</span>
+              </button>
+            </div>
+
+            <div class="demo-hub-form-grid">
+              <label class="demo-hub-field">
+                <span>{{ t("app.demoHub.formModuleCode") }}</span>
+                <input v-model="startDraft.moduleCode" type="text" />
+              </label>
+              <label class="demo-hub-field">
+                <span>{{ t("app.demoHub.formModuleLabel") }}</span>
+                <input v-model="startDraft.moduleLabel" type="text" />
+              </label>
+              <label class="demo-hub-field">
+                <span>{{ t("app.demoHub.formScenario") }}</span>
+                <input v-model="startDraft.pageGoal" type="text" />
+              </label>
+              <label class="demo-hub-field">
+                <span>{{ t("app.demoHub.formFrontendTarget") }}</span>
+                <select v-model="startDraft.frontendTarget">
+                  <option value="Vue">Vue</option>
+                  <option value="React">React</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="demo-hub-next-step">
+              <div>
+                <strong>{{ t("app.demoHub.formNextAction") }}</strong>
+                <p>{{ t("app.demoHub.formNextActionValue") }}</p>
+              </div>
+              <button type="button" class="enterprise-button">
+                {{ t("app.demoHub.start.primaryAction") }}
+              </button>
+            </div>
+
+            <section class="demo-hub-fact-grid">
+              <article class="demo-hub-fact-card">
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.prototypeFields") }}
+                </p>
+                <ul>
+                  <li
+                    v-for="fact in startHighlights"
+                    :key="fact"
+                  >
+                    {{ fact }}
+                  </li>
+                </ul>
+              </article>
+              <article class="demo-hub-fact-card">
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.prototypeChecklist") }}
+                </p>
+                <ul>
+                  <li>{{ t("app.demoHub.start.checklist.first") }}</li>
+                  <li>{{ t("app.demoHub.start.checklist.second") }}</li>
+                  <li>{{ t("app.demoHub.start.checklist.third") }}</li>
+                </ul>
+              </article>
+            </section>
+          </article>
+
+          <article
+            v-else-if="activePrototypeKey === 'generator-review'"
+            class="demo-hub-flow"
+          >
+            <div class="demo-hub-flow-copy">
+              <p class="demo-hub-section-label">
+                {{ t("app.demoHub.review.stateLabel") }}
+              </p>
+              <h4>{{ t("app.demoHub.review.headline") }}</h4>
+              <p>{{ t("app.demoHub.review.description") }}</p>
+            </div>
+
+            <div class="demo-hub-toggle-row">
+              <button
+                type="button"
+                class="demo-hub-toggle"
+                :class="{ 'demo-hub-toggle-active': reviewState === 'blocking' }"
+                @click="setReviewState('blocking')"
+              >
+                {{ t("app.demoHub.review.toggle.blocking") }}
+              </button>
+              <button
+                type="button"
+                class="demo-hub-toggle"
+                :class="{
+                  'demo-hub-toggle-active': reviewState === 'review-ready',
+                }"
+                @click="setReviewState('review-ready')"
+              >
+                {{ t("app.demoHub.review.toggle.ready") }}
+              </button>
+              <button
+                type="button"
+                class="demo-hub-toggle"
+                :class="{ 'demo-hub-toggle-active': reviewState === 'failed' }"
+                @click="setReviewState('failed')"
+              >
+                {{ t("app.demoHub.review.toggle.failed") }}
+              </button>
+            </div>
+
+            <section class="demo-hub-summary-banner">
+              <div>
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.review.summaryLabel") }}
+                </p>
+                <h4>{{ reviewSummary.title }}</h4>
+                <p>{{ reviewSummary.description }}</p>
+              </div>
+              <div class="demo-hub-summary-actions">
+                <strong>{{ reviewSummary.next }}</strong>
+                <button type="button" class="enterprise-button">
+                  {{ reviewSummary.primaryAction }}
+                </button>
+              </div>
+            </section>
+
+            <div class="demo-hub-review-grid">
+              <section class="demo-hub-review-list">
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.review.listTitle") }}
+                </p>
+                <button
+                  v-for="file in sortedReviewFiles"
+                  :key="file.path"
+                  type="button"
+                  class="demo-hub-review-item"
+                  :class="{
+                    'demo-hub-review-item-active':
+                      selectedReviewFile?.path === file.path,
+                  }"
+                  @click="selectedReviewFilePath = file.path"
+                >
+                  <div class="demo-hub-review-item-header">
+                    <strong>{{ file.name }}</strong>
+                    <span class="demo-hub-review-chip">{{
+                      t(`app.demoHub.review.actionLabel.${file.action}`)
+                    }}</span>
+                  </div>
+                  <span>{{ file.path }}</span>
+                </button>
+              </section>
+
+              <section class="demo-hub-review-detail">
+                <template v-if="selectedReviewFile">
+                  <p class="demo-hub-section-label">
+                    {{ t("app.demoHub.review.detailTitle") }}
+                  </p>
+                  <h4>{{ selectedReviewFile.name }}</h4>
+                  <p>{{ selectedReviewFile.reason }}</p>
+                  <div class="demo-hub-detail-meta">
+                    <span>{{ selectedReviewFile.path }}</span>
+                    <span>{{
+                      selectedReviewFile.hasChanges
+                        ? t("app.demoHub.review.hasChanges")
+                        : t("app.demoHub.review.noChanges")
+                    }}</span>
+                  </div>
+                  <div class="demo-hub-code-card">
+                    <strong>{{ t("app.demoHub.review.diffTitle") }}</strong>
+                    <pre>{{ selectedReviewFile.diff }}</pre>
+                  </div>
+                </template>
+              </section>
+            </div>
+
+            <section class="demo-hub-fact-grid">
+              <article class="demo-hub-fact-card">
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.prototypeChecklist") }}
+                </p>
+                <ul>
+                  <li
+                    v-for="item in reviewChecklist"
+                    :key="item"
+                  >
+                    {{ item }}
+                  </li>
+                </ul>
+              </article>
+            </section>
+          </article>
+
+          <article v-else class="demo-hub-flow">
+            <div class="demo-hub-flow-copy">
+              <p class="demo-hub-section-label">
+                {{ t("app.demoHub.apply.stateLabel") }}
+              </p>
+              <h4>{{ t("app.demoHub.apply.headline") }}</h4>
+              <p>{{ t("app.demoHub.apply.description") }}</p>
+            </div>
+
+            <div class="demo-hub-toggle-row">
+              <button
+                type="button"
+                class="demo-hub-toggle"
+                :class="{ 'demo-hub-toggle-active': applyState === 'ready' }"
+                @click="applyState = 'ready'"
+              >
+                {{ t("app.demoHub.apply.toggle.ready") }}
+              </button>
+              <button
+                type="button"
+                class="demo-hub-toggle"
+                :class="{
+                  'demo-hub-toggle-active': applyState === 'missing-checks',
+                }"
+                @click="applyState = 'missing-checks'"
+              >
+                {{ t("app.demoHub.apply.toggle.missing") }}
+              </button>
+              <button
+                type="button"
+                class="demo-hub-toggle"
+                :class="{ 'demo-hub-toggle-active': applyState === 'stale' }"
+                @click="applyState = 'stale'"
+              >
+                {{ t("app.demoHub.apply.toggle.stale") }}
+              </button>
+            </div>
+
+            <section class="demo-hub-summary-banner">
+              <div>
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.apply.summaryLabel") }}
+                </p>
+                <h4>{{ applySummary.title }}</h4>
+                <p>{{ applySummary.description }}</p>
+              </div>
+              <div class="demo-hub-summary-actions">
+                <strong>{{ t("app.demoHub.apply.summaryHint") }}</strong>
+                <button type="button" class="enterprise-button">
+                  {{ applySummary.primaryAction }}
+                </button>
+              </div>
+            </section>
+
+            <div class="demo-hub-apply-grid">
+              <section class="demo-hub-fact-card">
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.apply.checklistTitle") }}
+                </p>
+                <ul class="demo-hub-check-list">
+                  <li
+                    v-for="item in applyChecklist"
+                    :key="item.label"
+                    :class="{
+                      'demo-hub-check-list-item-checked': item.checked,
+                      'demo-hub-check-list-item-missing': !item.checked,
+                    }"
+                  >
+                    <span class="demo-hub-check-icon">
+                      {{ item.checked ? "✓" : "!" }}
+                    </span>
+                    <span>{{ item.label }}</span>
+                  </li>
+                </ul>
+              </section>
+
+              <section class="demo-hub-fact-card">
+                <p class="demo-hub-section-label">
+                  {{ t("app.demoHub.apply.riskTitle") }}
+                </p>
+                <ul>
+                  <li>{{ t("app.demoHub.apply.risk.first") }}</li>
+                  <li>{{ t("app.demoHub.apply.risk.second") }}</li>
+                  <li>{{ t("app.demoHub.apply.risk.third") }}</li>
+                </ul>
+              </section>
+            </div>
           </article>
         </section>
       </div>
@@ -280,8 +691,10 @@ const startModeOptions = computed(() => [
 
 .demo-hub-description,
 .demo-hub-surface-description,
-.demo-hub-next-step span,
-.demo-hub-scenario-card span {
+.demo-hub-prototype-card span,
+.demo-hub-mode-card span,
+.demo-hub-flow-copy p,
+.demo-hub-review-item span {
   color: #475569;
   line-height: 1.65;
 }
@@ -303,32 +716,35 @@ const startModeOptions = computed(() => [
   font-weight: 600;
 }
 
-.demo-hub-scenario-grid {
+.demo-hub-layout {
   display: grid;
   gap: 1rem;
   grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
 }
 
-.demo-hub-scenario-list,
-.demo-hub-stage {
+.demo-hub-stage,
+.demo-hub-prototype-nav,
+.demo-hub-flow {
   display: grid;
-  gap: 0.9rem;
+  gap: 1rem;
 }
 
-.demo-hub-scenario-card,
-.demo-hub-summary-card,
-.demo-hub-form-section,
-.demo-hub-list-card,
-.demo-hub-surface {
+.demo-hub-prototype-card,
+.demo-hub-surface,
+.demo-hub-mode-card,
+.demo-hub-fact-card,
+.demo-hub-review-list,
+.demo-hub-review-detail {
   padding: 1rem;
   border: 1px solid #e2e8f0;
-  border-radius: 0.9rem;
+  border-radius: 0.95rem;
   background: #fff;
 }
 
-.demo-hub-scenario-card {
-  display: grid;
-  gap: 0.35rem;
+.demo-hub-prototype-card,
+.demo-hub-mode-card,
+.demo-hub-review-item,
+.demo-hub-toggle {
   text-align: left;
   cursor: pointer;
   transition:
@@ -337,11 +753,32 @@ const startModeOptions = computed(() => [
     transform 0.18s ease;
 }
 
-.demo-hub-scenario-card:hover,
-.demo-hub-scenario-card-active {
+.demo-hub-prototype-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.demo-hub-prototype-card:hover,
+.demo-hub-prototype-card-active,
+.demo-hub-mode-card:hover,
+.demo-hub-mode-card-active,
+.demo-hub-review-item:hover,
+.demo-hub-review-item-active,
+.demo-hub-toggle:hover,
+.demo-hub-toggle-active {
   border-color: #93c5fd;
   box-shadow: 0 10px 24px rgba(37, 99, 235, 0.1);
   transform: translateY(-1px);
+}
+
+.demo-hub-prototype-stage {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.demo-hub-surface {
+  display: grid;
+  gap: 1rem;
 }
 
 .demo-hub-surface-header {
@@ -352,42 +789,50 @@ const startModeOptions = computed(() => [
 }
 
 .demo-hub-surface-header h3,
-.demo-hub-form-copy h3 {
+.demo-hub-flow-copy h4,
+.demo-hub-summary-banner h4,
+.demo-hub-review-detail h4 {
   margin: 0.3rem 0 0;
   color: #0f172a;
   font-size: 1.2rem;
 }
 
-.demo-hub-summary-grid,
-.demo-hub-lists,
-.demo-hub-form-grid {
+.demo-hub-mode-grid,
+.demo-hub-form-grid,
+.demo-hub-fact-grid,
+.demo-hub-apply-grid,
+.demo-hub-review-grid,
+.demo-hub-summary-actions {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.9rem;
 }
 
-.demo-hub-summary-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.demo-hub-mode-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.demo-hub-summary-card span,
-.demo-hub-field span,
-.demo-hub-next-step strong {
-  color: #64748b;
-  font-size: 0.85rem;
+.demo-hub-mode-card {
+  display: grid;
+  gap: 0.35rem;
 }
 
-.demo-hub-summary-card strong,
-.demo-hub-next-step p {
-  color: #0f172a;
-}
-
-.demo-hub-form-grid {
+.demo-hub-form-grid,
+.demo-hub-fact-grid,
+.demo-hub-apply-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .demo-hub-field {
   display: grid;
   gap: 0.45rem;
+}
+
+.demo-hub-field span,
+.demo-hub-summary-actions strong,
+.demo-hub-review-detail p,
+.demo-hub-detail-meta span {
+  color: #64748b;
+  font-size: 0.85rem;
 }
 
 .demo-hub-field input,
@@ -400,26 +845,147 @@ const startModeOptions = computed(() => [
   background: #fff;
 }
 
-.demo-hub-next-step {
-  display: grid;
-  gap: 0.25rem;
-  padding: 0.95rem 1rem;
+.demo-hub-next-step,
+.demo-hub-summary-banner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  padding: 1rem 1.05rem;
   border: 1px dashed #93c5fd;
-  border-radius: 0.9rem;
+  border-radius: 0.95rem;
   background: #f8fbff;
 }
 
-.demo-hub-list-card ul {
+.demo-hub-next-step p,
+.demo-hub-summary-banner p {
+  margin: 0.3rem 0 0;
+  color: #0f172a;
+}
+
+.demo-hub-toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.demo-hub-toggle {
+  padding: 0.7rem 0.95rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #1e293b;
+  background: #fff;
+  font-weight: 600;
+}
+
+.demo-hub-review-grid {
+  grid-template-columns: minmax(16rem, 20rem) minmax(0, 1fr);
+}
+
+.demo-hub-review-list,
+.demo-hub-review-detail {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.demo-hub-review-item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.8rem;
+  background: #fff;
+}
+
+.demo-hub-review-item-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.demo-hub-review-chip {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.demo-hub-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
+.demo-hub-code-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem;
+  border-radius: 0.85rem;
+  background: #eff6ff;
+}
+
+.demo-hub-code-card strong {
+  color: #1e3a8a;
+}
+
+.demo-hub-code-card pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #0f172a;
+  font-family: Consolas, "Liberation Mono", monospace;
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+
+.demo-hub-fact-card ul,
+.demo-hub-check-list {
   margin: 0.65rem 0 0;
   padding-left: 1rem;
   color: #0f172a;
   line-height: 1.7;
 }
 
-@media (max-width: 960px) {
-  .demo-hub-scenario-grid,
-  .demo-hub-summary-grid,
-  .demo-hub-form-grid {
+.demo-hub-check-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.demo-hub-check-list li {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.demo-hub-check-list li:last-child {
+  border-bottom: none;
+}
+
+.demo-hub-check-list-item-checked {
+  color: #0f766e;
+}
+
+.demo-hub-check-list-item-missing {
+  color: #b45309;
+}
+
+.demo-hub-check-icon {
+  min-width: 1.2rem;
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .demo-hub-layout,
+  .demo-hub-review-grid,
+  .demo-hub-mode-grid,
+  .demo-hub-form-grid,
+  .demo-hub-fact-grid,
+  .demo-hub-apply-grid {
     grid-template-columns: 1fr;
   }
 }

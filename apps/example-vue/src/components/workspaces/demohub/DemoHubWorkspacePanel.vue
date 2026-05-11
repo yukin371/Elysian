@@ -36,6 +36,24 @@ defineProps<{
     </article>
 
     <article class="demo-hub-panel-block">
+      <h4>{{ t("app.demoHub.panelPrototypeTitle") }}</h4>
+      <ul>
+        <li>{{ t("app.demoHub.panelPrototypeStart") }}</li>
+        <li>{{ t("app.demoHub.panelPrototypeReview") }}</li>
+        <li>{{ t("app.demoHub.panelPrototypeApply") }}</li>
+      </ul>
+    </article>
+
+    <article class="demo-hub-panel-block">
+      <h4>{{ t("app.demoHub.panelMigrationTitle") }}</h4>
+      <ul>
+        <li>{{ t("app.demoHub.panelMigrationFirst") }}</li>
+        <li>{{ t("app.demoHub.panelMigrationSecond") }}</li>
+        <li>{{ t("app.demoHub.panelMigrationThird") }}</li>
+      </ul>
+    </article>
+
+    <article class="demo-hub-panel-block">
       <h4>{{ t("app.placeholder.route") }}</h4>
       <p>{{ currentPath }}</p>
       <h4>{{ t("app.placeholder.moduleCode") }}</h4>
