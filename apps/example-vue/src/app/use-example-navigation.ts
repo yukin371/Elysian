@@ -8,6 +8,7 @@ import {
   replaceCurrentWorkspaceRoute,
   resolveExampleNavigationMenuKey,
   resolveExampleNavigationSelectionState,
+  resolveExampleRouteFirstNavigationMenuKey,
   resolveExampleShellTabKey,
   resolveExampleWorkspaceMenuSelection,
   resolveExampleWorkspaceSelectionIntent,
@@ -74,7 +75,10 @@ export const useExampleNavigation = ({
   )
 
   const syncMenuKeyFromRoute = () => {
-    const routeMenuKey = currentNavigationSelectionState.value.selectedMenuKey
+    const routeMenuKey = resolveExampleRouteFirstNavigationMenuKey(
+      enterpriseNavigation.value,
+      currentMenuKey.value,
+    )
 
     if (!routeMenuKey) {
       return
@@ -87,10 +91,10 @@ export const useExampleNavigation = ({
   watch(
     enterpriseNavigation,
     (items) => {
-      currentMenuKey.value = resolveExampleNavigationSelectionState(
+      currentMenuKey.value = resolveExampleRouteFirstNavigationMenuKey(
         items,
         currentMenuKey.value,
-      ).selectedMenuKey
+      )
     },
     {
       immediate: true,

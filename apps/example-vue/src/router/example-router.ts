@@ -234,6 +234,19 @@ export const resolveExampleNavigationMenuKey = (
   )
 }
 
+export const resolveExampleRouteFirstNavigationMenuKey = (
+  items: UiNavigationNode[],
+  currentMenuKey: string | null,
+) => {
+  const routeMenuKey = readCurrentWorkspaceRouteMenuKey(items)
+
+  if (routeMenuKey) {
+    return routeMenuKey
+  }
+
+  return resolveExampleNavigationMenuKey(items, currentMenuKey)
+}
+
 export const replaceCurrentWorkspaceRoute = (
   path: string | null | undefined,
 ) => {

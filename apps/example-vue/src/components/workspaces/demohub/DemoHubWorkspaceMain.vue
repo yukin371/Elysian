@@ -350,7 +350,7 @@ const coverageItems = computed<CoverageItem[]>(() => [
     state: props.t("app.demoHub.coverage.state.hashReload"),
     expected: props.t("app.demoHub.coverage.expected.hashReload"),
     owner: props.t("app.demoHub.coverage.owner.shell"),
-    status: "pending",
+    status: "covered",
   },
 ])
 

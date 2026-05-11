@@ -434,6 +434,10 @@ Feature: Generator Apply Checklist
 - 确认：确认项缺失或结果过期时，主动作回到结果检查或重新生成。
 - 壳层：直接刷新或输入 hash 时，应稳定渲染目标 workspace，不残留上一个工作区内容。
 
+当前验证结论：
+
+- 壳层 hash / reload 同步已补最小路由优先解析，并通过 `#/studio/generator-preview` 与 `#/studio/demo-hub` 直达和 reload 浏览器验证。
+
 覆盖状态含义：
 
 - `已覆盖`：已有 `demohub` 样本，并已至少一次迁回正式页或完成主路径验证。

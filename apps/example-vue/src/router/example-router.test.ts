@@ -9,6 +9,7 @@ import {
   resolveExampleAppLayout,
   resolveExampleNavigationMenuKey,
   resolveExampleNavigationSelectionState,
+  resolveExampleRouteFirstNavigationMenuKey,
   resolveExampleShellTabKey,
   resolveExampleWorkspaceMenuSelection,
   resolveExampleWorkspaceSelectionIntent,
@@ -211,6 +212,22 @@ describe("example app router", () => {
       "system-files",
     )
     expect(resolveExampleNavigationMenuKey(items, null)).toBe("customer-list")
+  })
+
+  test("resolves the route-first selected menu key for direct hash entry", () => {
+    const items = createNavigationItems()
+    const { mockWindow } = createMockWindow("#/system/files")
+    setMockWindow(mockWindow)
+
+    expect(
+      resolveExampleRouteFirstNavigationMenuKey(items, "customer-list"),
+    ).toBe("system-files")
+
+    mockWindow.location.hash = "#/"
+
+    expect(
+      resolveExampleRouteFirstNavigationMenuKey(items, "system-files"),
+    ).toBe("system-files")
   })
 
   test("resolves the selected navigation item with default fallback", () => {
