@@ -28,6 +28,15 @@ interface ReviewFileCard {
   hasChanges: boolean
 }
 
+interface CoverageItem {
+  id: string
+  stage: string
+  state: string
+  expected: string
+  owner: string
+  status: "covered" | "partial" | "pending"
+}
+
 const props = defineProps<{
   t: AppTranslate
 }>()
@@ -278,11 +287,90 @@ const applyChecklist = computed(() => [
   },
 ])
 
+const coverageItems = computed<CoverageItem[]>(() => [
+  {
+    id: "start-reference",
+    stage: props.t("app.demoHub.coverage.stage.start"),
+    state: props.t("app.demoHub.coverage.state.reference"),
+    expected: props.t("app.demoHub.coverage.expected.reference"),
+    owner: props.t("app.demoHub.coverage.owner.start"),
+    status: "covered",
+  },
+  {
+    id: "start-template",
+    stage: props.t("app.demoHub.coverage.stage.start"),
+    state: props.t("app.demoHub.coverage.state.template"),
+    expected: props.t("app.demoHub.coverage.expected.template"),
+    owner: props.t("app.demoHub.coverage.owner.start"),
+    status: "covered",
+  },
+  {
+    id: "review-blocking",
+    stage: props.t("app.demoHub.coverage.stage.review"),
+    state: props.t("app.demoHub.coverage.state.blocking"),
+    expected: props.t("app.demoHub.coverage.expected.blocking"),
+    owner: props.t("app.demoHub.coverage.owner.review"),
+    status: "covered",
+  },
+  {
+    id: "review-ready",
+    stage: props.t("app.demoHub.coverage.stage.review"),
+    state: props.t("app.demoHub.coverage.state.ready"),
+    expected: props.t("app.demoHub.coverage.expected.ready"),
+    owner: props.t("app.demoHub.coverage.owner.review"),
+    status: "covered",
+  },
+  {
+    id: "review-file-detail",
+    stage: props.t("app.demoHub.coverage.stage.review"),
+    state: props.t("app.demoHub.coverage.state.fileDetail"),
+    expected: props.t("app.demoHub.coverage.expected.fileDetail"),
+    owner: props.t("app.demoHub.coverage.owner.detail"),
+    status: "partial",
+  },
+  {
+    id: "apply-ready",
+    stage: props.t("app.demoHub.coverage.stage.apply"),
+    state: props.t("app.demoHub.coverage.state.applyReady"),
+    expected: props.t("app.demoHub.coverage.expected.applyReady"),
+    owner: props.t("app.demoHub.coverage.owner.apply"),
+    status: "covered",
+  },
+  {
+    id: "apply-missing",
+    stage: props.t("app.demoHub.coverage.stage.apply"),
+    state: props.t("app.demoHub.coverage.state.applyMissing"),
+    expected: props.t("app.demoHub.coverage.expected.applyMissing"),
+    owner: props.t("app.demoHub.coverage.owner.apply"),
+    status: "covered",
+  },
+  {
+    id: "runtime-hash-reload",
+    stage: props.t("app.demoHub.coverage.stage.shell"),
+    state: props.t("app.demoHub.coverage.state.hashReload"),
+    expected: props.t("app.demoHub.coverage.expected.hashReload"),
+    owner: props.t("app.demoHub.coverage.owner.shell"),
+    status: "pending",
+  },
+])
+
 const currentPrototypeCard = computed(
   () =>
     prototypeCards.value.find((card) => card.key === activePrototypeKey.value) ??
     prototypeCards.value[0],
 )
+
+const coverageCounts = computed(() => ({
+  covered: coverageItems.value.filter((item) => item.status === "covered")
+    .length,
+  partial: coverageItems.value.filter((item) => item.status === "partial")
+    .length,
+  pending: coverageItems.value.filter((item) => item.status === "pending")
+    .length,
+}))
+
+const coverageStatusLabel = (status: CoverageItem["status"]) =>
+  props.t(`app.demoHub.coverage.status.${status}`)
 
 const setReviewState = (nextState: ReviewState) => {
   reviewState.value = nextState
@@ -310,6 +398,58 @@ const setReviewState = (nextState: ReviewState) => {
         <span class="demo-hub-badge">{{ t("app.demoHub.badge.noApi") }}</span>
       </div>
     </header>
+
+    <section class="demo-hub-coverage">
+      <div class="demo-hub-coverage-header">
+        <div>
+          <p class="demo-hub-section-label">
+            {{ t("app.demoHub.coverage.label") }}
+          </p>
+          <h3>{{ t("app.demoHub.coverage.title") }}</h3>
+          <p>{{ t("app.demoHub.coverage.description") }}</p>
+        </div>
+        <div class="demo-hub-coverage-counts">
+          <span>
+            {{
+              t("app.demoHub.coverage.count.covered", {
+                count: coverageCounts.covered,
+              })
+            }}
+          </span>
+          <span>
+            {{
+              t("app.demoHub.coverage.count.partial", {
+                count: coverageCounts.partial,
+              })
+            }}
+          </span>
+          <span>
+            {{
+              t("app.demoHub.coverage.count.pending", {
+                count: coverageCounts.pending,
+              })
+            }}
+          </span>
+        </div>
+      </div>
+
+      <div class="demo-hub-coverage-grid">
+        <article
+          v-for="item in coverageItems"
+          :key="item.id"
+          class="demo-hub-coverage-card"
+          :class="`demo-hub-coverage-card-${item.status}`"
+        >
+          <div class="demo-hub-coverage-card-head">
+            <span>{{ item.stage }}</span>
+            <strong>{{ coverageStatusLabel(item.status) }}</strong>
+          </div>
+          <h4>{{ item.state }}</h4>
+          <p>{{ item.expected }}</p>
+          <small>{{ item.owner }}</small>
+        </article>
+      </div>
+    </section>
 
     <section class="demo-hub-layout">
       <aside class="demo-hub-prototype-nav">
@@ -714,6 +854,113 @@ const setReviewState = (nextState: ReviewState) => {
   background: rgba(255, 255, 255, 0.72);
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.demo-hub-coverage {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.demo-hub-coverage-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+}
+
+.demo-hub-coverage-header h3 {
+  margin: 0.3rem 0 0;
+  color: #0f172a;
+  font-size: 1.12rem;
+}
+
+.demo-hub-coverage-header p {
+  margin: 0.35rem 0 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.demo-hub-coverage-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-content: flex-start;
+}
+
+.demo-hub-coverage-counts span {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  color: #334155;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.demo-hub-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+  gap: 0.7rem;
+}
+
+.demo-hub-coverage-card {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+}
+
+.demo-hub-coverage-card-covered {
+  border-color: #99f6e4;
+  background: #f0fdfa;
+}
+
+.demo-hub-coverage-card-partial {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.demo-hub-coverage-card-pending {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.demo-hub-coverage-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: #64748b;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.demo-hub-coverage-card h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.88rem;
+}
+
+.demo-hub-coverage-card p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.demo-hub-coverage-card small {
+  color: #64748b;
+  font-size: 0.74rem;
+  line-height: 1.45;
 }
 
 .demo-hub-layout {

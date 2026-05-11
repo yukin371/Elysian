@@ -614,6 +614,55 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.badge.prototypeOnly": "Prototype only",
   "app.demoHub.badge.formFirst": "Form first",
   "app.demoHub.badge.noApi": "No live API",
+  "app.demoHub.coverage.label": "State coverage",
+  "app.demoHub.coverage.title":
+    "Confirm these states before moving conclusions into the real page.",
+  "app.demoHub.coverage.description":
+    "This is not a feature launcher. It is the experience regression board: every state should be visible and discussable in Demo Hub before it moves into the formal generator preview.",
+  "app.demoHub.coverage.count.covered": "Covered {count}",
+  "app.demoHub.coverage.count.partial": "Needs validation {count}",
+  "app.demoHub.coverage.count.pending": "Needs design {count}",
+  "app.demoHub.coverage.status.covered": "Covered",
+  "app.demoHub.coverage.status.partial": "Needs validation",
+  "app.demoHub.coverage.status.pending": "Needs design",
+  "app.demoHub.coverage.stage.start": "Start",
+  "app.demoHub.coverage.stage.review": "Review",
+  "app.demoHub.coverage.stage.apply": "Confirm",
+  "app.demoHub.coverage.stage.shell": "Shell",
+  "app.demoHub.coverage.state.reference": "Copy existing module",
+  "app.demoHub.coverage.state.template": "Start from template",
+  "app.demoHub.coverage.state.blocking": "Blocking files exist",
+  "app.demoHub.coverage.state.ready": "Ready for review",
+  "app.demoHub.coverage.state.fileDetail": "File detail first screen",
+  "app.demoHub.coverage.state.applyReady": "Checklist complete",
+  "app.demoHub.coverage.state.applyMissing": "Missing or stale checks",
+  "app.demoHub.coverage.state.hashReload": "Direct hash or reload entry",
+  "app.demoHub.coverage.expected.reference":
+    "After choosing a reference module, the flow stays form-first instead of switching to advanced JSON.",
+  "app.demoHub.coverage.expected.template":
+    "After loading a template, the page still shows only required fields and the next step before technical options.",
+  "app.demoHub.coverage.expected.blocking":
+    "The first verdict must stop apply and send the primary action to the first blocked file.",
+  "app.demoHub.coverage.expected.ready":
+    "The first screen says the result can enter review, with review as the primary action instead of apply.",
+  "app.demoHub.coverage.expected.fileDetail":
+    "The detail area explains the file verdict and reason before path, diff, source, and SQL evidence.",
+  "app.demoHub.coverage.expected.applyReady":
+    "The checklist page keeps only the ready verdict, risk summary, short checklist, and one primary action.",
+  "app.demoHub.coverage.expected.applyMissing":
+    "When checks are missing or stale, the primary action returns to review or regeneration instead of continuing apply.",
+  "app.demoHub.coverage.expected.hashReload":
+    "Direct reload or hash entry should render the target workspace without showing content from the previous workspace.",
+  "app.demoHub.coverage.owner.start":
+    "Formal owner: DraftStartPanel / OptionsSection",
+  "app.demoHub.coverage.owner.review":
+    "Formal owner: CurrentResultPanel / ResultListSection",
+  "app.demoHub.coverage.owner.detail":
+    "Formal owner: WorkspacePanel file detail composition",
+  "app.demoHub.coverage.owner.apply":
+    "Formal owner: CurrentResultPanel checklist area",
+  "app.demoHub.coverage.owner.shell":
+    "Formal owner: Shell route/workspace render sync",
   "app.demoHub.heroEyebrow": "Page prototype bus",
   "app.demoHub.heroTitle":
     "Make the flow obvious in Demo Hub first, then move into real implementation.",

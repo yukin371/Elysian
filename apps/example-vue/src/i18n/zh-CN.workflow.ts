@@ -562,6 +562,49 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.badge.prototypeOnly": "仅原型",
   "app.demoHub.badge.formFirst": "表单优先",
   "app.demoHub.badge.noApi": "无真实接口",
+  "app.demoHub.coverage.label": "状态覆盖",
+  "app.demoHub.coverage.title": "每次回灌正式页前，先确认这些状态都有样本。",
+  "app.demoHub.coverage.description":
+    "这张表不是功能入口，而是体验回归清单：每个状态都要能在 Demo Hub 里被看见、被讨论，再迁回正式 generator preview。",
+  "app.demoHub.coverage.count.covered": "已覆盖 {count}",
+  "app.demoHub.coverage.count.partial": "待补验证 {count}",
+  "app.demoHub.coverage.count.pending": "待设计 {count}",
+  "app.demoHub.coverage.status.covered": "已覆盖",
+  "app.demoHub.coverage.status.partial": "待补验证",
+  "app.demoHub.coverage.status.pending": "待设计",
+  "app.demoHub.coverage.stage.start": "起稿",
+  "app.demoHub.coverage.stage.review": "结果",
+  "app.demoHub.coverage.stage.apply": "确认",
+  "app.demoHub.coverage.stage.shell": "壳层",
+  "app.demoHub.coverage.state.reference": "复制现有模块",
+  "app.demoHub.coverage.state.template": "从模板开始",
+  "app.demoHub.coverage.state.blocking": "存在阻塞文件",
+  "app.demoHub.coverage.state.ready": "无阻塞待审核",
+  "app.demoHub.coverage.state.fileDetail": "文件详情首屏",
+  "app.demoHub.coverage.state.applyReady": "确认项已齐",
+  "app.demoHub.coverage.state.applyMissing": "确认项缺失或过期",
+  "app.demoHub.coverage.state.hashReload": "直接 hash/reload 进入工作区",
+  "app.demoHub.coverage.expected.reference":
+    "选择参考模块后仍停留在表单主流程，不自动切到高级 JSON。",
+  "app.demoHub.coverage.expected.template":
+    "套用模板后仍只展示必要字段和下一步，不把技术项提前。",
+  "app.demoHub.coverage.expected.blocking":
+    "首屏主结论必须阻止继续 apply，并把主动作指向第一个阻塞文件。",
+  "app.demoHub.coverage.expected.ready":
+    "首屏说明结果可以进入审核，主动作是审核判断而不是 apply。",
+  "app.demoHub.coverage.expected.fileDetail":
+    "详情区先讲文件结论和处理原因，再展示路径、diff、源码和 SQL 证据。",
+  "app.demoHub.coverage.expected.applyReady":
+    "确认页只保留可继续结论、风险摘要、短清单和唯一主动作。",
+  "app.demoHub.coverage.expected.applyMissing":
+    "缺项或过期时主动作回到结果检查或重新生成，不默认继续 apply。",
+  "app.demoHub.coverage.expected.hashReload":
+    "直接刷新或输入 hash 时，应稳定渲染目标 workspace，不残留上一个工作区内容。",
+  "app.demoHub.coverage.owner.start": "正式 owner：DraftStartPanel / OptionsSection",
+  "app.demoHub.coverage.owner.review": "正式 owner：CurrentResultPanel / ResultListSection",
+  "app.demoHub.coverage.owner.detail": "正式 owner：WorkspacePanel 文件详情组合区",
+  "app.demoHub.coverage.owner.apply": "正式 owner：CurrentResultPanel 确认清单区",
+  "app.demoHub.coverage.owner.shell": "正式 owner：Shell route/workspace render 同步",
   "app.demoHub.heroEyebrow": "页面原型总线",
   "app.demoHub.heroTitle": "先在 Demo Hub 把流程讲清楚，再进入真实实现。",
   "app.demoHub.heroDescription":
