@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-05-09`
+更新时间：`2026-05-11`
 
 ## 项目类型
 
@@ -88,6 +88,7 @@
 - `packages/generator` 当前已支持 `--target module` 直接产出模块目录内的 server 集成桩，并会额外生成 `*.persistence.ts` Drizzle schema 模板，供人工复制到 `packages/persistence` 继续完成正式 schema / migration 集成。
 - `apps/example-vue` 当前已把 workspace registry artifact 校验收口进默认工程入口：`@elysian/example-vue` 的 `build` 与仓库根 `bun run check` 都会显式执行 `verify:workspace-registry-artifacts`，标准 CRUD shell descriptor 漏接线或 generated artifact 漂移不会再只依赖人工记忆发现。
 - `apps/example-vue` 当前已把标准 CRUD 前端 surface 落盘到 `src/modules/*`，并由 shell main / secondary 真实消费；`@elysian/example-vue` 的 `build` 与仓库根 `bun run check` 已显式执行 `verify:standard-crud-surfaces`，标准 CRUD 页面骨架与生成器模板漂移不会再静默积累。
+- `apps/example-vue` 当前已新增 `demohub` prototype-only workspace，专门承接页面信息架构与交互试稿；当前 `generator preview` 的主流程试验先在该页验证，不直接接入真实 session / apply 能力。
 - `packages/persistence` 已新增 migration proposal 草案生成能力，可消费 `DatabaseChangePlan` 形状并输出 review-only SQL draft、Drizzle schema snippet 与风险说明；正式 `db:generate / db:migrate` 仍保持人工确认后进入。
 - `packages/schema` 已补 `validateModuleSchema` 与 `isModuleSchema`，可对 AI/JSON handoff 的 `ModuleSchema` 执行最小 runtime 校验。
 - `packages/schema` 已把 `enum` 字段必须提供 `options` 或 `dictionaryTypeCode` 收紧为 runtime 硬约束，避免裸 enum 误过 `P5A` handoff。

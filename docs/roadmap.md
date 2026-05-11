@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-09`（generator 自举闭环优先，后台基础能力作为首批验证对象）
+更新时间：`2026-05-11`（generator 自举闭环优先，后台基础能力作为首批验证对象）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -13,6 +13,7 @@
 - 已决定：当前主线优先收口 generator 的自举闭环，目标是把 schema -> preview/report -> apply / merge -> frontend artifact -> 正式模块落地这条链路做稳
 - 入口依据：代码生成已经不只是辅助工具，而是平台最底层的使用方式之一；优先把 generator 做成可重复、可审计、可回放的主能力
 - 当前范围：优先补齐 generator 产物进入正式模块目录的边界、冲突解释、差异回放、人工确认清单与前端 artifact 消费链路，保证新 schema 能稳定生成并纳入主工程
+- 当前前端试稿结论：`generator preview` 的页面结构优化不再直接在正式 workspace 上试错；起稿、结果判断、apply 前确认三段主流程先收口到 `apps/example-vue` 的 `demohub` 原型页，再决定哪些稳定结论迁回正式页
 - 当前约束：不把 generator 扩成通用低代码平台，不新增第二套 shared owner，不把后台日常功能写成主线叙事
 - 已具备基础：后台常用模块、workflow 最小闭环、generator-session、SQL preview 与标准 CRUD 前端 surface 已可作为验证对象继续打磨
 - 已推进收口：generator 当前已补 `text/json` 字段支持、simplified schema 展开、`validate-schema` 校验入口、`--target module`、`*.persistence.ts` 模板，以及 Studio 步骤引导流与模板化 schema 输入
@@ -225,6 +226,8 @@
 
 ## 最近进展
 
+- `apps/example-vue` 已把 `demohub` 收口为 generator preview 的原型试稿 owner：当前新增 `Generator Start / Generator Review / Apply Checklist` 三段本地原型流程，用于先验证“表单优先、结论优先、确认页短决策”这套用户路径；对应 BDD 计划文档已落 [2026-05-11-demohub-generator-preview-prototype-bdd.md](./plans/2026-05-11-demohub-generator-preview-prototype-bdd.md)
+- `apps/example-vue` 已同步 `MODULE.md` 与 `PAGE_DESIGN.md`，明确后续页面结构优化默认先落 `demohub`，稳定后才允许迁回真实 `generator preview` workspace，避免在正式页持续混入试错中的信息架构改动
 - 已完成一轮“类型/验证基线收口”而非新功能扩张：`apps/server` 多组测试已把响应体裸断言收紧为运行时 shape 校验，`generator-session` 已补 preview report 与 snapshot 读取的 payload/error guard，`scripts` 的 smoke / tenant / stability / download 报告解析已完成最小 payload 校验，`apps/example-vue` 也已补 API error envelope 收窄，当前主线先继续清理低风险断言与解析入口，不提前扩到结构性重构
 - 已确认下一批边界：剩余风险点主要集中在结构层 cast（如 `module.ts` 装配断言）与通用泛型 helper / 模板层 JSON 解析，这部分需单独开批处理，不并入本轮进度同步
 - generator → frontend 注册契约已完成：`ModuleFrontendSchema` 已扩展 `permissionActions` / `workspaceKind` / `moduleCode`，13 个 `ModuleSchema` 已补 `frontend` 元数据，`buildWorkspaceRegistration` 已接入 `packages/frontend-vue` 并替换 `system-registry` / `business-registry` 全部 schema 支撑的手写注册项；generator artifact 已包含 kind / permissions / i18nKeys，当前 470 测试全绿
@@ -329,6 +332,7 @@
 1. 第一顺序：继续按企业后台基础功能矩阵打磨现有工作区闭环，优先处理 `tenants / operation-logs / notifications / files` 的后台日常交互收口，目标是把“能打开”推进到“日常可用”，而不是继续新增新模块或新 shared 抽象。
 2. 第二顺序：对 `WP-6` 导入链路做边界判断，只回答“哪些模块值得进入当前主线、最小入口是什么、哪些仍应暂缓”；在未完成这一步前，不把统一导入 DSL、模板体系或批量治理平台写成已实现方向。
 3. 第三顺序：`generator / frontend` 只做必要延伸，不再回到 example-vue 手写标准 CRUD；若后续继续推进，范围限定为 generator 产物与前端 artifact 的增量收口，而不是重开一轮本地前端脊柱重构。
-4. 第四顺序：企业后台基础能力继续维持验证对象定位，优先补会话设备化、diff/evidence 强化、SQL proposal 到人工接入规范等必要收口，不抢占 generator 自举闭环主线。
-5. 当前已经补了一份 generator SQL proposal confirmation handoff 设计文档，后续若要落代码，优先沿 `packages/persistence -> apps/server -> apps/example-vue` 的既有 owner 顺序推进，不要反向从 UI 推导正式 migration owner。
-5. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、第二套消息中心模型，以及任何新的前端 shared owner。
+4. 在正式继续改 `generator preview` 前，先把 `demohub` 原型中的首屏起稿、结果结论和 apply 前确认三段流程压到足够稳定；正式页只负责承接真实 session / review / apply 状态，不再承担信息架构试错。
+5. 第五顺序：企业后台基础能力继续维持验证对象定位，优先补会话设备化、diff/evidence 强化、SQL proposal 到人工接入规范等必要收口，不抢占 generator 自举闭环主线。
+6. 当前已经补了一份 generator SQL proposal confirmation handoff 设计文档，后续若要落代码，优先沿 `packages/persistence -> apps/server -> apps/example-vue` 的既有 owner 顺序推进，不要反向从 UI 推导正式 migration owner。
+7. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、第二套消息中心模型，以及任何新的前端 shared owner。
