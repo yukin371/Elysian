@@ -227,6 +227,82 @@ const showAnyPrimaryAction = computed(
     showPrimaryConfirmAction.value ||
     showPrimaryApplyAction.value,
 )
+
+const showChecklistStage = computed(
+  () => props.showConfirmAction || props.showApplyAction,
+)
+
+const checklistVerdictTitle = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.applyChecklist.blockedTitle")
+  }
+
+  if (props.showConfirmAction) {
+    return props.t("app.generatorPreview.applyChecklist.pendingTitle")
+  }
+
+  if (props.showApplyAction && !props.canApply) {
+    return props.t("app.generatorPreview.applyChecklist.notReadyTitle")
+  }
+
+  if (props.showApplyAction) {
+    return props.t("app.generatorPreview.applyChecklist.readyTitle")
+  }
+
+  return props.t("app.generatorPreview.applyChecklist.idleTitle")
+})
+
+const checklistVerdictDescription = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.applyChecklist.blockedDescription")
+  }
+
+  if (props.showConfirmAction) {
+    return props.t("app.generatorPreview.applyChecklist.pendingDescription")
+  }
+
+  if (props.showApplyAction && !props.canApply) {
+    return props.t("app.generatorPreview.applyChecklist.notReadyDescription")
+  }
+
+  if (props.showApplyAction) {
+    return props.t("app.generatorPreview.applyChecklist.readyDescription")
+  }
+
+  return props.t("app.generatorPreview.applyChecklist.idleDescription")
+})
+
+const checklistRiskTitle = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.applyChecklist.riskBlockedTitle")
+  }
+
+  if (props.showConfirmAction) {
+    return props.t("app.generatorPreview.applyChecklist.riskConfirmTitle")
+  }
+
+  if (props.showApplyAction) {
+    return props.t("app.generatorPreview.applyChecklist.riskApplyTitle")
+  }
+
+  return props.t("app.generatorPreview.applyChecklist.riskIdleTitle")
+})
+
+const checklistRiskDescription = computed(() => {
+  if (props.blockedFileCount > 0) {
+    return props.t("app.generatorPreview.applyChecklist.riskBlockedDescription")
+  }
+
+  if (props.showConfirmAction) {
+    return props.t("app.generatorPreview.applyChecklist.riskConfirmDescription")
+  }
+
+  if (props.showApplyAction) {
+    return props.t("app.generatorPreview.applyChecklist.riskApplyDescription")
+  }
+
+  return props.t("app.generatorPreview.applyChecklist.riskIdleDescription")
+})
 </script>
 
 <template>
@@ -392,6 +468,21 @@ const showAnyPrimaryAction = computed(
       v-if="confirmationChecklist.length > 0"
       class="generator-confirmation-checklist"
     >
+      <div
+        v-if="showChecklistStage"
+        class="generator-checklist-intro"
+      >
+        <div class="generator-checklist-verdict">
+          <span>{{ t("app.generatorPreview.applyChecklist.verdictLabel") }}</span>
+          <strong>{{ checklistVerdictTitle }}</strong>
+          <p>{{ checklistVerdictDescription }}</p>
+        </div>
+        <div class="generator-checklist-risk">
+          <span>{{ t("app.generatorPreview.applyChecklist.riskLabel") }}</span>
+          <strong>{{ checklistRiskTitle }}</strong>
+          <p>{{ checklistRiskDescription }}</p>
+        </div>
+      </div>
       <h4>{{ t("app.generatorPreview.confirmationChecklistTitle") }}</h4>
       <ol>
         <li
@@ -694,6 +785,53 @@ const showAnyPrimaryAction = computed(
   background: rgba(36, 87, 214, 0.05);
 }
 
+.generator-checklist-intro {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.generator-checklist-verdict,
+.generator-checklist-risk {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.8rem 0.85rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.generator-checklist-verdict {
+  border: 1px solid rgba(36, 87, 214, 0.16);
+}
+
+.generator-checklist-risk {
+  border: 1px solid rgba(180, 83, 9, 0.16);
+}
+
+.generator-checklist-verdict span,
+.generator-checklist-risk span {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.generator-checklist-verdict strong,
+.generator-checklist-risk strong {
+  color: #0f172a;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.generator-checklist-verdict p,
+.generator-checklist-risk p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
 .generator-progress-message {
   display: grid;
   gap: 0.28rem;
@@ -794,6 +932,10 @@ const showAnyPrimaryAction = computed(
 
   .generator-status-session {
     min-width: 100%;
+  }
+
+  .generator-checklist-intro {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .generator-next-step-card {

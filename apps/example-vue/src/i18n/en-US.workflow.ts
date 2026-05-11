@@ -350,6 +350,46 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Confirmation evidence captured: {count} checklist items, report={reportPath}, snapshot={snapshotPath}, recovery={recoveryStatus}.",
   "app.generatorPreview.confirmationChecklistTitle":
     "Pre-apply confirmation checklist",
+  "app.generatorPreview.applyChecklist.verdictLabel":
+    "Can apply continue now",
+  "app.generatorPreview.applyChecklist.riskLabel":
+    "What to watch before continuing",
+  "app.generatorPreview.applyChecklist.idleTitle":
+    "This run is not in the pre-apply checkpoint yet",
+  "app.generatorPreview.applyChecklist.idleDescription":
+    "Finish review and state progression first before this area becomes a real apply decision.",
+  "app.generatorPreview.applyChecklist.pendingTitle":
+    "Do not apply yet. Finish the checklist first",
+  "app.generatorPreview.applyChecklist.pendingDescription":
+    "This screen answers whether the run is truly ready to continue. Apply only comes after the checklist is complete.",
+  "app.generatorPreview.applyChecklist.notReadyTitle":
+    "This result is still not ready for apply",
+  "app.generatorPreview.applyChecklist.notReadyDescription":
+    "Some conditions are still missing. Clear the blockers, finish the checklist, or wait for the status to update before applying.",
+  "app.generatorPreview.applyChecklist.readyTitle":
+    "This result can now continue to staging apply",
+  "app.generatorPreview.applyChecklist.readyDescription":
+    "Review and confirmation are complete. The only remaining decision is whether to write the current result to staging.",
+  "app.generatorPreview.applyChecklist.blockedTitle":
+    "Do not apply yet. Resolve blockers first",
+  "app.generatorPreview.applyChecklist.blockedDescription":
+    "Blocked files should always send the flow back to conflict handling before apply is considered again.",
+  "app.generatorPreview.applyChecklist.riskIdleTitle":
+    "There is no apply risk to resolve yet",
+  "app.generatorPreview.applyChecklist.riskIdleDescription":
+    "This is not the apply checkpoint yet, so no extra apply decision is needed here.",
+  "app.generatorPreview.applyChecklist.riskConfirmTitle":
+    "Confirm the scope, not every technical detail again",
+  "app.generatorPreview.applyChecklist.riskConfirmDescription":
+    "Focus on file actions, target environment, SQL handling, and permission impact instead of rereading every evidence panel.",
+  "app.generatorPreview.applyChecklist.riskApplyTitle":
+    "Continuing now will write to staging",
+  "app.generatorPreview.applyChecklist.riskApplyDescription":
+    "Once you continue, the current result will be written to staging. If the evidence looks stale, regenerate first.",
+  "app.generatorPreview.applyChecklist.riskBlockedTitle":
+    "Apply is riskiest while blockers still exist",
+  "app.generatorPreview.applyChecklist.riskBlockedDescription":
+    "Pushing forward with unresolved conflicts is the fastest way to carry stale judgment or bad overwrites into staging.",
   "app.generatorPreview.checklist.fileActions":
     "File actions: {total} artifacts, {changed} changed; create {create}, overwrite {overwrite}, skip {skip}, block {block}.",
   "app.generatorPreview.checklist.fileActionsMissing":

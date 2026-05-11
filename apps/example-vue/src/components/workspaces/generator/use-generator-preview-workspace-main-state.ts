@@ -171,9 +171,15 @@ export const useGeneratorPreviewWorkspaceMainState = (
       props.applyEvidence !== null,
   )
   const showFileTools = computed(
-    () => props.files.length > 0 && hasCurrentResult.value,
+    () =>
+      props.files.length > 0 &&
+      hasCurrentResult.value &&
+      !showConfirmAction.value &&
+      !showApplyAction.value,
   )
-  const showFileList = computed(() => hasCurrentResult.value)
+  const showFileList = computed(
+    () => hasCurrentResult.value && !showConfirmAction.value && !showApplyAction.value,
+  )
   const blockedFiles = computed(() =>
     props.files.filter((file) => file.plannedAction === "block"),
   )

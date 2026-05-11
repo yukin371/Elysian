@@ -323,6 +323,35 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.confirmationEvidenceDetailed":
     "已记录确认凭据：{count} 条清单，report={reportPath}，snapshot={snapshotPath}，恢复状态={recoveryStatus}。",
   "app.generatorPreview.confirmationChecklistTitle": "应用前确认清单",
+  "app.generatorPreview.applyChecklist.verdictLabel": "当前是否可继续 apply",
+  "app.generatorPreview.applyChecklist.riskLabel": "继续前要注意",
+  "app.generatorPreview.applyChecklist.idleTitle": "当前还没有进入 apply 前确认",
+  "app.generatorPreview.applyChecklist.idleDescription":
+    "先完成审核与状态推进，这里才会进入真正的 apply 前判断。",
+  "app.generatorPreview.applyChecklist.pendingTitle": "现在还不能直接 apply，先完成确认清单",
+  "app.generatorPreview.applyChecklist.pendingDescription":
+    "这一屏先回答“是否已经确认到可以继续”。只有清单完成后，才进入最终 apply。",
+  "app.generatorPreview.applyChecklist.notReadyTitle": "当前还不适合 apply",
+  "app.generatorPreview.applyChecklist.notReadyDescription":
+    "还有条件没有满足，先补齐阻塞项、确认项或状态更新，再决定是否继续 apply。",
+  "app.generatorPreview.applyChecklist.readyTitle": "当前可以继续 apply 到 staging",
+  "app.generatorPreview.applyChecklist.readyDescription":
+    "审核与确认已经完成，接下来只剩最后一次人工确认是否把当前结果写入 staging。",
+  "app.generatorPreview.applyChecklist.blockedTitle": "当前不能继续 apply，先回到阻塞处理",
+  "app.generatorPreview.applyChecklist.blockedDescription":
+    "存在阻塞文件时，不应继续 apply；先处理冲突，再回来看确认清单。",
+  "app.generatorPreview.applyChecklist.riskIdleTitle": "还没有 apply 风险需要处理",
+  "app.generatorPreview.applyChecklist.riskIdleDescription":
+    "当前阶段还不是 apply 前确认，不需要在这里做额外判断。",
+  "app.generatorPreview.applyChecklist.riskConfirmTitle": "确认的是范围，不是技术细节全文",
+  "app.generatorPreview.applyChecklist.riskConfirmDescription":
+    "这一步重点是确认文件动作、目标环境、SQL 处理方式和权限影响，不必重新通读所有证据。",
+  "app.generatorPreview.applyChecklist.riskApplyTitle": "继续后会真正写入 staging",
+  "app.generatorPreview.applyChecklist.riskApplyDescription":
+    "一旦继续，当前结果会正式落到 staging；如果你怀疑结果过期，更安全的动作是先重新生成。",
+  "app.generatorPreview.applyChecklist.riskBlockedTitle": "阻塞未清时继续 apply 风险最高",
+  "app.generatorPreview.applyChecklist.riskBlockedDescription":
+    "如果在冲突未清的情况下强行继续，最容易把过期判断或错误覆盖带进 staging。",
   "app.generatorPreview.checklist.fileActions":
     "文件动作：共 {total} 个产物，{changed} 个有变更；新增 {create}、覆盖 {overwrite}、跳过 {skip}、阻塞 {block}。",
   "app.generatorPreview.checklist.fileActionsMissing":
