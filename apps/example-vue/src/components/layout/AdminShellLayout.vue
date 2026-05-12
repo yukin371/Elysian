@@ -109,7 +109,8 @@ const navigateGeneratorPreviewFileSelection = (delta: -1 | 1) => {
   }
 
   const selectedFilePath =
-    typeof props.workspaceMainProps.selectedGeneratorPreviewFilePath === "string"
+    typeof props.workspaceMainProps.selectedGeneratorPreviewFilePath ===
+    "string"
       ? props.workspaceMainProps.selectedGeneratorPreviewFilePath
       : null
   const currentIndex = selectedFilePath
@@ -209,13 +210,7 @@ useWorkbenchShortcuts({
   onNavigateDown: () => {
     navigateGeneratorPreviewFileSelection(1)
   },
-  onEdit: () => {
-    // TODO: trigger edit on selected row
-  },
   onCreate: openContextPanel,
-  onDelete: () => {
-    // TODO: trigger delete on selected row
-  },
 })
 </script>
 

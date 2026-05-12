@@ -200,7 +200,7 @@ export const useGeneratorPreviewWorkspace = (
 
   const manualSchemaDraftErrorSuggestion = computed(() =>
     selectedInputMode.value === "manual-schema-json"
-      ? manualSchemaDraftParsed.value.errorSuggestion
+      ? (manualSchemaDraftParsed.value.errorSuggestion ?? null)
       : null,
   )
 

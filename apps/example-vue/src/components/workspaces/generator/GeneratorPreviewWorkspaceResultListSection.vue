@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue"
 
-import { Input as TInput } from "tdesign-vue-next/es/input"
+import type { Input as TInput } from "tdesign-vue-next/es/input"
 
 import GeneratorPreviewWorkspaceBlockedFiles from "./GeneratorPreviewWorkspaceBlockedFiles.vue"
 import GeneratorPreviewWorkspaceFileList from "./GeneratorPreviewWorkspaceFileList.vue"

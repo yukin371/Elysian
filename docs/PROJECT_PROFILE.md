@@ -1,20 +1,21 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-05-11`
+更新时间：`2026-05-12`
 
 ## 项目类型
 
 - 绿地仓库
-- 目标形态是企业级快速开发平台
-- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾、`Phase 5 / P5A` 归档与 `Phase 6B` 企业增强收口；`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 完成阶段出口复验；`Phase 7 / P7A Round-1` 的最小 workflow 闭环与 `Round-2` 的验证补齐/最小 `claim` 收口均已落地，当前 workflow 阶段结果保持在“已验证的简化运行态”，不默认扩展为通用 BPM 能力；当前优先级已转向 generator 自举闭环，企业后台基础能力作为首批验证对象继续完善，而不是作为主叙事继续外扩
+- 目标形态是可发布的中小项目快速开发平台
+- 当前阶段已完成 `Phase 2` 认证底座归档、`Phase 3` 标准企业模块闭环（含 `3A/3B/3C` 后端模块与 `3.10/3.11/3.12` Vue 企业预设首版）、`Phase 4` 预验证与 `P4D/P4E` 收口、`Phase 6A Round-2` 生产基线增强收尾、`Phase 5 / P5A` 归档与 `Phase 6B` 企业增强收口；`P6B3` 的真实 PostgreSQL 验证、`ADR-0009`、CI 接入与 tenant 稳定性观察收尾链路已完成，并已在 `2026-04-25` 通过本地 `bun run check` 与 `bun run e2e:tenant:full` 完成阶段出口复验；`Phase 7 / P7A Round-1` 的最小 workflow 闭环与 `Round-2` 的验证补齐/最小 `claim` 收口均已落地，当前 workflow 阶段结果保持在“已验证的简化运行态”，不默认扩展为通用 BPM 能力；当前优先级已转向首个可发布参考发行版收口，企业后台基础能力作为首批验证对象继续完善，而不是作为主叙事继续外扩
 
 ## 已确认事实
 
 - 仓库已从纯文档阶段进入可执行工程骨架持续扩展阶段，当前已具备稳定的 CI、E2E 与多租户治理增量能力。
 - 根目录已存在 [README.md](/E:/Github/Elysian/README.md)。
 - 已存在的设计文档包括产品定义、架构草案、AI 与代码生成策略、MVP 路线图、调研与技术决策。
-- 仓库目标是以 `Elysia` 为后端内核，以前端可插拔为原则，支持企业级快速开发与 AI 辅助。
+- 仓库目标是以 `Elysia` 为后端内核，以前端可插拔为原则，支持中小项目快速开发与 AI 辅助。
 - 前端当前不绑定单一实现；当前 C 端界面方向已明确为 `Vue` 第一优先级、`uniapp` 第二优先级设计储备，`React` 暂不进入当前 C 端主线。
+- 当前对外首发形态已固定为 `apps/example-vue` 参考发行版，`apps/example-uniapp` 与 `packages/frontend-react` 继续作为并行研发轨道。
 - 仓库已建立 `Bun workspaces` 工作区。
 - 仓库根目录已提供 `docker-compose.yml`，可一键拉起 `server + PostgreSQL` 本地容器栈（含 migrate + seed）。
 - `apps/server` 已提供最小生产镜像定义文件 `apps/server/Dockerfile`，当前首个正式生产平台基线已固定为“单 Linux 主机 + Docker Engine + 容器镜像优先”；自动回滚、镜像仓库与监控平台仍未定稿。
@@ -49,7 +50,7 @@
 - 服务端已启用 CORS，可直接支撑本地 `dev:server` + `dev:vue` 双端口开发；当前也已补 `dev:uniapp` / `build:uniapp` 骨架脚本，供 `uniapp` H5 空壳验证使用。
 - 服务端已支持基于环境变量的最小 CORS 白名单和内存限流策略（生产环境默认启用限流）。
 - 限流开启时服务端会返回 `x-ratelimit-limit`、`x-ratelimit-remaining`、`x-ratelimit-reset` 响应头，并在超限时保留 `retry-after`。
-- 已存在前端示例应用：`apps/example-vue`（主线企业后台验证）与 `apps/example-uniapp`（首轮 C 端骨架验证）。
+- 已存在前端应用：`apps/example-vue`（首个参考发行版与主线企业后台验证）与 `apps/example-uniapp`（首轮 C 端骨架验证与设计储备）。
 - 已存在共享包：`packages/core`、`packages/schema`、`packages/persistence`、`packages/generator`、`packages/frontend-vue`、`packages/frontend-react`、`packages/ui-core`、`packages/ui-enterprise-vue`。
 - persistence 路线已确定为 `PostgreSQL + Drizzle ORM + Bun SQL + drizzle-kit`。
 - `packages/persistence` 已定义首个真实表：`customers`。
@@ -75,7 +76,7 @@
 - `packages/persistence` 的 `bun run db:migrate` 已可正常执行已提交的 SQL migrations。
 - `packages/persistence` 已支持 `bun run db:tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>` 初始化非默认租户。
 - `packages/persistence` 已补 workflow repository 独立测试，当前通过 `PGlite` 嵌入式 PostgreSQL 兼容底座覆盖 definition 版本唯一性、next version 计算、todo/done 查询边界、实例任务排序与取消语义；tenant RLS 仍继续由 server 测试与真实 PostgreSQL E2E 兜底。
-- `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试，当前优先继续收口 preview/report、apply / merge、前端 artifact 与回放证据链路。
+- `packages/generator` 已支持为 `customer` 渲染 server 与页面模板，并带基础测试，当前优先继续收口 preview/report、安全 staging apply、前端 artifact 与正式模块人工接线证据链路。
 - `packages/generator` 已具备最小 CLI，可将已注册 schema 落盘到目标目录。
 - `packages/generator` 已新增 preview/report 能力，可在不写入目标目录的前提下输出文件动作预览、内容快照报告与 review-only SQL preview。
 - `packages/generator` 已新增 `DatabaseChangePlan` 中性数据库变更描述，可从 `ModuleSchema` 产出 reviewable create-table 计划，继续保持正式 migration owner 在 `packages/persistence`。
@@ -121,9 +122,9 @@
 - `packages/frontend-vue` 已提供最小 Vue 预设层，并包含导航构建、权限 gate helper 与供 enterprise preset 消费的页面协议映射。
 - `packages/ui-core` 已承接菜单树、CRUD 页面契约与权限相关 UI 协议。
 - `packages/ui-enterprise-vue` 已落地 `ElyShell`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyCrudWorkspace`、`ElyPreviewSkeleton` 等企业预设组件；当前运行时底座已完成 `TDesign Vue Next` 收口，并已具备 tabs、标准列表页、标准表单页与只读详情视图。
-- `2026-04-26` 已完成本地自动化回归整理：`bun run check`、workflow 定向测试与 `bun run build:vue` 通过；当前仍待补真实环境 E2E 与浏览器手工回归。
+- `2026-05-12` 首个参考发行版已完成本地发布门槛复验：`bun run check`、`bun run build:vue`、`bun run server:image:verify`、`bun run e2e:smoke:full`、`bun run e2e:tenant:full` 与 `bun run e2e:generator:cli` 均已通过；真实环境 go-live 仍需环境 owner 补齐 release tag / PR、migration、backup / recovery、proxy / TLS、值守与目标环境冒烟输入。
 - `packages/persistence` 的 `db:seed` 已包含默认 workflow definitions 样本（`expense-approval v1/v2`、`expense-approval-condition v1`），默认开发环境无需前端 override 也可验证 workflow 版本历史；`apps/example-vue` 的 override seam 当前只用于稳定复现特定测试样本。
-- `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace；当前定位仍是“企业预设 + customer 单模块”的最小交互验证页，不视为完整多模块后台。
+- `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace；当前定位已从“最小交互验证页”转为首个参考发行版的前端 owner，不再只是单模块验证。
 - `apps/example-vue` 的 customer workspace 已从“前端拉全量后本地筛选”收敛到服务端列表协议，当前 `GET /customers` 已承接 query、分页与排序参数，并返回 page metadata 供工作区 footer 分页交互消费。
 - `apps/example-vue` 的 generator preview workspace 已接入 `generator-session` 后端运行态，当前由 preview session DTO 驱动文件计划、差异摘要、SQL preview 与 staging apply 证据；schema 选项仍保持在前端注册表内解析。
 - `apps/example-vue` 的 generator preview workspace 当前已补简化 schema 草稿输入、模板快速填充、结构化校验反馈与步骤引导流，降低首次使用门槛。
@@ -212,8 +213,8 @@
 - 通知模块当前只验证了站内通知与已读未读语义，尚未进入邮件、短信、WebSocket 或消息队列投递。
 - workflow 模块当前只验证了线性审批、最小动作闭环与白名单条件分支；独立权限点与更复杂任务语义仍未进入实现。
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。
-- generator 的 apply / merge 机制仍未定稿，二次生成进入正式模块目录的边界还不稳定。
-- 当前已有最小验证命令，但仍缺少自动化 E2E 等更完整的工程验证链路；generator 自举闭环的完整可回放验证仍是当前重点收口方向。
+- generator 的安全 staging apply 已可用；二次生成进入正式模块目录仍以 `--target module` 集成桩和人工确认清单为边界，正式 migration / menu / permission / registry 合入不得自动化冒进。
+- 当前参考发行版的本地自动化验证链路已包含 `check`、Vue 构建、server 镜像烟测、smoke E2E、tenant E2E 与 generator CLI 回归；后续风险主要转向真实 go-live 环境输入、生产级对象存储、通知投递与更复杂 workflow 语义。
 
 ## 当前可用验证
 

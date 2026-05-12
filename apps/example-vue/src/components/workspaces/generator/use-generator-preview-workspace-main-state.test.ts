@@ -1,11 +1,13 @@
 import { describe, expect, test } from "bun:test"
 
+import { toGeneratorPreviewFileCard } from "../../../lib/generator-preview-workspace"
+import type { GeneratorPreviewReportFile } from "../../../lib/platform-api/workflow"
+import type { GeneratorPreviewSqlProposalHandoff } from "./types"
 import {
   type GeneratorPreviewWorkspaceMainEmit,
   type GeneratorPreviewWorkspaceMainProps,
   useGeneratorPreviewWorkspaceMainState,
 } from "./use-generator-preview-workspace-main-state"
-import type { GeneratorPreviewSqlProposalHandoff } from "./types"
 
 const t = (key: string, params?: Record<string, unknown>) =>
   params ? `${key} ${JSON.stringify(params)}` : key
@@ -41,6 +43,23 @@ const createSqlProposalHandoff = (
   unsupportedReason: null,
   ...overrides,
 })
+
+const createFileCard = (overrides: Partial<GeneratorPreviewReportFile> = {}) =>
+  toGeneratorPreviewFileCard({
+    absolutePath:
+      "E:/Github/Elysian/apps/example-vue/src/routes/supplier/index.ts",
+    contents: "export const supplier = true\n",
+    currentContents: null,
+    exists: false,
+    hasChanges: true,
+    isManaged: true,
+    mergeStrategy: "create",
+    path: "apps/example-vue/src/routes/supplier/index.ts",
+    plannedAction: "create",
+    plannedReason: "new file",
+    reason: "new file",
+    ...overrides,
+  })
 
 const createProps = (
   overrides: Partial<GeneratorPreviewWorkspaceMainProps> = {},
@@ -82,12 +101,12 @@ const createProps = (
 describe("useGeneratorPreviewWorkspaceMainState review actions", () => {
   test("requires a rejection reason before submitting reject", () => {
     const emitted: Array<{ event: string; value?: unknown }> = []
-    const state = useGeneratorPreviewWorkspaceMainState(
-      createProps(),
-      ((event: string, value?: unknown) => {
-        emitted.push({ event, value })
-      }) as GeneratorPreviewWorkspaceMainEmit,
-    )
+    const state = useGeneratorPreviewWorkspaceMainState(createProps(), ((
+      event: string,
+      value?: unknown,
+    ) => {
+      emitted.push({ event, value })
+    }) as GeneratorPreviewWorkspaceMainEmit)
 
     state.handleReviewPreview("reject")
 
@@ -102,12 +121,12 @@ describe("useGeneratorPreviewWorkspaceMainState review actions", () => {
 
   test("submits reject after a reason is provided", () => {
     const emitted: Array<{ event: string; value?: unknown }> = []
-    const state = useGeneratorPreviewWorkspaceMainState(
-      createProps(),
-      ((event: string, value?: unknown) => {
-        emitted.push({ event, value })
-      }) as GeneratorPreviewWorkspaceMainEmit,
-    )
+    const state = useGeneratorPreviewWorkspaceMainState(createProps(), ((
+      event: string,
+      value?: unknown,
+    ) => {
+      emitted.push({ event, value })
+    }) as GeneratorPreviewWorkspaceMainEmit)
 
     state.handleReviewPreview("reject")
     state.handleReviewCommentInput("字段语义不清，需要补状态字段。")
@@ -172,27 +191,33 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
     const state = useGeneratorPreviewWorkspaceMainState(
       createProps({
         files: [
-          {
+          createFileCard({
             path: "apps/example-vue/src/routes/supplier/index.ts",
             plannedAction: "overwrite",
-            changed: true,
             mergeStrategy: "overwrite",
             reason: "managed file",
-          },
-          {
+            plannedReason: "managed file",
+            exists: true,
+            currentContents: "export const supplier = false\n",
+          }),
+          createFileCard({
             path: "apps/example-vue/src/routes/supplier/detail.ts",
             plannedAction: "block",
-            changed: true,
             mergeStrategy: "fail",
             reason: "manual edits found",
-          },
-          {
+            plannedReason: "manual edits found",
+            exists: true,
+            currentContents: "export const supplierDetail = false\n",
+          }),
+          createFileCard({
             path: "apps/example-vue/src/routes/supplier/list.ts",
             plannedAction: "block",
-            changed: true,
             mergeStrategy: "fail",
             reason: "manual edits found",
-          },
+            plannedReason: "manual edits found",
+            exists: true,
+            currentContents: "export const supplierList = false\n",
+          }),
         ],
         hasBlockingConflicts: true,
       }),
@@ -243,13 +268,12 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
     const state = useGeneratorPreviewWorkspaceMainState(
       createProps({
         files: [
-          {
+          createFileCard({
             path: "apps/example-vue/src/routes/supplier/index.ts",
             plannedAction: "create",
-            changed: true,
             mergeStrategy: "create",
             reason: "new file",
-          },
+          }),
         ],
         loading: true,
       }),
@@ -283,13 +307,15 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
         currentStep: "apply",
         errorMessage: "Generator session stale because target files drifted",
         files: [
-          {
+          createFileCard({
             path: "apps/example-vue/src/routes/supplier/index.ts",
             plannedAction: "overwrite",
-            changed: true,
             mergeStrategy: "overwrite",
             reason: "managed file",
-          },
+            plannedReason: "managed file",
+            exists: true,
+            currentContents: "export const supplier = false\n",
+          }),
         ],
         sessionStatus: "ready",
       }),
@@ -309,13 +335,15 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
       createProps({
         errorMessage: "blocking conflict prevents apply",
         files: [
-          {
+          createFileCard({
             path: "apps/example-vue/src/routes/supplier/detail.ts",
             plannedAction: "block",
-            changed: true,
             mergeStrategy: "fail",
             reason: "manual edits found",
-          },
+            plannedReason: "manual edits found",
+            exists: true,
+            currentContents: "export const supplierDetail = false\n",
+          }),
         ],
         hasBlockingConflicts: true,
       }),
@@ -442,7 +470,7 @@ describe("useGeneratorPreviewWorkspaceMainState draft summary", () => {
     expect(state.draftSummaryFacts.value).toEqual([
       {
         label: "app.generatorPreview.inputModeLabel",
-        value: "app.generatorPreview.draftSource.json",
+        value: "app.generatorPreview.draftSource.template",
       },
       {
         label: "app.generatorPreview.input.schemaFieldCountLabel",

@@ -96,8 +96,7 @@ const reviewFiles = computed<ReviewFileCard[]>(() => {
       },
       {
         name: "supplier.frontend.generated.ts",
-        path:
-          "apps/example-vue/src/app/workspace-registry/generated/supplier.frontend.generated.ts",
+        path: "apps/example-vue/src/app/workspace-registry/generated/supplier.frontend.generated.ts",
         action: "create",
         reason: props.t("app.demoHub.review.reason.create"),
         diff: props.t("app.demoHub.review.diff.create"),
@@ -110,8 +109,7 @@ const reviewFiles = computed<ReviewFileCard[]>(() => {
     return [
       {
         name: "supplier.frontend.generated.ts",
-        path:
-          "apps/example-vue/src/app/workspace-registry/generated/supplier.frontend.generated.ts",
+        path: "apps/example-vue/src/app/workspace-registry/generated/supplier.frontend.generated.ts",
         action: "create",
         reason: props.t("app.demoHub.review.reason.create"),
         diff: props.t("app.demoHub.review.diff.create"),
@@ -356,8 +354,9 @@ const coverageItems = computed<CoverageItem[]>(() => [
 
 const currentPrototypeCard = computed(
   () =>
-    prototypeCards.value.find((card) => card.key === activePrototypeKey.value) ??
-    prototypeCards.value[0],
+    prototypeCards.value.find(
+      (card) => card.key === activePrototypeKey.value,
+    ) ?? prototypeCards.value[0],
 )
 
 const coverageCounts = computed(() => ({

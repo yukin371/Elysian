@@ -1,41 +1,42 @@
 # roadmap
 
-更新时间：`2026-05-11`（generator 自举闭环优先，后台基础能力作为首批验证对象）
+更新时间：`2026-05-12`（首个可发布参考发行版优先，generator 与后台能力并行收口）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A` 的最小 workflow 闭环已在 `2026-04-26` 完成 `Round-2` 收口，当前按“已完成的能力基线”处理，不继续外扩到 `transfer / delegate`。当前即时优先级切回“generator 自举闭环优先”：先把生成器从预览、报告、apply / merge 边界、前端 artifact 到正式模块落地的链路收口，优先补齐可重复生成、可回放、可审计的自举能力；企业后台基础功能作为首批验证对象继续完善，但不再作为主叙事。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A` 的最小 workflow 闭环已在 `2026-04-26` 完成 `Round-2` 收口，当前按“已完成的能力基线”处理，不继续外扩到 `transfer / delegate`。当前即时优先级切回“首个可发布参考发行版优先”：先把 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator` 收口成能直接开新项目、能上线、能维护的 starter；generator 自举、企业后台基础能力与平台能力继续并行推进，但要服务首发而不是抢占首发表述。
 
-### Current Mainline: generator 自举闭环优先 🚧
+### Current Mainline: reference starter release 优先 🚧
 
-- 已决定：当前主线优先收口 generator 的自举闭环，目标是把 schema -> preview/report -> apply / merge -> frontend artifact -> 正式模块落地这条链路做稳
-- 入口依据：代码生成已经不只是辅助工具，而是平台最底层的使用方式之一；优先把 generator 做成可重复、可审计、可回放的主能力
-- 当前范围：优先补齐 generator 产物进入正式模块目录的边界、冲突解释、差异回放、人工确认清单与前端 artifact 消费链路，保证新 schema 能稳定生成并纳入主工程
-- 当前前端试稿结论：`generator preview` 的页面结构优化不再直接在正式 workspace 上试错；起稿、结果判断、apply 前确认三段主流程先收口到 `apps/example-vue` 的 `demohub` 原型页，再决定哪些稳定结论迁回正式页
-- 当前约束：不把 generator 扩成通用低代码平台，不新增第二套 shared owner，不把后台日常功能写成主线叙事
-- 已具备基础：后台常用模块、workflow 最小闭环、generator-session、SQL preview 与标准 CRUD 前端 surface 已可作为验证对象继续打磨
+- 已决定：当前主线优先收口首个参考发行版，目标是把 starter 的安装、启动、登录、常用模块、生成器接入和 go-live 入口做成一条能直接交付的新项目路径
+- 入口依据：外部用户首先买单的是“能不能快速开新项目并上线”，不是“平台内部能力有多全”；参考发行版必须先可发布，再谈平台外扩
+- 当前范围：优先补齐 `apps/example-vue` 的参考发行版体验、生成器接入边界、发布清单、回滚路径、文档入口与验证命令，让新项目能按仓库标准被复制和交付
+- 当前前端试稿结论：`generator preview` 的页面结构优化仍先落在 `apps/example-vue` 的 `demohub` 原型页，再回流到正式参考发行版工作区，避免把试错直接写死在首发 owner 中
+- 当前约束：不把首发做成多前端生态，不新增第二套 starter 真相，不把高阶 Studio、复杂 BPM、React/uniapp 首发化写进首发门槛
+- 已具备基础：后台常用模块、workflow 最小闭环、generator-session、SQL preview、标准 CRUD 前端 surface 与 go-live / release checklist 已可作为首发验证对象继续打磨
 - 已推进收口：generator 当前已补 `text/json` 字段支持、simplified schema 展开、`validate-schema` 校验入口、`--target module`、`*.persistence.ts` 模板，以及 Studio 步骤引导流与模板化 schema 输入
-- 当前结论：先把生成链路做成平台级主能力，再用企业后台常用模块持续验证生成结果的可用性、可维护性与可扩展性
+- 当前结论：先把参考发行版做成可发布、可复制、可验证的新项目模板，再把 generator 自举和企业后台体验作为持续增强轨道
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
+- 首发计划：[2026-05-12-reference-starter-release-plan.md](./plans/2026-05-12-reference-starter-release-plan.md)
 
-### 1. 企业后台基础功能对齐 🚧
+### 1. 参考发行版基础功能对齐 🚧
 
-- 当前目标：把仓库现有系统能力收口成“企业后台日常可用”的基础包，作为生成器自举后的第一批稳定验证对象，优先解决模块闭环覆盖率不足，而不是继续拔高平台能力天花板
+- 当前目标：把仓库现有系统能力收口成“可发布参考发行版”的基础包，作为首发验证对象，优先解决模块闭环覆盖率、发布可复制性和开箱可用性，而不是继续拔高平台能力天花板
 - 第一优先级：继续收口 `apps/example-vue` 已有系统工作区，优先保证 `users / roles / menus / departments / dictionaries / settings / operation-logs / notifications / tenants` 具备真实路由切换、列表/详情、创建/编辑与必要状态动作
 - 第一优先级：继续收口 `users / roles / menus / departments / posts / dictionaries / settings / tenants / operation-logs / notifications / files` 的后台日常体验；登录安全、登录日志显式查询、`岗位（post）`、在线会话治理、第一轮高频导出、字典条目导出入口、操作日志当前筛选导出、通知批量已读与文件当前筛选导出/批量删除已完成最小闭环
-- 第二优先级：C 端界面扩展方向先固定为 `uniapp`，但当前只保留设计储备，不提前进入实现
+- 第二优先级：C 端界面扩展方向先固定为 `uniapp`，但当前只保留设计储备，不提前进入首发实现
 - 第二优先级：在不改变 owner 的前提下，继续把通知、操作日志、租户与数据权限体验向后台常用形态收口
-- 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心
+- 当前不优先：不继续扩 `workflow transfer / delegate`，不先做独立 SQL 工作区，不先做更重的 Studio 报告中心，不把多前端首发化
 - 前端本地收口当前结论：`M5 / provide-inject`、共享样式下沉与 `M6A / 类型网关` 已完成当前主线收口；后续不再继续扩大 `apps/example-vue` 的手写标准 CRUD 治理面
 - generator 契约已完成：`buildWorkspaceRegistration` 已接入 `packages/frontend-vue`，13 个标准 CRUD 模块注册已从手写切换为 schema 驱动；generator artifact 已包含 kind / permissions / i18nKeys，可被前端注册中心直接消费
 - generator Phase 3 当前结论：标准 CRUD `main/panel` 页面骨架、workspace state 注入 helper 与 generated surface 已回收到 generator 模板并接入 `apps/example-vue` 真实消费；新增标准 CRUD 模块不应再回退为手写 main/panel 大体结构
 - generator Phase 3 已推进首刀：公共 `WORKSPACE_STATE_KEY` / `FrontendWorkspaceStateContext` 已下沉到 `packages/frontend-vue`，标准 CRUD 生成模板已开始对齐 shell provide + workspace inject 契约，减少页面级状态 props 面
 - generator Phase 3 已进入真实消费：`apps/example-vue/src/modules/*` 已开始提交标准 CRUD surface 生成产物，shell main / secondary 已消费 generated component map，标准 CRUD 页面骨架不再只停留在模板/测试层
 - generator artifact 契约继续推进：frontend artifact 已补 `surfaceKind / panelComponentPath / workspaceComponentPath`，`packages/frontend-vue` 已提供 artifact -> workspace registration helper；`apps/example-vue` 的 `business/system` registry 已切到 app-local generated artifact 输入，开始脱离 schema 直连
-- 下一方向：主线从“继续手写收口前端脊柱”切回“企业后台基础功能对齐剩余项”，优先打磨 `tenants / operation-logs / notifications / files` 的后台日常交互闭环，并明确 `WP-6` 导入链路是否进入当前主线
+- 下一方向：主线从“继续手写收口前端脊柱”切回“参考发行版交付闭环”，优先打磨 `tenants / operation-logs / notifications / files` 的后台日常交互闭环，并明确 `WP-6` 导入链路是否进入当前首发主线
 - persistence 性能治理入口：先按 `data-scope.ts` 与 `auth.ts` 的高风险查询处理，再进入分页/模糊搜索统一治理
 
 ### 2. Phase 2: Auth Foundation ✅ 归档
@@ -173,7 +174,7 @@
 - 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已新增前期文档草案：[2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md) 与 [2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md)，用于在当前 `Phase 6B` runbook 收尾后评估 `Arco -> TDesign` 迁移窗口
 - 已推进：`packages/ui-enterprise-vue` 与 `apps/example-vue` 已完成当前 POC 范围内的 `TDesign Vue Next` 收口，`ElyShell / ElyTable / ElyQueryBar / ElyForm / ElyCrudWorkspace / ElyPreviewSkeleton` 已不再依赖 `Arco` runtime；示例页默认语言已切到 `zh-CN`，并保留 `en-US` 回退
-- 已完成：`2026-04-26` 自动化回归整理，已补 `P7A Round-1` 与 `TDesign` 迁移的统一回归收口文档，并明确当前仍待真实环境与手工 UI 验证
+- 已完成：`2026-05-12` 首个参考发行版本地发布门槛复验已通过；`check`、`build:vue`、`server:image:verify`、`e2e:smoke:full`、`e2e:tenant:full` 与 `e2e:generator:cli` 均已完成当前候选工作区复验；正式 PR / tag 前需在最终提交后重新锁定 commit
 - 已完成阶段出口复验：`2026-04-25` 本地 `bun run check` 与 `bun run e2e:tenant:full` 通过，可将 `Phase 6B` 作为已归档阶段处理
 - 归档后残留运营收尾：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
 - 已完成最小执行层自动化：新增 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize`，把既有 tenant migration/release runbook 收敛为 rehearsal report / gate / finalize 三段式入口；这些脚本仅服务发布演练，不代表生产平台命令、owner 边界或发布责任已变更
@@ -318,7 +319,7 @@
 - auth guard / middleware 应以模块级 helper 还是 app 级插件方式挂载
 - `/auth/me` 返回结构是否已经足够稳定到可被更多前端预设层直接消费
 - 第二个实体应优先选 `product` 还是 `order`
-- `generated/` 到正式模块目录的 apply / merge 机制是否需要独立 manifest
+- `--target module` 到正式模块目录的人工接线证据是否需要独立 manifest
 - 本地开发数据库与测试数据库策略是否需要拆分
 - `Arco` 主题 token 与 `ui-core` 页面协议之间的映射粒度应收敛到哪一层
 - 用户管理模块后端闭环是否已经足够稳定到可供角色 / 菜单模块复用

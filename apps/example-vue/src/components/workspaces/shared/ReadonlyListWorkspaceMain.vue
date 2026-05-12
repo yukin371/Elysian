@@ -89,13 +89,13 @@ const resolvedItemCountLabel = computed(() => {
 
 const emptyTitle = computed(() =>
   props.hasActiveFilters
-    ? props.filteredEmptyTitle ?? props.emptyTitle
+    ? (props.filteredEmptyTitle ?? props.emptyTitle)
     : props.emptyTitle,
 )
 
 const emptyDescription = computed(() =>
   props.hasActiveFilters
-    ? props.filteredEmptyDescription ?? props.emptyDescription
+    ? (props.filteredEmptyDescription ?? props.emptyDescription)
     : props.emptyDescription,
 )
 

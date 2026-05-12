@@ -352,11 +352,11 @@ export const useExampleShellMeta = ({
                                     ? t("app.demoHub.tabsHint", {
                                         count: 3,
                                       })
-                                  : isWorkflowDefinitionsWorkspace.value
-                                    ? t("app.workflow.tabsHint", {
-                                        count: workflowDefinitionTotal.value,
-                                      })
-                                    : currentNavigationPath.value,
+                                    : isWorkflowDefinitionsWorkspace.value
+                                      ? t("app.workflow.tabsHint", {
+                                          count: workflowDefinitionTotal.value,
+                                        })
+                                      : currentNavigationPath.value,
     },
   ])
 

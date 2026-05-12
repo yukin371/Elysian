@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 
-import { createSession } from "./use-generator-preview-workspace.test-helpers"
 import { buildGeneratorPreviewRecentSessionOptions } from "./generator-preview-session-presentation"
+import { createSession } from "./use-generator-preview-workspace.test-helpers"
 
 const t = (key: string) => key
 

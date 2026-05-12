@@ -220,7 +220,6 @@ const selectedTotalEdgeCount = computed(
       </div>
     </div>
 
-    <!-- TODO: Migrate workflow detail from TDialog to context panel pattern used by other workspaces. -->
     <TDialog
       :visible="detailDialogOpen"
       :header="

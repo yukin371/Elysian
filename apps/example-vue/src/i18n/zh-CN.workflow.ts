@@ -184,12 +184,14 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.verdict.idleTitle": "当前还没有可继续判断的结果",
   "app.generatorPreview.verdict.idleDescription":
     "先生成一份预览结果，页面才会给出是否可继续审核、确认或 apply 的明确判断。",
-  "app.generatorPreview.verdict.blockedTitle": "当前不能继续推进，先处理阻塞冲突",
+  "app.generatorPreview.verdict.blockedTitle":
+    "当前不能继续推进，先处理阻塞冲突",
   "app.generatorPreview.verdict.blockedDescription":
     "当前还有 {count} 个阻塞文件。先看阻塞原因，再决定是否调整已有文件处理方式或重新生成。",
   "app.generatorPreview.verdict.reviewTitle": "结果已生成，可以先进入审核判断",
   "app.generatorPreview.verdict.confirmTitle": "审核已通过，先完成应用前确认",
-  "app.generatorPreview.verdict.applyTitle": "确认项已齐，可以决定是否应用到 staging",
+  "app.generatorPreview.verdict.applyTitle":
+    "确认项已齐，可以决定是否应用到 staging",
   "app.generatorPreview.verdict.doneTitle": "本次结果已完成应用",
   "app.generatorPreview.progress.generatingTitle": "正在生成预览",
   "app.generatorPreview.progress.regeneratingTitle": "正在重新生成预览",
@@ -325,31 +327,39 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.confirmationChecklistTitle": "应用前确认清单",
   "app.generatorPreview.applyChecklist.verdictLabel": "当前是否可继续 apply",
   "app.generatorPreview.applyChecklist.riskLabel": "继续前要注意",
-  "app.generatorPreview.applyChecklist.idleTitle": "当前还没有进入 apply 前确认",
+  "app.generatorPreview.applyChecklist.idleTitle":
+    "当前还没有进入 apply 前确认",
   "app.generatorPreview.applyChecklist.idleDescription":
     "先完成审核与状态推进，这里才会进入真正的 apply 前判断。",
-  "app.generatorPreview.applyChecklist.pendingTitle": "现在还不能直接 apply，先完成确认清单",
+  "app.generatorPreview.applyChecklist.pendingTitle":
+    "现在还不能直接 apply，先完成确认清单",
   "app.generatorPreview.applyChecklist.pendingDescription":
     "这一屏先回答“是否已经确认到可以继续”。只有清单完成后，才进入最终 apply。",
   "app.generatorPreview.applyChecklist.notReadyTitle": "当前还不适合 apply",
   "app.generatorPreview.applyChecklist.notReadyDescription":
     "还有条件没有满足，先补齐阻塞项、确认项或状态更新，再决定是否继续 apply。",
-  "app.generatorPreview.applyChecklist.readyTitle": "当前可以继续 apply 到 staging",
+  "app.generatorPreview.applyChecklist.readyTitle":
+    "当前可以继续 apply 到 staging",
   "app.generatorPreview.applyChecklist.readyDescription":
     "审核与确认已经完成，接下来只剩最后一次人工确认是否把当前结果写入 staging。",
-  "app.generatorPreview.applyChecklist.blockedTitle": "当前不能继续 apply，先回到阻塞处理",
+  "app.generatorPreview.applyChecklist.blockedTitle":
+    "当前不能继续 apply，先回到阻塞处理",
   "app.generatorPreview.applyChecklist.blockedDescription":
     "存在阻塞文件时，不应继续 apply；先处理冲突，再回来看确认清单。",
-  "app.generatorPreview.applyChecklist.riskIdleTitle": "还没有 apply 风险需要处理",
+  "app.generatorPreview.applyChecklist.riskIdleTitle":
+    "还没有 apply 风险需要处理",
   "app.generatorPreview.applyChecklist.riskIdleDescription":
     "当前阶段还不是 apply 前确认，不需要在这里做额外判断。",
-  "app.generatorPreview.applyChecklist.riskConfirmTitle": "确认的是范围，不是技术细节全文",
+  "app.generatorPreview.applyChecklist.riskConfirmTitle":
+    "确认的是范围，不是技术细节全文",
   "app.generatorPreview.applyChecklist.riskConfirmDescription":
     "这一步重点是确认文件动作、目标环境、SQL 处理方式和权限影响，不必重新通读所有证据。",
-  "app.generatorPreview.applyChecklist.riskApplyTitle": "继续后会真正写入 staging",
+  "app.generatorPreview.applyChecklist.riskApplyTitle":
+    "继续后会真正写入 staging",
   "app.generatorPreview.applyChecklist.riskApplyDescription":
     "一旦继续，当前结果会正式落到 staging；如果你怀疑结果过期，更安全的动作是先重新生成。",
-  "app.generatorPreview.applyChecklist.riskBlockedTitle": "阻塞未清时继续 apply 风险最高",
+  "app.generatorPreview.applyChecklist.riskBlockedTitle":
+    "阻塞未清时继续 apply 风险最高",
   "app.generatorPreview.applyChecklist.riskBlockedDescription":
     "如果在冲突未清的情况下强行继续，最容易把过期判断或错误覆盖带进 staging。",
   "app.generatorPreview.checklist.fileActions":
@@ -449,10 +459,12 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.fileVerdict.idleTitle": "先从结果列表里选中一份文件",
   "app.generatorPreview.fileVerdict.idleDescription":
     "选择一份文件后，这里会先解释它为什么值得优先看，再带你进入差异和源码证据。",
-  "app.generatorPreview.fileVerdict.create.title": "这份文件会作为新增内容写入目标目录",
+  "app.generatorPreview.fileVerdict.create.title":
+    "这份文件会作为新增内容写入目标目录",
   "app.generatorPreview.fileVerdict.create.description":
     "重点确认它是否真的属于这次生成范围，以及默认生成内容是否符合预期。",
-  "app.generatorPreview.fileVerdict.overwrite.title": "这份文件计划覆盖现有内容",
+  "app.generatorPreview.fileVerdict.overwrite.title":
+    "这份文件计划覆盖现有内容",
   "app.generatorPreview.fileVerdict.overwrite.description":
     "优先确认覆盖是否安全，尤其要看现有内容是否包含不能被自动替换的人工修改。",
   "app.generatorPreview.fileVerdict.skip.title": "这份文件当前不会被改动",
@@ -526,7 +538,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.input.manualSchemaDraftSuggestionEnum":
     "下一步建议：给 enum 字段补 `options` 数组，或填写 `dictionaryTypeCode`。",
   "app.generatorPreview.input.manualSchemaDraftSuggestionId":
-    "下一步建议：补一个 `id` 字段，并设置 `kind: \"id\"`、`required: true`。",
+    '下一步建议：补一个 `id` 字段，并设置 `kind: "id"`、`required: true`。',
   "app.generatorPreview.input.manualSchemaDraftSuggestionKind":
     "下一步建议：把字段类型改成支持的 kind，例如 `string`、`number`、`enum` 或 `datetime`。",
   "app.generatorPreview.conflictStrategy.skip": "跳过已有文件",
@@ -600,11 +612,16 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "缺项或过期时主动作回到结果检查或重新生成，不默认继续 apply。",
   "app.demoHub.coverage.expected.hashReload":
     "直接刷新或输入 hash 时，应稳定渲染目标 workspace，不残留上一个工作区内容。",
-  "app.demoHub.coverage.owner.start": "正式 owner：DraftStartPanel / OptionsSection",
-  "app.demoHub.coverage.owner.review": "正式 owner：CurrentResultPanel / ResultListSection",
-  "app.demoHub.coverage.owner.detail": "正式 owner：WorkspacePanel 文件详情组合区",
-  "app.demoHub.coverage.owner.apply": "正式 owner：CurrentResultPanel 确认清单区",
-  "app.demoHub.coverage.owner.shell": "正式 owner：Shell route/workspace render 同步",
+  "app.demoHub.coverage.owner.start":
+    "正式 owner：DraftStartPanel / OptionsSection",
+  "app.demoHub.coverage.owner.review":
+    "正式 owner：CurrentResultPanel / ResultListSection",
+  "app.demoHub.coverage.owner.detail":
+    "正式 owner：WorkspacePanel 文件详情组合区",
+  "app.demoHub.coverage.owner.apply":
+    "正式 owner：CurrentResultPanel 确认清单区",
+  "app.demoHub.coverage.owner.shell":
+    "正式 owner：Shell route/workspace render 同步",
   "app.demoHub.heroEyebrow": "页面原型总线",
   "app.demoHub.heroTitle": "先在 Demo Hub 把流程讲清楚，再进入真实实现。",
   "app.demoHub.heroDescription":
@@ -631,14 +648,14 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.formVariant.template": "从模板开始",
   "app.demoHub.formVariant.manual": "稍后再开高级 JSON",
   "app.demoHub.formNextAction": "下一步会进入",
-  "app.demoHub.formNextActionValue": "字段确认与页面预览，而不是直接切到高级 JSON。",
+  "app.demoHub.formNextActionValue":
+    "字段确认与页面预览，而不是直接切到高级 JSON。",
   "app.demoHub.formLocalHint":
     "这些字段只用于原型体验，不会写入模块、路由或生成记录。",
   "app.demoHub.ruleTitle": "Demo Hub 使用规则",
   "app.demoHub.ruleDescription":
     "后续页面优化先落到这里，通过评审后再改真实 workspace，避免边看边改真实模块导致交互回退。",
-  "app.demoHub.rule1":
-    "不接 server、不落持久化、不调用真实生成或 CRUD 接口。",
+  "app.demoHub.rule1": "不接 server、不落持久化、不调用真实生成或 CRUD 接口。",
   "app.demoHub.rule2":
     "原型应直接表达主流程，次级和高级能力默认折叠，不抢第一屏注意力。",
   "app.demoHub.rule3":
@@ -731,8 +748,10 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.review.diff.retry":
     "当前结果不可继续，结果区应收起证据，把用户带回更安全的重生成入口。",
   "app.demoHub.review.checklist.first": "结果列表默认选中最需要先看的文件。",
-  "app.demoHub.review.checklist.second": "阻塞状态下只有一个强主动作：先处理阻塞。",
-  "app.demoHub.review.checklist.third": "详情区先解释处理原因，再展示 diff 和源码。",
+  "app.demoHub.review.checklist.second":
+    "阻塞状态下只有一个强主动作：先处理阻塞。",
+  "app.demoHub.review.checklist.third":
+    "详情区先解释处理原因，再展示 diff 和源码。",
   "app.demoHub.review.actionLabel.block": "阻塞",
   "app.demoHub.review.actionLabel.overwrite": "覆盖",
   "app.demoHub.review.actionLabel.create": "新增",
@@ -766,11 +785,15 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.apply.item.permission": "权限和菜单影响已审查",
   "app.demoHub.apply.item.fresh": "当前结果不是过期结果",
   "app.demoHub.apply.riskTitle": "风险摘要",
-  "app.demoHub.apply.risk.first": "阻塞风险要在结果页先处理，不留到确认页再解释。",
-  "app.demoHub.apply.risk.second": "SQL proposal 只提示是否需要人工处理，不在这里铺全文。",
-  "app.demoHub.apply.risk.third": "结果一旦可能过期，应优先回到重新生成，而不是继续 apply。",
+  "app.demoHub.apply.risk.first":
+    "阻塞风险要在结果页先处理，不留到确认页再解释。",
+  "app.demoHub.apply.risk.second":
+    "SQL proposal 只提示是否需要人工处理，不在这里铺全文。",
+  "app.demoHub.apply.risk.third":
+    "结果一旦可能过期，应优先回到重新生成，而不是继续 apply。",
   "app.demoHub.panelPrototypeTitle": "本轮原型范围",
-  "app.demoHub.panelPrototypeStart": "Generator Start：起稿第一页怎么更轻松开始。",
+  "app.demoHub.panelPrototypeStart":
+    "Generator Start：起稿第一页怎么更轻松开始。",
   "app.demoHub.panelPrototypeReview":
     "Generator Review：结果页先给结论，再给文件级证据。",
   "app.demoHub.panelPrototypeApply":

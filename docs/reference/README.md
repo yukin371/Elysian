@@ -7,7 +7,7 @@
 - 覆盖系统功能、边界、命令、报告字段、故障处理。
 - 作为 AI 遇错时的查询来源。
 
-## 文档列表（模板）
+## 文档列表
 
 - [01-system-overview.md](./01-system-overview.md)
 - [02-cli-reference.md](./02-cli-reference.md)

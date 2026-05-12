@@ -35,6 +35,7 @@ const createWorkspace = (options?: {
 describe("useFileWorkspace", () => {
   beforeEach(() => {
     Reflect.deleteProperty(globalThis, "fetch")
+    Reflect.deleteProperty(globalThis, "document")
   })
 
   test("preserves active filters when reloading files fails", async () => {
@@ -135,5 +136,211 @@ describe("useFileWorkspace", () => {
     expect(workspace.fileQuery.value).toEqual({
       originalName: "  report ",
     })
+  })
+
+  test("uploads a file and returns to detail mode", async () => {
+    const created = createFileRecord({
+      id: "file-created",
+      originalName: "invoice.pdf",
+      size: 4096,
+    })
+    const requests: Array<{
+      method: string
+      url: string
+      body?: BodyInit | null
+    }> = []
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+      requests.push({ method, url, body: init?.body })
+
+      if (url.endsWith("/system/files") && method === "POST") {
+        return new Response(JSON.stringify(created), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(JSON.stringify({ items: [created] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+    const file = new File(["invoice"], "invoice.pdf", {
+      type: "application/pdf",
+    })
+
+    workspace.openUploadPanel()
+    workspace.setPendingUploadFile(file)
+
+    await workspace.submitUpload()
+
+    const uploadRequest = requests.find(
+      (request) =>
+        request.method === "POST" && request.url.endsWith("/system/files"),
+    )
+
+    expect(uploadRequest).toBeDefined()
+    expect(uploadRequest?.body).toBeInstanceOf(FormData)
+    expect((uploadRequest?.body as FormData).get("file")).toBeInstanceOf(File)
+    expect(workspace.filePanelMode.value).toBe("detail")
+    expect(workspace.pendingUploadFile.value).toBeNull()
+    expect(workspace.selectedFileId.value).toBe("file-created")
+    expect(workspace.selectedFile.value?.originalName).toBe("invoice.pdf")
+    expect(workspace.fileItems.value).toEqual([created])
+    expect(workspace.fileErrorMessage.value).toBe("")
+  })
+
+  test("downloads the selected file through a hidden anchor", async () => {
+    const file = createFileRecord()
+    const requests: Array<{ method: string; url: string }> = []
+    const clicked: string[] = []
+    const appended: Array<{ href: string; download: string }> = []
+    const objectUrls: string[] = []
+    const revokedUrls: string[] = []
+    const originalCreateObjectURL = URL.createObjectURL
+    const originalRevokeObjectURL = URL.revokeObjectURL
+    const originalSetTimeout = globalThis.setTimeout
+
+    URL.createObjectURL = ((blob: Blob) => {
+      objectUrls.push(blob.type)
+      return "blob:download-url"
+    }) as typeof URL.createObjectURL
+    URL.revokeObjectURL = ((url: string) => {
+      revokedUrls.push(url)
+    }) as typeof URL.revokeObjectURL
+    globalThis.setTimeout = ((handler: TimerHandler) => {
+      if (typeof handler === "function") {
+        handler()
+      }
+
+      return 0 as unknown as ReturnType<typeof setTimeout>
+    }) as unknown as typeof setTimeout
+
+    const mockDocument = {
+      createElement: () => ({
+        href: "",
+        download: "",
+        style: { display: "" },
+        click: function () {
+          clicked.push(this.download)
+        },
+        remove: () => {},
+      }),
+      body: {
+        append: (node: Node) => {
+          const candidate = node as unknown as {
+            href: string
+            download: string
+          }
+          appended.push({ href: candidate.href, download: candidate.download })
+        },
+      },
+    } as unknown as Document
+    ;(globalThis as typeof globalThis & { document?: Document }).document =
+      mockDocument
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+      requests.push({ method, url })
+
+      if (url.endsWith("/system/files/file-1/download")) {
+        return new Response(new Blob(["report"], { type: "application/pdf" }), {
+          status: 200,
+        })
+      }
+
+      if (url.endsWith("/system/files/file-1")) {
+        return new Response(JSON.stringify(file), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(JSON.stringify({ items: [file] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+    await workspace.reloadFiles()
+    await workspace.downloadSelectedFile()
+
+    expect(
+      requests.some(
+        (request) =>
+          request.method === "GET" &&
+          request.url.endsWith("/system/files/file-1/download"),
+      ),
+    ).toBe(true)
+    expect(appended).toEqual([
+      { href: "blob:download-url", download: "report.pdf" },
+    ])
+    expect(clicked).toEqual(["report.pdf"])
+    expect(objectUrls).toEqual(["application/pdf"])
+    expect(revokedUrls).toEqual(["blob:download-url"])
+    expect(workspace.fileErrorMessage.value).toBe("")
+
+    URL.createObjectURL = originalCreateObjectURL
+    URL.revokeObjectURL = originalRevokeObjectURL
+    globalThis.setTimeout = originalSetTimeout
+  })
+
+  test("deletes the selected file and falls back to upload mode", async () => {
+    const file = createFileRecord()
+    const requests: Array<{ method: string; url: string }> = []
+    let deleted = false
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+      requests.push({ method, url })
+
+      if (url.endsWith("/system/files/file-1") && method === "DELETE") {
+        deleted = true
+        return new Response(null, { status: 204 })
+      }
+
+      if (url.endsWith("/system/files/file-1")) {
+        return new Response(JSON.stringify(file), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(
+        JSON.stringify({
+          items: deleted ? [] : [file],
+        }),
+        {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        },
+      )
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+    await workspace.reloadFiles()
+    workspace.openDeletePanel()
+
+    await workspace.confirmDelete()
+
+    expect(
+      requests.some(
+        (request) =>
+          request.method === "DELETE" &&
+          request.url.endsWith("/system/files/file-1"),
+      ),
+    ).toBe(true)
+    expect(workspace.fileItems.value).toEqual([])
+    expect(workspace.selectedFileId.value).toBeNull()
+    expect(workspace.selectedFile.value).toBeNull()
+    expect(workspace.filePanelMode.value).toBe("upload")
+    expect(workspace.fileErrorMessage.value).toBe("")
   })
 })

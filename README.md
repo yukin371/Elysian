@@ -1,6 +1,6 @@
 # Elysian
 
-以代码生成为核心能力的企业级快速开发平台。输入结构化模块规格，一键生成前后端生产级代码骨架，让开发者专注于业务实现。
+以代码生成为核心能力、可发布的中小项目快速开发平台。输入结构化模块规格，一键生成前后端生产级代码骨架，让团队专注于业务实现与上线交付。
 
 ## 为什么选择 Elysian
 
@@ -10,8 +10,15 @@
 | **前后端契约单一来源** | 一个 `ModuleSchema` 同时驱动后端 CRUD、前端页面、权限点、路由注册和数据库变更 |
 | **AI 辅助，不削弱质量** | AI 生成结构化 Schema（而非自由代码），通过校验网关后进入生成流程，人工兜底始终可用 |
 | **企业能力内建** | RBAC、多租户（PostgreSQL RLS）、数据权限、审计日志、操作日志——不是事后拼接 |
-| **前端可插拔** | UI 协议层与预设层分离，当前提供 Vue 企业预设（TDesign），React 适配层已规划 |
-| **生成闭环可审计** | 预览 → 报告 → Apply/Merge → 回放证据，二次生成不会覆盖手写代码 |
+| **前端可插拔** | UI 协议层与预设层分离，首发固定 Vue 参考发行版（TDesign），React 与 uniapp 保留为后续扩展 |
+| **生成闭环可审计** | 预览 → 报告 → staging apply → 回放证据；进入正式模块目录时保留人工确认清单，避免覆盖手写代码 |
+
+## 首发参考发行版
+
+- 默认参考发行版固定为 `apps/example-vue`
+- 后端与数据库发布路径固定为 `apps/server` + PostgreSQL + Docker
+- `apps/example-uniapp` 与 `packages/frontend-react` 继续作为并行研发轨道，不作为首发门槛
+- 目标不是做“更多示例”，而是做“能直接开新项目的发行版”
 
 ## 技术栈
 
@@ -166,7 +173,7 @@ bun run stack:up    # 自动执行 migrate + seed
 ```
 apps/
   server/             # Elysia 服务端（API、鉴权、模块装配）
-  example-vue/        # Vue 企业后台示例应用
+  example-vue/        # Vue 参考发行版（首个 starter 前端 owner）
   example-uniapp/     # UniApp C 端骨架（设计储备）
 packages/
   core/               # 平台级共享基础能力
@@ -195,8 +202,43 @@ packages/
 | `bun run build:vue` | 构建前端 |
 | `bun run test` | 单元测试 |
 | `bun run e2e:smoke:full` | E2E 冒烟（含 migrate + seed） |
+| `bun run e2e:tenant:full` | 多租户 E2E（含 migrate + seed） |
+| `bun run server:image:verify` | server 镜像构建 + 本地容器烟测 |
+| `bun run go-live:report` | 生成 go-live blocker 报告 |
+| `bun run go-live:gate` | 基于报告输出放行 / 阻断结论 |
+| `bun run go-live:finalize` | 串联 go-live report -> gate |
 | `bun run stack:up` | 容器一键启动 |
 | `bun run stack:down` | 停止容器 |
+
+### 首发官方命令链
+
+当前参考发行版首发默认使用以下命令链，不再额外维护第二套“推荐主路径”：
+
+```bash
+# 本地启动
+bun install
+bun run db:migrate
+bun run db:seed
+bun run dev:server
+bun run dev:vue
+
+# 首发验收
+bun run check
+bun run build:vue
+bun run server:image:verify
+bun run e2e:smoke:full
+bun run e2e:tenant:full
+
+# 真实环境 go-live 附加口径
+bun run go-live:report
+bun run go-live:gate
+```
+
+说明：
+
+- `dev -> main` 的仓库发布先走 `check` / `build:vue` 与 [release-checklist.md](./docs/release-checklist.md)。
+- 真实环境上线再追加 `go-live:*`。
+- `tenant:release:*` 仅服务 tenant 演练，不代表正式生产发布命令。
 
 ## 文档索引
 
@@ -221,6 +263,6 @@ packages/
 
 ## 当前状态
 
-项目已完成 7 个阶段的开发（Phase 1–7A），具备完整的后端模块、前端企业预设、代码生成器、AI Schema 转换、生产部署和多租户能力。当前聚焦于**生成器自举闭环**——让代码生成从辅助工具升级为平台核心使用方式。
+项目已完成 7 个阶段的开发（Phase 1–7A），具备完整的后端模块、前端企业预设、代码生成器、AI Schema 转换、生产部署和多租户能力。当前聚焦于**首个可发布参考发行版**：把 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator` 收口成真正可开项目、可交付、可上线的 starter。
 
-项目仍处于早期开发阶段，欢迎讨论和贡献。
+项目当前不是“早期原型”，而是进入了首发收口阶段。

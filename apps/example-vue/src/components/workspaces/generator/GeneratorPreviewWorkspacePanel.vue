@@ -40,9 +40,7 @@ interface GeneratorPreviewWorkspacePanelProps {
 }
 
 const props = defineProps<GeneratorPreviewWorkspacePanelProps>()
-const emit = defineEmits<{
-  (e: "clear-selection"): void
-}>()
+const emit = defineEmits<(e: "clear-selection") => void>()
 
 const {
   copySuggestedCommandsByKey,

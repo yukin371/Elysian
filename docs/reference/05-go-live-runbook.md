@@ -11,9 +11,15 @@
 - `artifacts/go-live/go-live-gate-report.json`
 - `docs/reference/09-go-live-gate-input-template.md`
 
+本 runbook 只处理“真实环境上线”这一层，不替代：
+
+- `docs/release-checklist.md` 中的 `dev -> main` 仓库发布检查
+- `tenant:release:*` 或 GitHub `Tenant Release Rehearsal` 的 tenant 演练流程
+
 ## 适用范围
 
 - `main` 已准备进入真实生产环境
+- 当前参考发行版已通过仓库发布门禁
 - 发布范围包含 server、frontend、migration 或 tenant 相关能力
 - 需要明确人工执行顺序、责任边界与回滚口径
 
@@ -32,6 +38,7 @@
 - 不定义 Kubernetes、ECS、Helm 等多机或编排平台细节
 - 不虚构自动化回滚平台
 - 不把 rehearsal 脚本误写成生产发布平台命令
+- 不替代参考发行版首发前的仓库内验收
 
 ## 角色分工
 
@@ -60,6 +67,8 @@
 
 - `bun run check`
 - `bun run build:vue`
+- `bun run server:image:verify`
+- `bun run e2e:smoke:full`
 - `bun run go-live:report`
 
 按需追加：

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { nextTick, ref } from "vue"
 
-import type { GeneratorPreviewFileCard, GeneratorPreviewTranslation } from "./types"
+import type {
+  GeneratorPreviewFileCard,
+  GeneratorPreviewTranslation,
+} from "./types"
 
 const props = defineProps<{
   t: GeneratorPreviewTranslation

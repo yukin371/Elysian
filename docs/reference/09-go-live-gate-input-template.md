@@ -17,6 +17,24 @@
 - `release tag / PR / environment / migration list / backup / roles / proxy owner / post-release smoke` 这几类字段，必须由对应 owner 显式填写。
 - 若本次发布不触及 tenant 主链路，`ELYSIAN_GO_LIVE_TENANT_IMPACT=false`，tenant 附加验证项可保留 `false`。
 
+## 环境前提与责任模板
+
+以下前提若未锁定，应直接视为 go-live blocker，而不是继续靠口头说明推进：
+
+| 前提项 | 需要锁定的事实 | 默认 owner |
+|---|---|---|
+| secrets | `DATABASE_URL`、`ACCESS_TOKEN_SECRET`、前端 API 域名、其他生产必需 secret 的注入位置与轮换 owner | 环境 owner / 应用 owner |
+| backup / recovery | 备份时间、备份编号、恢复点、恢复执行人、预计恢复时长 | DBA / 环境 owner |
+| proxy / TLS | 反向代理 owner、TLS 证书 owner、reload 路径 | 环境 owner |
+| 发布值守 | 发布负责人、应用 owner、DBA / 环境 owner、首 30 分钟值守人与升级路径 | 发布负责人 |
+| rollback decision | 谁能宣布停止上线、谁能协调前端 / server / 数据库回滚 | 发布负责人 / DBA / 环境 owner |
+
+推荐配套填写：
+
+- `docs/reference/07-database-backup-and-recovery-template.md`
+- `docs/reference/08-release-roles-and-oncall-template.md`
+- `docs/plans/2026-05-06-go-live-preparation-packet.md`
+
 ## 字段分组
 
 ### 1. 发布元数据
@@ -288,3 +306,78 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=
 3. 按 blocker 补齐剩余环境事实。
 4. 运行 `bun run go-live:gate`。
 5. 若希望一键执行，使用 `bun run go-live:finalize`。
+
+## Blocker 语义与停止条件映射
+
+### 1. 发布输入 blocker
+
+命中条件：
+
+- `release tag / PR / environment / migration list` 任一为空
+
+处理规则：
+
+- 不得开始 migration
+- 不得开始 server / frontend 切换
+- 先回到发布负责人补齐输入
+
+### 2. 环境前提 blocker
+
+命中条件：
+
+- `backup ready=false`
+- `release roles ready=false`
+- `proxy / tls owner ready=false`
+
+处理规则：
+
+- 不得开始正式上线
+- 不要把这类问题误归类为“应用验证失败”
+
+### 3. 发布后冒烟 blocker
+
+命中条件：
+
+- `/health`
+- `/metrics`
+- 管理员登录
+- 菜单 / 权限 gate
+- 核心工作区列表
+- 核心写操作
+
+任一项为 `false`
+
+处理规则：
+
+- 立即停止继续放量
+- 由发布负责人判断是否进入回滚
+- 先记录失败时间、失败项、当前环境版本、已执行动作
+
+### 4. tenant 安全 blocker
+
+命中条件：
+
+- super-admin 租户访问失败
+- tenant admin 越权成功
+- 非默认 tenant 无法登录
+- 跨租户隔离异常
+
+处理规则：
+
+- 直接按高优先级 blocker 处理
+- 默认进入“停止继续上线 + 评估回滚”路径
+
+## 回滚边界
+
+- 应用 owner：提供 server / frontend 可回退版本信息
+- DBA / 环境 owner：负责数据库恢复与恢复后验证
+- 发布负责人：宣布停止、协调回滚、归档结论
+
+最少归档项：
+
+- 停止时间
+- blocker 类别
+- 触发条件
+- 已执行回滚动作
+- 未恢复项
+- 后续 owner

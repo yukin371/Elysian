@@ -3,7 +3,6 @@ import type {
   GeneratorPreviewFileCard,
   GeneratorPreviewFileDiffStats,
 } from "../../../lib/generator-preview-workspace"
-import type { GeneratorPreviewFrontendImpact } from "./generator-preview-frontend-impact"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
@@ -14,6 +13,7 @@ import type {
   GeneratorPreviewSqlProposal,
   GeneratorPreviewSqlProposalHandoff,
 } from "../../../lib/platform-api"
+import type { GeneratorPreviewFrontendImpact } from "./generator-preview-frontend-impact"
 
 export type GeneratorPreviewTranslation = (
   key: string,

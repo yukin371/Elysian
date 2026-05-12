@@ -61,7 +61,7 @@ export interface ShellWorkspaceMainSwitchProps {
   workflowPaginationSummary: string
   workflowCanGoToPreviousPage: boolean
   workflowCanGoToNextPage: boolean
-  /** TODO: Migrate workflow detail from TDialog to context panel, then remove this prop. */
+  /** Keep until workflow detail moves from TDialog to the shared context panel pattern. */
   workflowDetailDialogOpen: boolean
   selectedWorkflowDefinitionId: string | null
   workflowDetailLoading: boolean
@@ -96,6 +96,7 @@ export interface ShellWorkspaceMainSwitchProps {
   generatorPreviewManualSchemaDraft: string
   generatorPreviewManualSchemaDraftError: string | null
   generatorPreviewManualSchemaDraftErrorDetails: string | null
+  generatorPreviewManualSchemaDraftErrorSuggestion: string | null
   generatorPreviewQuery: string
   generatorPreviewFiles: ReadonlyArray<unknown>
   selectedGeneratorPreviewFilePath: string | null
@@ -104,6 +105,7 @@ export interface ShellWorkspaceMainSwitchProps {
   canApplyGeneratorPreview: boolean
   canConfirmGeneratorPreview: boolean
   generatorPreviewDiffSummary: GeneratorPreviewDiffSummary | null
+  generatorPreviewSqlProposalHandoff: unknown
   generatorPreviewSession: GeneratorPreviewSessionSummary | null
   dictionaryModuleReady: boolean
   canEnterDictionaryWorkspace: boolean

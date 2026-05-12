@@ -2,8 +2,8 @@
 import { computed } from "vue"
 
 import type {
-  GeneratorPreviewFrontendImpact,
   GeneratorPreviewFileCard,
+  GeneratorPreviewFrontendImpact,
   GeneratorPreviewTranslation,
 } from "./types"
 

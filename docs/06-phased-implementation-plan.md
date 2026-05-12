@@ -1,6 +1,6 @@
 # 整体实施规划
 
-更新时间：`2026-05-08`
+更新时间：`2026-05-12`
 
 本文档定义 Elysian 的整体阶段划分、依赖关系和阶段出口。完整阶段体系只在本文件维护，[roadmap.md](./roadmap.md) 仅记录当前活跃轨道。
 
@@ -257,9 +257,10 @@ Phase 1 (垂直切片)
 
 ## 当前优先级
 
-1. **生成器自举闭环**（主线）：Schema → Preview/Report → Apply/Merge → Frontend Artifact → 正式模块落地
-2. **企业后台基础功能对齐**（验证对象）：系统工作区日常可用性打磨，而非继续拔高平台能力天花板
-3. **Phase 7–9**：保留为中长期方向，不等于当前第一优先级
+1. **首个可发布参考发行版**（主线）：Starter 安装 / 启动 / 登录 / 常用模块 / 发布清单 / 回滚演练
+2. **生成器自举闭环**（并行主线）：Schema → Preview/Report → staging apply → Frontend Artifact → 正式模块人工接线
+3. **企业后台基础功能对齐**（验证对象）：系统工作区日常可用性打磨，而非继续拔高平台能力天花板
+4. **Phase 7–9**：保留为中长期方向，不等于当前第一优先级
 
 功能矩阵与执行计划：[ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 
@@ -271,7 +272,7 @@ Phase 1 (垂直切片)
 |---|---|
 | Schema 体系过早固定 | P4A 前用 2–3 个实体验证 |
 | 前端适配层耦合 | 严格通过 schema 解耦，适配层不共享框架语义 |
-| Generator 合并策略不足 | P4D 完善 apply/merge 与区域保护 |
+| Generator 正式模块合入边界不足 | 保持 staging apply 与正式模块人工接线分层，继续完善 `--target module` checklist 与区域保护 |
 | AI 输出不可控 | Schema 校验网关 + 人工确认环节 |
 | 工作流边界膨胀 | 固定"agent 自编排辅助工具"定位，只保留最小流程语义 |
 | Phase 7–9 周期过长 | 按 Exit Gate 控制，每个子阶段独立可用 |

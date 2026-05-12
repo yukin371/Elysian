@@ -220,6 +220,7 @@ export interface CreateExampleShellBindingsOptionsInput {
     | "generatorPreviewManualSchemaDraft"
     | "generatorPreviewManualSchemaDraftError"
     | "generatorPreviewManualSchemaDraftErrorDetails"
+    | "generatorPreviewManualSchemaDraftErrorSuggestion"
     | "generatorPreviewQuery"
     | "generatorPreviewFiles"
     | "selectedGeneratorPreviewFilePath"

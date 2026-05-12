@@ -1,6 +1,6 @@
 # 发布 / 上线检查清单
 
-更新时间：`2026-05-06`
+更新时间：`2026-05-12`
 
 用于两类场景：
 
@@ -12,6 +12,16 @@
 - “功能做完但仓库还不适合进入 `main`”
 - “代码能合进 `main`，但仍不具备正式上线条件”
 
+当前首发默认按三层口径执行：
+
+1. `A. 仓库发布清单`：面向参考发行版的 `dev -> main`
+2. `B. 正式上线附加清单（go-live）`：面向真实环境上线
+3. `Tenant 发布演练附加检查`：只在触及 tenant 主链路时启用，且只代表 rehearsal
+
+若当前目标是完成“首个参考发行版是否已可发布”的统一验收，额外配套使用：
+
+- `docs/plans/2026-05-12-reference-starter-release-acceptance-packet.md`
+
 ---
 
 ## A. 仓库发布清单（`dev -> main`）
@@ -21,6 +31,7 @@
 - 日常阶段发布
 - 里程碑版本从 `dev` 合并进入 `main`
 - 不一定立刻触发真实生产上线
+- 当前参考发行版首发进入 `main`
 
 ## 1. 范围确认
 
@@ -38,8 +49,10 @@
 
 - [ ] `bun run check`
 - [ ] `bun run build:vue`
+- [ ] 若本次作为参考发行版首发候选，已确认 `bun run e2e:smoke:full`
 - [ ] 若改动涉及数据库，已确认 `bun run db:migrate` 可执行
 - [ ] 若改动涉及关键链路，已做对应 smoke 验证
+- [ ] 若改动触及 tenant 主链路，已确认 `bun run e2e:tenant:full`
 - [ ] 若改动涉及 server 生产交付面，已执行 `bun run server:image:verify` 或等价镜像构建 + 容器烟测
 
 ## 4. 文档同步
@@ -130,6 +143,11 @@
 
 当前脚本只收敛当前准备包里已经明确的 blocker，不代替环境 owner 实际执行备份、迁移、代理切换和值守。
 
+说明：
+
+- `go-live:*` 只在代码已经准备进入真实环境时执行，不替代 `dev -> main` 的仓库发布检查。
+- `go-live:*` 不是 tenant rehearsal 的替代入口；tenant 演练仍走 `tenant:release:*` 或 GitHub `Tenant Release Rehearsal`。
+
 ### B.1 Go-live 输入映射
 
 若使用 `go-live:*` 脚本，至少确认以下输入已被人工审核后再映射为环境变量：
@@ -154,6 +172,9 @@
 - `go-live:gate`：根据 report 输出放行 / 阻断结论
 - `go-live:finalize`：串联 report -> gate
 - 这套脚本不会替用户“自动确认环境已就绪”，只会把已填入的事实汇总成一致结论
+- 若需要记录 blocker 类型、停止条件与回滚边界，继续参考：
+  - `docs/reference/09-go-live-gate-input-template.md`
+  - `docs/plans/2026-05-06-go-live-preparation-packet.md`
 
 ## 发布说明模板
 

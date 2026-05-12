@@ -16,8 +16,8 @@ import type {
   GeneratorPreviewFileCard,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSchemaOption,
-  GeneratorPreviewStep,
   GeneratorPreviewSqlProposalHandoff,
+  GeneratorPreviewStep,
   GeneratorPreviewTranslation,
 } from "./types"
 
@@ -178,7 +178,10 @@ export const useGeneratorPreviewWorkspaceMainState = (
       !showApplyAction.value,
   )
   const showFileList = computed(
-    () => hasCurrentResult.value && !showConfirmAction.value && !showApplyAction.value,
+    () =>
+      hasCurrentResult.value &&
+      !showConfirmAction.value &&
+      !showApplyAction.value,
   )
   const blockedFiles = computed(() =>
     props.files.filter((file) => file.plannedAction === "block"),
@@ -473,7 +476,9 @@ export const useGeneratorPreviewWorkspaceMainState = (
       normalizedError.includes("already exists")
     ) {
       steps.add(
-        props.t("app.generatorPreview.errorRecoveryStep.changeConflictStrategy"),
+        props.t(
+          "app.generatorPreview.errorRecoveryStep.changeConflictStrategy",
+        ),
       )
     }
 

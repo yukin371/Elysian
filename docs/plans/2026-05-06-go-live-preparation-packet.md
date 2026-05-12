@@ -1,6 +1,6 @@
 # 2026-05-06 Go-live 准备包
 
-更新时间：`2026-05-06`
+更新时间：`2026-05-12`
 
 本文件用于把当前版本进入正式上线前的已知事实、待补证据和阻断项收敛到一处。
 
@@ -10,6 +10,12 @@
 - `docs/reference/05-go-live-runbook.md`
 - `docs/reference/07-database-backup-and-recovery-template.md`
 - `docs/reference/08-release-roles-and-oncall-template.md`
+
+当前已按 `2026-05-12` 首个参考发行版 spec 补充：
+
+- blocker 分类口径
+- 停止上线条件
+- 应用 / 环境责任边界
 
 当前可配套使用：
 
@@ -174,6 +180,75 @@ notes:
 - proxy / tls owner 未明确
 ```
 
+## Blocker 分类与 owner 归档
+
+| blocker 类别 | 典型触发项 | 默认 owner | 处理规则 |
+|---|---|---|---|
+| 发布输入 blocker | `release tag / PR / environment / migration list` 缺失 | 发布负责人 | 不得启动 migration 或发布切换 |
+| 环境前提 blocker | `backup / restore` 证据缺失、`proxy / TLS` owner 未锁定、值守未锁定 | 环境 owner / DBA / 发布负责人 | 不得开始正式上线 |
+| 应用验证 blocker | `check`、`build:vue`、`server:image:verify`、`e2e:tenant:full` 未通过 | 应用 owner | 不得进入 go-live 执行 |
+| 发布后冒烟 blocker | `/health`、登录、权限 gate、核心列表/写动作失败 | 应用 owner / 环境 owner | 立即停止继续放量并评估回滚 |
+| tenant 安全 blocker | super-admin 租户访问失败、tenant admin 越权、跨租户隔离异常 | 应用 owner / DBA / 环境 owner | 视为高优先级阻断，默认进入回滚评估 |
+
+## 停止上线与回滚判断
+
+出现以下任一情况，应停止继续上线：
+
+- migration 失败
+- `/health` 不可用
+- 管理员登录主链路异常
+- 关键 5xx 持续出现
+- 跨租户隔离异常
+
+当前记录模板：
+
+```text
+stop triggered at:
+stop triggered by:
+blocker category:
+failed check:
+
+current frontend version:
+current server image:
+current migration step:
+
+rollback required:
+rollback decision owner:
+rollback actions:
+-
+
+post-rollback verification:
+- GET /health
+- GET /metrics
+- admin login
+- core workspace list
+```
+
+## 应用侧与环境侧责任边界
+
+应用 owner 负责：
+
+- `bun run check`
+- `bun run build:vue`
+- `bun run server:image:verify`
+- `bun run e2e:tenant:full`
+- 管理员登录、权限 gate、核心工作区与核心写操作验证
+
+环境 / DBA owner 负责：
+
+- 目标环境 secret 注入
+- 数据库备份与恢复证据
+- proxy / TLS owner 与 reload 路径
+- migration 执行与数据库恢复
+- 发布后 `/health`、`/metrics` 可达性
+
+发布负责人负责：
+
+- 冻结发布输入
+- 锁定值守与升级路径
+- 宣布开始 / 停止 / 回滚
+- 归档最终 blocker 结论
+
 ## 发布后最小冒烟记录
 
 ```text
@@ -217,9 +292,17 @@ artifacts:
 
 latest result:
 - status: failed
-- blocker count: 12
+- blocker count: 16
 - notes: 当前脚本结论与准备包一致，阻断项集中在 release tag / PR、release environment、migration list、backup / roles / proxy owner，以及目标环境发布后最小冒烟证据。
 ```
+
+## 参考发行版首发验收衔接
+
+若当前不是单次 go-live 排查，而是要完成“首个参考发行版是否可发布”的统一验收，继续使用：
+
+- `docs/plans/2026-05-12-reference-starter-release-acceptance-packet.md`
+
+本准备包只负责 go-live 输入、blocker 与责任边界，不替代首发总验收清单。
 
 ## 当前 go-live env 预填建议
 

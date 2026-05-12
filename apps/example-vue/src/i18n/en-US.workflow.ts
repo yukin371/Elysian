@@ -135,7 +135,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.workspaceTitle": "Generated files",
   "app.generatorPreview.workspaceDescription":
     "Configure the module draft and frontend target first, then review file plans, diff summaries, SQL proposals, and apply evidence.",
-  "app.generatorPreview.resultListHeadline": "Open the file that needs attention first",
+  "app.generatorPreview.resultListHeadline":
+    "Open the file that needs attention first",
   "app.generatorPreview.resultListSummary":
     "{count} artifacts are included in the current result. Start with the one that matters most.",
   "app.generatorPreview.resultListHint":
@@ -201,8 +202,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "This result cannot move forward yet",
   "app.generatorPreview.verdict.blockedDescription":
     "{count} blocked files still need attention. Review the conflicts first, then decide whether to change existing-file handling or regenerate.",
-  "app.generatorPreview.verdict.reviewTitle":
-    "The result is ready for review",
+  "app.generatorPreview.verdict.reviewTitle": "The result is ready for review",
   "app.generatorPreview.verdict.confirmTitle":
     "Review passed. Finish the pre-apply confirmation next",
   "app.generatorPreview.verdict.applyTitle":
@@ -350,8 +350,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Confirmation evidence captured: {count} checklist items, report={reportPath}, snapshot={snapshotPath}, recovery={recoveryStatus}.",
   "app.generatorPreview.confirmationChecklistTitle":
     "Pre-apply confirmation checklist",
-  "app.generatorPreview.applyChecklist.verdictLabel":
-    "Can apply continue now",
+  "app.generatorPreview.applyChecklist.verdictLabel": "Can apply continue now",
   "app.generatorPreview.applyChecklist.riskLabel":
     "What to watch before continuing",
   "app.generatorPreview.applyChecklist.idleTitle":
@@ -529,7 +528,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Existing module structure",
   "app.generatorPreview.sourceType.manualSchemaJson": "Schema JSON",
   "app.generatorPreview.inputTitle": "New generation",
-  "app.generatorPreview.startHeadline": "Answer “what are we generating?” first",
+  "app.generatorPreview.startHeadline":
+    "Answer “what are we generating?” first",
   "app.generatorPreview.startDescription":
     "Start with the minimum required fields, then expand advanced JSON and existing-file handling only when needed so the first screen stays focused.",
   "app.generatorPreview.startNextStepLabel": "Next step",
@@ -541,7 +541,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.inputMode.registeredSchema": "Use registered schema",
   "app.generatorPreview.inputMode.manualSchemaJson": "Paste schema JSON",
   "app.generatorPreview.draftSource.template": "Public templates",
-  "app.generatorPreview.draftSource.reference": "Copy existing module structure",
+  "app.generatorPreview.draftSource.reference":
+    "Copy existing module structure",
   "app.generatorPreview.draftSource.json": "Advanced JSON",
   "app.generatorPreview.referenceSearchPlaceholder":
     "Search modules whose structure should be copied",
@@ -577,7 +578,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.input.manualSchemaDraftSuggestionEnum":
     "Next step: add an `options` array for the enum field, or fill in `dictionaryTypeCode`.",
   "app.generatorPreview.input.manualSchemaDraftSuggestionId":
-    "Next step: add an `id` field and set `kind: \"id\"` with `required: true`.",
+    'Next step: add an `id` field and set `kind: "id"` with `required: true`.',
   "app.generatorPreview.input.manualSchemaDraftSuggestionKind":
     "Next step: change the field kind to a supported value such as `string`, `number`, `enum`, or `datetime`.",
   "app.generatorPreview.conflictStrategy.skip": "Skip existing files",
@@ -706,9 +707,12 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.handoffTitle": "Prototype to implementation",
   "app.demoHub.handoffDescription":
     "Only move conclusions into a real workspace after the main flow, field order, feedback copy, and empty states are stable.",
-  "app.demoHub.handoffStep1": "Draft the single-page primary flow in Demo Hub first.",
-  "app.demoHub.handoffStep2": "Capture the required boundary notes and acceptance checks.",
-  "app.demoHub.handoffStep3": "Confirm the canonical owner, then edit the real page.",
+  "app.demoHub.handoffStep1":
+    "Draft the single-page primary flow in Demo Hub first.",
+  "app.demoHub.handoffStep2":
+    "Capture the required boundary notes and acceptance checks.",
+  "app.demoHub.handoffStep3":
+    "Confirm the canonical owner, then edit the real page.",
   "app.demoHub.panelTitle": "Prototype boundary",
   "app.demoHub.panelDescription":
     "This side panel explains scope, review criteria, and handoff rules only. It does not hold runtime detail or live diagnostics.",
@@ -747,7 +751,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.start.checklist.third":
     "Is continue the only strong next action?",
   "app.demoHub.review.stateLabel": "Result judgment",
-  "app.demoHub.review.headline": "Answer “is this result worth pushing forward?” first",
+  "app.demoHub.review.headline":
+    "Answer “is this result worth pushing forward?” first",
   "app.demoHub.review.description":
     "The result page should lead with status, blocking verdict, and next action before asking the user to read file-level detail.",
   "app.demoHub.review.toggle.blocking": "Blocking files",
@@ -765,8 +770,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.review.summary.ready.description":
     "When there are no blocking conflicts, the main task becomes review, not immediate apply.",
   "app.demoHub.review.summary.ready.next": "Next: enter review",
-  "app.demoHub.review.summary.failed.title":
-    "This result should not continue",
+  "app.demoHub.review.summary.failed.title": "This result should not continue",
   "app.demoHub.review.summary.failed.description":
     "On failure, the page should move the user back to the draft or regeneration path instead of keeping them in review mode.",
   "app.demoHub.review.summary.failed.next":

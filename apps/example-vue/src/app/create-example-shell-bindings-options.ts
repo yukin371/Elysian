@@ -307,8 +307,7 @@ export const createExampleShellBindingsOptions = (
     sessionCountLabel: input.sessionWorkspace.workspace.countLabel,
     sessionCurrentQuerySummary:
       input.sessionWorkspace.workspace.currentQuerySummary,
-    sessionHasActiveFilters:
-      input.sessionWorkspace.workspace.hasActiveFilters,
+    sessionHasActiveFilters: input.sessionWorkspace.workspace.hasActiveFilters,
     sessionActionLoading: input.sessionWorkspace.workspace.sessionActionLoading,
     selectedSession: input.sessionWorkspace.workspace.selectedSession,
     handleSessionSearch: input.sessionWorkspace.workspace.handleSearch,

@@ -711,7 +711,7 @@ const workspaceResolvers: Record<string, ShellWorkspaceSecondaryResolver> = {
       "cancel-panel": () => emit("cancel-file-panel"),
     },
   }),
-  "generator-preview": (props) => ({
+  "generator-preview": (props, emit) => ({
     component: GeneratorPreviewWorkspacePanel,
     props: {
       t: props.t,

@@ -14,7 +14,8 @@ export const enUSOnlineSessionLocaleMessages: VueLocaleMessages = {
   "app.onlineSession.emptyTitle": "No sessions match the current filters",
   "app.onlineSession.emptyDescription":
     "This account has no other visible sessions yet. Keep this page open and return after the next sign-in or refresh cycle.",
-  "app.onlineSession.filteredEmptyTitle": "No sessions match the current filters",
+  "app.onlineSession.filteredEmptyTitle":
+    "No sessions match the current filters",
   "app.onlineSession.filteredEmptyDescription":
     "The current filter set hides every visible session.",
   "app.onlineSession.filteredRecoveryHint":
@@ -33,10 +34,12 @@ export const enUSOnlineSessionLocaleMessages: VueLocaleMessages = {
   "app.onlineSession.panelDesc.detail":
     "Detail and actions stay focused on the current session.",
   "app.onlineSession.currentBadge": "Current session",
-  "app.onlineSession.currentSessionTitle": "You are reviewing the session you are using right now",
+  "app.onlineSession.currentSessionTitle":
+    "You are reviewing the session you are using right now",
   "app.onlineSession.currentSessionDescription":
     "Signing out here ends the current browser session immediately and sends you back through sign-in recovery.",
-  "app.onlineSession.otherSessionTitle": "This is another device or an older session",
+  "app.onlineSession.otherSessionTitle":
+    "This is another device or an older session",
   "app.onlineSession.otherSessionDescription":
     "Revoking it keeps the current browser session active and only removes access for the selected device.",
   "app.onlineSession.field.keyword": "Keyword",
