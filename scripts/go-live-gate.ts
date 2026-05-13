@@ -6,7 +6,29 @@ interface GoLiveReport {
   outputPath: string
   status: "passed" | "failed"
   blockers: string[]
+  blockerDetails?: Array<{
+    code: string
+    message: string
+    category: string
+    defaultOwner: string
+    milestoneId: string
+    envKeys: string[]
+  }>
   recommendedActions: string[]
+  milestones?: Array<{
+    id: string
+    title: string
+    status: "passed" | "blocked"
+    blockerCount: number
+    blockers: string[]
+  }>
+  nextMilestone?: string | null
+  ownerHandoffs?: Array<{
+    owner: string
+    blockerCount: number
+    blockers: string[]
+    envKeys: string[]
+  }>
   summary: {
     sourceBranch: string
     targetBranch: string
@@ -24,6 +46,10 @@ interface GoLiveGateReport {
   blockerCount: number
   summary: GoLiveReport["summary"]
   recommendedActions: string[]
+  blockerDetails: NonNullable<GoLiveReport["blockerDetails"]>
+  milestones: NonNullable<GoLiveReport["milestones"]>
+  nextMilestone: string | null
+  ownerHandoffs: NonNullable<GoLiveReport["ownerHandoffs"]>
 }
 
 const assert = (condition: unknown, message: string): asserts condition => {
@@ -73,7 +99,18 @@ const parseReport = (raw: string) => {
     "Invalid go-live report: summary is incomplete",
   )
 
-  return parsed as GoLiveReport
+  return {
+    ...parsed,
+    blockerDetails: Array.isArray(parsed.blockerDetails)
+      ? parsed.blockerDetails
+      : [],
+    milestones: Array.isArray(parsed.milestones) ? parsed.milestones : [],
+    nextMilestone:
+      typeof parsed.nextMilestone === "string" ? parsed.nextMilestone : null,
+    ownerHandoffs: Array.isArray(parsed.ownerHandoffs)
+      ? parsed.ownerHandoffs
+      : [],
+  } as GoLiveReport
 }
 
 export const renderGateSummaryMarkdown = (report: GoLiveGateReport) => {
@@ -85,10 +122,26 @@ export const renderGateSummaryMarkdown = (report: GoLiveGateReport) => {
     `- environment: \`${report.summary.releaseEnvironment ?? "unset"}\``,
     `- tenantImpact: \`${String(report.summary.tenantImpact)}\``,
     `- blockerCount: \`${String(report.blockerCount)}\``,
+    `- nextMilestone: \`${report.nextMilestone ?? "none"}\``,
     `- conclusion: ${report.conclusion}`,
+    "",
+    "Milestones:",
+    ...report.milestones.map(
+      (item) =>
+        `- ${item.id} ${item.title}: \`${item.status}\` (${String(item.blockerCount)} blocker(s))`,
+    ),
     "",
     "Recommended actions:",
     ...report.recommendedActions.map((item) => `- ${item}`),
+    "",
+    "Owner handoffs:",
+    ...(report.ownerHandoffs.length > 0
+      ? report.ownerHandoffs.flatMap((item) => [
+          `- ${item.owner}: ${String(item.blockerCount)} blocker(s)`,
+          ...item.blockers.map((blocker) => `  - ${blocker}`),
+          `  - envKeys: ${item.envKeys.join(", ")}`,
+        ])
+      : ["- none"]),
     "",
   ]
 
@@ -112,6 +165,10 @@ export const run = async () => {
     blockerCount: goLiveReport.blockers.length,
     summary: goLiveReport.summary,
     recommendedActions: goLiveReport.recommendedActions,
+    blockerDetails: goLiveReport.blockerDetails ?? [],
+    milestones: goLiveReport.milestones ?? [],
+    nextMilestone: goLiveReport.nextMilestone ?? null,
+    ownerHandoffs: goLiveReport.ownerHandoffs ?? [],
   }
 
   await mkdir(dirname(outputPath), { recursive: true })

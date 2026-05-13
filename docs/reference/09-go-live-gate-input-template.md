@@ -10,6 +10,10 @@
 - `bun run go-live:gate`
 - `bun run go-live:finalize`
 
+当前若按首发落地里程碑推进，配套参考：
+
+- `docs/plans/2026-05-13-reference-starter-go-live-stage-plan.md`
+
 ## 使用规则
 
 - 这份模板只收敛“已确认事实”，不替代真实发布动作。
@@ -56,6 +60,7 @@
 |---|---|---|
 | `ELYSIAN_GO_LIVE_CHECK_PASSED` | `bun run check` 是否通过 | 应用 owner |
 | `ELYSIAN_GO_LIVE_BUILD_VUE_PASSED` | `bun run build:vue` 是否通过 | 应用 owner |
+| `ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED` | `bun run e2e:smoke:full` 是否通过 | 应用 owner |
 | `ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED` | `bun run server:image:verify` 是否通过 | 应用 owner |
 | `ELYSIAN_GO_LIVE_TENANT_FULL_PASSED` | `bun run e2e:tenant:full` 是否通过 | 应用 owner |
 
@@ -105,6 +110,7 @@ ELYSIAN_GO_LIVE_TENANT_IMPACT=
 
 ELYSIAN_GO_LIVE_CHECK_PASSED=
 ELYSIAN_GO_LIVE_BUILD_VUE_PASSED=
+ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED=
 ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED=
 ELYSIAN_GO_LIVE_TENANT_FULL_PASSED=
 
@@ -132,6 +138,7 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=
 - `ELYSIAN_GO_LIVE_RELEASE_COMMIT`
 - `ELYSIAN_GO_LIVE_CHECK_PASSED`
 - `ELYSIAN_GO_LIVE_BUILD_VUE_PASSED`
+- `ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED`
 - `ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED`
 - `ELYSIAN_GO_LIVE_TENANT_FULL_PASSED`
 
@@ -197,6 +204,7 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=
 
 - `ELYSIAN_GO_LIVE_CHECK_PASSED`
 - `ELYSIAN_GO_LIVE_BUILD_VUE_PASSED`
+- `ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED`
 - `ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED`
 - `ELYSIAN_GO_LIVE_TENANT_FULL_PASSED`
 - `ELYSIAN_GO_LIVE_ADMIN_LOGIN_VERIFIED`
@@ -214,6 +222,23 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=
 交付口径：
 
 - 应用 owner 负责把“仓库内已验证事实”和“发布后功能冒烟结果”补齐，但不替环境 owner 虚构 backup / proxy / TLS 已就绪。
+
+## 当前里程碑映射
+
+`go-live:report` 当前默认把输入收敛到四个里程碑：
+
+- `M1 候选冻结`：`release commit`、`release tag / PR`、`check`、`build:vue`、`e2e:smoke:full`、`server:image:verify`，以及按需的 `e2e:tenant:full`
+- `M2 环境前提锁定`：`release environment`、`migration list`、`backup`、`roles / oncall`、`proxy / TLS owner`
+- `M3 目标环境演练`：`/health`、`/metrics`、管理员登录、权限 gate、核心工作区列表与核心写操作，以及按需的 tenant 验证
+- `M4 首发放行结论`：只有当前三层都通过才会进入 `passed`
+
+若 `nextMilestone` 仍停在前一层，不要跳过前置 blocker 直接推进下一层动作。
+
+同时，`go-live:report` 还会输出 `ownerHandoffs`：
+
+- 按默认 owner 分组当前 blocker
+- 给出每组 blocker 对应的 `envKeys`
+- 供发布负责人直接分发给对应 owner，而不必手工再从模板里二次摘字段
 
 ## 当前推荐交接顺序
 

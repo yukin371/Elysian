@@ -6,6 +6,7 @@
 
 若当前就是准备推进首次正式上线，建议同时维护：
 
+- `docs/plans/2026-05-13-reference-starter-go-live-stage-plan.md`
 - `docs/plans/2026-05-06-go-live-preparation-packet.md`
 - `artifacts/go-live/go-live-report.json`
 - `artifacts/go-live/go-live-gate-report.json`
@@ -90,6 +91,11 @@
 ```bash
 bun run go-live:gate
 ```
+
+说明：
+
+- `go-live:report` 当前会按 `M1 候选冻结`、`M2 环境前提锁定`、`M3 目标环境演练`、`M4 首发放行结论` 输出阶段状态，便于发布负责人快速判断当前卡在哪一层。
+- `go-live:report` 当前也会输出 `ownerHandoffs`，把 blocker 直接按默认 owner 和 `envKeys` 分组，便于分发给发布负责人、环境 / DBA owner 和应用 owner。
 
 若希望一键执行 report -> gate，可执行：
 

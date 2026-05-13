@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-12`（首个可发布参考发行版优先，generator 与后台能力并行收口）
+更新时间：`2026-05-13`（首个可发布参考发行版优先，当前按 go-live 里程碑收口）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -21,6 +21,7 @@
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
 - 首发计划：[2026-05-12-reference-starter-release-plan.md](./plans/2026-05-12-reference-starter-release-plan.md)
+- 阶段执行计划：[2026-05-13-reference-starter-go-live-stage-plan.md](./plans/2026-05-13-reference-starter-go-live-stage-plan.md)
 
 ### 1. 参考发行版基础功能对齐 🚧
 
@@ -330,10 +331,10 @@
 
 ## 下一步
 
-1. 第一顺序：继续按企业后台基础功能矩阵打磨现有工作区闭环，优先处理 `tenants / operation-logs / notifications / files` 的后台日常交互收口，目标是把“能打开”推进到“日常可用”，而不是继续新增新模块或新 shared 抽象。
-2. 第二顺序：对 `WP-6` 导入链路做边界判断，只回答“哪些模块值得进入当前主线、最小入口是什么、哪些仍应暂缓”；在未完成这一步前，不把统一导入 DSL、模板体系或批量治理平台写成已实现方向。
-3. 第三顺序：`generator / frontend` 只做必要延伸，不再回到 example-vue 手写标准 CRUD；若后续继续推进，范围限定为 generator 产物与前端 artifact 的增量收口，而不是重开一轮本地前端脊柱重构。
-4. 在正式继续改 `generator preview` 前，先把 `demohub` 原型中的首屏起稿、结果结论和 apply 前确认三段流程压到足够稳定；正式页只负责承接真实 session / review / apply 状态，不再承担信息架构试错。
-5. 第五顺序：企业后台基础能力继续维持验证对象定位，优先补会话设备化、diff/evidence 强化、SQL proposal 到人工接入规范等必要收口，不抢占 generator 自举闭环主线。
-6. 当前已经补了一份 generator SQL proposal confirmation handoff 设计文档，后续若要落代码，优先沿 `packages/persistence -> apps/server -> apps/example-vue` 的既有 owner 顺序推进，不要反向从 UI 推导正式 migration owner。
+1. 第一顺序：按 [2026-05-13-reference-starter-go-live-stage-plan.md](./plans/2026-05-13-reference-starter-go-live-stage-plan.md) 执行 `M1 -> M2 -> M3 -> M4`，当前最优先不是继续扩功能，而是把 `release commit/tag`、`release environment`、`migration list`、`backup / restore`、`roles / oncall`、`proxy / TLS` 和目标环境冒烟全部锁定。
+2. 第二顺序：仓库内只继续做直接服务首发闭环的收口，优先处理 `tenants / operation-logs / notifications / files` 的后台日常交互缺口，以及 `go-live:*`、候选包、验收包、准备包之间的证据一致性。
+3. 第三顺序：对 `WP-6` 导入链路做边界判断，只回答“哪些模块值得进入当前主线、最小入口是什么、哪些仍应暂缓”；在未完成这一步前，不把统一导入 DSL、模板体系或批量治理平台写成已实现方向。
+4. 第四顺序：`generator / frontend` 只做必要延伸，不再回到 example-vue 手写标准 CRUD；若后续继续推进，范围限定为 generator 产物与前端 artifact 的增量收口，而不是重开一轮本地前端脊柱重构。
+5. 第五顺序：在正式继续改 `generator preview` 前，先把 `demohub` 原型中的首屏起稿、结果结论和 apply 前确认三段流程压到足够稳定；正式页只负责承接真实 session / review / apply 状态，不再承担信息架构试错。
+6. 第六顺序：企业后台基础能力继续维持验证对象定位，优先补会话设备化、diff/evidence 强化、SQL proposal 到人工接入规范等必要收口，不抢占 generator 自举闭环主线。
 7. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、第二套消息中心模型，以及任何新的前端 shared owner。

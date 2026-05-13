@@ -28,6 +28,67 @@ const createReportFixture = async (status: "passed" | "failed") => {
                 "由环境 / DBA owner 填写数据库备份与恢复模板，并补齐恢复点证据。",
               ]
             : ["No action required."],
+        blockerDetails:
+          status === "failed"
+            ? [
+                {
+                  code: "backup-evidence-missing",
+                  message: "database backup / restore evidence 缺失。",
+                  category: "environment-prerequisite",
+                  defaultOwner: "DBA / 环境 owner",
+                  milestoneId: "M2",
+                  envKeys: ["ELYSIAN_GO_LIVE_BACKUP_READY"],
+                },
+              ]
+            : [],
+        milestones: [
+          {
+            id: "M1",
+            title: "候选冻结",
+            status: "passed",
+            blockerCount: 0,
+            blockers: [],
+          },
+          {
+            id: "M2",
+            title: "环境前提锁定",
+            status: status === "failed" ? "blocked" : "passed",
+            blockerCount: status === "failed" ? 1 : 0,
+            blockers:
+              status === "failed"
+                ? ["database backup / restore evidence 缺失。"]
+                : [],
+          },
+          {
+            id: "M3",
+            title: "目标环境演练",
+            status: status === "failed" ? "blocked" : "passed",
+            blockerCount: 0,
+            blockers: [],
+          },
+          {
+            id: "M4",
+            title: "首发放行结论",
+            status: status === "failed" ? "blocked" : "passed",
+            blockerCount: status === "failed" ? 1 : 0,
+            blockers:
+              status === "failed"
+                ? ["前序里程碑未全部通过，当前不可给出首发放行结论。"]
+                : [],
+          },
+        ],
+        nextMilestone: status === "failed" ? "M2" : null,
+        ownerHandoffs:
+          status === "failed"
+            ? [
+                {
+                  owner: "DBA / 环境 owner",
+                  blockerCount: 1,
+                  blockers: ["database backup / restore evidence 缺失。"],
+                  envKeys: ["ELYSIAN_GO_LIVE_BACKUP_READY"],
+                },
+              ]
+            : [],
         summary: {
           sourceBranch: "dev",
           targetBranch: "main",
@@ -101,11 +162,55 @@ describe("renderGateSummaryMarkdown", () => {
         tenantImpact: false,
       },
       recommendedActions: ["由发布负责人填写角色与值守模板。"],
+      blockerDetails: [],
+      milestones: [
+        {
+          id: "M1",
+          title: "候选冻结",
+          status: "passed",
+          blockerCount: 0,
+          blockers: [],
+        },
+        {
+          id: "M2",
+          title: "环境前提锁定",
+          status: "blocked",
+          blockerCount: 1,
+          blockers: ["database backup / restore evidence 缺失。"],
+        },
+        {
+          id: "M3",
+          title: "目标环境演练",
+          status: "blocked",
+          blockerCount: 0,
+          blockers: [],
+        },
+        {
+          id: "M4",
+          title: "首发放行结论",
+          status: "blocked",
+          blockerCount: 1,
+          blockers: ["前序里程碑未全部通过，当前不可给出首发放行结论。"],
+        },
+      ],
+      nextMilestone: "M2",
+      ownerHandoffs: [
+        {
+          owner: "DBA / 环境 owner",
+          blockerCount: 1,
+          blockers: ["database backup / restore evidence 缺失。"],
+          envKeys: ["ELYSIAN_GO_LIVE_BACKUP_READY"],
+        },
+      ],
     })
 
     expect(markdown).toContain("### Go-live Gate")
     expect(markdown).toContain("- status: `failed`")
     expect(markdown).toContain("- blockerCount: `1`")
+    expect(markdown).toContain("- nextMilestone: `M2`")
+    expect(markdown).toContain("- M2 环境前提锁定: `blocked` (1 blocker(s))")
+    expect(markdown).toContain("- DBA / 环境 owner: 1 blocker(s)")
+    expect(markdown).toContain("envKeys: ELYSIAN_GO_LIVE_BACKUP_READY")
     expect(markdown).toContain("由发布负责人填写角色与值守模板。")
   })
 })

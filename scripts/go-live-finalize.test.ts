@@ -102,6 +102,7 @@ describe("run", () => {
         ELYSIAN_GO_LIVE_TENANT_IMPACT: "false",
         ELYSIAN_GO_LIVE_CHECK_PASSED: "true",
         ELYSIAN_GO_LIVE_BUILD_VUE_PASSED: "true",
+        ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED: "true",
         ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED: "true",
         ELYSIAN_GO_LIVE_TENANT_FULL_PASSED: "true",
         ELYSIAN_GO_LIVE_BACKUP_READY: "true",

@@ -5,7 +5,10 @@ import { join } from "node:path"
 import { describe, expect, test } from "bun:test"
 
 import {
+  buildBlockerDetails,
   buildBlockers,
+  buildMilestones,
+  buildOwnerHandoffs,
   buildRecommendedActions,
   renderSummaryMarkdown,
 } from "./go-live-report"
@@ -56,6 +59,7 @@ describe("buildBlockers", () => {
       tenantImpact: true,
       checkPassed: true,
       buildVuePassed: true,
+      smokeFullPassed: true,
       serverImageVerifyPassed: true,
       tenantFullPassed: false,
       backupReady: true,
@@ -90,6 +94,7 @@ describe("buildBlockers", () => {
       tenantImpact: false,
       checkPassed: true,
       buildVuePassed: true,
+      smokeFullPassed: true,
       serverImageVerifyPassed: true,
       tenantFullPassed: false,
       backupReady: true,
@@ -127,6 +132,7 @@ describe("buildRecommendedActions", () => {
         tenantImpact: false,
         checkPassed: true,
         buildVuePassed: true,
+        smokeFullPassed: true,
         serverImageVerifyPassed: true,
         tenantFullPassed: true,
         backupReady: true,
@@ -144,6 +150,92 @@ describe("buildRecommendedActions", () => {
         crossTenantIsolationVerified: true,
       }),
     ).toEqual(["No action required."])
+  })
+})
+
+describe("buildMilestones", () => {
+  test("tracks next blocked milestone from blocker details", () => {
+    const blockerDetails = buildBlockerDetails({
+      sourceBranch: "dev",
+      targetBranch: "main",
+      releaseCommit: "abc",
+      releaseTag: null,
+      releasePr: null,
+      releaseEnvironment: null,
+      migrationList: [],
+      tenantImpact: false,
+      checkPassed: true,
+      buildVuePassed: true,
+      smokeFullPassed: false,
+      serverImageVerifyPassed: true,
+      tenantFullPassed: false,
+      backupReady: false,
+      releaseRolesReady: false,
+      proxyTlsOwnerReady: false,
+      healthVerified: false,
+      metricsVerified: false,
+      adminLoginVerified: false,
+      menuPermissionGateVerified: false,
+      coreWorkspaceListVerified: false,
+      coreWriteActionVerified: false,
+      superAdminTenantAccessVerified: false,
+      tenantAdminDeniedVerified: false,
+      nonDefaultTenantLoginVerified: false,
+      crossTenantIsolationVerified: false,
+    })
+
+    const milestoneState = buildMilestones(blockerDetails)
+
+    expect(milestoneState.nextMilestone).toBe("M1")
+    expect(milestoneState.milestones[0]?.status).toBe("blocked")
+    expect(milestoneState.milestones[1]?.status).toBe("blocked")
+    expect(milestoneState.milestones[3]?.status).toBe("blocked")
+  })
+})
+
+describe("buildOwnerHandoffs", () => {
+  test("groups blockers and env keys by owner", () => {
+    const handoffs = buildOwnerHandoffs([
+      {
+        code: "release-commit-missing",
+        message: "release commit 未锁定。",
+        category: "release-input",
+        defaultOwner: "发布负责人",
+        milestoneId: "M1",
+        envKeys: ["ELYSIAN_GO_LIVE_RELEASE_COMMIT"],
+      },
+      {
+        code: "release-tag-or-pr-missing",
+        message: "release tag / release PR 未锁定。",
+        category: "release-input",
+        defaultOwner: "发布负责人",
+        milestoneId: "M1",
+        envKeys: ["ELYSIAN_GO_LIVE_RELEASE_TAG", "ELYSIAN_GO_LIVE_RELEASE_PR"],
+      },
+      {
+        code: "backup-evidence-missing",
+        message: "database backup / restore evidence 缺失。",
+        category: "environment-prerequisite",
+        defaultOwner: "DBA / 环境 owner",
+        milestoneId: "M2",
+        envKeys: ["ELYSIAN_GO_LIVE_BACKUP_READY"],
+      },
+    ])
+
+    expect(handoffs[0]).toEqual({
+      owner: "发布负责人",
+      blockerCount: 2,
+      blockers: [
+        "release commit 未锁定。",
+        "release tag / release PR 未锁定。",
+      ],
+      envKeys: [
+        "ELYSIAN_GO_LIVE_RELEASE_COMMIT",
+        "ELYSIAN_GO_LIVE_RELEASE_TAG",
+        "ELYSIAN_GO_LIVE_RELEASE_PR",
+      ],
+    })
+    expect(handoffs[1]?.owner).toBe("DBA / 环境 owner")
   })
 })
 
@@ -171,6 +263,7 @@ describe("renderSummaryMarkdown", () => {
         tenantImpact: false,
         checkPassed: true,
         buildVuePassed: true,
+        smokeFullPassed: true,
         serverImageVerifyPassed: true,
         tenantFullPassed: true,
         backupReady: false,
@@ -189,12 +282,65 @@ describe("renderSummaryMarkdown", () => {
       },
       status: "failed",
       blockers: ["database backup / restore evidence 缺失。"],
+      blockerDetails: [
+        {
+          code: "backup-evidence-missing",
+          message: "database backup / restore evidence 缺失。",
+          category: "environment-prerequisite",
+          defaultOwner: "DBA / 环境 owner",
+          milestoneId: "M2",
+          envKeys: ["ELYSIAN_GO_LIVE_BACKUP_READY"],
+        },
+      ],
       recommendedActions: ["由发布负责人填写角色与值守模板。"],
+      milestones: [
+        {
+          id: "M1",
+          title: "候选冻结",
+          status: "passed",
+          blockerCount: 0,
+          blockers: [],
+        },
+        {
+          id: "M2",
+          title: "环境前提锁定",
+          status: "blocked",
+          blockerCount: 1,
+          blockers: ["database backup / restore evidence 缺失。"],
+        },
+        {
+          id: "M3",
+          title: "目标环境演练",
+          status: "blocked",
+          blockerCount: 1,
+          blockers: ["发布后 `/health` 未验证。"],
+        },
+        {
+          id: "M4",
+          title: "首发放行结论",
+          status: "blocked",
+          blockerCount: 1,
+          blockers: ["前序里程碑未全部通过，当前不可给出首发放行结论。"],
+        },
+      ],
+      nextMilestone: "M2",
+      ownerHandoffs: [
+        {
+          owner: "DBA / 环境 owner",
+          blockerCount: 1,
+          blockers: ["database backup / restore evidence 缺失。"],
+          envKeys: ["ELYSIAN_GO_LIVE_BACKUP_READY"],
+        },
+      ],
     })
 
     expect(markdown).toContain("### Go-live Report")
     expect(markdown).toContain("- status: `failed`")
     expect(markdown).toContain("- releaseEnvironment: `production`")
+    expect(markdown).toContain("- nextMilestone: `M2`")
+    expect(markdown).toContain("- M2 环境前提锁定: `blocked` (1 blocker(s))")
+    expect(markdown).toContain("- DBA / 环境 owner: 1 blocker(s)")
+    expect(markdown).toContain("envKeys: ELYSIAN_GO_LIVE_BACKUP_READY")
     expect(markdown).toContain("database backup / restore evidence 缺失。")
   })
 })
@@ -213,6 +359,7 @@ describe("run", () => {
         ELYSIAN_GO_LIVE_TENANT_IMPACT: "false",
         ELYSIAN_GO_LIVE_CHECK_PASSED: "true",
         ELYSIAN_GO_LIVE_BUILD_VUE_PASSED: "true",
+        ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED: "true",
         ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED: "true",
         ELYSIAN_GO_LIVE_TENANT_FULL_PASSED: "true",
         ELYSIAN_GO_LIVE_BACKUP_READY: "true",
@@ -234,9 +381,20 @@ describe("run", () => {
     const report = JSON.parse(await readFile(reportPath, "utf8")) as {
       status: string
       blockers: string[]
+      nextMilestone: string | null
+      milestones: Array<{ id: string; status: string }>
+      ownerHandoffs: Array<{ owner: string; envKeys: string[] }>
     }
     expect(report.status).toBe("passed")
     expect(report.blockers).toEqual([])
+    expect(report.nextMilestone).toBeNull()
+    expect(report.milestones.map((item) => item.status)).toEqual([
+      "passed",
+      "passed",
+      "passed",
+      "passed",
+    ])
+    expect(report.ownerHandoffs).toEqual([])
   })
 
   test("fails fast when a boolean env is invalid", async () => {

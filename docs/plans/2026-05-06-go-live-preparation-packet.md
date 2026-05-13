@@ -19,6 +19,7 @@
 
 当前可配套使用：
 
+- `docs/plans/2026-05-13-reference-starter-go-live-stage-plan.md`
 - `bun run go-live:report`
 - `bun run go-live:gate`
 - `bun run go-live:finalize`
@@ -46,6 +47,11 @@ check:
 build:vue:
 - status: passed
 - date: 2026-05-06
+
+e2e:smoke:full:
+- status: passed
+- date: 2026-05-12
+- notes: 已在 `docs/plans/2026-05-12-reference-starter-release-acceptance-packet.md` 记录为通过；当前 go-live 候选冻结默认把这条结果视为 M1 基线的一部分。
 
 server:image:build:
 - status: passed
@@ -293,7 +299,7 @@ artifacts:
 latest result:
 - status: failed
 - blocker count: 16
-- notes: 当前脚本结论与准备包一致，阻断项集中在 release tag / PR、release environment、migration list、backup / roles / proxy owner，以及目标环境发布后最小冒烟证据。
+- notes: 当前脚本结论与准备包一致，阻断项集中在 release tag / PR、release environment、migration list、backup / roles / proxy owner，以及目标环境发布后最小冒烟证据；当前 `go-live-report` 还会输出 `ownerHandoffs`，可直接按 owner 分发 blocker 和应填 `envKeys`。
 ```
 
 ## 参考发行版首发验收衔接
@@ -324,6 +330,7 @@ ELYSIAN_GO_LIVE_TENANT_IMPACT=
 
 ELYSIAN_GO_LIVE_CHECK_PASSED=true
 ELYSIAN_GO_LIVE_BUILD_VUE_PASSED=true
+ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED=true
 ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED=true
 ELYSIAN_GO_LIVE_TENANT_FULL_PASSED=true
 

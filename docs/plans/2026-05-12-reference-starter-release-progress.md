@@ -412,3 +412,22 @@
 残留风险：
 
 - `docs/reference` 里仍有部分真实环境说明保留 `TBD` 或“未定稿”字样，属于环境 owner 外部前提，不是仓库内实现缺口
+
+## 2026-05-13 首发落地阶段计划落仓
+
+已完成：
+
+- 新增 `docs/plans/2026-05-13-reference-starter-go-live-stage-plan.md`，把首发落地收口为 `M1 候选冻结 -> M2 环境前提锁定 -> M3 目标环境演练 -> M4 首发放行结论`
+- `go-live-report` 已补 `ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED` 输入，并输出里程碑状态、`nextMilestone` 与结构化 blocker detail
+- `go-live-report` 进一步补 `ownerHandoffs`，把 blocker 直接按默认 owner 和 `envKeys` 分组，降低发布负责人二次整理字段的协调风险
+- `go-live-gate` 已透传里程碑状态，便于在 gate 与 Step Summary 中直接判读当前卡点
+- `docs/roadmap.md`、`docs/release-checklist.md`、`docs/reference/05-go-live-runbook.md`、`docs/reference/09-go-live-gate-input-template.md`、`docs/plans/2026-05-06-go-live-preparation-packet.md` 已同步到同一口径
+
+验证结果：
+
+- `bun test scripts/go-live-report.test.ts scripts/go-live-gate.test.ts scripts/go-live-finalize.test.ts`：通过
+- `git diff --check`：待当前轮次统一收尾时复核
+
+残留风险：
+
+- `go-live:*` 仍不会替环境 owner 自动补事实；若 `release tag / PR`、`environment`、`backup / restore`、`roles / oncall`、`proxy / TLS` 与目标环境冒烟未锁定，报告仍应继续阻断

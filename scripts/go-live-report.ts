@@ -12,6 +12,7 @@ interface GoLiveCheckSummary {
   tenantImpact: boolean
   checkPassed: boolean
   buildVuePassed: boolean
+  smokeFullPassed: boolean
   serverImageVerifyPassed: boolean
   tenantFullPassed: boolean
   backupReady: boolean
@@ -29,6 +30,39 @@ interface GoLiveCheckSummary {
   crossTenantIsolationVerified: boolean
 }
 
+export type GoLiveMilestoneId = "M1" | "M2" | "M3" | "M4"
+
+type GoLiveBlockerCategory =
+  | "release-input"
+  | "application-verification"
+  | "environment-prerequisite"
+  | "post-release-smoke"
+  | "tenant-safety"
+
+interface GoLiveBlockerDetail {
+  code: string
+  message: string
+  category: GoLiveBlockerCategory
+  defaultOwner: string
+  milestoneId: Exclude<GoLiveMilestoneId, "M4">
+  envKeys: string[]
+}
+
+interface GoLiveMilestone {
+  id: GoLiveMilestoneId
+  title: string
+  status: "passed" | "blocked"
+  blockerCount: number
+  blockers: string[]
+}
+
+interface GoLiveOwnerHandoff {
+  owner: string
+  blockerCount: number
+  blockers: string[]
+  envKeys: string[]
+}
+
 export interface GoLiveReport {
   generatedAt: string
   outputPath: string
@@ -43,7 +77,11 @@ export interface GoLiveReport {
   summary: GoLiveCheckSummary
   status: "passed" | "failed"
   blockers: string[]
+  blockerDetails: GoLiveBlockerDetail[]
   recommendedActions: string[]
+  milestones: GoLiveMilestone[]
+  nextMilestone: GoLiveMilestoneId | null
+  ownerHandoffs: GoLiveOwnerHandoff[]
 }
 
 const readNonEmptyEnv = (key: string) => {
@@ -94,6 +132,7 @@ const buildSummary = (): GoLiveCheckSummary => ({
   tenantImpact: readBooleanEnv("ELYSIAN_GO_LIVE_TENANT_IMPACT"),
   checkPassed: readBooleanEnv("ELYSIAN_GO_LIVE_CHECK_PASSED"),
   buildVuePassed: readBooleanEnv("ELYSIAN_GO_LIVE_BUILD_VUE_PASSED"),
+  smokeFullPassed: readBooleanEnv("ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED"),
   serverImageVerifyPassed: readBooleanEnv(
     "ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED",
   ),
@@ -129,116 +168,297 @@ const buildSummary = (): GoLiveCheckSummary => ({
 
 const pushBlocker = (
   condition: boolean,
-  blockers: string[],
-  message: string,
+  blockers: GoLiveBlockerDetail[],
+  detail: GoLiveBlockerDetail,
 ) => {
   if (!condition) {
-    blockers.push(message)
+    blockers.push(detail)
   }
 }
 
-export const buildBlockers = (summary: GoLiveCheckSummary) => {
-  const blockers: string[] = []
+export const buildBlockerDetails = (summary: GoLiveCheckSummary) => {
+  const blockers: GoLiveBlockerDetail[] = []
 
   pushBlocker(
     summary.sourceBranch === "dev" && summary.targetBranch === "main",
     blockers,
-    `发布流转不符合当前仓库基线：source=${summary.sourceBranch}, target=${summary.targetBranch}。`,
+    {
+      code: "release-branch-flow",
+      message: `发布流转不符合当前仓库基线：source=${summary.sourceBranch}, target=${summary.targetBranch}。`,
+      category: "release-input",
+      defaultOwner: "发布负责人",
+      milestoneId: "M1",
+      envKeys: [
+        "ELYSIAN_GO_LIVE_SOURCE_BRANCH",
+        "ELYSIAN_GO_LIVE_TARGET_BRANCH",
+      ],
+    },
   )
-  pushBlocker(
-    summary.releaseCommit !== null,
-    blockers,
-    "release commit 未锁定。",
-  )
+  pushBlocker(summary.releaseCommit !== null, blockers, {
+    code: "release-commit-missing",
+    message: "release commit 未锁定。",
+    category: "release-input",
+    defaultOwner: "发布负责人",
+    milestoneId: "M1",
+    envKeys: ["ELYSIAN_GO_LIVE_RELEASE_COMMIT"],
+  })
   pushBlocker(
     summary.releaseTag !== null || summary.releasePr !== null,
     blockers,
-    "release tag / release PR 未锁定。",
+    {
+      code: "release-tag-or-pr-missing",
+      message: "release tag / release PR 未锁定。",
+      category: "release-input",
+      defaultOwner: "发布负责人",
+      milestoneId: "M1",
+      envKeys: ["ELYSIAN_GO_LIVE_RELEASE_TAG", "ELYSIAN_GO_LIVE_RELEASE_PR"],
+    },
   )
-  pushBlocker(
-    summary.releaseEnvironment !== null,
-    blockers,
-    "release environment 未锁定。",
-  )
-  pushBlocker(
-    summary.migrationList.length > 0,
-    blockers,
-    "migration list 未锁定。",
-  )
-  pushBlocker(summary.checkPassed, blockers, "`bun run check` 未确认通过。")
-  pushBlocker(
-    summary.buildVuePassed,
-    blockers,
-    "`bun run build:vue` 未确认通过。",
-  )
-  pushBlocker(
-    summary.serverImageVerifyPassed,
-    blockers,
-    "`bun run server:image:verify` 未确认通过。",
-  )
-  pushBlocker(
-    summary.backupReady,
-    blockers,
-    "database backup / restore evidence 缺失。",
-  )
-  pushBlocker(
-    summary.releaseRolesReady,
-    blockers,
-    "release roles / oncall evidence 缺失。",
-  )
-  pushBlocker(
-    summary.proxyTlsOwnerReady,
-    blockers,
-    "proxy / tls owner 未明确。",
-  )
-  pushBlocker(summary.healthVerified, blockers, "发布后 `/health` 未验证。")
-  pushBlocker(summary.metricsVerified, blockers, "发布后 `/metrics` 未验证。")
-  pushBlocker(summary.adminLoginVerified, blockers, "发布后管理员登录未验证。")
-  pushBlocker(
-    summary.menuPermissionGateVerified,
-    blockers,
-    "发布后菜单与权限 gate 未验证。",
-  )
-  pushBlocker(
-    summary.coreWorkspaceListVerified,
-    blockers,
-    "发布后核心工作区列表未验证。",
-  )
-  pushBlocker(
-    summary.coreWriteActionVerified,
-    blockers,
-    "发布后核心写操作未验证。",
-  )
+  pushBlocker(summary.checkPassed, blockers, {
+    code: "check-not-passed",
+    message: "`bun run check` 未确认通过。",
+    category: "application-verification",
+    defaultOwner: "应用 owner",
+    milestoneId: "M1",
+    envKeys: ["ELYSIAN_GO_LIVE_CHECK_PASSED"],
+  })
+  pushBlocker(summary.buildVuePassed, blockers, {
+    code: "build-vue-not-passed",
+    message: "`bun run build:vue` 未确认通过。",
+    category: "application-verification",
+    defaultOwner: "应用 owner",
+    milestoneId: "M1",
+    envKeys: ["ELYSIAN_GO_LIVE_BUILD_VUE_PASSED"],
+  })
+  pushBlocker(summary.smokeFullPassed, blockers, {
+    code: "smoke-full-not-passed",
+    message: "`bun run e2e:smoke:full` 未确认通过。",
+    category: "application-verification",
+    defaultOwner: "应用 owner",
+    milestoneId: "M1",
+    envKeys: ["ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED"],
+  })
+  pushBlocker(summary.serverImageVerifyPassed, blockers, {
+    code: "server-image-verify-not-passed",
+    message: "`bun run server:image:verify` 未确认通过。",
+    category: "application-verification",
+    defaultOwner: "应用 owner",
+    milestoneId: "M1",
+    envKeys: ["ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED"],
+  })
+  pushBlocker(summary.releaseEnvironment !== null, blockers, {
+    code: "release-environment-missing",
+    message: "release environment 未锁定。",
+    category: "release-input",
+    defaultOwner: "发布负责人",
+    milestoneId: "M2",
+    envKeys: ["ELYSIAN_GO_LIVE_ENVIRONMENT"],
+  })
+  pushBlocker(summary.migrationList.length > 0, blockers, {
+    code: "migration-list-missing",
+    message: "migration list 未锁定。",
+    category: "release-input",
+    defaultOwner: "发布负责人 / DBA / 环境 owner",
+    milestoneId: "M2",
+    envKeys: ["ELYSIAN_GO_LIVE_MIGRATIONS"],
+  })
+  pushBlocker(summary.backupReady, blockers, {
+    code: "backup-evidence-missing",
+    message: "database backup / restore evidence 缺失。",
+    category: "environment-prerequisite",
+    defaultOwner: "DBA / 环境 owner",
+    milestoneId: "M2",
+    envKeys: ["ELYSIAN_GO_LIVE_BACKUP_READY"],
+  })
+  pushBlocker(summary.releaseRolesReady, blockers, {
+    code: "release-roles-missing",
+    message: "release roles / oncall evidence 缺失。",
+    category: "environment-prerequisite",
+    defaultOwner: "发布负责人",
+    milestoneId: "M2",
+    envKeys: ["ELYSIAN_GO_LIVE_RELEASE_ROLES_READY"],
+  })
+  pushBlocker(summary.proxyTlsOwnerReady, blockers, {
+    code: "proxy-tls-owner-missing",
+    message: "proxy / tls owner 未明确。",
+    category: "environment-prerequisite",
+    defaultOwner: "环境 owner",
+    milestoneId: "M2",
+    envKeys: ["ELYSIAN_GO_LIVE_PROXY_TLS_OWNER_READY"],
+  })
+  pushBlocker(summary.healthVerified, blockers, {
+    code: "health-not-verified",
+    message: "发布后 `/health` 未验证。",
+    category: "post-release-smoke",
+    defaultOwner: "应用 owner / 环境 owner",
+    milestoneId: "M3",
+    envKeys: ["ELYSIAN_GO_LIVE_HEALTH_VERIFIED"],
+  })
+  pushBlocker(summary.metricsVerified, blockers, {
+    code: "metrics-not-verified",
+    message: "发布后 `/metrics` 未验证。",
+    category: "post-release-smoke",
+    defaultOwner: "应用 owner / 环境 owner",
+    milestoneId: "M3",
+    envKeys: ["ELYSIAN_GO_LIVE_METRICS_VERIFIED"],
+  })
+  pushBlocker(summary.adminLoginVerified, blockers, {
+    code: "admin-login-not-verified",
+    message: "发布后管理员登录未验证。",
+    category: "post-release-smoke",
+    defaultOwner: "应用 owner",
+    milestoneId: "M3",
+    envKeys: ["ELYSIAN_GO_LIVE_ADMIN_LOGIN_VERIFIED"],
+  })
+  pushBlocker(summary.menuPermissionGateVerified, blockers, {
+    code: "menu-permission-gate-not-verified",
+    message: "发布后菜单与权限 gate 未验证。",
+    category: "post-release-smoke",
+    defaultOwner: "应用 owner",
+    milestoneId: "M3",
+    envKeys: ["ELYSIAN_GO_LIVE_MENU_PERMISSION_GATE_VERIFIED"],
+  })
+  pushBlocker(summary.coreWorkspaceListVerified, blockers, {
+    code: "core-workspace-list-not-verified",
+    message: "发布后核心工作区列表未验证。",
+    category: "post-release-smoke",
+    defaultOwner: "应用 owner",
+    milestoneId: "M3",
+    envKeys: ["ELYSIAN_GO_LIVE_CORE_WORKSPACE_LIST_VERIFIED"],
+  })
+  pushBlocker(summary.coreWriteActionVerified, blockers, {
+    code: "core-write-action-not-verified",
+    message: "发布后核心写操作未验证。",
+    category: "post-release-smoke",
+    defaultOwner: "应用 owner",
+    milestoneId: "M3",
+    envKeys: ["ELYSIAN_GO_LIVE_CORE_WRITE_ACTION_VERIFIED"],
+  })
 
   if (summary.tenantImpact) {
-    pushBlocker(
-      summary.tenantFullPassed,
-      blockers,
-      "`bun run e2e:tenant:full` 未确认通过。",
-    )
-    pushBlocker(
-      summary.superAdminTenantAccessVerified,
-      blockers,
-      "super-admin `/system/tenants` 未验证。",
-    )
-    pushBlocker(
-      summary.tenantAdminDeniedVerified,
-      blockers,
-      "tenant admin 禁止访问 `/system/tenants` 未验证。",
-    )
-    pushBlocker(
-      summary.nonDefaultTenantLoginVerified,
-      blockers,
-      "非默认 tenant 登录未验证。",
-    )
-    pushBlocker(
-      summary.crossTenantIsolationVerified,
-      blockers,
-      "跨租户隔离未验证。",
-    )
+    pushBlocker(summary.tenantFullPassed, blockers, {
+      code: "tenant-full-not-passed",
+      message: "`bun run e2e:tenant:full` 未确认通过。",
+      category: "application-verification",
+      defaultOwner: "应用 owner",
+      milestoneId: "M1",
+      envKeys: ["ELYSIAN_GO_LIVE_TENANT_FULL_PASSED"],
+    })
+    pushBlocker(summary.superAdminTenantAccessVerified, blockers, {
+      code: "super-admin-tenant-access-not-verified",
+      message: "super-admin `/system/tenants` 未验证。",
+      category: "tenant-safety",
+      defaultOwner: "应用 owner",
+      milestoneId: "M3",
+      envKeys: ["ELYSIAN_GO_LIVE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED"],
+    })
+    pushBlocker(summary.tenantAdminDeniedVerified, blockers, {
+      code: "tenant-admin-denied-not-verified",
+      message: "tenant admin 禁止访问 `/system/tenants` 未验证。",
+      category: "tenant-safety",
+      defaultOwner: "应用 owner",
+      milestoneId: "M3",
+      envKeys: ["ELYSIAN_GO_LIVE_TENANT_ADMIN_DENIED_VERIFIED"],
+    })
+    pushBlocker(summary.nonDefaultTenantLoginVerified, blockers, {
+      code: "non-default-tenant-login-not-verified",
+      message: "非默认 tenant 登录未验证。",
+      category: "tenant-safety",
+      defaultOwner: "应用 owner",
+      milestoneId: "M3",
+      envKeys: ["ELYSIAN_GO_LIVE_NON_DEFAULT_TENANT_LOGIN_VERIFIED"],
+    })
+    pushBlocker(summary.crossTenantIsolationVerified, blockers, {
+      code: "cross-tenant-isolation-not-verified",
+      message: "跨租户隔离未验证。",
+      category: "tenant-safety",
+      defaultOwner: "应用 owner / DBA / 环境 owner",
+      milestoneId: "M3",
+      envKeys: ["ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED"],
+    })
   }
 
   return blockers
+}
+
+export const buildBlockers = (summary: GoLiveCheckSummary) =>
+  buildBlockerDetails(summary).map((item) => item.message)
+
+export const buildOwnerHandoffs = (blockerDetails: GoLiveBlockerDetail[]) => {
+  const handoffMap = new Map<string, GoLiveOwnerHandoff>()
+
+  for (const detail of blockerDetails) {
+    const current = handoffMap.get(detail.defaultOwner) ?? {
+      owner: detail.defaultOwner,
+      blockerCount: 0,
+      blockers: [],
+      envKeys: [],
+    }
+
+    current.blockerCount += 1
+    current.blockers.push(detail.message)
+
+    for (const envKey of detail.envKeys) {
+      if (!current.envKeys.includes(envKey)) {
+        current.envKeys.push(envKey)
+      }
+    }
+
+    handoffMap.set(detail.defaultOwner, current)
+  }
+
+  return Array.from(handoffMap.values()).sort(
+    (left, right) => right.blockerCount - left.blockerCount,
+  )
+}
+
+export const buildMilestones = (blockerDetails: GoLiveBlockerDetail[]) => {
+  const orderedMilestones: Array<{
+    id: GoLiveMilestoneId
+    title: string
+  }> = [
+    { id: "M1", title: "候选冻结" },
+    { id: "M2", title: "环境前提锁定" },
+    { id: "M3", title: "目标环境演练" },
+    { id: "M4", title: "首发放行结论" },
+  ]
+
+  const milestones = orderedMilestones.map<GoLiveMilestone>((milestone) => {
+    if (milestone.id === "M4") {
+      const hasBlockedPrerequisite = blockerDetails.length > 0
+      return {
+        id: milestone.id,
+        title: milestone.title,
+        status: hasBlockedPrerequisite ? "blocked" : "passed",
+        blockerCount: hasBlockedPrerequisite ? 1 : 0,
+        blockers: hasBlockedPrerequisite
+          ? ["前序里程碑未全部通过，当前不可给出首发放行结论。"]
+          : [],
+      }
+    }
+
+    const blockers = blockerDetails
+      .filter((item) => item.milestoneId === milestone.id)
+      .map((item) => item.message)
+
+    return {
+      id: milestone.id,
+      title: milestone.title,
+      status: blockers.length === 0 ? "passed" : "blocked",
+      blockerCount: blockers.length,
+      blockers,
+    }
+  })
+
+  const nextMilestone =
+    milestones.find(
+      (milestone) => milestone.id !== "M4" && milestone.status === "blocked",
+    )?.id ?? null
+
+  return {
+    milestones,
+    nextMilestone,
+  }
 }
 
 export const buildRecommendedActions = (
@@ -259,8 +479,20 @@ export const buildRecommendedActions = (
     actions.add("补齐 release tag 或 release PR，避免上线对象漂移。")
   }
 
+  if (summary.releaseCommit === null) {
+    actions.add("先锁定 release commit，避免候选工作区与最终发布对象漂移。")
+  }
+
   if (summary.migrationList.length === 0) {
     actions.add("锁定 migration list，并由 DBA / 环境 owner 明确执行顺序。")
+  }
+
+  if (!summary.checkPassed || !summary.buildVuePassed) {
+    actions.add("先补齐仓库基线验证，再继续推进 release 候选冻结。")
+  }
+
+  if (!summary.smokeFullPassed) {
+    actions.add("先执行 `bun run e2e:smoke:full`，再推进真实环境 go-live。")
   }
 
   if (!summary.backupReady) {
@@ -321,12 +553,28 @@ export const renderSummaryMarkdown = (report: GoLiveReport) => {
     `- releasePr: \`${report.summary.releasePr ?? "unset"}\``,
     `- tenantImpact: \`${String(report.summary.tenantImpact)}\``,
     `- blockerCount: \`${String(report.blockers.length)}\``,
+    `- nextMilestone: \`${report.nextMilestone ?? "none"}\``,
+    "",
+    "Milestones:",
+    ...report.milestones.map(
+      (item) =>
+        `- ${item.id} ${item.title}: \`${item.status}\` (${String(item.blockerCount)} blocker(s))`,
+    ),
     "",
     "Blockers:",
     ...report.blockers.map((item) => `- ${item}`),
     "",
     "Recommended actions:",
     ...report.recommendedActions.map((item) => `- ${item}`),
+    "",
+    "Owner handoffs:",
+    ...(report.ownerHandoffs.length > 0
+      ? report.ownerHandoffs.flatMap((item) => [
+          `- ${item.owner}: ${String(item.blockerCount)} blocker(s)`,
+          ...item.blockers.map((blocker) => `  - ${blocker}`),
+          `  - envKeys: ${item.envKeys.join(", ")}`,
+        ])
+      : ["- none"]),
     "",
   ]
 
@@ -335,8 +583,11 @@ export const renderSummaryMarkdown = (report: GoLiveReport) => {
 
 export const run = async () => {
   const summary = buildSummary()
-  const blockers = buildBlockers(summary)
+  const blockerDetails = buildBlockerDetails(summary)
+  const blockers = blockerDetails.map((item) => item.message)
   const recommendedActions = buildRecommendedActions(blockers, summary)
+  const { milestones, nextMilestone } = buildMilestones(blockerDetails)
+  const ownerHandoffs = buildOwnerHandoffs(blockerDetails)
   const outputPath = resolveOutputPath()
 
   const report: GoLiveReport = {
@@ -353,7 +604,11 @@ export const run = async () => {
     summary,
     status: blockers.length === 0 ? "passed" : "failed",
     blockers,
+    blockerDetails,
     recommendedActions,
+    milestones,
+    nextMilestone,
+    ownerHandoffs,
   }
 
   await mkdir(dirname(outputPath), { recursive: true })
