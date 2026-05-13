@@ -71,6 +71,7 @@
 - 锁定 `release roles / oncall`
 - 锁定 `proxy / TLS owner`
 - 用统一模板把上述输入映射为 `go-live:*` 环境变量
+- 必要时执行 `bun run go-live:handoff`，把当前 blocker 与预填字段分发给发布负责人、环境 / DBA owner、应用 owner
 
 出口门禁：
 
@@ -84,6 +85,8 @@
 - `docs/reference/08-release-roles-and-oncall-template.md`
 - `docs/reference/09-go-live-gate-input-template.md`
 - `docs/plans/2026-05-06-go-live-preparation-packet.md`
+- `artifacts/go-live/go-live-handoff-report.json`
+- `artifacts/go-live/go-live-input.prefill.env`
 
 ## M3 目标环境演练
 

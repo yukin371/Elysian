@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-05-12`
+更新时间：`2026-05-13`
 
 ## 项目类型
 
@@ -176,7 +176,7 @@
   确认路径：若后续新增 worker、job 或多进程运行面，再补充更多运行入口。
 - 构建命令：已存在 `bun run build:vue`、`bun run build:uniapp` 与 `bun run server:image:build`
   补充：已存在 `bun run server:image:smoke` 与 `bun run server:image:verify`，用于镜像构建后的本机容器烟测。
-  补充：已存在 `bun run go-live:report`、`bun run go-live:gate` 与 `bun run go-live:finalize`，用于把 go-live 阻断项收敛成统一报告与门禁结论。
+  补充：已存在 `bun run go-live:report`、`bun run go-live:handoff`、`bun run go-live:gate` 与 `bun run go-live:finalize`，用于把 go-live 阻断项收敛成统一报告、按角色拆分交接包与门禁结论。
   确认路径：若后续需要 server bundle、签名产物或多架构镜像，再补充更正式的 build matrix。
 - 部署方式：已固定首个正式生产平台基线为“单 Linux 主机 + Docker Engine”；具体镜像仓库、反向代理实现、自动回滚与监控告警平台仍为 `TBD`
   确认路径：后续按平台化能力逐项补 ADR / runbook。
@@ -215,6 +215,7 @@
 - 如果在 schema 未稳定前直接做 AI 自由生成，后续可维护性风险很高。
 - generator 的安全 staging apply 已可用；二次生成进入正式模块目录仍以 `--target module` 集成桩和人工确认清单为边界，正式 migration / menu / permission / registry 合入不得自动化冒进。
 - 当前参考发行版的本地自动化验证链路已包含 `check`、Vue 构建、server 镜像烟测、smoke E2E、tenant E2E 与 generator CLI 回归；后续风险主要转向真实 go-live 环境输入、生产级对象存储、通知投递与更复杂 workflow 语义。
+- 已新增 `bun run go-live:handoff`，可基于 `go-live-report.json` 产出预填 `.env` 草稿和按 `发布负责人 / 环境-DBA / 应用 owner` 拆分的交接包，继续降低发布负责人二次摘字段与漏传 blocker 的协调风险。
 
 ## 当前可用验证
 
@@ -298,6 +299,10 @@
 - Tenant 发布演练报告：`bun run tenant:release:report`
 - Tenant 发布演练门禁：`bun run tenant:release:gate`
 - Tenant 发布演练收尾：`bun run tenant:release:finalize`
+- Go-live 报告：`bun run go-live:report`
+- Go-live 交接包：`bun run go-live:handoff`
+- Go-live 门禁：`bun run go-live:gate`
+- Go-live 一键收尾：`bun run go-live:finalize`
 - E2E 冒烟报告诊断：`bun run e2e:smoke:diagnose`
 - E2E 冒烟报告索引：`bun run e2e:smoke:reports:index`
 - E2E 冒烟报告门禁：`bun run e2e:smoke:reports:gate`

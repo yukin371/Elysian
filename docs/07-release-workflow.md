@@ -1,6 +1,6 @@
 # 发布流转
 
-更新时间：`2026-05-06`
+更新时间：`2026-05-13`
 
 本文档定义 `Elysian` 当前阶段的标准开发与发布流转，目标是让团队在不引入复杂发布平台的前提下，保持：
 
@@ -87,8 +87,9 @@
 若希望把 go-live 清单进一步收敛成统一结论，当前可追加：
 
 1. `bun run go-live:report`
-2. 根据 blocker 补齐环境证据
-3. `bun run go-live:gate`
+2. 若需要分发给对应 owner，执行 `bun run go-live:handoff`
+3. 根据 blocker 与交接包补齐环境证据
+4. `bun run go-live:gate`
 
 若希望一键执行 report -> gate，可使用：
 

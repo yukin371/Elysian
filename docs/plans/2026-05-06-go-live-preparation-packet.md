@@ -21,6 +21,7 @@
 
 - `docs/plans/2026-05-13-reference-starter-go-live-stage-plan.md`
 - `bun run go-live:report`
+- `bun run go-live:handoff`
 - `bun run go-live:gate`
 - `bun run go-live:finalize`
 - `docs/reference/09-go-live-gate-input-template.md`
@@ -290,16 +291,20 @@ next actions:
 ```text
 commands:
 - bun run go-live:report
+- bun run go-live:handoff
 - bun run go-live:gate
 
 artifacts:
 - artifacts/go-live/go-live-report.json
+- artifacts/go-live/go-live-handoff-report.json
+- artifacts/go-live/go-live-input.prefill.env
+- artifacts/go-live/handoffs/
 - artifacts/go-live/go-live-gate-report.json
 
 latest result:
 - status: failed
 - blocker count: 16
-- notes: 当前脚本结论与准备包一致，阻断项集中在 release tag / PR、release environment、migration list、backup / roles / proxy owner，以及目标环境发布后最小冒烟证据；当前 `go-live-report` 还会输出 `ownerHandoffs`，可直接按 owner 分发 blocker 和应填 `envKeys`。
+- notes: 当前脚本结论与准备包一致，阻断项集中在 release tag / PR、release environment、migration list、backup / roles / proxy owner，以及目标环境发布后最小冒烟证据；当前可先用 `go-live-report` 收敛 blocker，再用 `go-live-handoff` 生成预填 `.env` 与按角色拆分的交接包。
 ```
 
 ## 参考发行版首发验收衔接

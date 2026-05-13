@@ -76,7 +76,8 @@ bun run e2e:tenant:full
 
 ```powershell
 bun run go-live:report
+bun run go-live:handoff
 bun run go-live:gate
 ```
 
-`go-live:*` 的输入模板见 [09-go-live-gate-input-template.md](./09-go-live-gate-input-template.md)。若缺少 release tag / PR、migration 顺序、backup / recovery、proxy / TLS、值守或目标环境 smoke 证据，脚本应继续阻断上线。
+`go-live:*` 的输入模板见 [09-go-live-gate-input-template.md](./09-go-live-gate-input-template.md)。若缺少 release tag / PR、migration 顺序、backup / recovery、proxy / TLS、值守或目标环境 smoke 证据，脚本应继续阻断上线；若需要直接分发 blocker 和 `envKeys`，先执行 `go-live:handoff` 生成预填 `.env` 与按角色拆分的交接包。

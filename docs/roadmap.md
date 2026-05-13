@@ -16,6 +16,7 @@
 - 当前前端试稿结论：`generator preview` 的页面结构优化仍先落在 `apps/example-vue` 的 `demohub` 原型页，再回流到正式参考发行版工作区，避免把试错直接写死在首发 owner 中
 - 当前约束：不把首发做成多前端生态，不新增第二套 starter 真相，不把高阶 Studio、复杂 BPM、React/uniapp 首发化写进首发门槛
 - 已具备基础：后台常用模块、workflow 最小闭环、generator-session、SQL preview、标准 CRUD 前端 surface 与 go-live / release checklist 已可作为首发验证对象继续打磨
+- 已补 repo 侧 go-live 交接收口：`go-live:report` 之外，当前还可用 `go-live:handoff` 直接产出预填 `.env` 草稿与按角色拆分的交接包，继续降低发布负责人二次整理 blocker 和 `envKeys` 的人工风险
 - 已推进收口：generator 当前已补 `text/json` 字段支持、simplified schema 展开、`validate-schema` 校验入口、`--target module`、`*.persistence.ts` 模板，以及 Studio 步骤引导流与模板化 schema 输入
 - 当前结论：先把参考发行版做成可发布、可复制、可验证的新项目模板，再把 generator 自举和企业后台体验作为持续增强轨道
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)

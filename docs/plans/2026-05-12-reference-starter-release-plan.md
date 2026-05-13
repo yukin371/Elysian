@@ -429,6 +429,7 @@
 - `bun run e2e:smoke:full`
 - `bun run e2e:tenant:full`
 - `bun run go-live:report`
+- `bun run go-live:handoff`
 - `bun run go-live:gate`
 - `bun run go-live:finalize`
 

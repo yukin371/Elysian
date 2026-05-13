@@ -205,6 +205,7 @@ packages/
 | `bun run e2e:tenant:full` | 多租户 E2E（含 migrate + seed） |
 | `bun run server:image:verify` | server 镜像构建 + 本地容器烟测 |
 | `bun run go-live:report` | 生成 go-live blocker 报告 |
+| `bun run go-live:handoff` | 基于 report 生成预填交接包 |
 | `bun run go-live:gate` | 基于报告输出放行 / 阻断结论 |
 | `bun run go-live:finalize` | 串联 go-live report -> gate |
 | `bun run stack:up` | 容器一键启动 |
@@ -231,13 +232,14 @@ bun run e2e:tenant:full
 
 # 真实环境 go-live 附加口径
 bun run go-live:report
+bun run go-live:handoff
 bun run go-live:gate
 ```
 
 说明：
 
 - `dev -> main` 的仓库发布先走 `check` / `build:vue` 与 [release-checklist.md](./docs/release-checklist.md)。
-- 真实环境上线再追加 `go-live:*`。
+- 真实环境上线再追加 `go-live:*`；若需要分发给发布负责人、环境 / DBA owner、应用 owner，先跑 `go-live:handoff` 产出拆分交接包。
 - `tenant:release:*` 仅服务 tenant 演练，不代表正式生产发布命令。
 
 ## 文档索引

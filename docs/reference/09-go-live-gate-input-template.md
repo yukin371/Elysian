@@ -1,12 +1,13 @@
 # Go-live Gate 输入模板
 
-更新时间：`2026-05-06`
+更新时间：`2026-05-13`
 
 本文档用于给 `go-live:*` 脚本提供统一输入来源，减少发布负责人、环境 owner 与 DBA 之间的口径漂移。
 
 适用脚本：
 
 - `bun run go-live:report`
+- `bun run go-live:handoff`
 - `bun run go-live:gate`
 - `bun run go-live:finalize`
 
@@ -240,12 +241,23 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=
 - 给出每组 blocker 对应的 `envKeys`
 - 供发布负责人直接分发给对应 owner，而不必手工再从模板里二次摘字段
 
+若需要把这些字段和 blocker 进一步收敛成可直接转发的产物，可执行 `bun run go-live:handoff`。当前默认会生成：
+
+- `artifacts/go-live/go-live-input.prefill.env`
+- `artifacts/go-live/handoffs/release-coordinator.md`
+- `artifacts/go-live/handoffs/release-coordinator.env`
+- `artifacts/go-live/handoffs/environment-dba.md`
+- `artifacts/go-live/handoffs/environment-dba.env`
+- `artifacts/go-live/handoffs/application-owner.md`
+- `artifacts/go-live/handoffs/application-owner.env`
+
 ## 当前推荐交接顺序
 
 1. 发布负责人先补 `release tag / PR / environment / roles`。
 2. 环境 / DBA owner 再补 `migration / backup / proxy / health / metrics`。
 3. 应用 owner 最后补 `admin login / permission gate / workspace / write action`，以及按需的 tenant 附加验证。
-4. 三方完成后执行 `bun run go-live:report` 与 `bun run go-live:gate`。
+4. 先执行 `bun run go-live:report`，再按需执行 `bun run go-live:handoff` 分发交接包。
+5. 三方回填完成后执行 `bun run go-live:gate`。
 
 ## 可直接转发的交接消息
 
@@ -328,9 +340,10 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=
 
 1. 先按本模板填值。
 2. 运行 `bun run go-live:report`。
-3. 按 blocker 补齐剩余环境事实。
-4. 运行 `bun run go-live:gate`。
-5. 若希望一键执行，使用 `bun run go-live:finalize`。
+3. 若需要按角色分发，运行 `bun run go-live:handoff`。
+4. 按 blocker 补齐剩余环境事实。
+5. 运行 `bun run go-live:gate`。
+6. 若希望一键执行，使用 `bun run go-live:finalize`。
 
 ## Blocker 语义与停止条件映射
 

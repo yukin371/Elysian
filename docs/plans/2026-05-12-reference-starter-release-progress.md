@@ -162,6 +162,7 @@
   - `bun run e2e:smoke:full`
   - `bun run e2e:tenant:full`
   - `bun run go-live:report`
+  - `bun run go-live:handoff`
   - `bun run go-live:gate`
 - `package.json` 已确认这些脚本存在
 - `docs/reference/05-go-live-runbook.md` 已把 `server:image:verify` 与 `e2e:smoke:full` 纳入发布前验证

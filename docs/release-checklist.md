@@ -1,6 +1,6 @@
 # 发布 / 上线检查清单
 
-更新时间：`2026-05-12`
+更新时间：`2026-05-13`
 
 用于两类场景：
 
@@ -139,6 +139,7 @@
 若要把正式上线检查从“人工清单”收敛成“可执行报告”，可追加：
 
 - `bun run go-live:report`
+- `bun run go-live:handoff`
 - `bun run go-live:gate`
 - 或一键执行 `bun run go-live:finalize`
 
@@ -170,6 +171,7 @@
 ### B.2 当前脚本结论边界
 
 - `go-live:report`：生成当前 blocker 列表与建议动作
+- `go-live:handoff`：基于 report 产出预填总模板与按角色拆分的交接包
 - `go-live:gate`：根据 report 输出放行 / 阻断结论
 - `go-live:finalize`：串联 report -> gate
 - 这套脚本不会替用户“自动确认环境已就绪”，只会把已填入的事实汇总成一致结论

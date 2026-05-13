@@ -22,6 +22,7 @@
     "server:image:smoke": "bun scripts/server-image-smoke.ts",
     "server:image:verify": "bun run server:image:build && bun run server:image:smoke",
     "go-live:report": "bun scripts/go-live-report.ts",
+    "go-live:handoff": "bun scripts/go-live-handoff.ts",
     "go-live:gate": "bun scripts/go-live-gate.ts",
     "go-live:finalize": "bun scripts/go-live-finalize.ts",
     "openapi:types:generate": "bun scripts/generate-openapi-types.ts",
