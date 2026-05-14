@@ -61,8 +61,8 @@ docker build -f apps/server/Dockerfile -t elysian-server:local .
 - 镜像基于 `oven/bun:1.3.10`
 - 当前镜像安装的是 production 依赖，目标是运行 `@elysian/server`
 - 当前镜像不承担 `drizzle-kit` 执行责任，因此 migration 仍在镜像外完成
-- `server:image:smoke` 会启动临时容器并检查 `/health` 与 `/metrics`，默认要求外部提供可达的 `DATABASE_URL` 与 `ACCESS_TOKEN_SECRET`
-- 若本机 PostgreSQL 供容器访问，`DATABASE_URL` 通常应写成 `host.docker.internal`，而不是容器内不可达的 `localhost`
+- `server:image:smoke` 会启动临时容器并检查 `/health` 与 `/metrics`，默认要求外部提供可达的 `DATABASE_URL` 与 `ACCESS_TOKEN_SECRET`；若同时提供 `DATABASE_RUNTIME_URL`，容器内 server 运行时会优先使用它
+- 若本机 PostgreSQL 供容器访问，`DATABASE_URL` / `DATABASE_RUNTIME_URL` 通常应写成 `host.docker.internal`，而不是容器内不可达的 `localhost`
 
 ## 运行前必备环境变量
 
@@ -71,6 +71,7 @@ docker build -f apps/server/Dockerfile -t elysian-server:local .
 - `APP_ENV=production`
 - `PORT`
 - `DATABASE_URL`
+- `DATABASE_RUNTIME_URL`（若运行时与 migration/seed 使用不同数据库角色）
 - `ACCESS_TOKEN_SECRET`
 
 强烈建议显式设置：

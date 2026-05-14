@@ -1,5 +1,13 @@
-export { createDatabaseConfig, type DatabaseConfig } from "./config"
-export { createDatabaseClient, type DatabaseClient } from "./client"
+export {
+  createDatabaseConfig,
+  createRuntimeDatabaseConfig,
+  type DatabaseConfig,
+} from "./config"
+export {
+  createDatabaseClient,
+  createRuntimeDatabaseClient,
+  type DatabaseClient,
+} from "./client"
 export {
   buildMigrationProposalFromChangePlan,
   type DatabaseChangePlanLike,

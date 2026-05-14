@@ -46,7 +46,7 @@
 - `customer` 模块已接入 auth guard，401 / 403 语义已有测试覆盖。
 - auth 模块当前已对 `login / refresh / logout / permission denied` 写入最小审计记录，并保留 `request id / ip / user agent / actor / target / result` 字段。
 - 在启用 `tenant-context` 数据库上下文时，`/auth/login` 若未显式传入 `tenantCode`，当前会默认收敛到 `DEFAULT_TENANT_ID` 范围，避免同名用户跨租户误命中。
-- 在存在 `DATABASE_URL` 时，server 会自动注册 `tenant-context`、`auth`、`tenant`、`customer`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 模块。
+- 在存在 `DATABASE_RUNTIME_URL` 或 `DATABASE_URL` 时，server 会自动注册 `tenant-context`、`auth`、`tenant`、`customer`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 模块；运行时若同时提供两者，优先使用 `DATABASE_RUNTIME_URL`，便于把 server 连接切到 `NOSUPERUSER + NOBYPASSRLS` 的受限角色，而 migrate / seed 继续使用管理连接。
 - 服务端已启用 CORS，可直接支撑本地 `dev:server` + `dev:vue` 双端口开发；当前也已补 `dev:uniapp` / `build:uniapp` 骨架脚本，供 `uniapp` H5 空壳验证使用。
 - 服务端已支持基于环境变量的最小 CORS 白名单和内存限流策略（生产环境默认启用限流）。
 - 限流开启时服务端会返回 `x-ratelimit-limit`、`x-ratelimit-remaining`、`x-ratelimit-reset` 响应头，并在超限时保留 `retry-after`。

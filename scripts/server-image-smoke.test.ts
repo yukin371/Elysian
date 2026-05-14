@@ -20,6 +20,9 @@ describe("loadServerImageSmokeConfig", () => {
     expect(config.appEnv).toBe("production")
     expect(config.rateLimitEnabled).toBeTrue()
     expect(config.baseUrl).toBe("http://127.0.0.1:3300")
+    expect(config.runtimeDatabaseUrl).toBe(
+      "postgres://postgres:postgres@host.docker.internal:5432/elysian",
+    )
   })
 
   test("throws when DATABASE_URL is missing", () => {
@@ -28,6 +31,22 @@ describe("loadServerImageSmokeConfig", () => {
         ACCESS_TOKEN_SECRET: "secret",
       }),
     ).toThrow("DATABASE_URL is required for server image smoke")
+  })
+
+  test("prefers DATABASE_RUNTIME_URL when provided", () => {
+    const config = loadServerImageSmokeConfig({
+      DATABASE_URL: "postgres://owner:owner@host.docker.internal:5432/elysian",
+      DATABASE_RUNTIME_URL:
+        "postgres://runtime:runtime@host.docker.internal:5432/elysian",
+      ACCESS_TOKEN_SECRET: "secret",
+    })
+
+    expect(config.databaseUrl).toBe(
+      "postgres://owner:owner@host.docker.internal:5432/elysian",
+    )
+    expect(config.runtimeDatabaseUrl).toBe(
+      "postgres://runtime:runtime@host.docker.internal:5432/elysian",
+    )
   })
 })
 
@@ -57,6 +76,8 @@ describe("buildDockerRunArgs", () => {
       "PORT=3400",
       "-e",
       "DATABASE_URL=postgres://postgres:postgres@host.docker.internal:5432/elysian",
+      "-e",
+      "DATABASE_RUNTIME_URL=postgres://postgres:postgres@host.docker.internal:5432/elysian",
       "-e",
       "ACCESS_TOKEN_SECRET=secret",
       "-e",

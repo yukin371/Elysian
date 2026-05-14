@@ -21,6 +21,7 @@ export interface ServerImageSmokeConfig {
   timeoutMs: number
   logTailLines: number
   databaseUrl: string
+  runtimeDatabaseUrl: string
   accessTokenSecret: string
   corsAllowedOrigins: string
   rateLimitEnabled: boolean
@@ -128,8 +129,14 @@ export const loadServerImageSmokeConfig = (
   env: Record<string, string | undefined> = process.env,
 ): ServerImageSmokeConfig => {
   const databaseUrl = env.DATABASE_URL?.trim()
+  const runtimeDatabaseUrl =
+    env.DATABASE_RUNTIME_URL?.trim() || databaseUrl || undefined
   const accessTokenSecret = env.ACCESS_TOKEN_SECRET?.trim()
   assert(databaseUrl, "DATABASE_URL is required for server image smoke")
+  assert(
+    runtimeDatabaseUrl,
+    "DATABASE_RUNTIME_URL or DATABASE_URL is required for server image smoke",
+  )
   assert(
     accessTokenSecret,
     "ACCESS_TOKEN_SECRET is required for server image smoke",
@@ -168,6 +175,7 @@ export const loadServerImageSmokeConfig = (
       DEFAULT_LOG_TAIL_LINES,
     ),
     databaseUrl,
+    runtimeDatabaseUrl,
     accessTokenSecret,
     corsAllowedOrigins:
       env.CORS_ALLOWED_ORIGINS?.trim() || "http://localhost:4173",
@@ -198,6 +206,8 @@ export const buildDockerRunArgs = (config: ServerImageSmokeConfig) => {
     `PORT=${String(config.port)}`,
     "-e",
     `DATABASE_URL=${config.databaseUrl}`,
+    "-e",
+    `DATABASE_RUNTIME_URL=${config.runtimeDatabaseUrl}`,
     "-e",
     `ACCESS_TOKEN_SECRET=${config.accessTokenSecret}`,
     "-e",

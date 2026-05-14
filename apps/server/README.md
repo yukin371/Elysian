@@ -2,7 +2,7 @@
 
 `apps/server` 是后端运行时 owner，负责把 HTTP、鉴权、租户上下文、模块注册和错误/观测基线装配成一个可运行服务。
 
-> 当前简化边界：除 `system` 外，业务模块只在存在 `DATABASE_URL` 时注册；运行时默认基于 `Elysia + @elysian/persistence`，不声明独立发布平台、对象存储或通用 BPM 引擎已经成熟。
+> 当前简化边界：除 `system` 外，业务模块只在存在 `DATABASE_RUNTIME_URL` 或 `DATABASE_URL` 时注册；server 运行时若同时提供两者，优先使用 `DATABASE_RUNTIME_URL`，而 migration / seed 仍沿用 `DATABASE_URL`。
 
 ## Owns
 
@@ -69,7 +69,7 @@ flowchart LR
 ## Validation
 
 - `src/app.ts` 已确认统一拥有 CORS、OpenAPI、rate limit、404 与异常错误映射。
-- `src/index.ts` 已确认模块注册是显式装配，且 `DATABASE_URL` 缺失时不会注册业务模块。
+- `src/index.ts` 已确认模块注册是显式装配，且 `DATABASE_RUNTIME_URL` 与 `DATABASE_URL` 都缺失时不会注册业务模块。
 - `src/modules/module.ts` 已确认模块边界契约仅包含 `name + register(app, context)`。
 - `src/modules/system.ts` 已确认 `/health`、`/platform`、`/metrics`、`/metrics/prometheus`、`/system/modules` 属于 server runtime owner。
 
