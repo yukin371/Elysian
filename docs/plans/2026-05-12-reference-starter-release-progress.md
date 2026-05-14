@@ -586,3 +586,22 @@
 
 - 当前 `staging` go-live 演练已通过，已不存在应用侧或环境侧 blocker
 - 若后续切换到新的真实目标环境，仍需按同一模板重新锁定该环境的 runtime DB 角色、backup / restore 与发布后冒烟证据，不能直接复用本次 `staging` 结果
+
+## 2026-05-14 发布对象锁定
+
+已完成：
+
+- 创建 annotated tag：`v1.0.0`
+- 将 `v1.0.0` 锁定到 `b0c2c0f`
+- 以 `ELYSIAN_GO_LIVE_RELEASE_COMMIT=b0c2c0f` 重新执行 `bun run go-live:finalize`
+- 确认 `artifacts/go-live/go-live-report.json` 与 `artifacts/go-live/go-live-gate-report.json` 均已切换到 `b0c2c0f`
+
+验证结果：
+
+- `git rev-list -n 1 v1.0.0`：`b0c2c0f...`
+- `go-live:finalize`：通过
+- `go-live-report`：`releaseCommit=b0c2c0f`
+
+残留风险：
+
+- 当前发布对象已锁定到真实可发布 head，不再存在“通过证据基于旧 commit、tag 指向新 commit”的口径漂移

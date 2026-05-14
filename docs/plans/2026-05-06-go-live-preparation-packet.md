@@ -31,7 +31,7 @@
 
 ```text
 source branch: dev
-release commit: 8e0b74e
+release commit: b0c2c0f
 release tag: v1.0.0
 release pr:
 release environment: staging
@@ -70,6 +70,11 @@ M1 candidate verification:
 - date: 2026-05-14
 - notes: `8e0b74e` 上复跑 `bun run check`、`bun run build:vue`、`bun run server:image:verify`、`bun run e2e:smoke:full` 与 `bun run e2e:tenant:full` 均通过；当前候选 commit 已锁定，release tag 已进入 `v1.0.0`
 
+final tagged release object:
+- status: passed
+- date: 2026-05-14
+- notes: `v1.0.0` 已锁定到 `b0c2c0f`；`go-live:report`、`go-live:gate` 与 `go-live:finalize` 已按 `b0c2c0f` 重生成并通过
+
 e2e:tenant:full:
 - status: passed
 - date: 2026-05-06
@@ -98,7 +103,7 @@ not in this release:
 
 ```text
 release environment: staging
-release commit / tag / PR: 8e0b74e / v1.0.0
+release commit / tag / PR: b0c2c0f / v1.0.0
 release date window:
 
 database owner:
@@ -154,7 +159,7 @@ notes:
 
 ```text
 release environment: staging
-release commit / tag / PR: 8e0b74e / v1.0.0
+release commit / tag / PR: b0c2c0f / v1.0.0
 release date window:
 
 release coordinator: yukin371
@@ -336,7 +341,7 @@ latest result:
 ```text
 ELYSIAN_GO_LIVE_SOURCE_BRANCH=dev
 ELYSIAN_GO_LIVE_TARGET_BRANCH=main
-ELYSIAN_GO_LIVE_RELEASE_COMMIT=8e0b74e
+ELYSIAN_GO_LIVE_RELEASE_COMMIT=b0c2c0f
 ELYSIAN_GO_LIVE_RELEASE_TAG=v1.0.0
 ELYSIAN_GO_LIVE_RELEASE_PR=
 ELYSIAN_GO_LIVE_ENVIRONMENT=staging

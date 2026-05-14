@@ -6,10 +6,15 @@
 
 - branch: `dev`
 - base head: `8e0b74e`
+- final tagged release object: `b0c2c0f` (`v1.0.0`)
 - worktree: clean
 - objective: 首个参考发行版可发布
 
-说明：本文结论当前绑定 `8e0b74e`。正式 PR / tag 前仍需至少重跑 `bun run check` 与本文件列出的首发命令基线，并把最终 `release tag / PR` 锁定到同一候选对象。
+说明：
+
+- `8e0b74e` 是本轮 `M1` 候选冻结时的固定验证基线。
+- 在 `M3` 修复跨租户隔离并完成最终归档后，正式 `v1.0.0` tag 已锁定到 `b0c2c0f`。
+- 这意味着：候选冻结证据保留在 `8e0b74e`，最终发布对象锁定为 `b0c2c0f`。
 
 ## 一、候选范围
 
@@ -84,7 +89,14 @@
 真实 go-live 仍需环境 owner 完成外部前提锁定，不能直接把本地参考发行版结论等同为生产上线放行。
 当前 `M1` 已在 `8e0b74e` 上完成 `check`、`build:vue`、`server:image:verify`、`e2e:smoke:full` 与 `e2e:tenant:full` 的固定版本复跑；当前剩余未锁定项已经收敛到 `release tag / PR` 与环境侧输入，而不是应用侧验证。
 
-## 六、建议 PR / 发布说明
+## 六、最终发布对象锁定
+
+- release tag: `v1.0.0`
+- tagged commit: `b0c2c0f`
+- tag 说明：包含 runtime DB role 切换修复、`M3` 重跑交接文档与最终 go-live readiness 归档
+- 最终 go-live 产物：`artifacts/go-live/go-live-report.json` 与 `artifacts/go-live/go-live-gate-report.json` 已按 `b0c2c0f` 重生成并通过
+
+## 七、建议 PR / 发布说明
 
 ```text
 feat(release): 收口首个参考发行版可发布候选
