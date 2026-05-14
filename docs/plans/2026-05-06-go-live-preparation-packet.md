@@ -30,7 +30,7 @@
 
 ```text
 source branch: dev
-release commit: 867a3b5e1c2a41f6a8ddd11e8194d1e78fffc414
+release commit: 8e0b74e
 release tag:
 release pr:
 release environment:
@@ -92,7 +92,7 @@ not in this release:
 
 ```text
 release environment:
-release commit / tag / PR: 867a3b5e1c2a41f6a8ddd11e8194d1e78fffc414
+release commit / tag / PR: 8e0b74e
 release date window:
 
 database owner:
@@ -148,7 +148,7 @@ notes:
 
 ```text
 release environment:
-release commit / tag / PR: 867a3b5e1c2a41f6a8ddd11e8194d1e78fffc414
+release commit / tag / PR: 8e0b74e
 release date window:
 
 release coordinator:
@@ -304,7 +304,8 @@ artifacts:
 latest result:
 - status: failed
 - blocker count: 16
-- notes: 当前脚本结论与准备包一致，阻断项集中在 release tag / PR、release environment、migration list、backup / roles / proxy owner，以及目标环境发布后最小冒烟证据；当前可先用 `go-live-report` 收敛 blocker，再用 `go-live-handoff` 生成预填 `.env` 与按角色拆分的交接包。
+- next milestone: M1
+- notes: `8e0b74e` 上的 `check`、`build:vue`、`server:image:verify`、`e2e:smoke:full` 与 `e2e:tenant:full` 已重新复跑通过；当前阻断已收敛为 `release tag / PR`、`release environment`、`migration list`、`backup / roles / proxy owner` 与目标环境发布后最小冒烟证据。`go-live-handoff` 已生成按 owner 拆分的交接包，可直接转发。
 ```
 
 ## 参考发行版首发验收衔接
@@ -326,7 +327,7 @@ latest result:
 ```text
 ELYSIAN_GO_LIVE_SOURCE_BRANCH=dev
 ELYSIAN_GO_LIVE_TARGET_BRANCH=main
-ELYSIAN_GO_LIVE_RELEASE_COMMIT=867a3b5e1c2a41f6a8ddd11e8194d1e78fffc414
+ELYSIAN_GO_LIVE_RELEASE_COMMIT=8e0b74e
 ELYSIAN_GO_LIVE_RELEASE_TAG=
 ELYSIAN_GO_LIVE_RELEASE_PR=
 ELYSIAN_GO_LIVE_ENVIRONMENT=
@@ -363,6 +364,7 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=false
 - `ELYSIAN_GO_LIVE_RELEASE_TAG` 或 `ELYSIAN_GO_LIVE_RELEASE_PR`
 - `ELYSIAN_GO_LIVE_ENVIRONMENT`
 - `ELYSIAN_GO_LIVE_RELEASE_ROLES_READY`
+- 对应交接包：`artifacts/go-live/handoffs/release-coordinator.md`
 
 环境 / DBA owner 再补：
 
@@ -371,6 +373,7 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=false
 - `ELYSIAN_GO_LIVE_PROXY_TLS_OWNER_READY`
 - `ELYSIAN_GO_LIVE_HEALTH_VERIFIED`
 - `ELYSIAN_GO_LIVE_METRICS_VERIFIED`
+- 对应交接包：`artifacts/go-live/handoffs/environment-dba.md`
 
 应用 owner 最后补：
 
@@ -379,6 +382,7 @@ ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=false
 - `ELYSIAN_GO_LIVE_CORE_WORKSPACE_LIST_VERIFIED`
 - `ELYSIAN_GO_LIVE_CORE_WRITE_ACTION_VERIFIED`
 - 若触及 tenant，再补全部 tenant 附加验证项
+- 对应交接包：`artifacts/go-live/handoffs/application-owner.md`
 
 ## 当前可直接转发的话术
 

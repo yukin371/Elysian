@@ -457,3 +457,25 @@
 
 - `release tag / PR` 仍未锁定，因此当前只能视为“候选 commit 已锁定，发布对象未完全锁定”
 - 当前 `M1` 的剩余缺口已不在应用验证，而在发布对象锁定和后续 `M2` 环境前提输入
+
+## 2026-05-14 go-live 报告与交接包收口
+
+已完成：
+
+- 以 `ELYSIAN_GO_LIVE_RELEASE_COMMIT=8e0b74e` 重新执行 `bun run go-live:report`
+- 以同一组环境前提执行 `bun run go-live:handoff`
+- 生成按 owner 拆分的交接包：
+  - `artifacts/go-live/handoffs/release-coordinator.md`
+  - `artifacts/go-live/handoffs/environment-dba.md`
+  - `artifacts/go-live/handoffs/application-owner.md`
+
+验证结果：
+
+- `go-live:report`：失败，`blockerCount=16`
+- `go-live:handoff`：执行完成，已产出 `go-live-input.prefill.env` 与 owner bundles
+
+残留风险：
+
+- 当前 `M1` 仍缺 `release tag / PR`
+- `M2` 仍缺 `release environment`、`migration list`、`backup / restore`、`release roles / oncall`、`proxy / TLS owner`
+- `M3` 仍缺全部发布后最小冒烟证据与 tenant 附加验证
