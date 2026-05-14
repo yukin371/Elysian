@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-13`（首个可发布参考发行版优先，当前按 go-live 里程碑收口）
+更新时间：`2026-05-14`（首个可发布参考发行版优先，当前按 go-live 里程碑收口）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -23,6 +23,11 @@
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
 - 首发计划：[2026-05-12-reference-starter-release-plan.md](./plans/2026-05-12-reference-starter-release-plan.md)
 - 阶段执行计划：[2026-05-13-reference-starter-go-live-stage-plan.md](./plans/2026-05-13-reference-starter-go-live-stage-plan.md)
+- 下阶段规划 Spec：[2026-05-14-reference-starter-next-stage-planning-spec.md](./plans/2026-05-14-reference-starter-next-stage-planning-spec.md)
+- `M1` 执行清单：[2026-05-14-reference-starter-m1-candidate-freeze-checklist.md](./plans/2026-05-14-reference-starter-m1-candidate-freeze-checklist.md)
+- `M2` 执行清单：[2026-05-14-reference-starter-m2-environment-readiness-checklist.md](./plans/2026-05-14-reference-starter-m2-environment-readiness-checklist.md)
+- `M3` 执行清单：[2026-05-14-reference-starter-m3-target-environment-rehearsal-checklist.md](./plans/2026-05-14-reference-starter-m3-target-environment-rehearsal-checklist.md)
+- `M4` 执行清单：[2026-05-14-reference-starter-m4-release-decision-checklist.md](./plans/2026-05-14-reference-starter-m4-release-decision-checklist.md)
 
 ### 1. 参考发行版基础功能对齐 🚧
 
