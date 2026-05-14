@@ -432,3 +432,28 @@
 残留风险：
 
 - `go-live:*` 仍不会替环境 owner 自动补事实；若 `release tag / PR`、`environment`、`backup / restore`、`roles / oncall`、`proxy / TLS` 与目标环境冒烟未锁定，报告仍应继续阻断
+
+## 2026-05-14 M1 候选冻结启动
+
+已完成：
+
+- 提交下阶段 go-live 规划文档，固定当前候选基线为 `8e0b74e`
+- 将 `docs/plans/2026-05-12-reference-starter-release-candidate.md` 的 `base head` 从旧的未提交工作区基线收口为 `8e0b74e + clean worktree`
+- 在 `8e0b74e` 上重新执行 `bun run check`，通过
+- 在 `8e0b74e` 上重新执行 `bun run build:vue`，通过
+- 在 `8e0b74e` 上重新执行 `bun run server:image:verify`，通过
+- 在仓库根 `.env` 的本地 `DATABASE_URL` 与 `ACCESS_TOKEN_SECRET` 前提下重新执行 `bun run e2e:smoke:full`，通过
+- 在同一组本地前提下重新执行 `bun run e2e:tenant:full`，通过
+
+验证结果：
+
+- `bun run check`：通过，`890` tests，`0` fail
+- `bun run build:vue`：通过
+- `bun run server:image:verify`：通过，`server-image-smoke-report.json` 状态 `passed`
+- `bun run e2e:smoke:full`：通过
+- `bun run e2e:tenant:full`：通过
+
+残留风险：
+
+- `release tag / PR` 仍未锁定，因此当前只能视为“候选 commit 已锁定，发布对象未完全锁定”
+- 当前 `M1` 的剩余缺口已不在应用验证，而在发布对象锁定和后续 `M2` 环境前提输入

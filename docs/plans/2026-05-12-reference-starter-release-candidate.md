@@ -5,11 +5,11 @@
 当前校验基线：
 
 - branch: `dev`
-- base head: `ef57bc3`
-- worktree: 包含本轮首发候选未提交变更
+- base head: `8e0b74e`
+- worktree: clean
 - objective: 首个参考发行版可发布
 
-说明：本文结论绑定当前候选工作区。正式 PR / tag 前必须在最终提交后重新锁定 commit，并至少重跑 `bun run check` 与本文件列出的首发命令基线。
+说明：本文结论当前绑定 `8e0b74e`。正式 PR / tag 前仍需至少重跑 `bun run check` 与本文件列出的首发命令基线，并把最终 `release tag / PR` 锁定到同一候选对象。
 
 ## 一、候选范围
 
@@ -34,21 +34,21 @@
 
 ### 命令
 
-- `bun run check`：通过
-- `bun run build:vue`：通过
-- `bun run server:image:verify`：通过
+- `bun run check`：已于 `8e0b74e` 重新执行，通过
+- `bun run build:vue`：已于 `8e0b74e` 重新执行，通过
+- `bun run server:image:verify`：已于 `8e0b74e` 重新执行，通过
 - `bun run e2e:generator:cli`：通过
-- `bun run e2e:smoke:full`：通过
-- `bun run e2e:tenant:full`：通过
+- `bun run e2e:smoke:full`：已于 `8e0b74e` 重新执行，通过
+- `bun run e2e:tenant:full`：已于 `8e0b74e` 重新执行，通过
 
 ### 证据位置
 
-- `bun run check`：仓库级 lint / typecheck / workspace registry / standard CRUD / test 全绿
-- `bun run build:vue`：Vite 构建通过，workspace registry 与 shell descriptor coverage 通过
-- `bun run server:image:verify`：镜像构建与 `/health`、`/metrics` 烟测通过
+- `bun run check`：`8e0b74e` 上复跑通过；仓库级 lint / typecheck / workspace registry / standard CRUD / test 全绿
+- `bun run build:vue`：`8e0b74e` 上复跑通过；Vite 构建通过，workspace registry 与 shell descriptor coverage 通过
+- `bun run server:image:verify`：`8e0b74e` 上复跑通过；镜像构建与 `/health`、`/metrics` 烟测通过
 - `bun run e2e:generator:cli`：generator CLI 真实路径通过
-- `bun run e2e:smoke:full`：本地 PostgreSQL + `DATABASE_URL` + `ACCESS_TOKEN_SECRET` 下通过
-- `bun run e2e:tenant:full`：本地 PostgreSQL + `DATABASE_URL` + `ACCESS_TOKEN_SECRET` 下通过
+- `bun run e2e:smoke:full`：`8e0b74e` 上复跑通过；使用仓库根 `.env` 中的本地 PostgreSQL `DATABASE_URL` 与 `ACCESS_TOKEN_SECRET`
+- `bun run e2e:tenant:full`：`8e0b74e` 上复跑通过；使用仓库根 `.env` 中的本地 PostgreSQL `DATABASE_URL` 与 `ACCESS_TOKEN_SECRET`
 
 ## 三、人工验收摘要
 
@@ -82,6 +82,7 @@
 
 当前候选工作区已达到“仓库参考发行版 ready”。
 真实 go-live 仍需环境 owner 完成外部前提锁定，不能直接把本地参考发行版结论等同为生产上线放行。
+当前 `M1` 已在 `8e0b74e` 上完成 `check`、`build:vue`、`server:image:verify`、`e2e:smoke:full` 与 `e2e:tenant:full` 的固定版本复跑；当前剩余未锁定项已经收敛到 `release tag / PR` 与环境侧输入，而不是应用侧验证。
 
 ## 六、建议 PR / 发布说明
 
