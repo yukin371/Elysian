@@ -20,6 +20,7 @@
 当前可配套使用：
 
 - `docs/plans/2026-05-13-reference-starter-go-live-stage-plan.md`
+- `docs/plans/2026-05-14-m3-staging-runtime-role-rerun-handoff.md`
 - `bun run go-live:report`
 - `bun run go-live:handoff`
 - `bun run go-live:gate`
