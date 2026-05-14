@@ -1,16 +1,16 @@
 # roadmap
 
-更新时间：`2026-05-14`（首个可发布参考发行版优先，当前按 go-live 里程碑收口）
+更新时间：`2026-05-14`（`v1.0.0` 已锁定，当前转入 post-release 收口与下一阶段规划）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
 ## 当前版本目标
 
-保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A` 的最小 workflow 闭环已在 `2026-04-26` 完成 `Round-2` 收口，当前按“已完成的能力基线”处理，不继续外扩到 `transfer / delegate`。当前即时优先级切回“首个可发布参考发行版优先”：先把 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator` 收口成能直接开新项目、能上线、能维护的 starter；generator 自举、企业后台基础能力与平台能力继续并行推进，但要服务首发而不是抢占首发表述。
+保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A` 的最小 workflow 闭环已在 `2026-04-26` 完成 `Round-2` 收口，当前按“已完成的能力基线”处理，不继续外扩到 `transfer / delegate`。当前即时优先级已完成“首个可发布参考发行版优先”的发布闭环：`v1.0.0` 已锁定到真实发布对象。下一步转入 post-release 收口与下一阶段规划，继续把 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator` 作为 starter 基线维护，但不再沿用“首发前未发布”口径。
 
-### Current Mainline: reference starter release 优先 🚧
+### Current Mainline: post-v1.0.0 收口与下一阶段规划 🚧
 
-- 已决定：当前主线优先收口首个参考发行版，目标是把 starter 的安装、启动、登录、常用模块、生成器接入和 go-live 入口做成一条能直接交付的新项目路径
+- 已完成：`v1.0.0` 已锁定为首个参考发行版正式发布对象，starter 的安装、启动、登录、常用模块、生成器接入和 go-live 入口已形成可交付路径
 - 入口依据：外部用户首先买单的是“能不能快速开新项目并上线”，不是“平台内部能力有多全”；参考发行版必须先可发布，再谈平台外扩
 - 当前范围：优先补齐 `apps/example-vue` 的参考发行版体验、生成器接入边界、发布清单、回滚路径、文档入口与验证命令，让新项目能按仓库标准被复制和交付
 - 当前前端试稿结论：`generator preview` 的页面结构优化仍先落在 `apps/example-vue` 的 `demohub` 原型页，再回流到正式参考发行版工作区，避免把试错直接写死在首发 owner 中
@@ -18,7 +18,8 @@
 - 已具备基础：后台常用模块、workflow 最小闭环、generator-session、SQL preview、标准 CRUD 前端 surface 与 go-live / release checklist 已可作为首发验证对象继续打磨
 - 已补 repo 侧 go-live 交接收口：`go-live:report` 之外，当前还可用 `go-live:handoff` 直接产出预填 `.env` 草稿与按角色拆分的交接包，继续降低发布负责人二次整理 blocker 和 `envKeys` 的人工风险
 - 已推进收口：generator 当前已补 `text/json` 字段支持、simplified schema 展开、`validate-schema` 校验入口、`--target module`、`*.persistence.ts` 模板，以及 Studio 步骤引导流与模板化 schema 输入
-- 当前结论：先把参考发行版做成可发布、可复制、可验证的新项目模板，再把 generator 自举和企业后台体验作为持续增强轨道
+- 当前结论：`v1.0.0` 已完成“可发布、可复制、可验证”的 starter 模板目标；主线切换为 post-release 收口与下一阶段增强规划
+- 发布说明：[releases/v1.0.0.md](./releases/v1.0.0.md)
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
 - 首发计划：[2026-05-12-reference-starter-release-plan.md](./plans/2026-05-12-reference-starter-release-plan.md)
@@ -337,8 +338,8 @@
 
 ## 下一步
 
-1. 第一顺序：按 [2026-05-13-reference-starter-go-live-stage-plan.md](./plans/2026-05-13-reference-starter-go-live-stage-plan.md) 执行 `M1 -> M2 -> M3 -> M4`，当前最优先不是继续扩功能，而是把 `release commit/tag`、`release environment`、`migration list`、`backup / restore`、`roles / oncall`、`proxy / TLS` 和目标环境冒烟全部锁定。
-2. 第二顺序：仓库内只继续做直接服务首发闭环的收口，优先处理 `tenants / operation-logs / notifications / files` 的后台日常交互缺口，以及 `go-live:*`、候选包、验收包、准备包之间的证据一致性。
+1. 第一顺序：把 `v1.0.0` 发布说明、`dev -> main` 合并材料与后续 patch 版本入口收口到同一套口径，避免“已发布对象”和“仓库当前 head”再次漂移。
+2. 第二顺序：继续做直接服务 post-release 稳定性的收口，优先处理 `tenants / operation-logs / notifications / files` 的后台日常交互缺口，以及 go-live / candidate / acceptance / preparation 文档之间的证据一致性。
 3. 第三顺序：对 `WP-6` 导入链路做边界判断，只回答“哪些模块值得进入当前主线、最小入口是什么、哪些仍应暂缓”；在未完成这一步前，不把统一导入 DSL、模板体系或批量治理平台写成已实现方向。
 4. 第四顺序：`generator / frontend` 只做必要延伸，不再回到 example-vue 手写标准 CRUD；若后续继续推进，范围限定为 generator 产物与前端 artifact 的增量收口，而不是重开一轮本地前端脊柱重构。
 5. 第五顺序：在正式继续改 `generator preview` 前，先把 `demohub` 原型中的首屏起稿、结果结论和 apply 前确认三段流程压到足够稳定；正式页只负责承接真实 session / review / apply 状态，不再承担信息架构试错。
