@@ -543,3 +543,23 @@
 
 - 当前发布已经不再缺少基础环境前提
 - 现阶段唯一阻断是跨租户隔离修复：需要把应用数据库连接切到非 owner 的受限角色，或调整 owner/RLS 策略使隔离对当前连接身份真正生效
+
+## 2026-05-14 M3 blocker 修复已提交，等待 staging 重跑
+
+已完成：
+
+- 提交 `c6d06d6` `fix(tenant): prefer runtime db url for server rls enforcement`
+- 在 `packages/persistence` 增加 runtime DB 配置分流：运行态优先使用 `DATABASE_RUNTIME_URL`，迁移与管理仍保留 `DATABASE_URL`
+- 在 `apps/server` 切换为 runtime DB client，避免服务继续默认以 migration / owner 连接身份访问业务表
+- 更新 `server image smoke` 配置与测试，使镜像烟测也能显式透传 runtime 连接串
+- 同步 `PROJECT_PROFILE`、server README 与 production baseline 文档，明确 runtime / migration DB 身份分离
+
+验证结果：
+
+- `bun test packages/persistence/src/config.test.ts scripts/server-image-smoke.test.ts apps/server/src/app.config.test.ts`：通过
+- `bun run check`：通过
+
+残留风险：
+
+- 应用侧修复已进入仓库，但 `staging` 只有在实际注入 `DATABASE_RUNTIME_URL`，且该角色不是 table owner、不是 superuser、没有 `BYPASSRLS` 时，`cross-tenant isolation` 才会转为通过
+- 当前 `M3` 仍需在目标环境重跑，不能把仓库内修复直接视为 go-live blocker 已解除

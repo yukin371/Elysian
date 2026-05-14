@@ -280,6 +280,8 @@ notes:
 - 非默认 tenant 登录通过
 - cross-tenant isolation 失败：tenant B（`m3-test-tenant-b`）可读取 tenant A（`m3-test-tenant`）customers
 - 当前根因判断：应用以 `postgres`（table owner）连接数据库，PostgreSQL RLS 默认不对 table owner 生效，即使启用了 `FORCE ROW LEVEL SECURITY`
+- 仓库侧修复已在 `c6d06d6` 提交：server runtime 改为优先读取 `DATABASE_RUNTIME_URL`；`DATABASE_URL` 继续保留给 migration / admin 路径
+- `staging` 重跑前必须确认 `DATABASE_RUNTIME_URL` 指向非 owner、`NOSUPERUSER`、`NOBYPASSRLS` 的受限运行角色
 ```
 
 ## 当前结论
@@ -288,9 +290,10 @@ notes:
 go-live ready: no
 
 next actions:
-1. 修复 `cross-tenant isolation`，让应用以非 owner 的受限数据库角色连接并重新验证 RLS
-2. 在 `staging` 重新执行 tenant 附加验证，优先复核跨租户隔离
-3. 复跑 `go-live:report` / `go-live:gate`，确认 `M3` 是否转为 `passed`
+1. 在 `staging` 注入 `DATABASE_RUNTIME_URL`，并确认其角色不是 table owner / superuser，且无 `BYPASSRLS`
+2. 保留 `DATABASE_URL` 给 migration / admin 路径，不要再让 server runtime 直接复用 owner 连接
+3. 在 `staging` 重新执行 tenant 附加验证，优先复核跨租户隔离
+4. 复跑 `go-live:report` / `go-live:gate`，确认 `M3` 是否转为 `passed`
 ```
 
 ## 当前 go-live gate 试跑
@@ -312,7 +315,7 @@ latest result:
 - status: failed
 - blocker count: 1
 - next milestone: M3
-- notes: `M1/M2` 已通过，`M3` 的 10 项验证中 9 项通过、1 项失败。当前唯一 blocker 是 `cross-tenant isolation`：`postgres` 作为 table owner 连接数据库时，RLS 未对 owner 生效，导致 tenant B 可读取 tenant A customers。`go-live:gate` 当前因此返回 failed。
+- notes: `M1/M2` 已通过，`M3` 的 10 项验证中 9 项通过、1 项失败。当前唯一 blocker 是 `cross-tenant isolation`：`postgres` 作为 table owner 连接数据库时，RLS 未对 owner 生效，导致 tenant B 可读取 tenant A customers。仓库侧修复已在 `c6d06d6` 提交，但 `staging` 仍需完成 `DATABASE_RUNTIME_URL` 受限角色注入并重跑验证。`go-live:gate` 当前因此返回 failed。
 ```
 
 ## 参考发行版首发验收衔接
