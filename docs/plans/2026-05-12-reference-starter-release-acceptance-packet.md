@@ -211,9 +211,9 @@ not blocking:
 - `bun run e2e:tenant:full`：通过
   - 证据：本地 PostgreSQL + `DATABASE_URL` + `ACCESS_TOKEN_SECRET` 下执行通过，报告为 `passed`
 - `bun run go-live:report`：失败
-  - 证据：`artifacts/go-live/go-live-report.json`，当前 blockerCount=`16`
+  - 证据：`artifacts/go-live/go-live-report.json`，当前 blockerCount=`1`
 - `bun run go-live:gate`：失败
-  - 证据：`artifacts/go-live/go-live-gate-report.json`，当前 blockerCount=`16`
+  - 证据：`artifacts/go-live/go-live-gate-report.json`，当前 blockerCount=`1`
 - `bun run go-live:finalize`：失败
   - 证据：当前候选工作区尚未填完真实环境、release tag / PR、migration、backup / recovery、proxy / TLS、值守等输入
 
@@ -225,21 +225,20 @@ not blocking:
 - `generator happy path`：通过，README、generator 文档、`e2e:generator:cli` 与 preview 测试已覆盖
 - `production smoke`：通过，server 镜像烟测验证 `/health` 与 `/metrics`
 - `go-live blocker convergence`：通过，`release-checklist`、go-live runbook 与 gate 输入模板已把 blocker / 回滚 / owner 边界固定，且 `go-live:*` 已把缺失项稳定收敛为环境 blocker，而不是应用侧空白
+- `staging go-live rehearsal`：未通过，`health / metrics / admin login / permission gate / core workspace list / core write action / super-admin tenants / tenant admin denied / non-default tenant login` 通过，但 `cross-tenant isolation` 失败
 
 ### 结论
 
 ```text
 首发结论：
-- ready（仓库参考发行版）
+- not ready（staging go-live）
 
 残留 blocker：
 - application: 无
-- environment:
-  - 目标发布环境未锁定
-  - release tag / release PR 未锁定
-  - migration 执行顺序未锁定
-  - backup / recovery 证据未锁定
-  - 发布负责人 / 环境 owner / DBA / 值守角色未锁定
-  - proxy / TLS / 目标环境最小冒烟输入未锁定
+- environment: 无
+- application:
+  - 无仓库内应用验证 blocker
+- tenant-safety:
+  - cross-tenant isolation 失败；tenant B 可读取 tenant A customers
 - out-of-scope: React / uniapp / 复杂 BPM / 低代码 Studio / 自动化发布平台
 ```

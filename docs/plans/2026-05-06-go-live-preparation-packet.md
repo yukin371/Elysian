@@ -260,18 +260,26 @@ post-rollback verification:
 ## 发布后最小冒烟记录
 
 ```text
-health:
-metrics:
-admin login:
-menu and permission gate:
-core workspace list:
-core write action:
+health: true
+metrics: true
+admin login: true
+menu and permission gate: true
+core workspace list: true
+core write action: true
 
 tenant add-ons:
-- super-admin /system/tenants:
-- tenant admin denied /system/tenants:
-- non-default tenant login:
-- cross-tenant isolation:
+- super-admin /system/tenants: true
+- tenant admin denied /system/tenants: true
+- non-default tenant login: true
+- cross-tenant isolation: false
+
+notes:
+- health=ok, metrics=ok
+- admin login、permission gate（16 menus, 47 perms）与 customer CRUD 通过
+- super-admin 可列出 36 个 tenants，tenant admin 访问 `/system/tenants` 正确返回 403
+- 非默认 tenant 登录通过
+- cross-tenant isolation 失败：tenant B（`m3-test-tenant-b`）可读取 tenant A（`m3-test-tenant`）customers
+- 当前根因判断：应用以 `postgres`（table owner）连接数据库，PostgreSQL RLS 默认不对 table owner 生效，即使启用了 `FORCE ROW LEVEL SECURITY`
 ```
 
 ## 当前结论
@@ -280,9 +288,9 @@ tenant add-ons:
 go-live ready: no
 
 next actions:
-1. 由环境 / DBA owner 补齐数据库备份与恢复细节证据
-2. 在目标环境完成镜像拉取、容器启动与发布后最小冒烟
-3. 发布后按最小冒烟记录补齐目标环境证据
+1. 修复 `cross-tenant isolation`，让应用以非 owner 的受限数据库角色连接并重新验证 RLS
+2. 在 `staging` 重新执行 tenant 附加验证，优先复核跨租户隔离
+3. 复跑 `go-live:report` / `go-live:gate`，确认 `M3` 是否转为 `passed`
 ```
 
 ## 当前 go-live gate 试跑
@@ -302,9 +310,9 @@ artifacts:
 
 latest result:
 - status: failed
-- blocker count: 10
+- blocker count: 1
 - next milestone: M3
-- notes: `8e0b74e` 上的固定版本复跑已完成，`release tag=v1.0.0`、`release environment=staging`、`migration list=0000-0022`、`backup=true`、`proxy / tls owner=yukin371` 与 `release roles / oncall=yukin371` 已锁定。当前 `M1/M2` 已通过，剩余 blocker 全部收敛到 `M3` 目标环境发布后最小冒烟与 tenant 附加验证。
+- notes: `M1/M2` 已通过，`M3` 的 10 项验证中 9 项通过、1 项失败。当前唯一 blocker 是 `cross-tenant isolation`：`postgres` 作为 table owner 连接数据库时，RLS 未对 owner 生效，导致 tenant B 可读取 tenant A customers。`go-live:gate` 当前因此返回 failed。
 ```
 
 ## 参考发行版首发验收衔接
@@ -343,16 +351,16 @@ ELYSIAN_GO_LIVE_BACKUP_READY=true
 ELYSIAN_GO_LIVE_RELEASE_ROLES_READY=true
 ELYSIAN_GO_LIVE_PROXY_TLS_OWNER_READY=true
 
-ELYSIAN_GO_LIVE_HEALTH_VERIFIED=false
-ELYSIAN_GO_LIVE_METRICS_VERIFIED=false
-ELYSIAN_GO_LIVE_ADMIN_LOGIN_VERIFIED=false
-ELYSIAN_GO_LIVE_MENU_PERMISSION_GATE_VERIFIED=false
-ELYSIAN_GO_LIVE_CORE_WORKSPACE_LIST_VERIFIED=false
-ELYSIAN_GO_LIVE_CORE_WRITE_ACTION_VERIFIED=false
+ELYSIAN_GO_LIVE_HEALTH_VERIFIED=true
+ELYSIAN_GO_LIVE_METRICS_VERIFIED=true
+ELYSIAN_GO_LIVE_ADMIN_LOGIN_VERIFIED=true
+ELYSIAN_GO_LIVE_MENU_PERMISSION_GATE_VERIFIED=true
+ELYSIAN_GO_LIVE_CORE_WORKSPACE_LIST_VERIFIED=true
+ELYSIAN_GO_LIVE_CORE_WRITE_ACTION_VERIFIED=true
 
-ELYSIAN_GO_LIVE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED=false
-ELYSIAN_GO_LIVE_TENANT_ADMIN_DENIED_VERIFIED=false
-ELYSIAN_GO_LIVE_NON_DEFAULT_TENANT_LOGIN_VERIFIED=false
+ELYSIAN_GO_LIVE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED=true
+ELYSIAN_GO_LIVE_TENANT_ADMIN_DENIED_VERIFIED=true
+ELYSIAN_GO_LIVE_NON_DEFAULT_TENANT_LOGIN_VERIFIED=true
 ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=false
 ```
 

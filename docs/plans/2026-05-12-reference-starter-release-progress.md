@@ -522,3 +522,24 @@
 残留风险：
 
 - 当前剩余 blocker 全部位于 `M3`，需要在 `staging` 目标环境完成 `/health`、`/metrics`、管理员登录、权限 gate、核心列表/写操作与 tenant 附加验证
+
+## 2026-05-14 M3 结果回填
+
+已完成：
+
+- 回填 `staging` 目标环境最小冒烟结果
+- 记录 `health / metrics / admin login / permission gate / core list / core write / tenant admin denied / non-default tenant login` 为通过
+- 记录 `cross-tenant isolation=false`，并补充根因判断：应用以 `postgres`（table owner）连接数据库，RLS 不对 table owner 生效
+- 以最新结果重新执行 `bun run go-live:report`，当前 `blockerCount=1`
+- 以最新结果重新执行 `bun run go-live:gate`，失败
+
+验证结果：
+
+- `go-live:report`：失败，`M3` 仍 blocked
+- `go-live:gate`：失败
+- `go-live:report`：唯一 blocker 为 `cross-tenant isolation`
+
+残留风险：
+
+- 当前发布已经不再缺少基础环境前提
+- 现阶段唯一阻断是跨租户隔离修复：需要把应用数据库连接切到非 owner 的受限角色，或调整 owner/RLS 策略使隔离对当前连接身份真正生效
