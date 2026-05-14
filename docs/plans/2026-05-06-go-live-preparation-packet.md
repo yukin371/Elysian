@@ -31,9 +31,9 @@
 ```text
 source branch: dev
 release commit: 8e0b74e
-release tag:
+release tag: v1.0.0
 release pr:
-release environment:
+release environment: staging
 prepared at: 2026-05-06 19:21:01 +08:00
 docker engine: 28.5.1
 ```
@@ -64,6 +64,11 @@ server:image:smoke:
 - date: 2026-05-06
 - notes: 通过 `bun run server:image:smoke` / `bun run server:image:verify` 完成；临时容器同时通过 `/health` 与 `/metrics`，报告文件：`.ci-reports/server-image-smoke-2026-05-06/server-image-smoke-report.json`
 
+M1 candidate verification:
+- status: passed
+- date: 2026-05-14
+- notes: `8e0b74e` 上复跑 `bun run check`、`bun run build:vue`、`bun run server:image:verify`、`bun run e2e:smoke:full` 与 `bun run e2e:tenant:full` 均通过；当前候选 commit 已锁定，release tag 已进入 `v1.0.0`
+
 e2e:tenant:full:
 - status: passed
 - date: 2026-05-06
@@ -91,8 +96,8 @@ not in this release:
 当前预填：
 
 ```text
-release environment:
-release commit / tag / PR: 8e0b74e
+release environment: staging
+release commit / tag / PR: 8e0b74e / v1.0.0
 release date window:
 
 database owner:
@@ -104,13 +109,13 @@ database host / cluster:
 affected databases / schemas:
 
 migration list:
-- 
+- 0000–0022（`packages/persistence/drizzle/` 下全部 `.sql`）
 
 backup strategy:
 - 
 
 backup ready:
-- blocked
+- confirmed
 
 backup created at:
 backup created by:
@@ -135,7 +140,7 @@ post-restore validation steps:
 - core workspace list
 
 notes:
-- 目标环境数据库备份与恢复证据尚未提供
+- 备份已确认；恢复点、执行人、备份编号与存储位置仍待 DBA / 环境 owner 补齐
 ```
 
 ## 发布角色与值守记录
@@ -147,8 +152,8 @@ notes:
 当前预填：
 
 ```text
-release environment:
-release commit / tag / PR: 8e0b74e
+release environment: staging
+release commit / tag / PR: 8e0b74e / v1.0.0
 release date window:
 
 release coordinator:
@@ -163,7 +168,7 @@ escalation manager:
 
 log access owner:
 metrics access owner:
-proxy / tls owner:
+proxy / tls owner: yukin371
 
 incident channel:
 escalation path:
@@ -173,18 +178,15 @@ stop decision owner:
 rollback coordination owner:
 
 notes:
-- 当前模板已创建，但目标环境值守人和升级路径仍未填写
+- `proxy / tls owner` 已锁定为 `yukin371`
+- 发布值守与升级路径仍未填写，`release roles / oncall` 当前仍未锁定
 ```
 
 ## 运行前阻断项
 
 ```text
-- release environment 未锁定
-- release tag / release PR 未锁定
-- migration list 未锁定
-- database backup / restore evidence 缺失
 - release roles / oncall evidence 缺失
-- proxy / tls owner 未明确
+- 目标环境数据库恢复点 / 执行人 / 备份编号等细节证据仍未补齐
 ```
 
 ## Blocker 分类与 owner 归档
@@ -279,11 +281,10 @@ tenant add-ons:
 go-live ready: no
 
 next actions:
-1. 锁定 release environment、tag / PR、migration list
-2. 由环境 / DBA owner 填写数据库备份与恢复记录
-3. 由发布负责人填写角色与值守记录
-4. 在目标环境完成镜像拉取、容器启动与发布后最小冒烟
-5. 发布后按最小冒烟记录补齐目标环境证据
+1. 由环境 / DBA owner 补齐数据库备份与恢复细节证据
+2. 由发布负责人填写角色与值守记录
+3. 在目标环境完成镜像拉取、容器启动与发布后最小冒烟
+4. 发布后按最小冒烟记录补齐目标环境证据
 ```
 
 ## 当前 go-live gate 试跑
@@ -303,9 +304,9 @@ artifacts:
 
 latest result:
 - status: failed
-- blocker count: 16
-- next milestone: M1
-- notes: `8e0b74e` 上的 `check`、`build:vue`、`server:image:verify`、`e2e:smoke:full` 与 `e2e:tenant:full` 已重新复跑通过；当前阻断已收敛为 `release tag / PR`、`release environment`、`migration list`、`backup / roles / proxy owner` 与目标环境发布后最小冒烟证据。`go-live-handoff` 已生成按 owner 拆分的交接包，可直接转发。
+- blocker count: 11
+- next milestone: M2
+- notes: `8e0b74e` 上的固定版本复跑已完成，`release tag=v1.0.0`、`release environment=staging`、`migration list=0000-0022`、`backup=true` 与 `proxy / tls owner=yukin371` 已锁定；当前只剩 `release roles / oncall` 与目标环境发布后最小冒烟证据。`go-live-handoff` 已生成按 owner 拆分的交接包，可直接转发。
 ```
 
 ## 参考发行版首发验收衔接
@@ -328,11 +329,11 @@ latest result:
 ELYSIAN_GO_LIVE_SOURCE_BRANCH=dev
 ELYSIAN_GO_LIVE_TARGET_BRANCH=main
 ELYSIAN_GO_LIVE_RELEASE_COMMIT=8e0b74e
-ELYSIAN_GO_LIVE_RELEASE_TAG=
+ELYSIAN_GO_LIVE_RELEASE_TAG=v1.0.0
 ELYSIAN_GO_LIVE_RELEASE_PR=
-ELYSIAN_GO_LIVE_ENVIRONMENT=
-ELYSIAN_GO_LIVE_MIGRATIONS=
-ELYSIAN_GO_LIVE_TENANT_IMPACT=
+ELYSIAN_GO_LIVE_ENVIRONMENT=staging
+ELYSIAN_GO_LIVE_MIGRATIONS=0000-0022
+ELYSIAN_GO_LIVE_TENANT_IMPACT=true
 
 ELYSIAN_GO_LIVE_CHECK_PASSED=true
 ELYSIAN_GO_LIVE_BUILD_VUE_PASSED=true
@@ -340,9 +341,9 @@ ELYSIAN_GO_LIVE_SMOKE_FULL_PASSED=true
 ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED=true
 ELYSIAN_GO_LIVE_TENANT_FULL_PASSED=true
 
-ELYSIAN_GO_LIVE_BACKUP_READY=false
+ELYSIAN_GO_LIVE_BACKUP_READY=true
 ELYSIAN_GO_LIVE_RELEASE_ROLES_READY=false
-ELYSIAN_GO_LIVE_PROXY_TLS_OWNER_READY=false
+ELYSIAN_GO_LIVE_PROXY_TLS_OWNER_READY=true
 
 ELYSIAN_GO_LIVE_HEALTH_VERIFIED=false
 ELYSIAN_GO_LIVE_METRICS_VERIFIED=false

@@ -479,3 +479,27 @@
 - 当前 `M1` 仍缺 `release tag / PR`
 - `M2` 仍缺 `release environment`、`migration list`、`backup / restore`、`release roles / oncall`、`proxy / TLS owner`
 - `M3` 仍缺全部发布后最小冒烟证据与 tenant 附加验证
+
+## 2026-05-14 M2 外部输入回填
+
+已完成：
+
+- 回填 `release tag=v1.0.0`
+- 回填 `release environment=staging`
+- 回填 `migration list=0000-0022`
+- 回填 `backup=true`
+- 回填 `proxy / tls owner=yukin371`
+- 保持 `release roles / oncall=false`
+- 基于上述输入重新执行 `bun run go-live:report` 与 `bun run go-live:handoff`
+
+验证结果：
+
+- `go-live:report`：失败，`blockerCount=11`
+- `go-live:report`：`M1` 已变为 `passed`
+- `go-live:report`：`nextMilestone=M2`
+- `go-live:handoff`：已按最新 blocker 刷新 owner bundles
+
+残留风险：
+
+- `M2` 当前只剩 `release roles / oncall evidence 缺失`
+- `M3` 的 `/health`、`/metrics`、管理员登录、权限 gate、核心列表/写操作与 tenant 附加验证仍全部未在目标环境确认
