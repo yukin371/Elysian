@@ -156,36 +156,35 @@ release environment: staging
 release commit / tag / PR: 8e0b74e / v1.0.0
 release date window:
 
-release coordinator:
-application owner:
-dba / environment owner:
-frontend release owner:
-server release owner:
+release coordinator: yukin371
+application owner: yukin371
+dba / environment owner: yukin371
+frontend release owner: yukin371
+server release owner: yukin371
 
-first 30m oncall:
-first day oncall:
-escalation manager:
+first 30m oncall: yukin371
+first day oncall: yukin371
+escalation manager: yukin371
 
-log access owner:
-metrics access owner:
+log access owner: yukin371
+metrics access owner: yukin371
 proxy / tls owner: yukin371
 
-incident channel:
-escalation path:
-fallback contact:
+incident channel: yukin371
+escalation path: yukin371
+fallback contact: yukin371
 
-stop decision owner:
-rollback coordination owner:
+stop decision owner: yukin371
+rollback coordination owner: yukin371
 
 notes:
 - `proxy / tls owner` 已锁定为 `yukin371`
-- 发布值守与升级路径仍未填写，`release roles / oncall` 当前仍未锁定
+- 发布值守与升级路径已按当前首发演练 owner 锁定为 `yukin371`
 ```
 
 ## 运行前阻断项
 
 ```text
-- release roles / oncall evidence 缺失
 - 目标环境数据库恢复点 / 执行人 / 备份编号等细节证据仍未补齐
 ```
 
@@ -282,9 +281,8 @@ go-live ready: no
 
 next actions:
 1. 由环境 / DBA owner 补齐数据库备份与恢复细节证据
-2. 由发布负责人填写角色与值守记录
-3. 在目标环境完成镜像拉取、容器启动与发布后最小冒烟
-4. 发布后按最小冒烟记录补齐目标环境证据
+2. 在目标环境完成镜像拉取、容器启动与发布后最小冒烟
+3. 发布后按最小冒烟记录补齐目标环境证据
 ```
 
 ## 当前 go-live gate 试跑
@@ -304,9 +302,9 @@ artifacts:
 
 latest result:
 - status: failed
-- blocker count: 11
-- next milestone: M2
-- notes: `8e0b74e` 上的固定版本复跑已完成，`release tag=v1.0.0`、`release environment=staging`、`migration list=0000-0022`、`backup=true` 与 `proxy / tls owner=yukin371` 已锁定；当前只剩 `release roles / oncall` 与目标环境发布后最小冒烟证据。`go-live-handoff` 已生成按 owner 拆分的交接包，可直接转发。
+- blocker count: 10
+- next milestone: M3
+- notes: `8e0b74e` 上的固定版本复跑已完成，`release tag=v1.0.0`、`release environment=staging`、`migration list=0000-0022`、`backup=true`、`proxy / tls owner=yukin371` 与 `release roles / oncall=yukin371` 已锁定。当前 `M1/M2` 已通过，剩余 blocker 全部收敛到 `M3` 目标环境发布后最小冒烟与 tenant 附加验证。
 ```
 
 ## 参考发行版首发验收衔接
@@ -342,7 +340,7 @@ ELYSIAN_GO_LIVE_SERVER_IMAGE_VERIFY_PASSED=true
 ELYSIAN_GO_LIVE_TENANT_FULL_PASSED=true
 
 ELYSIAN_GO_LIVE_BACKUP_READY=true
-ELYSIAN_GO_LIVE_RELEASE_ROLES_READY=false
+ELYSIAN_GO_LIVE_RELEASE_ROLES_READY=true
 ELYSIAN_GO_LIVE_PROXY_TLS_OWNER_READY=true
 
 ELYSIAN_GO_LIVE_HEALTH_VERIFIED=false

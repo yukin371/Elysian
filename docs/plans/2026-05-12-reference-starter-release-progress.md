@@ -503,3 +503,22 @@
 
 - `M2` 当前只剩 `release roles / oncall evidence 缺失`
 - `M3` 的 `/health`、`/metrics`、管理员登录、权限 gate、核心列表/写操作与 tenant 附加验证仍全部未在目标环境确认
+
+## 2026-05-14 M2 通过，切换到 M3
+
+已完成：
+
+- 回填 `release roles / oncall=yukin371`
+- 以 `ELYSIAN_GO_LIVE_RELEASE_ROLES_READY=true` 重新执行 `bun run go-live:report`
+- 按最新状态重新执行 `bun run go-live:handoff`
+
+验证结果：
+
+- `go-live:report`：失败，`blockerCount=10`
+- `go-live:report`：`M2` 已变为 `passed`
+- `go-live:report`：`nextMilestone=M3`
+- `go-live:handoff`：owner bundles 已刷新为只包含 `M3` 相关 blocker
+
+残留风险：
+
+- 当前剩余 blocker 全部位于 `M3`，需要在 `staging` 目标环境完成 `/health`、`/metrics`、管理员登录、权限 gate、核心列表/写操作与 tenant 附加验证
