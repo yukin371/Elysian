@@ -563,3 +563,26 @@
 
 - 应用侧修复已进入仓库，但 `staging` 只有在实际注入 `DATABASE_RUNTIME_URL`，且该角色不是 table owner、不是 superuser、没有 `BYPASSRLS` 时，`cross-tenant isolation` 才会转为通过
 - 当前 `M3` 仍需在目标环境重跑，不能把仓库内修复直接视为 go-live blocker 已解除
+
+## 2026-05-14 M3 通过，M4 放行结论通过
+
+已完成：
+
+- 回填 `staging` 目标环境重跑结果：`health / metrics / admin login / permission gate / core workspace list / core write action / super-admin tenants / tenant admin denied / non-default tenant login / cross-tenant isolation` 全部通过
+- 记录环境侧事实：已创建 `elysian_runtime` 角色，约束为 `NOSUPERUSER`、`NOCREATEDB`、`NOCREATEROLE`、`NOINHERIT`、`NOBYPASSRLS`
+- 记录配置事实：`DATABASE_RUNTIME_URL` 已切到受限运行角色，`DATABASE_URL` 保留给 migration / admin
+- 重新执行 `bun run go-live:report`
+- 重新执行 `bun run go-live:gate`
+- 重新执行 `bun run go-live:finalize`
+
+验证结果：
+
+- `go-live:report`：通过，`blockerCount=0`
+- `go-live:gate`：通过
+- `go-live:finalize`：通过
+- `go-live:report`：`M1/M2/M3/M4` 全部为 `passed`
+
+残留风险：
+
+- 当前 `staging` go-live 演练已通过，已不存在应用侧或环境侧 blocker
+- 若后续切换到新的真实目标环境，仍需按同一模板重新锁定该环境的 runtime DB 角色、backup / restore 与发布后冒烟证据，不能直接复用本次 `staging` 结果

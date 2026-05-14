@@ -1,6 +1,6 @@
 # 2026-05-06 Go-live 准备包
 
-更新时间：`2026-05-12`
+更新时间：`2026-05-14`
 
 本文件用于把当前版本进入正式上线前的已知事实、待补证据和阻断项收敛到一处。
 
@@ -272,29 +272,27 @@ tenant add-ons:
 - super-admin /system/tenants: true
 - tenant admin denied /system/tenants: true
 - non-default tenant login: true
-- cross-tenant isolation: false
+- cross-tenant isolation: true
 
 notes:
 - health=ok, metrics=ok
 - admin login、permission gate（16 menus, 47 perms）与 customer CRUD 通过
 - super-admin 可列出 36 个 tenants，tenant admin 访问 `/system/tenants` 正确返回 403
 - 非默认 tenant 登录通过
-- cross-tenant isolation 失败：tenant B（`m3-test-tenant-b`）可读取 tenant A（`m3-test-tenant`）customers
-- 当前根因判断：应用以 `postgres`（table owner）连接数据库，PostgreSQL RLS 默认不对 table owner 生效，即使启用了 `FORCE ROW LEVEL SECURITY`
-- 仓库侧修复已在 `c6d06d6` 提交：server runtime 改为优先读取 `DATABASE_RUNTIME_URL`；`DATABASE_URL` 继续保留给 migration / admin 路径
-- `staging` 重跑前必须确认 `DATABASE_RUNTIME_URL` 指向非 owner、`NOSUPERUSER`、`NOBYPASSRLS` 的受限运行角色
+- 已创建 `elysian_runtime` 角色，约束为 `NOSUPERUSER`、`NOCREATEDB`、`NOCREATEROLE`、`NOINHERIT`、`NOBYPASSRLS`
+- `DATABASE_RUNTIME_URL` 已切到受限运行角色，`DATABASE_URL` 保留给 migration / admin 路径
+- server 在 `3002` 端口重启后，`M3` 的 10 项验证全部通过
+- PostgreSQL RLS 已按目标租户边界生效，`cross-tenant isolation` 通过
 ```
 
 ## 当前结论
 
 ```text
-go-live ready: no
+go-live ready: yes
 
 next actions:
-1. 在 `staging` 注入 `DATABASE_RUNTIME_URL`，并确认其角色不是 table owner / superuser，且无 `BYPASSRLS`
-2. 保留 `DATABASE_URL` 给 migration / admin 路径，不要再让 server runtime 直接复用 owner 连接
-3. 在 `staging` 重新执行 tenant 附加验证，优先复核跨租户隔离
-4. 复跑 `go-live:report` / `go-live:gate`，确认 `M3` 是否转为 `passed`
+1. 归档本次 `staging` runtime role 配置与验证证据
+2. 若后续切换到其他目标环境，复用同一套 `DATABASE_RUNTIME_URL` 受限角色基线与 `M3` 验证顺序
 ```
 
 ## 当前 go-live gate 试跑
@@ -313,10 +311,10 @@ artifacts:
 - artifacts/go-live/go-live-gate-report.json
 
 latest result:
-- status: failed
-- blocker count: 1
-- next milestone: M3
-- notes: `M1/M2` 已通过，`M3` 的 10 项验证中 9 项通过、1 项失败。当前唯一 blocker 是 `cross-tenant isolation`：`postgres` 作为 table owner 连接数据库时，RLS 未对 owner 生效，导致 tenant B 可读取 tenant A customers。仓库侧修复已在 `c6d06d6` 提交，但 `staging` 仍需完成 `DATABASE_RUNTIME_URL` 受限角色注入并重跑验证。`go-live:gate` 当前因此返回 failed。
+- status: passed
+- blocker count: 0
+- next milestone:
+- notes: `M1/M2/M3/M4` 全部通过。`staging` 已创建 `elysian_runtime` 受限运行角色，并将 `DATABASE_RUNTIME_URL` 切到该角色；`DATABASE_URL` 继续保留给 migration / admin。`go-live:report`、`go-live:gate` 与 `go-live:finalize` 当前全部返回 `passed`。
 ```
 
 ## 参考发行版首发验收衔接
@@ -365,7 +363,7 @@ ELYSIAN_GO_LIVE_CORE_WRITE_ACTION_VERIFIED=true
 ELYSIAN_GO_LIVE_SUPER_ADMIN_TENANT_ACCESS_VERIFIED=true
 ELYSIAN_GO_LIVE_TENANT_ADMIN_DENIED_VERIFIED=true
 ELYSIAN_GO_LIVE_NON_DEFAULT_TENANT_LOGIN_VERIFIED=true
-ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=false
+ELYSIAN_GO_LIVE_CROSS_TENANT_ISOLATION_VERIFIED=true
 ```
 
 ## 当前交接建议
