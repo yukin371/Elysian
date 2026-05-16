@@ -43,7 +43,7 @@ const assert = (condition: unknown, message: string) => {
 const resolveInputDir = () =>
   process.env.ELYSIAN_REPORT_INDEX_INPUT_DIR ?? resolveGeneratorReportDir()
 
-const resolveReportSource = (
+export const resolveReportSource = (
   relativePath: string,
 ): ReportIndexItem["source"] => {
   if (relativePath.startsWith("matrix/")) {
@@ -59,6 +59,34 @@ const resolveReportSource = (
   }
 
   return "unknown"
+}
+
+export const parseReportEnvelope = (
+  parsed: Partial<ParsedReport>,
+  relativePath: string,
+): ParsedReport => {
+  const status = parsed.status
+  const passedCount = parsed.passedCount
+  const failedCount = parsed.failedCount
+
+  assert(
+    status === "passed" || status === "failed",
+    `Invalid report status: ${relativePath}`,
+  )
+  assert(
+    typeof passedCount === "number" && Number.isFinite(passedCount),
+    `Invalid passedCount: ${relativePath}`,
+  )
+  assert(
+    typeof failedCount === "number" && Number.isFinite(failedCount),
+    `Invalid failedCount: ${relativePath}`,
+  )
+
+  return {
+    status,
+    passedCount,
+    failedCount,
+  }
 }
 
 const findJsonFilesRecursively = async (
@@ -99,28 +127,7 @@ const readParsedReport = async (
   const raw = await readFile(join(inputDir, relativePath), "utf8")
   const parsed = JSON.parse(raw) as Partial<ParsedReport>
 
-  const status = parsed.status
-  const passedCount = parsed.passedCount
-  const failedCount = parsed.failedCount
-
-  assert(
-    status === "passed" || status === "failed",
-    `Invalid report status: ${relativePath}`,
-  )
-  assert(
-    typeof passedCount === "number" && Number.isFinite(passedCount),
-    `Invalid passedCount: ${relativePath}`,
-  )
-  assert(
-    typeof failedCount === "number" && Number.isFinite(failedCount),
-    `Invalid failedCount: ${relativePath}`,
-  )
-
-  return {
-    status,
-    passedCount,
-    failedCount,
-  }
+  return parseReportEnvelope(parsed, relativePath)
 }
 
 const run = async () => {
@@ -181,10 +188,12 @@ const run = async () => {
   console.log("[e2e-generator-reports-index] passed")
 }
 
-try {
-  await run()
-} catch (error) {
-  const message = error instanceof Error ? error.message : String(error)
-  console.error(`[e2e-generator-reports-index] failed: ${message}`)
-  process.exitCode = 1
+if (import.meta.main) {
+  try {
+    await run()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`[e2e-generator-reports-index] failed: ${message}`)
+    process.exitCode = 1
+  }
 }

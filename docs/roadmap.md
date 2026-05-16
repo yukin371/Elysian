@@ -219,8 +219,8 @@
 - 已清理：并发覆盖下 Windows `rename` 瞬时冲突风险（原子写入增加重试），并补并发回归断言
 - 已新增：`bun run e2e:generator:cli`，覆盖 generator CLI 真实执行路径的冲突策略语义
 - 已推进：`packages/generator` 已补 preview/report 闭环，当前 `generate --preview` 可输出文件动作预览、结构化报告与 review-only SQL preview，为后续 Studio 生成预览提供底层产物
-- 已新增：matrix/cli JSON 报告输出，并在 CI 归档 artifact 用于失败定位与趋势追踪
-- 已新增：`bun run e2e:generator:reports:index` 与 CI `e2e-generator-report-index`，汇总 matrix/cli 报告为单一索引 artifact
+- 已新增：matrix/cli/studio JSON 报告输出，并在 CI 归档 artifact 用于失败定位与趋势追踪
+- 已新增：`bun run e2e:generator:reports:index` 与 CI `e2e-generator-report-index`，汇总 matrix/cli/studio 报告为单一索引 artifact
 - 已新增：`bun run e2e:generator:reports:gate` 与 CI `e2e-generator-report-gate`，按阈值策略执行发布门禁判定
 - 已支持：`workflow_dispatch` 手动触发时可配置 gate 阈值与失败来源白名单
 - 已补：`scripts/e2e-generator-reports-gate.test.ts`，覆盖来源白名单解析、推荐动作分流与索引一致性校验，降低门禁误配置与报告漂移风险
