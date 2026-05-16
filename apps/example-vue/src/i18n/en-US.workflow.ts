@@ -359,6 +359,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Rebuilt from a corrupt snapshot",
   "app.generatorPreview.recoveryStatus.rebuiltFromMissing":
     "Rebuilt from a missing snapshot",
+  "app.generatorPreview.driftStatus.stale":
+    "This result may be stale. Regenerate it before continuing with review or apply.",
+  "app.generatorPreview.driftStatus.applyConflict":
+    "Target files changed or still need manual review, so apply cannot continue yet.",
   "app.generatorPreview.confirmationChecklistTitle":
     "Pre-apply confirmation checklist",
   "app.generatorPreview.blockerReasonTitle": "Why this cannot continue yet",

@@ -115,7 +115,8 @@ const toApplyConflictError = (
       blockerReasons: [
         {
           code: "blocking-conflicts",
-          message: "Current target files still need manual review before apply.",
+          message:
+            "Current target files still need manual review before apply.",
           stage: "apply",
         },
       ],
@@ -278,7 +279,8 @@ export const createGeneratorSessionService = (
             blockerReasons: [
               {
                 code: "blocking-conflicts",
-                message: "Blocking files still need manual review before apply.",
+                message:
+                  "Blocking files still need manual review before apply.",
                 stage: "apply",
               },
             ],

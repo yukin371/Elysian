@@ -276,6 +276,16 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
           JSON.stringify({
             error: {
               code: "GENERATOR_SESSION_STALE",
+              details: {
+                blockerReasons: [
+                  {
+                    code: "blocking-conflicts",
+                    message: "Target files drifted since the last preview.",
+                    stage: "apply",
+                  },
+                ],
+                driftStatus: "stale",
+              },
               message: "Generator preview session is stale",
               status: 409,
             },
@@ -330,7 +340,9 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(previewRequestCount).toBe(1)
     expect(workspace.currentSession.value?.id).toBe("preview-session-2")
     expect(workspace.currentSession.value?.status).toBe("pending_review")
-    expect(workspace.errorMessage.value).toContain("GENERATOR_SESSION_STALE")
+    expect(workspace.errorMessage.value).toBe(
+      "Current result is stale. Regenerate it before continuing.",
+    )
     expect(workspace.canApplyPreview.value).toBe(false)
   })
 
@@ -608,6 +620,17 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
           JSON.stringify({
             error: {
               code: "GENERATOR_SESSION_APPLY_CONFLICT",
+              details: {
+                blockerReasons: [
+                  {
+                    code: "blocking-conflicts",
+                    message:
+                      "Current target files still need manual review before apply.",
+                    stage: "apply",
+                  },
+                ],
+                driftStatus: "apply-conflict",
+              },
               message: "Generator preview session cannot be applied",
               status: 409,
             },
@@ -666,8 +689,8 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.currentSession.value?.id).toBe("preview-session-3")
     expect(workspace.currentSession.value?.status).toBe("pending_review")
     expect(workspace.currentSession.value?.hasBlockingConflicts).toBe(true)
-    expect(workspace.errorMessage.value).toContain(
-      "GENERATOR_SESSION_APPLY_CONFLICT",
+    expect(workspace.errorMessage.value).toBe(
+      "Target files changed or still need manual review before apply can continue.",
     )
     expect(workspace.canApplyPreview.value).toBe(false)
   })
@@ -781,6 +804,16 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
           JSON.stringify({
             error: {
               code: "GENERATOR_SESSION_BLOCKING_CONFLICTS",
+              details: {
+                blockerReasons: [
+                  {
+                    code: "blocking-conflicts",
+                    message:
+                      "Blocking files still need manual review before apply.",
+                    stage: "apply",
+                  },
+                ],
+              },
               message: "Generator session still has blocking conflicts",
               status: 409,
             },
@@ -826,8 +859,8 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(detailRequestCount).toBe(2)
     expect(workspace.currentSession.value?.id).toBe("preview-session-1")
     expect(workspace.currentSession.value?.hasBlockingConflicts).toBe(true)
-    expect(workspace.errorMessage.value).toContain(
-      "GENERATOR_SESSION_BLOCKING_CONFLICTS",
+    expect(workspace.errorMessage.value).toBe(
+      "Blocking files still need manual review before apply.",
     )
     expect(workspace.canApplyPreview.value).toBe(false)
   })
@@ -847,6 +880,15 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
           JSON.stringify({
             error: {
               code: "GENERATOR_SESSION_REJECTED",
+              details: {
+                blockerReasons: [
+                  {
+                    code: "rejected",
+                    message: "Resolve the rejected result before apply.",
+                    stage: "review",
+                  },
+                ],
+              },
               message: "Generator session has been rejected",
               status: 409,
             },
@@ -897,7 +939,9 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(workspace.currentSession.value?.reviewComment).toBe(
       "Needs manual merge review",
     )
-    expect(workspace.errorMessage.value).toContain("GENERATOR_SESSION_REJECTED")
+    expect(workspace.errorMessage.value).toBe(
+      "Resolve the rejected result before apply.",
+    )
     expect(workspace.canApplyPreview.value).toBe(false)
   })
 
@@ -916,6 +960,15 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
           JSON.stringify({
             error: {
               code: "GENERATOR_SESSION_CONFIRMATION_REQUIRED",
+              details: {
+                blockerReasons: [
+                  {
+                    code: "confirmation-required",
+                    message: "Confirm the SQL handoff checklist before apply.",
+                    stage: "confirm",
+                  },
+                ],
+              },
               message: "Generator session must be confirmed before apply",
               status: 409,
             },
@@ -964,8 +1017,8 @@ describe("useGeneratorPreviewWorkspace action flows", () => {
     expect(detailRequestCount).toBe(1)
     expect(workspace.currentSession.value?.status).toBe("ready")
     expect(workspace.currentSession.value?.confirmedAt).toBeNull()
-    expect(workspace.errorMessage.value).toContain(
-      "GENERATOR_SESSION_CONFIRMATION_REQUIRED",
+    expect(workspace.errorMessage.value).toBe(
+      "Confirm the SQL handoff checklist before apply.",
     )
     expect(workspace.canApplyPreview.value).toBe(false)
     expect(workspace.canConfirmPreview.value).toBe(true)

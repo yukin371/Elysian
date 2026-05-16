@@ -345,7 +345,10 @@ describe("generator session module lifecycle", () => {
       createSqlProposalHandoff,
       "migrationProposalSnapshot",
     )
-    const createBlockerReasons = readRecordArray(createSession, "blockerReasons")
+    const createBlockerReasons = readRecordArray(
+      createSession,
+      "blockerReasons",
+    )
     const createMigrationProposalSnapshotPath = readString(
       createSqlProposalHandoff,
       "migrationProposalSnapshotPath",
@@ -464,7 +467,10 @@ describe("generator session module lifecycle", () => {
       "migrationProposalSnapshot",
     )
     const reviewEvidence = readRecord(reviewSession, "reviewEvidence")
-    const reviewBlockerReasons = readRecordArray(reviewSession, "blockerReasons")
+    const reviewBlockerReasons = readRecordArray(
+      reviewSession,
+      "blockerReasons",
+    )
     const reviewMigrationProposalSnapshotRecovery = readNullableRecord(
       reviewSqlProposalHandoff,
       "migrationProposalSnapshotRecovery",

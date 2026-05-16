@@ -40,6 +40,7 @@ type CreateGeneratorPreviewSessionActionsOptions = {
     staleMessage: string,
   ) => Promise<boolean>
   reviewLoading: Ref<boolean>
+  resolveErrorMessage: (error: unknown, fallback: string) => string
   selectedRecentSessionId: Ref<string>
   setErrorMessage: (message: string) => void
   upsertRecentSession: (session: GeneratorPreviewSessionRecord) => void
@@ -87,6 +88,11 @@ export const createGeneratorPreviewSessionActions = (
         options.persistCurrentSelection()
       }
     } catch (error) {
+      const applyErrorMessage = options.resolveErrorMessage(
+        error,
+        "Generator apply failed",
+      )
+
       if (
         isGeneratorPreviewErrorCodeOneOf(error, [
           generatorPreviewErrorCodes.GENERATOR_SESSION_STALE,
@@ -94,9 +100,7 @@ export const createGeneratorPreviewSessionActions = (
         ])
       ) {
         if (await options.refreshPreviewAfterApplyStale()) {
-          options.setErrorMessage(
-            error instanceof Error ? error.message : "Generator apply failed",
-          )
+          options.setErrorMessage(applyErrorMessage)
           return
         }
 
@@ -114,7 +118,7 @@ export const createGeneratorPreviewSessionActions = (
         if (
           await options.refreshSessionDetailAfterStateDrift(
             sessionId,
-            error instanceof Error ? error.message : "Generator apply failed",
+            applyErrorMessage,
           )
         ) {
           return
@@ -124,9 +128,7 @@ export const createGeneratorPreviewSessionActions = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
       }
-      options.setErrorMessage(
-        error instanceof Error ? error.message : "Generator apply failed",
-      )
+      options.setErrorMessage(applyErrorMessage)
     } finally {
       options.applyLoading.value = false
     }
@@ -182,6 +184,11 @@ export const createGeneratorPreviewSessionActions = (
         options.persistCurrentSelection()
       }
     } catch (error) {
+      const reviewErrorMessage = options.resolveErrorMessage(
+        error,
+        "Generator review failed",
+      )
+
       if (
         isGeneratorPreviewErrorCode(
           error,
@@ -191,7 +198,7 @@ export const createGeneratorPreviewSessionActions = (
         if (
           await options.refreshSessionDetailAfterStateDrift(
             sessionId,
-            error instanceof Error ? error.message : "Generator review failed",
+            reviewErrorMessage,
           )
         ) {
           return
@@ -201,9 +208,7 @@ export const createGeneratorPreviewSessionActions = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
       }
-      options.setErrorMessage(
-        error instanceof Error ? error.message : "Generator review failed",
-      )
+      options.setErrorMessage(reviewErrorMessage)
     } finally {
       options.reviewLoading.value = false
     }
@@ -242,6 +247,11 @@ export const createGeneratorPreviewSessionActions = (
       options.selectedRecentSessionId.value = response.session.id
       options.persistCurrentSelection()
     } catch (error) {
+      const confirmationErrorMessage = options.resolveErrorMessage(
+        error,
+        "Generator confirmation failed",
+      )
+
       if (
         isGeneratorPreviewErrorCodeOneOf(error, [
           generatorPreviewErrorCodes.GENERATOR_SESSION_CONFIRMATION_HANDOFF_MISMATCH,
@@ -252,9 +262,7 @@ export const createGeneratorPreviewSessionActions = (
         if (
           await options.refreshSessionDetailAfterStateDrift(
             sessionId,
-            error instanceof Error
-              ? error.message
-              : "Generator confirmation failed",
+            confirmationErrorMessage,
           )
         ) {
           return
@@ -264,11 +272,7 @@ export const createGeneratorPreviewSessionActions = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
       }
-      options.setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Generator confirmation failed",
-      )
+      options.setErrorMessage(confirmationErrorMessage)
     } finally {
       options.reviewLoading.value = false
     }

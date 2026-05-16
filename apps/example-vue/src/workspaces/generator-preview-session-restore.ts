@@ -37,6 +37,7 @@ type CreateGeneratorPreviewSessionRestoreOptions = {
   selectedSchemaName: Readonly<Ref<string>>
   selectionSessionCache: Map<string, GeneratorPreviewSessionDetail>
   sessionDetailCache: Map<string, GeneratorPreviewSessionDetail>
+  resolveErrorMessage: (error: unknown, fallback: string) => string
   setErrorMessage: (message: string) => void
   storedSessionId: string | null | undefined
 }
@@ -63,9 +64,10 @@ export const createGeneratorPreviewSessionRestore = (
         options.onRecoverableAuthError(refreshError)
       }
       options.setErrorMessage(
-        refreshError instanceof Error
-          ? refreshError.message
-          : "Generator session restore failed",
+        options.resolveErrorMessage(
+          refreshError,
+          "Generator session restore failed",
+        ),
       )
       return true
     }
@@ -98,9 +100,10 @@ export const createGeneratorPreviewSessionRestore = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
         options.setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Generator session restore failed",
+          options.resolveErrorMessage(
+            error,
+            "Generator session restore failed",
+          ),
         )
         return true
       }
@@ -115,9 +118,7 @@ export const createGeneratorPreviewSessionRestore = (
       }
 
       options.setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Generator session restore failed",
+        options.resolveErrorMessage(error, "Generator session restore failed"),
       )
       return true
     } finally {
@@ -181,9 +182,10 @@ export const createGeneratorPreviewSessionRestore = (
             if (isGeneratorPreviewRecoverableAuthError(error)) {
               options.onRecoverableAuthError(error)
               options.setErrorMessage(
-                error instanceof Error
-                  ? error.message
-                  : "Generator session restore failed",
+                options.resolveErrorMessage(
+                  error,
+                  "Generator session restore failed",
+                ),
               )
               return true
             }
@@ -198,9 +200,10 @@ export const createGeneratorPreviewSessionRestore = (
             }
 
             options.setErrorMessage(
-              error instanceof Error
-                ? error.message
-                : "Generator session restore failed",
+              options.resolveErrorMessage(
+                error,
+                "Generator session restore failed",
+              ),
             )
             return true
           }
@@ -214,9 +217,10 @@ export const createGeneratorPreviewSessionRestore = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         options.onRecoverableAuthError(error)
         options.setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Generator session restore failed",
+          options.resolveErrorMessage(
+            error,
+            "Generator session restore failed",
+          ),
         )
         return true
       }
@@ -228,9 +232,7 @@ export const createGeneratorPreviewSessionRestore = (
 
       options.recentSessions.value = []
       options.setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Generator session restore failed",
+        options.resolveErrorMessage(error, "Generator session restore failed"),
       )
       return true
     }

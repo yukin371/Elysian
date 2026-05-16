@@ -15,8 +15,8 @@ import type {
   GeneratorPreviewBlockerReason,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewDriftStatus,
-  GeneratorPreviewRecoveryStatus,
   GeneratorPreviewFileCard,
+  GeneratorPreviewRecoveryStatus,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSchemaOption,
   GeneratorPreviewSqlProposalHandoff,
@@ -139,9 +139,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
     return translated === key ? fallback : translated
   }
 
-  const resolveBlockerReasonMessage = (
-    reason: GeneratorPreviewBlockerReason,
-  ) =>
+  const resolveBlockerReasonMessage = (reason: GeneratorPreviewBlockerReason) =>
     translateOrFallback(
       `app.generatorPreview.blockerReason.${reason.code}.${reason.stage}`,
       reason.message,
@@ -378,8 +376,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
         text: props.blockerReasons[0]
           ? resolveBlockerReasonMessage(props.blockerReasons[0])
           : "",
-        tone:
-          props.blockerReasons[0]?.code === "rejected" ? "warning" : "info",
+        tone: props.blockerReasons[0]?.code === "rejected" ? "warning" : "info",
       } as const
     }
 

@@ -331,10 +331,12 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.message.recoveryStatusInline":
     "本次确认曾触发恢复处理：{value}。",
   "app.generatorPreview.recoveryStatus.none": "无需恢复",
-  "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt":
-    "快照损坏后已重建",
-  "app.generatorPreview.recoveryStatus.rebuiltFromMissing":
-    "快照缺失后已重建",
+  "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt": "快照损坏后已重建",
+  "app.generatorPreview.recoveryStatus.rebuiltFromMissing": "快照缺失后已重建",
+  "app.generatorPreview.driftStatus.stale":
+    "当前结果可能已经过期，请先重新生成，再继续审核或 apply。",
+  "app.generatorPreview.driftStatus.applyConflict":
+    "目标文件状态已变化或仍需人工处理，当前不能直接 apply。",
   "app.generatorPreview.confirmationChecklistTitle": "应用前确认清单",
   "app.generatorPreview.blockerReasonTitle": "当前不能继续的原因",
   "app.generatorPreview.blockerReason.review-required.review":

@@ -7,8 +7,10 @@ import {
   listRegisteredSchemas,
 } from "../lib/generator-preview-browser"
 import {
+  type GeneratorPreviewBlockerReason,
   type GeneratorPreviewConflictStrategy,
   type GeneratorPreviewDiffSummary,
+  type GeneratorPreviewDriftStatus,
   type GeneratorPreviewReport,
   type GeneratorPreviewSessionDetail,
   type GeneratorPreviewSessionRecord,
@@ -34,6 +36,7 @@ import { createGeneratorPreviewSessionActions } from "./generator-preview-sessio
 import {
   buildGeneratorPreviewSessionDetail,
   generatorPreviewErrorCodes,
+  getGeneratorPreviewErrorDetails,
   isGeneratorPreviewErrorCode,
   isGeneratorPreviewRecoverableAuthError,
   isGeneratorPreviewSessionDetailConsistent,
@@ -105,6 +108,58 @@ export const useGeneratorPreviewWorkspace = (
       value: "manual-schema-json",
     },
   ])
+
+  const translateOrFallback = (key: string, fallback: string) => {
+    const translated = t(key)
+
+    return translated === key ? fallback : translated
+  }
+
+  const resolveBlockerReasonMessage = (reason: GeneratorPreviewBlockerReason) =>
+    translateOrFallback(
+      `app.generatorPreview.blockerReason.${reason.code}.${reason.stage}`,
+      reason.message,
+    )
+
+  const resolveDriftStatusMessage = (
+    driftStatus: GeneratorPreviewDriftStatus | null,
+  ) => {
+    if (driftStatus === "stale") {
+      return translateOrFallback(
+        "app.generatorPreview.driftStatus.stale",
+        "Current result is stale. Regenerate it before continuing.",
+      )
+    }
+
+    if (driftStatus === "apply-conflict") {
+      return translateOrFallback(
+        "app.generatorPreview.driftStatus.applyConflict",
+        "Target files changed or still need manual review before apply can continue.",
+      )
+    }
+
+    return null
+  }
+
+  const resolveGeneratorPreviewErrorMessage = (
+    error: unknown,
+    fallback: string,
+  ) => {
+    const details = getGeneratorPreviewErrorDetails(error)
+    const driftMessage = resolveDriftStatusMessage(details?.driftStatus ?? null)
+
+    if (driftMessage) {
+      return driftMessage
+    }
+
+    const blockerReason = details?.blockerReasons[0]
+
+    if (blockerReason) {
+      return resolveBlockerReasonMessage(blockerReason)
+    }
+
+    return error instanceof Error ? error.message : fallback
+  }
 
   const selectedSchema = computed(() =>
     selectedSchemaName.value
@@ -446,6 +501,7 @@ export const useGeneratorPreviewWorkspace = (
       selectedSchemaName,
       selectionSessionCache,
       sessionDetailCache,
+      resolveErrorMessage: resolveGeneratorPreviewErrorMessage,
       setErrorMessage: (message) => {
         errorMessage.value = message
       },
@@ -544,8 +600,10 @@ export const useGeneratorPreviewWorkspace = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         onRecoverableAuthError(error)
       }
-      errorMessage.value =
-        error instanceof Error ? error.message : "Generator preview failed"
+      errorMessage.value = resolveGeneratorPreviewErrorMessage(
+        error,
+        "Generator preview failed",
+      )
       return false
     } finally {
       if (requestId === latestPreviewRequestId) {
@@ -573,6 +631,7 @@ export const useGeneratorPreviewWorkspace = (
         refreshPreview({ ignoreApplyLoading: true }),
       refreshSessionDetailAfterStateDrift,
       reviewLoading,
+      resolveErrorMessage: resolveGeneratorPreviewErrorMessage,
       selectedRecentSessionId,
       setErrorMessage: (message) => {
         errorMessage.value = message
@@ -622,10 +681,10 @@ export const useGeneratorPreviewWorkspace = (
       if (isGeneratorPreviewRecoverableAuthError(error)) {
         onRecoverableAuthError(error)
       }
-      errorMessage.value =
-        error instanceof Error
-          ? error.message
-          : "Generator session restore failed"
+      errorMessage.value = resolveGeneratorPreviewErrorMessage(
+        error,
+        "Generator session restore failed",
+      )
     } finally {
       loading.value = false
     }

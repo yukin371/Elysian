@@ -58,10 +58,7 @@ export type GeneratorPreviewRecoveryStatus =
   | "rebuilt-from-corrupt"
   | "rebuilt-from-missing"
 
-export type GeneratorPreviewDriftStatus =
-  | "clean"
-  | "stale"
-  | "apply-conflict"
+export type GeneratorPreviewDriftStatus = "clean" | "stale" | "apply-conflict"
 
 export type GeneratorPreviewBlockerReasonCode =
   | "review-required"

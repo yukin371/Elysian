@@ -29,6 +29,7 @@
 验证方式：
 - `bun test apps/example-vue/src/components/workspaces/generator/generator-preview-confirmation-evidence.test.ts apps/example-vue/src/components/workspaces/generator/use-generator-preview-workspace-main-state.test.ts apps/example-vue/src/workspaces/use-generator-preview-workspace.actions.test.ts apps/example-vue/src/workspaces/use-generator-preview-workspace.selection.test.ts`
 - `bun test apps/server/src/modules/generator-session/module.lifecycle.test.ts apps/server/src/modules/generator-session/module.guards.test.ts apps/server/src/modules/generator-session/module.detail.test.ts`
+- `bun run e2e:generator:studio`
 - `bun run build:vue`
 
 需要同步的文档：
@@ -80,6 +81,9 @@
   - apply 冲突、stale、rejected、confirmation required 等阻断路径
   - SQL proposal snapshot 的读取、缺失重建、损坏重建
   - 真实 workspace 的前端编译与 generator 相关交互测试
+- `scripts/e2e-generator-studio-guided-flow-smoke.ts` 已从步骤映射 smoke 收口为真实 workspace 验收：
+  - happy path 覆盖 `start -> preview -> review -> confirm -> apply`
+  - blocked path 覆盖 apply 阻断后的 detail refresh 与 blocker evidence 回看
 
 ## 阶段内保留边界
 

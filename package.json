@@ -66,6 +66,7 @@
     "e2e:generator:safe-apply": "bun scripts/e2e-generator-safe-apply.ts",
     "e2e:generator:matrix": "bun scripts/e2e-generator-regression-matrix.ts",
     "e2e:generator:cli": "bun scripts/e2e-generator-cli.ts",
+    "e2e:generator:studio": "bun scripts/e2e-generator-studio-guided-flow-smoke.ts",
     "e2e:generator:reports:index": "bun scripts/e2e-generator-reports-index.ts",
     "e2e:generator:reports:gate": "bun scripts/e2e-generator-reports-gate.ts",
     "example-vue:standard-crud-surfaces:generate": "bun --filter @elysian/example-vue generate:standard-crud-surfaces",
