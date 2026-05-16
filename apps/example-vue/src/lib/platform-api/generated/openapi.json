@@ -11314,7 +11314,7 @@
         "tags": [
           "setting"
         ],
-        "summary": "List settings",
+        "summary": "List config entries",
         "parameters": [
           {
             "name": "page",
@@ -11506,7 +11506,7 @@
         "tags": [
           "setting"
         ],
-        "summary": "Create setting",
+        "summary": "Create config entry",
         "requestBody": {
           "required": true,
           "content": {
@@ -11793,7 +11793,7 @@
         "tags": [
           "setting"
         ],
-        "summary": "Export settings as CSV",
+        "summary": "Export config entries as CSV",
         "responses": {
           "401": {
             "description": "Response for status 401",
@@ -11868,7 +11868,7 @@
         "tags": [
           "setting"
         ],
-        "summary": "Get setting by id",
+        "summary": "Get config entry by id",
         "parameters": [
           {
             "name": "id",
@@ -12039,7 +12039,7 @@
         "tags": [
           "setting"
         ],
-        "summary": "Update setting",
+        "summary": "Update config entry",
         "parameters": [
           {
             "name": "id",
@@ -16794,6 +16794,62 @@
           "workflow"
         ],
         "summary": "List workflow definitions",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "disabled"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Response for status 200",
@@ -16802,7 +16858,11 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "items"
+                    "items",
+                    "page",
+                    "pageSize",
+                    "total",
+                    "totalPages"
                   ],
                   "properties": {
                     "items": {
@@ -16986,6 +17046,18 @@
                           }
                         }
                       }
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "pageSize": {
+                      "type": "number"
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "totalPages": {
+                      "type": "number"
                     }
                   }
                 }
@@ -21499,6 +21571,147 @@
         "operationId": "postWorkflowInstancesByIdCancel"
       }
     },
+    "/studio/generator/validate-schema": {
+      "post": {
+        "tags": [
+          "generator"
+        ],
+        "summary": "Validate and expand generator schema input",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "schema"
+                ],
+                "properties": {
+                  "schema": {}
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "schema"
+                ],
+                "properties": {
+                  "schema": {}
+                }
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "schema"
+                ],
+                "properties": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response for status 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "valid",
+                        "expandedSchema"
+                      ],
+                      "properties": {
+                        "valid": {
+                          "const": true,
+                          "type": "boolean"
+                        },
+                        "expandedSchema": {}
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "valid",
+                        "issues",
+                        "formattedMessage"
+                      ],
+                      "properties": {
+                        "valid": {
+                          "const": false,
+                          "type": "boolean"
+                        },
+                        "issues": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "path",
+                              "message"
+                            ],
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "formattedMessage": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response for status 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "status"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "number"
+                    },
+                    "details": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "postStudioGeneratorValidate-schema"
+      }
+    },
     "/studio/generator/sessions": {
       "get": {
         "tags": [
@@ -21551,6 +21764,9 @@
                           "confirmedByUserId",
                           "confirmedByUsername",
                           "confirmationEvidence",
+                          "blockerReasons",
+                          "recoveryStatus",
+                          "driftStatus",
                           "schemaName",
                           "skippedFileCount",
                           "sourceType",
@@ -21679,8 +21895,90 @@
                             "anyOf": [
                               {
                                 "type": "object",
-                                "patternProperties": {
-                                  "^(.*)$": {}
+                                "required": [
+                                  "sessionId",
+                                  "reportPath",
+                                  "manifestPath",
+                                  "appliedAt",
+                                  "actorDisplayName",
+                                  "actorUserId",
+                                  "actorUsername",
+                                  "requestId"
+                                ],
+                                "properties": {
+                                  "sessionId": {
+                                    "type": "string"
+                                  },
+                                  "reportPath": {
+                                    "type": "string"
+                                  },
+                                  "manifestPath": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "appliedAt": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "format": "date-time",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorDisplayName": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorUserId": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorUsername": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "requestId": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
                                 }
                               },
                               {
@@ -21781,8 +22079,91 @@
                             "anyOf": [
                               {
                                 "type": "object",
-                                "patternProperties": {
-                                  "^(.*)$": {}
+                                "required": [
+                                  "sessionId",
+                                  "reportPath",
+                                  "reviewedAt",
+                                  "actorDisplayName",
+                                  "actorUserId",
+                                  "actorUsername",
+                                  "comment",
+                                  "decision"
+                                ],
+                                "properties": {
+                                  "sessionId": {
+                                    "type": "string"
+                                  },
+                                  "reportPath": {
+                                    "type": "string"
+                                  },
+                                  "reviewedAt": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "format": "date-time",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorDisplayName": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorUserId": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorUsername": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "comment": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "decision": {
+                                    "anyOf": [
+                                      {
+                                        "const": "approve",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "reject",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  }
                                 }
                               },
                               {
@@ -21840,13 +22221,160 @@
                             "anyOf": [
                               {
                                 "type": "object",
-                                "patternProperties": {
-                                  "^(.*)$": {}
+                                "required": [
+                                  "sessionId",
+                                  "reportPath",
+                                  "snapshotPath",
+                                  "recoveryStatus",
+                                  "archivedSnapshotPath",
+                                  "confirmedAt",
+                                  "actorDisplayName",
+                                  "actorUserId",
+                                  "actorUsername",
+                                  "checklist"
+                                ],
+                                "properties": {
+                                  "sessionId": {
+                                    "type": "string"
+                                  },
+                                  "reportPath": {
+                                    "type": "string"
+                                  },
+                                  "snapshotPath": {
+                                    "type": "string"
+                                  },
+                                  "recoveryStatus": {
+                                    "anyOf": [
+                                      {
+                                        "const": "none",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "rebuilt-from-corrupt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "rebuilt-from-missing",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "archivedSnapshotPath": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "confirmedAt": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "format": "date-time",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorDisplayName": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorUserId": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "actorUsername": {
+                                    "nullable": true,
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "checklist": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
                                 }
                               },
                               {
                                 "type": "null"
                               }
+                            ]
+                          },
+                          "blockerReasons": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "code",
+                                "message",
+                                "stage"
+                              ],
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "enum": [
+                                    "review-required",
+                                    "rejected",
+                                    "blocking-conflicts",
+                                    "confirmation-required"
+                                  ]
+                                },
+                                "message": {
+                                  "type": "string"
+                                },
+                                "stage": {
+                                  "type": "string",
+                                  "enum": [
+                                    "review",
+                                    "confirm",
+                                    "apply"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "recoveryStatus": {
+                            "type": "string",
+                            "enum": [
+                              "none",
+                              "rebuilt-from-corrupt",
+                              "rebuilt-from-missing"
+                            ]
+                          },
+                          "driftStatus": {
+                            "type": "string",
+                            "enum": [
+                              "clean",
+                              "stale",
+                              "apply-conflict"
                             ]
                           },
                           "schemaName": {
@@ -21864,8 +22392,11 @@
                             ]
                           },
                           "sourceType": {
-                            "const": "registered-schema",
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                              "registered-schema",
+                              "manual-schema-json"
+                            ]
                           },
                           "sourceValue": {
                             "type": "string"
@@ -21883,6 +22414,7 @@
                             "type": "string",
                             "enum": [
                               "staging",
+                              "module",
                               "default"
                             ]
                           },
@@ -22028,6 +22560,9 @@
                     "confirmedByUserId",
                     "confirmedByUsername",
                     "confirmationEvidence",
+                    "blockerReasons",
+                    "recoveryStatus",
+                    "driftStatus",
                     "schemaName",
                     "skippedFileCount",
                     "sourceType",
@@ -22162,8 +22697,90 @@
                       "anyOf": [
                         {
                           "type": "object",
-                          "patternProperties": {
-                            "^(.*)$": {}
+                          "required": [
+                            "sessionId",
+                            "reportPath",
+                            "manifestPath",
+                            "appliedAt",
+                            "actorDisplayName",
+                            "actorUserId",
+                            "actorUsername",
+                            "requestId"
+                          ],
+                          "properties": {
+                            "sessionId": {
+                              "type": "string"
+                            },
+                            "reportPath": {
+                              "type": "string"
+                            },
+                            "manifestPath": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "appliedAt": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "format": "date-time",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorDisplayName": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorUserId": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorUsername": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "requestId": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
                           }
                         },
                         {
@@ -22264,8 +22881,91 @@
                       "anyOf": [
                         {
                           "type": "object",
-                          "patternProperties": {
-                            "^(.*)$": {}
+                          "required": [
+                            "sessionId",
+                            "reportPath",
+                            "reviewedAt",
+                            "actorDisplayName",
+                            "actorUserId",
+                            "actorUsername",
+                            "comment",
+                            "decision"
+                          ],
+                          "properties": {
+                            "sessionId": {
+                              "type": "string"
+                            },
+                            "reportPath": {
+                              "type": "string"
+                            },
+                            "reviewedAt": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "format": "date-time",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorDisplayName": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorUserId": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorUsername": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "comment": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "decision": {
+                              "anyOf": [
+                                {
+                                  "const": "approve",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "reject",
+                                  "type": "string"
+                                }
+                              ]
+                            }
                           }
                         },
                         {
@@ -22323,13 +23023,160 @@
                       "anyOf": [
                         {
                           "type": "object",
-                          "patternProperties": {
-                            "^(.*)$": {}
+                          "required": [
+                            "sessionId",
+                            "reportPath",
+                            "snapshotPath",
+                            "recoveryStatus",
+                            "archivedSnapshotPath",
+                            "confirmedAt",
+                            "actorDisplayName",
+                            "actorUserId",
+                            "actorUsername",
+                            "checklist"
+                          ],
+                          "properties": {
+                            "sessionId": {
+                              "type": "string"
+                            },
+                            "reportPath": {
+                              "type": "string"
+                            },
+                            "snapshotPath": {
+                              "type": "string"
+                            },
+                            "recoveryStatus": {
+                              "anyOf": [
+                                {
+                                  "const": "none",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "rebuilt-from-corrupt",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "rebuilt-from-missing",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "archivedSnapshotPath": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "confirmedAt": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "format": "date-time",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorDisplayName": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorUserId": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "actorUsername": {
+                              "nullable": true,
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "checklist": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
                           }
                         },
                         {
                           "type": "null"
                         }
+                      ]
+                    },
+                    "blockerReasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "code",
+                          "message",
+                          "stage"
+                        ],
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "review-required",
+                              "rejected",
+                              "blocking-conflicts",
+                              "confirmation-required"
+                            ]
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "stage": {
+                            "type": "string",
+                            "enum": [
+                              "review",
+                              "confirm",
+                              "apply"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "recoveryStatus": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "rebuilt-from-corrupt",
+                        "rebuilt-from-missing"
+                      ]
+                    },
+                    "driftStatus": {
+                      "type": "string",
+                      "enum": [
+                        "clean",
+                        "stale",
+                        "apply-conflict"
                       ]
                     },
                     "schemaName": {
@@ -22347,8 +23194,11 @@
                       ]
                     },
                     "sourceType": {
-                      "const": "registered-schema",
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "registered-schema",
+                        "manual-schema-json"
+                      ]
                     },
                     "sourceValue": {
                       "type": "string"
@@ -22366,6 +23216,7 @@
                       "type": "string",
                       "enum": [
                         "staging",
+                        "module",
                         "default"
                       ]
                     },
@@ -22559,9 +23410,22 @@
                       "fail"
                     ]
                   },
-                  "targetPreset": {
-                    "const": "staging",
+                  "sourceType": {
+                    "type": "string",
+                    "enum": [
+                      "registered-schema",
+                      "manual-schema-json"
+                    ]
+                  },
+                  "sourceValue": {
                     "type": "string"
+                  },
+                  "targetPreset": {
+                    "type": "string",
+                    "enum": [
+                      "staging",
+                      "module"
+                    ]
                   }
                 }
               }
@@ -22593,9 +23457,22 @@
                       "fail"
                     ]
                   },
-                  "targetPreset": {
-                    "const": "staging",
+                  "sourceType": {
+                    "type": "string",
+                    "enum": [
+                      "registered-schema",
+                      "manual-schema-json"
+                    ]
+                  },
+                  "sourceValue": {
                     "type": "string"
+                  },
+                  "targetPreset": {
+                    "type": "string",
+                    "enum": [
+                      "staging",
+                      "module"
+                    ]
                   }
                 }
               }
@@ -22627,9 +23504,22 @@
                       "fail"
                     ]
                   },
-                  "targetPreset": {
-                    "const": "staging",
+                  "sourceType": {
+                    "type": "string",
+                    "enum": [
+                      "registered-schema",
+                      "manual-schema-json"
+                    ]
+                  },
+                  "sourceValue": {
                     "type": "string"
+                  },
+                  "targetPreset": {
+                    "type": "string",
+                    "enum": [
+                      "staging",
+                      "module"
+                    ]
                   }
                 }
               }
@@ -22686,6 +23576,9 @@
                         "confirmedByUserId",
                         "confirmedByUsername",
                         "confirmationEvidence",
+                        "blockerReasons",
+                        "recoveryStatus",
+                        "driftStatus",
                         "schemaName",
                         "skippedFileCount",
                         "sourceType",
@@ -22814,8 +23707,90 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "manifestPath",
+                                "appliedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "requestId"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "manifestPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "appliedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "requestId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -22916,8 +23891,91 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "reviewedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "comment",
+                                "decision"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "reviewedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "comment": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "decision": {
+                                  "anyOf": [
+                                    {
+                                      "const": "approve",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "reject",
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -22975,13 +24033,160 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "snapshotPath",
+                                "recoveryStatus",
+                                "archivedSnapshotPath",
+                                "confirmedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "checklist"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "snapshotPath": {
+                                  "type": "string"
+                                },
+                                "recoveryStatus": {
+                                  "anyOf": [
+                                    {
+                                      "const": "none",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-corrupt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-missing",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "archivedSnapshotPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "confirmedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "checklist": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
                               }
                             },
                             {
                               "type": "null"
                             }
+                          ]
+                        },
+                        "blockerReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "code",
+                              "message",
+                              "stage"
+                            ],
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "enum": [
+                                  "review-required",
+                                  "rejected",
+                                  "blocking-conflicts",
+                                  "confirmation-required"
+                                ]
+                              },
+                              "message": {
+                                "type": "string"
+                              },
+                              "stage": {
+                                "type": "string",
+                                "enum": [
+                                  "review",
+                                  "confirm",
+                                  "apply"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "recoveryStatus": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "rebuilt-from-corrupt",
+                            "rebuilt-from-missing"
+                          ]
+                        },
+                        "driftStatus": {
+                          "type": "string",
+                          "enum": [
+                            "clean",
+                            "stale",
+                            "apply-conflict"
                           ]
                         },
                         "schemaName": {
@@ -22999,8 +24204,11 @@
                           ]
                         },
                         "sourceType": {
-                          "const": "registered-schema",
-                          "type": "string"
+                          "type": "string",
+                          "enum": [
+                            "registered-schema",
+                            "manual-schema-json"
+                          ]
                         },
                         "sourceValue": {
                           "type": "string"
@@ -23018,6 +24226,7 @@
                           "type": "string",
                           "enum": [
                             "staging",
+                            "module",
                             "default"
                           ]
                         },
@@ -23040,6 +24249,38 @@
                     "report": {},
                     "sqlProposal": {},
                     "sqlProposalHandoff": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response for status 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "status"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "number"
+                    },
+                    "details": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {}
+                      }
+                    }
                   }
                 }
               }
@@ -23341,6 +24582,9 @@
                         "confirmedByUserId",
                         "confirmedByUsername",
                         "confirmationEvidence",
+                        "blockerReasons",
+                        "recoveryStatus",
+                        "driftStatus",
                         "schemaName",
                         "skippedFileCount",
                         "sourceType",
@@ -23469,8 +24713,90 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "manifestPath",
+                                "appliedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "requestId"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "manifestPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "appliedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "requestId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -23571,8 +24897,91 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "reviewedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "comment",
+                                "decision"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "reviewedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "comment": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "decision": {
+                                  "anyOf": [
+                                    {
+                                      "const": "approve",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "reject",
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -23630,13 +25039,160 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "snapshotPath",
+                                "recoveryStatus",
+                                "archivedSnapshotPath",
+                                "confirmedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "checklist"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "snapshotPath": {
+                                  "type": "string"
+                                },
+                                "recoveryStatus": {
+                                  "anyOf": [
+                                    {
+                                      "const": "none",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-corrupt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-missing",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "archivedSnapshotPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "confirmedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "checklist": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
                               }
                             },
                             {
                               "type": "null"
                             }
+                          ]
+                        },
+                        "blockerReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "code",
+                              "message",
+                              "stage"
+                            ],
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "enum": [
+                                  "review-required",
+                                  "rejected",
+                                  "blocking-conflicts",
+                                  "confirmation-required"
+                                ]
+                              },
+                              "message": {
+                                "type": "string"
+                              },
+                              "stage": {
+                                "type": "string",
+                                "enum": [
+                                  "review",
+                                  "confirm",
+                                  "apply"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "recoveryStatus": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "rebuilt-from-corrupt",
+                            "rebuilt-from-missing"
+                          ]
+                        },
+                        "driftStatus": {
+                          "type": "string",
+                          "enum": [
+                            "clean",
+                            "stale",
+                            "apply-conflict"
                           ]
                         },
                         "schemaName": {
@@ -23654,8 +25210,11 @@
                           ]
                         },
                         "sourceType": {
-                          "const": "registered-schema",
-                          "type": "string"
+                          "type": "string",
+                          "enum": [
+                            "registered-schema",
+                            "manual-schema-json"
+                          ]
                         },
                         "sourceValue": {
                           "type": "string"
@@ -23673,6 +25232,7 @@
                           "type": "string",
                           "enum": [
                             "staging",
+                            "module",
                             "default"
                           ]
                         },
@@ -24000,6 +25560,9 @@
                         "confirmedByUserId",
                         "confirmedByUsername",
                         "confirmationEvidence",
+                        "blockerReasons",
+                        "recoveryStatus",
+                        "driftStatus",
                         "schemaName",
                         "skippedFileCount",
                         "sourceType",
@@ -24128,8 +25691,90 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "manifestPath",
+                                "appliedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "requestId"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "manifestPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "appliedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "requestId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -24230,8 +25875,91 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "reviewedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "comment",
+                                "decision"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "reviewedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "comment": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "decision": {
+                                  "anyOf": [
+                                    {
+                                      "const": "approve",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "reject",
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -24289,13 +26017,160 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "snapshotPath",
+                                "recoveryStatus",
+                                "archivedSnapshotPath",
+                                "confirmedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "checklist"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "snapshotPath": {
+                                  "type": "string"
+                                },
+                                "recoveryStatus": {
+                                  "anyOf": [
+                                    {
+                                      "const": "none",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-corrupt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-missing",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "archivedSnapshotPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "confirmedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "checklist": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
                               }
                             },
                             {
                               "type": "null"
                             }
+                          ]
+                        },
+                        "blockerReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "code",
+                              "message",
+                              "stage"
+                            ],
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "enum": [
+                                  "review-required",
+                                  "rejected",
+                                  "blocking-conflicts",
+                                  "confirmation-required"
+                                ]
+                              },
+                              "message": {
+                                "type": "string"
+                              },
+                              "stage": {
+                                "type": "string",
+                                "enum": [
+                                  "review",
+                                  "confirm",
+                                  "apply"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "recoveryStatus": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "rebuilt-from-corrupt",
+                            "rebuilt-from-missing"
+                          ]
+                        },
+                        "driftStatus": {
+                          "type": "string",
+                          "enum": [
+                            "clean",
+                            "stale",
+                            "apply-conflict"
                           ]
                         },
                         "schemaName": {
@@ -24313,8 +26188,11 @@
                           ]
                         },
                         "sourceType": {
-                          "const": "registered-schema",
-                          "type": "string"
+                          "type": "string",
+                          "enum": [
+                            "registered-schema",
+                            "manual-schema-json"
+                          ]
                         },
                         "sourceValue": {
                           "type": "string"
@@ -24332,6 +26210,7 @@
                           "type": "string",
                           "enum": [
                             "staging",
+                            "module",
                             "default"
                           ]
                         },
@@ -24585,6 +26464,9 @@
                         "confirmedByUserId",
                         "confirmedByUsername",
                         "confirmationEvidence",
+                        "blockerReasons",
+                        "recoveryStatus",
+                        "driftStatus",
                         "schemaName",
                         "skippedFileCount",
                         "sourceType",
@@ -24713,8 +26595,90 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "manifestPath",
+                                "appliedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "requestId"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "manifestPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "appliedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "requestId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -24815,8 +26779,91 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "reviewedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "comment",
+                                "decision"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "reviewedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "comment": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "decision": {
+                                  "anyOf": [
+                                    {
+                                      "const": "approve",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "reject",
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
                               }
                             },
                             {
@@ -24874,13 +26921,160 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "patternProperties": {
-                                "^(.*)$": {}
+                              "required": [
+                                "sessionId",
+                                "reportPath",
+                                "snapshotPath",
+                                "recoveryStatus",
+                                "archivedSnapshotPath",
+                                "confirmedAt",
+                                "actorDisplayName",
+                                "actorUserId",
+                                "actorUsername",
+                                "checklist"
+                              ],
+                              "properties": {
+                                "sessionId": {
+                                  "type": "string"
+                                },
+                                "reportPath": {
+                                  "type": "string"
+                                },
+                                "snapshotPath": {
+                                  "type": "string"
+                                },
+                                "recoveryStatus": {
+                                  "anyOf": [
+                                    {
+                                      "const": "none",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-corrupt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "rebuilt-from-missing",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "archivedSnapshotPath": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "confirmedAt": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "format": "date-time",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorDisplayName": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUserId": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "actorUsername": {
+                                  "nullable": true,
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "checklist": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
                               }
                             },
                             {
                               "type": "null"
                             }
+                          ]
+                        },
+                        "blockerReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "code",
+                              "message",
+                              "stage"
+                            ],
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "enum": [
+                                  "review-required",
+                                  "rejected",
+                                  "blocking-conflicts",
+                                  "confirmation-required"
+                                ]
+                              },
+                              "message": {
+                                "type": "string"
+                              },
+                              "stage": {
+                                "type": "string",
+                                "enum": [
+                                  "review",
+                                  "confirm",
+                                  "apply"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "recoveryStatus": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "rebuilt-from-corrupt",
+                            "rebuilt-from-missing"
+                          ]
+                        },
+                        "driftStatus": {
+                          "type": "string",
+                          "enum": [
+                            "clean",
+                            "stale",
+                            "apply-conflict"
                           ]
                         },
                         "schemaName": {
@@ -24898,8 +27092,11 @@
                           ]
                         },
                         "sourceType": {
-                          "const": "registered-schema",
-                          "type": "string"
+                          "type": "string",
+                          "enum": [
+                            "registered-schema",
+                            "manual-schema-json"
+                          ]
                         },
                         "sourceValue": {
                           "type": "string"
@@ -24917,6 +27114,7 @@
                           "type": "string",
                           "enum": [
                             "staging",
+                            "module",
                             "default"
                           ]
                         },

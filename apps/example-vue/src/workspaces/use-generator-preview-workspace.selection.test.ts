@@ -171,11 +171,15 @@ describe("useGeneratorPreviewWorkspace selection flows", () => {
                 actorDisplayName: "Admin",
                 actorUserId: "user-1",
                 actorUsername: "admin",
+                archivedSnapshotPath: null,
                 checklist: ["Review the SQL draft."],
                 confirmedAt: "2026-05-02T16:07:00.000Z",
+                recoveryStatus: "none",
                 reportPath:
                   "generated/reports/preview-session-created.preview.json",
                 sessionId: "preview-session-created",
+                snapshotPath:
+                  "/tmp/generator-session-report/customer.migration-proposal.json",
               },
               confirmedByDisplayName: "Admin",
               confirmedByUserId: "user-1",

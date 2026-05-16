@@ -623,10 +623,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List settings */
+        /** List config entries */
         get: operations["getSystemSettings"];
         put?: never;
-        /** Create setting */
+        /** Create config entry */
         post: operations["postSystemSettings"];
         delete?: never;
         options?: never;
@@ -641,7 +641,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Export settings as CSV */
+        /** Export config entries as CSV */
         get: operations["getSystemSettingsExport"];
         put?: never;
         post?: never;
@@ -658,9 +658,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get setting by id */
+        /** Get config entry by id */
         get: operations["getSystemSettingsById"];
-        /** Update setting */
+        /** Update config entry */
         put: operations["putSystemSettingsById"];
         post?: never;
         delete?: never;
@@ -1113,6 +1113,23 @@ export interface paths {
         put?: never;
         /** Cancel workflow instance */
         post: operations["postWorkflowInstancesByIdCancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/studio/generator/validate-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validate and expand generator schema input */
+        post: operations["postStudioGeneratorValidate-schema"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7997,7 +8014,12 @@ export interface operations {
     };
     getWorkflowDefinitions: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                status?: "active" | "disabled";
+                page?: string | number;
+                pageSize?: string | number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -8055,6 +8077,10 @@ export interface operations {
                             /** Format: date-time */
                             updatedAt: string;
                         }[];
+                        page: number;
+                        pageSize: number;
+                        total: number;
+                        totalPages: number;
                     };
                 };
             };
@@ -9658,6 +9684,66 @@ export interface operations {
             };
         };
     };
+    "postStudioGeneratorValidate-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    schema: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    schema: unknown;
+                };
+                "multipart/form-data": {
+                    schema: unknown;
+                };
+            };
+        };
+        responses: {
+            /** @description Response for status 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @constant */
+                        valid: true;
+                        expandedSchema: unknown;
+                    } | {
+                        /** @constant */
+                        valid: false;
+                        issues: {
+                            path: string;
+                            message: string;
+                        }[];
+                        formattedMessage: string;
+                    };
+                };
+            };
+            /** @description Response for status 400 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        code: number;
+                        message: string;
+                        status: number;
+                        details?: {
+                            [key: string]: unknown;
+                        };
+                    };
+                };
+            };
+        };
+    };
     getStudioGeneratorSessions: {
         parameters: {
             query?: never;
@@ -9687,7 +9773,14 @@ export interface operations {
                             applyManifestPath: (string | null) | null;
                             applyRequestId: (string | null) | null;
                             applyEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                manifestPath: (string | null) | null;
+                                appliedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                requestId: (string | null) | null;
                             } | null) | null;
                             /** @enum {string} */
                             conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
@@ -9705,24 +9798,51 @@ export interface operations {
                             reviewedByUserId: (string | null) | null;
                             reviewedByUsername: (string | null) | null;
                             reviewEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                reviewedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                comment: (string | null) | null;
+                                decision: "approve" | "reject";
                             } | null) | null;
                             confirmedAt: (string | null) | null;
                             confirmedByDisplayName: (string | null) | null;
                             confirmedByUserId: (string | null) | null;
                             confirmedByUsername: (string | null) | null;
                             confirmationEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                snapshotPath: string;
+                                recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                                archivedSnapshotPath: (string | null) | null;
+                                confirmedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                checklist: string[];
                             } | null) | null;
+                            blockerReasons: {
+                                /** @enum {string} */
+                                code: "review-required" | "rejected" | "blocking-conflicts" | "confirmation-required";
+                                message: string;
+                                /** @enum {string} */
+                                stage: "review" | "confirm" | "apply";
+                            }[];
+                            /** @enum {string} */
+                            recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                            /** @enum {string} */
+                            driftStatus: "clean" | "stale" | "apply-conflict";
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
-                            /** @constant */
+                            /** @enum {string} */
                             sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
                             /** @enum {string} */
-                            targetPreset: "staging" | "default";
+                            targetPreset: "staging" | "module" | "default";
                             tenantId: (string | null) | null;
                         }[];
                     };
@@ -9792,7 +9912,14 @@ export interface operations {
                         applyManifestPath: (string | null) | null;
                         applyRequestId: (string | null) | null;
                         applyEvidence: ({
-                            [key: string]: unknown;
+                            sessionId: string;
+                            reportPath: string;
+                            manifestPath: (string | null) | null;
+                            appliedAt: (string | null) | null;
+                            actorDisplayName: (string | null) | null;
+                            actorUserId: (string | null) | null;
+                            actorUsername: (string | null) | null;
+                            requestId: (string | null) | null;
                         } | null) | null;
                         /** @enum {string} */
                         conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
@@ -9810,24 +9937,51 @@ export interface operations {
                         reviewedByUserId: (string | null) | null;
                         reviewedByUsername: (string | null) | null;
                         reviewEvidence: ({
-                            [key: string]: unknown;
+                            sessionId: string;
+                            reportPath: string;
+                            reviewedAt: (string | null) | null;
+                            actorDisplayName: (string | null) | null;
+                            actorUserId: (string | null) | null;
+                            actorUsername: (string | null) | null;
+                            comment: (string | null) | null;
+                            decision: "approve" | "reject";
                         } | null) | null;
                         confirmedAt: (string | null) | null;
                         confirmedByDisplayName: (string | null) | null;
                         confirmedByUserId: (string | null) | null;
                         confirmedByUsername: (string | null) | null;
                         confirmationEvidence: ({
-                            [key: string]: unknown;
+                            sessionId: string;
+                            reportPath: string;
+                            snapshotPath: string;
+                            recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                            archivedSnapshotPath: (string | null) | null;
+                            confirmedAt: (string | null) | null;
+                            actorDisplayName: (string | null) | null;
+                            actorUserId: (string | null) | null;
+                            actorUsername: (string | null) | null;
+                            checklist: string[];
                         } | null) | null;
+                        blockerReasons: {
+                            /** @enum {string} */
+                            code: "review-required" | "rejected" | "blocking-conflicts" | "confirmation-required";
+                            message: string;
+                            /** @enum {string} */
+                            stage: "review" | "confirm" | "apply";
+                        }[];
+                        /** @enum {string} */
+                        recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                        /** @enum {string} */
+                        driftStatus: "clean" | "stale" | "apply-conflict";
                         schemaName: string;
                         skippedFileCount: (number | null) | null;
-                        /** @constant */
+                        /** @enum {string} */
                         sourceType: "registered-schema" | "manual-schema-json";
                         sourceValue: string;
                         /** @enum {string} */
                         status: "pending_review" | "ready" | "rejected" | "applied";
                         /** @enum {string} */
-                        targetPreset: "staging" | "default";
+                        targetPreset: "staging" | "module" | "default";
                         tenantId: (string | null) | null;
                         diffSummary: unknown;
                         targetDirectoryDiff: unknown;
@@ -9919,8 +10073,11 @@ export interface operations {
                     frontendTarget?: "vue" | "react";
                     /** @enum {string} */
                     conflictStrategy?: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
-                    /** @constant */
-                    targetPreset?: "staging";
+                    /** @enum {string} */
+                    sourceType?: "registered-schema" | "manual-schema-json";
+                    sourceValue?: string;
+                    /** @enum {string} */
+                    targetPreset?: "staging" | "module";
                 };
                 "application/x-www-form-urlencoded": {
                     schemaName: string;
@@ -9928,8 +10085,11 @@ export interface operations {
                     frontendTarget?: "vue" | "react";
                     /** @enum {string} */
                     conflictStrategy?: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
-                    /** @constant */
-                    targetPreset?: "staging";
+                    /** @enum {string} */
+                    sourceType?: "registered-schema" | "manual-schema-json";
+                    sourceValue?: string;
+                    /** @enum {string} */
+                    targetPreset?: "staging" | "module";
                 };
                 "multipart/form-data": {
                     schemaName: string;
@@ -9937,8 +10097,11 @@ export interface operations {
                     frontendTarget?: "vue" | "react";
                     /** @enum {string} */
                     conflictStrategy?: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
-                    /** @constant */
-                    targetPreset?: "staging";
+                    /** @enum {string} */
+                    sourceType?: "registered-schema" | "manual-schema-json";
+                    sourceValue?: string;
+                    /** @enum {string} */
+                    targetPreset?: "staging" | "module";
                 };
             };
         };
@@ -9963,7 +10126,14 @@ export interface operations {
                             applyManifestPath: (string | null) | null;
                             applyRequestId: (string | null) | null;
                             applyEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                manifestPath: (string | null) | null;
+                                appliedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                requestId: (string | null) | null;
                             } | null) | null;
                             /** @enum {string} */
                             conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
@@ -9981,24 +10151,51 @@ export interface operations {
                             reviewedByUserId: (string | null) | null;
                             reviewedByUsername: (string | null) | null;
                             reviewEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                reviewedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                comment: (string | null) | null;
+                                decision: "approve" | "reject";
                             } | null) | null;
                             confirmedAt: (string | null) | null;
                             confirmedByDisplayName: (string | null) | null;
                             confirmedByUserId: (string | null) | null;
                             confirmedByUsername: (string | null) | null;
                             confirmationEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                snapshotPath: string;
+                                recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                                archivedSnapshotPath: (string | null) | null;
+                                confirmedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                checklist: string[];
                             } | null) | null;
+                            blockerReasons: {
+                                /** @enum {string} */
+                                code: "review-required" | "rejected" | "blocking-conflicts" | "confirmation-required";
+                                message: string;
+                                /** @enum {string} */
+                                stage: "review" | "confirm" | "apply";
+                            }[];
+                            /** @enum {string} */
+                            recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                            /** @enum {string} */
+                            driftStatus: "clean" | "stale" | "apply-conflict";
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
-                            /** @constant */
+                            /** @enum {string} */
                             sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
                             /** @enum {string} */
-                            targetPreset: "staging" | "default";
+                            targetPreset: "staging" | "module" | "default";
                             tenantId: (string | null) | null;
                         };
                         diff: unknown;
@@ -10007,6 +10204,22 @@ export interface operations {
                         report: unknown;
                         sqlProposal: unknown;
                         sqlProposalHandoff: unknown;
+                    };
+                };
+            };
+            /** @description Response for status 400 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        code: number;
+                        message: string;
+                        status: number;
+                        details?: {
+                            [key: string]: unknown;
+                        };
                     };
                 };
             };
@@ -10141,7 +10354,14 @@ export interface operations {
                             applyManifestPath: (string | null) | null;
                             applyRequestId: (string | null) | null;
                             applyEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                manifestPath: (string | null) | null;
+                                appliedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                requestId: (string | null) | null;
                             } | null) | null;
                             /** @enum {string} */
                             conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
@@ -10159,24 +10379,51 @@ export interface operations {
                             reviewedByUserId: (string | null) | null;
                             reviewedByUsername: (string | null) | null;
                             reviewEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                reviewedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                comment: (string | null) | null;
+                                decision: "approve" | "reject";
                             } | null) | null;
                             confirmedAt: (string | null) | null;
                             confirmedByDisplayName: (string | null) | null;
                             confirmedByUserId: (string | null) | null;
                             confirmedByUsername: (string | null) | null;
                             confirmationEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                snapshotPath: string;
+                                recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                                archivedSnapshotPath: (string | null) | null;
+                                confirmedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                checklist: string[];
                             } | null) | null;
+                            blockerReasons: {
+                                /** @enum {string} */
+                                code: "review-required" | "rejected" | "blocking-conflicts" | "confirmation-required";
+                                message: string;
+                                /** @enum {string} */
+                                stage: "review" | "confirm" | "apply";
+                            }[];
+                            /** @enum {string} */
+                            recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                            /** @enum {string} */
+                            driftStatus: "clean" | "stale" | "apply-conflict";
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
-                            /** @constant */
+                            /** @enum {string} */
                             sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
                             /** @enum {string} */
-                            targetPreset: "staging" | "default";
+                            targetPreset: "staging" | "module" | "default";
                             tenantId: (string | null) | null;
                         };
                         diff: unknown;
@@ -10319,7 +10566,14 @@ export interface operations {
                             applyManifestPath: (string | null) | null;
                             applyRequestId: (string | null) | null;
                             applyEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                manifestPath: (string | null) | null;
+                                appliedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                requestId: (string | null) | null;
                             } | null) | null;
                             /** @enum {string} */
                             conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
@@ -10337,24 +10591,51 @@ export interface operations {
                             reviewedByUserId: (string | null) | null;
                             reviewedByUsername: (string | null) | null;
                             reviewEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                reviewedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                comment: (string | null) | null;
+                                decision: "approve" | "reject";
                             } | null) | null;
                             confirmedAt: (string | null) | null;
                             confirmedByDisplayName: (string | null) | null;
                             confirmedByUserId: (string | null) | null;
                             confirmedByUsername: (string | null) | null;
                             confirmationEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                snapshotPath: string;
+                                recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                                archivedSnapshotPath: (string | null) | null;
+                                confirmedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                checklist: string[];
                             } | null) | null;
+                            blockerReasons: {
+                                /** @enum {string} */
+                                code: "review-required" | "rejected" | "blocking-conflicts" | "confirmation-required";
+                                message: string;
+                                /** @enum {string} */
+                                stage: "review" | "confirm" | "apply";
+                            }[];
+                            /** @enum {string} */
+                            recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                            /** @enum {string} */
+                            driftStatus: "clean" | "stale" | "apply-conflict";
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
-                            /** @constant */
+                            /** @enum {string} */
                             sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
                             /** @enum {string} */
-                            targetPreset: "staging" | "default";
+                            targetPreset: "staging" | "module" | "default";
                             tenantId: (string | null) | null;
                         };
                         sqlProposalHandoff: unknown;
@@ -10474,7 +10755,14 @@ export interface operations {
                             applyManifestPath: (string | null) | null;
                             applyRequestId: (string | null) | null;
                             applyEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                manifestPath: (string | null) | null;
+                                appliedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                requestId: (string | null) | null;
                             } | null) | null;
                             /** @enum {string} */
                             conflictStrategy: "skip" | "overwrite" | "overwrite-generated-only" | "fail";
@@ -10492,24 +10780,51 @@ export interface operations {
                             reviewedByUserId: (string | null) | null;
                             reviewedByUsername: (string | null) | null;
                             reviewEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                reviewedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                comment: (string | null) | null;
+                                decision: "approve" | "reject";
                             } | null) | null;
                             confirmedAt: (string | null) | null;
                             confirmedByDisplayName: (string | null) | null;
                             confirmedByUserId: (string | null) | null;
                             confirmedByUsername: (string | null) | null;
                             confirmationEvidence: ({
-                                [key: string]: unknown;
+                                sessionId: string;
+                                reportPath: string;
+                                snapshotPath: string;
+                                recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                                archivedSnapshotPath: (string | null) | null;
+                                confirmedAt: (string | null) | null;
+                                actorDisplayName: (string | null) | null;
+                                actorUserId: (string | null) | null;
+                                actorUsername: (string | null) | null;
+                                checklist: string[];
                             } | null) | null;
+                            blockerReasons: {
+                                /** @enum {string} */
+                                code: "review-required" | "rejected" | "blocking-conflicts" | "confirmation-required";
+                                message: string;
+                                /** @enum {string} */
+                                stage: "review" | "confirm" | "apply";
+                            }[];
+                            /** @enum {string} */
+                            recoveryStatus: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing";
+                            /** @enum {string} */
+                            driftStatus: "clean" | "stale" | "apply-conflict";
                             schemaName: string;
                             skippedFileCount: (number | null) | null;
-                            /** @constant */
+                            /** @enum {string} */
                             sourceType: "registered-schema" | "manual-schema-json";
                             sourceValue: string;
                             /** @enum {string} */
                             status: "pending_review" | "ready" | "rejected" | "applied";
                             /** @enum {string} */
-                            targetPreset: "staging" | "default";
+                            targetPreset: "staging" | "module" | "default";
                             tenantId: (string | null) | null;
                         };
                         diff: unknown;
