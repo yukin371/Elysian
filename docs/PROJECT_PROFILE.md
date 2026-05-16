@@ -112,11 +112,12 @@
 - generator 当前官方 staging 落点是仓库根 `generated/`。
 - 已新增 `e2e:generator:matrix`，用于多 schema、多冲突策略与多前端目标的生成一致性回归。
 - 已新增 `e2e:generator:cli`，用于 generator CLI 真实执行路径冲突策略回归。
+- 已新增 `e2e:generator:studio`，用于真实 `generator preview` workspace 的 guided happy path / blocked apply 验收。
 - 已新增 `e2e:generator:reports:index`，用于汇总 generator 回归报告索引。
 - 已新增 `e2e:generator:reports:gate`，用于按策略执行 generator 回归门禁判定。
 - `scripts/e2e-generator-reports-gate.test.ts` 已覆盖来源白名单解析、推荐动作分流与索引一致性校验，降低门禁误配置风险。
 - CI 手动触发（`workflow_dispatch`）可动态配置 gate 参数（失败阈值、允许失败来源）。
-- `e2e:generator:matrix` 与 `e2e:generator:cli` 支持通过 `ELYSIAN_REPORT_DIR` 指定报告输出目录。
+- `e2e:generator:matrix`、`e2e:generator:cli` 与 `e2e:generator:studio` 支持通过 `ELYSIAN_REPORT_DIR` 指定报告输出目录。
 - `packages/schema` 当前已注册 `customer`、`product`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 十一个模块 schema。
 - `packages/schema` 已补 workflow definition / instance / task 的最小 contract，并补实例历史任务视图、任务结果字段与条件表达式白名单校验，用于当前 agent 自编排辅助工具的流程定义与运行态数据交换。
 - `packages/frontend-vue` 已提供最小 Vue 预设层，并包含导航构建、权限 gate helper 与供 enterprise preset 消费的页面协议映射。

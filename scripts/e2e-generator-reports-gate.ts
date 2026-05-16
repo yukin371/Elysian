@@ -6,7 +6,7 @@ import {
   resolveGeneratorReportGitSha,
 } from "./_shared/generator-report"
 
-type ReportSource = "matrix" | "cli" | "unknown"
+type ReportSource = "matrix" | "cli" | "studio" | "unknown"
 
 interface ReportIndexItem {
   source: ReportSource
@@ -77,7 +77,12 @@ export const parseAllowFailedSourcesRaw = (
 
   const sources = new Set<ReportSource>()
   for (const value of values) {
-    if (value === "matrix" || value === "cli" || value === "unknown") {
+    if (
+      value === "matrix" ||
+      value === "cli" ||
+      value === "studio" ||
+      value === "unknown"
+    ) {
       sources.add(value)
       continue
     }
@@ -148,9 +153,15 @@ export const buildRecommendedActions = (
     )
   }
 
+  if (failedSources.has("studio")) {
+    actions.add(
+      "For studio failures, inspect the guided workspace happy path and blocked apply evidence flow in e2e-generator-studio-guided-flow-smoke.",
+    )
+  }
+
   if (failedSources.has("unknown")) {
     actions.add(
-      "For unknown source failures, verify artifact download paths and ensure report files keep source prefixes (matrix/ or cli/).",
+      "For unknown source failures, verify artifact download paths and ensure report files keep source prefixes (matrix/, cli/, or studio/).",
     )
   }
 

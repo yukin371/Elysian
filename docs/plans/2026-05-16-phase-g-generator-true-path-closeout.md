@@ -84,6 +84,7 @@
 - `scripts/e2e-generator-studio-guided-flow-smoke.ts` 已从步骤映射 smoke 收口为真实 workspace 验收：
   - happy path 覆盖 `start -> preview -> review -> confirm -> apply`
   - blocked path 覆盖 apply 阻断后的 detail refresh 与 blocker evidence 回看
+- `studio` 验收已接入 generator report/CI 链路，后续 `reports:index / gate` 会把真实 workspace 路径与 `matrix / cli` 一起纳入统一回归证据。
 
 ## 阶段内保留边界
 

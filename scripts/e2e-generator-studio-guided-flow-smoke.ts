@@ -1,3 +1,12 @@
+import { mkdir, writeFile } from "node:fs/promises"
+import { join } from "node:path"
+import {
+  type GeneratorReportBase,
+  createGeneratorReportRuntimeMetadata,
+  resolveGeneratorReportDir,
+  resolveGeneratorReportGitSha,
+} from "./_shared/generator-report"
+
 import {
   createDiffSummary,
   createReport,
@@ -15,6 +24,26 @@ const assert = (condition: unknown, message: string) => {
   if (!condition) {
     throw new Error(message)
   }
+}
+
+interface StudioScenarioResult {
+  name: string
+  status: "passed" | "failed"
+  message?: string
+}
+
+interface StudioReport extends GeneratorReportBase {
+  scenarios: StudioScenarioResult[]
+}
+
+const writeReport = async (report: StudioReport) => {
+  const reportDir = resolveGeneratorReportDir()
+  const reportPath = join(reportDir, "e2e-generator-studio-report.json")
+
+  await mkdir(reportDir, { recursive: true })
+  await writeFile(reportPath, JSON.stringify(report, null, 2), "utf8")
+
+  return reportPath
 }
 
 const createJsonResponse = (payload: unknown, status = 200) =>
@@ -454,32 +483,109 @@ const runBlockedApplyScenario = async () => {
   )
 }
 
-const run = async () => {
+const run = async (): Promise<StudioScenarioResult[]> => {
   installGeneratorPreviewWorkspaceTestEnv()
+  const scenarios: StudioScenarioResult[] = []
+
+  const recordScenario = async (name: string, fn: () => Promise<void>) => {
+    try {
+      await fn()
+      scenarios.push({ name, status: "passed" })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      scenarios.push({ name, status: "failed", message })
+    }
+  }
 
   try {
-    globalThis.localStorage.clear()
+    await recordScenario(
+      "initial workspace enters configure state",
+      async () => {
+        globalThis.localStorage.clear()
 
-    const { workspace: initialWorkspace } = createWorkspace()
+        const { workspace: initialWorkspace } = createWorkspace()
 
-    await waitForAsyncWork()
+        await waitForAsyncWork()
 
-    assert(
-      initialWorkspace.currentStep.value === "configure",
-      `Expected initial currentStep to be "configure", got "${initialWorkspace.currentStep.value}".`,
+        assert(
+          initialWorkspace.currentStep.value === "configure",
+          `Expected initial currentStep to be "configure", got "${initialWorkspace.currentStep.value}".`,
+        )
+      },
     )
 
-    await runHappyPathScenario()
-    await runBlockedApplyScenario()
-
-    console.log("[e2e-generator-studio-guided-flow-smoke] passed")
+    await recordScenario(
+      "guided workspace happy path reaches apply completion",
+      runHappyPathScenario,
+    )
+    await recordScenario(
+      "guided workspace blocked apply keeps evidence visible",
+      runBlockedApplyScenario,
+    )
   } finally {
     restoreGeneratorPreviewWorkspaceTestEnv()
   }
+
+  return scenarios
 }
 
-run().catch((error) => {
-  const message = error instanceof Error ? error.message : String(error)
-  console.error(`[e2e-generator-studio-guided-flow-smoke] failed: ${message}`)
-  process.exitCode = 1
-})
+const startedTimestamp = Date.now()
+const startedAt = new Date(startedTimestamp).toISOString()
+
+run()
+  .then(async (scenarios) => {
+    const passedCount = scenarios.filter(
+      (scenario) => scenario.status === "passed",
+    ).length
+    const failedCount = scenarios.length - passedCount
+    const reportPath = await writeReport({
+      gitSha: resolveGeneratorReportGitSha(),
+      runtime: createGeneratorReportRuntimeMetadata(),
+      startedAt,
+      finishedAt: new Date().toISOString(),
+      durationMs: Date.now() - startedTimestamp,
+      status: failedCount === 0 ? "passed" : "failed",
+      passedCount,
+      failedCount,
+      scenarios,
+    })
+
+    console.log(
+      `[e2e-generator-studio-guided-flow-smoke] report: ${reportPath}`,
+    )
+    if (failedCount === 0) {
+      console.log("[e2e-generator-studio-guided-flow-smoke] passed")
+      return
+    }
+
+    for (const scenario of scenarios) {
+      if (scenario.status === "failed") {
+        console.error(`[studio] fail ${scenario.name}: ${scenario.message}`)
+      }
+    }
+    console.error(
+      `[e2e-generator-studio-guided-flow-smoke] failed: ${failedCount} studio scenario(s) failed`,
+    )
+    process.exitCode = 1
+  })
+  .catch(async (error) => {
+    const message = error instanceof Error ? error.message : String(error)
+    const reportPath = await writeReport({
+      gitSha: resolveGeneratorReportGitSha(),
+      runtime: createGeneratorReportRuntimeMetadata(),
+      startedAt,
+      finishedAt: new Date().toISOString(),
+      durationMs: Date.now() - startedTimestamp,
+      status: "failed",
+      passedCount: 0,
+      failedCount: 1,
+      scenarios: [],
+      errorMessage: message,
+    })
+
+    console.error(
+      `[e2e-generator-studio-guided-flow-smoke] report: ${reportPath}`,
+    )
+    console.error(`[e2e-generator-studio-guided-flow-smoke] failed: ${message}`)
+    process.exitCode = 1
+  })

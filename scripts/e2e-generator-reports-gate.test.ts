@@ -8,9 +8,10 @@ import {
 
 describe("parseAllowFailedSourcesRaw", () => {
   test("returns unique supported sources", () => {
-    expect(parseAllowFailedSourcesRaw("matrix, cli, matrix")).toEqual([
+    expect(parseAllowFailedSourcesRaw("matrix, cli, studio, matrix")).toEqual([
       "matrix",
       "cli",
+      "studio",
     ])
   })
 
@@ -28,7 +29,7 @@ describe("buildRecommendedActions", () => {
     ])
   })
 
-  test("includes source-specific suggested actions for matrix and cli", () => {
+  test("includes source-specific suggested actions for matrix, cli, and studio", () => {
     const actions = buildRecommendedActions("failed", [
       {
         source: "matrix",
@@ -46,6 +47,14 @@ describe("buildRecommendedActions", () => {
         passedCount: 0,
         failedCount: 1,
       },
+      {
+        source: "studio",
+        reportPath: "studio/report.json",
+        fileName: "report.json",
+        status: "failed",
+        passedCount: 0,
+        failedCount: 1,
+      },
     ])
 
     expect(
@@ -53,6 +62,9 @@ describe("buildRecommendedActions", () => {
     ).toBeTrue()
     expect(
       actions.some((action) => action.includes("For cli failures")),
+    ).toBeTrue()
+    expect(
+      actions.some((action) => action.includes("For studio failures")),
     ).toBeTrue()
   })
 })
@@ -64,8 +76,8 @@ describe("validateReportsIndex", () => {
         gitSha: "abc",
         generatedAt: "2026-04-22T00:00:00.000Z",
         inputDir: "tmp",
-        totalReports: 2,
-        passedReports: 1,
+        totalReports: 3,
+        passedReports: 2,
         failedReports: 1,
         overallStatus: "failed",
         conclusion: "1 failed",
@@ -94,6 +106,14 @@ describe("validateReportsIndex", () => {
             fileName: "b.json",
             status: "passed",
             passedCount: 2,
+            failedCount: 0,
+          },
+          {
+            source: "studio",
+            reportPath: "studio/c.json",
+            fileName: "c.json",
+            status: "passed",
+            passedCount: 3,
             failedCount: 0,
           },
         ],
