@@ -123,7 +123,7 @@
 - `packages/frontend-vue` 已提供最小 Vue 预设层，并包含导航构建、权限 gate helper 与供 enterprise preset 消费的页面协议映射。
 - `packages/ui-core` 已承接菜单树、CRUD 页面契约与权限相关 UI 协议。
 - `packages/ui-enterprise-vue` 已落地 `ElyShell`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyCrudWorkspace`、`ElyPreviewSkeleton` 等企业预设组件；当前运行时底座已完成 `TDesign Vue Next` 收口，并已具备 tabs、标准列表页、标准表单页与只读详情视图。
-- `2026-05-12` 首个参考发行版已完成本地发布门槛复验：`bun run check`、`bun run build:vue`、`bun run server:image:verify`、`bun run e2e:smoke:full`、`bun run e2e:tenant:full` 与 `bun run e2e:generator:cli` 均已通过；真实环境 go-live 仍需环境 owner 补齐 release tag / PR、migration、backup / recovery、proxy / TLS、值守与目标环境冒烟输入。
+- `2026-05-12` 首个参考发行版已完成本地发布门槛复验：`bun run check`、`bun run build:vue`、`bun run server:image:verify`、`bun run e2e:smoke:full`、`bun run e2e:tenant:full` 与 `bun run e2e:generator:cli` 均已通过；当前 `Phase G` 额外把真实 workspace 验收固定为 `bun run e2e:generator:studio`，用于补齐 `generator preview` 的 review / confirm / apply 真链路回归。真实环境 go-live 仍需环境 owner 补齐 release tag / PR、migration、backup / recovery、proxy / TLS、值守与目标环境冒烟输入。
 - `packages/persistence` 的 `db:seed` 已包含默认 workflow definitions 样本（`expense-approval v1/v2`、`expense-approval-condition v1`），默认开发环境无需前端 override 也可验证 workflow 版本历史；`apps/example-vue` 的 override seam 当前只用于稳定复现特定测试样本。
 - `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace；当前定位已从“最小交互验证页”转为首个参考发行版的前端 owner，不再只是单模块验证。
 - `apps/example-vue` 的 customer workspace 已从“前端拉全量后本地筛选”收敛到服务端列表协议，当前 `GET /customers` 已承接 query、分页与排序参数，并返回 page metadata 供工作区 footer 分页交互消费。
@@ -247,6 +247,7 @@
 - `bun run e2e:generator:safe-apply`
 - `bun run e2e:generator:matrix`
 - `bun run e2e:generator:cli`
+- `bun run e2e:generator:studio`
 - `bun run e2e:generator:reports:index`
 - `bun run e2e:generator:reports:gate`
 - `bun run build:vue`
@@ -318,6 +319,7 @@
 - Generator 安全写入冒烟：`bun run e2e:generator:safe-apply`
 - Generator 回归矩阵：`bun run e2e:generator:matrix`
 - Generator CLI 回归：`bun run e2e:generator:cli`
+- Generator workspace guided 回归：`bun run e2e:generator:studio`
 - Generator 报告索引：`bun run e2e:generator:reports:index`
 - Generator 报告门禁：`bun run e2e:generator:reports:gate`
 - 生成数据库迁移：`bun run db:generate`
