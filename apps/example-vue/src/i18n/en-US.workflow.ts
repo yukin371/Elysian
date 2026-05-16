@@ -348,8 +348,28 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Confirmation evidence captured with {count} checklist items.",
   "app.generatorPreview.message.confirmationEvidenceDetailed":
     "Confirmation evidence captured: {count} checklist items, report={reportPath}, snapshot={snapshotPath}, recovery={recoveryStatus}.",
+  "app.generatorPreview.message.recoveryCorrupt":
+    "The SQL proposal snapshot used for confirmation was corrupt, so the system rebuilt a confirmation copy. Re-check the snapshot path and generated time before apply.",
+  "app.generatorPreview.message.recoveryMissing":
+    "The SQL proposal snapshot used for confirmation was missing, so the system rebuilt a confirmation copy. Re-check the snapshot path and generated time before apply.",
+  "app.generatorPreview.message.recoveryStatusInline":
+    "This confirmation required recovery handling: {value}.",
+  "app.generatorPreview.recoveryStatus.none": "No recovery needed",
+  "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt":
+    "Rebuilt from a corrupt snapshot",
+  "app.generatorPreview.recoveryStatus.rebuiltFromMissing":
+    "Rebuilt from a missing snapshot",
   "app.generatorPreview.confirmationChecklistTitle":
     "Pre-apply confirmation checklist",
+  "app.generatorPreview.blockerReasonTitle": "Why this cannot continue yet",
+  "app.generatorPreview.blockerReason.review-required.review":
+    "Review the current result before moving into confirmation or apply.",
+  "app.generatorPreview.blockerReason.rejected.review":
+    "This result was rejected. Revise the draft and generate again before continuing.",
+  "app.generatorPreview.blockerReason.blocking-conflicts.apply":
+    "Blocked files still need attention before apply can continue.",
+  "app.generatorPreview.blockerReason.confirmation-required.confirm":
+    "Confirm the SQL proposal and checklist before apply can continue.",
   "app.generatorPreview.applyChecklist.verdictLabel": "Can apply continue now",
   "app.generatorPreview.applyChecklist.riskLabel":
     "What to watch before continuing",
@@ -535,7 +555,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.startNextStepLabel": "Next step",
   "app.generatorPreview.startNextStepValue":
     "Review the result and decide what to do next, instead of dropping straight into advanced configuration.",
-  "app.generatorPreview.inputModeLabel": "Starting point",
+  "app.generatorPreview.inputModeLabel": "Input mode",
+  "app.generatorPreview.startModeLabel": "Starting point",
   "app.generatorPreview.inputTemplateLabel": "Copy existing module structure",
   "app.generatorPreview.inputSchemaLabel": "Schema template",
   "app.generatorPreview.inputMode.registeredSchema": "Use registered schema",
@@ -750,6 +771,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Does the first screen stay free of technical noise?",
   "app.demoHub.start.checklist.third":
     "Is continue the only strong next action?",
+  "app.demoHub.start.checklist.fourth":
+    "Advanced JSON stays behind the advanced area and is no longer a first-screen entry.",
   "app.demoHub.review.stateLabel": "Result judgment",
   "app.demoHub.review.headline":
     "Answer “is this result worth pushing forward?” first",

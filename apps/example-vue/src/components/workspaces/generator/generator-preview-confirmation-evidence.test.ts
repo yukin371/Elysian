@@ -20,7 +20,16 @@ describe("resolveGeneratorPreviewConfirmationEvidenceSummary", () => {
   test("returns null when confirmation checklist is missing", () => {
     expect(
       resolveGeneratorPreviewConfirmationEvidenceSummary(t, {
+        actorDisplayName: null,
+        actorUserId: null,
+        actorUsername: null,
+        archivedSnapshotPath: null,
+        checklist: [],
         confirmedAt: "2026-05-02T12:15:00.000Z",
+        recoveryStatus: "none",
+        reportPath: "",
+        sessionId: "session-1",
+        snapshotPath: "",
       }),
     ).toBeNull()
   })
@@ -28,7 +37,16 @@ describe("resolveGeneratorPreviewConfirmationEvidenceSummary", () => {
   test("summarizes confirmation checklist size", () => {
     expect(
       resolveGeneratorPreviewConfirmationEvidenceSummary(t, {
+        actorDisplayName: null,
+        actorUserId: null,
+        actorUsername: null,
+        archivedSnapshotPath: null,
         checklist: ["Review the SQL draft.", "Confirm the snapshot path."],
+        confirmedAt: "2026-05-02T12:15:00.000Z",
+        recoveryStatus: "none",
+        reportPath: "",
+        sessionId: "session-1",
+        snapshotPath: "",
       }),
     ).toBe("captured:2")
   })
@@ -36,9 +54,15 @@ describe("resolveGeneratorPreviewConfirmationEvidenceSummary", () => {
   test("summarizes confirmation report, snapshot, and recovery status", () => {
     expect(
       resolveGeneratorPreviewConfirmationEvidenceSummary(t, {
+        actorDisplayName: null,
+        actorUserId: null,
+        actorUsername: null,
+        archivedSnapshotPath: null,
         checklist: ["Review the SQL draft.", "Confirm the snapshot path."],
+        confirmedAt: "2026-05-02T12:15:00.000Z",
         recoveryStatus: "rebuilt-from-missing",
         reportPath: "generated/reports/customer.preview.json",
+        sessionId: "session-1",
         snapshotPath: "generated/reports/customer.migration-proposal.json",
       }),
     ).toBe(

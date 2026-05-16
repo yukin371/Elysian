@@ -324,7 +324,27 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "已记录确认凭据，包含 {count} 条确认清单项。",
   "app.generatorPreview.message.confirmationEvidenceDetailed":
     "已记录确认凭据：{count} 条清单，report={reportPath}，snapshot={snapshotPath}，恢复状态={recoveryStatus}。",
+  "app.generatorPreview.message.recoveryCorrupt":
+    "用于确认的 SQL proposal snapshot 已损坏，系统已重建一份确认副本；apply 前请重新核对快照路径和生成时间。",
+  "app.generatorPreview.message.recoveryMissing":
+    "用于确认的 SQL proposal snapshot 缺失，系统已重建一份确认副本；apply 前请重新核对快照路径和生成时间。",
+  "app.generatorPreview.message.recoveryStatusInline":
+    "本次确认曾触发恢复处理：{value}。",
+  "app.generatorPreview.recoveryStatus.none": "无需恢复",
+  "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt":
+    "快照损坏后已重建",
+  "app.generatorPreview.recoveryStatus.rebuiltFromMissing":
+    "快照缺失后已重建",
   "app.generatorPreview.confirmationChecklistTitle": "应用前确认清单",
+  "app.generatorPreview.blockerReasonTitle": "当前不能继续的原因",
+  "app.generatorPreview.blockerReason.review-required.review":
+    "请先审核当前结果，再决定是否进入确认或 apply。",
+  "app.generatorPreview.blockerReason.rejected.review":
+    "当前结果已被拒绝，请先修正草稿并重新生成。",
+  "app.generatorPreview.blockerReason.blocking-conflicts.apply":
+    "仍有阻塞文件未处理，当前不能继续 apply。",
+  "app.generatorPreview.blockerReason.confirmation-required.confirm":
+    "apply 前还需要先确认 SQL proposal 与确认清单。",
   "app.generatorPreview.applyChecklist.verdictLabel": "当前是否可继续 apply",
   "app.generatorPreview.applyChecklist.riskLabel": "继续前要注意",
   "app.generatorPreview.applyChecklist.idleTitle":
@@ -497,7 +517,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.startNextStepLabel": "下一步会进入",
   "app.generatorPreview.startNextStepValue":
     "生成结果检查与下一步判断，而不是直接把你推进高级配置。",
-  "app.generatorPreview.inputModeLabel": "起稿方式",
+  "app.generatorPreview.inputModeLabel": "输入模式",
+  "app.generatorPreview.startModeLabel": "起稿方式",
   "app.generatorPreview.inputTemplateLabel": "复制现有模块结构",
   "app.generatorPreview.inputSchemaLabel": "Schema 模板",
   "app.generatorPreview.inputMode.registeredSchema": "选择已注册 Schema",
@@ -699,6 +720,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.demoHub.start.checklist.first": "起稿方式是否一眼能选",
   "app.demoHub.start.checklist.second": "首屏是否没有技术噪音",
   "app.demoHub.start.checklist.third": "继续下一步是否是唯一强动作",
+  "app.demoHub.start.checklist.fourth":
+    "高级 JSON 只保留在高级区，需要时再展开，不再作为首屏主入口。",
   "app.demoHub.review.stateLabel": "结果判断",
   "app.demoHub.review.headline": "先回答“结果值不值得继续推进”",
   "app.demoHub.review.description":

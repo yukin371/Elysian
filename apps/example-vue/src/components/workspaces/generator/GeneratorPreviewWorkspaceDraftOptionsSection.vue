@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { ref } from "vue"
 
 import { Input as TInput } from "tdesign-vue-next/es/input"
 
@@ -9,7 +9,7 @@ import type {
   GeneratorPreviewTranslation,
 } from "./types"
 
-type GeneratorDraftSourceMode = "template" | "reference" | "json"
+type GeneratorDraftSourceMode = "template" | "reference"
 
 interface GeneratorOptionCard {
   description: string
@@ -53,16 +53,6 @@ const emit = defineEmits<{
 }>()
 
 const showAdvancedOptions = ref(false)
-
-watch(
-  () => props.draftSourceMode,
-  (mode) => {
-    if (mode === "json") {
-      showAdvancedOptions.value = true
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>
@@ -70,7 +60,7 @@ watch(
     <div class="generator-option-row">
       <div class="generator-option-label">
         <h4 class="generator-group-title">
-          {{ t("app.generatorPreview.inputModeLabel") }}
+          {{ t("app.generatorPreview.startModeLabel") }}
         </h4>
       </div>
       <div class="generator-option-values generator-option-values-mode">
@@ -301,7 +291,7 @@ watch(
 
 .generator-option-values-mode {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .generator-option-values-templates {

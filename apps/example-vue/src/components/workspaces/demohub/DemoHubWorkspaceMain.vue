@@ -8,7 +8,7 @@ type DemoHubPrototypeKey =
   | "generator-review"
   | "generator-apply-checklist"
 
-type StartMode = "reference" | "template" | "manual"
+type StartMode = "reference" | "template"
 type ReviewState = "blocking" | "review-ready" | "failed"
 type ApplyState = "ready" | "missing-checks" | "stale"
 
@@ -238,11 +238,6 @@ const startModeCards = computed(() => [
     value: "template" as const,
     title: props.t("app.demoHub.formVariant.template"),
     description: props.t("app.demoHub.start.mode.template"),
-  },
-  {
-    value: "manual" as const,
-    title: props.t("app.demoHub.formVariant.manual"),
-    description: props.t("app.demoHub.start.mode.manual"),
   },
 ])
 
@@ -567,6 +562,7 @@ const setReviewState = (nextState: ReviewState) => {
                   <li>{{ t("app.demoHub.start.checklist.first") }}</li>
                   <li>{{ t("app.demoHub.start.checklist.second") }}</li>
                   <li>{{ t("app.demoHub.start.checklist.third") }}</li>
+                  <li>{{ t("app.demoHub.start.checklist.fourth") }}</li>
                 </ul>
               </article>
             </section>

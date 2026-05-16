@@ -12,7 +12,10 @@ import {
 } from "./generator-preview-schema-templates"
 import type {
   GeneratorPreviewApplyEvidence,
+  GeneratorPreviewBlockerReason,
   GeneratorPreviewDiffSummary,
+  GeneratorPreviewDriftStatus,
+  GeneratorPreviewRecoveryStatus,
   GeneratorPreviewFileCard,
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewSchemaOption,
@@ -50,6 +53,9 @@ export interface GeneratorPreviewWorkspaceMainProps {
   diffSummary: GeneratorPreviewDiffSummary | null
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff | null
   sessionStatus: "pending_review" | "ready" | "rejected" | "applied" | null
+  blockerReasons: GeneratorPreviewBlockerReason[]
+  recoveryStatus: GeneratorPreviewRecoveryStatus
+  driftStatus: GeneratorPreviewDriftStatus
   reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
   hasBlockingConflicts: boolean
@@ -96,7 +102,7 @@ type EditableSchemaDraft = Record<string, unknown> & {
   name?: string
 }
 
-type GeneratorDraftSourceMode = "template" | "reference" | "json"
+type GeneratorDraftSourceMode = "template" | "reference"
 
 const frontendOptions = [
   { label: "Vue", value: "vue" },
@@ -127,6 +133,20 @@ export const useGeneratorPreviewWorkspaceMainState = (
   props: GeneratorPreviewWorkspaceMainProps,
   emit: GeneratorPreviewWorkspaceMainEmit,
 ) => {
+  const translateOrFallback = (key: string, fallback: string) => {
+    const translated = props.t(key)
+
+    return translated === key ? fallback : translated
+  }
+
+  const resolveBlockerReasonMessage = (
+    reason: GeneratorPreviewBlockerReason,
+  ) =>
+    translateOrFallback(
+      `app.generatorPreview.blockerReason.${reason.code}.${reason.stage}`,
+      reason.message,
+    )
+
   const reviewComment = ref("")
   const draftModuleName = ref("")
   const draftModuleLabel = ref("")
@@ -151,10 +171,6 @@ export const useGeneratorPreviewWorkspaceMainState = (
         {
           label: props.t("app.generatorPreview.draftSource.reference"),
           value: "reference",
-        },
-        {
-          label: props.t("app.generatorPreview.draftSource.json"),
-          value: "json",
         },
       ] as const,
   )
@@ -266,7 +282,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
   ])
   const draftSummaryFacts = computed<GeneratorDraftSummaryFact[]>(() => [
     {
-      label: props.t("app.generatorPreview.inputModeLabel"),
+      label: props.t("app.generatorPreview.startModeLabel"),
       value:
         draftSourceModeOptions.value.find(
           (option) => option.value === draftSourceMode.value,
@@ -354,6 +370,16 @@ export const useGeneratorPreviewWorkspaceMainState = (
       return {
         text: props.t("app.generatorPreview.message.blockingConflicts"),
         tone: "warning",
+      } as const
+    }
+
+    if (props.blockerReasons.length > 0) {
+      return {
+        text: props.blockerReasons[0]
+          ? resolveBlockerReasonMessage(props.blockerReasons[0])
+          : "",
+        tone:
+          props.blockerReasons[0]?.code === "rejected" ? "warning" : "info",
       } as const
     }
 
@@ -528,6 +554,20 @@ export const useGeneratorPreviewWorkspaceMainState = (
 
     return Array.from(steps)
   })
+  const blockerReasonMessages = computed(() =>
+    props.blockerReasons.map(resolveBlockerReasonMessage),
+  )
+  const recoveryStatusMessage = computed(() => {
+    if (props.recoveryStatus === "rebuilt-from-corrupt") {
+      return props.t("app.generatorPreview.message.recoveryCorrupt")
+    }
+
+    if (props.recoveryStatus === "rebuilt-from-missing") {
+      return props.t("app.generatorPreview.message.recoveryMissing")
+    }
+
+    return null
+  })
   const conflictStrategyCards = computed(() =>
     props.conflictStrategyOptions.map((option) => ({
       ...option,
@@ -644,7 +684,6 @@ export const useGeneratorPreviewWorkspaceMainState = (
       return
     }
 
-    draftSourceMode.value = "json"
     selectedTemplateId.value = null
     emit("update:manual-schema-draft", nextValue)
   }
@@ -685,13 +724,6 @@ export const useGeneratorPreviewWorkspaceMainState = (
     }
 
     draftSourceMode.value = mode
-
-    if (mode === "json") {
-      isSchemaEditorExpanded.value = true
-      selectedTemplateId.value = null
-      emit("update:selected-input-mode", "manual-schema-json")
-      return
-    }
 
     isSchemaEditorExpanded.value = false
   }
@@ -816,7 +848,6 @@ export const useGeneratorPreviewWorkspaceMainState = (
     isSchemaEditorExpanded.value = !isSchemaEditorExpanded.value
 
     if (isSchemaEditorExpanded.value) {
-      draftSourceMode.value = "json"
       emit("update:selected-input-mode", "manual-schema-json")
     }
   }
@@ -861,7 +892,6 @@ export const useGeneratorPreviewWorkspaceMainState = (
     (error) => {
       if (error) {
         isSchemaEditorExpanded.value = true
-        draftSourceMode.value = "json"
       }
     },
     { immediate: true },
@@ -955,6 +985,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
     cancelApplyConfirmation,
     cancelRejectConfirmation,
     blockedFileCount,
+    blockerReasonMessages,
     configPrimaryActionLabel,
     configErrorRecoverySteps,
     conflictStrategyCards,
@@ -993,6 +1024,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
     isRejectConfirming,
     operationProgressMessage,
     referenceSchemaQuery,
+    recoveryStatusMessage,
     rejectCommentRequired,
     resultErrorRecoverySteps,
     resultPrimaryActionLabel,

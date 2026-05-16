@@ -345,6 +345,7 @@ describe("generator session module lifecycle", () => {
       createSqlProposalHandoff,
       "migrationProposalSnapshot",
     )
+    const createBlockerReasons = readRecordArray(createSession, "blockerReasons")
     const createMigrationProposalSnapshotPath = readString(
       createSqlProposalHandoff,
       "migrationProposalSnapshotPath",
@@ -361,6 +362,15 @@ describe("generator session module lifecycle", () => {
     expect(createSession.applyEvidence).toBeNull()
     expect(createSession.reviewEvidence).toBeNull()
     expect(createSession.status).toBe("pending_review")
+    expect(createSession.recoveryStatus).toBe("none")
+    expect(createSession.driftStatus).toBe("clean")
+    expect(createBlockerReasons).toEqual([
+      {
+        code: "review-required",
+        message: "Review the current result before confirm or apply.",
+        stage: "review",
+      },
+    ])
     expect(createDiff).toEqual({
       totalFileCount: 7,
       changedFileCount: 7,
@@ -454,6 +464,7 @@ describe("generator session module lifecycle", () => {
       "migrationProposalSnapshot",
     )
     const reviewEvidence = readRecord(reviewSession, "reviewEvidence")
+    const reviewBlockerReasons = readRecordArray(reviewSession, "blockerReasons")
     const reviewMigrationProposalSnapshotRecovery = readNullableRecord(
       reviewSqlProposalHandoff,
       "migrationProposalSnapshotRecovery",
@@ -478,6 +489,15 @@ describe("generator session module lifecycle", () => {
     expect(reviewDiff.totalFileCount).toBe(7)
     expect(reviewSqlProposal.tableName).toBe("customers")
     expect(reviewSqlProposalHandoff.proposalStatus).toBe("ready")
+    expect(reviewSession.recoveryStatus).toBe("none")
+    expect(reviewSession.driftStatus).toBe("clean")
+    expect(reviewBlockerReasons).toEqual([
+      {
+        code: "confirmation-required",
+        message: "Confirm the SQL handoff checklist before apply.",
+        stage: "confirm",
+      },
+    ])
     expect(reviewMigrationProposalSnapshot).toMatchObject({
       snapshotPath: reviewMigrationProposalSnapshotPath,
     })
@@ -515,6 +535,10 @@ describe("generator session module lifecycle", () => {
       "migrationProposalSnapshot",
     )
     const confirmEvidence = readRecord(confirmSession, "confirmationEvidence")
+    const confirmBlockerReasons = readRecordArray(
+      confirmSession,
+      "blockerReasons",
+    )
     const confirmMigrationProposalSnapshotPath = readString(
       confirmSqlProposalHandoff,
       "migrationProposalSnapshotPath",
@@ -533,6 +557,9 @@ describe("generator session module lifecycle", () => {
     expect(confirmEvidence.checklist).toEqual(
       confirmSqlProposalHandoff.confirmationChecklist,
     )
+    expect(confirmSession.recoveryStatus).toBe("none")
+    expect(confirmSession.driftStatus).toBe("clean")
+    expect(confirmBlockerReasons).toEqual([])
     expect(confirmMigrationProposalSnapshot).toMatchObject({
       snapshotPath: confirmMigrationProposalSnapshotPath,
     })
@@ -581,6 +608,7 @@ describe("generator session module lifecycle", () => {
       applySqlProposalHandoff,
       "migrationProposalSnapshotPath",
     )
+    const applyBlockerReasons = readRecordArray(applySession, "blockerReasons")
     expect(applySessionId).toBe(createSessionId)
     expect(applySession.status).toBe("applied")
     expect(applySessionAppliedAt).toBeTruthy()
@@ -605,6 +633,9 @@ describe("generator session module lifecycle", () => {
     })
     expect(applyEvidence.appliedAt).toBe(applySessionAppliedAt)
     expect(applySession.applyEvidence).toEqual(applyEvidence)
+    expect(applySession.recoveryStatus).toBe("none")
+    expect(applySession.driftStatus).toBe("clean")
+    expect(applyBlockerReasons).toEqual([])
     expect(applyFiles.every((file) => readBoolean(file, "written"))).toBe(true)
     expect(applySqlProposal.tableName).toBe("customers")
     expect(applySqlProposalHandoff.proposalStatus).toBe("ready")
@@ -637,10 +668,17 @@ describe("generator session module lifecycle", () => {
       firstListItem,
       "reviewEvidence",
     )
+    const firstListItemBlockerReasons = readRecordArray(
+      firstListItem,
+      "blockerReasons",
+    )
     expect(firstListItem).toMatchObject({
       id: createSessionId,
       schemaName: "customer",
     })
+    expect(firstListItem.recoveryStatus).toBe("none")
+    expect(firstListItem.driftStatus).toBe("clean")
+    expect(firstListItemBlockerReasons).toEqual([])
     expect(firstListItemApplyEvidence.requestId).toBe(
       "req-generator-session-apply-1",
     )
@@ -677,12 +715,16 @@ describe("generator session module lifecycle", () => {
       detailSqlProposalHandoff,
       "migrationProposalSnapshotPath",
     )
+    const detailBlockerReasons = readRecordArray(detailBody, "blockerReasons")
     expect(detailBody).toMatchObject({
       id: createSessionId,
       report: {
         schemaName: "customer",
       },
     })
+    expect(detailBody.recoveryStatus).toBe("none")
+    expect(detailBody.driftStatus).toBe("clean")
+    expect(detailBlockerReasons).toEqual([])
     expect(detailDiffSummary.totalFileCount).toBe(7)
     expect(detailDiffActionCounts.create).toBe(7)
     expect(detailApplyEvidence).toMatchObject({

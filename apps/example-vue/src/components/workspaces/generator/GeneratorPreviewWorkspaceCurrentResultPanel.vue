@@ -38,7 +38,9 @@ interface GeneratorPreviewWorkspaceCurrentResultPanelProps {
   currentStateMessage: GeneratorCurrentStateMessage | null
   operationProgressMessage: GeneratorOperationProgressMessage | null
   blockedFileCount: number
+  blockerReasonMessages: string[]
   firstBlockedFilePath: string | null
+  recoveryStatusMessage: string | null
   resultErrorRecoverySteps: string[]
   confirmationChecklist: string[]
   showReviewCommentInput: boolean
@@ -455,6 +457,28 @@ const checklistRiskDescription = computed(() => {
         </button>
       </div>
     </section>
+
+    <section
+      v-if="blockerReasonMessages.length > 0"
+      class="generator-result-recovery"
+    >
+      <strong>{{ t("app.generatorPreview.blockerReasonTitle") }}</strong>
+      <ol>
+        <li
+          v-for="reason in blockerReasonMessages"
+          :key="reason"
+        >
+          {{ reason }}
+        </li>
+      </ol>
+    </section>
+
+    <div
+      v-if="recoveryStatusMessage"
+      class="enterprise-message enterprise-message-info"
+    >
+      {{ recoveryStatusMessage }}
+    </div>
 
     <section
       v-if="operationProgressMessage"

@@ -53,6 +53,28 @@ export interface GeneratorPreviewApplyEvidence {
   requestId: string | null
 }
 
+export type GeneratorPreviewRecoveryStatus =
+  | "none"
+  | "rebuilt-from-corrupt"
+  | "rebuilt-from-missing"
+
+export type GeneratorPreviewDriftStatus =
+  | "clean"
+  | "stale"
+  | "apply-conflict"
+
+export type GeneratorPreviewBlockerReasonCode =
+  | "review-required"
+  | "rejected"
+  | "blocking-conflicts"
+  | "confirmation-required"
+
+export interface GeneratorPreviewBlockerReason {
+  code: GeneratorPreviewBlockerReasonCode
+  message: string
+  stage: "review" | "confirm" | "apply"
+}
+
 export interface GeneratorPreviewReviewEvidence {
   sessionId: string
   reportPath: string
@@ -62,6 +84,19 @@ export interface GeneratorPreviewReviewEvidence {
   actorUsername: string | null
   comment: string | null
   decision: "approve" | "reject"
+}
+
+export interface GeneratorPreviewConfirmationEvidence {
+  sessionId: string
+  reportPath: string
+  snapshotPath: string
+  recoveryStatus: GeneratorPreviewRecoveryStatus
+  archivedSnapshotPath: string | null
+  confirmedAt: string | null
+  actorDisplayName: string | null
+  actorUserId: string | null
+  actorUsername: string | null
+  checklist: string[]
 }
 
 export interface GeneratorPreviewReportFile {
@@ -119,15 +154,17 @@ export interface GeneratorPreviewMigrationProposalSnapshot {
   snapshotPath: string
 }
 
+export interface GeneratorPreviewMigrationProposalSnapshotRecovery {
+  archivedSnapshotPath: string | null
+  status: GeneratorPreviewRecoveryStatus
+}
+
 export interface GeneratorPreviewSqlProposalHandoff {
   proposalStatus: "ready" | "unsupported"
   reviewMode: "manual"
   canonicalMigrationOwner: "packages/persistence"
   confirmationChecklist: string[]
-  migrationProposalSnapshotRecovery?: {
-    archivedSnapshotPath: string | null
-    status: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
-  } | null
+  migrationProposalSnapshotRecovery?: GeneratorPreviewMigrationProposalSnapshotRecovery | null
   migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
   migrationProposalSnapshotPath: string
   targetPaths: {
@@ -186,13 +223,16 @@ export interface GeneratorPreviewSessionRecord {
   confirmedByDisplayName: string | null
   confirmedByUserId: string | null
   confirmedByUsername: string | null
-  confirmationEvidence: Record<string, unknown> | null
+  confirmationEvidence: GeneratorPreviewConfirmationEvidence | null
+  blockerReasons: GeneratorPreviewBlockerReason[]
+  recoveryStatus: GeneratorPreviewRecoveryStatus
+  driftStatus: GeneratorPreviewDriftStatus
   schemaName: string
   skippedFileCount: number | null
   sourceType: "registered-schema" | "manual-schema-json"
   sourceValue: string
   status: "pending_review" | "ready" | "rejected" | "applied"
-  targetPreset: "staging"
+  targetPreset: "staging" | "module" | "default"
   tenantId: string | null
 }
 
@@ -243,10 +283,7 @@ export interface ConfirmGeneratorPreviewSessionResponse {
 }
 
 export interface ConfirmGeneratorPreviewSessionRequest {
-  displayedRecoveryStatus:
-    | "none"
-    | "rebuilt-from-corrupt"
-    | "rebuilt-from-missing"
+  displayedRecoveryStatus: GeneratorPreviewRecoveryStatus
   displayedSnapshotPath: string
 }
 

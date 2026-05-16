@@ -9,7 +9,7 @@ import type {
   GeneratorPreviewTranslation,
 } from "./types"
 
-type GeneratorDraftSourceMode = "template" | "reference" | "json"
+type GeneratorDraftSourceMode = "template" | "reference"
 
 interface GeneratorOptionCard {
   description: string

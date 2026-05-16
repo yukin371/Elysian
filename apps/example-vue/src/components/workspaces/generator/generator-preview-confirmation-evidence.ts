@@ -1,43 +1,33 @@
-import type { GeneratorPreviewTranslation } from "./types"
-
-interface GeneratorPreviewConfirmationEvidenceRecord {
-  recoveryStatus?: unknown
-  checklist?: unknown
-  reportPath?: unknown
-  snapshotPath?: unknown
-}
+import type {
+  GeneratorPreviewConfirmationEvidence,
+  GeneratorPreviewTranslation,
+} from "./types"
 
 export const resolveGeneratorPreviewConfirmationEvidenceSummary = (
   t: GeneratorPreviewTranslation,
-  confirmationEvidence: Record<string, unknown> | null,
+  confirmationEvidence: GeneratorPreviewConfirmationEvidence | null,
 ) => {
-  if (!confirmationEvidence) {
-    return null
-  }
-
-  const evidence =
-    confirmationEvidence as GeneratorPreviewConfirmationEvidenceRecord
-
-  if (!Array.isArray(evidence.checklist)) {
+  if (
+    !confirmationEvidence ||
+    !Array.isArray(confirmationEvidence.checklist) ||
+    confirmationEvidence.checklist.length === 0
+  ) {
     return null
   }
 
   if (
-    typeof evidence.reportPath === "string" &&
-    typeof evidence.snapshotPath === "string"
+    confirmationEvidence.reportPath.trim().length > 0 &&
+    confirmationEvidence.snapshotPath.trim().length > 0
   ) {
     return t("app.generatorPreview.message.confirmationEvidenceDetailed", {
-      count: evidence.checklist.length,
-      recoveryStatus:
-        typeof evidence.recoveryStatus === "string"
-          ? evidence.recoveryStatus
-          : "unknown",
-      reportPath: evidence.reportPath,
-      snapshotPath: evidence.snapshotPath,
+      count: confirmationEvidence.checklist.length,
+      recoveryStatus: confirmationEvidence.recoveryStatus,
+      reportPath: confirmationEvidence.reportPath,
+      snapshotPath: confirmationEvidence.snapshotPath,
     })
   }
 
   return t("app.generatorPreview.message.confirmationEvidenceCaptured", {
-    count: evidence.checklist.length,
+    count: confirmationEvidence.checklist.length,
   })
 }

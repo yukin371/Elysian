@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue"
+
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
@@ -22,7 +24,43 @@ interface GeneratorPreviewWorkspaceSessionPanelProps {
   confirmationEvidenceSummary: string | null
 }
 
-defineProps<GeneratorPreviewWorkspaceSessionPanelProps>()
+const props = defineProps<GeneratorPreviewWorkspaceSessionPanelProps>()
+
+const translateOrFallback = (key: string, fallback: string) => {
+  const translated = props.t(key)
+
+  return translated === key ? fallback : translated
+}
+
+const blockerReasonMessages = computed(() =>
+  props.session.blockerReasons.map((reason) =>
+    translateOrFallback(
+      `app.generatorPreview.blockerReason.${reason.code}.${reason.stage}`,
+      reason.message,
+    ),
+  ),
+)
+
+const recoveryStatusLabel = computed(() => {
+  if (props.session.recoveryStatus === "rebuilt-from-corrupt") {
+    return translateOrFallback(
+      "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt",
+      props.session.recoveryStatus,
+    )
+  }
+
+  if (props.session.recoveryStatus === "rebuilt-from-missing") {
+    return translateOrFallback(
+      "app.generatorPreview.recoveryStatus.rebuiltFromMissing",
+      props.session.recoveryStatus,
+    )
+  }
+
+  return translateOrFallback(
+    "app.generatorPreview.recoveryStatus.none",
+    props.session.recoveryStatus,
+  )
+})
 </script>
 
 <template>
@@ -84,6 +122,27 @@ defineProps<GeneratorPreviewWorkspaceSessionPanelProps>()
     >
       {{ confirmationEvidenceSummary }}
     </p>
+    <p
+      v-if="session.recoveryStatus !== 'none'"
+      class="enterprise-message enterprise-message-info"
+    >
+      {{
+        t("app.generatorPreview.message.recoveryStatusInline", {
+          value: recoveryStatusLabel,
+        })
+      }}
+    </p>
+    <div
+      v-if="blockerReasonMessages.length > 0"
+      class="generator-facts"
+    >
+      <span
+        v-for="reason in blockerReasonMessages"
+        :key="reason"
+      >
+        {{ reason }}
+      </span>
+    </div>
     <p class="generator-source-value">{{ session.sourceValue }}</p>
   </section>
 </template>

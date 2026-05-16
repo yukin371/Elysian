@@ -537,6 +537,9 @@ const toSessionResponse = (session: GeneratorPreviewSessionRecord) => ({
   confirmedByUserId: session.confirmedByUserId,
   confirmedByUsername: session.confirmedByUsername,
   confirmationEvidence: buildConfirmationEvidence(session),
+  blockerReasons: buildBlockerReasons(session),
+  recoveryStatus: buildRecoveryStatus(session),
+  driftStatus: "clean",
   schemaName: session.schemaName,
   skippedFileCount: session.skippedFileCount,
   sourceType: session.sourceType,
@@ -590,6 +593,70 @@ const buildConfirmationEvidence = (session: GeneratorPreviewSessionRecord) => {
   }
 
   return null
+}
+
+const buildRecoveryStatus = (session: GeneratorPreviewSessionRecord) => {
+  const confirmationEvidence = buildConfirmationEvidence(session)
+  const recoveryStatus = confirmationEvidence?.recoveryStatus
+
+  if (
+    recoveryStatus === "rebuilt-from-corrupt" ||
+    recoveryStatus === "rebuilt-from-missing"
+  ) {
+    return recoveryStatus
+  }
+
+  return "none"
+}
+
+const buildBlockerReasons = (session: GeneratorPreviewSessionRecord) => {
+  const reasons: Array<{
+    code:
+      | "review-required"
+      | "rejected"
+      | "blocking-conflicts"
+      | "confirmation-required"
+    message: string
+    stage: "review" | "confirm" | "apply"
+  }> = []
+
+  if (session.status === "pending_review") {
+    reasons.push({
+      code: "review-required",
+      message: "Review the current result before confirm or apply.",
+      stage: "review",
+    })
+  }
+
+  if (session.status === "rejected") {
+    reasons.push({
+      code: "rejected",
+      message: "Resolve the rejected result before continuing.",
+      stage: "review",
+    })
+  }
+
+  if (session.hasBlockingConflicts) {
+    reasons.push({
+      code: "blocking-conflicts",
+      message: "Blocking files still need manual review before apply.",
+      stage: "apply",
+    })
+  }
+
+  if (
+    session.status === "ready" &&
+    session.confirmedAt === null &&
+    !session.hasBlockingConflicts
+  ) {
+    reasons.push({
+      code: "confirmation-required",
+      message: "Confirm the SQL handoff checklist before apply.",
+      stage: "confirm",
+    })
+  }
+
+  return reasons
 }
 
 const buildReviewEvidence = (session: GeneratorPreviewSessionRecord) => {

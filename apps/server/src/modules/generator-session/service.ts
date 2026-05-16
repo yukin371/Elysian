@@ -90,6 +90,14 @@ const toApplyConflictError = (
         id: session.id,
         outputDir: session.outputDir,
         reason: error.message,
+        driftStatus: "stale",
+        blockerReasons: [
+          {
+            code: "blocking-conflicts",
+            message: "Target files drifted since the last preview.",
+            stage: "apply",
+          },
+        ],
       },
     })
   }
@@ -103,6 +111,14 @@ const toApplyConflictError = (
       id: session.id,
       outputDir: session.outputDir,
       reason: error.message,
+      driftStatus: "apply-conflict",
+      blockerReasons: [
+        {
+          code: "blocking-conflicts",
+          message: "Current target files still need manual review before apply.",
+          stage: "apply",
+        },
+      ],
     },
   })
 }
@@ -180,6 +196,13 @@ export const createGeneratorSessionService = (
             details: {
               id: session.id,
               status: session.status,
+              blockerReasons: [
+                {
+                  code: "review-required",
+                  message: "Review the current result before apply.",
+                  stage: "review",
+                },
+              ],
             },
           })
         }
@@ -193,6 +216,13 @@ export const createGeneratorSessionService = (
             details: {
               id: session.id,
               status: session.status,
+              blockerReasons: [
+                {
+                  code: "rejected",
+                  message: "Resolve the rejected result before apply.",
+                  stage: "review",
+                },
+              ],
             },
           })
         }
@@ -205,6 +235,13 @@ export const createGeneratorSessionService = (
           details: {
             id: session.id,
             status: session.status,
+            blockerReasons: [
+              {
+                code: "review-required",
+                message: "Session is not ready for apply yet.",
+                stage: "review",
+              },
+            ],
           },
         })
       }
@@ -218,6 +255,13 @@ export const createGeneratorSessionService = (
           details: {
             id: session.id,
             status: session.status,
+            blockerReasons: [
+              {
+                code: "confirmation-required",
+                message: "Confirm the SQL handoff checklist before apply.",
+                stage: "confirm",
+              },
+            ],
           },
         })
       }
@@ -231,6 +275,13 @@ export const createGeneratorSessionService = (
           details: {
             id: session.id,
             conflictStrategy: session.conflictStrategy,
+            blockerReasons: [
+              {
+                code: "blocking-conflicts",
+                message: "Blocking files still need manual review before apply.",
+                stage: "apply",
+              },
+            ],
           },
         })
       }

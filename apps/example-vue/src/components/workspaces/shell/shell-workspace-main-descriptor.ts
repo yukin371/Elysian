@@ -33,6 +33,9 @@ interface GeneratorPreviewSessionSummary {
   status?: string | null
   applyEvidence?: unknown
   reviewEvidence?: unknown
+  blockerReasons?: Array<{ message: string }>
+  recoveryStatus?: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
+  driftStatus?: "clean" | "stale" | "apply-conflict"
   hasBlockingConflicts?: boolean
 }
 
@@ -617,6 +620,9 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       diffSummary: props.generatorPreviewDiffSummary,
       sqlProposalHandoff: props.generatorPreviewSqlProposalHandoff,
       sessionStatus: props.generatorPreviewSession?.status ?? null,
+      blockerReasons: props.generatorPreviewSession?.blockerReasons ?? [],
+      recoveryStatus: props.generatorPreviewSession?.recoveryStatus ?? "none",
+      driftStatus: props.generatorPreviewSession?.driftStatus ?? "clean",
       reviewEvidence: props.generatorPreviewSession?.reviewEvidence ?? null,
       applyEvidence: props.generatorPreviewSession?.applyEvidence ?? null,
       hasBlockingConflicts:

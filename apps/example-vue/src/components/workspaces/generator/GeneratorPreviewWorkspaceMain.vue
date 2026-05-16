@@ -18,6 +18,7 @@ const {
   cancelApplyConfirmation,
   cancelRejectConfirmation,
   blockedFileCount,
+  blockerReasonMessages,
   configPrimaryActionLabel,
   configErrorRecoverySteps,
   conflictStrategyCards,
@@ -56,6 +57,7 @@ const {
   isRejectConfirming,
   operationProgressMessage,
   referenceSchemaQuery,
+  recoveryStatusMessage,
   rejectCommentRequired,
   resultErrorRecoverySteps,
   resultPrimaryActionLabel,
@@ -131,7 +133,9 @@ const {
     :current-state-message="currentStateMessage"
     :operation-progress-message="operationProgressMessage"
     :blocked-file-count="blockedFileCount"
+    :blocker-reason-messages="blockerReasonMessages"
     :first-blocked-file-path="firstBlockedFilePath"
+    :recovery-status-message="recoveryStatusMessage"
     :result-error-recovery-steps="resultErrorRecoverySteps"
     :confirmation-checklist="confirmationChecklist"
     :show-review-comment-input="showReviewCommentInput"

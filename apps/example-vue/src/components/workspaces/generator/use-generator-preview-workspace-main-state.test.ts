@@ -92,6 +92,9 @@ const createProps = (
   diffSummary: null,
   sqlProposalHandoff: null,
   sessionStatus: "pending_review",
+  blockerReasons: [],
+  recoveryStatus: "none",
+  driftStatus: "clean",
   reviewEvidence: null,
   applyEvidence: null,
   hasBlockingConflicts: false,
@@ -469,7 +472,7 @@ describe("useGeneratorPreviewWorkspaceMainState draft summary", () => {
 
     expect(state.draftSummaryFacts.value).toEqual([
       {
-        label: "app.generatorPreview.inputModeLabel",
+        label: "app.generatorPreview.startModeLabel",
         value: "app.generatorPreview.draftSource.template",
       },
       {
