@@ -18,6 +18,8 @@
 - [07-database-backup-and-recovery-template.md](./07-database-backup-and-recovery-template.md)
 - [08-release-roles-and-oncall-template.md](./08-release-roles-and-oncall-template.md)
 - [09-go-live-gate-input-template.md](./09-go-live-gate-input-template.md)
+- [10-feature-review-and-evaluation.md](./10-feature-review-and-evaluation.md)
+- [11-system-capability-assessment.md](./11-system-capability-assessment.md)
 
 ## 维护规则
 
