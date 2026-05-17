@@ -6,7 +6,7 @@ import {
   resolveGeneratorReportGitSha,
 } from "./_shared/generator-report"
 
-type ReportSource = "matrix" | "cli" | "studio" | "unknown"
+type ReportSource = "matrix" | "cli" | "studio" | "browser" | "unknown"
 
 interface ReportIndexItem {
   source: ReportSource
@@ -81,6 +81,7 @@ export const parseAllowFailedSourcesRaw = (
       value === "matrix" ||
       value === "cli" ||
       value === "studio" ||
+      value === "browser" ||
       value === "unknown"
     ) {
       sources.add(value)
@@ -159,9 +160,15 @@ export const buildRecommendedActions = (
     )
   }
 
+  if (failedSources.has("browser")) {
+    actions.add(
+      "For browser failures, inspect the real generator preview route, DOM expectations, network DTO mocks, and any screenshot attached by e2e-generator-browser-smoke.",
+    )
+  }
+
   if (failedSources.has("unknown")) {
     actions.add(
-      "For unknown source failures, verify artifact download paths and ensure report files keep source prefixes (matrix/, cli/, or studio/).",
+      "For unknown source failures, verify artifact download paths and ensure report files keep source prefixes (matrix/, cli/, studio/, or browser/).",
     )
   }
 

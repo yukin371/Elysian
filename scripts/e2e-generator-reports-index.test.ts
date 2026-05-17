@@ -6,10 +6,11 @@ import {
 } from "./e2e-generator-reports-index"
 
 describe("resolveReportSource", () => {
-  test("recognizes matrix, cli, and studio prefixes", () => {
+  test("recognizes matrix, cli, studio, and browser prefixes", () => {
     expect(resolveReportSource("matrix/report.json")).toBe("matrix")
     expect(resolveReportSource("cli/report.json")).toBe("cli")
     expect(resolveReportSource("studio/report.json")).toBe("studio")
+    expect(resolveReportSource("browser/report.json")).toBe("browser")
   })
 
   test("falls back to unknown for unprefixed reports", () => {

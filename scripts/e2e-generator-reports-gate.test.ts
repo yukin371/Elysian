@@ -8,11 +8,9 @@ import {
 
 describe("parseAllowFailedSourcesRaw", () => {
   test("returns unique supported sources", () => {
-    expect(parseAllowFailedSourcesRaw("matrix, cli, studio, matrix")).toEqual([
-      "matrix",
-      "cli",
-      "studio",
-    ])
+    expect(
+      parseAllowFailedSourcesRaw("matrix, cli, studio, browser, matrix"),
+    ).toEqual(["matrix", "cli", "studio", "browser"])
   })
 
   test("throws on unsupported sources", () => {
@@ -29,7 +27,7 @@ describe("buildRecommendedActions", () => {
     ])
   })
 
-  test("includes source-specific suggested actions for matrix, cli, and studio", () => {
+  test("includes source-specific suggested actions for matrix, cli, studio, and browser", () => {
     const actions = buildRecommendedActions("failed", [
       {
         source: "matrix",
@@ -55,6 +53,14 @@ describe("buildRecommendedActions", () => {
         passedCount: 0,
         failedCount: 1,
       },
+      {
+        source: "browser",
+        reportPath: "browser/report.json",
+        fileName: "report.json",
+        status: "failed",
+        passedCount: 0,
+        failedCount: 1,
+      },
     ])
 
     expect(
@@ -66,6 +72,9 @@ describe("buildRecommendedActions", () => {
     expect(
       actions.some((action) => action.includes("For studio failures")),
     ).toBeTrue()
+    expect(
+      actions.some((action) => action.includes("For browser failures")),
+    ).toBeTrue()
   })
 })
 
@@ -76,8 +85,8 @@ describe("validateReportsIndex", () => {
         gitSha: "abc",
         generatedAt: "2026-04-22T00:00:00.000Z",
         inputDir: "tmp",
-        totalReports: 3,
-        passedReports: 2,
+        totalReports: 4,
+        passedReports: 3,
         failedReports: 1,
         overallStatus: "failed",
         conclusion: "1 failed",
@@ -114,6 +123,14 @@ describe("validateReportsIndex", () => {
             fileName: "c.json",
             status: "passed",
             passedCount: 3,
+            failedCount: 0,
+          },
+          {
+            source: "browser",
+            reportPath: "browser/d.json",
+            fileName: "d.json",
+            status: "passed",
+            passedCount: 4,
             failedCount: 0,
           },
         ],

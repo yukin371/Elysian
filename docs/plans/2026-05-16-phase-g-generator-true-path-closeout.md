@@ -30,6 +30,7 @@
 - `bun test apps/example-vue/src/components/workspaces/generator/generator-preview-confirmation-evidence.test.ts apps/example-vue/src/components/workspaces/generator/use-generator-preview-workspace-main-state.test.ts apps/example-vue/src/workspaces/use-generator-preview-workspace.actions.test.ts apps/example-vue/src/workspaces/use-generator-preview-workspace.selection.test.ts`
 - `bun test apps/server/src/modules/generator-session/module.lifecycle.test.ts apps/server/src/modules/generator-session/module.guards.test.ts apps/server/src/modules/generator-session/module.detail.test.ts`
 - `bun run e2e:generator:studio`
+- `bun run e2e:generator:browser`
 - `bun run build:vue`
 
 需要同步的文档：
@@ -85,6 +86,11 @@
   - happy path 覆盖 `start -> preview -> review -> confirm -> apply`
   - blocked path 覆盖 apply 阻断后的 detail refresh 与 blocker evidence 回看
 - `studio` 验收已接入 generator report/CI 链路，后续 `reports:index / gate` 会把真实 workspace 路径与 `matrix / cli` 一起纳入统一回归证据。
+- `scripts/e2e-generator-browser-smoke.ts` 已补 Phase G-B 浏览器信心层：
+  - 直接启动真实 `apps/example-vue` 路由并打开 `/studio/generator-preview`
+  - 用浏览器网络拦截复用既有 `generator-session` DTO，不新增后端测试协议
+  - 覆盖首屏三段结构、起稿输入、review / confirm / apply 主动作、blocked apply 证据可见性
+  - 失败时输出 JSON report 与截图，CI 作业单独归档，不改变 `packages/generator` owner
 
 ## 阶段内保留边界
 

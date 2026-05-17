@@ -113,17 +113,18 @@
 - 已新增 `e2e:generator:matrix`，用于多 schema、多冲突策略与多前端目标的生成一致性回归。
 - 已新增 `e2e:generator:cli`，用于 generator CLI 真实执行路径冲突策略回归。
 - 已新增 `e2e:generator:studio`，用于真实 `generator preview` workspace 的 guided happy path / blocked apply 验收。
-- 已新增 `e2e:generator:reports:index`，用于汇总 generator 回归报告索引。
+- 已新增 `e2e:generator:browser`，用于在真实 Vue 路由中执行 `generator preview` 浏览器级 smoke，覆盖首屏结构、起稿输入、review / confirm / apply 主动作与阻断证据可见性；该入口只作为 Phase G-B 信心补强，不扩成通用浏览器 E2E 平台。
+- 已新增 `e2e:generator:reports:index`，用于汇总 generator 回归报告索引；当前索引来源包含 `matrix`、`cli`、`studio` 与 `browser`。
 - 已新增 `e2e:generator:reports:gate`，用于按策略执行 generator 回归门禁判定。
 - `scripts/e2e-generator-reports-gate.test.ts` 已覆盖来源白名单解析、推荐动作分流与索引一致性校验，降低门禁误配置风险。
 - CI 手动触发（`workflow_dispatch`）可动态配置 gate 参数（失败阈值、允许失败来源）。
-- `e2e:generator:matrix`、`e2e:generator:cli` 与 `e2e:generator:studio` 支持通过 `ELYSIAN_REPORT_DIR` 指定报告输出目录。
+- `e2e:generator:matrix`、`e2e:generator:cli` 与 `e2e:generator:studio` 支持通过 `ELYSIAN_REPORT_DIR` 指定报告输出目录；`e2e:generator:browser` 默认输出到 `.ci-reports/generator-browser-smoke`，也可通过 `ELYSIAN_BROWSER_SMOKE_REPORT_DIR` 覆盖。
 - `packages/schema` 当前已注册 `customer`、`product`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 十一个模块 schema。
 - `packages/schema` 已补 workflow definition / instance / task 的最小 contract，并补实例历史任务视图、任务结果字段与条件表达式白名单校验，用于当前 agent 自编排辅助工具的流程定义与运行态数据交换。
 - `packages/frontend-vue` 已提供最小 Vue 预设层，并包含导航构建、权限 gate helper 与供 enterprise preset 消费的页面协议映射。
 - `packages/ui-core` 已承接菜单树、CRUD 页面契约与权限相关 UI 协议。
 - `packages/ui-enterprise-vue` 已落地 `ElyShell`、`ElyTable`、`ElyQueryBar`、`ElyForm`、`ElyCrudWorkspace`、`ElyPreviewSkeleton` 等企业预设组件；当前运行时底座已完成 `TDesign Vue Next` 收口，并已具备 tabs、标准列表页、标准表单页与只读详情视图。
-- `2026-05-12` 首个参考发行版已完成本地发布门槛复验：`bun run check`、`bun run build:vue`、`bun run server:image:verify`、`bun run e2e:smoke:full`、`bun run e2e:tenant:full` 与 `bun run e2e:generator:cli` 均已通过；当前 `Phase G` 额外把真实 workspace 验收固定为 `bun run e2e:generator:studio`，用于补齐 `generator preview` 的 review / confirm / apply 真链路回归。真实环境 go-live 仍需环境 owner 补齐 release tag / PR、migration、backup / recovery、proxy / TLS、值守与目标环境冒烟输入。
+- `2026-05-12` 首个参考发行版已完成本地发布门槛复验：`bun run check`、`bun run build:vue`、`bun run server:image:verify`、`bun run e2e:smoke:full`、`bun run e2e:tenant:full` 与 `bun run e2e:generator:cli` 均已通过；当前 `Phase G` 额外把真实 workspace 验收固定为 `bun run e2e:generator:studio`，并用 `bun run e2e:generator:browser` 补一层真实路由浏览器 smoke，用于压实 `generator preview` 的 review / confirm / apply 真链路回归。真实环境 go-live 仍需环境 owner 补齐 release tag / PR、migration、backup / recovery、proxy / TLS、值守与目标环境冒烟输入。
 - `packages/persistence` 的 `db:seed` 已包含默认 workflow definitions 样本（`expense-approval v1/v2`、`expense-approval-condition v1`），默认开发环境无需前端 override 也可验证 workflow 版本历史；`apps/example-vue` 的 override seam 当前只用于稳定复现特定测试样本。
 - `apps/example-vue` 已消费 auth identity、动态菜单、权限 gate 和 `ui-enterprise-vue` 预设组件，并已接入真实 customer enterprise workspace；当前定位已从“最小交互验证页”转为首个参考发行版的前端 owner，不再只是单模块验证。
 - `apps/example-vue` 的 customer workspace 已从“前端拉全量后本地筛选”收敛到服务端列表协议，当前 `GET /customers` 已承接 query、分页与排序参数，并返回 page metadata 供工作区 footer 分页交互消费。
@@ -136,7 +137,7 @@
 - 仓库已具备最小质量链路：`Biome + GitHub Actions CI`。
 - 仓库当前已使用 `Husky` 托管 `pre-commit / commit-msg / pre-push` 本地 hooks；`bun install` 会自动执行 `prepare` 完成安装，并保留 `bun run hooks:install` 作为手动修复入口。
 - CI workflow 已升级至 Node 24 兼容 action 版本（`actions/checkout@v5`、`actions/download-artifact@v7`、`actions/upload-artifact@v6`）。
-- 仓库 CI 已新增 `e2e-smoke` 作业（PostgreSQL service + migrate/seed + 登录/customer CRUD 冒烟）、`e2e-tenant` 作业（真实 PostgreSQL 下 tenant init 幂等、super-admin 授权、跨租户隔离、RLS/FK 验证 + artifact 归档）、`e2e-generator-safe-apply` 作业（生成安全覆盖三场景冒烟）、`e2e-generator-matrix` 作业（多 schema / 多策略回归矩阵）、`e2e-generator-cli` 作业（CLI 真实执行路径回归）、`p5a-handoff-corpus` 作业（P5A 语料分类回归 + artifact 归档）、`p5a-acceptance` 作业（P5A 阶段最小闭环验收 + artifact 归档）、`e2e-generator-report-index` 作业（汇总报告索引 artifact）与 `e2e-generator-report-gate` 作业（门禁判定 artifact）。
+- 仓库 CI 已新增 `e2e-smoke` 作业（PostgreSQL service + migrate/seed + 登录/customer CRUD 冒烟）、`e2e-tenant` 作业（真实 PostgreSQL 下 tenant init 幂等、super-admin 授权、跨租户隔离、RLS/FK 验证 + artifact 归档）、`e2e-generator-safe-apply` 作业（生成安全覆盖三场景冒烟）、`e2e-generator-matrix` 作业（多 schema / 多策略回归矩阵）、`e2e-generator-cli` 作业（CLI 真实执行路径回归）、`e2e-generator-browser` 作业（真实 Vue 路由浏览器 smoke + 截图 artifact）、`p5a-handoff-corpus` 作业（P5A 语料分类回归 + artifact 归档）、`p5a-acceptance` 作业（P5A 阶段最小闭环验收 + artifact 归档）、`e2e-generator-report-index` 作业（汇总报告索引 artifact）与 `e2e-generator-report-gate` 作业（门禁判定 artifact）。
 - GitHub Actions 当前还提供 `Tenant Release Rehearsal` 手动工作流：先从 GitHub 下载 tenant artifact 生成 evidence / decision，再把人工确认项映射给 `tenant:release:finalize`；该入口仅服务 release rehearsal，不代表生产发布平台命令，当前已固定为 tenant 发布演练默认入口。
 - `Tenant Release Rehearsal` 已完成一次真实 GitHub `workflow_dispatch` 验证（run `24894806843`）：workflow 可稳定下载 tenant artifact、生成 evidence / decision、执行 release gate 并上传 rehearsal artifact；在固定 checkout 后 git 基线后，gate 仅保留目标环境与发布后验证相关的 `8` 个预期 blocker。
 - `scripts/e2e-smoke.ts` 已支持输出 `e2e-smoke-report.json`（状态、阶段、失败分类、失败信息），CI `e2e-smoke` 作业已归档 smoke report artifact。
@@ -248,6 +249,7 @@
 - `bun run e2e:generator:matrix`
 - `bun run e2e:generator:cli`
 - `bun run e2e:generator:studio`
+- `bun run e2e:generator:browser`
 - `bun run e2e:generator:reports:index`
 - `bun run e2e:generator:reports:gate`
 - `bun run build:vue`
@@ -320,6 +322,7 @@
 - Generator 回归矩阵：`bun run e2e:generator:matrix`
 - Generator CLI 回归：`bun run e2e:generator:cli`
 - Generator workspace guided 回归：`bun run e2e:generator:studio`
+- Generator 浏览器 smoke：`bun run e2e:generator:browser`
 - Generator 报告索引：`bun run e2e:generator:reports:index`
 - Generator 报告门禁：`bun run e2e:generator:reports:gate`
 - 生成数据库迁移：`bun run db:generate`

@@ -281,7 +281,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.collapseSchemaEditor": "Hide JSON",
   "app.generatorPreview.action.showAdvancedOptions": "Show advanced options",
   "app.generatorPreview.action.hideAdvancedOptions": "Hide advanced options",
-  "app.generatorPreview.input.templateLabel": "Public templates",
+  "app.generatorPreview.input.templateLabel": "Start from blank template",
   "app.generatorPreview.input.templateHint":
     "Load a base template first, then expand Schema JSON only when needed.",
   "app.generatorPreview.input.validationDetails": "Validation details",
@@ -565,7 +565,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.inputSchemaLabel": "Schema template",
   "app.generatorPreview.inputMode.registeredSchema": "Use registered schema",
   "app.generatorPreview.inputMode.manualSchemaJson": "Paste schema JSON",
-  "app.generatorPreview.draftSource.template": "Public templates",
+  "app.generatorPreview.draftSource.template": "Start from blank template",
   "app.generatorPreview.draftSource.reference":
     "Copy existing module structure",
   "app.generatorPreview.draftSource.json": "Advanced JSON",

@@ -259,7 +259,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.collapseSchemaEditor": "收起编辑",
   "app.generatorPreview.action.showAdvancedOptions": "展开高级项",
   "app.generatorPreview.action.hideAdvancedOptions": "收起高级项",
-  "app.generatorPreview.input.templateLabel": "公共模板",
+  "app.generatorPreview.input.templateLabel": "从空白模板开始",
   "app.generatorPreview.input.templateHint":
     "先载入一个基础模板，再按需要展开 Schema JSON。",
   "app.generatorPreview.input.validationDetails": "校验详情",
@@ -525,7 +525,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.inputSchemaLabel": "Schema 模板",
   "app.generatorPreview.inputMode.registeredSchema": "选择已注册 Schema",
   "app.generatorPreview.inputMode.manualSchemaJson": "粘贴 Schema JSON",
-  "app.generatorPreview.draftSource.template": "公共模板",
+  "app.generatorPreview.draftSource.template": "从空白模板开始",
   "app.generatorPreview.draftSource.reference": "复制现有模块结构",
   "app.generatorPreview.draftSource.json": "高级 JSON",
   "app.generatorPreview.referenceSearchPlaceholder": "搜索要复制结构的模块",

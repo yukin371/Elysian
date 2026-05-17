@@ -13,7 +13,7 @@ interface ParsedReport {
 }
 
 interface ReportIndexItem {
-  source: "matrix" | "cli" | "studio" | "unknown"
+  source: "matrix" | "cli" | "studio" | "browser" | "unknown"
   reportPath: string
   fileName: string
   status: "passed" | "failed"
@@ -56,6 +56,10 @@ export const resolveReportSource = (
 
   if (relativePath.startsWith("studio/")) {
     return "studio"
+  }
+
+  if (relativePath.startsWith("browser/")) {
+    return "browser"
   }
 
   return "unknown"
