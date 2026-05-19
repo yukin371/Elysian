@@ -309,6 +309,14 @@ interface ModuleHandoffManualStep {
 默认结论：
 - 本阶段先不纳入 gate required source，除非已有明确 CI 产物与失败语义。
 
+当前评估：
+
+- module handoff manifest 是 review 辅助证据，不是 release blocker。
+- 缺失 module handoff manifest 不应导致 `e2e:generator:reports:gate` 失败；当前 gate 继续只要求 `matrix / cli / studio / browser` 四类发布闭环报告源。
+- manifest 的存在只能说明 generator 输出了人工接线待办，不能说明 persistence migration、server compose 或 frontend registry 已经完成。
+- 若后续要纳入 reports index，应先新增独立 source 与失败语义，并确保 gate 不把 `manualSteps.status = "pending"` 误判为失败或完成。
+- 当前结论：保持附属证据，不接入 gate required source。
+
 ## 非目标
 
 - 不实现导入 DSL、导入 API、批量落库或错误回写平台。
@@ -321,7 +329,6 @@ interface ModuleHandoffManualStep {
 
 ## 推荐起手顺序
 
-1. 复跑 module target smoke，拿到当前事实。
-2. 写 MHM-1 契约草案与示例 JSON。
-3. 评审 manifest 字段是否足够小。
-4. 再决定是否进入 MHM-2 最小实现。
+1. 若继续本方向，优先补 module handoff manifest 的示例文档或 README 引用，而不是接入 reports gate。
+2. 若未来要做正式模块接线验证，先单独设计人工步骤完成证据，不复用 generator 生成时的 pending manifest。
+3. 若继续扩大 generator 输入来源，回到 Phase H 导入边界决策，只做 schema 输入层 POC，不进入导入平台实现。

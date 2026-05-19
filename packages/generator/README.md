@@ -104,7 +104,7 @@ flowchart TD
 
 - CLI 入口 `src/cli.ts` 负责读取注册 schema 或外部 schema 文件，并调用规划、preview、写入链路。
 - `previewModuleFiles()` 生成结构化 preview report，供 server 侧 `generator-session` 和示例前端展示。
-- `write.ts` 负责冲突策略、漂移校验、原子写入和 manifest 落盘，是“安全 apply”边界所在。
+- `write.ts` 负责冲突策略、漂移校验、原子写入和 manifest 落盘，是“安全 apply”边界所在。`module` target 还会旁挂 module handoff manifest，用来记录 pending 的人工接线步骤，但不会自动完成接线。
 - `@elysian/generator/browser` 只暴露纯计算能力，故可被 `apps/example-vue` 直接消费；它不包含文件系统写入接口。
 
 ## Input Modes

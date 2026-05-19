@@ -72,7 +72,7 @@ bun --filter @elysian/generator generate --schema-file ./my-module.json --out ./
 # 预览生成结果（不写入磁盘）
 bun --filter @elysian/generator generate --schema customer --target staging --frontend vue --preview
 
-# 直接生成到服务端模块目录，并输出集成清单
+# 直接生成到服务端模块目录，并输出集成清单与 handoff manifest
 bun --filter @elysian/generator generate --schema customer --target module --frontend vue --preview
 ```
 
@@ -85,7 +85,7 @@ bun --filter @elysian/generator generate --schema customer --target module --fro
 - 每次生成输出 manifest，支持二次生成安全覆盖
 - Preview 模式：预览文件计划、diff、SQL 变更，确认后再 Apply
 
-`--target module` 会把生成目标切到 `apps/server/src/modules`，额外产出 `*.module.ts` 装配桩，并在 CLI 末尾输出集成清单，提示后续需要完成的 persistence schema、compose 注册和前端注册步骤。为避免覆盖手写装配代码，生成器会保留已有的 `*.module.ts`。
+`--target module` 会把生成目标切到 `apps/server/src/modules`，额外产出 `*.module.ts` 装配桩，并在 CLI 末尾输出集成清单。该目标还会旁挂一个 `module-handoff` manifest，用来记录 `pending` 的人工接线步骤、canonical owner、建议验证命令和 non-goals，但它不是完成证明。为避免覆盖手写装配代码，生成器会保留已有的 `*.module.ts`。
 
 最小 simplified schema 示例：
 
