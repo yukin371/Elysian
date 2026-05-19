@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-19`（Generator module handoff manifest 已完成最小实现并提交；当前保留为 review 辅助证据，不接入 reports gate required source）
+更新时间：`2026-05-19`（Generator module handoff manifest 已完成最小实现并提交；下一步只规划人工接线完成证据，不让 generator 自动宣称完成）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -17,9 +17,11 @@
 - 当前已推进：已定义 `ModuleHandoffManifestV1` 草案，并在 `packages/generator` 内落最小实现；`module` target 写入时会旁挂 `{schema}.{frontend}.module-handoff.json`，CLI checklist 会提示该文件名
 - 当前边界：manifest 只能记录既有 generation manifest 路径、pending 人工步骤、canonical owner、建议验证命令与 non-goals，不能宣称人工步骤已完成
 - 当前结论：module handoff manifest 是 review 辅助证据，不是 release blocker；当前不接入 `e2e:generator:reports:gate` required source
+- 后续候选：若要证明人工接线已完成，应单独设计 completion evidence；该证据不能由 generator 生成阶段自动产生，也不能复用 pending handoff manifest
 - 当前不做：不自动修改 `packages/persistence` schema index / migration，不自动修改 server compose，不自动修改 frontend registry，不新增跨层 handoff center
 - Phase H 收口记录：[2026-05-19-generator-release-hardening-closeout.md](./plans/2026-05-19-generator-release-hardening-closeout.md)
 - Module handoff manifest 计划：[2026-05-19-generator-module-handoff-manifest-next-stage-plan.md](./plans/2026-05-19-generator-module-handoff-manifest-next-stage-plan.md)
+- Module integration completion evidence 候选：[2026-05-19-generator-module-integration-completion-evidence-plan.md](./plans/2026-05-19-generator-module-integration-completion-evidence-plan.md)
 
 ### Recent Mainline: Phase H Generator 可发布闭环硬化 ✅
 
@@ -361,9 +363,9 @@
 
 ## 下一步
 
-1. 第一顺序：若继续 module handoff 方向，只补 README / 示例层的使用说明，不把 manifest 接入 reports gate required source。
-2. 第二顺序：若要证明人工接线已完成，应单独设计人工完成证据，不复用 generator 生成时的 pending manifest。
-3. 第三顺序：保持 `demohub` 作为后续 Generator 页面试稿 owner；新交互先在原型里验证，再迁回正式页。
-4. 第四顺序：按 Phase H 导入边界决策保留后续候选输入层 POC，不把导入 DSL、导入平台接口、批量落库或第二套 starter 拉进已完成事实。
-5. 第五顺序：`generator / frontend` 只做必要延伸，不回到 example-vue 手写标准 CRUD，也不重开一轮页面级 step bar 或共享运行时抽象。
+1. 第一顺序：若继续 module handoff 方向，先评审 completion evidence 计划；不直接实现，不复用 pending manifest 作为完成证明。
+2. 第二顺序：若只是提高 review 体验，优先补 PR 模板或 review checklist，而不是新增脚本。
+3. 第三顺序：若要做脚本，只做只读验证，不写 persistence / server / frontend 正式 owner。
+4. 第四顺序：保持 `demohub` 作为后续 Generator 页面试稿 owner；新交互先在原型里验证，再迁回正式页。
+5. 第五顺序：按 Phase H 导入边界决策保留后续候选输入层 POC，不把导入 DSL、导入平台接口、批量落库或第二套 starter 拉进已完成事实。
 6. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、正式 migration 自动化、第二套消息中心模型，以及任何新的前端 shared owner。
