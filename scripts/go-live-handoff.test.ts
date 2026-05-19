@@ -122,7 +122,7 @@ const runHandoffProcess = async (paths: {
   envTemplatePath: string
   bundleDir: string
 }) => {
-  const child = Bun.spawn(["bun", "scripts/go-live-handoff.ts"], {
+  const child = Bun.spawn([process.execPath, "scripts/go-live-handoff.ts"], {
     cwd: process.cwd(),
     env: {
       ...process.env,

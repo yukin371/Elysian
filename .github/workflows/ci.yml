@@ -513,6 +513,7 @@ jobs:
     env:
       ELYSIAN_REPORT_DIR: ${{ github.workspace }}/.ci-reports/gate
       ELYSIAN_REPORT_GATE_INDEX_PATH: ${{ github.workspace }}/.ci-reports/index-input/e2e-generator-reports-index.json
+      ELYSIAN_REPORT_GATE_REQUIRED_SOURCES: matrix,cli,studio,browser
       ELYSIAN_REPORT_GATE_MAX_FAILED_REPORTS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.gate_max_failed_reports || '0' }}
       ELYSIAN_REPORT_GATE_ALLOW_FAILED_SOURCES: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.gate_allow_failed_sources || '' }}
 

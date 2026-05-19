@@ -17,7 +17,7 @@ const runReportProcess = async (
   env: Record<string, string | undefined>,
   reportPath: string,
 ) => {
-  const child = Bun.spawn(["bun", "scripts/go-live-report.ts"], {
+  const child = Bun.spawn([process.execPath, "scripts/go-live-report.ts"], {
     cwd: process.cwd(),
     env: {
       ...process.env,

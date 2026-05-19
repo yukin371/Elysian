@@ -359,6 +359,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Rebuilt from a corrupt snapshot",
   "app.generatorPreview.recoveryStatus.rebuiltFromMissing":
     "Rebuilt from a missing snapshot",
+  "app.generatorPreview.driftStatus.clean": "No target-file drift detected",
   "app.generatorPreview.driftStatus.stale":
     "This result may be stale. Regenerate it before continuing with review or apply.",
   "app.generatorPreview.driftStatus.applyConflict":
@@ -498,6 +499,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.exists": "Target file exists",
   "app.generatorPreview.meta.managed": "Target file is managed",
   "app.generatorPreview.meta.reportPath": "Preview report path",
+  "app.generatorPreview.meta.snapshotPath": "Snapshot path",
   "app.generatorPreview.meta.outputDir": "Output directory",
   "app.generatorPreview.meta.targetPreset": "Target",
   "app.generatorPreview.meta.addedLines": "Added lines",
@@ -548,6 +550,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.appliedAt": "Applied at",
   "app.generatorPreview.meta.manifestPath": "Manifest path",
   "app.generatorPreview.meta.requestId": "Request ID",
+  "app.generatorPreview.meta.driftStatus": "Drift status",
+  "app.generatorPreview.meta.recoveryStatus": "Recovery status",
+  "app.generatorPreview.meta.confirmationChecklistCount": "Checklist items",
+  "app.generatorPreview.meta.archivedSnapshotPath": "Archived snapshot path",
   "app.generatorPreview.sourceType.registeredSchema":
     "Existing module structure",
   "app.generatorPreview.sourceType.manualSchemaJson": "Schema JSON",

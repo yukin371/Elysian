@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-17`（`v1.0.0` 已发布，当前主线仍在 `Phase G` 的 Generator 真链路收口；下阶段候选已规划）
+更新时间：`2026-05-19`（`Phase H` Generator 可发布闭环硬化已完成当前工作区本地收口；正式 PR / tag 前仍需在最终提交后重新锁定 commit）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -8,20 +8,29 @@
 
 保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A` 的最小 workflow 闭环已在 `2026-04-26` 完成 `Round-2` 收口，当前按“已完成的能力基线”处理，不继续外扩到 `transfer / delegate`。`v1.0.0` 已完成正式发布口径收口，当前即时优先级不再重复做 go-live 阶段包装，而是把 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator` 继续作为 starter 基线，推进 `Generator` 真实 workspace 的可审查、可确认、可 apply 闭环。
 
-### Current Mainline: Phase G Generator 真链路收口 🚧
+### Current Mainline: Phase H Generator 可发布闭环硬化（本地收口，待提交后锁定）
 
 - 已完成前提：`v1.0.0` 已作为首个参考发行版正式发布对象收口，starter 的安装、启动、登录、常用模块、生成器接入和 go-live 入口都已有正式交付口径
-- 当前范围：只推进 `Generator` 主线，不扩成新的平台能力 phase；出口固定为“真实 workspace 可顺畅完成 `start -> preview -> review -> confirm -> apply`”
+- 已完成前提：`Phase G` 已在 `2026-05-19` 完成本地出口复验，`bun run e2e:generator:studio`、`bun run e2e:generator:browser` 与 `bun run build:vue` 均已通过；该结论只代表当前工作区本地复验，正式 PR / tag 前仍需在最终提交后重新锁定 commit
+- 当前范围：只推进 `Generator` 主线，不扩成新的平台能力 phase；出口固定为“真实 workspace 可顺畅完成 `start -> preview -> review -> confirm -> apply to staging`，且验证证据可统一判读、可回看”
 - 当前前端路径：`generator preview` 的页面结构仍先在 `apps/example-vue` 的 `demohub` 原型页验证，再迁回正式 workspace；`demohub` 继续是试稿 owner，不再作为主流程必经页
 - 当前已推进：正式 `generator preview` workspace 已固定为“新建生成 / 最近结果 / 生成结果”三段结构，起稿首屏只保留“从空白模板开始 / 复制现有模块结构”，`Schema JSON` 已退到高级区
 - 当前已推进：`apps/server` 的 `generator-session` 响应已显式暴露 `blockerReasons`、`confirmationEvidence`、`recoveryStatus`、`applyEvidence` 与 `driftStatus`；`apps/example-vue` 已按用户语义消费这些结构化证据，而不是把 `session / step / manual-schema-json` 直接暴露在首屏主文案里
 - 当前已推进：新增 `bun run e2e:generator:browser` 与 CI `e2e-generator-browser`，直接打开真实 Vue `generator preview` 路由，用浏览器 smoke 验证首屏结构、起稿输入、review / confirm / apply 主动作、阻断证据与截图报告
+- 当前已推进：`bun run e2e:generator:reports:index` 与 `bun run e2e:generator:reports:gate` 已可在本地通过，reports 测试已覆盖 `browser` source 的识别、失败建议与缺失检测；CI generator index / gate 已输出 GitHub Step Summary / outputs，且 gate 显式要求 `matrix / cli / studio / browser` 四类报告源，避免 browser artifact 缺失时误判阶段门禁通过或只能下载 artifact 后判读
+- 当前已推进：正式 `generator preview` 当前结果摘要会在 drift、snapshot recovery 或 apply evidence 存在时补充结构化事实；drift 状态本身可触发当前结果恢复建议，不再只依赖错误字符串识别
+- 当前已推进：正式 `generator preview` 的 session detail 已把 confirmation evidence 的 report / snapshot / recovery / checklist count 与 apply evidence 的 report / manifest / request id 作为可回放事实展示，仍只消费 `generator-session` 响应与 persistence handoff artifact，不迁移 proposal owner
+- 当前已推进：正式 `generator preview` 的当前结果恢复建议会直接消费结构化 `blockerReasons`，即使没有错误字符串，也能把 confirmation required、blocking conflicts 等阻断原因落到复核清单、查看阻塞文件、恢复结果或重新生成等既有动作建议上
+- 当前已推进：`e2e:generator:studio` 的 guided-flow report 已把 happy path 的 confirmation / apply 证据、blocked apply 的 blockerReasons / final 状态、stale apply 的 driftStatus / blockerReasons / regenerated session 写入 JSON，失败判断不再只停留在控制台输出
+- 当前已推进：导入链路边界已形成阶段决策，`Phase H` 不实现导入 DSL、导入 API、批量落库或错误回写平台；后续若继续，只能先从 `ModuleSchema` / 简化 schema 输入层 POC 评估，不能把 generator apply 语义扩成业务数据导入
 - 当前边界：`packages/generator` 继续只负责 schema -> preview/report/apply artifact；`packages/persistence` 继续作为 review-only SQL proposal snapshot 的 canonical owner；confirm 不等于 migration 完成，apply 只到 staging
-- 当前不做：不新增第二套 starter，不新增跨层 shared owner，不把前端运行时职责迁入 `packages/generator`，不把导入链路拉进本阶段完成定义
-- 当前结论：post-release 主线已经从“发布收口”切换为“Generator 真链路收口”；下一步先完成 `Phase G` 出口锁定，再按候选计划进入 Generator 可发布闭环硬化，不再回到 go-live 规划语义
+- 当前不做：不新增第二套 starter，不新增跨层 shared owner，不把前端运行时职责迁入 `packages/generator`，不把导入链路、正式 migration 自动化或生产发布平台拉进本阶段完成定义
+- 当前结论：`Phase H` 已在当前工作区完成本地收口，generator 验证证据、真实 workspace 阻断回看与 staging apply / handoff 证据已补齐到可发布基线；正式 PR / tag 前仍需在最终提交后重新复跑关键验证并锁定 commit
 - 发布说明：[releases/v1.0.0.md](./releases/v1.0.0.md)
 - Phase G 实施记录：[2026-05-16-phase-g-generator-true-path-closeout.md](./plans/2026-05-16-phase-g-generator-true-path-closeout.md)
-- 下阶段候选计划：[2026-05-17-generator-release-hardening-next-stage-plan.md](./plans/2026-05-17-generator-release-hardening-next-stage-plan.md)
+- Phase H 执行计划：[2026-05-17-generator-release-hardening-next-stage-plan.md](./plans/2026-05-17-generator-release-hardening-next-stage-plan.md)
+- Phase H 导入边界决策：[2026-05-19-generator-import-boundary-decision.md](./plans/2026-05-19-generator-import-boundary-decision.md)
+- Phase H 收口记录：[2026-05-19-generator-release-hardening-closeout.md](./plans/2026-05-19-generator-release-hardening-closeout.md)
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
 - 首发计划：[2026-05-12-reference-starter-release-plan.md](./plans/2026-05-12-reference-starter-release-plan.md)
@@ -184,7 +193,7 @@
 - 已完成：基于 `main` 最近 `10` 次 tenant artifact（含 `24889218600 / 24889284909 / 24889342252 / 24889396810 / 24889454355 / 24889506795 / 24889562531 / 24889627339 / 24889689643 / 24889747211`）输出主线级第一版 `10/10` 观察结论；当前 `selectedWindowRuns=10`、`failedRunCount=0`、`systemicBlockerDetected=false`、`qualifiedForNextStep=true`
 - 已新增前期文档草案：[2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-migration-draft.md) 与 [2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md](./plans/2026-04-25-vue-enterprise-preset-tdesign-mapping-checklist.md)，用于在当前 `Phase 6B` runbook 收尾后评估 `Arco -> TDesign` 迁移窗口
 - 已推进：`packages/ui-enterprise-vue` 与 `apps/example-vue` 已完成当前 POC 范围内的 `TDesign Vue Next` 收口，`ElyShell / ElyTable / ElyQueryBar / ElyForm / ElyCrudWorkspace / ElyPreviewSkeleton` 已不再依赖 `Arco` runtime；示例页默认语言已切到 `zh-CN`，并保留 `en-US` 回退
-- 已完成：`2026-05-12` 首个参考发行版本地发布门槛复验已通过；`check`、`build:vue`、`server:image:verify`、`e2e:smoke:full`、`e2e:tenant:full` 与 `e2e:generator:cli` 均已完成当前候选工作区复验；当前 `Phase G` 额外把真实 workspace 的 `e2e:generator:studio` 固定为主线回归入口，并以 `e2e:generator:browser` 补真实路由浏览器 smoke，正式 PR / tag 前需在最终提交后重新锁定 commit
+- 已完成：`2026-05-12` 首个参考发行版本地发布门槛复验已通过；`check`、`build:vue`、`server:image:verify`、`e2e:smoke:full`、`e2e:tenant:full` 与 `e2e:generator:cli` 均已完成当前候选工作区复验；`Phase G` 已额外把真实 workspace 的 `e2e:generator:studio` 固定为主线回归入口，并以 `e2e:generator:browser` 补真实路由浏览器 smoke；`Phase H` 继续消费这些入口做可发布闭环硬化，正式 PR / tag 前需在最终提交后重新锁定 commit
 - 已完成阶段出口复验：`2026-04-25` 本地 `bun run check` 与 `bun run e2e:tenant:full` 通过，可将 `Phase 6B` 作为已归档阶段处理
 - 归档后残留运营收尾：按迁移/发布 runbook 收敛生产发布演练、平台级发布命令与回滚责任边界，不再把“主线 tenant artifact 缺失”作为阻断项
 - 已完成最小执行层自动化：新增 `tenant:release:report`、`tenant:release:gate`、`tenant:release:finalize`，把既有 tenant migration/release runbook 收敛为 rehearsal report / gate / finalize 三段式入口；这些脚本仅服务发布演练，不代表生产平台命令、owner 边界或发布责任已变更
@@ -340,9 +349,9 @@
 
 ## 下一步
 
-1. 第一顺序：完成 `Phase G` 出口锁定，复跑并归档真实 `generator preview` workspace 的 happy path、apply 阻断路径与证据回看验证。
-2. 第二顺序：按下阶段候选计划推进 `Generator 可发布闭环硬化`，优先把 `cli / matrix / studio / browser` 的 generator 验证收成统一 reports index / gate 证据。
-3. 第三顺序：保持 `demohub` 作为后续 Generator 页面试稿 owner；新交互先在原型里验证，再迁回正式页。
-4. 第四顺序：对导入链路只做边界判断，不把导入 DSL、导入平台接口或第二套 starter 拉进 `Phase G` 或候选硬化阶段完成定义。
+1. 第一顺序：提交前重新复跑 `Phase H` 关键验证并锁定最终 commit，尤其是 `check`、`build:vue`、四类 generator e2e 与 reports index / gate。
+2. 第二顺序：保持 `demohub` 作为后续 Generator 页面试稿 owner；新交互先在原型里验证，再迁回正式页。
+3. 第三顺序：按 Phase H 导入边界决策保留后续候选输入层 POC，不把导入 DSL、导入平台接口、批量落库或第二套 starter 拉进已完成事实。
+4. 第四顺序：若后续继续扩大 generator 输入来源，先验证 `ModuleSchema` / 简化 schema 输入层契约，再决定是否进入正式 workspace。
 5. 第五顺序：`generator / frontend` 只做必要延伸，不回到 example-vue 手写标准 CRUD，也不重开一轮页面级 step bar 或共享运行时抽象。
-6. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、第二套消息中心模型，以及任何新的前端 shared owner。
+6. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、正式 migration 自动化、第二套消息中心模型，以及任何新的前端 shared owner。

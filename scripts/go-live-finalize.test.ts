@@ -19,7 +19,7 @@ const runFinalizeProcess = async (
   env: Record<string, string | undefined>,
   paths: { reportPath: string; gatePath: string },
 ) => {
-  const child = Bun.spawn(["bun", "scripts/go-live-finalize.ts"], {
+  const child = Bun.spawn([process.execPath, "scripts/go-live-finalize.ts"], {
     cwd: process.cwd(),
     env: {
       ...process.env,

@@ -1,4 +1,10 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises"
+import {
+  appendFile,
+  mkdir,
+  readFile,
+  readdir,
+  writeFile,
+} from "node:fs/promises"
 import { join } from "node:path"
 
 import {
@@ -40,13 +46,27 @@ const assert = (condition: unknown, message: string) => {
   }
 }
 
+const resolveSummaryPath = () => process.env.GITHUB_STEP_SUMMARY ?? null
+const resolveGitHubOutputPath = () => process.env.GITHUB_OUTPUT ?? null
+
 const resolveInputDir = () =>
   process.env.ELYSIAN_REPORT_INDEX_INPUT_DIR ?? resolveGeneratorReportDir()
+
+export const shouldIndexGeneratorReportFile = (fileName: string) =>
+  fileName.endsWith(".json") &&
+  fileName !== "e2e-generator-reports-index.json" &&
+  fileName !== "e2e-generator-reports-gate.json"
 
 export const resolveReportSource = (
   relativePath: string,
 ): ReportIndexItem["source"] => {
+  const fileName = relativePath.split("/").at(-1) ?? relativePath
+
   if (relativePath.startsWith("matrix/")) {
+    return "matrix"
+  }
+
+  if (fileName === "e2e-generator-matrix-report.json") {
     return "matrix"
   }
 
@@ -54,11 +74,23 @@ export const resolveReportSource = (
     return "cli"
   }
 
+  if (fileName === "e2e-generator-cli-report.json") {
+    return "cli"
+  }
+
   if (relativePath.startsWith("studio/")) {
     return "studio"
   }
 
+  if (fileName === "e2e-generator-studio-report.json") {
+    return "studio"
+  }
+
   if (relativePath.startsWith("browser/")) {
+    return "browser"
+  }
+
+  if (fileName === "e2e-generator-browser-smoke-report.json") {
     return "browser"
   }
 
@@ -113,10 +145,7 @@ const findJsonFilesRecursively = async (
       continue
     }
 
-    if (
-      entry.name.endsWith(".json") &&
-      entry.name !== "e2e-generator-reports-index.json"
-    ) {
+    if (shouldIndexGeneratorReportFile(entry.name)) {
       files.push(entryRelativePath)
     }
   }
@@ -133,6 +162,36 @@ const readParsedReport = async (
 
   return parseReportEnvelope(parsed, relativePath)
 }
+
+export const renderIndexSummaryMarkdown = (index: ReportsIndex) => {
+  const lines = [
+    "### Generator Reports Index",
+    "",
+    `- status: \`${index.overallStatus}\``,
+    `- totalReports: \`${String(index.totalReports)}\``,
+    `- passedReports: \`${String(index.passedReports)}\``,
+    `- failedReports: \`${String(index.failedReports)}\``,
+    `- inputDir: \`${index.inputDir}\``,
+    `- conclusion: ${index.conclusion}`,
+    "",
+    "Failed reports:",
+    ...(index.failedItems.length > 0
+      ? index.failedItems.map(
+          (item) => `- \`${item.source}\`: \`${item.reportPath}\``,
+        )
+      : ["- none"]),
+    "",
+  ]
+
+  return `${lines.join("\n")}\n`
+}
+
+export const buildGitHubOutputLines = (index: ReportsIndex) => [
+  `generator_reports_index_status=${index.overallStatus}`,
+  `generator_reports_index_total_reports=${String(index.totalReports)}`,
+  `generator_reports_index_failed_reports=${String(index.failedReports)}`,
+  `generator_reports_index_failed_sources=${index.failedItems.map((item) => item.source).join(",")}`,
+]
 
 const run = async () => {
   const inputDir = resolveInputDir()
@@ -179,6 +238,24 @@ const run = async () => {
 
   await mkdir(outputDir, { recursive: true })
   await writeFile(outputPath, JSON.stringify(index, null, 2), "utf8")
+
+  const summaryPath = resolveSummaryPath()
+  if (summaryPath) {
+    await appendFile(summaryPath, renderIndexSummaryMarkdown(index), "utf8")
+    console.log(`[e2e-generator-reports-index] summary: ${summaryPath}`)
+  }
+
+  const githubOutputPath = resolveGitHubOutputPath()
+  if (githubOutputPath) {
+    await appendFile(
+      githubOutputPath,
+      `${buildGitHubOutputLines(index).join("\n")}\n`,
+      "utf8",
+    )
+    console.log(
+      `[e2e-generator-reports-index] github-output: ${githubOutputPath}`,
+    )
+  }
 
   console.log(`[e2e-generator-reports-index] report: ${outputPath}`)
   if (failedReports > 0) {

@@ -122,7 +122,7 @@ const createMalformedReportFixture = async (rawContent: string) => {
 }
 
 const runGateProcess = async (reportPath: string, gatePath: string) => {
-  const child = Bun.spawn(["bun", "scripts/go-live-gate.ts"], {
+  const child = Bun.spawn([process.execPath, "scripts/go-live-gate.ts"], {
     cwd: process.cwd(),
     env: {
       ...process.env,

@@ -27,7 +27,7 @@
 - 标准 CRUD 的生成产物当前落在 `src/modules/*`；这些文件属于 generator 输出面，不在示例应用内手工维护，任何修改都应回到 `packages/generator` 模板或 `scripts/generate-standard-crud-surfaces.ts`。
 - shell main / secondary 当前都消费 `src/modules/generated/index.ts` 暴露的生成组件映射；标准 CRUD 的 main/panel 不再保留示例应用本地手写实现。
 - generator preview workspace 当前固定为“新建生成 / 最近结果 / 生成结果”三段结构：起稿首屏只保留“从空白模板开始”和“复制现有模块结构”，`Schema JSON` 退到高级区；它负责真实输入装配、状态展示、主动作组织与证据视图，但不拥有 generator 引擎。
-- generator preview workspace 当前消费 `generator-session` 的结构化证据字段（如 `blockerReasons`、`confirmationEvidence`、`recoveryStatus`、`applyEvidence`、`driftStatus`），并负责把这些运行时事实翻译成用户动作语义；不要在首屏主文案里直接暴露 `session / step / manual-schema-json / human boundary` 等内部词。
+- generator preview workspace 当前消费 `generator-session` 的结构化证据字段（如 `blockerReasons`、`confirmationEvidence`、`recoveryStatus`、`applyEvidence`、`driftStatus`），并负责把这些运行时事实翻译成用户动作语义；confirmation / apply 的 report path、snapshot path、manifest path、request id、recovery status 与 checklist count 应作为可回放事实展示，不要在首屏主文案里直接暴露 `session / step / manual-schema-json / human boundary` 等内部词。
 - `bun run e2e:generator:browser` 只验证本模块真实路由和 DOM 的浏览器信心层，API 响应仍复用 `generator-session` DTO mock；该入口不得演变成第二套 server owner、generator owner 或通用浏览器 E2E 平台。
 - `demohub` workspace 只承载本地页面原型与交互试稿，用来先验证信息架构、表单主流程和反馈文案；它不接真实接口、不改真实模块、不替代正式 workspace owner。
 - 任何面向用户流程的页面优化，默认先落到 `demohub` 验证，再迁回真实 workspace；当前 `generator preview` 的起稿、结果判断、apply 前确认三段主流程原型都以 `demohub` 为试稿 owner，但真实链路验收以正式 workspace 为准。

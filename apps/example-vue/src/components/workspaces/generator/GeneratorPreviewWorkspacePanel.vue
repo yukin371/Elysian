@@ -7,7 +7,10 @@ import GeneratorPreviewWorkspaceSessionPanel from "./GeneratorPreviewWorkspaceSe
 import GeneratorPreviewWorkspaceSourcePanel from "./GeneratorPreviewWorkspaceSourcePanel.vue"
 import GeneratorPreviewWorkspaceSqlHandoffPanel from "./GeneratorPreviewWorkspaceSqlHandoffPanel.vue"
 import GeneratorPreviewWorkspaceSummaryPanel from "./GeneratorPreviewWorkspaceSummaryPanel.vue"
-import { resolveGeneratorPreviewConfirmationEvidenceSummary } from "./generator-preview-confirmation-evidence"
+import {
+  resolveGeneratorPreviewConfirmationEvidenceFacts,
+  resolveGeneratorPreviewConfirmationEvidenceSummary,
+} from "./generator-preview-confirmation-evidence"
 import { resolveGeneratorPreviewFrontendImpact } from "./generator-preview-frontend-impact"
 import { joinGeneratorPreviewSuggestedCommands } from "./generator-preview-handoff"
 import { resolveGeneratorPreviewRecoveryNote } from "./generator-preview-recovery-note"
@@ -149,6 +152,13 @@ const confirmationEvidenceSummary = computed(() => {
     props.session.confirmationEvidence,
   )
 })
+
+const confirmationEvidenceFacts = computed(() =>
+  resolveGeneratorPreviewConfirmationEvidenceFacts(
+    props.t,
+    props.session?.confirmationEvidence ?? null,
+  ),
+)
 
 const sqlProposalStatusLabel = computed(() =>
   props.sqlProposalHandoff
@@ -331,6 +341,7 @@ onUnmounted(() => document.removeEventListener("keydown", handleKeydown))
         :session-confirmed-by-label="sessionConfirmedByLabel"
         :session-confirmation-note="sessionConfirmationNote"
         :confirmation-evidence-summary="confirmationEvidenceSummary"
+        :confirmation-evidence-facts="confirmationEvidenceFacts"
       />
 
       <GeneratorPreviewWorkspaceSqlHandoffPanel

@@ -2,6 +2,10 @@ import { computed, ref, watch } from "vue"
 
 import { shouldSelectGeneratorPreviewFile } from "../../../lib/generator-preview-workspace"
 import {
+  buildGeneratorResultRecoverySteps,
+  buildGeneratorStatusFacts,
+} from "./generator-preview-main-state-facts"
+import {
   clearGeneratorPreviewReviewDraft,
   loadGeneratorPreviewReviewDraft,
   persistGeneratorPreviewReviewDraft,
@@ -59,11 +63,6 @@ export interface GeneratorPreviewWorkspaceMainProps {
   reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
   hasBlockingConflicts: boolean
-}
-
-interface GeneratorDraftSummaryFact {
-  label: string
-  value: string
 }
 
 interface GeneratorOperationProgressMessage {
@@ -278,7 +277,7 @@ export const useGeneratorPreviewWorkspaceMainState = (
       value: String(draftFieldCount.value),
     },
   ])
-  const draftSummaryFacts = computed<GeneratorDraftSummaryFact[]>(() => [
+  const draftSummaryFacts = computed(() => [
     {
       label: props.t("app.generatorPreview.startModeLabel"),
       value:
@@ -299,32 +298,20 @@ export const useGeneratorPreviewWorkspaceMainState = (
       value: selectedConflictStrategyLabel.value || "-",
     },
   ])
-  const statusFacts = computed(() => [
-    {
-      label: props.t("app.generatorPreview.filter.schemaLabel"),
-      value: props.selectedSchemaName || draftModuleName.value.trim() || "-",
-    },
-    {
-      label: props.t("app.generatorPreview.meta.frontendTarget"),
-      value: selectedFrontendTargetLabel.value,
-    },
-    {
-      label: props.t("app.generatorPreview.meta.status"),
-      value: currentStatusLabel.value,
-    },
-    {
-      label: props.t("app.generatorPreview.statsHint"),
-      value: String(previewArtifactCount.value),
-    },
-    {
-      label: props.t("app.generatorPreview.filter.conflictLabel"),
-      value: selectedConflictStrategyLabel.value || "-",
-    },
-    {
-      label: props.t("app.generatorPreview.meta.targetPreset"),
-      value: "staging",
-    },
-  ])
+  const statusFacts = computed(() =>
+    buildGeneratorStatusFacts({
+      applyEvidence: props.applyEvidence,
+      currentStatusLabel: currentStatusLabel.value,
+      draftModuleName: draftModuleName.value.trim(),
+      driftStatus: props.driftStatus,
+      previewArtifactCount: previewArtifactCount.value,
+      recoveryStatus: props.recoveryStatus,
+      selectedConflictStrategyLabel: selectedConflictStrategyLabel.value,
+      selectedFrontendTargetLabel: selectedFrontendTargetLabel.value,
+      selectedSchemaName: props.selectedSchemaName,
+      t: props.t,
+    }),
+  )
   const confirmationChecklist = computed(() => {
     if (!showConfirmAction.value && !showApplyAction.value) {
       return []
@@ -510,47 +497,17 @@ export const useGeneratorPreviewWorkspaceMainState = (
 
     return Array.from(steps)
   })
-  const resultErrorRecoverySteps = computed(() => {
-    if (props.errorMessage.trim().length === 0 || !hasCurrentResult.value) {
-      return []
-    }
-
-    const steps = new Set<string>()
-    const normalizedError = props.errorMessage.toLowerCase()
-
-    if (
-      normalizedError.includes("stale") ||
-      normalizedError.includes("drift") ||
-      normalizedError.includes("apply conflict")
-    ) {
-      steps.add(props.t("app.generatorPreview.resultRecoveryStep.refreshDrift"))
-    }
-
-    if (
-      props.hasBlockingConflicts ||
-      normalizedError.includes("blocking conflict") ||
-      normalizedError.includes("cannot be applied directly")
-    ) {
-      steps.add(
-        props.t("app.generatorPreview.resultRecoveryStep.reviewBlockedFiles"),
-      )
-    }
-
-    if (
-      props.currentStep === "apply" ||
-      normalizedError.includes("apply") ||
-      normalizedError.includes("confirmation")
-    ) {
-      steps.add(
-        props.t("app.generatorPreview.resultRecoveryStep.recheckChecklist"),
-      )
-    }
-
-    steps.add(props.t("app.generatorPreview.resultRecoveryStep.restoreSession"))
-    steps.add(props.t("app.generatorPreview.resultRecoveryStep.regenerate"))
-
-    return Array.from(steps)
-  })
+  const resultErrorRecoverySteps = computed(() =>
+    buildGeneratorResultRecoverySteps({
+      blockerReasons: props.blockerReasons,
+      currentStep: props.currentStep,
+      driftStatus: props.driftStatus,
+      errorMessage: props.errorMessage,
+      hasBlockingConflicts: props.hasBlockingConflicts,
+      hasCurrentResult: hasCurrentResult.value,
+      t: props.t,
+    }),
+  )
   const blockerReasonMessages = computed(() =>
     props.blockerReasons.map(resolveBlockerReasonMessage),
   )

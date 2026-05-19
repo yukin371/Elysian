@@ -22,6 +22,7 @@ interface GeneratorPreviewWorkspaceSessionPanelProps {
   sessionConfirmedByLabel: string
   sessionConfirmationNote: string | null
   confirmationEvidenceSummary: string | null
+  confirmationEvidenceFacts: Array<{ label: string; value: string }>
 }
 
 const props = defineProps<GeneratorPreviewWorkspaceSessionPanelProps>()
@@ -60,6 +61,39 @@ const recoveryStatusLabel = computed(() => {
     "app.generatorPreview.recoveryStatus.none",
     props.session.recoveryStatus,
   )
+})
+
+const applyEvidenceFacts = computed(() => {
+  if (!props.applyEvidence) {
+    return []
+  }
+
+  return [
+    {
+      label: props.t("app.generatorPreview.meta.appliedAt"),
+      value: props.applyEvidence.appliedAt ?? "-",
+    },
+    {
+      label: props.t("app.generatorPreview.meta.actor"),
+      value:
+        props.applyEvidence.actorDisplayName ??
+        props.applyEvidence.actorUsername ??
+        props.applyEvidence.actorUserId ??
+        "-",
+    },
+    {
+      label: props.t("app.generatorPreview.meta.requestId"),
+      value: props.applyEvidence.requestId ?? "-",
+    },
+    {
+      label: props.t("app.generatorPreview.meta.reportPath"),
+      value: props.applyEvidence.reportPath || "-",
+    },
+    {
+      label: props.t("app.generatorPreview.meta.manifestPath"),
+      value: props.applyEvidence.manifestPath ?? "-",
+    },
+  ]
 })
 </script>
 
@@ -105,10 +139,16 @@ const recoveryStatusLabel = computed(() => {
     <p v-if="reviewEvidence?.comment" class="generator-note">
       {{ reviewEvidence.comment }}
     </p>
-    <div v-if="applyEvidence" class="generator-facts">
-      <span>{{ applyEvidence.appliedAt ?? "-" }}</span>
-      <span>{{ applyEvidence.actorDisplayName ?? applyEvidence.actorUsername ?? applyEvidence.actorUserId ?? "-" }}</span>
-      <span>{{ applyEvidence.requestId ?? "-" }}</span>
+    <div
+      v-if="applyEvidenceFacts.length > 0"
+      class="generator-facts generator-facts-stacked"
+    >
+      <span
+        v-for="fact in applyEvidenceFacts"
+        :key="fact.label"
+      >
+        {{ fact.label }} · {{ fact.value }}
+      </span>
     </div>
     <p
       v-if="sessionConfirmationNote"
@@ -122,6 +162,17 @@ const recoveryStatusLabel = computed(() => {
     >
       {{ confirmationEvidenceSummary }}
     </p>
+    <div
+      v-if="confirmationEvidenceFacts.length > 0"
+      class="generator-facts generator-facts-stacked"
+    >
+      <span
+        v-for="fact in confirmationEvidenceFacts"
+        :key="fact.label"
+      >
+        {{ fact.label }} · {{ fact.value }}
+      </span>
+    </div>
     <p
       v-if="session.recoveryStatus !== 'none'"
       class="enterprise-message enterprise-message-info"
@@ -161,6 +212,11 @@ const recoveryStatusLabel = computed(() => {
   gap: 0.55rem;
   color: #64748b;
   font-size: 0.82rem;
+}
+
+.generator-facts-stacked {
+  display: grid;
+  gap: 0.35rem;
 }
 
 .generator-path {

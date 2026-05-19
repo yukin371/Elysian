@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
 import {
@@ -36,17 +36,21 @@ interface GateReport {
   indexPath: string
   status: "passed" | "failed"
   maxFailedReports: number
+  requiredSources: ReportSource[]
   allowFailedSources: ReportSource[]
   effectiveFailedReports: number
   allFailedItems: ReportIndexItem[]
+  missingRequiredSources: ReportSource[]
   blockedFailedItems: ReportIndexItem[]
   conclusion: string
   recommendedActions: string[]
   appliedPolicy: {
     maxFailedReports: number
+    requiredSources: ReportSource[]
     allowFailedSources: ReportSource[]
     policyInputs: {
       gateMaxFailedReportsRaw: string | null
+      gateRequiredSourcesRaw: string | null
       gateAllowFailedSourcesRaw: string | null
       gateIndexPathRaw: string | null
     }
@@ -62,6 +66,9 @@ const assert = (condition: unknown, message: string) => {
     throw new Error(message)
   }
 }
+
+const resolveSummaryPath = () => process.env.GITHUB_STEP_SUMMARY ?? null
+const resolveGitHubOutputPath = () => process.env.GITHUB_OUTPUT ?? null
 
 export const parseAllowFailedSourcesRaw = (
   raw: string | null | undefined,
@@ -93,6 +100,47 @@ export const parseAllowFailedSourcesRaw = (
 
   return Array.from(sources)
 }
+
+export const parseRequiredSourcesRaw = (
+  raw: string | null | undefined,
+): Exclude<ReportSource, "unknown">[] => {
+  if (!raw) {
+    return []
+  }
+
+  const values = raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+
+  const sources = new Set<Exclude<ReportSource, "unknown">>()
+  for (const value of values) {
+    if (
+      value === "matrix" ||
+      value === "cli" ||
+      value === "studio" ||
+      value === "browser"
+    ) {
+      sources.add(value)
+      continue
+    }
+
+    throw new Error(`Invalid required source: ${value}`)
+  }
+
+  return Array.from(sources)
+}
+
+export const buildMissingRequiredSources = (
+  items: ReportIndexItem[],
+  requiredSources: Exclude<ReportSource, "unknown">[],
+) => {
+  const presentSources = new Set(items.map((item) => item.source))
+  return requiredSources.filter((source) => !presentSources.has(source))
+}
+
+const parseRequiredSources = () =>
+  parseRequiredSourcesRaw(process.env.ELYSIAN_REPORT_GATE_REQUIRED_SOURCES)
 
 const parseAllowFailedSources = () =>
   parseAllowFailedSourcesRaw(
@@ -175,6 +223,41 @@ export const buildRecommendedActions = (
   return Array.from(actions)
 }
 
+export const renderGateSummaryMarkdown = (report: GateReport) => {
+  const lines = [
+    "### Generator Reports Gate",
+    "",
+    `- status: \`${report.status}\``,
+    `- effectiveFailedReports: \`${String(report.effectiveFailedReports)}\``,
+    `- maxFailedReports: \`${String(report.maxFailedReports)}\``,
+    `- requiredSources: \`${report.requiredSources.join(", ") || "none"}\``,
+    `- missingRequiredSources: \`${report.missingRequiredSources.join(", ") || "none"}\``,
+    `- blockedFailedItems: \`${String(report.blockedFailedItems.length)}\``,
+    `- indexPath: \`${report.indexPath}\``,
+    `- conclusion: ${report.conclusion}`,
+    "",
+    "Failed sources:",
+    ...(report.blockedFailedItems.length > 0
+      ? report.blockedFailedItems.map(
+          (item) => `- \`${item.source}\`: \`${item.reportPath}\``,
+        )
+      : ["- none"]),
+    "",
+    "Recommended actions:",
+    ...report.recommendedActions.map((action) => `- ${action}`),
+    "",
+  ]
+
+  return `${lines.join("\n")}\n`
+}
+
+export const buildGitHubOutputLines = (report: GateReport) => [
+  `generator_gate_status=${report.status}`,
+  `generator_gate_effective_failed_reports=${String(report.effectiveFailedReports)}`,
+  `generator_gate_missing_required_sources=${report.missingRequiredSources.join(",")}`,
+  `generator_gate_blocked_failed_items=${String(report.blockedFailedItems.length)}`,
+]
+
 export const validateReportsIndex = (index: ReportsIndex) => {
   assert(Array.isArray(index.items), "Invalid reports index: items is missing")
   assert(
@@ -221,46 +304,63 @@ export const validateReportsIndex = (index: ReportsIndex) => {
 export const run = async () => {
   const gateMaxFailedReportsRaw =
     process.env.ELYSIAN_REPORT_GATE_MAX_FAILED_REPORTS ?? null
+  const gateRequiredSourcesRaw =
+    process.env.ELYSIAN_REPORT_GATE_REQUIRED_SOURCES ?? null
   const gateAllowFailedSourcesRaw =
     process.env.ELYSIAN_REPORT_GATE_ALLOW_FAILED_SOURCES ?? null
   const gateIndexPathRaw = process.env.ELYSIAN_REPORT_GATE_INDEX_PATH ?? null
   const indexPath = resolveIndexPath()
+  const requiredSources = parseRequiredSources()
   const allowFailedSources = parseAllowFailedSources()
   const maxFailedReports = resolveMaxFailedReports()
   const raw = await readFile(indexPath, "utf8")
   const index = JSON.parse(raw) as ReportsIndex
 
   validateReportsIndex(index)
+  const missingRequiredSources = buildMissingRequiredSources(
+    index.items,
+    requiredSources,
+  )
   const allFailedItems = index.items.filter((item) => item.status === "failed")
   const blockedFailedItems = allFailedItems.filter(
     (item) => !allowFailedSources.includes(item.source),
   )
-  const effectiveFailedReports = blockedFailedItems.length
+  const effectiveFailedReports =
+    blockedFailedItems.length + missingRequiredSources.length
   const status: "passed" | "failed" =
     effectiveFailedReports <= maxFailedReports ? "passed" : "failed"
   const conclusion =
     status === "passed"
       ? "Generator reports gate passed."
-      : `Generator reports gate failed: effectiveFailedReports=${effectiveFailedReports}, maxFailedReports=${maxFailedReports}.`
+      : `Generator reports gate failed: effectiveFailedReports=${effectiveFailedReports}, maxFailedReports=${maxFailedReports}, missingRequiredSources=${missingRequiredSources.length}.`
   const recommendedActions = buildRecommendedActions(status, blockedFailedItems)
+  if (missingRequiredSources.length > 0) {
+    recommendedActions.unshift(
+      `Required generator report source(s) missing: ${missingRequiredSources.join(", ")}. Ensure the corresponding jobs run and the artifacts are downloaded before gating.`,
+    )
+  }
 
-  const reportPath = await writeGateReport({
+  const report = {
     gitSha: resolveGeneratorReportGitSha(),
     generatedAt: new Date().toISOString(),
     indexPath,
     status,
     maxFailedReports,
+    requiredSources,
     allowFailedSources,
     effectiveFailedReports,
     allFailedItems,
+    missingRequiredSources,
     blockedFailedItems,
     conclusion,
     recommendedActions,
     appliedPolicy: {
       maxFailedReports,
+      requiredSources,
       allowFailedSources,
       policyInputs: {
         gateMaxFailedReportsRaw,
+        gateRequiredSourcesRaw,
         gateAllowFailedSourcesRaw,
         gateIndexPathRaw,
       },
@@ -269,7 +369,27 @@ export const run = async () => {
         githubRef: process.env.GITHUB_REF ?? null,
       },
     },
-  })
+  } satisfies GateReport
+
+  const reportPath = await writeGateReport(report)
+
+  const summaryPath = resolveSummaryPath()
+  if (summaryPath) {
+    await appendFile(summaryPath, renderGateSummaryMarkdown(report), "utf8")
+    console.log(`[e2e-generator-reports-gate] summary: ${summaryPath}`)
+  }
+
+  const githubOutputPath = resolveGitHubOutputPath()
+  if (githubOutputPath) {
+    await appendFile(
+      githubOutputPath,
+      `${buildGitHubOutputLines(report).join("\n")}\n`,
+      "utf8",
+    )
+    console.log(
+      `[e2e-generator-reports-gate] github-output: ${githubOutputPath}`,
+    )
+  }
 
   console.log(`[e2e-generator-reports-gate] report: ${reportPath}`)
   if (status === "passed") {
@@ -277,6 +397,9 @@ export const run = async () => {
     return
   }
 
+  for (const source of missingRequiredSources) {
+    console.error(`[gate] missing-required-source=${source}`)
+  }
   for (const item of blockedFailedItems) {
     console.error(
       `[gate] fail source=${item.source} reportPath=${item.reportPath}`,

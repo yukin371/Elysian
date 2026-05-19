@@ -114,9 +114,10 @@
 - 已新增 `e2e:generator:cli`，用于 generator CLI 真实执行路径冲突策略回归。
 - 已新增 `e2e:generator:studio`，用于真实 `generator preview` workspace 的 guided happy path / blocked apply 验收。
 - 已新增 `e2e:generator:browser`，用于在真实 Vue 路由中执行 `generator preview` 浏览器级 smoke，覆盖首屏结构、起稿输入、review / confirm / apply 主动作与阻断证据可见性；该入口只作为 Phase G-B 信心补强，不扩成通用浏览器 E2E 平台。
-- 已新增 `e2e:generator:reports:index`，用于汇总 generator 回归报告索引；当前索引来源包含 `matrix`、`cli`、`studio` 与 `browser`。
-- 已新增 `e2e:generator:reports:gate`，用于按策略执行 generator 回归门禁判定。
-- `scripts/e2e-generator-reports-gate.test.ts` 已覆盖来源白名单解析、推荐动作分流与索引一致性校验，降低门禁误配置风险。
+- 已新增 `e2e:generator:reports:index`，用于汇总 generator 回归报告索引；当前索引来源包含 `matrix`、`cli`、`studio` 与 `browser`，并可识别 CI artifact 子目录与本地扁平报告文件两种形态。
+- 已新增 `e2e:generator:reports:gate`，用于按策略执行 generator 回归门禁判定；CI 当前要求 `matrix / cli / studio / browser` 四类 report source 同时存在，避免 browser 或其他 generator artifact 缺失时误判通过。
+- `scripts/e2e-generator-reports-index.ts` 与 `scripts/e2e-generator-reports-gate.ts` 现已支持输出 GitHub Step Summary 与 `GITHUB_OUTPUT`，便于 CI 页面直接判读 generator reports index / gate 结论。
+- `scripts/e2e-generator-reports-gate.test.ts` 已覆盖来源白名单解析、必需来源缺失检测、推荐动作分流与索引一致性校验，降低门禁误配置风险。
 - CI 手动触发（`workflow_dispatch`）可动态配置 gate 参数（失败阈值、允许失败来源）。
 - `e2e:generator:matrix`、`e2e:generator:cli` 与 `e2e:generator:studio` 支持通过 `ELYSIAN_REPORT_DIR` 指定报告输出目录；`e2e:generator:browser` 默认输出到 `.ci-reports/generator-browser-smoke`，也可通过 `ELYSIAN_BROWSER_SMOKE_REPORT_DIR` 覆盖。
 - `packages/schema` 当前已注册 `customer`、`product`、`user`、`role`、`menu`、`department`、`dictionary`、`setting`、`operation-log`、`file` 与 `notification` 十一个模块 schema。

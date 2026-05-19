@@ -27,6 +27,7 @@ const assert = (condition: unknown, message: string) => {
 }
 
 interface StudioScenarioResult {
+  evidence?: Record<string, unknown>
   name: string
   status: "passed" | "failed"
   message?: string
@@ -52,7 +53,7 @@ const createJsonResponse = (payload: unknown, status = 200) =>
     status,
   })
 
-const runHappyPathScenario = async () => {
+const runHappyPathScenario = async (): Promise<Record<string, unknown>> => {
   globalThis.localStorage.clear()
 
   let applyRequestCount = 0
@@ -264,6 +265,13 @@ const runHappyPathScenario = async () => {
     "Expected apply to become available after confirmation.",
   )
 
+  const confirmedSession = workspace.currentSession.value
+
+  assert(
+    confirmedSession,
+    "Expected confirmed session to be available before apply.",
+  )
+
   await workspace.applyPreview()
 
   assert(applyRequestCount === 1, "Expected one apply request in happy path.")
@@ -280,9 +288,29 @@ const runHappyPathScenario = async () => {
     workspace.currentStep.value === "done",
     `Expected done step after apply, got "${workspace.currentStep.value}".`,
   )
+
+  const finalSession = workspace.currentSession.value
+
+  assert(finalSession, "Expected final happy path session to be available.")
+
+  return {
+    applyManifestPath: finalSession.applyEvidence?.manifestPath ?? null,
+    applyReportPath: finalSession.applyEvidence?.reportPath ?? null,
+    applyRequestId: finalSession.applyEvidence?.requestId ?? null,
+    confirmationChecklistCount:
+      confirmedSession.confirmationEvidence?.checklist.length ?? 0,
+    confirmationRecoveryStatus:
+      confirmedSession.confirmationEvidence?.recoveryStatus ?? null,
+    confirmationReportPath:
+      confirmedSession.confirmationEvidence?.reportPath ?? null,
+    confirmationSnapshotPath:
+      confirmedSession.confirmationEvidence?.snapshotPath ?? null,
+    finalStep: workspace.currentStep.value,
+    finalStatus: finalSession.status,
+  }
 }
 
-const runBlockedApplyScenario = async () => {
+const runBlockedApplyScenario = async (): Promise<Record<string, unknown>> => {
   globalThis.localStorage.clear()
 
   let applyRequestCount = 0
@@ -481,16 +509,157 @@ const runBlockedApplyScenario = async () => {
     workspace.canApplyPreview.value === false,
     "Expected blocked apply scenario to disable apply after refresh.",
   )
+
+  return {
+    applyRequestCount,
+    blockerReasons: workspace.currentSession.value?.blockerReasons ?? [],
+    canApply: workspace.canApplyPreview.value,
+    detailRequestCount,
+    driftStatus: workspace.currentSession.value?.driftStatus ?? null,
+    errorMessage: workspace.errorMessage.value,
+    finalStep: workspace.currentStep.value,
+    finalStatus: workspace.currentSession.value?.status ?? null,
+    hasBlockingConflicts:
+      workspace.currentSession.value?.hasBlockingConflicts ?? false,
+  }
+}
+
+const runStaleApplyScenario = async (): Promise<Record<string, unknown>> => {
+  globalThis.localStorage.clear()
+
+  let applyRequestCount = 0
+  let previewRequestCount = 0
+  const blockerReasons = [
+    {
+      code: "blocking-conflicts" as const,
+      message: "Target files drifted since the last preview.",
+      stage: "apply" as const,
+    },
+  ]
+  const driftStatus = "stale"
+
+  globalThis.fetch = (async (input, init) => {
+    const url = String(input)
+    const method = init?.method ?? "GET"
+
+    if (
+      url.endsWith("/studio/generator/sessions/guided-flow-stale") &&
+      method === "GET"
+    ) {
+      return createJsonResponse(
+        createSessionDetail({
+          confirmedAt: "2026-05-09T11:10:00.000Z",
+          id: "guided-flow-stale",
+          status: "ready",
+        }),
+      )
+    }
+
+    if (
+      url.endsWith("/studio/generator/sessions/guided-flow-stale/apply") &&
+      method === "POST"
+    ) {
+      applyRequestCount += 1
+
+      return createJsonResponse(
+        {
+          error: {
+            code: "GENERATOR_SESSION_STALE",
+            details: {
+              blockerReasons,
+              driftStatus,
+            },
+            message: "Generator preview session is stale",
+            status: 409,
+          },
+        },
+        409,
+      )
+    }
+
+    if (url.endsWith("/studio/generator/sessions") && method === "GET") {
+      return createJsonResponse({ items: [] })
+    }
+
+    if (
+      url.endsWith("/studio/generator/sessions/preview") &&
+      method === "POST"
+    ) {
+      previewRequestCount += 1
+
+      return createJsonResponse({
+        diff: createDiffSummary(),
+        report: createReport(),
+        session: createSession({
+          id: "guided-flow-stale-regenerated",
+          status: "pending_review",
+        }),
+        sqlProposal: createSqlProposal(),
+        sqlProposalHandoff: createSqlProposalHandoff(),
+      })
+    }
+
+    return new Response("not found", { status: 404 })
+  }) as typeof fetch
+
+  const { enabled, workspace } = createWorkspace({ enabled: false })
+
+  await workspace.restorePreviewSession("guided-flow-stale")
+  enabled.value = true
+
+  await workspace.applyPreview()
+
+  assert(
+    applyRequestCount === 1,
+    "Expected one apply attempt in stale apply scenario.",
+  )
+  assert(
+    previewRequestCount === 1,
+    "Expected stale apply scenario to regenerate preview once.",
+  )
+  assert(
+    workspace.currentSession.value?.id === "guided-flow-stale-regenerated",
+    `Expected regenerated session after stale apply, got "${workspace.currentSession.value?.id ?? "null"}".`,
+  )
+  assert(
+    workspace.currentSession.value?.status === "pending_review",
+    `Expected regenerated session to be pending_review, got "${workspace.currentSession.value?.status ?? "null"}".`,
+  )
+  assert(
+    workspace.errorMessage.value ===
+      "Current result is stale. Regenerate it before continuing.",
+    `Expected stale drift message, got "${workspace.errorMessage.value}".`,
+  )
+
+  return {
+    applyRequestCount,
+    blockerReasons,
+    canApply: workspace.canApplyPreview.value,
+    driftStatus,
+    errorMessage: workspace.errorMessage.value,
+    finalStep: workspace.currentStep.value,
+    finalStatus: workspace.currentSession.value?.status ?? null,
+    originalSessionId: "guided-flow-stale",
+    previewRequestCount,
+    regeneratedSessionId: workspace.currentSession.value?.id ?? null,
+  }
 }
 
 const run = async (): Promise<StudioScenarioResult[]> => {
   installGeneratorPreviewWorkspaceTestEnv()
   const scenarios: StudioScenarioResult[] = []
 
-  const recordScenario = async (name: string, fn: () => Promise<void>) => {
+  const recordScenario = async (
+    name: string,
+    fn: () => Promise<Record<string, unknown> | undefined>,
+  ) => {
     try {
-      await fn()
-      scenarios.push({ name, status: "passed" })
+      const evidence = await fn()
+      scenarios.push({
+        evidence: evidence ?? undefined,
+        name,
+        status: "passed",
+      })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       scenarios.push({ name, status: "failed", message })
@@ -511,6 +680,8 @@ const run = async (): Promise<StudioScenarioResult[]> => {
           initialWorkspace.currentStep.value === "configure",
           `Expected initial currentStep to be "configure", got "${initialWorkspace.currentStep.value}".`,
         )
+
+        return undefined
       },
     )
 
@@ -521,6 +692,10 @@ const run = async (): Promise<StudioScenarioResult[]> => {
     await recordScenario(
       "guided workspace blocked apply keeps evidence visible",
       runBlockedApplyScenario,
+    )
+    await recordScenario(
+      "guided workspace stale apply regenerates with report evidence",
+      runStaleApplyScenario,
     )
   } finally {
     restoreGeneratorPreviewWorkspaceTestEnv()

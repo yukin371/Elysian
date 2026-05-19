@@ -17,6 +17,7 @@
 | `e2e-generator-browser-smoke-report.json` | generator preview 真实路由浏览器 smoke 报告，失败时同目录保留截图 | `e2e:generator:browser` |
 | `e2e-generator-reports-index.json` | generator 汇总索引 | `e2e:generator:reports:index` |
 | `e2e-generator-reports-gate.json` | generator 门禁结论 | `e2e:generator:reports:gate` |
+| `GITHUB_STEP_SUMMARY` / `GITHUB_OUTPUT`（generator reports） | generator reports index / gate 的页面级结论与 step outputs | `e2e:generator:reports:index` / `e2e:generator:reports:gate` |
 | `p5a-handoff-corpus-report.json` | P5A 语料分类回归结果 | `p5a:handoff:corpus` |
 | `GITHUB_STEP_SUMMARY` / `GITHUB_OUTPUT`（handoff） | P5A 单次 handoff / replay 的页面级结论与 step outputs | `p5a:handoff:report` / `p5a:handoff:replay` |
 | `p5a-schema-handoff-replay-report.json` | P5A 单次人工接管 replay 结果 | `p5a:handoff:replay` |
@@ -33,7 +34,7 @@
 
 - `validate` 失败：先本地执行 `bun run check` 与 `bun run build:vue`
 - smoke gate 失败：先看 `e2e-smoke-reports-index.json` 与 attempt 级 diagnosis
-- generator gate 失败：先看 `e2e-generator-reports-index.json`，按 `source=matrix|cli|studio|browser` 回到对应入口
+- generator gate 失败：先看 `e2e-generator-reports-index.json`，按 `source=matrix|cli|studio|browser` 回到对应入口；若提示 `missing-required-source`，先确认对应 job 的 artifact 是否下载到同一目录
 - generator browser smoke 失败：先看 `e2e-generator-browser-smoke-report.json` 与同目录截图，确认是真实路由渲染、主动作切换还是 blocker evidence 展示回退
 - P5A corpus 失败：先看 `p5a-handoff-corpus-summary.md`，确认 `retry_ai_generation` / `manual_fix_required` 分界是否漂移
 - P5A replay 失败：先看 `p5a-schema-handoff-replay-report.json`，区分是 handoff 仍未通过还是 generator 步骤失败

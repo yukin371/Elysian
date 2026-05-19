@@ -190,6 +190,43 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
     ])
   })
 
+  test("adds drift, recovery, and apply evidence to status facts when present", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        applyEvidence: {
+          actorDisplayName: "Yuki",
+          actorUserId: "user-1",
+          actorUsername: "yuki",
+          appliedAt: "2026-05-18T10:00:00.000Z",
+          manifestPath: "reports/session-1.apply-manifest.json",
+          reportPath: "reports/session-1.json",
+          requestId: "req-1",
+          sessionId: "session-1",
+        },
+        driftStatus: "apply-conflict",
+        recoveryStatus: "rebuilt-from-missing",
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.statusFacts.value).toContainEqual({
+      label: "app.generatorPreview.meta.driftStatus",
+      value: "app.generatorPreview.driftStatus.applyConflict",
+    })
+    expect(state.statusFacts.value).toContainEqual({
+      label: "app.generatorPreview.meta.recoveryStatus",
+      value: "app.generatorPreview.recoveryStatus.rebuiltFromMissing",
+    })
+    expect(state.statusFacts.value).toContainEqual({
+      label: "app.generatorPreview.meta.appliedAt",
+      value: "2026-05-18T10:00:00.000Z",
+    })
+    expect(state.statusFacts.value).toContainEqual({
+      label: "app.generatorPreview.meta.manifestPath",
+      value: "reports/session-1.apply-manifest.json",
+    })
+  })
+
   test("exposes the first blocked file for quick recovery", () => {
     const state = useGeneratorPreviewWorkspaceMainState(
       createProps({
@@ -333,6 +370,27 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
     ])
   })
 
+  test("builds result recovery steps from drift status without relying on error text", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        driftStatus: "stale",
+        files: [
+          createFileCard({
+            path: "apps/example-vue/src/routes/supplier/index.ts",
+          }),
+        ],
+        sessionStatus: "ready",
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.resultErrorRecoverySteps.value).toEqual([
+      "app.generatorPreview.resultRecoveryStep.refreshDrift",
+      "app.generatorPreview.resultRecoveryStep.restoreSession",
+      "app.generatorPreview.resultRecoveryStep.regenerate",
+    ])
+  })
+
   test("prioritizes blocked-file recovery when current result still has blocking conflicts", () => {
     const state = useGeneratorPreviewWorkspaceMainState(
       createProps({
@@ -356,6 +414,51 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
     expect(state.resultErrorRecoverySteps.value).toEqual([
       "app.generatorPreview.resultRecoveryStep.reviewBlockedFiles",
       "app.generatorPreview.resultRecoveryStep.recheckChecklist",
+      "app.generatorPreview.resultRecoveryStep.restoreSession",
+      "app.generatorPreview.resultRecoveryStep.regenerate",
+    ])
+  })
+
+  test("builds recovery steps from structured blocker reasons without error text", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        blockerReasons: [
+          {
+            code: "confirmation-required",
+            message: "Confirm the SQL handoff checklist before apply.",
+            stage: "confirm",
+          },
+        ],
+        currentStep: "confirm",
+        sessionStatus: "ready",
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.resultErrorRecoverySteps.value).toEqual([
+      "app.generatorPreview.resultRecoveryStep.recheckChecklist",
+      "app.generatorPreview.resultRecoveryStep.restoreSession",
+      "app.generatorPreview.resultRecoveryStep.regenerate",
+    ])
+  })
+
+  test("points blocker-only apply conflicts to blocked file review", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        blockerReasons: [
+          {
+            code: "blocking-conflicts",
+            message: "Generated files cannot be applied directly.",
+            stage: "apply",
+          },
+        ],
+        sessionStatus: "ready",
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.resultErrorRecoverySteps.value).toEqual([
+      "app.generatorPreview.resultRecoveryStep.reviewBlockedFiles",
       "app.generatorPreview.resultRecoveryStep.restoreSession",
       "app.generatorPreview.resultRecoveryStep.regenerate",
     ])

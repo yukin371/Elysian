@@ -333,6 +333,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.recoveryStatus.none": "无需恢复",
   "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt": "快照损坏后已重建",
   "app.generatorPreview.recoveryStatus.rebuiltFromMissing": "快照缺失后已重建",
+  "app.generatorPreview.driftStatus.clean": "目标文件未发现漂移",
   "app.generatorPreview.driftStatus.stale":
     "当前结果可能已经过期，请先重新生成，再继续审核或 apply。",
   "app.generatorPreview.driftStatus.applyConflict":
@@ -463,6 +464,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.exists": "目标文件已存在",
   "app.generatorPreview.meta.managed": "目标文件受管",
   "app.generatorPreview.meta.reportPath": "预览报告路径",
+  "app.generatorPreview.meta.snapshotPath": "快照路径",
   "app.generatorPreview.meta.outputDir": "输出目录",
   "app.generatorPreview.meta.targetPreset": "目标位置",
   "app.generatorPreview.meta.addedLines": "新增行",
@@ -510,6 +512,10 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.appliedAt": "应用时间",
   "app.generatorPreview.meta.manifestPath": "Manifest 路径",
   "app.generatorPreview.meta.requestId": "请求 ID",
+  "app.generatorPreview.meta.driftStatus": "漂移状态",
+  "app.generatorPreview.meta.recoveryStatus": "恢复状态",
+  "app.generatorPreview.meta.confirmationChecklistCount": "确认清单数",
+  "app.generatorPreview.meta.archivedSnapshotPath": "归档快照路径",
   "app.generatorPreview.sourceType.registeredSchema": "现有模块结构",
   "app.generatorPreview.sourceType.manualSchemaJson": "Schema JSON",
   "app.generatorPreview.inputTitle": "新建生成",

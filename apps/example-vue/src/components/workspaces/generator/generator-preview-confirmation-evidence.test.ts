@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test"
 
-import { resolveGeneratorPreviewConfirmationEvidenceSummary } from "./generator-preview-confirmation-evidence"
+import {
+  resolveGeneratorPreviewConfirmationEvidenceFacts,
+  resolveGeneratorPreviewConfirmationEvidenceSummary,
+} from "./generator-preview-confirmation-evidence"
 
 const t = (key: string, params?: Record<string, unknown>) =>
   key === "app.generatorPreview.message.confirmationEvidenceCaptured" &&
@@ -68,5 +71,55 @@ describe("resolveGeneratorPreviewConfirmationEvidenceSummary", () => {
     ).toBe(
       "detailed:2:generated/reports/customer.preview.json:generated/reports/customer.migration-proposal.json:rebuilt-from-missing",
     )
+  })
+})
+
+describe("resolveGeneratorPreviewConfirmationEvidenceFacts", () => {
+  test("returns an empty fact list when confirmation evidence is missing", () => {
+    expect(resolveGeneratorPreviewConfirmationEvidenceFacts(t, null)).toEqual(
+      [],
+    )
+  })
+
+  test("returns replayable confirmation evidence facts", () => {
+    expect(
+      resolveGeneratorPreviewConfirmationEvidenceFacts(t, {
+        actorDisplayName: null,
+        actorUserId: null,
+        actorUsername: null,
+        archivedSnapshotPath: "generated/reports/customer.archived.json",
+        checklist: ["Review the SQL draft.", "Confirm the snapshot path."],
+        confirmedAt: "2026-05-02T12:15:00.000Z",
+        recoveryStatus: "rebuilt-from-missing",
+        reportPath: "generated/reports/customer.preview.json",
+        sessionId: "session-1",
+        snapshotPath: "generated/reports/customer.migration-proposal.json",
+      }),
+    ).toEqual([
+      {
+        label: "app.generatorPreview.meta.confirmedAt",
+        value: "2026-05-02T12:15:00.000Z",
+      },
+      {
+        label: "app.generatorPreview.meta.reportPath",
+        value: "generated/reports/customer.preview.json",
+      },
+      {
+        label: "app.generatorPreview.meta.snapshotPath",
+        value: "generated/reports/customer.migration-proposal.json",
+      },
+      {
+        label: "app.generatorPreview.meta.recoveryStatus",
+        value: "app.generatorPreview.recoveryStatus.rebuiltFromMissing",
+      },
+      {
+        label: "app.generatorPreview.meta.confirmationChecklistCount",
+        value: "2",
+      },
+      {
+        label: "app.generatorPreview.meta.archivedSnapshotPath",
+        value: "generated/reports/customer.archived.json",
+      },
+    ])
   })
 })

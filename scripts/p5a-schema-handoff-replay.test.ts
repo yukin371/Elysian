@@ -67,7 +67,7 @@ describe("p5a-schema-handoff-replay", () => {
 
       const invalidRun = Bun.spawn(
         [
-          "bun",
+          process.execPath,
           "scripts/p5a-schema-handoff-report.ts",
           "--input-file",
           inputPath,
@@ -93,7 +93,7 @@ describe("p5a-schema-handoff-replay", () => {
 
       const replayRun = Bun.spawn(
         [
-          "bun",
+          process.execPath,
           "scripts/p5a-schema-handoff-replay.ts",
           "--input-file",
           inputPath,
