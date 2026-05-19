@@ -23,6 +23,14 @@ export {
   type RenderedFrontendArtifactModule,
 } from "./templates"
 export {
+  buildModuleHandoffManifest,
+  MODULE_HANDOFF_MANIFEST_NON_GOALS,
+  type ModuleHandoffCanonicalOwner,
+  type ModuleHandoffManifest,
+  type ModuleHandoffManualStep,
+  type ModuleHandoffManualStepId,
+} from "./module-handoff-manifest"
+export {
   getRegisteredSchema,
   listRegisteredSchemas,
   listRegisteredSchemaNames,

@@ -47,7 +47,10 @@ const WORKSPACE_ROOT = resolve(import.meta.dir, "..", "..", "..")
 const resolveCliPath = (targetPath: string) =>
   resolve(WORKSPACE_ROOT, targetPath)
 
-const printModuleIntegrationChecklist = (schemaName: string) => {
+const printModuleIntegrationChecklist = (
+  schemaName: string,
+  frontendTarget: "vue" | "react",
+) => {
   console.log("")
   console.log("Integration Checklist:")
   console.log(
@@ -66,6 +69,9 @@ const printModuleIntegrationChecklist = (schemaName: string) => {
   )
   console.log(
     "  7. Register the frontend workspace in apps/example-vue/src/modules/",
+  )
+  console.log(
+    `  Handoff manifest: .elysian-generator/${schemaName}.${frontendTarget}.module-handoff.json`,
   )
   console.log(
     "  See docs/plans/2026-05-09-generator-module-apply-path-plan.md for the full handoff checklist.",
@@ -158,7 +164,7 @@ const main = async () => {
       console.log(previewReport.sqlPreview.contents)
 
       if (options.targetPreset === "module") {
-        printModuleIntegrationChecklist(schema.name)
+        printModuleIntegrationChecklist(schema.name, options.frontendTarget)
       }
       return
     }
@@ -178,7 +184,7 @@ const main = async () => {
     }
 
     if (options.targetPreset === "module") {
-      printModuleIntegrationChecklist(schema.name)
+      printModuleIntegrationChecklist(schema.name, options.frontendTarget)
     }
   } catch (error) {
     console.error(

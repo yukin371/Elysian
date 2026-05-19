@@ -20,6 +20,7 @@
 - `example-vue/src/modules/*` 所消费的标准 CRUD 前端 surface 生成产物
 - `DatabaseChangePlan` / SQL preview / `*.persistence.ts` 这类 review-only 与 handoff 模板产物
 - `module` target 下的 server 集成桩与人工集成清单
+- `module` target 下的人工接线 handoff manifest；该 manifest 只能记录 pending 人工步骤、canonical owner、验证建议和 non-goals
 
 ## Must Not Own
 
@@ -38,6 +39,7 @@
 - 生成结果必须支持二次维护
 - 再生成必须可预测，不能静默破坏手工代码
 - `module` target 只能补集成桩，不能覆盖已有 `*.module.ts` 手写装配代码
+- `module` target 的 handoff manifest 不是完成证明，不能把人工步骤标记为已完成，也不能自动接线 persistence / server / frontend 正式 owner
 - 模板输出必须和当前架构 owner 保持一致，不能把 persistence / server / frontend 边界重新搅乱
 - 标准 CRUD 前端 surface 产物必须可被 `apps/example-vue` 直接提交、校验并消费，不能只停留在预览态
 - 当前生成输入只收两类边界：`registered-schema` 和 `manual-schema-json`；其中 `manual-schema-json` 可为完整 `ModuleSchema` 或 schema owner 内部支持的 simplified 输入，但进入 generator 前必须先展开成标准 `ModuleSchema`

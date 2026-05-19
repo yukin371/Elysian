@@ -70,6 +70,44 @@ describe("writeModuleFiles", () => {
     expect(manifestFile).toContain('"targetPreset": "custom"')
   })
 
+  it("writes a pending module handoff manifest for module target", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "elysian-generator-"))
+
+    await writeModuleFiles(customerModuleSchema, {
+      outputDir: directory,
+      frontendTarget: "vue",
+      targetPreset: "module",
+    })
+
+    const handoffManifestRaw = await readFile(
+      join(directory, ".elysian-generator/customer.vue.module-handoff.json"),
+      "utf8",
+    )
+    const handoffManifest = JSON.parse(handoffManifestRaw) as {
+      generationManifestPath: string
+      manualSteps: Array<{ status: string; canonicalOwner: string }>
+      nonGoals: string[]
+      targetPreset: string
+    }
+
+    expect(handoffManifest.targetPreset).toBe("module")
+    expect(handoffManifest.generationManifestPath).toContain(
+      ".elysian-generator",
+    )
+    expect(handoffManifest.manualSteps.length).toBeGreaterThan(0)
+    expect(
+      handoffManifest.manualSteps.every((step) => step.status === "pending"),
+    ).toBe(true)
+    expect(
+      handoffManifest.manualSteps.some(
+        (step) => step.canonicalOwner === "packages/persistence",
+      ),
+    ).toBe(true)
+    expect(handoffManifest.nonGoals).toContain(
+      "Does not register server compose automatically.",
+    )
+  })
+
   it("writes 8 standard CRUD files with inject-aligned workspace artifacts", async () => {
     const directory = await mkdtemp(join(tmpdir(), "elysian-generator-"))
     const results = await writeModuleFiles(postModuleSchema, {

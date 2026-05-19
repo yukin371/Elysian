@@ -10,6 +10,7 @@ import {
   type RenderedModuleFile,
   renderModuleFiles,
 } from "./core"
+import { buildModuleHandoffManifest } from "./module-handoff-manifest"
 import {
   type GeneratedConflictStrategy,
   type ResolvedGeneratedFileTarget,
@@ -85,6 +86,17 @@ const buildManifestPath = (
     outputDir,
     ".elysian-generator",
     `${schemaName}.${frontendTarget}.json`,
+  )
+
+const buildModuleHandoffManifestPath = (
+  outputDir: string,
+  schemaName: string,
+  frontendTarget: FrontendTarget,
+) =>
+  resolve(
+    outputDir,
+    ".elysian-generator",
+    `${schemaName}.${frontendTarget}.module-handoff.json`,
   )
 
 const RETRYABLE_RENAME_ERROR_CODES = new Set(["EPERM", "EBUSY", "EACCES"])
@@ -207,6 +219,14 @@ const writeManifest = async (
   await writeFileAtomically(manifestPath, JSON.stringify(manifest, null, 2))
 }
 
+const writeModuleHandoffManifest = async (
+  manifestPath: string,
+  manifest: ReturnType<typeof buildModuleHandoffManifest>,
+) => {
+  await mkdir(dirname(manifestPath), { recursive: true })
+  await writeFileAtomically(manifestPath, JSON.stringify(manifest, null, 2))
+}
+
 const buildManifest = (
   schemaName: string,
   frontendTarget: FrontendTarget,
@@ -308,6 +328,21 @@ export const applyGenerationPreviewReport = async (
     ),
   )
 
+  if (report.targetPreset === "module") {
+    await writeModuleHandoffManifest(
+      buildModuleHandoffManifestPath(
+        report.outputDir,
+        report.schemaName,
+        report.frontendTarget,
+      ),
+      buildModuleHandoffManifest({
+        schemaName: report.schemaName,
+        frontendTarget: report.frontendTarget,
+        generationManifestPath: manifestPath,
+      }),
+    )
+  }
+
   return {
     files,
     manifestPath,
@@ -352,6 +387,21 @@ export const writeModuleFiles = async (
         results,
       ),
     )
+
+    if (options.targetPreset === "module") {
+      await writeModuleHandoffManifest(
+        buildModuleHandoffManifestPath(
+          options.outputDir,
+          schema.name,
+          frontendTarget,
+        ),
+        buildModuleHandoffManifest({
+          schemaName: schema.name,
+          frontendTarget,
+          generationManifestPath: manifestPath,
+        }),
+      )
+    }
   }
 
   return results

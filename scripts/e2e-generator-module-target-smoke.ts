@@ -63,6 +63,10 @@ const run = async () => {
     "Expected module target preview to print the integration checklist.",
   )
   assert(
+    previewResult.stdout.includes("customer.vue.module-handoff.json"),
+    "Expected module target preview to mention the handoff manifest path.",
+  )
+  assert(
     previewResult.stdout.includes(
       "apps/server/src/modules/customer/customer.module.ts",
     ),
@@ -102,6 +106,38 @@ const run = async () => {
     assert(
       moduleFile.includes("// TODO:"),
       "Expected module target output to keep TODO markers for manual follow-up.",
+    )
+
+    const handoffManifest = JSON.parse(
+      await readFile(
+        join(outputDir, ".elysian-generator/customer.vue.module-handoff.json"),
+        "utf8",
+      ),
+    ) as {
+      manualSteps: Array<{ status: string; canonicalOwner: string }>
+      nonGoals: string[]
+      targetPreset: string
+    }
+
+    assert(
+      handoffManifest.targetPreset === "module",
+      "Expected handoff manifest to record module target.",
+    )
+    assert(
+      handoffManifest.manualSteps.every((step) => step.status === "pending"),
+      "Expected handoff manifest manual steps to remain pending.",
+    )
+    assert(
+      handoffManifest.manualSteps.some(
+        (step) => step.canonicalOwner === "apps/server",
+      ),
+      "Expected handoff manifest to include server owner steps.",
+    )
+    assert(
+      handoffManifest.nonGoals.includes(
+        "Does not register frontend workspace automatically.",
+      ),
+      "Expected handoff manifest to keep frontend auto-registration as a non-goal.",
     )
 
     const stagingFiles = renderModuleFiles(customerModuleSchema, {

@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-19`（`Phase H` Generator 可发布闭环硬化已完成当前工作区本地收口；正式 PR / tag 前仍需在最终提交后重新锁定 commit）
+更新时间：`2026-05-19`（`Phase H` Generator 可发布闭环硬化已提交；下一轮候选主线切换到 Generator module handoff manifest 边界验证）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -8,7 +8,18 @@
 
 保持 `Phase 2`、`Phase 3`、`Phase 4`、`Phase 6A Round-2`、`Phase 5 / P5A` 与 `Phase 6B` 已归档；`Phase 7 / P7A` 的最小 workflow 闭环已在 `2026-04-26` 完成 `Round-2` 收口，当前按“已完成的能力基线”处理，不继续外扩到 `transfer / delegate`。`v1.0.0` 已完成正式发布口径收口，当前即时优先级不再重复做 go-live 阶段包装，而是把 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator` 继续作为 starter 基线，推进 `Generator` 真实 workspace 的可审查、可确认、可 apply 闭环。
 
-### Current Mainline: Phase H Generator 可发布闭环硬化（本地收口，待提交后锁定）
+### Current Mainline: Generator Module Handoff Manifest 候选计划 🚧
+
+- 已完成前提：`Phase H` 已在当前工作区完成本地收口并提交，提交为 `3622e6a chore(generator): 硬化发布闭环证据与报告门禁`
+- 当前范围：只评估 `--target module` 到正式模块目录的人工接线证据是否需要独立 manifest，不把 module target 扩成一键正式接线、正式 migration 自动化或导入平台能力
+- 当前 owner：`packages/generator` 继续拥有 module target preset、文件计划、写入 manifest、`*.persistence.ts` 交接模板与人工集成清单；`packages/persistence`、`apps/server`、`apps/example-vue` 仍分别拥有正式 schema / migration、runtime 装配与前端 workspace 消费
+- 当前已推进：已定义 `ModuleHandoffManifestV1` 草案，并在 `packages/generator` 内落最小实现；`module` target 写入时会旁挂 `{schema}.{frontend}.module-handoff.json`，CLI checklist 会提示该文件名
+- 当前边界：manifest 只能记录既有 generation manifest 路径、pending 人工步骤、canonical owner、建议验证命令与 non-goals，不能宣称人工步骤已完成
+- 当前不做：不自动修改 `packages/persistence` schema index / migration，不自动修改 server compose，不自动修改 frontend registry，不新增跨层 handoff center
+- Phase H 收口记录：[2026-05-19-generator-release-hardening-closeout.md](./plans/2026-05-19-generator-release-hardening-closeout.md)
+- Module handoff manifest 计划：[2026-05-19-generator-module-handoff-manifest-next-stage-plan.md](./plans/2026-05-19-generator-module-handoff-manifest-next-stage-plan.md)
+
+### Recent Mainline: Phase H Generator 可发布闭环硬化 ✅
 
 - 已完成前提：`v1.0.0` 已作为首个参考发行版正式发布对象收口，starter 的安装、启动、登录、常用模块、生成器接入和 go-live 入口都已有正式交付口径
 - 已完成前提：`Phase G` 已在 `2026-05-19` 完成本地出口复验，`bun run e2e:generator:studio`、`bun run e2e:generator:browser` 与 `bun run build:vue` 均已通过；该结论只代表当前工作区本地复验，正式 PR / tag 前仍需在最终提交后重新锁定 commit
@@ -30,7 +41,6 @@
 - Phase G 实施记录：[2026-05-16-phase-g-generator-true-path-closeout.md](./plans/2026-05-16-phase-g-generator-true-path-closeout.md)
 - Phase H 执行计划：[2026-05-17-generator-release-hardening-next-stage-plan.md](./plans/2026-05-17-generator-release-hardening-next-stage-plan.md)
 - Phase H 导入边界决策：[2026-05-19-generator-import-boundary-decision.md](./plans/2026-05-19-generator-import-boundary-decision.md)
-- Phase H 收口记录：[2026-05-19-generator-release-hardening-closeout.md](./plans/2026-05-19-generator-release-hardening-closeout.md)
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
 - 首发计划：[2026-05-12-reference-starter-release-plan.md](./plans/2026-05-12-reference-starter-release-plan.md)
@@ -349,9 +359,9 @@
 
 ## 下一步
 
-1. 第一顺序：提交前重新复跑 `Phase H` 关键验证并锁定最终 commit，尤其是 `check`、`build:vue`、四类 generator e2e 与 reports index / gate。
-2. 第二顺序：保持 `demohub` 作为后续 Generator 页面试稿 owner；新交互先在原型里验证，再迁回正式页。
-3. 第三顺序：按 Phase H 导入边界决策保留后续候选输入层 POC，不把导入 DSL、导入平台接口、批量落库或第二套 starter 拉进已完成事实。
-4. 第四顺序：若后续继续扩大 generator 输入来源，先验证 `ModuleSchema` / 简化 schema 输入层契约，再决定是否进入正式 workspace。
-5. 第五顺序：`generator / frontend` 只做必要延伸，不回到 example-vue 手写标准 CRUD，也不重开一轮页面级 step bar 或共享运行时抽象。
+1. 第一顺序：按 `Generator Module Handoff Manifest` 计划复核现有 module target smoke、CLI checklist 与生成 manifest 边界。
+2. 第二顺序：补齐 module handoff manifest 的定向测试、module target smoke 与 generator CLI 回归，确认 manifest 不会被误判为人工接线完成证明。
+3. 第三顺序：评估 manifest 是否仅作为附属证据保留，默认不接入 reports gate required source。
+4. 第四顺序：保持 `demohub` 作为后续 Generator 页面试稿 owner；新交互先在原型里验证，再迁回正式页。
+5. 第五顺序：按 Phase H 导入边界决策保留后续候选输入层 POC，不把导入 DSL、导入平台接口、批量落库或第二套 starter 拉进已完成事实。
 6. 当前不进入：通知中心联动、调度器、脚本节点、前端设计器、正式 migration 自动化、第二套消息中心模型，以及任何新的前端 shared owner。
