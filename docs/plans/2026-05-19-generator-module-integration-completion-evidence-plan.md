@@ -109,3 +109,36 @@ interface ModuleIntegrationCompletionEvidence {
 1. 若需要继续，先选一个真实 `--target module` 样例，人工完成接线后再设计 evidence。
 2. 若只是提高 review 体验，优先补 PR 模板或 review checklist，而不是新增脚本。
 3. 若要做脚本，先只读检查文件与命令结果，不写正式 owner 文件。
+
+## Reviewer Checklist
+
+人工确认 `module` 接线完成时，建议至少检查：
+
+- `module-handoff.json` 是否存在，且所有 `manualSteps.status` 仍然是 `pending`。
+- `GenerationManifest` 是否仍然只记录生成文件与冲突策略，没有把人工接线状态伪装成完成状态。
+- `packages/persistence` 是否已经由 owner 自己完成 schema / migration 接入。
+- `apps/server` 的 module compose 和 route registration 是否已经由 owner 自己完成。
+- `apps/example-vue` 的 workspace 接线是否已经通过现有 generated surface 校验。
+- 如果要写 completion evidence，是否能逐项给出文件路径或命令结果，而不是只给结论。
+
+## Completion Evidence Skeleton
+
+```json
+{
+  "version": 1,
+  "generatedAt": "2026-05-19T00:00:00.000Z",
+  "schemaName": "customer",
+  "sourceHandoffManifestPath": ".elysian-generator/customer.vue.module-handoff.json",
+  "completedSteps": [],
+  "openSteps": [
+    "persistence schema review",
+    "server module registration",
+    "frontend workspace verification"
+  ],
+  "nonGoals": [
+    "Does not rewrite generated handoff manifest.",
+    "Does not auto-register server compose.",
+    "Does not auto-register frontend workspace."
+  ]
+}
+```
