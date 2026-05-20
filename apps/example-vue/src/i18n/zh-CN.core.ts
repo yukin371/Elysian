@@ -83,6 +83,8 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.workspace.title": "客户台账",
   "app.workspace.description":
     "表格、动作和查询条件都来自共享的客户页面定义，再通过企业预设进行渲染。",
+  "app.workspace.createButton": "新建客户",
+  "app.workspace.searchPlaceholder": "搜索客户...",
   "app.workspace.emptyTitle": "当前范围内没有客户",
   "app.workspace.emptyDescription": "调整筛选条件，或使用新建入口创建客户。",
   "app.workspace.countLabel":
@@ -228,6 +230,7 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.customer.field.createdAt": "创建时间",
   "app.customer.field.updatedAt": "更新时间",
   "app.customer.action.create": "新建",
+  "app.customer.action.edit": "编辑",
   "app.customer.action.update": "编辑",
   "app.customer.action.delete": "删除",
   "app.customer.query.namePlaceholder": "按名称或 ID 搜索",

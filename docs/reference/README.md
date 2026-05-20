@@ -20,6 +20,7 @@
 - [09-go-live-gate-input-template.md](./09-go-live-gate-input-template.md)
 - [10-feature-review-and-evaluation.md](./10-feature-review-and-evaluation.md)
 - [11-system-capability-assessment.md](./11-system-capability-assessment.md)
+- [12-project-narrative.md](./12-project-narrative.md)
 
 ## 维护规则
 

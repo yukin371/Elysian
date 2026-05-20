@@ -537,7 +537,7 @@ const run = async () => {
 
   try {
     lastStage = "tenant_init_alpha_first"
-    await runCommand("bun", [
+    await runCommand(process.execPath, [
       "run",
       "tenant:init",
       "--",
@@ -555,7 +555,7 @@ const run = async () => {
     }
 
     lastStage = "tenant_init_alpha_second"
-    await runCommand("bun", [
+    await runCommand(process.execPath, [
       "run",
       "tenant:init",
       "--",
@@ -575,7 +575,7 @@ const run = async () => {
     }
 
     lastStage = "tenant_init_beta"
-    await runCommand("bun", [
+    await runCommand(process.execPath, [
       "run",
       "tenant:init",
       "--",
@@ -667,7 +667,7 @@ const run = async () => {
       })
     })
 
-    server = spawn("bun", ["run", "server"], {
+    server = spawn(process.execPath, ["run", "server"], {
       cwd: process.cwd(),
       env: {
         ...process.env,

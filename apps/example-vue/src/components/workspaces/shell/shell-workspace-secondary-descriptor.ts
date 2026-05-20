@@ -173,6 +173,7 @@ export interface ShellWorkspaceSecondarySwitchProps {
   workflowDetailLoading: boolean
   workflowDetailErrorMessage: string
   selectedWorkflowDefinition: Record<string, unknown> | null
+  selectedWorkflowDefinitionId: string | null
   localizeWorkflowStatus: (status: string) => string
   fileModuleReady: boolean
   canViewFiles: boolean
@@ -386,6 +387,8 @@ const customerResolver: ShellWorkspaceSecondaryResolver = (props, emit) => ({
     workspaceStateInjected: true,
   },
   listeners: {
+    "start-edit": () => emit("start-customer-edit"),
+    "request-delete": () => emit("request-customer-delete"),
     "submit-form": (payload: unknown) => emit("submit-customer-form", payload),
     "cancel-form": () => emit("cancel-customer-form"),
   },

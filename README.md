@@ -1,6 +1,14 @@
 # Elysian
 
-以代码生成为核心能力、可发布的中小项目快速开发平台。输入结构化模块规格，一键生成前后端生产级代码骨架，让团队专注于业务实现与上线交付。
+以代码生成为核心能力、面向中小项目交付的快速开发平台。输入结构化模块规格，生成可回收、可审查、可测试的前后端代码骨架，让团队把精力放回业务实现、权限边界和上线交付。
+
+当前仓库已完成首个参考发行版 `v1.0.0` 的发布口径收口：
+
+- 发布对象：`apps/example-vue` + `apps/server` + `packages/persistence` + `packages/generator`
+- 发布说明：[docs/releases/v1.0.0.md](./docs/releases/v1.0.0.md)
+- 默认前端：Vue 3 企业后台参考发行版
+- 默认后端：Elysia + PostgreSQL + Docker 单主机生产基线
+- 当前主线：继续硬化 generator 真实 workspace 的 preview / review / confirm / apply 证据链，不把后续候选能力写成已完成事实
 
 ## 为什么选择 Elysian
 
@@ -9,16 +17,38 @@
 | **结构化生成，不是低代码** | 基于 Schema 驱动生成可回收、可重构、可测试的生产级代码，不是黑盒运行时拖拽 |
 | **前后端契约单一来源** | 一个 `ModuleSchema` 同时驱动后端 CRUD、前端页面、权限点、路由注册和数据库变更 |
 | **AI 辅助，不削弱质量** | AI 生成结构化 Schema（而非自由代码），通过校验网关后进入生成流程，人工兜底始终可用 |
-| **企业能力内建** | RBAC、多租户（PostgreSQL RLS）、数据权限、审计日志、操作日志——不是事后拼接 |
+| **企业能力内建** | RBAC、多租户（PostgreSQL RLS）、数据权限、审计日志、操作日志，不作为事后拼接项 |
 | **前端可插拔** | UI 协议层与预设层分离，首发固定 Vue 参考发行版（TDesign），React 与 uniapp 保留为后续扩展 |
 | **生成闭环可审计** | 预览 → 报告 → staging apply → 回放证据；进入正式模块目录时保留人工确认清单，避免覆盖手写代码 |
 
 ## 首发参考发行版
 
-- 默认参考发行版固定为 `apps/example-vue`
-- 后端与数据库发布路径固定为 `apps/server` + PostgreSQL + Docker
-- `apps/example-uniapp` 与 `packages/frontend-react` 继续作为并行研发轨道，不作为首发门槛
-- 目标不是做“更多示例”，而是做“能直接开新项目的发行版”
+首发不是“更多示例”，而是一个可直接作为新项目起点的参考发行版。
+
+| 范围 | 当前口径 |
+|---|---|
+| 参考前端 | `apps/example-vue`，企业后台 starter 与 generator workspace 验证入口 |
+| 服务端 | `apps/server`，HTTP API、鉴权、模块装配、运行态观测 |
+| 数据库 | `packages/persistence`，PostgreSQL + Drizzle ORM + migration / seed |
+| 生成器 | `packages/generator`，Schema → 代码骨架 / 报告 / staging apply |
+| 暂不首发 | `apps/example-uniapp`、`packages/frontend-react`，保留为并行研发与设计储备 |
+| 非目标 | 自动化生产发布平台、复杂 BPM、低代码 Studio、正式 migration 自动合入 |
+
+## 项目截图
+
+以下截图来自真实 `apps/example-vue` 路由，并复用 `e2e:generator:browser` 的 mock API 路径生成，适合展示当前参考发行版的主体验。
+
+![Generator workspace](./docs/assets/screenshots/generator-workspace.png)
+
+`generator preview` 工作区固定为“新建生成 / 最近结果 / 生成结果”三段结构，让 schema 输入、历史结果和当前复核面保持在同一条主流程里。
+
+![Generator staging apply evidence](./docs/assets/screenshots/generator-staging-apply.png)
+
+生成结果在 review / confirm 之后只 apply 到 staging，并保留 report、manifest、request id 和 apply evidence，避免把生成动作误写成正式模块接线完成。
+
+![Generator blocked apply evidence](./docs/assets/screenshots/generator-blocked-apply.png)
+
+当 apply 被阻断时，页面会保留 blocker evidence 和下一步建议，便于 reviewer 判断是继续复核、重新生成，还是转人工接线。
 
 ## 技术栈
 
@@ -123,35 +153,54 @@ bun --filter @elysian/generator generate --schema-file ./supplier.module-schema.
 
 ### 前置条件
 
-- [Bun](https://bun.sh) >= 1.3
-- PostgreSQL（用于完整 CRUD 体验；不配置时 server 以纯系统模式启动）
+- [Bun](https://bun.sh) >= 1.3.10
+- PostgreSQL（用于完整 CRUD 体验）
+- Docker（用于 `stack:*` 与 server 镜像验证）
 
-### 安装与启动
+### 推荐：容器一键启动（server + db）
 
 ```bash
 # 1. 安装依赖
 bun install
 
 # 2. 复制环境配置
-cp .env.example .env   # Windows PowerShell: Copy-Item .env.example .env
+cp .env.example .env
 
-# 3. 启动服务端
-bun run dev:server
-
-# 4. 启动 Vue 前端（另开终端）
-bun run dev:vue
+# 3. 启动 server + PostgreSQL（会执行 migrate + seed）
+bun run stack:up
 ```
 
-### 容器一键启动（server + db）
+Windows PowerShell:
 
-```bash
-cp .env.example .env
-bun run stack:up    # 自动执行 migrate + seed
+```powershell
+Copy-Item .env.example .env
+bun run stack:up
 ```
 
 服务默认监听：
+
 - API：`http://localhost:3000`
 - PostgreSQL：`localhost:5432`
+
+### 本地双端口开发
+
+```bash
+# 1. 安装依赖
+bun install
+
+# 2. 复制环境配置并填入 DATABASE_URL / ACCESS_TOKEN_SECRET
+cp .env.example .env
+
+# 3. 执行迁移与 seed
+bun run db:migrate
+bun run db:seed
+
+# 4. 启动服务端
+bun run dev:server
+
+# 5. 启动 Vue 前端（另开终端）
+bun run dev:vue
+```
 
 ### 连接数据库
 
@@ -159,10 +208,11 @@ bun run stack:up    # 自动执行 migrate + seed
 
 1. 确保 PostgreSQL 运行中
 2. 在 `.env` 中设置 `DATABASE_URL=postgres://user:pass@localhost:5432/elysian`
-3. 设置 `ACCESS_TOKEN_SECRET`（避免使用缺失 secret 启动鉴权）
-4. 执行迁移：`bun run db:migrate`
-5. 写入种子数据：`bun run db:seed`
-6. 重启 server
+3. 设置 `ACCESS_TOKEN_SECRET`
+4. 若要验证 PostgreSQL RLS 的真实运行态隔离，额外设置 `DATABASE_RUNTIME_URL` 为受限运行角色连接串
+5. 执行迁移：`bun run db:migrate`
+6. 写入种子数据：`bun run db:seed`
+7. 重启 server
 
 默认 seed 创建超管账号 `admin / <ELYSIAN_ADMIN_PASSWORD>`。
 
@@ -204,6 +254,11 @@ packages/
 | `bun run e2e:smoke:full` | E2E 冒烟（含 migrate + seed） |
 | `bun run e2e:tenant:full` | 多租户 E2E（含 migrate + seed） |
 | `bun run server:image:verify` | server 镜像构建 + 本地容器烟测 |
+| `bun run e2e:generator:cli` | generator CLI 真实执行路径回归 |
+| `bun run e2e:generator:studio` | generator workspace guided-flow 回归 |
+| `bun run e2e:generator:browser` | Vue 真实路由 generator browser smoke |
+| `bun run e2e:generator:reports:index` | generator 回归报告索引 |
+| `bun run e2e:generator:reports:gate` | generator 回归报告门禁 |
 | `bun run go-live:report` | 生成 go-live blocker 报告 |
 | `bun run go-live:handoff` | 基于 report 生成预填交接包 |
 | `bun run go-live:gate` | 基于报告输出放行 / 阻断结论 |
@@ -229,6 +284,11 @@ bun run build:vue
 bun run server:image:verify
 bun run e2e:smoke:full
 bun run e2e:tenant:full
+bun run e2e:generator:cli
+bun run e2e:generator:studio
+bun run e2e:generator:browser
+bun run e2e:generator:reports:index
+bun run e2e:generator:reports:gate
 
 # 真实环境 go-live 附加口径
 bun run go-live:report
@@ -241,6 +301,24 @@ bun run go-live:gate
 - `dev -> main` 的仓库发布先走 `check` / `build:vue` 与 [release-checklist.md](./docs/release-checklist.md)。
 - 真实环境上线再追加 `go-live:*`；若需要分发给发布负责人、环境 / DBA owner、应用 owner，先跑 `go-live:handoff` 产出拆分交接包。
 - `tenant:release:*` 仅服务 tenant 演练，不代表正式生产发布命令。
+- `go-live:*` 只汇总已提供的目标环境事实，不替代备份、代理、TLS、值守和上线后 smoke 的人工 owner。
+
+## 发布边界
+
+`v1.0.0` 已作为参考发行版发布对象完成收口，但这不等同于“任意生产环境自动可上线”。进入真实环境前仍需按 [docs/release-checklist.md](./docs/release-checklist.md) 和 [docs/reference/09-go-live-gate-input-template.md](./docs/reference/09-go-live-gate-input-template.md) 锁定：
+
+- release commit / tag / PR
+- migration 列表与数据库备份恢复责任
+- `DATABASE_URL` 与 `DATABASE_RUNTIME_URL` 的权限边界
+- proxy / TLS / 监控 / 值守 owner
+- 目标环境 `/health`、`/metrics`、登录、权限 gate、核心工作区与 tenant 隔离 smoke 证据
+
+仍保持边界外的能力：
+
+- React / uniapp 不作为首发发布门槛
+- generator 的 `staging apply` 不等于正式 migration 或正式模块接线完成
+- `module-handoff` manifest 是人工接线辅助证据，不是完成证明，也不是 release blocker
+- workflow 保持最小简化运行态，不扩展为通用 BPM 平台
 
 ## 文档索引
 
@@ -248,6 +326,8 @@ bun run go-live:gate
 - [路线图](./docs/roadmap.md) — 活跃工作轨道与进展
 - [架构边界](./docs/ARCHITECTURE_GUARDRAILS.md) — 模块职责与依赖约束
 - [开发原则](./docs/DEVELOPMENT_PRINCIPLES.md) — 核心开发理念
+- [v1.0.0 发布说明](./docs/releases/v1.0.0.md) — 首个参考发行版发布口径
+- [发布检查清单](./docs/release-checklist.md) — 仓库发布与真实 go-live 检查项
 - [产品定义](./docs/01-product-definition.md) — 产品目标与范围
 - [架构草案](./docs/02-architecture.md) — 技术架构设计
 - [AI 与代码生成策略](./docs/03-ai-codegen-strategy.md) — AI 辅助开发策略
@@ -265,6 +345,6 @@ bun run go-live:gate
 
 ## 当前状态
 
-项目已完成 7 个阶段的开发（Phase 1–7A），具备完整的后端模块、前端企业预设、代码生成器、AI Schema 转换、生产部署和多租户能力。当前聚焦于**首个可发布参考发行版**：把 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator` 收口成真正可开项目、可交付、可上线的 starter。
+项目已完成 `v1.0.0` 参考发行版发布对象锁定，具备后端模块、前端企业预设、代码生成器、AI Schema 转换、生产基线验证和多租户隔离能力。当前不再停留在早期原型，也不继续扩大首发范围；主线转为在既有 starter 基线上硬化 generator 真实 workspace 的审查、确认、apply 与 handoff 证据链。
 
-项目当前不是“早期原型”，而是进入了首发收口阶段。
+真实生产上线仍以目标环境输入、备份恢复、运行角色、监控值守和上线后 smoke 为准，不能只凭本地参考发行版结果自动放行。

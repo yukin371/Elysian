@@ -70,7 +70,6 @@ const handleMoreAction = (data: { value: string }) => {
         :placeholder="searchPlaceholder"
         :value="localSearch"
         clearable
-        prefix-icon="search"
         @change="handleSearchChange"
       />
     </div>

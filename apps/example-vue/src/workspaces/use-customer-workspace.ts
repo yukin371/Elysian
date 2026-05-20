@@ -23,6 +23,25 @@ import {
   updateCustomer,
 } from "../lib/platform-api"
 
+const resolveCustomerActionRowId = (row: unknown) => {
+  if (!row || typeof row !== "object") {
+    return ""
+  }
+
+  const candidate = row as Record<string, unknown>
+  if (candidate.id !== undefined && candidate.id !== null) {
+    return String(candidate.id)
+  }
+
+  const nestedRow = candidate.row
+  if (!nestedRow || typeof nestedRow !== "object") {
+    return ""
+  }
+
+  const nestedCandidate = nestedRow as Record<string, unknown>
+  return String(nestedCandidate.id ?? "")
+}
+
 type CustomerPageColumn = {
   key: string
   label?: string
@@ -616,8 +635,13 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
     await reloadCustomers()
   }
 
-  const handleAction = (key: string, row: Record<string, unknown>) => {
-    const rowId = String(row.id ?? "")
+  const handleAction = (key: string, row: unknown) => {
+    if (key === "create") {
+      openCreatePanel()
+      return
+    }
+
+    const rowId = resolveCustomerActionRowId(row)
     const customer = customerItems.value.find(
       (item: CustomerRecord) => item.id === rowId,
     )
@@ -626,7 +650,7 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
       return
     }
 
-    if (key === "update") {
+    if (key === "update" || key === "edit") {
       startEdit(customer)
       return
     }
@@ -637,7 +661,7 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
   }
 
   const handleRowClick = (row: Record<string, unknown>) => {
-    const rowId = String(row.id ?? "")
+    const rowId = resolveCustomerActionRowId(row)
     const customer = customerItems.value.find(
       (item: CustomerRecord) => item.id === rowId,
     )

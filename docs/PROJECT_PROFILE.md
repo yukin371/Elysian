@@ -17,7 +17,7 @@
 - 前端当前不绑定单一实现；当前 C 端界面方向已明确为 `Vue` 第一优先级、`uniapp` 第二优先级设计储备，`React` 暂不进入当前 C 端主线。
 - 当前对外首发形态已固定为 `apps/example-vue` 参考发行版，`apps/example-uniapp` 与 `packages/frontend-react` 继续作为并行研发轨道。
 - 仓库已建立 `Bun workspaces` 工作区。
-- 仓库根目录已提供 `docker-compose.yml`，可一键拉起 `server + PostgreSQL` 本地容器栈（含 migrate + seed）。
+- 仓库根目录已提供 `docker-compose.yml`，可一键拉起 `server + PostgreSQL` 本地容器栈（含 migrate + seed）；compose server 会显式把 `DATABASE_URL` 与 `DATABASE_RUNTIME_URL` 都覆盖到 `db:5432` 服务地址，避免宿主机 `.env` 中的 `localhost` 运行态连接串污染容器内 server。
 - `apps/server` 已提供最小生产镜像定义文件 `apps/server/Dockerfile`，当前首个正式生产平台基线已固定为“单 Linux 主机 + Docker Engine + 容器镜像优先”；自动回滚、镜像仓库与监控平台仍未定稿。
 - 根依赖声明文件已存在：[package.json](/E:/Github/Elysian/package.json)。
 - TypeScript 基线配置已存在：[tsconfig.json](/E:/Github/Elysian/tsconfig.json)。

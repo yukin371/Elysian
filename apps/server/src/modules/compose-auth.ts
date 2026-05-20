@@ -51,16 +51,15 @@ export const composeAuthModules = (
         accessTokenSecret,
         secureCookies: config.env === "production",
         tenantContextDb: db,
-        resolveTenantIdByCode: (tenantCode) =>
-          db.transaction(async (tx) => {
-            await clearTenantContext(tx)
+        resolveTenantIdByCode: async (tenantCode) => {
+          await clearTenantContext(db)
 
-            try {
-              return (await getTenantByCode(tx, tenantCode))?.id ?? null
-            } finally {
-              await resetTenantContext(tx)
-            }
-          }),
+          try {
+            return (await getTenantByCode(db, tenantCode))?.id ?? null
+          } finally {
+            await resetTenantContext(db)
+          }
+        },
       }),
       createPostModule(postRepository, {
         authGuard,

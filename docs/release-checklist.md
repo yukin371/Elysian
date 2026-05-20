@@ -1,6 +1,6 @@
 # 发布 / 上线检查清单
 
-更新时间：`2026-05-13`
+更新时间：`2026-05-20`
 
 用于两类场景：
 
@@ -55,6 +55,7 @@
 - [ ] 若改动涉及关键链路，已做对应 smoke 验证
 - [ ] 若改动触及 tenant 主链路，已确认 `bun run e2e:tenant:full`
 - [ ] 若改动涉及 server 生产交付面，已执行 `bun run server:image:verify` 或等价镜像构建 + 容器烟测
+- [ ] 若改动触及 generator 主链路，已确认 `bun run e2e:generator:cli`、`bun run e2e:generator:studio`、`bun run e2e:generator:browser` 与 `bun run e2e:generator:reports:gate`
 
 ## 4. 文档同步
 
@@ -343,7 +344,8 @@ Tenant 发布 blocker 确认单
 - [ ] 已在待发布版本上重新执行 `bun run build:vue`
 - [ ] 已审阅构建输出警告（例如 chunk size warning），并确认是否影响上线决策
 - [ ] 若本次触及多租户主链路，已重新执行 `bun run e2e:tenant:full` 或等价目标环境演练
-- [ ] 若本次触及 generator 主链路，已确认 preview / report / apply 边界与本次发布范围一致
+- [ ] 若本次触及 generator 主链路，已确认 preview / report / review / confirm / staging apply 边界与本次发布范围一致
+- [ ] 若本次触及 `--target module`，已确认 `module-handoff` manifest 只作为 pending 人工接线辅助证据，不作为完成证明或 release blocker
 - [ ] 已确认本次上线不依赖仍为 `TBD` 的生产发布前提
 
 ## 13. 观测、告警与排障入口
@@ -413,5 +415,6 @@ Tenant 发布 blocker 确认单
 4. `/metrics` 和 `/metrics/prometheus` 接入到哪套监控系统？
 5. 首次上线后由谁负责前 30 分钟和首日值守？
 6. generator 当前哪些能力允许进入正式主工程，哪些仍停留在 staging / preview / rehearsal 边界？
+   当前默认口径：preview / report / review / confirm / staging apply 可进入发布信心链；正式 migration、正式模块接线完成证明、导入 DSL / API / 批量落库平台不应由 generator 发布链自动宣称完成。
 
 若这 6 个问题答不清，建议继续视为“可发布工程 alpha / 内测 beta”，而不是正式上线版本。

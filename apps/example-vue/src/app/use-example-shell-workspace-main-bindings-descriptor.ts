@@ -65,6 +65,7 @@ export const createExampleShellWorkspaceMainBindings = ({
   generatorPreviewManualSchemaDraft,
   generatorPreviewManualSchemaDraftError,
   generatorPreviewManualSchemaDraftErrorDetails,
+  generatorPreviewManualSchemaDraftErrorSuggestion,
   loadGeneratorSchemaTemplate,
   generatorPreviewQuery,
   generatorPreviewFiles,
@@ -74,6 +75,7 @@ export const createExampleShellWorkspaceMainBindings = ({
   canApplyGeneratorPreview,
   canConfirmGeneratorPreview,
   generatorPreviewDiffSummary,
+  generatorPreviewSqlProposalHandoff,
   generatorPreviewSession,
   dictionaryModuleReady,
   canEnterDictionaryWorkspace,
@@ -366,8 +368,9 @@ export const createExampleShellWorkspaceMainBindings = ({
     generatorPreviewManualSchemaDraftErrorDetails: read(
       generatorPreviewManualSchemaDraftErrorDetails,
     ),
-    loadSelectedSchemaDraft,
-    loadGeneratorSchemaTemplate,
+    generatorPreviewManualSchemaDraftErrorSuggestion: read(
+      generatorPreviewManualSchemaDraftErrorSuggestion,
+    ),
     generatorPreviewQuery: generatorPreviewQuery.value,
     generatorPreviewFiles: read(generatorPreviewFiles),
     selectedGeneratorPreviewFilePath: selectedGeneratorPreviewFilePath.value,
@@ -376,6 +379,9 @@ export const createExampleShellWorkspaceMainBindings = ({
     canApplyGeneratorPreview: read(canApplyGeneratorPreview),
     canConfirmGeneratorPreview: read(canConfirmGeneratorPreview),
     generatorPreviewDiffSummary: read(generatorPreviewDiffSummary),
+    generatorPreviewSqlProposalHandoff: read(
+      generatorPreviewSqlProposalHandoff,
+    ),
     generatorPreviewSession: read(generatorPreviewSession),
     dictionaryModuleReady: read(dictionaryModuleReady),
     canEnterDictionaryWorkspace: read(canEnterDictionaryWorkspace),

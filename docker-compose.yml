@@ -24,6 +24,7 @@ services:
       - .env
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-elysian}
+      DATABASE_RUNTIME_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-elysian}
     command: >
       sh -lc "bun install --frozen-lockfile &&
               bun run db:migrate &&

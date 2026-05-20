@@ -5,6 +5,8 @@ import {
   type ElyFormField,
   type ElyFormValues,
 } from "@elysian/ui-enterprise-vue"
+import { Button as TButton } from "tdesign-vue-next/es/button"
+import { Space as TSpace } from "tdesign-vue-next/es/space"
 import { computed, inject } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "../../../app/workspace-registry"
@@ -28,6 +30,8 @@ interface CustomerWorkspacePanelProps {
 const props = defineProps<CustomerWorkspacePanelProps>()
 
 const emit = defineEmits<{
+  (e: "start-edit"): void
+  (e: "request-delete"): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-form"): void
 }>()
@@ -68,9 +72,22 @@ const resolvedFormValues = readInjectedValue(
   computed(() => resolvedCustomerWorkspaceState.value?.formValues ?? null),
   {} as ElyFormValues,
 )
+const resolvedPanelTitle = readInjectedValue(
+  computed(() => resolvedCustomerWorkspaceState.value?.panelTitle ?? null),
+  "",
+)
+const resolvedPanelDescription = readInjectedValue(
+  computed(
+    () => resolvedCustomerWorkspaceState.value?.panelDescription ?? null,
+  ),
+  "",
+)
 
 const showIdentity = computed(
   () => resolvedSelectedCustomer.value && resolvedPanelMode.value !== "create",
+)
+const showDetailActions = computed(
+  () => resolvedSelectedCustomer.value && resolvedPanelMode.value === "detail",
 )
 
 const handleFormSubmit = (values: ElyFormValues) => {
@@ -84,6 +101,18 @@ const handleFormCancel = () => {
 
 <template>
   <div class="customer-panel-content">
+    <div
+      v-if="resolvedPanelTitle || resolvedPanelDescription"
+      class="customer-panel-heading"
+    >
+      <h3 v-if="resolvedPanelTitle" class="enterprise-heading">
+        {{ resolvedPanelTitle }}
+      </h3>
+      <p v-if="resolvedPanelDescription" class="enterprise-subheading">
+        {{ resolvedPanelDescription }}
+      </p>
+    </div>
+
     <!-- Identity section -->
     <div
       class="ely-context-panel__identity"
@@ -98,6 +127,15 @@ const handleFormCancel = () => {
         </div>
       </div>
     </div>
+
+    <TSpace v-if="showDetailActions" class="customer-panel-actions">
+      <TButton theme="primary" variant="outline" @click="emit('start-edit')">
+        {{ props.t("app.customer.action.edit", "编辑") }}
+      </TButton>
+      <TButton theme="danger" variant="outline" @click="emit('request-delete')">
+        {{ props.t("app.customer.action.delete", "删除") }}
+      </TButton>
+    </TSpace>
 
     <!-- Form -->
     <ElyForm
@@ -118,6 +156,26 @@ const handleFormCancel = () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.customer-panel-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.enterprise-heading {
+  margin: 0;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 24px;
+}
+
+.enterprise-subheading {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .ely-context-panel__identity {
@@ -144,5 +202,10 @@ const handleFormCancel = () => {
 
 .customer-panel-form {
   margin-top: 4px;
+}
+
+.customer-panel-actions {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 </style>

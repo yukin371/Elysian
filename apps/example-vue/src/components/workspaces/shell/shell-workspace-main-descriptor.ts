@@ -116,6 +116,8 @@ export interface ShellWorkspaceMainSwitchProps {
   canCreateDictionaryTypes: boolean
   canUpdateDictionaryTypes: boolean
   dictionaryWorkspaceState: Record<string, unknown>
+  dictionaryLoading: boolean
+  dictionaryErrorMessage: string
   enterpriseDictionaryQueryFields: ReadonlyArray<unknown>
   enterpriseDictionaryTableColumns: ReadonlyArray<unknown>
   dictionaryCountLabel: string
@@ -124,6 +126,7 @@ export interface ShellWorkspaceMainSwitchProps {
   canViewDepartments: boolean
   canCreateDepartments: boolean
   canUpdateDepartments: boolean
+  departmentWorkspaceState: Record<string, unknown>
   enterpriseDepartmentQueryFields: ReadonlyArray<unknown>
   enterpriseDepartmentTableColumns: ReadonlyArray<unknown>
   departmentCountLabel: string
@@ -184,6 +187,8 @@ export interface ShellWorkspaceMainSwitchProps {
   canCreateRoles: boolean
   canUpdateRoles: boolean
   roleWorkspaceState: Record<string, unknown>
+  roleLoading: boolean
+  roleErrorMessage: string
   enterpriseRoleQueryFields: ReadonlyArray<unknown>
   enterpriseRoleTableColumns: ReadonlyArray<unknown>
   roleCountLabel: string
@@ -307,7 +312,9 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "load-generator-current-schema-draft"): void
   (event: "load-generator-schema-template", templateId: string): void
   (event: "restore-generator-session", sessionId: string): void
+  (event: "restore-current-generator-session"): void
   (event: "select-generator-file", filePath: string): void
+  (event: "clear-generator-file-selection"): void
   (event: "reset-generator-filters"): void
   (event: "refresh-generator-preview"): void
   (
@@ -352,7 +359,7 @@ export type ShellWorkspaceMainSwitchEmitFn = {
   (event: "back-to-customer"): void
   (event: "customer-search", payload: unknown): void
   (event: "customer-reset"): void
-  (event: "customer-action", payload: unknown): void
+  (event: "customer-action", key: string, row: Record<string, unknown>): void
   (event: "customer-row-click", payload: unknown): void
   (event: "change-customer-page-size", value: string): void
   (event: "change-customer-sort", value: string): void
@@ -482,7 +489,8 @@ const customerResolver: ShellWorkspaceMainResolver = (props, emit) => ({
     workspaceStateInjected: true,
   },
   listeners: {
-    action: (payload: unknown) => emit("customer-action", payload),
+    action: (key: unknown, row: unknown) =>
+      emit("customer-action", String(key), row as Record<string, unknown>),
     "row-click": (payload: unknown) => emit("customer-row-click", payload),
     search: (value: unknown) => emit("customer-search", value as string),
   },
@@ -583,10 +591,6 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       reviewLoading: props.generatorPreviewReviewLoading,
       applyLoading: props.generatorPreviewApplyLoading,
       errorMessage: props.generatorPreviewErrorMessage,
-      inputModeOptions: props.generatorPreviewInputModeOptions as Array<{
-        label: string
-        value: string
-      }>,
       schemaOptions: props.generatorPreviewSchemaOptions,
       conflictStrategyOptions:
         props.generatorPreviewConflictStrategyOptions as Array<{

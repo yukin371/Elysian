@@ -83,6 +83,8 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.workspace.title": "Customer Register",
   "app.workspace.description":
     "The table, actions, and query inputs come from the shared customer page definition and are rendered through the enterprise wrapper.",
+  "app.workspace.createButton": "Create customer",
+  "app.workspace.searchPlaceholder": "Search customers...",
   "app.workspace.emptyTitle": "No customers in scope",
   "app.workspace.emptyDescription":
     "Adjust the filters or create a new customer from the detail cards.",
@@ -233,6 +235,7 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.customer.field.createdAt": "Created At",
   "app.customer.field.updatedAt": "Updated At",
   "app.customer.action.create": "Create",
+  "app.customer.action.edit": "Edit",
   "app.customer.action.update": "Update",
   "app.customer.action.delete": "Delete",
   "app.customer.query.namePlaceholder": "Search by name or id",

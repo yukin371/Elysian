@@ -36,6 +36,12 @@ const reportDir =
   process.env.ELYSIAN_BROWSER_SMOKE_REPORT_DIR ??
   process.env.ELYSIAN_REPORT_DIR ??
   ".ci-reports/generator-browser-smoke"
+const successScreenshotDir =
+  process.env.ELYSIAN_BROWSER_SMOKE_SUCCESS_SCREENSHOT_DIR
+const browserSmokeActorDisplayName =
+  process.env.ELYSIAN_BROWSER_SMOKE_ACTOR_DISPLAY_NAME ?? "Browser Smoke"
+const browserSmokeActorUsername =
+  process.env.ELYSIAN_BROWSER_SMOKE_ACTOR_USERNAME ?? "browser-smoke"
 
 const appPort = Number.parseInt(
   process.env.ELYSIAN_BROWSER_SMOKE_PORT ?? "4176",
@@ -69,11 +75,11 @@ const createAuthPayload = () => ({
   permissionCodes: ["*"],
   roles: ["admin"],
   user: {
-    displayName: "Browser Smoke",
+    displayName: browserSmokeActorDisplayName,
     id: "browser-smoke-user",
     isSuperAdmin: true,
     tenantId: "default",
-    username: "browser-smoke",
+    username: browserSmokeActorUsername,
   },
 })
 
@@ -86,9 +92,9 @@ const createEmptyPage = () => ({
 })
 
 const createApplyEvidence = (sessionId: string) => ({
-  actorDisplayName: "Browser Smoke",
+  actorDisplayName: browserSmokeActorDisplayName,
   actorUserId: "browser-smoke-user",
-  actorUsername: "browser-smoke",
+  actorUsername: browserSmokeActorUsername,
   appliedAt: "2026-05-16T08:30:00.000Z",
   manifestPath: `generated/reports/${sessionId}.manifest.json`,
   reportPath: `generated/reports/${sessionId}.preview.json`,
@@ -201,9 +207,9 @@ const createSqlProposalHandoff = () => ({
 const createSession = (
   overrides?: Partial<GeneratorPreviewSessionRecord>,
 ): GeneratorPreviewSessionRecord => ({
-  actorDisplayName: "Browser Smoke",
+  actorDisplayName: browserSmokeActorDisplayName,
   actorUserId: "browser-smoke-user",
-  actorUsername: "browser-smoke",
+  actorUsername: browserSmokeActorUsername,
   appliedAt: null,
   appliedByDisplayName: null,
   appliedByUserId: null,
@@ -420,9 +426,9 @@ class BrowserSmokeApi {
         ...this.sessions.get(sessionId),
         id: sessionId,
         reviewEvidence: {
-          actorDisplayName: "Browser Smoke",
+          actorDisplayName: browserSmokeActorDisplayName,
           actorUserId: "browser-smoke-user",
-          actorUsername: "browser-smoke",
+          actorUsername: browserSmokeActorUsername,
           comment: null,
           decision: "approve",
           reportPath: `generated/reports/${sessionId}.preview.json`,
@@ -430,9 +436,9 @@ class BrowserSmokeApi {
           sessionId,
         },
         reviewedAt: "2026-05-16T08:10:00.000Z",
-        reviewedByDisplayName: "Browser Smoke",
+        reviewedByDisplayName: browserSmokeActorDisplayName,
         reviewedByUserId: "browser-smoke-user",
-        reviewedByUsername: "browser-smoke",
+        reviewedByUsername: browserSmokeActorUsername,
         status: "ready",
       })
 
@@ -452,9 +458,9 @@ class BrowserSmokeApi {
       const confirmed = createSession({
         ...this.sessions.get(sessionId),
         confirmationEvidence: {
-          actorDisplayName: "Browser Smoke",
+          actorDisplayName: browserSmokeActorDisplayName,
           actorUserId: "browser-smoke-user",
-          actorUsername: "browser-smoke",
+          actorUsername: browserSmokeActorUsername,
           archivedSnapshotPath: null,
           checklist: [
             "Review file actions.",
@@ -468,9 +474,9 @@ class BrowserSmokeApi {
           snapshotPath: `/tmp/${sessionId}.migration-proposal.json`,
         },
         confirmedAt: "2026-05-16T08:20:00.000Z",
-        confirmedByDisplayName: "Browser Smoke",
+        confirmedByDisplayName: browserSmokeActorDisplayName,
         confirmedByUserId: "browser-smoke-user",
-        confirmedByUsername: "browser-smoke",
+        confirmedByUsername: browserSmokeActorUsername,
         id: sessionId,
         status: "ready",
       })
@@ -525,9 +531,9 @@ class BrowserSmokeApi {
       const applied = createSession({
         ...this.sessions.get(sessionId),
         appliedAt: applyEvidence.appliedAt,
-        appliedByDisplayName: "Browser Smoke",
+        appliedByDisplayName: browserSmokeActorDisplayName,
         appliedByUserId: "browser-smoke-user",
-        appliedByUsername: "browser-smoke",
+        appliedByUsername: browserSmokeActorUsername,
         appliedFileCount: 1,
         applyEvidence,
         applyManifestPath: applyEvidence.manifestPath,
@@ -698,6 +704,18 @@ const writeReport = async (report: BrowserSmokeReport) => {
   return reportPath
 }
 
+const captureSuccessScreenshot = async (page: Page, fileName: string) => {
+  if (!successScreenshotDir) {
+    return
+  }
+
+  await mkdir(successScreenshotDir, { recursive: true })
+  await page.screenshot({
+    fullPage: false,
+    path: join(successScreenshotDir, fileName),
+  })
+}
+
 const run = async () => {
   await mkdir(reportDir, { recursive: true })
 
@@ -737,8 +755,12 @@ const run = async () => {
       }
     }
 
-    await recordScenario("route renders generator workspace sections", () =>
-      gotoGeneratorWorkspace(page),
+    await recordScenario(
+      "route renders generator workspace sections",
+      async () => {
+        await gotoGeneratorWorkspace(page)
+        await captureSuccessScreenshot(page, "generator-workspace.png")
+      },
     )
 
     await recordScenario(
@@ -752,6 +774,7 @@ const run = async () => {
           .waitFor()
         await page.getByText("应用时间").first().waitFor()
         await assertNoInternalCopyLeak(page)
+        await captureSuccessScreenshot(page, "generator-staging-apply.png")
       },
     )
 
@@ -768,6 +791,7 @@ const run = async () => {
           .waitFor()
         await page.getByText("当前结果的下一步建议").first().waitFor()
         await assertNoInternalCopyLeak(page)
+        await captureSuccessScreenshot(page, "generator-blocked-apply.png")
       },
     )
 

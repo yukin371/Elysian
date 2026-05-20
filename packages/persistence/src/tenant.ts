@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm"
+import { asc, desc, eq, sql } from "drizzle-orm"
 
 import type { DatabaseClient } from "./client"
 import { type TenantRow, tenants } from "./schema"
@@ -22,7 +22,8 @@ export interface UpdateTenantPersistenceInput {
 
 type TenantReadableDb = Pick<DatabaseClient, "execute" | "select">
 type TenantListingDb = Pick<DatabaseClient, "select">
-type TenantContextDb = Pick<DatabaseClient, "execute">
+type TenantContextDb = Pick<DatabaseClient, "execute"> &
+  Partial<Pick<DatabaseClient, "$client">>
 
 export async function getTenantById(db: TenantReadableDb, id: string) {
   const rows = await db
@@ -97,15 +98,54 @@ export async function updateTenant(
 
 export async function setTenantContext(db: TenantContextDb, tenantId: string) {
   assertTenantId(tenantId)
-  await db.execute(`SET app.current_tenant = '${tenantId}'`)
+
+  if (typeof db.$client === "function") {
+    await db.$client`select set_config('app.current_tenant', ${tenantId}, false)`
+    return
+  }
+
+  if (db.$client) {
+    await db.execute(
+      sql`select set_config('app.current_tenant', ${tenantId}, false)`,
+    )
+    return
+  }
+
+  await db.execute(
+    `SET app.current_tenant = '${tenantId}'` as Parameters<
+      TenantContextDb["execute"]
+    >[0],
+  )
 }
 
 export async function resetTenantContext(db: TenantContextDb) {
-  await db.execute("RESET app.current_tenant")
+  if (typeof db.$client === "function") {
+    await db.$client`RESET app.current_tenant`
+    return
+  }
+
+  await db.execute(
+    (db.$client
+      ? sql`RESET app.current_tenant`
+      : "RESET app.current_tenant") as Parameters<
+      TenantContextDb["execute"]
+    >[0],
+  )
 }
 
 export async function clearTenantContext(db: TenantContextDb) {
-  await db.execute(`SET app.current_tenant = ''`)
+  if (typeof db.$client === "function") {
+    await db.$client`select set_config('app.current_tenant', '', false)`
+    return
+  }
+
+  await db.execute(
+    (db.$client
+      ? sql`select set_config('app.current_tenant', '', false)`
+      : "RESET app.current_tenant") as Parameters<
+      TenantContextDb["execute"]
+    >[0],
+  )
 }
 
 const assertTenantId = (tenantId: string) => {

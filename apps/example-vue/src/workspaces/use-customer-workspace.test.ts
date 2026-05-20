@@ -181,6 +181,88 @@ describe("useCustomerWorkspace", () => {
     expect(workspace.selectedCustomerId.value).toBe("cust-beta")
   })
 
+  test("opens the create panel from the toolbar create action", () => {
+    const workspace = createWorkspace()
+
+    workspace.handleAction("create", {})
+
+    expect(workspace.customerFormMode.value).toBe("create")
+    expect(workspace.selectedCustomerId.value).toBeNull()
+  })
+
+  test("opens the edit panel from a table action row", async () => {
+    const alpha = createCustomerRecord({ id: "cust-alpha", name: "Alpha" })
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.includes("/customers") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [alpha],
+            page: 1,
+            pageSize: 20,
+            total: 1,
+            totalPages: 1,
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+
+    await workspace.reloadCustomers()
+    workspace.handleAction("edit", { row: { id: "cust-alpha" } })
+
+    expect(workspace.customerFormMode.value).toBe("edit")
+    expect(workspace.selectedCustomerId.value).toBe("cust-alpha")
+    expect(workspace.formValues.value).toMatchObject({
+      name: "Alpha",
+      status: "active",
+    })
+  })
+
+  test("opens the delete confirmation from a table action row", async () => {
+    const alpha = createCustomerRecord({ id: "cust-alpha", name: "Alpha" })
+
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input)
+      const method = init?.method ?? "GET"
+
+      if (url.includes("/customers") && method === "GET") {
+        return new Response(
+          JSON.stringify({
+            items: [alpha],
+            page: 1,
+            pageSize: 20,
+            total: 1,
+            totalPages: 1,
+          }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 200,
+          },
+        )
+      }
+
+      return new Response("not found", { status: 404 })
+    }) as typeof fetch
+
+    const workspace = createWorkspace()
+
+    await workspace.reloadCustomers()
+    workspace.handleAction("delete", { row: { id: "cust-alpha" } })
+
+    expect(workspace.deleteConfirmId.value).toBe("cust-alpha")
+  })
+
   test("reports recoverable auth errors when customer create fails", async () => {
     const recoverableErrors: unknown[] = []
 

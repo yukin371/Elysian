@@ -64,7 +64,7 @@ const run = async () => {
   const runId = `${Date.now()}`
   const workflowDrafts = buildWorkflowDefinitionDrafts(runId)
 
-  const server = spawn("bun", ["src/index.ts"], {
+  const server = spawn(process.execPath, ["src/index.ts"], {
     cwd: join(process.cwd(), "apps", "server"),
     env: {
       ...process.env,
