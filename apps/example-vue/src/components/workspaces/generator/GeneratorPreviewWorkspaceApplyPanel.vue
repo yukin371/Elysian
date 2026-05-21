@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from "vue"
+
+import { formatGeneratorPreviewDateTime } from "./generator-preview-main-state-facts"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewTranslation,
@@ -10,13 +13,17 @@ interface GeneratorPreviewWorkspaceApplyPanelProps {
   applyActorLabel: string
 }
 
-defineProps<GeneratorPreviewWorkspaceApplyPanelProps>()
+const props = defineProps<GeneratorPreviewWorkspaceApplyPanelProps>()
+
+const appliedAtLabel = computed(() =>
+  formatGeneratorPreviewDateTime(props.applyEvidence.appliedAt),
+)
 </script>
 
 <template>
   <section class="panel-section">
     <div class="generator-facts">
-      <span>{{ applyEvidence.appliedAt ?? "-" }}</span>
+      <span>{{ appliedAtLabel }}</span>
       <span>{{ applyActorLabel }}</span>
       <span v-if="applyEvidence.requestId">{{ applyEvidence.requestId }}</span>
     </div>

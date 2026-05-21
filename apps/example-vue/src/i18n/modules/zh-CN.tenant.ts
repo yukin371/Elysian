@@ -27,6 +27,8 @@ export const zhCNTenantLocaleMessages: VueLocaleMessages = {
   "app.tenant.status.suspended": "停用",
   "app.tenant.query.codePlaceholder": "按租户编码搜索",
   "app.tenant.query.namePlaceholder": "按租户名称搜索",
+  "app.tenant.form.codePlaceholder": "请输入租户编码",
+  "app.tenant.form.namePlaceholder": "请输入租户名称",
   "app.tenant.action.create": "新建租户",
   "app.tenant.action.edit": "编辑租户",
   "app.tenant.action.activate": "启用租户",

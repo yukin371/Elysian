@@ -29,6 +29,7 @@ const providedWorkspaceState = computed(() =>
       customerErrorMessage: { value: string }
       customerItems: { value: unknown[] }
       customerLoading: { value: boolean }
+      tableItems: { value: unknown[] }
       customerFormMode: { value: "create" | "detail" | "edit" }
       deleteConfirmId: { value: string | null }
       formFields: { value: unknown[] }

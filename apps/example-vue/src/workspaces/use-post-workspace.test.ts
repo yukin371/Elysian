@@ -19,7 +19,9 @@ const createPostRecord = (overrides?: Partial<PostRecord>): PostRecord => ({
   ...overrides,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (
+  overrides: Partial<Parameters<typeof usePostWorkspace>[0]> = {},
+) =>
   usePostWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
@@ -35,6 +37,7 @@ const createWorkspace = () =>
       tableColumns: computed(() => []),
     },
     t: (key) => key,
+    ...overrides,
   })
 
 describe("usePostWorkspace", () => {
@@ -45,6 +48,34 @@ describe("usePostWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps post list columns focused on organization usage", () => {
+    const workspace = createWorkspace({
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "createdAt" },
+          { key: "code" },
+          { key: "name" },
+          { key: "sort" },
+          { key: "status" },
+          { key: "remark" },
+          { key: "updatedAt" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "name",
+      "code",
+      "sort",
+      "status",
+      "remark",
+      "updatedAt",
+    ])
   })
 
   test("filters posts from local query state and clears the query on reset", async () => {

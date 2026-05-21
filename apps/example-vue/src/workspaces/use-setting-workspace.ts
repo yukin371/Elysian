@@ -47,6 +47,13 @@ interface UseSettingWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const settingListColumnOrder = new Map(
+  ["key", "value", "description", "status", "updatedAt"].map((key, index) => [
+    key,
+    index,
+  ]),
+)
+
 export const useSettingWorkspace = (options: UseSettingWorkspaceOptions) => {
   const settingWorkspace = createCrudWorkspace({
     canCreate: options.canCreate,
@@ -136,18 +143,29 @@ export const useSettingWorkspace = (options: UseSettingWorkspaceOptions) => {
   const selectedSetting = settingWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "status"
-            ? "120"
-            : column.key.endsWith("At")
-              ? "200"
-              : undefined,
-    })),
+    options.page.tableColumns.value
+      .filter((column) => settingListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (settingListColumnOrder.get(left.key) ?? 99) -
+          (settingListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "key"
+            ? "180"
+            : column.key === "value"
+              ? "220"
+              : column.key === "description"
+                ? "240"
+                : column.key === "status"
+                  ? "100"
+                  : column.key === "updatedAt"
+                    ? "180"
+                    : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -203,11 +221,11 @@ export const useSettingWorkspace = (options: UseSettingWorkspaceOptions) => {
           : field.options,
       placeholder:
         field.key === "key"
-          ? options.t("app.setting.query.keyPlaceholder")
+          ? options.t("app.setting.form.keyPlaceholder")
           : field.key === "value"
-            ? options.t("app.setting.query.valuePlaceholder")
+            ? options.t("app.setting.form.valuePlaceholder")
             : field.key === "description"
-              ? options.t("app.setting.query.descriptionPlaceholder")
+              ? options.t("app.setting.form.descriptionPlaceholder")
               : field.key === "status"
                 ? options.t("copy.query.statusPlaceholder")
                 : field.placeholder,

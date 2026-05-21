@@ -45,6 +45,46 @@ const createWorkspace = (options?: {
   })
 
 describe("useOperationLogWorkspace", () => {
+  test("keeps operation log list columns focused on traceable events", () => {
+    const workspace = useOperationLogWorkspace({
+      currentShellTabKey: ref("overview"),
+      page: {
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "authFailureReason" },
+          { key: "ip" },
+          { key: "userAgent" },
+          { key: "requestId" },
+          { key: "result" },
+          { key: "targetId" },
+          { key: "targetType" },
+          { key: "actorUserId" },
+          { key: "action" },
+          { key: "category" },
+          { key: "createdAt" },
+        ]),
+        queryFields: computed(() => []),
+      },
+      locale: ref("zh-CN"),
+      t: (key) => key,
+      localizeFieldLabel: (fieldKey) => fieldKey,
+      localizeResult: (result) => `result:${result}`,
+      canView: computed(() => true),
+      onRecoverableAuthError: () => {},
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "category",
+      "action",
+      "actorUserId",
+      "targetType",
+      "targetId",
+      "result",
+      "requestId",
+      "createdAt",
+    ])
+  })
+
   test("exposes known auth failure reasons as localized query select options", () => {
     const workspace = useOperationLogWorkspace({
       currentShellTabKey: ref("overview"),

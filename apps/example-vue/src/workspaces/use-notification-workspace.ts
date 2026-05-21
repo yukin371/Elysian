@@ -54,6 +54,13 @@ interface UseNotificationWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const notificationListColumnOrder = new Map(
+  ["title", "level", "status", "readAt", "createdAt"].map((key, index) => [
+    key,
+    index,
+  ]),
+)
+
 export const useNotificationWorkspace = (
   options: UseNotificationWorkspaceOptions,
 ) => {
@@ -202,21 +209,26 @@ export const useNotificationWorkspace = (
   const selectedNotification = notificationWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      key: column.key === "status" ? "statusLabel" : column.key,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "recipientUserId" || column.key === "createdByUserId"
-            ? "180"
+    options.page.tableColumns.value
+      .filter((column) => notificationListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (notificationListColumnOrder.get(left.key) ?? 99) -
+          (notificationListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        key: column.key === "status" ? "statusLabel" : column.key,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "title"
+            ? "220"
             : column.key === "level" || column.key === "status"
-              ? "120"
+              ? "100"
               : column.key.endsWith("At")
-                ? "200"
+                ? "180"
                 : undefined,
-    })),
+      })),
   )
 
   const queryFields = computed<ElyQueryField[]>(() => [
@@ -321,13 +333,13 @@ export const useNotificationWorkspace = (
               : field.options,
         placeholder:
           field.key === "recipientUserId"
-            ? options.t("app.notification.query.recipientUserIdPlaceholder")
+            ? options.t("app.notification.form.recipientUserIdPlaceholder")
             : field.key === "title"
-              ? options.t("app.notification.query.titlePlaceholder")
+              ? options.t("app.notification.form.titlePlaceholder")
               : field.key === "content"
-                ? options.t("app.notification.query.contentPlaceholder")
+                ? options.t("app.notification.form.contentPlaceholder")
                 : field.key === "level"
-                  ? options.t("app.notification.query.levelPlaceholder")
+                  ? options.t("app.notification.form.levelPlaceholder")
                   : field.placeholder,
       }))
   })

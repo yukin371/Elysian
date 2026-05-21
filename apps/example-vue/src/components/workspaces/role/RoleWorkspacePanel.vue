@@ -169,44 +169,6 @@ const resolvedFormValues = computed(
         </div>
       </div>
 
-      <div v-if="resolvedSelectedRoleDetail" class="mt-5 space-y-4">
-        <div>
-          <p class="enterprise-subheading">
-            {{ t("app.role.meta.permissionCodes") }}
-          </p>
-          <p class="enterprise-copy">
-            {{
-              resolvedSelectedRoleDetail.permissionCodes.length > 0
-                ? resolvedSelectedRoleDetail.permissionCodes.join(", ")
-                : t("app.role.meta.empty")
-            }}
-          </p>
-        </div>
-        <div>
-          <p class="enterprise-subheading">
-            {{ t("app.role.meta.userIds") }}
-          </p>
-          <p class="enterprise-copy">
-            {{
-              resolvedSelectedRoleDetail.userIds.length > 0
-                ? resolvedSelectedRoleDetail.userIds.join(", ")
-                : t("app.role.meta.empty")
-            }}
-          </p>
-        </div>
-        <div>
-          <p class="enterprise-subheading">
-            {{ t("app.role.meta.deptIds") }}
-          </p>
-          <p class="enterprise-copy">
-            {{
-              resolvedSelectedRoleDetail.deptIds.length > 0
-                ? resolvedSelectedRoleDetail.deptIds.join(", ")
-                : t("app.role.meta.empty")
-            }}
-          </p>
-        </div>
-      </div>
     </template>
 
     <template

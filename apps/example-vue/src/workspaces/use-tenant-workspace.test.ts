@@ -23,6 +23,7 @@ const createWorkspace = (
   canUpdate = true,
   options?: {
     onRecoverableAuthError?: (error: unknown) => void
+    page?: Parameters<typeof useTenantWorkspace>[0]["page"]
   },
 ) =>
   useTenantWorkspace({
@@ -34,7 +35,7 @@ const createWorkspace = (
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeStatus: (status) => status,
     onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
-    page: {
+    page: options?.page ?? {
       formFields: computed(() => []),
       queryFields: computed(() => []),
       tableColumns: computed(() => []),
@@ -50,6 +51,30 @@ describe("useTenantWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps tenant list columns focused on tenant identification", () => {
+    const workspace = createWorkspace(true, {
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "createdAt" },
+          { key: "code" },
+          { key: "name" },
+          { key: "status" },
+          { key: "updatedAt" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "name",
+      "code",
+      "status",
+      "updatedAt",
+    ])
   })
 
   test("toggles the selected tenant status and refreshes the visible list", async () => {

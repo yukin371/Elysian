@@ -214,13 +214,10 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.panelTitle.detailFallback": "Customer detail",
   "app.panelTitle.create": "Create customer",
   "app.panelDesc.delete":
-    "Deletion still goes through the canonical customer API. The preset only owns the view state.",
-  "app.panelDesc.edit":
-    "The edit form reuses the same schema-derived contract as the list page.",
-  "app.panelDesc.detail":
-    "Readonly detail view proves the standard detail-page template without adding a second owner.",
-  "app.panelDesc.create":
-    "Create mode uses the same preset form wrapper that future generator output can target.",
+    "Confirm the customer name and status before deleting.",
+  "app.panelDesc.edit": "Save changes and the list will refresh.",
+  "app.panelDesc.detail": "Review the customer basics and latest update time.",
+  "app.panelDesc.create": "Enter a customer name and initial status.",
   "app.previewUser.name": "Preview Operator",
   "app.previewUser.username": "preview@elysian",
   "app.filter.none": "No active filters",
@@ -238,7 +235,8 @@ export const enUSCoreLocaleMessages: VueLocaleMessages = {
   "app.customer.action.edit": "Edit",
   "app.customer.action.update": "Update",
   "app.customer.action.delete": "Delete",
-  "app.customer.query.namePlaceholder": "Search by name or id",
+  "app.customer.query.namePlaceholder": "Search by name",
+  "app.customer.form.namePlaceholder": "Enter customer name",
   "app.platform.status.prototype": "prototype",
   "app.platform.status.accepted": "accepted",
   "app.platform.status.planned": "planned",

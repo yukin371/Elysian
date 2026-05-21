@@ -9,6 +9,7 @@ interface CustomerWorkspaceProviderState {
   customerErrorMessage: Ref<string>
   customerItems: Ref<unknown[]>
   customerLoading: Ref<boolean>
+  tableItems: Ref<unknown[]>
 }
 
 interface DictionaryWorkspaceProviderState {

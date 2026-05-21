@@ -209,13 +209,10 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.panelTitle.edit": "编辑客户",
   "app.panelTitle.detailFallback": "客户详情",
   "app.panelTitle.create": "新建客户",
-  "app.panelDesc.delete":
-    "删除操作仍然走 canonical customer API。预设层只持有视图状态。",
-  "app.panelDesc.edit": "编辑表单复用了与列表页相同的 schema 派生契约。",
-  "app.panelDesc.detail":
-    "只读详情视图用于证明标准详情页模板，不引入第二个 owner。",
-  "app.panelDesc.create":
-    "新建模式使用同一个预设表单封装，未来 generator 输出可直接复用。",
+  "app.panelDesc.delete": "删除前请确认当前客户名称与状态。",
+  "app.panelDesc.edit": "修改客户信息后保存，列表会同步更新。",
+  "app.panelDesc.detail": "查看当前客户的基础信息和最近更新时间。",
+  "app.panelDesc.create": "填写客户名称并选择初始状态。",
   "app.previewUser.name": "预览操作员",
   "app.previewUser.username": "preview@elysian",
   "app.filter.none": "当前没有启用筛选条件",
@@ -233,7 +230,8 @@ export const zhCNCoreLocaleMessages: VueLocaleMessages = {
   "app.customer.action.edit": "编辑",
   "app.customer.action.update": "编辑",
   "app.customer.action.delete": "删除",
-  "app.customer.query.namePlaceholder": "按名称或 ID 搜索",
+  "app.customer.query.namePlaceholder": "按名称搜索",
+  "app.customer.form.namePlaceholder": "请输入客户名称",
   "app.platform.status.prototype": "原型",
   "app.platform.status.accepted": "已采纳",
   "app.platform.status.planned": "规划中",

@@ -20,7 +20,9 @@ const createSettingRecord = (
   ...overrides,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (
+  overrides: Partial<Parameters<typeof useSettingWorkspace>[0]> = {},
+) =>
   useSettingWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
@@ -36,6 +38,7 @@ const createWorkspace = () =>
       tableColumns: computed(() => []),
     },
     t: (key) => key,
+    ...overrides,
   })
 
 describe("useSettingWorkspace", () => {
@@ -46,6 +49,32 @@ describe("useSettingWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps setting list columns focused on editable configuration", () => {
+    const workspace = createWorkspace({
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "createdAt" },
+          { key: "key" },
+          { key: "value" },
+          { key: "description" },
+          { key: "status" },
+          { key: "updatedAt" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "key",
+      "value",
+      "description",
+      "status",
+      "updatedAt",
+    ])
   })
 
   test("filters settings from local query state and clears the query on reset", async () => {

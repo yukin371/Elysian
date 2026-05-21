@@ -32,6 +32,12 @@ type DepartmentPageColumn = {
   width?: string
 }
 
+const departmentListColumnOrder = new Map(
+  ["name", "code", "parentId", "sort", "status", "updatedAt"].map(
+    (key, index) => [key, index],
+  ),
+)
+
 interface DepartmentPageContract {
   tableColumns: ComputedRef<DepartmentPageColumn[]>
   queryFields: ComputedRef<ElyQueryField[]>
@@ -165,22 +171,29 @@ export const useDepartmentWorkspace = (
   )
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "parentId"
-            ? "220"
-            : column.key === "status"
-              ? "120"
-              : column.key === "sort"
-                ? "120"
-                : column.key.endsWith("At")
-                  ? "200"
-                  : undefined,
-    })),
+    options.page.tableColumns.value
+      .filter((column) => departmentListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (departmentListColumnOrder.get(left.key) ?? 99) -
+          (departmentListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "name"
+            ? "180"
+            : column.key === "code"
+              ? "140"
+              : column.key === "parentId"
+                ? "180"
+                : column.key === "status" || column.key === "sort"
+                  ? "100"
+                  : column.key === "updatedAt"
+                    ? "180"
+                    : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -249,9 +262,9 @@ export const useDepartmentWorkspace = (
         field.key === "parentId"
           ? options.t("app.department.parentPlaceholder")
           : field.key === "code"
-            ? options.t("app.department.query.codePlaceholder")
+            ? options.t("app.department.form.codePlaceholder")
             : field.key === "name"
-              ? options.t("app.department.query.namePlaceholder")
+              ? options.t("app.department.form.namePlaceholder")
               : field.key === "status"
                 ? options.t("copy.query.statusPlaceholder")
                 : field.placeholder,

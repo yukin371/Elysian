@@ -136,6 +136,7 @@ const handleGlobalSearch = (value: string | number) => {
       </div>
       <div class="ely-workbench__search">
         <TInput
+          name="ely-workbench-global-search"
           :placeholder="resolvedCopy.searchPlaceholder"
           clearable
           size="small"

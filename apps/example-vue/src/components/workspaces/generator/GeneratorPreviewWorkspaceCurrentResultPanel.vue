@@ -4,6 +4,7 @@ import { computed } from "vue"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 
+import { formatGeneratorPreviewDateTime } from "./generator-preview-main-state-facts"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewReviewEvidence,
@@ -76,6 +77,13 @@ const emit = defineEmits<{
   (e: "select-file", value: string): void
 }>()
 
+const reviewedAtLabel = computed(() =>
+  formatGeneratorPreviewDateTime(props.reviewEvidence?.reviewedAt),
+)
+const appliedAtLabel = computed(() =>
+  formatGeneratorPreviewDateTime(props.applyEvidence?.appliedAt),
+)
+
 const verdictTone = computed<"warning" | "info" | "success">(() => {
   if (props.blockedFileCount > 0) {
     return "warning"
@@ -129,14 +137,14 @@ const verdictDescription = computed(() => {
         ? "app.generatorPreview.message.reviewApproved"
         : "app.generatorPreview.message.reviewRejected",
       {
-        value: props.reviewEvidence.reviewedAt ?? "-",
+        value: reviewedAtLabel.value,
       },
     )
   }
 
   if (props.applyEvidence) {
     return props.t("app.generatorPreview.message.applied", {
-      value: props.applyEvidence.appliedAt ?? "-",
+      value: appliedAtLabel.value,
     })
   }
 
@@ -329,6 +337,7 @@ const checklistRiskDescription = computed(() => {
         <span>{{ t("app.generatorPreview.filter.sessionLabel") }}</span>
         <TSelect
           class="generator-session-select"
+          :input-props="{ name: 'generator-preview-recent-session' }"
           :model-value="selectedRecentSessionId"
           :options="recentSessionOptions"
           :placeholder="t('app.generatorPreview.filter.sessionPlaceholder')"
@@ -548,7 +557,7 @@ const checklistRiskDescription = computed(() => {
             ? "app.generatorPreview.message.reviewApproved"
             : "app.generatorPreview.message.reviewRejected",
           {
-            value: reviewEvidence.reviewedAt ?? "-",
+            value: reviewedAtLabel,
           },
         )
       }}
@@ -557,7 +566,7 @@ const checklistRiskDescription = computed(() => {
     <div v-if="applyEvidence" class="enterprise-message enterprise-message-success">
       {{
         t("app.generatorPreview.message.applied", {
-          value: applyEvidence.appliedAt ?? "-",
+          value: appliedAtLabel,
         })
       }}
     </div>

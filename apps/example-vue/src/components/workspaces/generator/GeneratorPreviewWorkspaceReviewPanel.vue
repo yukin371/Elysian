@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from "vue"
+
+import { formatGeneratorPreviewDateTime } from "./generator-preview-main-state-facts"
 import type {
   GeneratorPreviewReviewEvidence,
   GeneratorPreviewTranslation,
@@ -11,13 +14,17 @@ interface GeneratorPreviewWorkspaceReviewPanelProps {
   reviewDecisionLabel: string
 }
 
-defineProps<GeneratorPreviewWorkspaceReviewPanelProps>()
+const props = defineProps<GeneratorPreviewWorkspaceReviewPanelProps>()
+
+const reviewedAtLabel = computed(() =>
+  formatGeneratorPreviewDateTime(props.reviewEvidence.reviewedAt),
+)
 </script>
 
 <template>
   <section class="panel-section">
     <div class="generator-facts">
-      <span>{{ reviewEvidence.reviewedAt ?? "-" }}</span>
+      <span>{{ reviewedAtLabel }}</span>
       <span>{{ reviewActorLabel }}</span>
       <span>{{ reviewDecisionLabel }}</span>
     </div>

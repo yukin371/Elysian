@@ -50,6 +50,13 @@ interface UseDictionaryWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const dictionaryListColumnOrder = new Map(
+  ["name", "code", "description", "status", "updatedAt"].map((key, index) => [
+    key,
+    index,
+  ]),
+)
+
 export const useDictionaryWorkspace = (
   options: UseDictionaryWorkspaceOptions,
 ) => {
@@ -171,18 +178,29 @@ export const useDictionaryWorkspace = (
   })
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "status"
-            ? "120"
-            : column.key.endsWith("At")
-              ? "200"
-              : undefined,
-    })),
+    options.page.tableColumns.value
+      .filter((column) => dictionaryListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (dictionaryListColumnOrder.get(left.key) ?? 99) -
+          (dictionaryListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "name"
+            ? "180"
+            : column.key === "code"
+              ? "150"
+              : column.key === "description"
+                ? "240"
+                : column.key === "status"
+                  ? "100"
+                  : column.key === "updatedAt"
+                    ? "180"
+                    : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -242,11 +260,11 @@ export const useDictionaryWorkspace = (
           : field.options,
       placeholder:
         field.key === "code"
-          ? options.t("app.dictionary.query.codePlaceholder")
+          ? options.t("app.dictionary.form.codePlaceholder")
           : field.key === "name"
-            ? options.t("app.dictionary.query.namePlaceholder")
+            ? options.t("app.dictionary.form.namePlaceholder")
             : field.key === "description"
-              ? options.t("app.dictionary.query.descriptionPlaceholder")
+              ? options.t("app.dictionary.form.descriptionPlaceholder")
               : field.key === "status"
                 ? options.t("copy.query.statusPlaceholder")
                 : field.placeholder,

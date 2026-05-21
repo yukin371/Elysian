@@ -40,6 +40,10 @@ export const zhCNNotificationLocaleMessages: VueLocaleMessages = {
   "app.notification.query.contentPlaceholder": "按内容查询",
   "app.notification.query.levelPlaceholder": "选择通知级别",
   "app.notification.query.statusPlaceholder": "选择通知状态",
+  "app.notification.form.recipientUserIdPlaceholder": "填写接收用户",
+  "app.notification.form.titlePlaceholder": "填写通知标题",
+  "app.notification.form.contentPlaceholder": "填写通知内容",
+  "app.notification.form.levelPlaceholder": "选择通知级别",
   "app.notification.status.unread": "未读",
   "app.notification.status.read": "已读",
   "app.notification.level.info": "提示",
@@ -51,5 +55,6 @@ export const zhCNNotificationLocaleMessages: VueLocaleMessages = {
   "app.notification.meta.level": "级别",
   "app.notification.meta.readAt": "已读时间",
   "app.notification.action.create": "新建通知",
+  "app.notification.action.edit": "编辑通知",
   "app.notification.action.markRead": "标记已读",
 }

@@ -35,6 +35,22 @@ export interface BuildGeneratorResultRecoveryStepsInput {
   t: GeneratorPreviewTranslation
 }
 
+export const formatGeneratorPreviewDateTime = (
+  value: string | null | undefined,
+) => {
+  if (!value) {
+    return "-"
+  }
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return date.toLocaleString()
+}
+
 export const resolveGeneratorDriftStatusLabel = (
   t: GeneratorPreviewTranslation,
   driftStatus: GeneratorPreviewDriftStatus,
@@ -113,7 +129,7 @@ export const buildGeneratorStatusFacts = (
     facts.push(
       {
         label: input.t("app.generatorPreview.meta.appliedAt"),
-        value: input.applyEvidence.appliedAt ?? "-",
+        value: formatGeneratorPreviewDateTime(input.applyEvidence.appliedAt),
       },
       {
         label: input.t("app.generatorPreview.meta.manifestPath"),

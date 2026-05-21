@@ -7,6 +7,7 @@ export interface CustomerWorkspaceMainInjectedState {
   customerErrorMessage: { value: string }
   customerItems: { value: CustomerRecord[] }
   customerLoading: { value: boolean }
+  tableItems: { value: Array<Record<string, unknown>> }
 }
 
 export type CustomerPanelMode = "create" | "detail" | "edit" | "delete-confirm"

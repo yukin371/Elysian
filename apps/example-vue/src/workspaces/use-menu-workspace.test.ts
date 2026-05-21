@@ -168,6 +168,98 @@ describe("useMenuWorkspace", () => {
     ])
   })
 
+  test("shows menu parent names instead of raw parent ids in the table", async () => {
+    const parent = createMenuRecord({
+      code: "system-root",
+      id: "parent-menu-id",
+      name: "System",
+      parentId: null,
+      type: "directory",
+    })
+    const child = createMenuRecord({
+      code: "system-dictionaries",
+      id: "child-menu-id",
+      name: "Dictionaries",
+      parentId: "parent-menu-id",
+    })
+    const orphan = createMenuRecord({
+      code: "system-settings",
+      id: "orphan-menu-id",
+      name: "Settings",
+      parentId: "f7047a2f-f3b9-4331-9be1-1faa3742a96f",
+    })
+
+    globalThis.fetch = (async (_input, _init) =>
+      new Response(JSON.stringify({ items: [parent, child, orphan] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })) as typeof fetch
+
+    const workspace = createWorkspace({
+      tableColumns: computed(() => [{ key: "parentId" }, { key: "name" }]),
+    })
+
+    await workspace.reloadMenus()
+
+    expect(
+      workspace.tableItems.value.map((item) => ({
+        name: item.name,
+        parentId: item.parentId,
+      })),
+    ).toEqual([
+      { name: "System", parentId: "app.menu.parentRoot" },
+      { name: "Dictionaries", parentId: "System" },
+      { name: "Settings", parentId: "app.menu.parentUnknown" },
+    ])
+  })
+
+  test("shows a readable option for a missing parent while editing", async () => {
+    const orphan = createMenuDetailRecord({
+      code: "system-settings",
+      id: "orphan-menu-id",
+      name: "Settings",
+      parentId: "f7047a2f-f3b9-4331-9be1-1faa3742a96f",
+    })
+
+    globalThis.fetch = (async (input) => {
+      const url = String(input)
+
+      if (url.endsWith("/system/menus/orphan-menu-id")) {
+        return new Response(JSON.stringify(orphan), {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        })
+      }
+
+      return new Response(JSON.stringify({ items: [orphan] }), {
+        headers: { "content-type": "application/json" },
+        status: 200,
+      })
+    }) as typeof fetch
+
+    const workspace = createWorkspace({
+      formFields: computed(() => [
+        {
+          input: "text" as const,
+          key: "parentId",
+          label: "parentId",
+        },
+      ]),
+    })
+
+    await workspace.reloadMenus()
+    await workspace.handleRowClick({ id: "orphan-menu-id" })
+
+    const parentField = workspace.formFields.value.find(
+      (field) => field.key === "parentId",
+    )
+
+    expect(parentField?.options).toContainEqual({
+      label: "app.menu.parentUnknown",
+      value: "f7047a2f-f3b9-4331-9be1-1faa3742a96f",
+    })
+  })
+
   test("keeps menu query and detail fields compact", async () => {
     const allFieldKeys = [
       "id",

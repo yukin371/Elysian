@@ -189,13 +189,32 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
 
   const parentLookup = computed(() => createMenuParentLookup(menuItems.value))
 
-  const parentOptions = computed(() =>
-    createMenuParentOptions(
+  const parentOptions = computed(() => {
+    const baseOptions = createMenuParentOptions(
       menuItems.value,
       selectedMenuId.value,
       options.t("app.menu.parentRoot"),
-    ),
-  )
+    )
+    const activeParentId =
+      menuPanelMode.value === "edit"
+        ? menuEditForm.value.parentId
+        : selectedMenu.value?.parentId
+
+    if (
+      activeParentId &&
+      !baseOptions.some((option) => option.value === activeParentId)
+    ) {
+      return [
+        ...baseOptions,
+        {
+          label: options.t("app.menu.parentUnknown"),
+          value: activeParentId,
+        },
+      ]
+    }
+
+    return baseOptions
+  })
 
   const visibleTableColumnKeys = new Set([
     "name",
@@ -278,6 +297,7 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
     createMenuTableItems(filteredMenuItems.value, {
       parentLookup: parentLookup.value,
       rootLabel: options.t("app.menu.parentRoot"),
+      unknownParentLabel: options.t("app.menu.parentUnknown"),
       localizeType: (type) => options.localizeType(type),
       localizeBoolean: options.localizeBoolean,
       localizeStatus: (status) => options.localizeStatus(status),
@@ -341,17 +361,17 @@ export const useMenuWorkspace = (options: UseMenuWorkspaceOptions) => {
         field.key === "parentId"
           ? options.t("app.menu.parentPlaceholder")
           : field.key === "code"
-            ? options.t("app.menu.query.codePlaceholder")
+            ? options.t("app.menu.form.codePlaceholder")
             : field.key === "name"
-              ? options.t("app.menu.query.namePlaceholder")
+              ? options.t("app.menu.form.namePlaceholder")
               : field.key === "path"
-                ? options.t("app.menu.query.pathPlaceholder")
+                ? options.t("app.menu.form.pathPlaceholder")
                 : field.key === "component"
-                  ? options.t("app.menu.query.componentPlaceholder")
+                  ? options.t("app.menu.form.componentPlaceholder")
                   : field.key === "icon"
-                    ? options.t("app.menu.query.iconPlaceholder")
+                    ? options.t("app.menu.form.iconPlaceholder")
                     : field.key === "permissionCode"
-                      ? options.t("app.menu.query.permissionCodePlaceholder")
+                      ? options.t("app.menu.form.permissionCodePlaceholder")
                       : field.key === "status"
                         ? options.t("copy.query.statusPlaceholder")
                         : field.placeholder,

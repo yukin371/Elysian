@@ -158,6 +158,7 @@ describe("menu workspace helpers", () => {
       createMenuTableItems(menus, {
         parentLookup: createMenuParentLookup(menus),
         rootLabel: "Root Menu",
+        unknownParentLabel: "Unknown Parent",
         localizeType: (type) => `type:${type}`,
         localizeBoolean: (value) => `bool:${String(value)}`,
         localizeStatus: (status) => `status:${status}`,

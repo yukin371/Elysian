@@ -48,6 +48,12 @@ interface UsePostWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const postListColumnOrder = new Map(
+  ["name", "code", "sort", "status", "remark", "updatedAt"].map(
+    (key, index) => [key, index],
+  ),
+)
+
 export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
   const postWorkspace = createCrudWorkspace({
     canCreate: options.canCreate,
@@ -139,20 +145,29 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
   const selectedPost = postWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "status"
-            ? "120"
-            : column.key === "remark"
-              ? "220"
-              : column.key.endsWith("At")
-                ? "200"
-                : undefined,
-    })),
+    options.page.tableColumns.value
+      .filter((column) => postListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (postListColumnOrder.get(left.key) ?? 99) -
+          (postListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "name"
+            ? "180"
+            : column.key === "code"
+              ? "140"
+              : column.key === "sort" || column.key === "status"
+                ? "100"
+                : column.key === "remark"
+                  ? "220"
+                  : column.key === "updatedAt"
+                    ? "180"
+                    : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -212,11 +227,11 @@ export const usePostWorkspace = (options: UsePostWorkspaceOptions) => {
           : field.options,
       placeholder:
         field.key === "code"
-          ? options.t("app.post.query.codePlaceholder")
+          ? options.t("app.post.form.codePlaceholder")
           : field.key === "name"
-            ? options.t("app.post.query.namePlaceholder")
+            ? options.t("app.post.form.namePlaceholder")
             : field.key === "remark"
-              ? options.t("app.post.query.remarkPlaceholder")
+              ? options.t("app.post.form.remarkPlaceholder")
               : field.key === "status"
                 ? options.t("copy.query.statusPlaceholder")
                 : field.placeholder,

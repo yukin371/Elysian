@@ -93,6 +93,7 @@ const showConfigError = () => props.errorMessage.trim().length > 0
           {{ t("app.generatorPreview.input.moduleNameLabel") }}
         </span>
         <TInput
+          name="generator-preview-module-code"
           :model-value="draftModuleName"
           :disabled="loading || reviewLoading || applyLoading || !canPatchDraftMeta"
           :placeholder="t('app.generatorPreview.input.moduleNamePlaceholder')"
@@ -108,6 +109,7 @@ const showConfigError = () => props.errorMessage.trim().length > 0
           {{ t("app.generatorPreview.input.moduleLabelLabel") }}
         </span>
         <TInput
+          name="generator-preview-module-label"
           :model-value="draftModuleLabel"
           :disabled="loading || reviewLoading || applyLoading || !canPatchDraftMeta"
           :placeholder="t('app.generatorPreview.input.moduleLabelPlaceholder')"

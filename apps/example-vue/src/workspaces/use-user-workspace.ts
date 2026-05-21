@@ -56,6 +56,19 @@ interface UseUserWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const userListColumnOrder = new Map(
+  [
+    "displayName",
+    "username",
+    "email",
+    "phone",
+    "status",
+    "isSuperAdmin",
+    "lastLoginAt",
+    "updatedAt",
+  ].map((key, index) => [key, index]),
+)
+
 export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
   const userPasswordInput = ref("")
   const resetPanelActive = ref(false)
@@ -208,20 +221,33 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
   const selectedUser = userWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "status"
-            ? "120"
-            : column.key === "isSuperAdmin"
-              ? "140"
-              : column.key.endsWith("At")
-                ? "200"
-                : undefined,
-    })),
+    options.page.tableColumns.value
+      .filter((column) => userListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (userListColumnOrder.get(left.key) ?? 99) -
+          (userListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "displayName"
+            ? "160"
+            : column.key === "username"
+              ? "150"
+              : column.key === "email"
+                ? "220"
+                : column.key === "phone"
+                  ? "150"
+                  : column.key === "status"
+                    ? "100"
+                    : column.key === "isSuperAdmin"
+                      ? "120"
+                      : column.key.endsWith("At")
+                        ? "180"
+                        : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -288,13 +314,13 @@ export const useUserWorkspace = (options: UseUserWorkspaceOptions) => {
             : field.options,
         placeholder:
           field.key === "username"
-            ? options.t("app.user.query.usernamePlaceholder")
+            ? options.t("app.user.form.usernamePlaceholder")
             : field.key === "displayName"
-              ? options.t("app.user.query.displayNamePlaceholder")
+              ? options.t("app.user.form.displayNamePlaceholder")
               : field.key === "email"
-                ? options.t("app.user.query.emailPlaceholder")
+                ? options.t("app.user.form.emailPlaceholder")
                 : field.key === "phone"
-                  ? options.t("app.user.query.phonePlaceholder")
+                  ? options.t("app.user.form.phonePlaceholder")
                   : field.key === "status"
                     ? options.t("copy.query.statusPlaceholder")
                     : field.placeholder,

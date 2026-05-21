@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test"
 
 import { toGeneratorPreviewFileCard } from "../../../lib/generator-preview-workspace"
 import type { GeneratorPreviewReportFile } from "../../../lib/platform-api/workflow"
+import { formatGeneratorPreviewDateTime } from "./generator-preview-main-state-facts"
 import type { GeneratorPreviewSqlProposalHandoff } from "./types"
 import {
   type GeneratorPreviewWorkspaceMainEmit,
@@ -219,12 +220,20 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
     })
     expect(state.statusFacts.value).toContainEqual({
       label: "app.generatorPreview.meta.appliedAt",
-      value: "2026-05-18T10:00:00.000Z",
+      value: new Date("2026-05-18T10:00:00.000Z").toLocaleString(),
     })
     expect(state.statusFacts.value).toContainEqual({
       label: "app.generatorPreview.meta.manifestPath",
       value: "reports/session-1.apply-manifest.json",
     })
+  })
+
+  test("formats generator evidence timestamps for user-facing facts", () => {
+    expect(formatGeneratorPreviewDateTime("2026-05-18T10:00:00.000Z")).toBe(
+      new Date("2026-05-18T10:00:00.000Z").toLocaleString(),
+    )
+    expect(formatGeneratorPreviewDateTime(null)).toBe("-")
+    expect(formatGeneratorPreviewDateTime("not-a-date")).toBe("not-a-date")
   })
 
   test("exposes the first blocked file for quick recovery", () => {

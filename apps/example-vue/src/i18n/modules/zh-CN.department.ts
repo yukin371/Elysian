@@ -31,6 +31,8 @@ export const zhCNDepartmentLocaleMessages: VueLocaleMessages = {
   "app.department.parentPlaceholder": "选择上级部门",
   "app.department.query.codePlaceholder": "按编码搜索",
   "app.department.query.namePlaceholder": "按名称搜索",
+  "app.department.form.codePlaceholder": "请输入部门编码",
+  "app.department.form.namePlaceholder": "请输入部门名称",
   "app.department.action.create": "新建部门",
   "app.department.action.edit": "编辑部门",
   "app.department.countLabel": "当前显示 {visible} 条，共 {total} 条",

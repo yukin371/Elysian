@@ -204,6 +204,7 @@ export const createMenuTableItems = (
   options: {
     parentLookup: Map<string, MenuRecord>
     rootLabel: string
+    unknownParentLabel: string
     localizeType: (type: MenuRecord["type"]) => string
     localizeBoolean: (value: boolean) => string
     localizeStatus: (status: MenuRecord["status"]) => string
@@ -213,7 +214,8 @@ export const createMenuTableItems = (
   menus.map((menu) => ({
     ...menu,
     parentId: menu.parentId
-      ? (options.parentLookup.get(menu.parentId)?.name ?? menu.parentId)
+      ? (options.parentLookup.get(menu.parentId)?.name ??
+        options.unknownParentLabel)
       : options.rootLabel,
     type: options.localizeType(menu.type),
     isVisible: options.localizeBoolean(menu.isVisible),

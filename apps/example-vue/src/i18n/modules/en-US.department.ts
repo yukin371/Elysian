@@ -33,6 +33,8 @@ export const enUSDepartmentLocaleMessages: VueLocaleMessages = {
   "app.department.parentPlaceholder": "Select parent department",
   "app.department.query.codePlaceholder": "Search by code",
   "app.department.query.namePlaceholder": "Search by name",
+  "app.department.form.codePlaceholder": "Enter department code",
+  "app.department.form.namePlaceholder": "Enter department name",
   "app.department.action.create": "New department",
   "app.department.action.edit": "Edit department",
   "app.department.countLabel": "Showing {visible} of {total} departments",

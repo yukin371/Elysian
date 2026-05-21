@@ -58,6 +58,10 @@ const resolvedItems = readInjectedValue(
   computed(() => resolvedCustomerWorkspaceState.value?.customerItems ?? null),
   [] as CustomerRecord[],
 )
+const resolvedTableItems = readInjectedValue(
+  computed(() => resolvedCustomerWorkspaceState.value?.tableItems ?? null),
+  [] as Array<Record<string, unknown>>,
+)
 
 const panelTitle = computed(() => props.t("app.workspace.title"))
 
@@ -94,7 +98,7 @@ const handleCreate = () => {
   <ElyCrudWorkbench
     :title="panelTitle"
     :table-columns="tableColumns"
-    :items="resolvedItems"
+    :items="resolvedTableItems"
     :table-loading="resolvedLoading"
     :table-actions="tableActions"
     :search-placeholder="t('app.workspace.searchPlaceholder', '搜索客户...')"

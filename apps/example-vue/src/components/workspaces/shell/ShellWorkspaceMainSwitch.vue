@@ -10,6 +10,8 @@ import {
 } from "./shell-workspace-main-descriptor"
 import { resolveProvidedWorkspaceState } from "./workspace-state-provider"
 
+defineOptions({ inheritAttrs: false })
+
 const props = defineProps<ShellWorkspaceMainSwitchProps>()
 const emit = defineEmits<ShellWorkspaceMainSwitchEmitFn>()
 
@@ -27,6 +29,7 @@ const providedWorkspaceState = computed(() =>
       customerErrorMessage: { value: string }
       customerItems: { value: unknown[] }
       customerLoading: { value: boolean }
+      tableItems: { value: unknown[] }
     } | null,
     (props.dictionaryWorkspaceState ?? null) as {
       dictionaryErrorMessage: { value: string }

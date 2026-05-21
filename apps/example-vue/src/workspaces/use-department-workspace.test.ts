@@ -32,7 +32,9 @@ const createDepartmentDetailRecord = (
   ...overrides,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (
+  overrides: Partial<Parameters<typeof useDepartmentWorkspace>[0]> = {},
+) =>
   useDepartmentWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
@@ -48,6 +50,7 @@ const createWorkspace = () =>
       tableColumns: computed(() => []),
     },
     t: (key) => key,
+    ...overrides,
   })
 
 describe("useDepartmentWorkspace", () => {
@@ -116,6 +119,35 @@ describe("useDepartmentWorkspace", () => {
       workspace.filteredDepartmentItems.value.map((item) => item.id),
     ).toEqual(["department-1", "department-2"])
     expect(workspace.departmentQueryValues.value).toEqual({})
+  })
+
+  test("keeps technical ids out of the default department list columns", () => {
+    const workspace = createWorkspace({
+      localizeFieldLabel: (fieldKey) => `field:${fieldKey}`,
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "parentId" },
+          { key: "code" },
+          { key: "name" },
+          { key: "sort" },
+          { key: "status" },
+          { key: "createdAt" },
+          { key: "updatedAt" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value).toEqual([
+      { key: "name", label: "field:name", width: "180" },
+      { key: "code", label: "field:code", width: "140" },
+      { key: "parentId", label: "field:parentId", width: "180" },
+      { key: "sort", label: "field:sort", width: "100" },
+      { key: "status", label: "field:status", width: "100" },
+      { key: "updatedAt", label: "field:updatedAt", width: "180" },
+    ])
   })
 
   test("normalizes create payload and keeps edit mode after creation", async () => {

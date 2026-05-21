@@ -53,6 +53,10 @@ type CustomerPageAction = {
   label: string
 }
 
+const customerListColumnOrder = new Map(
+  ["name", "status", "updatedAt"].map((key, index) => [key, index]),
+)
+
 interface CustomerPageContract {
   tableColumns: ComputedRef<CustomerPageColumn[]>
   tableActions: ComputedRef<CustomerPageAction[]>
@@ -124,18 +128,25 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
     }))
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "status"
-            ? "120"
-            : column.key.endsWith("At")
-              ? "200"
-              : undefined,
-    })),
+    options.page.tableColumns.value
+      .filter((column) => customerListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (customerListColumnOrder.get(left.key) ?? 99) -
+          (customerListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "name"
+            ? "220"
+            : column.key === "status"
+              ? "120"
+              : column.key === "updatedAt"
+                ? "180"
+                : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -175,9 +186,11 @@ export const useCustomerWorkspace = (options: UseCustomerWorkspaceOptions) => {
       label: options.localizeFieldLabel(field.key),
       options: localizeSelectOptions(field.options),
       placeholder:
-        field.key === "status"
-          ? options.t("copy.query.statusPlaceholder")
-          : field.placeholder,
+        field.key === "name"
+          ? options.t("app.customer.form.namePlaceholder")
+          : field.key === "status"
+            ? options.t("copy.query.statusPlaceholder")
+            : field.placeholder,
     }))
 
     if (customerFormMode.value !== "detail") {

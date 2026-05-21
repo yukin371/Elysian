@@ -23,6 +23,7 @@ const createNotificationRecord = (
 
 const createWorkspace = (options?: {
   onRecoverableAuthError?: (error: unknown) => void
+  page?: Parameters<typeof useNotificationWorkspace>[0]["page"]
 }) =>
   useNotificationWorkspace({
     canCreate: computed(() => true),
@@ -34,7 +35,7 @@ const createWorkspace = (options?: {
     localizeLevel: (level) => level,
     localizeStatus: (status) => status,
     onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
-    page: {
+    page: options?.page ?? {
       formFields: computed(() => []),
       queryFields: computed(() => [
         { key: "title", kind: "text" as const, label: "Title" },
@@ -80,6 +81,34 @@ describe("useNotificationWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps notification list columns task-oriented", () => {
+    const workspace = createWorkspace({
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "content" },
+          { key: "title" },
+          { key: "level" },
+          { key: "status" },
+          { key: "recipientUserId" },
+          { key: "readAt" },
+          { key: "createdAt" },
+          { key: "createdByUserId" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "title",
+      "level",
+      "statusLabel",
+      "readAt",
+      "createdAt",
+    ])
   })
 
   test("requests filtered notifications from the server when searching and resetting", async () => {

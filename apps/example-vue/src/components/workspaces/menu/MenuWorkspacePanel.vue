@@ -168,7 +168,7 @@ const resolvedMenuParentLookup = readInjectedValue(
           <strong>{{
             resolvedSelectedMenu.parentId
               ? (resolvedMenuParentLookup.get(resolvedSelectedMenu.parentId)?.name ??
-                resolvedSelectedMenu.parentId)
+                t("app.menu.parentUnknown"))
               : t("app.menu.parentRoot")
           }}</strong>
         </div>
@@ -178,20 +178,6 @@ const resolvedMenuParentLookup = readInjectedValue(
         </div>
       </div>
 
-      <div v-if="resolvedSelectedMenuDetail" class="mt-5 space-y-4">
-        <div>
-          <p class="enterprise-subheading">
-            {{ t("app.menu.meta.roleIds") }}
-          </p>
-          <p class="enterprise-copy">
-            {{
-              resolvedSelectedMenuDetail.roleIds.length > 0
-                ? resolvedSelectedMenuDetail.roleIds.join(", ")
-                : t("app.menu.meta.empty")
-            }}
-          </p>
-        </div>
-      </div>
     </template>
 
     <template

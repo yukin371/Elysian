@@ -8,11 +8,15 @@ describe("resolveProvidedWorkspaceState", () => {
     const customerLoading = ref(false)
     const customerErrorMessage = ref("")
     const customerItems = ref([{ id: "customer-1" }])
+    const tableItems = ref([
+      { id: "customer-1", updatedAt: "2026/5/20 19:33:47" },
+    ])
 
     const resolved = resolveProvidedWorkspaceState("customer", {
       customerErrorMessage,
       customerItems,
       customerLoading,
+      tableItems,
     })
 
     expect(resolved?.kind).toBe("customer")
@@ -22,6 +26,9 @@ describe("resolveProvidedWorkspaceState", () => {
       (resolved?.state as { customerItems: typeof customerItems })
         .customerItems,
     ).toBe(customerItems)
+    expect(
+      (resolved?.state as { tableItems: typeof tableItems }).tableItems,
+    ).toBe(tableItems)
   })
 
   test("does not provide workspace state for unrelated workspaces", () => {
@@ -29,6 +36,7 @@ describe("resolveProvidedWorkspaceState", () => {
       customerErrorMessage: ref(""),
       customerItems: ref([]),
       customerLoading: ref(false),
+      tableItems: ref([]),
     })
 
     expect(resolved).toBeNull()

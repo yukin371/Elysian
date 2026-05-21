@@ -52,6 +52,18 @@ interface UseRoleWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const roleListColumnOrder = new Map(
+  [
+    "name",
+    "code",
+    "description",
+    "dataScope",
+    "isSystem",
+    "status",
+    "updatedAt",
+  ].map((key, index) => [key, index]),
+)
+
 export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
   const roleWorkspace = createCrudWorkspace<
     RoleRecord,
@@ -156,22 +168,33 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
   )
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "status"
-            ? "120"
-            : column.key === "isSystem"
+    options.page.tableColumns.value
+      .filter((column) => roleListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (roleListColumnOrder.get(left.key) ?? 99) -
+          (roleListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "name"
+            ? "180"
+            : column.key === "code"
               ? "140"
-              : column.key === "dataScope"
-                ? "160"
-                : column.key.endsWith("At")
-                  ? "200"
-                  : undefined,
-    })),
+              : column.key === "description"
+                ? "220"
+                : column.key === "status"
+                  ? "100"
+                  : column.key === "isSystem"
+                    ? "120"
+                    : column.key === "dataScope"
+                      ? "150"
+                      : column.key === "updatedAt"
+                        ? "180"
+                        : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -266,11 +289,11 @@ export const useRoleWorkspace = (options: UseRoleWorkspaceOptions) => {
             : field.options,
       placeholder:
         field.key === "code"
-          ? options.t("app.role.query.codePlaceholder")
+          ? options.t("app.role.form.codePlaceholder")
           : field.key === "name"
-            ? options.t("app.role.query.namePlaceholder")
+            ? options.t("app.role.form.namePlaceholder")
             : field.key === "description"
-              ? options.t("app.role.query.descriptionPlaceholder")
+              ? options.t("app.role.form.descriptionPlaceholder")
               : field.key === "status"
                 ? options.t("copy.query.statusPlaceholder")
                 : field.placeholder,

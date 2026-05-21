@@ -164,6 +164,7 @@ export const useExampleAppShellOrchestration = ({
     selectNotification: async (item) => {
       await notificationWorkspace.selectNotification(item as never)
     },
+    openNotificationCreatePanel: notificationWorkspace.openCreatePanel,
     filteredDepartmentItems: departmentWorkspace.filteredDepartmentItems,
     isDepartmentWorkspace: navigation.isDepartmentWorkspace,
     departmentLoading: departmentWorkspace.departmentLoading,

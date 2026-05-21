@@ -44,6 +44,10 @@ export const enUSNotificationLocaleMessages: VueLocaleMessages = {
   "app.notification.query.contentPlaceholder": "Filter by content",
   "app.notification.query.levelPlaceholder": "Select level",
   "app.notification.query.statusPlaceholder": "Select status",
+  "app.notification.form.recipientUserIdPlaceholder": "Enter recipient user",
+  "app.notification.form.titlePlaceholder": "Enter notification title",
+  "app.notification.form.contentPlaceholder": "Enter notification content",
+  "app.notification.form.levelPlaceholder": "Select notification level",
   "app.notification.status.unread": "Unread",
   "app.notification.status.read": "Read",
   "app.notification.level.info": "Info",
@@ -55,5 +59,6 @@ export const enUSNotificationLocaleMessages: VueLocaleMessages = {
   "app.notification.meta.level": "Level",
   "app.notification.meta.readAt": "Read at",
   "app.notification.action.create": "New notification",
+  "app.notification.action.edit": "Edit notification",
   "app.notification.action.markRead": "Mark as read",
 }

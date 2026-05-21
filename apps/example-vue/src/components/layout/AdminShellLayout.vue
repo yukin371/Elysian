@@ -231,10 +231,22 @@ useWorkbenchShortcuts({
     @panel-close="closeContextPanel"
   >
     <template #workspace>
-      <ShellWorkspaceMainSwitch
-        v-bind="workspaceMainProps"
-        v-on="wrappedWorkspaceMainListeners"
-      />
+      <Suspense>
+        <ShellWorkspaceMainSwitch
+          v-bind="workspaceMainProps"
+          v-on="wrappedWorkspaceMainListeners"
+        />
+
+        <template #fallback>
+          <section class="workspace-loading-panel" aria-live="polite">
+            <span class="workspace-loading-panel__dot" />
+            <div>
+              <strong>{{ t("app.loading.workspace") }}</strong>
+              <p>{{ workspaceTitle }}</p>
+            </div>
+          </section>
+        </template>
+      </Suspense>
     </template>
 
     <template #context>
@@ -254,3 +266,56 @@ useWorkbenchShortcuts({
     </template>
   </ElyWorkbenchShell>
 </template>
+
+<style scoped>
+.workspace-loading-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 9rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 1.25rem;
+  color: #0f172a;
+}
+
+.workspace-loading-panel__dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: #2457d6;
+  box-shadow: 0 0 0 0 rgba(36, 87, 214, 0.24);
+  animation: workspace-loading-pulse 1.2s ease-in-out infinite;
+  flex: 0 0 auto;
+}
+
+.workspace-loading-panel strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.workspace-loading-panel p {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+@keyframes workspace-loading-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(36, 87, 214, 0.24);
+    transform: scale(1);
+  }
+
+  70% {
+    box-shadow: 0 0 0 0.45rem rgba(36, 87, 214, 0);
+    transform: scale(1.05);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(36, 87, 214, 0);
+    transform: scale(1);
+  }
+}
+</style>

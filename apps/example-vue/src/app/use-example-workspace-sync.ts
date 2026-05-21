@@ -32,6 +32,7 @@ interface UseExampleWorkspaceSyncOptions {
   notificationDetail: Ref<ItemWithId | null>
   canCreateNotifications: ComputedRef<boolean>
   selectNotification: (item: ItemWithId) => Promise<void>
+  openNotificationCreatePanel: () => void
 
   filteredDepartmentItems: ComputedRef<ItemWithId[]>
   isDepartmentWorkspace: ComputedRef<boolean>
@@ -209,7 +210,7 @@ export const useExampleWorkspaceSync = (
         options.notificationDetail.value = null
 
         if (options.canCreateNotifications.value) {
-          options.notificationPanelMode.value = "create"
+          options.openNotificationCreatePanel()
         }
 
         return

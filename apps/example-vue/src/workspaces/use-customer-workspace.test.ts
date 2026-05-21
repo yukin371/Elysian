@@ -19,6 +19,7 @@ const createCustomerRecord = (
 
 const createWorkspace = (options?: {
   onRecoverableAuthError?: (error: unknown) => void
+  page?: Parameters<typeof useCustomerWorkspace>[0]["page"]
 }) =>
   useCustomerWorkspace({
     canCreate: computed(() => true),
@@ -31,7 +32,7 @@ const createWorkspace = (options?: {
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeStatus: (status) => status,
     onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
-    page: {
+    page: options?.page ?? {
       formFields: computed(() => []),
       queryFields: computed(() => [
         { key: "name", kind: "text" as const, label: "Name" },
@@ -71,6 +72,29 @@ describe("useCustomerWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps the customer list focused on business fields", () => {
+    const workspace = createWorkspace({
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableActions: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "createdAt" },
+          { key: "updatedAt" },
+          { key: "status" },
+          { key: "name" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "name",
+      "status",
+      "updatedAt",
+    ])
   })
 
   test("requests server-side pagination and sorting with the current query state", async () => {
@@ -126,6 +150,10 @@ describe("useCustomerWorkspace", () => {
     expect(workspace.customerListPageSize.value).toBe(50)
     expect(workspace.customerListSortValue.value).toBe("name:asc")
     expect(workspace.customerCountLabel.value).toContain("visible=2")
+    expect(workspace.tableItems.value[0]?.updatedAt).not.toBe(
+      "2026-05-01T10:00:00.000Z",
+    )
+    expect(String(workspace.tableItems.value[0]?.updatedAt)).toContain("/")
   })
 
   test("deletes the selected customer and reloads the list", async () => {

@@ -122,9 +122,6 @@ const handleFormCancel = () => {
         <div class="ely-context-panel__identity-name">
           {{ resolvedSelectedCustomer.name }}
         </div>
-        <div class="ely-context-panel__identity-sub">
-          {{ resolvedSelectedCustomer.id }}
-        </div>
       </div>
     </div>
 

@@ -24,6 +24,7 @@ const createUserRecord = (overrides?: Partial<UserRecord>): UserRecord => ({
 
 const createWorkspace = (options?: {
   onRecoverableAuthError?: (error: unknown) => void
+  page?: Parameters<typeof useUserWorkspace>[0]["page"]
 }) =>
   useUserWorkspace({
     canCreate: computed(() => true),
@@ -36,7 +37,7 @@ const createWorkspace = (options?: {
     localizeFieldLabel: (fieldKey) => fieldKey,
     localizeStatus: (status) => status,
     onRecoverableAuthError: options?.onRecoverableAuthError ?? (() => {}),
-    page: {
+    page: options?.page ?? {
       formFields: computed(() => []),
       queryFields: computed(() => []),
       tableColumns: computed(() => []),
@@ -55,6 +56,38 @@ describe("useUserWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps user list columns focused on account recognition", () => {
+    const workspace = createWorkspace({
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "createdAt" },
+          { key: "username" },
+          { key: "displayName" },
+          { key: "email" },
+          { key: "phone" },
+          { key: "status" },
+          { key: "isSuperAdmin" },
+          { key: "lastLoginAt" },
+          { key: "updatedAt" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "displayName",
+      "username",
+      "email",
+      "phone",
+      "status",
+      "isSuperAdmin",
+      "lastLoginAt",
+      "updatedAt",
+    ])
   })
 
   test("resets the selected user password and returns to edit mode", async () => {

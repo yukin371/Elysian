@@ -54,6 +54,19 @@ interface UseOperationLogWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const operationLogListColumnOrder = new Map(
+  [
+    "category",
+    "action",
+    "actorUserId",
+    "targetType",
+    "targetId",
+    "result",
+    "requestId",
+    "createdAt",
+  ].map((key, index) => [key, index]),
+)
+
 export const useOperationLogWorkspace = (
   options: UseOperationLogWorkspaceOptions,
 ) => {
@@ -155,18 +168,25 @@ export const useOperationLogWorkspace = (
   )
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "result"
-            ? "120"
+    options.page.tableColumns.value
+      .filter((column) => operationLogListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (operationLogListColumnOrder.get(left.key) ?? 99) -
+          (operationLogListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "result"
+            ? "100"
             : column.key === "createdAt"
-              ? "200"
-              : undefined,
-    })),
+              ? "180"
+              : column.key === "requestId" || column.key.endsWith("Id")
+                ? "180"
+                : undefined,
+      })),
   )
 
   const queryFields = computed(() => {

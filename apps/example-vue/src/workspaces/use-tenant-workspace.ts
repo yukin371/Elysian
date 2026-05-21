@@ -47,6 +47,10 @@ interface UseTenantWorkspaceOptions {
   onRecoverableAuthError: (error: unknown) => void
 }
 
+const tenantListColumnOrder = new Map(
+  ["name", "code", "status", "updatedAt"].map((key, index) => [key, index]),
+)
+
 export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
   const tenantWorkspace = createCrudWorkspace<
     TenantRecord,
@@ -134,18 +138,27 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
   const selectedTenant = tenantWorkspace.selectedRecord
 
   const tableColumns = computed(() =>
-    options.page.tableColumns.value.map((column) => ({
-      ...column,
-      label: options.localizeFieldLabel(column.key),
-      width:
-        column.key === "id"
-          ? "240"
-          : column.key === "status"
-            ? "120"
-            : column.key.endsWith("At")
-              ? "200"
-              : undefined,
-    })),
+    options.page.tableColumns.value
+      .filter((column) => tenantListColumnOrder.has(column.key))
+      .sort(
+        (left, right) =>
+          (tenantListColumnOrder.get(left.key) ?? 99) -
+          (tenantListColumnOrder.get(right.key) ?? 99),
+      )
+      .map((column) => ({
+        ...column,
+        label: options.localizeFieldLabel(column.key),
+        width:
+          column.key === "name"
+            ? "200"
+            : column.key === "code"
+              ? "160"
+              : column.key === "status"
+                ? "120"
+                : column.key === "updatedAt"
+                  ? "180"
+                  : undefined,
+      })),
   )
 
   const queryFields = computed(() =>
@@ -198,9 +211,9 @@ export const useTenantWorkspace = (options: UseTenantWorkspaceOptions) => {
           : field.options,
       placeholder:
         field.key === "code"
-          ? options.t("app.tenant.query.codePlaceholder")
+          ? options.t("app.tenant.form.codePlaceholder")
           : field.key === "name"
-            ? options.t("app.tenant.query.namePlaceholder")
+            ? options.t("app.tenant.form.namePlaceholder")
             : field.key === "status"
               ? options.t("copy.query.statusPlaceholder")
               : field.placeholder,

@@ -29,6 +29,8 @@ export const enUSTenantLocaleMessages: VueLocaleMessages = {
   "app.tenant.status.suspended": "Suspended",
   "app.tenant.query.codePlaceholder": "Search by tenant code",
   "app.tenant.query.namePlaceholder": "Search by tenant name",
+  "app.tenant.form.codePlaceholder": "Enter tenant code",
+  "app.tenant.form.namePlaceholder": "Enter tenant name",
   "app.tenant.action.create": "New tenant",
   "app.tenant.action.edit": "Edit tenant",
   "app.tenant.action.activate": "Activate tenant",

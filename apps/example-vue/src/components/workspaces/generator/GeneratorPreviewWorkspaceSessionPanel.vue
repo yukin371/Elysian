@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 
+import { formatGeneratorPreviewDateTime } from "./generator-preview-main-state-facts"
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewDiffSummary,
@@ -63,6 +64,13 @@ const recoveryStatusLabel = computed(() => {
   )
 })
 
+const sessionCreatedAtLabel = computed(() =>
+  formatGeneratorPreviewDateTime(props.session.createdAt),
+)
+const reviewEvidenceReviewedAtLabel = computed(() =>
+  formatGeneratorPreviewDateTime(props.reviewEvidence?.reviewedAt),
+)
+
 const applyEvidenceFacts = computed(() => {
   if (!props.applyEvidence) {
     return []
@@ -71,7 +79,7 @@ const applyEvidenceFacts = computed(() => {
   return [
     {
       label: props.t("app.generatorPreview.meta.appliedAt"),
-      value: props.applyEvidence.appliedAt ?? "-",
+      value: formatGeneratorPreviewDateTime(props.applyEvidence.appliedAt),
     },
     {
       label: props.t("app.generatorPreview.meta.actor"),
@@ -103,7 +111,7 @@ const applyEvidenceFacts = computed(() => {
     <div class="generator-facts">
       <span>{{ session.id }}</span>
       <span>{{ sessionActorLabel }}</span>
-      <span>{{ session.createdAt }}</span>
+      <span>{{ sessionCreatedAtLabel }}</span>
       <span>{{ sessionSourceTypeLabel }}</span>
       <span>{{ sessionConflictStrategyLabel }}</span>
       <span v-if="session.confirmedAt">{{ sessionConfirmedAtLabel }}</span>
@@ -132,7 +140,7 @@ const applyEvidenceFacts = computed(() => {
       </span>
     </div>
     <div v-if="reviewEvidence" class="generator-facts">
-      <span>{{ reviewEvidence.reviewedAt ?? "-" }}</span>
+      <span>{{ reviewEvidenceReviewedAtLabel }}</span>
       <span>{{ reviewEvidence.actorDisplayName ?? reviewEvidence.actorUsername ?? reviewEvidence.actorUserId ?? "-" }}</span>
       <span>{{ reviewEvidence.decision === "approve" ? t("app.generatorPreview.action.approve") : t("app.generatorPreview.action.reject") }}</span>
     </div>

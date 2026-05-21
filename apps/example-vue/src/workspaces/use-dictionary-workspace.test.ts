@@ -47,7 +47,9 @@ const createDictionaryTypeDetailRecord = (
   ...overrides,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (
+  overrides: Partial<Parameters<typeof useDictionaryWorkspace>[0]> = {},
+) =>
   useDictionaryWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
@@ -63,6 +65,7 @@ const createWorkspace = () =>
       tableColumns: computed(() => []),
     },
     t: (key) => key,
+    ...overrides,
   })
 
 describe("useDictionaryWorkspace", () => {
@@ -73,6 +76,32 @@ describe("useDictionaryWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps dictionary type list columns focused on lookup management", () => {
+    const workspace = createWorkspace({
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "createdAt" },
+          { key: "code" },
+          { key: "name" },
+          { key: "description" },
+          { key: "status" },
+          { key: "updatedAt" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "name",
+      "code",
+      "description",
+      "status",
+      "updatedAt",
+    ])
   })
 
   test("filters dictionary types from local query state and clears the query on reset", async () => {

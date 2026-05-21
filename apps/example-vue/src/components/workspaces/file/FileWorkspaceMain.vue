@@ -128,6 +128,7 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
           <span>{{ t("app.file.field.originalName") }}</span>
           <TInput
             :model-value="query.originalName ?? ''"
+            name="originalName"
             :placeholder="t('app.file.query.originalNamePlaceholder')"
             clearable
             @update:model-value="updateQuery('originalName', $event)"
@@ -138,6 +139,7 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
           <span>{{ t("app.file.field.mimeType") }}</span>
           <TInput
             :model-value="query.mimeType ?? ''"
+            name="mimeType"
             :placeholder="t('app.file.query.mimeTypePlaceholder')"
             clearable
             @update:model-value="updateQuery('mimeType', $event)"
@@ -148,6 +150,7 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
           <span>{{ t("app.file.field.uploaderUserId") }}</span>
           <TInput
             :model-value="query.uploaderUserId ?? ''"
+            name="uploaderUserId"
             :placeholder="t('app.file.query.uploaderUserIdPlaceholder')"
             clearable
             @update:model-value="updateQuery('uploaderUserId', $event)"
@@ -201,7 +204,6 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
               <th>{{ t("app.file.field.originalName") }}</th>
               <th>{{ t("app.file.field.mimeType") }}</th>
               <th>{{ t("app.file.field.size") }}</th>
-              <th>{{ t("app.file.field.uploaderUserId") }}</th>
               <th>{{ t("app.file.field.createdAt") }}</th>
             </tr>
           </thead>
@@ -218,7 +220,6 @@ const updateQuery = (key: keyof FileWorkspaceQuery, value: string | number) => {
               </td>
               <td>{{ file.mimeType }}</td>
               <td>{{ file.sizeLabel }}</td>
-              <td>{{ file.uploaderUserId }}</td>
               <td>{{ file.createdAt }}</td>
             </tr>
           </tbody>

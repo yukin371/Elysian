@@ -18,12 +18,14 @@ describe("customer workspace state helpers", () => {
         customerErrorMessage: ref(""),
         customerItems: ref([{ id: "customer-1", name: "A" }]),
         customerLoading: ref(false),
+        tableItems: ref([{ id: "customer-1", name: "A" }]),
       },
     }
 
     const resolved = resolveCustomerWorkspaceMainState(context, true)
 
     expect(resolved?.customerItems.value).toHaveLength(1)
+    expect(resolved?.tableItems.value).toHaveLength(1)
     expect(resolved?.customerLoading.value).toBe(false)
   })
 
@@ -36,6 +38,7 @@ describe("customer workspace state helpers", () => {
         customerErrorMessage: ref(""),
         customerItems: ref([]),
         customerLoading: ref(false),
+        tableItems: ref([]),
         customerFormMode: ref<"create" | "detail" | "edit">("detail"),
         deleteConfirmId: ref("customer-1"),
         formFields: ref([{ key: "name" }]),

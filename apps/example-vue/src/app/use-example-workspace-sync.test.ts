@@ -184,4 +184,38 @@ describe("useExampleWorkspaceSync", () => {
     expect(selectedUserId.value).toBeNull()
     expect(userPanelMode.value).toBe("create")
   })
+
+  test("opens the notification create panel through workspace action when list is empty", async () => {
+    const filteredNotificationItems = ref<ItemWithId[]>([{ id: "notice-1" }])
+    const selectedNotificationId = ref<string | null>("notice-1")
+    const notificationDetail = ref<ItemWithId | null>({ id: "notice-1" })
+    const openedPanels: string[] = []
+
+    useExampleWorkspaceSync(
+      createWorkspaceSyncOptions({
+        customerItems: ref<ItemWithId[]>([]),
+        enterpriseFormMode: ref("detail"),
+        selectedCustomerId: ref<string | null>(null),
+        canCreateCustomers: computed(() => false),
+        isNotificationWorkspace: computed(() => true),
+        filteredNotificationItems: computed(
+          () => filteredNotificationItems.value,
+        ),
+        selectedNotificationId,
+        notificationDetail,
+        notificationPanelMode: computed(() => "detail"),
+        canCreateNotifications: computed(() => true),
+        openNotificationCreatePanel: () => {
+          openedPanels.push("notification")
+        },
+      }),
+    )
+
+    filteredNotificationItems.value = []
+    await nextTick()
+
+    expect(selectedNotificationId.value).toBeNull()
+    expect(notificationDetail.value).toBeNull()
+    expect(openedPanels).toEqual(["notification"])
+  })
 })

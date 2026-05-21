@@ -30,7 +30,9 @@ const createRoleDetailRecord = (
   ...overrides,
 })
 
-const createWorkspace = () =>
+const createWorkspace = (
+  overrides: Partial<Parameters<typeof useRoleWorkspace>[0]> = {},
+) =>
   useRoleWorkspace({
     canCreate: computed(() => true),
     canUpdate: computed(() => true),
@@ -48,6 +50,7 @@ const createWorkspace = () =>
       tableColumns: computed(() => []),
     },
     t: (key) => key,
+    ...overrides,
   })
 
 describe("useRoleWorkspace", () => {
@@ -58,6 +61,36 @@ describe("useRoleWorkspace", () => {
   afterEach(() => {
     clearAccessToken()
     globalThis.fetch = originalFetch
+  })
+
+  test("keeps role list columns readable for daily management", () => {
+    const workspace = createWorkspace({
+      page: {
+        formFields: computed(() => []),
+        queryFields: computed(() => []),
+        tableColumns: computed(() => [
+          { key: "id" },
+          { key: "createdAt" },
+          { key: "status" },
+          { key: "code" },
+          { key: "name" },
+          { key: "description" },
+          { key: "dataScope" },
+          { key: "isSystem" },
+          { key: "updatedAt" },
+        ]),
+      },
+    })
+
+    expect(workspace.tableColumns.value.map((column) => column.key)).toEqual([
+      "name",
+      "code",
+      "description",
+      "dataScope",
+      "isSystem",
+      "status",
+      "updatedAt",
+    ])
   })
 
   test("filters roles from local query state and clears the query on reset", async () => {
