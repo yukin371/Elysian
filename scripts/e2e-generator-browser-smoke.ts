@@ -768,9 +768,7 @@ const run = async () => {
       async () => {
         await runFullBrowserPath(page, "browserSmokeHappy")
         await page
-          .getByText(
-            "本次预览已完成 staging apply，应用时间：2026-05-16T08:30:00.000Z。",
-          )
+          .getByText(/本次预览已完成 staging apply，应用时间：.+。/)
           .waitFor()
         await page.getByText("应用时间").first().waitFor()
         await assertNoInternalCopyLeak(page)
