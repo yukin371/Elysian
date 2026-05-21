@@ -36,6 +36,14 @@ if [ "${#STAGED_FILES[@]}" -eq 0 ]; then
     exit 0
 fi
 
+if ! bun run verify:required-generated-artifacts; then
+    error "关键 generated 产物校验失败，请先生成并纳入版本控制"
+fi
+
+if ! bunx @biomejs/biome@1.9.4 check --staged --files-ignore-unknown=true --no-errors-on-unmatched; then
+    error "已暂存文件存在格式 / import 排序 / Biome 诊断，请先修复或运行 bun run format"
+fi
+
 is_binary_in_index() {
     local file="$1"
     local numstat

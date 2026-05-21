@@ -230,6 +230,8 @@
 - `bun run typecheck`
 - `bun run test`
 - `bun run check`
+- `bun run verify:required-generated-artifacts`
+- `bun run lint:workflows`（需本机可用 `actionlint`）
 - `bun run example-vue:workspace-registry:verify`
 - `bun run example-vue:standard-crud-surfaces:verify`
 - `bun run e2e:tenant`（需配置 `DATABASE_URL`、`ACCESS_TOKEN_SECRET` 与本地 PostgreSQL）
@@ -283,6 +285,8 @@
 - 校验 example-vue 标准 CRUD surface：`bun run example-vue:standard-crud-surfaces:verify`
 - 构建 uniapp H5 骨架：`bun run build:uniapp`
 - lint：`bun run lint`
+- 校验关键 generated 产物：`bun run verify:required-generated-artifacts`
+- 校验 GitHub workflows：`bun run lint:workflows`
 - 格式化：`bun run format`
 - 全量检查：`bun run check`
 - 手动重装 hooks：`bun run hooks:install`

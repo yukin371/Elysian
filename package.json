@@ -28,6 +28,8 @@
     "openapi:types:generate": "bun scripts/generate-openapi-types.ts",
     "build:vue": "bun --filter @elysian/example-vue build",
     "build:uniapp": "bun --filter @elysian/example-uniapp build:h5",
+    "verify:required-generated-artifacts": "bun scripts/verify-required-generated-artifacts.ts",
+    "lint:workflows": "actionlint -color",
     "db:generate": "bun --filter @elysian/persistence db:generate",
     "db:migrate": "bun --filter @elysian/persistence db:migrate",
     "db:seed": "bun --filter @elysian/persistence db:seed",
@@ -76,7 +78,7 @@
     "example-vue:workspace-registry:verify": "bun --filter @elysian/example-vue verify:workspace-registry-artifacts",
     "lint": "bunx @biomejs/biome@1.9.4 check .",
     "format": "bunx @biomejs/biome@1.9.4 format --write .",
-    "check": "bun run lint && bun run typecheck && bun run example-vue:workspace-registry:verify && bun run example-vue:standard-crud-surfaces:verify && bun run test",
+    "check": "bun run lint && bun run verify:required-generated-artifacts && bun run example-vue:workspace-registry:verify && bun run example-vue:standard-crud-surfaces:verify && bun run typecheck && bun run test",
     "typecheck": "bunx tsc --noEmit -p tsconfig.json",
     "test": "bun test"
   },

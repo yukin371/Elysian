@@ -24,6 +24,8 @@ generated/
 !apps/example-vue/src/app/workspace-registry/generated/*.ts
 !apps/example-vue/src/lib/platform-api/generated/
 !apps/example-vue/src/lib/platform-api/generated/*
+!apps/example-vue/src/modules/generated/
+!apps/example-vue/src/modules/generated/*.ts
 .turbo/
 .cache/
 coverage/
