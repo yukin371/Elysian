@@ -7,6 +7,13 @@ import {
 } from "./generator-preview-handoff"
 
 describe("generator preview handoff helpers", () => {
+  const restoreNavigator = (value: Navigator | undefined) => {
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value,
+    })
+  }
+
   test("joins suggested commands for display and copy", () => {
     expect(
       joinGeneratorPreviewSuggestedCommands([
@@ -28,9 +35,16 @@ describe("generator preview handoff helpers", () => {
   })
 
   test("returns false when clipboard is unavailable", async () => {
-    await expect(
-      copyGeneratorPreviewSuggestedCommands(["bun run db:generate"], undefined),
-    ).resolves.toBe(false)
+    const originalNavigator = globalThis.navigator
+
+    try {
+      restoreNavigator(undefined)
+      await expect(
+        copyGeneratorPreviewSuggestedCommands(["bun run db:generate"]),
+      ).resolves.toBe(false)
+    } finally {
+      restoreNavigator(originalNavigator)
+    }
   })
 
   test("returns false when copied text is empty", async () => {
