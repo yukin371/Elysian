@@ -4,6 +4,7 @@ import {
   copyGeneratorPreviewSuggestedCommands,
   copyGeneratorPreviewText,
   joinGeneratorPreviewSuggestedCommands,
+  resolveGeneratorPreviewPreferredSqlView,
 } from "./generator-preview-handoff"
 
 describe("generator preview handoff helpers", () => {
@@ -32,6 +33,36 @@ describe("generator preview handoff helpers", () => {
         "bun run db:migrate",
       ]),
     ).toBe("bun run db:generate\nbun run db:migrate")
+  })
+
+  test("prefers the handoff view after apply when manual integration is still pending", () => {
+    expect(
+      resolveGeneratorPreviewPreferredSqlView({
+        hasApplyEvidence: true,
+        hasSqlProposal: true,
+        pendingManualIntegrationStepCount: 2,
+      }),
+    ).toBe("handoff")
+  })
+
+  test("keeps the proposal view before apply when a sql proposal is available", () => {
+    expect(
+      resolveGeneratorPreviewPreferredSqlView({
+        hasApplyEvidence: false,
+        hasSqlProposal: true,
+        pendingManualIntegrationStepCount: 2,
+      }),
+    ).toBe("proposal")
+  })
+
+  test("falls back to the handoff view when no sql proposal is available", () => {
+    expect(
+      resolveGeneratorPreviewPreferredSqlView({
+        hasApplyEvidence: false,
+        hasSqlProposal: false,
+        pendingManualIntegrationStepCount: 1,
+      }),
+    ).toBe("handoff")
   })
 
   test("returns false when clipboard is unavailable", async () => {

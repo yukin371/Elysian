@@ -32,6 +32,7 @@ const WorkflowWorkspaceMain = defineAsyncComponent(
 interface GeneratorPreviewSessionSummary {
   status?: string | null
   applyEvidence?: unknown
+  confirmationEvidence?: unknown
   reviewEvidence?: unknown
   blockerReasons?: Array<{ message: string }>
   recoveryStatus?: "none" | "rebuilt-from-corrupt" | "rebuilt-from-missing"
@@ -629,6 +630,8 @@ const workspaceResolvers: Record<string, ShellWorkspaceMainResolver> = {
       driftStatus: props.generatorPreviewSession?.driftStatus ?? "clean",
       reviewEvidence: props.generatorPreviewSession?.reviewEvidence ?? null,
       applyEvidence: props.generatorPreviewSession?.applyEvidence ?? null,
+      confirmationEvidence:
+        props.generatorPreviewSession?.confirmationEvidence ?? null,
       hasBlockingConflicts:
         props.generatorPreviewSession?.hasBlockingConflicts ?? false,
     },

@@ -66,6 +66,7 @@ type GeneratorPreviewCopyFeedbackStatus = "idle" | "copied" | "failed"
 
 type GeneratorPreviewCopyIdleLabelKey =
   | "app.generatorPreview.action.copyCommands"
+  | "app.generatorPreview.action.copyHandoffCommands"
   | "app.generatorPreview.action.copySnippet"
 
 const createInitialCopyFeedback = (): Record<
@@ -142,7 +143,8 @@ export const useGeneratorPreviewCopyFeedback = (
   ) => {
     if (copyFeedback.value[key] === "copied") {
       return t(
-        idleLabelKey === "app.generatorPreview.action.copyCommands"
+        idleLabelKey === "app.generatorPreview.action.copyCommands" ||
+          idleLabelKey === "app.generatorPreview.action.copyHandoffCommands"
           ? "app.generatorPreview.action.copyCommandsDone"
           : "app.generatorPreview.action.copySnippetDone",
       )
@@ -150,7 +152,8 @@ export const useGeneratorPreviewCopyFeedback = (
 
     if (copyFeedback.value[key] === "failed") {
       return t(
-        idleLabelKey === "app.generatorPreview.action.copyCommands"
+        idleLabelKey === "app.generatorPreview.action.copyCommands" ||
+          idleLabelKey === "app.generatorPreview.action.copyHandoffCommands"
           ? "app.generatorPreview.action.copyCommandsFailed"
           : "app.generatorPreview.action.copySnippetFailed",
       )

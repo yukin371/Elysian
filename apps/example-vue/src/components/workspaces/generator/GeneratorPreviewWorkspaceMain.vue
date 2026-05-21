@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { onBeforeUnmount } from "vue"
+
 import GeneratorPreviewWorkspaceCurrentResultPanel from "./GeneratorPreviewWorkspaceCurrentResultPanel.vue"
 import GeneratorPreviewWorkspaceDraftStartPanel from "./GeneratorPreviewWorkspaceDraftStartPanel.vue"
 import GeneratorPreviewWorkspaceResultListSection from "./GeneratorPreviewWorkspaceResultListSection.vue"
+import { useGeneratorPreviewCopyFeedback } from "./use-generator-preview-copy-feedback"
 import type {
   GeneratorPreviewWorkspaceMainEmit,
   GeneratorPreviewWorkspaceMainProps,
@@ -15,6 +18,8 @@ const {
   canPatchDraftMeta,
   canSubmitReject,
   confirmationChecklist,
+  confirmationEvidenceFacts,
+  confirmationEvidenceSummary,
   cancelApplyConfirmation,
   cancelRejectConfirmation,
   blockedFileCount,
@@ -23,6 +28,9 @@ const {
   configErrorRecoverySteps,
   conflictStrategyCards,
   currentStateMessage,
+  deliveryBoundaryDescription,
+  deliveryBoundaryFacts,
+  deliveryBoundaryTitle,
   draftModuleLabel,
   draftModuleName,
   draftSourceMode,
@@ -56,11 +64,14 @@ const {
   isApplyConfirming,
   isRejectConfirming,
   operationProgressMessage,
+  pendingManualIntegrationStepCount,
+  firstPendingManualIntegrationStep,
   referenceSchemaQuery,
   recoveryStatusMessage,
   rejectCommentRequired,
   resultErrorRecoverySteps,
   resultPrimaryActionLabel,
+  prioritizedReviewEvidenceFilePath,
   reviewComment,
   schemaEditorFacts,
   schemaTemplates,
@@ -69,11 +80,29 @@ const {
   showConfirmAction,
   showFileList,
   showFileTools,
+  showPrimaryHandoffCommandsAction,
+  showPrimaryReviewEvidenceAction,
   showReviewActions,
   showReviewCommentInput,
   showSchemaEditor,
   statusFacts,
 } = useGeneratorPreviewWorkspaceMainState(props, emit)
+
+const {
+  copySuggestedCommandsByKey,
+  disposeCopyFeedbackTimers,
+  resolveCopyLabel,
+} = useGeneratorPreviewCopyFeedback(props.t)
+
+const handleCopyHandoffCommands = async () => {
+  await copySuggestedCommandsByKey(
+    props.sqlProposalHandoff?.suggestedCommands ?? [],
+  )
+}
+
+onBeforeUnmount(() => {
+  disposeCopyFeedbackTimers()
+})
 </script>
 
 <template>
@@ -138,12 +167,28 @@ const {
     :recovery-status-message="recoveryStatusMessage"
     :result-error-recovery-steps="resultErrorRecoverySteps"
     :confirmation-checklist="confirmationChecklist"
+    :confirmation-evidence-summary="confirmationEvidenceSummary"
+    :confirmation-evidence-facts="confirmationEvidenceFacts"
+    :delivery-boundary-title="deliveryBoundaryTitle"
+    :delivery-boundary-description="deliveryBoundaryDescription"
+    :delivery-boundary-facts="deliveryBoundaryFacts"
+    :pending-manual-integration-step-count="pendingManualIntegrationStepCount"
+    :first-pending-manual-integration-step="firstPendingManualIntegrationStep"
+    :show-primary-handoff-commands-action="showPrimaryHandoffCommandsAction"
+    :handoff-commands-copy-label="
+      resolveCopyLabel(
+        'commands',
+        'app.generatorPreview.action.copyHandoffCommands',
+      )
+    "
     :show-review-comment-input="showReviewCommentInput"
     :review-comment="reviewComment"
     :reject-comment-required="rejectCommentRequired"
     :review-evidence="reviewEvidence"
     :apply-evidence="applyEvidence"
     :show-review-actions="showReviewActions"
+    :show-primary-review-evidence-action="showPrimaryReviewEvidenceAction"
+    :primary-review-evidence-file-path="prioritizedReviewEvidenceFilePath"
     :is-reject-confirming="isRejectConfirming"
     :can-reject="canReject"
     :can-submit-reject="canSubmitReject"
@@ -163,6 +208,7 @@ const {
     @cancel-apply-confirm="cancelApplyConfirmation"
     @confirm-preview="handleConfirmPreview"
     @apply-preview="handleApplyPreview"
+    @copy-handoff-commands="handleCopyHandoffCommands"
     @select-file="handleFileSelection"
   />
 

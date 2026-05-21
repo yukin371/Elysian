@@ -98,6 +98,7 @@ const createProps = (
   driftStatus: "clean",
   reviewEvidence: null,
   applyEvidence: null,
+  confirmationEvidence: null,
   hasBlockingConflicts: false,
   ...overrides,
 })
@@ -277,6 +278,201 @@ describe("useGeneratorPreviewWorkspaceMainState status facts", () => {
     expect(state.firstBlockedFilePath.value).toBe(
       "apps/example-vue/src/routes/supplier/detail.ts",
     )
+  })
+
+  test("surfaces confirmation evidence in the main workspace state", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        confirmationEvidence: {
+          sessionId: "session-1",
+          reportPath: "reports/session-1.json",
+          snapshotPath: "reports/session-1.confirmation.json",
+          recoveryStatus: "rebuilt-from-missing",
+          archivedSnapshotPath: "reports/session-1.confirmation.corrupt.json",
+          confirmedAt: "2026-05-18T11:00:00.000Z",
+          actorDisplayName: "Yuki",
+          actorUserId: "user-1",
+          actorUsername: "yuki",
+          checklist: ["确认 SQL 交接", "确认 staging 目标"],
+        },
+        currentStep: "apply",
+        sessionStatus: "ready",
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.confirmationEvidenceSummary.value).toBe(
+      'app.generatorPreview.message.confirmationEvidenceDetailed {"count":2,"recoveryStatus":"rebuilt-from-missing","reportPath":"reports/session-1.json","snapshotPath":"reports/session-1.confirmation.json"}',
+    )
+    expect(state.confirmationEvidenceFacts.value).toEqual([
+      {
+        label: "app.generatorPreview.meta.confirmedAt",
+        value: "2026-05-18T11:00:00.000Z",
+      },
+      {
+        label: "app.generatorPreview.meta.reportPath",
+        value: "reports/session-1.json",
+      },
+      {
+        label: "app.generatorPreview.meta.snapshotPath",
+        value: "reports/session-1.confirmation.json",
+      },
+      {
+        label: "app.generatorPreview.meta.recoveryStatus",
+        value: "app.generatorPreview.recoveryStatus.rebuiltFromMissing",
+      },
+      {
+        label: "app.generatorPreview.meta.confirmationChecklistCount",
+        value: "2",
+      },
+      {
+        label: "app.generatorPreview.meta.archivedSnapshotPath",
+        value: "reports/session-1.confirmation.corrupt.json",
+      },
+    ])
+  })
+
+  test("clarifies staging-only delivery boundary after apply", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        applyEvidence: {
+          actorDisplayName: "Yuki",
+          actorUserId: "user-1",
+          actorUsername: "yuki",
+          appliedAt: "2026-05-18T10:00:00.000Z",
+          manifestPath: "reports/session-1.apply-manifest.json",
+          reportPath: "reports/session-1.json",
+          requestId: "req-1",
+          sessionId: "session-1",
+        },
+        currentStep: "done",
+        sessionStatus: "applied",
+        sqlProposalHandoff: createSqlProposalHandoff({
+          steps: [
+            "Review generated persistence schema handoff template",
+            "Create and review the formal database migration",
+          ],
+        }),
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.deliveryBoundaryTitle.value).toBe(
+      "app.generatorPreview.deliveryBoundaryTitle",
+    )
+    expect(state.deliveryBoundaryDescription.value).toBe(
+      'app.generatorPreview.deliveryBoundary.done {"count":2}',
+    )
+    expect(state.deliveryBoundaryFacts.value).toEqual([
+      {
+        label: "app.generatorPreview.meta.targetPreset",
+        value: "staging",
+      },
+      {
+        label: "app.generatorPreview.meta.reviewMode",
+        value: "manual",
+      },
+      {
+        label: "app.generatorPreview.meta.canonicalOwner",
+        value: "packages/persistence",
+      },
+      {
+        label: "app.generatorPreview.meta.manualStepCount",
+        value: "2",
+      },
+    ])
+  })
+
+  test("surfaces pending formal integration steps after apply", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        applyEvidence: {
+          actorDisplayName: "Yuki",
+          actorUserId: "user-1",
+          actorUsername: "yuki",
+          appliedAt: "2026-05-18T10:00:00.000Z",
+          manifestPath: "reports/session-1.apply-manifest.json",
+          reportPath: "reports/session-1.json",
+          requestId: "req-1",
+          sessionId: "session-1",
+        },
+        currentStep: "done",
+        sessionStatus: "applied",
+        sqlProposalHandoff: createSqlProposalHandoff({
+          steps: [
+            "Review generated persistence schema handoff template",
+            "Create and review the formal database migration",
+          ],
+        }),
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.pendingManualIntegrationStepCount.value).toBe(2)
+    expect(state.firstPendingManualIntegrationStep.value).toBe(
+      "Review generated persistence schema handoff template",
+    )
+  })
+
+  test("promotes handoff commands as the next primary action after apply", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        applyEvidence: {
+          actorDisplayName: "Yuki",
+          actorUserId: "user-1",
+          actorUsername: "yuki",
+          appliedAt: "2026-05-18T10:00:00.000Z",
+          manifestPath: "reports/session-1.apply-manifest.json",
+          reportPath: "reports/session-1.json",
+          requestId: "req-1",
+          sessionId: "session-1",
+        },
+        currentStep: "done",
+        sessionStatus: "applied",
+        sqlProposalHandoff: createSqlProposalHandoff({
+          steps: [
+            "Review generated persistence schema handoff template",
+            "Create and review the formal database migration",
+          ],
+          suggestedCommands: ["bun run db:generate", "bun run db:migrate"],
+        }),
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.showPrimaryHandoffCommandsAction.value).toBe(true)
+  })
+
+  test("prioritizes opening key review evidence before approve action", () => {
+    const state = useGeneratorPreviewWorkspaceMainState(
+      createProps({
+        files: [
+          createFileCard({
+            path: "apps/example-vue/src/routes/supplier/detail.ts",
+            plannedAction: "overwrite",
+            mergeStrategy: "overwrite",
+            reason: "managed file",
+            plannedReason: "managed file",
+            exists: true,
+            currentContents: "export const supplierDetail = false\n",
+          }),
+          createFileCard({
+            path: "apps/example-vue/src/routes/supplier/list.ts",
+            plannedAction: "create",
+            mergeStrategy: "create",
+            reason: "new file",
+            plannedReason: "new file",
+          }),
+        ],
+        selectedFilePath: null,
+      }),
+      (() => {}) as GeneratorPreviewWorkspaceMainEmit,
+    )
+
+    expect(state.prioritizedReviewEvidenceFilePath.value).toBe(
+      "apps/example-vue/src/routes/supplier/detail.ts",
+    )
+    expect(state.showPrimaryReviewEvidenceAction.value).toBe(true)
   })
 
   test("builds actionable recovery steps for schema validation errors", () => {

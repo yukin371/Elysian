@@ -286,6 +286,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "Load a base template first, then expand Schema JSON only when needed.",
   "app.generatorPreview.input.validationDetails": "Validation details",
   "app.generatorPreview.action.approve": "Approve",
+  "app.generatorPreview.action.reviewPrimaryEvidence": "Review key evidence",
   "app.generatorPreview.action.reject": "Reject",
   "app.generatorPreview.action.confirmReject": "Confirm reject",
   "app.generatorPreview.action.cancelRejectConfirm": "Cancel reject",
@@ -295,6 +296,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.cancelApplyConfirm": "Cancel confirm",
   "app.generatorPreview.action.applying": "Applying",
   "app.generatorPreview.action.copyCommands": "Copy commands",
+  "app.generatorPreview.action.copyHandoffCommands":
+    "Copy formal integration commands",
   "app.generatorPreview.action.copyCommandsDone": "Copied",
   "app.generatorPreview.action.copyCommandsFailed": "Copy failed",
   "app.generatorPreview.action.copySnippet": "Copy snippet",
@@ -302,6 +305,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.copySnippetFailed": "Copy failed",
   "app.generatorPreview.next.refresh": "Next: generate preview",
   "app.generatorPreview.next.refreshing": "Next: wait for generation",
+  "app.generatorPreview.next.reviewEvidence": "Next: review key evidence",
   "app.generatorPreview.next.review": "Next: approve or reject",
   "app.generatorPreview.next.reviewing": "Next: wait for review",
   "app.generatorPreview.next.confirmReject": "Next: confirm reject or cancel",
@@ -312,10 +316,13 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.next.applying": "Next: wait for apply",
   "app.generatorPreview.next.resolveConflicts":
     "Next: resolve blocking conflicts",
+  "app.generatorPreview.next.handoff": "Next: complete formal integration",
   "app.generatorPreview.next.done": "Next: complete",
   "app.generatorPreview.next.wait": "Next: wait for status update",
   "app.generatorPreview.nextSummary.review":
     "Decide whether this result is good enough to continue. If it is not, reject it and leave a correction reason.",
+  "app.generatorPreview.nextSummary.reviewEvidence":
+    "Open the highest-priority generated file first, confirm the diff, source, and SQL evidence, then decide whether to continue.",
   "app.generatorPreview.nextSummary.confirmChecklist":
     "Before apply, verify the target, file count, conflict strategy, and SQL proposal one more time.",
   "app.generatorPreview.nextSummary.apply":
@@ -324,6 +331,8 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "This is the final confirmation. Continuing will write the current result to staging.",
   "app.generatorPreview.nextSummary.resolveConflicts":
     "Open the blocked files first, understand why they are blocked, then decide whether to revise the draft or regenerate.",
+  "app.generatorPreview.nextSummary.handoff":
+    "Staging is done, but formal migration, runtime wiring, and final frontend integration still need manual follow-up. Start with the first pending step.",
   "app.generatorPreview.nextSummary.done":
     "This run is already in staging, so the next practical step is validation or a new iteration.",
   "app.generatorPreview.nextSummary.wait":
@@ -354,6 +363,22 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
     "The SQL proposal snapshot used for confirmation was missing, so the system rebuilt a confirmation copy. Re-check the snapshot path and generated time before apply.",
   "app.generatorPreview.message.recoveryStatusInline":
     "This confirmation required recovery handling: {value}.",
+  "app.generatorPreview.evidenceTitle": "Key records",
+  "app.generatorPreview.evidence.reviewTitle": "Review record",
+  "app.generatorPreview.evidence.confirmTitle": "Confirmation record",
+  "app.generatorPreview.evidence.applyTitle": "Apply record",
+  "app.generatorPreview.handoffPendingTitle": "Pending formal integration",
+  "app.generatorPreview.handoffPendingCount": "{count} pending step(s)",
+  "app.generatorPreview.handoffPendingFirstStep": "First step: {value}",
+  "app.generatorPreview.deliveryBoundaryTitle": "Delivery boundary",
+  "app.generatorPreview.deliveryBoundary.review":
+    "Even if this run passes review, the flow still only moves toward staging. Formal migrations and module integration remain manual work, and {count} follow-up steps are currently identified.",
+  "app.generatorPreview.deliveryBoundary.confirm":
+    "This stage only confirms the boundary before apply. Continuing can write to staging at most; it does not complete formal migrations or module integration automatically, and {count} follow-up steps are currently identified.",
+  "app.generatorPreview.deliveryBoundary.apply":
+    "This result can now be applied to staging, but that is not the same as formal integration. SQL proposal handling and final module wiring still need manual work, and {count} follow-up steps are currently identified.",
+  "app.generatorPreview.deliveryBoundary.done":
+    "This run has already been written to staging, but formal migrations, server wiring, and final frontend integration do not complete automatically. {count} manual follow-up steps still remain.",
   "app.generatorPreview.recoveryStatus.none": "No recovery needed",
   "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt":
     "Rebuilt from a corrupt snapshot",
@@ -469,6 +494,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sqlProposalDrizzleSchemaTitle":
     "Drizzle schema snippet",
   "app.generatorPreview.sqlHandoffTitle": "Formal handoff guide",
+  "app.generatorPreview.sqlHandoffBoundaryNote":
+    "This area shows the formal handoff guidance only. It does not mean migrations, runtime wiring, or final frontend integration have been completed automatically.",
+  "app.generatorPreview.sqlHandoffStepsTitle":
+    "Pending manual integration steps",
   "app.generatorPreview.migrationProposalSnapshotTitle":
     "Migration proposal snapshot",
   "app.generatorPreview.sqlConfirmationTitle": "Manual confirmation checklist",
@@ -539,6 +568,7 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.generatedAt": "Generated at",
   "app.generatorPreview.meta.canonicalOwner": "Canonical owner",
   "app.generatorPreview.meta.reviewMode": "Handoff mode",
+  "app.generatorPreview.meta.manualStepCount": "Manual steps",
   "app.generatorPreview.meta.generatedOnly": "Generated only",
   "app.generatorPreview.meta.schemaDir": "Schema directory",
   "app.generatorPreview.meta.drizzleDir": "Migration directory",
@@ -546,8 +576,10 @@ export const enUSWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.persistenceIndexFile": "Persistence index",
   "app.generatorPreview.meta.reviewedAt": "Reviewed at",
   "app.generatorPreview.meta.reviewDecision": "Review decision",
+  "app.generatorPreview.meta.reviewedBy": "Reviewed by",
   "app.generatorPreview.meta.reviewComment": "Review comment",
   "app.generatorPreview.meta.appliedAt": "Applied at",
+  "app.generatorPreview.meta.appliedBy": "Applied by",
   "app.generatorPreview.meta.manifestPath": "Manifest path",
   "app.generatorPreview.meta.requestId": "Request ID",
   "app.generatorPreview.meta.driftStatus": "Drift status",

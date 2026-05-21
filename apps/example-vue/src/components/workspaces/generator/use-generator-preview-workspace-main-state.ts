@@ -1,6 +1,13 @@
 import { computed, ref, watch } from "vue"
 
-import { shouldSelectGeneratorPreviewFile } from "../../../lib/generator-preview-workspace"
+import {
+  resolveGeneratorPreviewSelection,
+  shouldSelectGeneratorPreviewFile,
+} from "../../../lib/generator-preview-workspace"
+import {
+  resolveGeneratorPreviewConfirmationEvidenceFacts,
+  resolveGeneratorPreviewConfirmationEvidenceSummary,
+} from "./generator-preview-confirmation-evidence"
 import {
   buildGeneratorResultRecoverySteps,
   buildGeneratorStatusFacts,
@@ -17,6 +24,7 @@ import {
 import type {
   GeneratorPreviewApplyEvidence,
   GeneratorPreviewBlockerReason,
+  GeneratorPreviewConfirmationEvidence,
   GeneratorPreviewDiffSummary,
   GeneratorPreviewDriftStatus,
   GeneratorPreviewFileCard,
@@ -62,12 +70,18 @@ export interface GeneratorPreviewWorkspaceMainProps {
   driftStatus: GeneratorPreviewDriftStatus
   reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
+  confirmationEvidence: GeneratorPreviewConfirmationEvidence | null
   hasBlockingConflicts: boolean
 }
 
 interface GeneratorOperationProgressMessage {
   description: string
   title: string
+}
+
+interface GeneratorDeliveryBoundaryFact {
+  label: string
+  value: string
 }
 
 export type GeneratorPreviewWorkspaceMainEmit = {
@@ -203,6 +217,13 @@ export const useGeneratorPreviewWorkspaceMainState = (
   const firstBlockedFilePath = computed(
     () => blockedFiles.value[0]?.path ?? null,
   )
+  const prioritizedReviewEvidenceFilePath = computed(() => {
+    if (!showReviewActions.value || props.files.length === 0) {
+      return null
+    }
+
+    return resolveGeneratorPreviewSelection(props.files, props.selectedFilePath)
+  })
   const hasRecentSessions = computed(
     () => props.recentSessionOptions.length > 0,
   )
@@ -311,6 +332,90 @@ export const useGeneratorPreviewWorkspaceMainState = (
       selectedSchemaName: props.selectedSchemaName,
       t: props.t,
     }),
+  )
+  const deliveryBoundaryTitle = computed(() =>
+    props.t("app.generatorPreview.deliveryBoundaryTitle"),
+  )
+  const pendingManualIntegrationStepCount = computed(
+    () => props.sqlProposalHandoff?.steps.length ?? 0,
+  )
+  const firstPendingManualIntegrationStep = computed(
+    () => props.sqlProposalHandoff?.steps[0] ?? null,
+  )
+  const showPrimaryHandoffCommandsAction = computed(
+    () =>
+      Boolean(props.applyEvidence) &&
+      pendingManualIntegrationStepCount.value > 0 &&
+      (props.sqlProposalHandoff?.suggestedCommands.length ?? 0) > 0,
+  )
+  const deliveryBoundaryDescription = computed(() => {
+    if (!hasCurrentResult.value) {
+      return null
+    }
+
+    if (props.applyEvidence) {
+      return props.t("app.generatorPreview.deliveryBoundary.done", {
+        count: pendingManualIntegrationStepCount.value,
+      })
+    }
+
+    if (showApplyAction.value) {
+      return props.t("app.generatorPreview.deliveryBoundary.apply", {
+        count: pendingManualIntegrationStepCount.value,
+      })
+    }
+
+    if (showConfirmAction.value) {
+      return props.t("app.generatorPreview.deliveryBoundary.confirm", {
+        count: pendingManualIntegrationStepCount.value,
+      })
+    }
+
+    if (showReviewActions.value) {
+      return props.t("app.generatorPreview.deliveryBoundary.review", {
+        count: pendingManualIntegrationStepCount.value,
+      })
+    }
+
+    return null
+  })
+  const deliveryBoundaryFacts = computed<GeneratorDeliveryBoundaryFact[]>(
+    () => {
+      if (!hasCurrentResult.value) {
+        return []
+      }
+
+      return [
+        {
+          label: props.t("app.generatorPreview.meta.targetPreset"),
+          value: "staging",
+        },
+        {
+          label: props.t("app.generatorPreview.meta.reviewMode"),
+          value: props.sqlProposalHandoff?.reviewMode ?? "-",
+        },
+        {
+          label: props.t("app.generatorPreview.meta.canonicalOwner"),
+          value: props.sqlProposalHandoff?.canonicalMigrationOwner ?? "-",
+        },
+        {
+          label: props.t("app.generatorPreview.meta.manualStepCount"),
+          value: String(pendingManualIntegrationStepCount.value),
+        },
+      ]
+    },
+  )
+  const confirmationEvidenceSummary = computed(() =>
+    resolveGeneratorPreviewConfirmationEvidenceSummary(
+      props.t,
+      props.confirmationEvidence,
+    ),
+  )
+  const confirmationEvidenceFacts = computed(() =>
+    resolveGeneratorPreviewConfirmationEvidenceFacts(
+      props.t,
+      props.confirmationEvidence,
+    ),
   )
   const confirmationChecklist = computed(() => {
     if (!showConfirmAction.value && !showApplyAction.value) {
@@ -537,6 +642,13 @@ export const useGeneratorPreviewWorkspaceMainState = (
         `app.generatorPreview.frontendTargetDescription.${option.value}`,
       ),
     })),
+  )
+  const showPrimaryReviewEvidenceAction = computed(
+    () =>
+      showReviewActions.value &&
+      !props.reviewLoading &&
+      !isRejectConfirming.value &&
+      Boolean(prioritizedReviewEvidenceFilePath.value),
   )
   const filteredReferenceSchemaOptions = computed(() => {
     const query = referenceSchemaQuery.value.trim().toLowerCase()
@@ -940,10 +1052,15 @@ export const useGeneratorPreviewWorkspaceMainState = (
     cancelRejectConfirmation,
     blockedFileCount,
     blockerReasonMessages,
+    confirmationEvidenceFacts,
+    confirmationEvidenceSummary,
     configPrimaryActionLabel,
     configErrorRecoverySteps,
     conflictStrategyCards,
     currentStateMessage,
+    deliveryBoundaryDescription,
+    deliveryBoundaryFacts,
+    deliveryBoundaryTitle,
     draftModuleLabel,
     draftModuleName,
     draftSourceMode,
@@ -977,6 +1094,8 @@ export const useGeneratorPreviewWorkspaceMainState = (
     isApplyConfirming,
     isRejectConfirming,
     operationProgressMessage,
+    pendingManualIntegrationStepCount,
+    firstPendingManualIntegrationStep,
     referenceSchemaQuery,
     recoveryStatusMessage,
     rejectCommentRequired,
@@ -986,10 +1105,13 @@ export const useGeneratorPreviewWorkspaceMainState = (
     schemaEditorFacts,
     schemaTemplates,
     selectedTemplateId,
+    prioritizedReviewEvidenceFilePath,
     showApplyAction,
     showConfirmAction,
     showFileList,
     showFileTools,
+    showPrimaryHandoffCommandsAction,
+    showPrimaryReviewEvidenceAction,
     showReviewActions,
     showReviewCommentInput,
     showSchemaEditor,

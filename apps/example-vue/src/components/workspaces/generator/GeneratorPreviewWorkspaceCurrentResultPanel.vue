@@ -4,6 +4,7 @@ import { computed } from "vue"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
 import { Textarea as TTextarea } from "tdesign-vue-next/es/textarea"
 
+import type { GeneratorPreviewConfirmationEvidenceFact } from "./generator-preview-confirmation-evidence"
 import { formatGeneratorPreviewDateTime } from "./generator-preview-main-state-facts"
 import type {
   GeneratorPreviewApplyEvidence,
@@ -26,6 +27,11 @@ interface GeneratorOperationProgressMessage {
   title: string
 }
 
+interface GeneratorDeliveryBoundaryFact {
+  label: string
+  value: string
+}
+
 interface GeneratorPreviewWorkspaceCurrentResultPanelProps {
   t: GeneratorPreviewTranslation
   loading: boolean
@@ -44,12 +50,23 @@ interface GeneratorPreviewWorkspaceCurrentResultPanelProps {
   recoveryStatusMessage: string | null
   resultErrorRecoverySteps: string[]
   confirmationChecklist: string[]
+  confirmationEvidenceSummary: string | null
+  confirmationEvidenceFacts: GeneratorPreviewConfirmationEvidenceFact[]
+  deliveryBoundaryTitle: string
+  deliveryBoundaryDescription: string | null
+  deliveryBoundaryFacts: GeneratorDeliveryBoundaryFact[]
+  pendingManualIntegrationStepCount: number
+  firstPendingManualIntegrationStep: string | null
+  showPrimaryHandoffCommandsAction: boolean
+  handoffCommandsCopyLabel: string
   showReviewCommentInput: boolean
   reviewComment: string
   rejectCommentRequired: boolean
   reviewEvidence: GeneratorPreviewReviewEvidence | null
   applyEvidence: GeneratorPreviewApplyEvidence | null
   showReviewActions: boolean
+  showPrimaryReviewEvidenceAction: boolean
+  primaryReviewEvidenceFilePath: string | null
   isRejectConfirming: boolean
   canReject: boolean
   canSubmitReject: boolean
@@ -74,6 +91,7 @@ const emit = defineEmits<{
   (e: "cancel-apply-confirm"): void
   (e: "confirm-preview"): void
   (e: "apply-preview"): void
+  (e: "copy-handoff-commands"): void
   (e: "select-file", value: string): void
 }>()
 
@@ -82,6 +100,77 @@ const reviewedAtLabel = computed(() =>
 )
 const appliedAtLabel = computed(() =>
   formatGeneratorPreviewDateTime(props.applyEvidence?.appliedAt),
+)
+const reviewEvidenceFacts = computed(() => {
+  if (!props.reviewEvidence) {
+    return []
+  }
+
+  return [
+    {
+      label: props.t("app.generatorPreview.meta.reviewedAt"),
+      value: reviewedAtLabel.value,
+    },
+    {
+      label: props.t("app.generatorPreview.meta.reviewDecision"),
+      value:
+        props.reviewEvidence.decision === "approve"
+          ? props.t("app.generatorPreview.action.approve")
+          : props.t("app.generatorPreview.action.reject"),
+    },
+    {
+      label: props.t("app.generatorPreview.meta.reviewedBy"),
+      value:
+        props.reviewEvidence.actorDisplayName ??
+        props.reviewEvidence.actorUsername ??
+        props.reviewEvidence.actorUserId ??
+        "-",
+    },
+  ]
+})
+const applyEvidenceFacts = computed(() => {
+  if (!props.applyEvidence) {
+    return []
+  }
+
+  return [
+    {
+      label: props.t("app.generatorPreview.meta.appliedAt"),
+      value: appliedAtLabel.value,
+    },
+    {
+      label: props.t("app.generatorPreview.meta.appliedBy"),
+      value:
+        props.applyEvidence.actorDisplayName ??
+        props.applyEvidence.actorUsername ??
+        props.applyEvidence.actorUserId ??
+        "-",
+    },
+    {
+      label: props.t("app.generatorPreview.meta.requestId"),
+      value: props.applyEvidence.requestId || "-",
+    },
+    {
+      label: props.t("app.generatorPreview.meta.manifestPath"),
+      value: props.applyEvidence.manifestPath || "-",
+    },
+  ]
+})
+const showEvidenceSection = computed(
+  () =>
+    reviewEvidenceFacts.value.length > 0 ||
+    Boolean(props.confirmationEvidenceSummary) ||
+    props.confirmationEvidenceFacts.length > 0 ||
+    applyEvidenceFacts.value.length > 0,
+)
+const showDeliveryBoundarySection = computed(
+  () =>
+    Boolean(props.deliveryBoundaryDescription) ||
+    props.deliveryBoundaryFacts.length > 0,
+)
+const showHandoffPendingSection = computed(
+  () =>
+    Boolean(props.applyEvidence) && props.pendingManualIntegrationStepCount > 0,
 )
 
 const verdictTone = computed<"warning" | "info" | "success">(() => {
@@ -156,6 +245,10 @@ const nextStepTitle = computed(() => {
     return props.t("app.generatorPreview.next.resolveConflicts")
   }
 
+  if (props.showPrimaryReviewEvidenceAction) {
+    return props.t("app.generatorPreview.next.reviewEvidence")
+  }
+
   if (props.showReviewActions) {
     return props.t("app.generatorPreview.next.review")
   }
@@ -172,6 +265,10 @@ const nextStepTitle = computed(() => {
     return props.t("app.generatorPreview.next.apply")
   }
 
+  if (showHandoffPendingSection.value) {
+    return props.t("app.generatorPreview.next.handoff")
+  }
+
   if (props.applyEvidence) {
     return props.t("app.generatorPreview.next.done")
   }
@@ -182,6 +279,10 @@ const nextStepTitle = computed(() => {
 const nextStepDescription = computed(() => {
   if (props.blockedFileCount > 0) {
     return props.t("app.generatorPreview.nextSummary.resolveConflicts")
+  }
+
+  if (props.showPrimaryReviewEvidenceAction) {
+    return props.t("app.generatorPreview.nextSummary.reviewEvidence")
   }
 
   if (props.showReviewActions) {
@@ -200,6 +301,10 @@ const nextStepDescription = computed(() => {
     return props.t("app.generatorPreview.nextSummary.apply")
   }
 
+  if (showHandoffPendingSection.value) {
+    return props.t("app.generatorPreview.nextSummary.handoff")
+  }
+
   if (props.applyEvidence) {
     return props.t("app.generatorPreview.nextSummary.done")
   }
@@ -214,6 +319,7 @@ const showPrimaryBlockedAction = computed(
 const showPrimaryReviewAction = computed(
   () =>
     !showPrimaryBlockedAction.value &&
+    !props.showPrimaryReviewEvidenceAction &&
     props.showReviewActions &&
     props.canApprove &&
     !props.isRejectConfirming,
@@ -233,9 +339,11 @@ const showPrimaryApplyAction = computed(
 const showAnyPrimaryAction = computed(
   () =>
     showPrimaryBlockedAction.value ||
+    props.showPrimaryReviewEvidenceAction ||
     showPrimaryReviewAction.value ||
     showPrimaryConfirmAction.value ||
-    showPrimaryApplyAction.value,
+    showPrimaryApplyAction.value ||
+    props.showPrimaryHandoffCommandsAction,
 )
 
 const showChecklistStage = computed(
@@ -392,6 +500,17 @@ const checklistRiskDescription = computed(() => {
             {{ t("app.generatorPreview.blockedPrimaryAction") }}
           </button>
           <button
+            v-else-if="
+              showPrimaryReviewEvidenceAction && primaryReviewEvidenceFilePath
+            "
+            type="button"
+            class="enterprise-button"
+            :disabled="loading || reviewLoading || applyLoading"
+            @click="emit('select-file', primaryReviewEvidenceFilePath)"
+          >
+            {{ t("app.generatorPreview.action.reviewPrimaryEvidence") }}
+          </button>
+          <button
             v-else-if="showPrimaryReviewAction"
             type="button"
             class="enterprise-button"
@@ -417,6 +536,14 @@ const checklistRiskDescription = computed(() => {
             @click="emit('apply-preview')"
           >
             {{ resultPrimaryActionLabel }}
+          </button>
+          <button
+            v-else-if="showPrimaryHandoffCommandsAction"
+            type="button"
+            class="enterprise-button"
+            @click="emit('copy-handoff-commands')"
+          >
+            {{ handoffCommandsCopyLabel }}
           </button>
         </div>
       </section>
@@ -498,6 +625,115 @@ const checklistRiskDescription = computed(() => {
     </section>
 
     <section
+      v-if="showEvidenceSection"
+      class="generator-evidence-summary"
+    >
+      <strong>{{ t("app.generatorPreview.evidenceTitle") }}</strong>
+
+      <article
+        v-if="reviewEvidenceFacts.length > 0"
+        class="generator-evidence-card"
+      >
+        <span>{{ t("app.generatorPreview.evidence.reviewTitle") }}</span>
+        <div class="generator-evidence-facts">
+          <p
+            v-for="fact in reviewEvidenceFacts"
+            :key="fact.label"
+          >
+            {{ fact.label }} · {{ fact.value }}
+          </p>
+        </div>
+        <p
+          v-if="reviewEvidence?.comment"
+          class="generator-evidence-note"
+        >
+          {{ reviewEvidence.comment }}
+        </p>
+      </article>
+
+      <article
+        v-if="confirmationEvidenceSummary || confirmationEvidenceFacts.length > 0"
+        class="generator-evidence-card"
+      >
+        <span>{{ t("app.generatorPreview.evidence.confirmTitle") }}</span>
+        <p
+          v-if="confirmationEvidenceSummary"
+          class="generator-evidence-note"
+        >
+          {{ confirmationEvidenceSummary }}
+        </p>
+        <div
+          v-if="confirmationEvidenceFacts.length > 0"
+          class="generator-evidence-facts"
+        >
+          <p
+            v-for="fact in confirmationEvidenceFacts"
+            :key="fact.label"
+          >
+            {{ fact.label }} · {{ fact.value }}
+          </p>
+        </div>
+      </article>
+
+      <article
+        v-if="applyEvidenceFacts.length > 0"
+        class="generator-evidence-card"
+      >
+        <span>{{ t("app.generatorPreview.evidence.applyTitle") }}</span>
+        <div class="generator-evidence-facts">
+          <p
+            v-for="fact in applyEvidenceFacts"
+            :key="fact.label"
+          >
+            {{ fact.label }} · {{ fact.value }}
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <section
+      v-if="showDeliveryBoundarySection"
+      class="generator-delivery-boundary"
+    >
+      <strong>{{ deliveryBoundaryTitle }}</strong>
+      <p v-if="deliveryBoundaryDescription">
+        {{ deliveryBoundaryDescription }}
+      </p>
+      <div
+        v-if="deliveryBoundaryFacts.length > 0"
+        class="generator-evidence-facts"
+      >
+        <p
+          v-for="fact in deliveryBoundaryFacts"
+          :key="fact.label"
+        >
+          {{ fact.label }} · {{ fact.value }}
+        </p>
+      </div>
+    </section>
+
+    <section
+      v-if="showHandoffPendingSection"
+      class="generator-handoff-pending"
+    >
+      <strong>{{ t("app.generatorPreview.handoffPendingTitle") }}</strong>
+      <p>
+        {{
+          t("app.generatorPreview.handoffPendingCount", {
+            count: pendingManualIntegrationStepCount,
+          })
+        }}
+      </p>
+      <p v-if="firstPendingManualIntegrationStep">
+        {{
+          t("app.generatorPreview.handoffPendingFirstStep", {
+            value: firstPendingManualIntegrationStep,
+          })
+        }}
+      </p>
+    </section>
+
+    <section
       v-if="confirmationChecklist.length > 0"
       class="generator-confirmation-checklist"
     >
@@ -545,30 +781,6 @@ const checklistRiskDescription = computed(() => {
       class="enterprise-message enterprise-message-warning"
     >
       {{ t("app.generatorPreview.message.rejectCommentRequired") }}
-    </div>
-
-    <div
-      v-if="reviewEvidence"
-      class="enterprise-message enterprise-message-info"
-    >
-      {{
-        t(
-          reviewEvidence.decision === "approve"
-            ? "app.generatorPreview.message.reviewApproved"
-            : "app.generatorPreview.message.reviewRejected",
-          {
-            value: reviewedAtLabel,
-          },
-        )
-      }}
-    </div>
-
-    <div v-if="applyEvidence" class="enterprise-message enterprise-message-success">
-      {{
-        t("app.generatorPreview.message.applied", {
-          value: appliedAtLabel,
-        })
-      }}
     </div>
 
     <div class="generator-toolbar-actions">
@@ -884,6 +1096,95 @@ const checklistRiskDescription = computed(() => {
   color: #475569;
   font-size: 0.77rem;
   line-height: 1.45;
+}
+
+.generator-evidence-summary {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.generator-evidence-summary > strong {
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.generator-evidence-card {
+  display: grid;
+  gap: 0.38rem;
+  padding: 0.8rem 0.85rem;
+  border: 1px solid rgba(36, 87, 214, 0.12);
+  border-radius: 6px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.generator-evidence-card > span {
+  color: #173ea6;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.generator-evidence-facts {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.generator-evidence-facts p,
+.generator-evidence-note {
+  margin: 0;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.generator-delivery-boundary {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(180, 83, 9, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 247, 237, 0.72);
+}
+
+.generator-delivery-boundary strong {
+  color: #9a3412;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.generator-delivery-boundary p {
+  margin: 0;
+  color: #7c2d12;
+  font-size: 0.78rem;
+  line-height: 1.52;
+}
+
+.generator-handoff-pending {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(36, 87, 214, 0.16);
+  border-radius: 6px;
+  background: rgba(239, 246, 255, 0.88);
+}
+
+.generator-handoff-pending strong {
+  color: #1d4ed8;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.generator-handoff-pending p {
+  margin: 0;
+  color: #334155;
+  font-size: 0.78rem;
+  line-height: 1.52;
 }
 
 .generator-result-recovery {

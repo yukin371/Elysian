@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 
+import type { GeneratorPreviewPreferredSqlView } from "./generator-preview-handoff"
 import type {
   GeneratorPreviewMigrationProposalSnapshot,
   GeneratorPreviewSqlProposal,
@@ -8,13 +9,12 @@ import type {
   GeneratorPreviewTranslation,
 } from "./types"
 
-type SqlViewKey = "proposal" | "handoff"
-
 interface GeneratorPreviewWorkspaceSqlHandoffPanelProps {
   t: GeneratorPreviewTranslation
   sqlProposal: GeneratorPreviewSqlProposal | null
   sqlProposalHandoff: GeneratorPreviewSqlProposalHandoff
   proposalStatusLabel: string
+  preferredView: GeneratorPreviewPreferredSqlView
   migrationProposalSnapshot: GeneratorPreviewMigrationProposalSnapshot
   recoveryNoteText: string | null
   recoveryNoteTone: "info" | "warning" | null
@@ -37,7 +37,7 @@ const emit = defineEmits<{
   (event: "copy-drizzle-schema"): void
 }>()
 
-const activeView = ref<SqlViewKey>("proposal")
+const activeView = ref<GeneratorPreviewPreferredSqlView>("proposal")
 
 const sqlViews = computed(() => [
   {
@@ -49,6 +49,15 @@ const sqlViews = computed(() => [
     label: props.t("app.generatorPreview.sqlHandoffTitle"),
   },
 ])
+
+watch(
+  () =>
+    [props.preferredView, props.migrationProposalSnapshot.sessionId] as const,
+  ([preferredView]) => {
+    activeView.value = preferredView
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -149,6 +158,21 @@ const sqlViews = computed(() => [
     </template>
 
     <template v-else>
+      <div class="generator-code-toolbar">
+        <p class="enterprise-subheading">
+          {{ t("app.generatorPreview.sqlHandoffTitle") }}
+        </p>
+        <button
+          type="button"
+          class="enterprise-button enterprise-button-ghost"
+          :disabled="sqlProposalHandoff.suggestedCommands.length === 0"
+          @click="emit('copy-suggested-commands')"
+        >
+          {{ commandsCopyLabel }}
+        </button>
+      </div>
+      <pre class="generator-code-block"><code>{{ suggestedCommandsText }}</code></pre>
+
       <div class="generator-path-list">
         <code>{{ sqlProposalHandoff.targetPaths.schemaDir }}</code>
         <code>{{ sqlProposalHandoff.targetPaths.drizzleDir }}</code>
@@ -185,36 +209,40 @@ const sqlViews = computed(() => [
         {{ sessionConfirmationNote }}
       </p>
 
-      <ol
+      <p class="enterprise-message enterprise-message-warning">
+        {{ t("app.generatorPreview.sqlHandoffBoundaryNote") }}
+      </p>
+
+      <div
         v-if="sqlProposalHandoff.confirmationChecklist.length > 0"
-        class="generator-steps"
+        class="generator-code-section"
       >
-        <li
-          v-for="item in sqlProposalHandoff.confirmationChecklist"
-          :key="item"
-        >
-          {{ item }}
-        </li>
-      </ol>
-
-      <ol v-if="sqlProposalHandoff.steps.length > 0" class="generator-steps">
-        <li v-for="step in sqlProposalHandoff.steps" :key="step">
-          {{ step }}
-        </li>
-      </ol>
-
-      <div class="generator-code-toolbar">
-        <p class="enterprise-subheading">{{ t("app.generatorPreview.sqlHandoffTitle") }}</p>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="sqlProposalHandoff.suggestedCommands.length === 0"
-          @click="emit('copy-suggested-commands')"
-        >
-          {{ commandsCopyLabel }}
-        </button>
+        <p class="enterprise-subheading">
+          {{ t("app.generatorPreview.sqlConfirmationTitle") }}
+        </p>
+        <ol class="generator-steps">
+          <li
+            v-for="item in sqlProposalHandoff.confirmationChecklist"
+            :key="item"
+          >
+            {{ item }}
+          </li>
+        </ol>
       </div>
-      <pre class="generator-code-block"><code>{{ suggestedCommandsText }}</code></pre>
+
+      <div
+        v-if="sqlProposalHandoff.steps.length > 0"
+        class="generator-code-section"
+      >
+        <p class="enterprise-subheading">
+          {{ t("app.generatorPreview.sqlHandoffStepsTitle") }}
+        </p>
+        <ol class="generator-steps">
+          <li v-for="step in sqlProposalHandoff.steps" :key="step">
+            {{ step }}
+          </li>
+        </ol>
+      </div>
     </template>
   </section>
 </template>

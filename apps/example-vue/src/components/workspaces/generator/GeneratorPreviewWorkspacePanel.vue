@@ -12,7 +12,10 @@ import {
   resolveGeneratorPreviewConfirmationEvidenceSummary,
 } from "./generator-preview-confirmation-evidence"
 import { resolveGeneratorPreviewFrontendImpact } from "./generator-preview-frontend-impact"
-import { joinGeneratorPreviewSuggestedCommands } from "./generator-preview-handoff"
+import {
+  joinGeneratorPreviewSuggestedCommands,
+  resolveGeneratorPreviewPreferredSqlView,
+} from "./generator-preview-handoff"
 import { resolveGeneratorPreviewRecoveryNote } from "./generator-preview-recovery-note"
 import type {
   GeneratorPreviewApplyEvidence,
@@ -222,6 +225,14 @@ const suggestedCommandsText = computed(() =>
       )
     : "",
 )
+const preferredSqlView = computed(() =>
+  resolveGeneratorPreviewPreferredSqlView({
+    hasApplyEvidence: Boolean(props.applyEvidence),
+    hasSqlProposal: Boolean(props.sqlProposal),
+    pendingManualIntegrationStepCount:
+      props.sqlProposalHandoff?.steps.length ?? 0,
+  }),
+)
 
 const copyPanelValue = async (
   key: GeneratorPreviewCopyFeedbackKey,
@@ -350,6 +361,7 @@ onUnmounted(() => document.removeEventListener("keydown", handleKeydown))
         :sql-proposal="sqlProposal"
         :sql-proposal-handoff="sqlProposalHandoff"
         :proposal-status-label="sqlProposalStatusLabel"
+        :preferred-view="preferredSqlView"
         :migration-proposal-snapshot="
           sqlProposalHandoff.migrationProposalSnapshot
         "

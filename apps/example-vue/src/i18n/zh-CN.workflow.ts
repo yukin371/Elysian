@@ -264,6 +264,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "先载入一个基础模板，再按需要展开 Schema JSON。",
   "app.generatorPreview.input.validationDetails": "校验详情",
   "app.generatorPreview.action.approve": "审核通过",
+  "app.generatorPreview.action.reviewPrimaryEvidence": "先看关键证据",
   "app.generatorPreview.action.reject": "拒绝",
   "app.generatorPreview.action.confirmReject": "确认拒绝",
   "app.generatorPreview.action.cancelRejectConfirm": "取消拒绝",
@@ -273,6 +274,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.cancelApplyConfirm": "取消确认",
   "app.generatorPreview.action.applying": "应用中",
   "app.generatorPreview.action.copyCommands": "复制命令",
+  "app.generatorPreview.action.copyHandoffCommands": "复制正式接线命令",
   "app.generatorPreview.action.copyCommandsDone": "已复制",
   "app.generatorPreview.action.copyCommandsFailed": "复制失败",
   "app.generatorPreview.action.copySnippet": "复制片段",
@@ -280,6 +282,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.action.copySnippetFailed": "复制失败",
   "app.generatorPreview.next.refresh": "下一步：生成预览",
   "app.generatorPreview.next.refreshing": "下一步：等待生成完成",
+  "app.generatorPreview.next.reviewEvidence": "下一步：先看关键证据",
   "app.generatorPreview.next.review": "下一步：审核通过或拒绝",
   "app.generatorPreview.next.reviewing": "下一步：等待审核完成",
   "app.generatorPreview.next.confirmReject": "下一步：确认拒绝或取消",
@@ -288,10 +291,13 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.next.confirmApply": "下一步：确认 apply 或取消",
   "app.generatorPreview.next.applying": "下一步：等待 apply 完成",
   "app.generatorPreview.next.resolveConflicts": "下一步：处理阻塞冲突",
+  "app.generatorPreview.next.handoff": "下一步：处理正式接线",
   "app.generatorPreview.next.done": "下一步：已完成",
   "app.generatorPreview.next.wait": "下一步：等待状态更新",
   "app.generatorPreview.nextSummary.review":
     "先确认这次生成结果是否值得继续推进；如果不合适，就直接拒绝并留下原因。",
+  "app.generatorPreview.nextSummary.reviewEvidence":
+    "先打开一份优先级最高的生成文件，确认差异、源码和 SQL 证据，再决定是否继续推进。",
   "app.generatorPreview.nextSummary.confirmChecklist":
     "在真正 apply 前，再核对目标、文件数量、冲突策略和 SQL 提案。",
   "app.generatorPreview.nextSummary.apply":
@@ -300,6 +306,8 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "这是最后一次确认；继续后会把当前结果正式应用到 staging。",
   "app.generatorPreview.nextSummary.resolveConflicts":
     "先打开阻塞文件，看清为什么被拦住，再决定回改草稿还是重新生成。",
+  "app.generatorPreview.nextSummary.handoff":
+    "staging 已完成，但正式 migration、runtime 装配和前端正式接线仍需人工处理。先从第一条待办开始收尾。",
   "app.generatorPreview.nextSummary.done":
     "这一轮结果已经落到 staging，接下来更适合转去做验证或开始下一轮调整。",
   "app.generatorPreview.nextSummary.wait":
@@ -330,6 +338,22 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
     "用于确认的 SQL proposal snapshot 缺失，系统已重建一份确认副本；apply 前请重新核对快照路径和生成时间。",
   "app.generatorPreview.message.recoveryStatusInline":
     "本次确认曾触发恢复处理：{value}。",
+  "app.generatorPreview.evidenceTitle": "关键记录",
+  "app.generatorPreview.evidence.reviewTitle": "审核记录",
+  "app.generatorPreview.evidence.confirmTitle": "确认记录",
+  "app.generatorPreview.evidence.applyTitle": "应用记录",
+  "app.generatorPreview.handoffPendingTitle": "正式接线待办",
+  "app.generatorPreview.handoffPendingCount": "待处理 {count} 项",
+  "app.generatorPreview.handoffPendingFirstStep": "第一项：{value}",
+  "app.generatorPreview.deliveryBoundaryTitle": "交付边界",
+  "app.generatorPreview.deliveryBoundary.review":
+    "即使这轮审核通过，后续也只会推进到 staging；正式 migration 和模块接线仍需要人工完成，当前已识别 {count} 条待处理步骤。",
+  "app.generatorPreview.deliveryBoundary.confirm":
+    "当前这一步只是在进入 apply 前确认边界；继续后最多写入 staging，不会自动完成正式 migration 或模块接线，当前已识别 {count} 条待处理步骤。",
+  "app.generatorPreview.deliveryBoundary.apply":
+    "当前可以决定是否 apply 到 staging，但这不等于正式接线完成；SQL proposal 和正式模块接入仍需要人工处理，当前已识别 {count} 条待处理步骤。",
+  "app.generatorPreview.deliveryBoundary.done":
+    "这轮结果已经写入 staging，但正式 migration、server 装配和前端正式接线并不会自动完成，当前仍有 {count} 条人工步骤需要跟进。",
   "app.generatorPreview.recoveryStatus.none": "无需恢复",
   "app.generatorPreview.recoveryStatus.rebuiltFromCorrupt": "快照损坏后已重建",
   "app.generatorPreview.recoveryStatus.rebuiltFromMissing": "快照缺失后已重建",
@@ -436,6 +460,9 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.sqlProposalDrizzleImportTitle": "Drizzle 导入片段",
   "app.generatorPreview.sqlProposalDrizzleSchemaTitle": "Drizzle Schema 片段",
   "app.generatorPreview.sqlHandoffTitle": "正式接入规范",
+  "app.generatorPreview.sqlHandoffBoundaryNote":
+    "这里展示的是正式接入说明，不代表系统已经自动完成 migration、runtime 装配或前端正式接线。",
+  "app.generatorPreview.sqlHandoffStepsTitle": "待人工接线步骤",
   "app.generatorPreview.migrationProposalSnapshotTitle": "迁移提案快照",
   "app.generatorPreview.sqlConfirmationTitle": "人工确认清单",
   "app.generatorPreview.migrationProposalRecovery.rebuiltFromMissing":
@@ -501,6 +528,7 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.generatedAt": "生成时间",
   "app.generatorPreview.meta.canonicalOwner": "规范 owner",
   "app.generatorPreview.meta.reviewMode": "接入模式",
+  "app.generatorPreview.meta.manualStepCount": "人工步骤数",
   "app.generatorPreview.meta.generatedOnly": "仅生成",
   "app.generatorPreview.meta.schemaDir": "Schema 目录",
   "app.generatorPreview.meta.drizzleDir": "迁移目录",
@@ -508,8 +536,10 @@ export const zhCNWorkflowLocaleMessages: VueLocaleMessages = {
   "app.generatorPreview.meta.persistenceIndexFile": "Persistence 索引文件",
   "app.generatorPreview.meta.reviewedAt": "审核时间",
   "app.generatorPreview.meta.reviewDecision": "审核结果",
+  "app.generatorPreview.meta.reviewedBy": "审核人",
   "app.generatorPreview.meta.reviewComment": "审核备注",
   "app.generatorPreview.meta.appliedAt": "应用时间",
+  "app.generatorPreview.meta.appliedBy": "应用人",
   "app.generatorPreview.meta.manifestPath": "Manifest 路径",
   "app.generatorPreview.meta.requestId": "请求 ID",
   "app.generatorPreview.meta.driftStatus": "漂移状态",

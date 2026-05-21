@@ -6,6 +6,8 @@ type NavigatorWithClipboard = {
   clipboard?: GeneratorPreviewClipboard
 }
 
+export type GeneratorPreviewPreferredSqlView = "proposal" | "handoff"
+
 const resolveDefaultClipboard = () =>
   (globalThis.navigator as NavigatorWithClipboard | undefined)?.clipboard
 
@@ -14,6 +16,22 @@ export const joinGeneratorPreviewSuggestedCommands = (commands: string[]) =>
     .map((command) => command.trim())
     .filter((command) => command.length > 0)
     .join("\n")
+
+export const resolveGeneratorPreviewPreferredSqlView = (input: {
+  hasApplyEvidence: boolean
+  hasSqlProposal: boolean
+  pendingManualIntegrationStepCount: number
+}): GeneratorPreviewPreferredSqlView => {
+  if (input.hasApplyEvidence && input.pendingManualIntegrationStepCount > 0) {
+    return "handoff"
+  }
+
+  if (input.hasSqlProposal) {
+    return "proposal"
+  }
+
+  return "handoff"
+}
 
 export const copyGeneratorPreviewText = async (
   value: string,
