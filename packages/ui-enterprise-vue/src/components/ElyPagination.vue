@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Select as TSelect } from "tdesign-vue-next/es/select"
+
+import { computed } from "vue"
 import type { ElyPaginationEmits, ElyPaginationProps } from "../contracts"
 
 const props = withDefaults(defineProps<ElyPaginationProps>(), {
@@ -8,6 +11,10 @@ const props = withDefaults(defineProps<ElyPaginationProps>(), {
 })
 
 const emit = defineEmits<ElyPaginationEmits>()
+
+const pageSizeOptions = computed(() =>
+  props.pageSizeOptions.map((size) => ({ label: String(size), value: size })),
+)
 </script>
 
 <template>
@@ -15,18 +22,13 @@ const emit = defineEmits<ElyPaginationEmits>()
     <span>{{ summary }}</span>
     <label>
       <small>{{ pageSizeLabel }}</small>
-      <select
+      <TSelect
         :value="pageSize"
+        :options="pageSizeOptions"
+        size="small"
+        style="width: 80px"
         @change="emit('update-page-size', $event)"
-      >
-        <option
-          v-for="option in pageSizeOptions"
-          :key="option"
-          :value="option"
-        >
-          {{ option }}
-        </option>
-      </select>
+      />
     </label>
     <button
       type="button"
@@ -66,14 +68,6 @@ const emit = defineEmits<ElyPaginationEmits>()
 
 .ely-pagination small {
   color: #64748b;
-}
-
-.ely-pagination select {
-  height: 2rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 4px;
-  background: white;
-  color: #0f172a;
 }
 
 .ely-pagination__button {

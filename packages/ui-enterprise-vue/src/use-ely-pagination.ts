@@ -78,8 +78,11 @@ export const useElyPagination = <T extends Record<string, unknown>>(
     currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
   }
 
-  const updatePageSize = (event: Event) => {
-    const nextValue = Number((event.target as HTMLSelectElement).value)
+  const updatePageSize = (eventOrValue: Event | number) => {
+    const nextValue =
+      typeof eventOrValue === "number"
+        ? eventOrValue
+        : Number((eventOrValue.target as HTMLSelectElement).value)
 
     pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
     currentPage.value = 1

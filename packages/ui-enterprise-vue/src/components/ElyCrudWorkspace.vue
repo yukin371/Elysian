@@ -78,6 +78,13 @@ onBeforeUnmount(() => {
 <template>
   <div v-if="!isReady" :class="statusClass">
     {{ statusText }}
+    <button
+      v-if="status === 'error' || status === 'module-offline'"
+      class="ely-status__retry"
+      @click="emit('retry')"
+    >
+      重试
+    </button>
   </div>
 
   <div v-else class="ely-crud-workspace">
@@ -156,6 +163,22 @@ onBeforeUnmount(() => {
   background: #fdf2f2;
   color: #9b1c1c;
   border: 1px solid #f5c6c6;
+}
+
+.ely-status__retry {
+  margin-left: 0.75rem;
+  padding: 2px 10px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ely-status__retry:hover {
+  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .ely-crud-workspace {

@@ -101,6 +101,7 @@ const handleReset = () => {
     <div v-if="$slots.actions" class="ely-query-extra-actions">
       <slot name="actions" />
     </div>
+    <kbd class="ely-query-shortcut-hint">/</kbd>
   </div>
 </template>
 
@@ -135,6 +136,23 @@ const handleReset = () => {
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.ely-query-shortcut-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #94a3b8;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
   flex-shrink: 0;
 }
 

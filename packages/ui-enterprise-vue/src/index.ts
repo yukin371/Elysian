@@ -55,6 +55,10 @@ export {
   type UseElyPaginationOptions,
   type UseElyPaginationReturn,
 } from "./use-ely-pagination"
+export {
+  useElyFormDirtyState,
+  type UseElyFormDirtyStateReturn,
+} from "./use-ely-form-dirty-state"
 
 export { default as ElyForm } from "./components/ElyForm.vue"
 export { default as ElyContextPanel } from "./components/ElyContextPanel.vue"

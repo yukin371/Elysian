@@ -218,6 +218,7 @@ const resolvedColumns = computed(() => {
       :scroll="{ y: 420 }"
       table-layout="fixed"
       hover
+      table-ellipsis-title
       class="ely-table-inner"
     />
   </div>
@@ -231,6 +232,12 @@ const resolvedColumns = computed(() => {
 
 .ely-table-inner {
   border-radius: 6px;
+}
+
+.ely-table-inner :deep(td .t-table__body-td-inner) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ely-table-inner :deep(tbody tr) {

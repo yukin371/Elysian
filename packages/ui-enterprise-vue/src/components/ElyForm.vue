@@ -17,11 +17,19 @@ import type {
   ElyFormValues,
 } from "../contracts"
 import { formatReadonlyFieldValue } from "../form-readonly"
+import { useElyFormDirtyState } from "../use-ely-form-dirty-state"
 
 const props = defineProps<ElyFormProps>()
 const emit = defineEmits<ElyFormEmits>()
 
 const form = reactive<ElyFormValues>({})
+
+const dirtyState = useElyFormDirtyState(
+  () => props.fields,
+  () => form,
+)
+
+defineExpose({ dirty: dirtyState })
 
 const getDefaultFieldValue = (field: ElyFormField) =>
   field.input === "switch" ? false : ""

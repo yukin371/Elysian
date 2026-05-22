@@ -348,6 +348,7 @@ export interface ElyCrudWorkspaceEmits {
   (e: "reset"): void
   (e: "action", key: string, row: Record<string, unknown>): void
   (e: "row-click", row: Record<string, unknown>): void
+  (e: "retry"): void
 }
 
 // ─── Ely CRUD workbench ────────────────────────────────────────────────────────
@@ -366,7 +367,7 @@ export interface ElyPaginationProps {
 export interface ElyPaginationEmits {
   (e: "previous"): void
   (e: "next"): void
-  (e: "update-page-size", event: Event): void
+  (e: "update-page-size", value: Event | number): void
 }
 
 // ─── Ely CRUD workbench ────────────────────────────────────────────────────────

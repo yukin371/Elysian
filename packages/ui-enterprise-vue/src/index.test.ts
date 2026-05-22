@@ -250,6 +250,36 @@ describe("ui-enterprise-vue adapters", () => {
     ).toBe('{\n  "foo": "bar",\n  "nested": {\n    "enabled": true\n  }\n}')
   })
 
+  describe("form dirty tracking", () => {
+    it("detects dirty when values differ from initial snapshot", () => {
+      const { useElyFormDirtyState } = require("./use-ely-form-dirty-state")
+      const fields = [
+        { key: "name", label: "Name", input: "text" as const },
+        { key: "active", label: "Active", input: "switch" as const },
+      ]
+      const values = ref({ name: "Alice", active: true })
+      const dirty = useElyFormDirtyState(fields, values)
+
+      expect(dirty.value).toBe(false)
+
+      values.value = { ...values.value, name: "Bob" }
+      expect(dirty.value).toBe(true)
+    })
+
+    it("resets dirty flag when snapshot is refreshed", () => {
+      const { useElyFormDirtyState } = require("./use-ely-form-dirty-state")
+      const fields = [{ key: "name", label: "Name", input: "text" as const }]
+      const values = ref({ name: "Alice" })
+      const dirty = useElyFormDirtyState(fields, values)
+
+      values.value = { name: "Bob" }
+      expect(dirty.value).toBe(true)
+
+      dirty.resetSnapshot()
+      expect(dirty.value).toBe(false)
+    })
+  })
+
   describe("empty state distinction", () => {
     it("resolves filtered-empty copy when hasActiveQuery is true", () => {
       const { resolveElyCrudWorkspaceEmptyCopy } = require("./contracts")

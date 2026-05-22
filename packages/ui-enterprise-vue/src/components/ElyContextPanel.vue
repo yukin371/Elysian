@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button as TButton } from "tdesign-vue-next/es/button"
 import { Loading as TLoading } from "tdesign-vue-next/es/loading"
-import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 import type { ElyContextPanelEmits, ElyContextPanelProps } from "../contracts"
 
@@ -44,6 +44,32 @@ const handleKeydown = (event: KeyboardEvent) => {
     event.preventDefault()
     emit("cancel")
   }
+
+  if (event.key === "Tab" && props.visible && panelRef.value) {
+    const focusable = panelRef.value.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    if (focusable.length === 0) return
+
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+}
+
+const autoFocus = () => {
+  if (!panelRef.value) return
+  const first = panelRef.value.querySelector<HTMLElement>(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+  )
+  first?.focus()
 }
 
 onMounted(() => {
@@ -53,12 +79,23 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener("keydown", handleKeydown)
 })
+
+watch(
+  () => props.visible,
+  (visible) => {
+    if (visible) {
+      nextTick(autoFocus)
+    }
+  },
+)
 </script>
 
 <template>
+  <Transition name="ely-panel">
   <div
+    v-if="visible"
+    ref="panelRef"
     class="ely-context-panel"
-    :class="{ 'ely-context-panel--visible': visible }"
     :style="{ width: resolvedWidth + 'px' }"
     role="dialog"
     aria-modal="true"
@@ -100,9 +137,21 @@ onBeforeUnmount(() => {
       </div>
     </div>
   </div>
+  </Transition>
 </template>
 
 <style scoped>
+.ely-panel-enter-active,
+.ely-panel-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.ely-panel-enter-from,
+.ely-panel-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
 .ely-context-panel {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
