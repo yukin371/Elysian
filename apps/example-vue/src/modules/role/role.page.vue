@@ -10,12 +10,14 @@
 import {
   ElyCrudWorkspace,
   type ElyCrudWorkspaceProps,
+  ElyPagination,
   type ElyQueryField,
   type ElyQueryValues,
   type ElyTableAction,
   type ElyTableColumn,
+  useElyPagination,
 } from "@elysian/ui-enterprise-vue"
-import { computed, inject, ref, watch } from "vue"
+import { computed, inject, ref } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "@elysian/frontend-vue"
 import {
@@ -38,6 +40,8 @@ interface RoleWorkspaceMainProps {
   canViewRoles: boolean
   canCreateRoles: boolean
   canUpdateRoles: boolean
+  canDeleteRoles: boolean
+  canExportRoles: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -54,7 +58,21 @@ const emit = defineEmits<{
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: RoleRecord): void
+  (e: "page-change", page: number, pageSize: number): void
+  (e: "export", query: ElyQueryValues): void
 }>()
+
+const activeQuery = ref<ElyQueryValues>({})
+
+const hasActiveQuery = computed(() => {
+  const q = activeQuery.value
+  return Object.keys(q).some((k) => {
+    const v = q[k]
+    if (v === undefined || v === "") return false
+    if (Array.isArray(v)) return v.length > 0
+    return true
+  })
+})
 
 const injectedWorkspaceState = inject(
   WORKSPACE_STATE_KEY,
@@ -80,61 +98,61 @@ const resolvedItems = readInjectedValue(
   computed(() => resolvedRoleWorkspaceState.value?.tableItems ?? null),
   [] as RoleRecord[],
 )
-const resolvedTableActions = computed<ElyTableAction[]>(() =>
-  props.canUpdateRoles
-    ? [
-        {
-          key: "edit",
-          label: props.t("app.role.action.edit"),
-        },
-      ]
-    : [],
-)
 
-const pageSizeOptions = [20, 50, 100]
-const currentPage = ref(1)
-const pageSize = ref(20)
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(resolvedItems.value.length / pageSize.value)),
-)
-const pageStart = computed(() =>
-  resolvedItems.value.length === 0
-    ? 0
-    : (currentPage.value - 1) * pageSize.value + 1,
-)
-const pageEnd = computed(() =>
-  Math.min(resolvedItems.value.length, currentPage.value * pageSize.value),
-)
-const paginatedItems = computed(() =>
-  resolvedItems.value.slice(
-    (currentPage.value - 1) * pageSize.value,
-    currentPage.value * pageSize.value,
-  ),
-)
-const paginationSummary = computed(() =>
-  props.t("app.pagination.summary", {
-    page: currentPage.value,
-    totalPages: totalPages.value,
-    start: pageStart.value,
-    end: pageEnd.value,
-    total: resolvedItems.value.length,
-  }),
-)
+const {
+  currentPage,
+  pageSize,
+  pageSizeOptions,
+  totalPages,
+  paginatedItems,
+  paginationSummary,
+  goPreviousPage,
+  goNextPage,
+  updatePageSize,
+} = useElyPagination(resolvedItems, { t: props.t })
 
-const goPreviousPage = () => {
-  currentPage.value = Math.max(1, currentPage.value - 1)
-}
+const resolvedStatus = computed(() => {
+  if (!props.moduleReady) return "module-offline"
+  if (props.authModuleReady && !props.isAuthenticated)
+    return "not-authenticated"
+  if (props.canEnterWorkspace && !props.canViewRoles) return "no-permission"
+  if (resolvedErrorMessage.value) return "error"
+  return "ready"
+})
 
-const goNextPage = () => {
-  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
-}
+const resolvedStatusMessage = computed(() => {
+  if (resolvedStatus.value === "module-offline") {
+    return props.t("app.message.roleModuleOffline")
+  }
+  if (resolvedStatus.value === "not-authenticated") {
+    return props.t("app.message.roleSignInToLoad")
+  }
+  if (resolvedStatus.value === "no-permission") {
+    return props.t("app.message.roleNoListPermission")
+  }
+  return resolvedErrorMessage.value
+})
 
-const updatePageSize = (event: Event) => {
-  const nextValue = Number((event.target as HTMLSelectElement).value)
+const resolvedTableActions = computed<ElyTableAction[]>(() => {
+  const actions: ElyTableAction[] = []
 
-  pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
-  currentPage.value = 1
-}
+  if (props.canUpdateRoles) {
+    actions.push({
+      key: "edit",
+      label: props.t("app.role.action.edit"),
+    })
+  }
+
+  if (props.canDeleteRoles) {
+    actions.push({
+      key: "delete",
+      label: props.t("app.role.action.delete"),
+      tone: "danger",
+    })
+  }
+
+  return actions
+})
 
 const handleAction = (key: string, row: Record<string, unknown>) => {
   const rowId = String(row.id ?? "")
@@ -149,39 +167,43 @@ const handleCreate = () => {
   emit("action", "create", {} as RoleRecord)
 }
 
-watch(resolvedItems, () => {
-  currentPage.value = Math.min(currentPage.value, totalPages.value)
-})
+const exportConfirmVisible = ref(false)
+
+const exportScopeSummary = computed(() =>
+  props.t("app.role.exportScopeSummary", {
+    count: resolvedItems.value.length,
+    filtered: hasActiveQuery.value ? "1" : "0",
+  }),
+)
+
+const requestExport = () => {
+  exportConfirmVisible.value = true
+}
+
+const confirmExport = () => {
+  exportConfirmVisible.value = false
+  emit("export", activeQuery.value)
+}
+
+const cancelExport = () => {
+  exportConfirmVisible.value = false
+}
+
+const handleSearch = (values: ElyQueryValues) => {
+  activeQuery.value = values
+  emit("search", values)
+}
+
+const handleReset = () => {
+  activeQuery.value = {}
+  emit("reset")
+}
 </script>
 
 <template>
-  <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-    {{ t("app.message.roleModuleOffline") }}
-  </div>
-
-  <div
-    v-else-if="authModuleReady && !isAuthenticated"
-    class="enterprise-message enterprise-message-info"
-  >
-    {{ t("app.message.roleSignInToLoad") }}
-  </div>
-
-  <div
-    v-else-if="canEnterWorkspace && !canViewRoles"
-    class="enterprise-message enterprise-message-warning"
-  >
-    {{ t("app.message.roleNoListPermission") }}
-  </div>
-
-  <div
-    v-else-if="resolvedErrorMessage"
-    class="enterprise-message enterprise-message-danger"
-  >
-    {{ resolvedErrorMessage }}
-  </div>
-
   <ElyCrudWorkspace
-    v-else
+    :status="resolvedStatus"
+    :status-message="resolvedStatusMessage"
     :eyebrow="t('app.role.workspaceEyebrow')"
     :title="t('app.role.workspaceTitle')"
     :description="''"
@@ -194,13 +216,33 @@ watch(resolvedItems, () => {
     :item-count-label="itemCountLabel"
     :empty-title="emptyTitle"
     :empty-description="emptyDescription"
+    :has-active-query="hasActiveQuery"
+    :can-create="canCreateRoles"
     :copy="copy"
     @action="handleAction"
-    @search="emit('search', $event)"
-    @reset="emit('reset')"
+    @search="handleSearch"
+    @reset="handleReset"
     @row-click="emit('row-click', $event as RoleRecord)"
   >
     <template #toolbar>
+      <button
+        v-if="canExportRoles"
+        type="button"
+        class="enterprise-button enterprise-button-ghost"
+        :disabled="resolvedLoading"
+        @click="requestExport"
+      >
+        {{ t("app.role.action.export") }}
+      </button>
+      <div v-if="exportConfirmVisible" class="enterprise-export-confirm">
+        <span>{{ exportScopeSummary }}</span>
+        <button type="button" class="enterprise-button" @click="confirmExport">
+          {{ t("app.role.confirmExport") }}
+        </button>
+        <button type="button" class="enterprise-button enterprise-button-ghost" @click="cancelExport">
+          {{ t("app.role.cancelExport") }}
+        </button>
+      </div>
       <button
         v-if="canCreateRoles"
         type="button"
@@ -212,67 +254,19 @@ watch(resolvedItems, () => {
       </button>
     </template>
     <template #footer>
-      <div class="role-pagination">
-        <span>{{ paginationSummary }}</span>
-        <label>
-          <small>{{ t("app.pagination.pageSize") }}</small>
-          <select :value="pageSize" @change="updatePageSize">
-            <option
-              v-for="option in pageSizeOptions"
-              :key="option"
-              :value="option"
-            >
-              {{ option }}
-            </option>
-          </select>
-        </label>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="currentPage <= 1"
-          @click="goPreviousPage"
-        >
-          {{ t("app.pagination.previous") }}
-        </button>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="currentPage >= totalPages"
-          @click="goNextPage"
-        >
-          {{ t("app.pagination.next") }}
-        </button>
-      </div>
+      <ElyPagination
+        :summary="paginationSummary"
+        :page-size="pageSize"
+        :page-size-options="pageSizeOptions"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :previous-label="t('app.pagination.previous')"
+        :next-label="t('app.pagination.next')"
+        :page-size-label="t('app.pagination.pageSize')"
+        @previous="goPreviousPage"
+        @next="goNextPage"
+        @update-page-size="updatePageSize"
+      />
     </template>
   </ElyCrudWorkspace>
 </template>
-
-<style scoped>
-.role-pagination {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.65rem;
-  color: #475569;
-  font-size: 0.82rem;
-}
-
-.role-pagination label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.role-pagination small {
-  color: #64748b;
-}
-
-.role-pagination select {
-  height: 2rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 4px;
-  background: white;
-  color: #0f172a;
-}
-</style>

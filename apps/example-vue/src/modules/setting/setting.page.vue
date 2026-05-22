@@ -10,12 +10,14 @@
 import {
   ElyCrudWorkspace,
   type ElyCrudWorkspaceProps,
+  ElyPagination,
   type ElyQueryField,
   type ElyQueryValues,
   type ElyTableAction,
   type ElyTableColumn,
+  useElyPagination,
 } from "@elysian/ui-enterprise-vue"
-import { computed, inject, ref, watch } from "vue"
+import { computed, inject, ref } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "@elysian/frontend-vue"
 import {
@@ -38,6 +40,8 @@ interface SettingWorkspaceMainProps {
   canViewSettings: boolean
   canCreateSettings: boolean
   canUpdateSettings: boolean
+  canDeleteSettings: boolean
+  canExportSettings: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -54,7 +58,21 @@ const emit = defineEmits<{
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: SettingRecord): void
+  (e: "page-change", page: number, pageSize: number): void
+  (e: "export", query: ElyQueryValues): void
 }>()
+
+const activeQuery = ref<ElyQueryValues>({})
+
+const hasActiveQuery = computed(() => {
+  const q = activeQuery.value
+  return Object.keys(q).some((k) => {
+    const v = q[k]
+    if (v === undefined || v === "") return false
+    if (Array.isArray(v)) return v.length > 0
+    return true
+  })
+})
 
 const injectedWorkspaceState = inject(
   WORKSPACE_STATE_KEY,
@@ -82,61 +100,61 @@ const resolvedItems = readInjectedValue(
   computed(() => resolvedSettingWorkspaceState.value?.tableItems ?? null),
   [] as SettingRecord[],
 )
-const resolvedTableActions = computed<ElyTableAction[]>(() =>
-  props.canUpdateSettings
-    ? [
-        {
-          key: "edit",
-          label: props.t("app.setting.action.edit"),
-        },
-      ]
-    : [],
-)
 
-const pageSizeOptions = [20, 50, 100]
-const currentPage = ref(1)
-const pageSize = ref(20)
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(resolvedItems.value.length / pageSize.value)),
-)
-const pageStart = computed(() =>
-  resolvedItems.value.length === 0
-    ? 0
-    : (currentPage.value - 1) * pageSize.value + 1,
-)
-const pageEnd = computed(() =>
-  Math.min(resolvedItems.value.length, currentPage.value * pageSize.value),
-)
-const paginatedItems = computed(() =>
-  resolvedItems.value.slice(
-    (currentPage.value - 1) * pageSize.value,
-    currentPage.value * pageSize.value,
-  ),
-)
-const paginationSummary = computed(() =>
-  props.t("app.pagination.summary", {
-    page: currentPage.value,
-    totalPages: totalPages.value,
-    start: pageStart.value,
-    end: pageEnd.value,
-    total: resolvedItems.value.length,
-  }),
-)
+const {
+  currentPage,
+  pageSize,
+  pageSizeOptions,
+  totalPages,
+  paginatedItems,
+  paginationSummary,
+  goPreviousPage,
+  goNextPage,
+  updatePageSize,
+} = useElyPagination(resolvedItems, { t: props.t })
 
-const goPreviousPage = () => {
-  currentPage.value = Math.max(1, currentPage.value - 1)
-}
+const resolvedStatus = computed(() => {
+  if (!props.moduleReady) return "module-offline"
+  if (props.authModuleReady && !props.isAuthenticated)
+    return "not-authenticated"
+  if (props.canEnterWorkspace && !props.canViewSettings) return "no-permission"
+  if (resolvedErrorMessage.value) return "error"
+  return "ready"
+})
 
-const goNextPage = () => {
-  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
-}
+const resolvedStatusMessage = computed(() => {
+  if (resolvedStatus.value === "module-offline") {
+    return props.t("app.message.settingModuleOffline")
+  }
+  if (resolvedStatus.value === "not-authenticated") {
+    return props.t("app.message.settingSignInToLoad")
+  }
+  if (resolvedStatus.value === "no-permission") {
+    return props.t("app.message.settingNoListPermission")
+  }
+  return resolvedErrorMessage.value
+})
 
-const updatePageSize = (event: Event) => {
-  const nextValue = Number((event.target as HTMLSelectElement).value)
+const resolvedTableActions = computed<ElyTableAction[]>(() => {
+  const actions: ElyTableAction[] = []
 
-  pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
-  currentPage.value = 1
-}
+  if (props.canUpdateSettings) {
+    actions.push({
+      key: "edit",
+      label: props.t("app.setting.action.edit"),
+    })
+  }
+
+  if (props.canDeleteSettings) {
+    actions.push({
+      key: "delete",
+      label: props.t("app.setting.action.delete"),
+      tone: "danger",
+    })
+  }
+
+  return actions
+})
 
 const handleAction = (key: string, row: Record<string, unknown>) => {
   const rowId = String(row.id ?? "")
@@ -151,39 +169,43 @@ const handleCreate = () => {
   emit("action", "create", {} as SettingRecord)
 }
 
-watch(resolvedItems, () => {
-  currentPage.value = Math.min(currentPage.value, totalPages.value)
-})
+const exportConfirmVisible = ref(false)
+
+const exportScopeSummary = computed(() =>
+  props.t("app.setting.exportScopeSummary", {
+    count: resolvedItems.value.length,
+    filtered: hasActiveQuery.value ? "1" : "0",
+  }),
+)
+
+const requestExport = () => {
+  exportConfirmVisible.value = true
+}
+
+const confirmExport = () => {
+  exportConfirmVisible.value = false
+  emit("export", activeQuery.value)
+}
+
+const cancelExport = () => {
+  exportConfirmVisible.value = false
+}
+
+const handleSearch = (values: ElyQueryValues) => {
+  activeQuery.value = values
+  emit("search", values)
+}
+
+const handleReset = () => {
+  activeQuery.value = {}
+  emit("reset")
+}
 </script>
 
 <template>
-  <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-    {{ t("app.message.settingModuleOffline") }}
-  </div>
-
-  <div
-    v-else-if="authModuleReady && !isAuthenticated"
-    class="enterprise-message enterprise-message-info"
-  >
-    {{ t("app.message.settingSignInToLoad") }}
-  </div>
-
-  <div
-    v-else-if="canEnterWorkspace && !canViewSettings"
-    class="enterprise-message enterprise-message-warning"
-  >
-    {{ t("app.message.settingNoListPermission") }}
-  </div>
-
-  <div
-    v-else-if="resolvedErrorMessage"
-    class="enterprise-message enterprise-message-danger"
-  >
-    {{ resolvedErrorMessage }}
-  </div>
-
   <ElyCrudWorkspace
-    v-else
+    :status="resolvedStatus"
+    :status-message="resolvedStatusMessage"
     :eyebrow="t('app.setting.workspaceEyebrow')"
     :title="t('app.setting.workspaceTitle')"
     :description="''"
@@ -196,13 +218,33 @@ watch(resolvedItems, () => {
     :item-count-label="itemCountLabel"
     :empty-title="emptyTitle"
     :empty-description="emptyDescription"
+    :has-active-query="hasActiveQuery"
+    :can-create="canCreateSettings"
     :copy="copy"
     @action="handleAction"
-    @search="emit('search', $event)"
-    @reset="emit('reset')"
+    @search="handleSearch"
+    @reset="handleReset"
     @row-click="emit('row-click', $event as SettingRecord)"
   >
     <template #toolbar>
+      <button
+        v-if="canExportSettings"
+        type="button"
+        class="enterprise-button enterprise-button-ghost"
+        :disabled="resolvedLoading"
+        @click="requestExport"
+      >
+        {{ t("app.setting.action.export") }}
+      </button>
+      <div v-if="exportConfirmVisible" class="enterprise-export-confirm">
+        <span>{{ exportScopeSummary }}</span>
+        <button type="button" class="enterprise-button" @click="confirmExport">
+          {{ t("app.setting.confirmExport") }}
+        </button>
+        <button type="button" class="enterprise-button enterprise-button-ghost" @click="cancelExport">
+          {{ t("app.setting.cancelExport") }}
+        </button>
+      </div>
       <button
         v-if="canCreateSettings"
         type="button"
@@ -214,67 +256,19 @@ watch(resolvedItems, () => {
       </button>
     </template>
     <template #footer>
-      <div class="setting-pagination">
-        <span>{{ paginationSummary }}</span>
-        <label>
-          <small>{{ t("app.pagination.pageSize") }}</small>
-          <select :value="pageSize" @change="updatePageSize">
-            <option
-              v-for="option in pageSizeOptions"
-              :key="option"
-              :value="option"
-            >
-              {{ option }}
-            </option>
-          </select>
-        </label>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="currentPage <= 1"
-          @click="goPreviousPage"
-        >
-          {{ t("app.pagination.previous") }}
-        </button>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="currentPage >= totalPages"
-          @click="goNextPage"
-        >
-          {{ t("app.pagination.next") }}
-        </button>
-      </div>
+      <ElyPagination
+        :summary="paginationSummary"
+        :page-size="pageSize"
+        :page-size-options="pageSizeOptions"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :previous-label="t('app.pagination.previous')"
+        :next-label="t('app.pagination.next')"
+        :page-size-label="t('app.pagination.pageSize')"
+        @previous="goPreviousPage"
+        @next="goNextPage"
+        @update-page-size="updatePageSize"
+      />
     </template>
   </ElyCrudWorkspace>
 </template>
-
-<style scoped>
-.setting-pagination {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.65rem;
-  color: #475569;
-  font-size: 0.82rem;
-}
-
-.setting-pagination label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.setting-pagination small {
-  color: #64748b;
-}
-
-.setting-pagination select {
-  height: 2rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 4px;
-  background: white;
-  color: #0f172a;
-}
-</style>

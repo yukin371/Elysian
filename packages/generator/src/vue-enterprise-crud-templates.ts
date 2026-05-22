@@ -4,6 +4,8 @@ import { renderVueEnterprisePanelTemplateOverride } from "./vue-enterprise-crud-
 import {
   SYSTEM_FIELD_KEYS,
   getCreatePermissionPropName,
+  getDeletePermissionPropName,
+  getExportPermissionPropName,
   getPanelModeType,
   getSelectedStateProperty,
   getUpdatePermissionPropName,
@@ -25,6 +27,8 @@ export const renderVueEnterpriseMainTemplate = (schema: ModuleSchema) => {
   const viewPermission = getViewPermissionPropName(schema.name, pascalName)
   const createPermission = getCreatePermissionPropName(schema.name, pascalName)
   const updatePermission = getUpdatePermissionPropName(schema.name, pascalName)
+  const deletePermission = getDeletePermissionPropName(schema.name, pascalName)
+  const exportPermission = getExportPermissionPropName(schema.name, pascalName)
 
   return `<script setup lang="ts">
 import {
@@ -34,8 +38,10 @@ import {
   type ElyQueryValues,
   type ElyTableAction,
   type ElyTableColumn,
+  ElyPagination,
+  useElyPagination,
 } from "@elysian/ui-enterprise-vue"
-import { computed, inject, ref, watch } from "vue"
+import { computed, inject, ref } from "vue"
 
 import { WORKSPACE_STATE_KEY } from "@elysian/frontend-vue"
 import type { ${recordTypeName} } from "./${schema.name}.schema"
@@ -58,6 +64,8 @@ interface ${pascalName}WorkspaceMainProps {
   ${viewPermission}: boolean
   ${createPermission}: boolean
   ${updatePermission}: boolean
+  ${deletePermission}: boolean
+  ${exportPermission}: boolean
   queryFields: ElyQueryField[]
   tableColumns: ElyTableColumn[]
   itemCountLabel: string
@@ -74,7 +82,21 @@ const emit = defineEmits<{
   (e: "search", values: ElyQueryValues): void
   (e: "reset"): void
   (e: "row-click", row: ${recordTypeName}): void
+  (e: "page-change", page: number, pageSize: number): void
+  (e: "export", query: ElyQueryValues): void
 }>()
+
+const activeQuery = ref<ElyQueryValues>({})
+
+const hasActiveQuery = computed(() => {
+  const q = activeQuery.value
+  return Object.keys(q).some((k) => {
+    const v = q[k]
+    if (v === undefined || v === "") return false
+    if (Array.isArray(v)) return v.length > 0
+    return true
+  })
+})
 
 const injectedWorkspaceState = inject(
   WORKSPACE_STATE_KEY,
@@ -102,61 +124,60 @@ const resolvedItems = readInjectedValue(
   computed(() => resolved${pascalName}WorkspaceState.value?.tableItems ?? null),
   [] as ${recordTypeName}[],
 )
-const resolvedTableActions = computed<ElyTableAction[]>(() =>
-  props.${updatePermission}
-    ? [
-        {
-          key: "edit",
-          label: props.t("app.${camelName}.action.edit"),
-        },
-      ]
-    : [],
-)
 
-const pageSizeOptions = [20, 50, 100]
-const currentPage = ref(1)
-const pageSize = ref(20)
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(resolvedItems.value.length / pageSize.value)),
-)
-const pageStart = computed(() =>
-  resolvedItems.value.length === 0
-    ? 0
-    : (currentPage.value - 1) * pageSize.value + 1,
-)
-const pageEnd = computed(() =>
-  Math.min(resolvedItems.value.length, currentPage.value * pageSize.value),
-)
-const paginatedItems = computed(() =>
-  resolvedItems.value.slice(
-    (currentPage.value - 1) * pageSize.value,
-    currentPage.value * pageSize.value,
-  ),
-)
-const paginationSummary = computed(() =>
-  props.t("app.pagination.summary", {
-    page: currentPage.value,
-    totalPages: totalPages.value,
-    start: pageStart.value,
-    end: pageEnd.value,
-    total: resolvedItems.value.length,
-  }),
-)
+const {
+  currentPage,
+  pageSize,
+  pageSizeOptions,
+  totalPages,
+  paginatedItems,
+  paginationSummary,
+  goPreviousPage,
+  goNextPage,
+  updatePageSize,
+} = useElyPagination(resolvedItems, { t: props.t })
 
-const goPreviousPage = () => {
-  currentPage.value = Math.max(1, currentPage.value - 1)
-}
+const resolvedStatus = computed(() => {
+  if (!props.moduleReady) return "module-offline"
+  if (props.authModuleReady && !props.isAuthenticated) return "not-authenticated"
+  if (props.canEnterWorkspace && !props.${viewPermission}) return "no-permission"
+  if (resolvedErrorMessage.value) return "error"
+  return "ready"
+})
 
-const goNextPage = () => {
-  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
-}
+const resolvedStatusMessage = computed(() => {
+  if (resolvedStatus.value === "module-offline") {
+    return props.t("app.message.${camelName}ModuleOffline")
+  }
+  if (resolvedStatus.value === "not-authenticated") {
+    return props.t("app.message.${camelName}SignInToLoad")
+  }
+  if (resolvedStatus.value === "no-permission") {
+    return props.t("app.message.${camelName}NoListPermission")
+  }
+  return resolvedErrorMessage.value
+})
 
-const updatePageSize = (event: Event) => {
-  const nextValue = Number((event.target as HTMLSelectElement).value)
+const resolvedTableActions = computed<ElyTableAction[]>(() => {
+  const actions: ElyTableAction[] = []
 
-  pageSize.value = pageSizeOptions.includes(nextValue) ? nextValue : 20
-  currentPage.value = 1
-}
+  if (props.${updatePermission}) {
+    actions.push({
+      key: "edit",
+      label: props.t("app.${camelName}.action.edit"),
+    })
+  }
+
+  if (props.${deletePermission}) {
+    actions.push({
+      key: "delete",
+      label: props.t("app.${camelName}.action.delete"),
+      tone: "danger",
+    })
+  }
+
+  return actions
+})
 
 const handleAction = (key: string, row: Record<string, unknown>) => {
   const rowId = String(row.id ?? "")
@@ -171,39 +192,43 @@ const handleCreate = () => {
   emit("action", "create", {} as ${recordTypeName})
 }
 
-watch(resolvedItems, () => {
-  currentPage.value = Math.min(currentPage.value, totalPages.value)
-})
+const exportConfirmVisible = ref(false)
+
+const exportScopeSummary = computed(() =>
+  props.t("app.${camelName}.exportScopeSummary", {
+    count: resolvedItems.value.length,
+    filtered: hasActiveQuery.value ? "1" : "0",
+  }),
+)
+
+const requestExport = () => {
+  exportConfirmVisible.value = true
+}
+
+const confirmExport = () => {
+  exportConfirmVisible.value = false
+  emit("export", activeQuery.value)
+}
+
+const cancelExport = () => {
+  exportConfirmVisible.value = false
+}
+
+const handleSearch = (values: ElyQueryValues) => {
+  activeQuery.value = values
+  emit("search", values)
+}
+
+const handleReset = () => {
+  activeQuery.value = {}
+  emit("reset")
+}
 </script>
 
 <template>
-  <div v-if="!moduleReady" class="enterprise-message enterprise-message-warning">
-    {{ t("app.message.${camelName}ModuleOffline") }}
-  </div>
-
-  <div
-    v-else-if="authModuleReady && !isAuthenticated"
-    class="enterprise-message enterprise-message-info"
-  >
-    {{ t("app.message.${camelName}SignInToLoad") }}
-  </div>
-
-  <div
-    v-else-if="canEnterWorkspace && !${viewPermission}"
-    class="enterprise-message enterprise-message-warning"
-  >
-    {{ t("app.message.${camelName}NoListPermission") }}
-  </div>
-
-  <div
-    v-else-if="resolvedErrorMessage"
-    class="enterprise-message enterprise-message-danger"
-  >
-    {{ resolvedErrorMessage }}
-  </div>
-
   <ElyCrudWorkspace
-    v-else
+    :status="resolvedStatus"
+    :status-message="resolvedStatusMessage"
     :eyebrow="t('app.${camelName}.workspaceEyebrow')"
     :title="t('app.${camelName}.workspaceTitle')"
     :description="''"
@@ -216,13 +241,33 @@ watch(resolvedItems, () => {
     :item-count-label="itemCountLabel"
     :empty-title="emptyTitle"
     :empty-description="emptyDescription"
+    :has-active-query="hasActiveQuery"
+    :can-create="${createPermission}"
     :copy="copy"
     @action="handleAction"
-    @search="emit('search', $event)"
-    @reset="emit('reset')"
+    @search="handleSearch"
+    @reset="handleReset"
     @row-click="emit('row-click', $event as ${recordTypeName})"
   >
     <template #toolbar>
+      <button
+        v-if="${exportPermission}"
+        type="button"
+        class="enterprise-button enterprise-button-ghost"
+        :disabled="resolvedLoading"
+        @click="requestExport"
+      >
+        {{ t("app.${camelName}.action.export") }}
+      </button>
+      <div v-if="exportConfirmVisible" class="enterprise-export-confirm">
+        <span>{{ exportScopeSummary }}</span>
+        <button type="button" class="enterprise-button" @click="confirmExport">
+          {{ t("app.${camelName}.confirmExport") }}
+        </button>
+        <button type="button" class="enterprise-button enterprise-button-ghost" @click="cancelExport">
+          {{ t("app.${camelName}.cancelExport") }}
+        </button>
+      </div>
       <button
         v-if="${createPermission}"
         type="button"
@@ -234,70 +279,22 @@ watch(resolvedItems, () => {
       </button>
     </template>
     <template #footer>
-      <div class="${camelName}-pagination">
-        <span>{{ paginationSummary }}</span>
-        <label>
-          <small>{{ t("app.pagination.pageSize") }}</small>
-          <select :value="pageSize" @change="updatePageSize">
-            <option
-              v-for="option in pageSizeOptions"
-              :key="option"
-              :value="option"
-            >
-              {{ option }}
-            </option>
-          </select>
-        </label>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="currentPage <= 1"
-          @click="goPreviousPage"
-        >
-          {{ t("app.pagination.previous") }}
-        </button>
-        <button
-          type="button"
-          class="enterprise-button enterprise-button-ghost"
-          :disabled="currentPage >= totalPages"
-          @click="goNextPage"
-        >
-          {{ t("app.pagination.next") }}
-        </button>
-      </div>
+      <ElyPagination
+        :summary="paginationSummary"
+        :page-size="pageSize"
+        :page-size-options="pageSizeOptions"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :previous-label="t('app.pagination.previous')"
+        :next-label="t('app.pagination.next')"
+        :page-size-label="t('app.pagination.pageSize')"
+        @previous="goPreviousPage"
+        @next="goNextPage"
+        @update-page-size="updatePageSize"
+      />
     </template>
   </ElyCrudWorkspace>
 </template>
-
-<style scoped>
-.${camelName}-pagination {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.65rem;
-  color: #475569;
-  font-size: 0.82rem;
-}
-
-.${camelName}-pagination label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.${camelName}-pagination small {
-  color: #64748b;
-}
-
-.${camelName}-pagination select {
-  height: 2rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 4px;
-  background: white;
-  color: #0f172a;
-}
-</style>
 `
 }
 
@@ -321,7 +318,9 @@ export const renderVueEnterprisePanelTemplate = (schema: ModuleSchema) => {
 
   return `<script setup lang="ts">
 import {
+  ElyContextPanel,
   ElyForm,
+  type ElyContextPanelCopy,
   type ElyFormCopy,
   type ElyFormField,
   type ElyFormValues,
@@ -350,6 +349,7 @@ interface ${pascalName}WorkspacePanelProps {
   ${createPermission}: boolean
   ${updatePermission}: boolean
   formCopy: ElyFormCopy
+  contextPanelCopy?: ElyContextPanelCopy
   workspaceStateInjected?: boolean
 }
 
@@ -359,6 +359,8 @@ const emit = defineEmits<{
   (e: "start-edit", ${camelName}: ${recordTypeName}): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
+  (e: "confirm-delete", ${camelName}: ${recordTypeName}): void
+  (e: "cancel-delete"): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -415,47 +417,67 @@ const resolvedFormValues = readInjectedValue(
   computed(() => resolved${pascalName}WorkspaceState.value?.formValues ?? null),
   {} as ElyFormValues,
 )
+
+const resolvedPanelStatus = computed(() => {
+  if (!props.moduleReady) return "module-offline"
+  if (props.authModuleReady && !props.isAuthenticated) return "not-authenticated"
+  if (props.canEnterWorkspace && !props.${viewPermission}) return "no-permission"
+  if (resolvedErrorMessage.value) return "error"
+  if (resolvedDetailLoading.value && resolvedSelected${pascalName}.value) return "loading"
+  if (resolvedDetailErrorMessage.value) return "detail-error"
+  return "ready"
+})
+
+const resolvedPanelStatusMessage = computed(() => {
+  switch (resolvedPanelStatus.value) {
+    case "module-offline":
+      return t("app.message.${camelName}ModuleOffline")
+    case "not-authenticated":
+      return t("app.message.${camelName}SignInToLoad")
+    case "no-permission":
+      return t("app.message.${camelName}NoListPermission")
+    case "error":
+      return resolvedErrorMessage.value
+    case "loading":
+      return t("app.${camelName}.detailLoading")
+    case "detail-error":
+      return resolvedDetailErrorMessage.value
+    default:
+      return ""
+  }
+})
+
+const panelVisible = computed(() => {
+  if (resolvedPanelStatus.value !== "ready") return true
+  return resolvedPanelMode.value === "detail" || resolvedPanelMode.value === "create" || resolvedPanelMode.value === "edit" || resolvedPanelMode.value === "delete-confirm"
+})
+
+const resolvedPanelModeForContext = computed<"detail" | "edit" | "create" | "delete-confirm">(() => {
+  if (resolvedPanelMode.value === "delete-confirm") return "delete-confirm"
+  if (resolvedPanelMode.value === "edit") return "edit"
+  if (resolvedPanelMode.value === "create") return "create"
+  return "detail"
+})
 </script>
 
 <template>
-  <section class="enterprise-card">
-    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
+  <ElyContextPanel
+    :visible="panelVisible"
+    :title="resolvedPanelTitle"
+    :mode="resolvedPanelModeForContext"
+    :loading="resolvedLoading || resolvedDetailLoading"
+    :copy="contextPanelCopy"
+    @close="emit('cancel-panel')"
+    @cancel="emit('cancel-panel')"
+    @save="emit('submit-form', resolvedFormValues)"
+    @delete="resolvedSelected${pascalName} && emit('confirm-delete', resolvedSelected${pascalName})"
+  >
+    <template v-if="resolvedPanelStatus !== 'ready'">
+      <div class="ely-panel-status">{{ resolvedPanelStatusMessage }}</div>
+    </template>
 
-    <div v-if="!moduleReady" class="enterprise-inline-warning">
-      {{ t("app.message.${camelName}ModuleOffline") }}
-    </div>
-
-    <div v-else-if="authModuleReady && !isAuthenticated" class="enterprise-inline-warning">
-      {{ t("app.message.${camelName}SignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !${viewPermission}"
-      class="enterprise-inline-warning"
-    >
-      {{ t("app.message.${camelName}NoListPermission") }}
-    </div>
-
-    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <div
-      v-else-if="resolvedDetailLoading && resolvedSelected${pascalName}"
-      class="enterprise-inline-warning"
-    >
-      {{ t("app.${camelName}.detailLoading") }}
-    </div>
-
-    <div v-else-if="resolvedDetailErrorMessage" class="enterprise-inline-warning">
-      {{ resolvedDetailErrorMessage }}
-    </div>
-
-    <template
-      v-else-if="resolvedPanelMode === 'detail' && resolvedSelected${pascalName}"
-    >
+    <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelected${pascalName}">
       <ElyForm
-        class="mt-5"
         :fields="resolvedFormFields"
         :values="resolvedFormValues"
         readonly
@@ -464,11 +486,8 @@ const resolvedFormValues = readInjectedValue(
       />
     </template>
 
-    <template
-      v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
-    >
+    <template v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'">
       <ElyForm
-        class="mt-5"
         :fields="resolvedFormFields"
         :values="resolvedFormValues"
         :loading="resolvedLoading || resolvedDetailLoading"
@@ -478,10 +497,14 @@ const resolvedFormValues = readInjectedValue(
       />
     </template>
 
-    <div v-else class="enterprise-inline-warning mt-5">
-      {{ t("app.${camelName}.detailEmptyDescription") }}
-    </div>
-  </section>
+    <template v-else-if="resolvedPanelMode === 'delete-confirm' && resolvedSelected${pascalName}">
+      <p>{{ t("app.${camelName}.deleteConfirmMessage", { name: resolvedSelected${pascalName}.name ?? resolvedSelected${pascalName}.id }) }}</p>
+    </template>
+
+    <template v-else>
+      <p>{{ t("app.${camelName}.detailEmptyDescription") }}</p>
+    </template>
+  </ElyContextPanel>
   </template>
 `
 }

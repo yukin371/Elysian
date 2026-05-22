@@ -104,6 +104,24 @@ export const getUpdatePermissionPropName = (
   return `canUpdate${pluralizeIdentifier(pascalName)}`
 }
 
+export const getDeletePermissionPropName = (
+  schemaName: string,
+  pascalName: string,
+) => {
+  if (schemaName === "dictionary") {
+    return "canDeleteDictionaryTypes"
+  }
+
+  return `canDelete${pluralizeIdentifier(pascalName)}`
+}
+
+export const getExportPermissionPropName = (
+  schemaName: string,
+  pascalName: string,
+) => {
+  return `canExport${pluralizeIdentifier(pascalName)}`
+}
+
 export const getPanelModeType = (schemaName: string) => {
   if (schemaName === "notification") {
     return '"detail" | "create"'

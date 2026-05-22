@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-19`（Generator module handoff manifest 已完成最小实现并提交；下一步只规划人工接线完成证据，不让 generator 自动宣称完成）
+更新时间：`2026-05-21`（Generator module handoff manifest 已完成最小实现并提交；新增对标与 UX first 自我优化计划，作为功能强化的支持性轨道）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -22,6 +22,18 @@
 - Phase H 收口记录：[2026-05-19-generator-release-hardening-closeout.md](./plans/2026-05-19-generator-release-hardening-closeout.md)
 - Module handoff manifest 计划：[2026-05-19-generator-module-handoff-manifest-next-stage-plan.md](./plans/2026-05-19-generator-module-handoff-manifest-next-stage-plan.md)
 - Module integration completion evidence 候选：[2026-05-19-generator-module-integration-completion-evidence-plan.md](./plans/2026-05-19-generator-module-integration-completion-evidence-plan.md)
+
+### Supporting Track: 对标与 UX First 自我优化 🚧
+
+- 当前目标：把“对标开发”从分散口头判断收敛成可执行真相，明确 `RuoYi / GVA / elysia-admin / AI builder` 各自负责的参考维度，并把后续功能强化统一收敛到 `Parity / Better / Unique` 三层
+- 当前范围：只产出对标口径、能力分层、优先顺序与 UX first 判断规则，不直接宣称新增功能已完成
+- 当前 owner：`docs/plans` 负责沉淀判断规则；具体功能仍回到 `apps/example-vue`、`apps/server`、`packages/persistence` 与 `packages/generator`
+- 当前已推进：已新增“功能下限、体验提升、差异化护城河”三层模型，用于解释“为什么用户选择 Elysian”，避免后续只按竞品清单堆功能
+- 当前已推进：已明确 `RuoYi` 主要定义基础后台功能下限，`GVA` 主要定义后台 starter 与模块交付效率，`elysia-admin` 主要定义同生态竞争压力，AI builder 主要定义首屏体验与上手期待
+- 当前已推进：已补模块级对标矩阵，不再重复盘点基础模块是否存在，而是把重点切到默认路径、模块交付效率、结果判断与同生态选择理由
+- 当前结论：后续功能强化默认先补 `Parity`，再打磨 `Better`，最后放大 `Unique`；任何 UX 改动都要先回答“用户第一步是什么、首屏是否先服务这一步”
+- 计划文档：[2026-05-21-gva-ruoyi-elysia-admin-benchmark-and-ux-first-plan.md](./plans/2026-05-21-gva-ruoyi-elysia-admin-benchmark-and-ux-first-plan.md)
+- 模块级矩阵：[2026-05-21-module-level-benchmark-matrix.md](./plans/2026-05-21-module-level-benchmark-matrix.md)
 
 ### Recent Mainline: Phase H Generator 可发布闭环硬化 ✅
 
@@ -47,6 +59,7 @@
 - Phase H 导入边界决策：[2026-05-19-generator-import-boundary-decision.md](./plans/2026-05-19-generator-import-boundary-decision.md)
 - 功能矩阵：[2026-04-28-ruoyi-basic-feature-alignment-matrix.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-matrix.md)
 - 执行计划：[2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md](./plans/2026-04-28-ruoyi-basic-feature-alignment-execution-plan.md)
+- 对标与自我优化计划：[2026-05-21-gva-ruoyi-elysia-admin-benchmark-and-ux-first-plan.md](./plans/2026-05-21-gva-ruoyi-elysia-admin-benchmark-and-ux-first-plan.md)
 - 首发计划：[2026-05-12-reference-starter-release-plan.md](./plans/2026-05-12-reference-starter-release-plan.md)
 - 阶段执行计划：[2026-05-13-reference-starter-go-live-stage-plan.md](./plans/2026-05-13-reference-starter-go-live-stage-plan.md)
 - 下阶段规划 Spec：[2026-05-14-reference-starter-next-stage-planning-spec.md](./plans/2026-05-14-reference-starter-next-stage-planning-spec.md)

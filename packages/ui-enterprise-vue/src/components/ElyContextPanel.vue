@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button as TButton } from "tdesign-vue-next/es/button"
 import { Loading as TLoading } from "tdesign-vue-next/es/loading"
-import { computed } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 
 import type { ElyContextPanelEmits, ElyContextPanelProps } from "../contracts"
 
@@ -35,6 +35,23 @@ const resolvedWidth = computed(() => {
   }
 
   return 760
+})
+
+const panelRef = ref<HTMLElement | null>(null)
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === "Escape" && props.visible) {
+    event.preventDefault()
+    emit("cancel")
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("keydown", handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener("keydown", handleKeydown)
 })
 </script>
 

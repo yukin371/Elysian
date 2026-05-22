@@ -8,6 +8,8 @@
 
 <script setup lang="ts">
 import {
+  ElyContextPanel,
+  type ElyContextPanelCopy,
   ElyForm,
   type ElyFormCopy,
   type ElyFormField,
@@ -37,6 +39,7 @@ interface PostWorkspacePanelProps {
   canCreatePosts: boolean
   canUpdatePosts: boolean
   formCopy: ElyFormCopy
+  contextPanelCopy?: ElyContextPanelCopy
   workspaceStateInjected?: boolean
 }
 
@@ -46,6 +49,8 @@ const emit = defineEmits<{
   (e: "start-edit", post: PostRecord): void
   (e: "submit-form", values: ElyFormValues): void
   (e: "cancel-panel"): void
+  (e: "confirm-delete", post: PostRecord): void
+  (e: "cancel-delete"): void
 }>()
 
 const injectedWorkspaceState = inject(
@@ -98,47 +103,76 @@ const resolvedFormValues = readInjectedValue(
   computed(() => resolvedPostWorkspaceState.value?.formValues ?? null),
   {} as ElyFormValues,
 )
+
+const resolvedPanelStatus = computed(() => {
+  if (!props.moduleReady) return "module-offline"
+  if (props.authModuleReady && !props.isAuthenticated)
+    return "not-authenticated"
+  if (props.canEnterWorkspace && !props.canViewPosts) return "no-permission"
+  if (resolvedErrorMessage.value) return "error"
+  if (resolvedDetailLoading.value && resolvedSelectedPost.value)
+    return "loading"
+  if (resolvedDetailErrorMessage.value) return "detail-error"
+  return "ready"
+})
+
+const resolvedPanelStatusMessage = computed(() => {
+  switch (resolvedPanelStatus.value) {
+    case "module-offline":
+      return t("app.message.postModuleOffline")
+    case "not-authenticated":
+      return t("app.message.postSignInToLoad")
+    case "no-permission":
+      return t("app.message.postNoListPermission")
+    case "error":
+      return resolvedErrorMessage.value
+    case "loading":
+      return t("app.post.detailLoading")
+    case "detail-error":
+      return resolvedDetailErrorMessage.value
+    default:
+      return ""
+  }
+})
+
+const panelVisible = computed(() => {
+  if (resolvedPanelStatus.value !== "ready") return true
+  return (
+    resolvedPanelMode.value === "detail" ||
+    resolvedPanelMode.value === "create" ||
+    resolvedPanelMode.value === "edit" ||
+    resolvedPanelMode.value === "delete-confirm"
+  )
+})
+
+const resolvedPanelModeForContext = computed<
+  "detail" | "edit" | "create" | "delete-confirm"
+>(() => {
+  if (resolvedPanelMode.value === "delete-confirm") return "delete-confirm"
+  if (resolvedPanelMode.value === "edit") return "edit"
+  if (resolvedPanelMode.value === "create") return "create"
+  return "detail"
+})
 </script>
 
 <template>
-  <section class="enterprise-card">
-    <h3 class="enterprise-heading">{{ resolvedPanelTitle }}</h3>
+  <ElyContextPanel
+    :visible="panelVisible"
+    :title="resolvedPanelTitle"
+    :mode="resolvedPanelModeForContext"
+    :loading="resolvedLoading || resolvedDetailLoading"
+    :copy="contextPanelCopy"
+    @close="emit('cancel-panel')"
+    @cancel="emit('cancel-panel')"
+    @save="emit('submit-form', resolvedFormValues)"
+    @delete="resolvedSelectedPost && emit('confirm-delete', resolvedSelectedPost)"
+  >
+    <template v-if="resolvedPanelStatus !== 'ready'">
+      <div class="ely-panel-status">{{ resolvedPanelStatusMessage }}</div>
+    </template>
 
-    <div v-if="!moduleReady" class="enterprise-inline-warning">
-      {{ t("app.message.postModuleOffline") }}
-    </div>
-
-    <div v-else-if="authModuleReady && !isAuthenticated" class="enterprise-inline-warning">
-      {{ t("app.message.postSignInToLoad") }}
-    </div>
-
-    <div
-      v-else-if="canEnterWorkspace && !canViewPosts"
-      class="enterprise-inline-warning"
-    >
-      {{ t("app.message.postNoListPermission") }}
-    </div>
-
-    <div v-else-if="resolvedErrorMessage" class="enterprise-inline-warning">
-      {{ resolvedErrorMessage }}
-    </div>
-
-    <div
-      v-else-if="resolvedDetailLoading && resolvedSelectedPost"
-      class="enterprise-inline-warning"
-    >
-      {{ t("app.post.detailLoading") }}
-    </div>
-
-    <div v-else-if="resolvedDetailErrorMessage" class="enterprise-inline-warning">
-      {{ resolvedDetailErrorMessage }}
-    </div>
-
-    <template
-      v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedPost"
-    >
+    <template v-else-if="resolvedPanelMode === 'detail' && resolvedSelectedPost">
       <ElyForm
-        class="mt-5"
         :fields="resolvedFormFields"
         :values="resolvedFormValues"
         readonly
@@ -147,11 +181,8 @@ const resolvedFormValues = readInjectedValue(
       />
     </template>
 
-    <template
-      v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'"
-    >
+    <template v-else-if="resolvedPanelMode === 'create' || resolvedPanelMode === 'edit'">
       <ElyForm
-        class="mt-5"
         :fields="resolvedFormFields"
         :values="resolvedFormValues"
         :loading="resolvedLoading || resolvedDetailLoading"
@@ -161,8 +192,12 @@ const resolvedFormValues = readInjectedValue(
       />
     </template>
 
-    <div v-else class="enterprise-inline-warning mt-5">
-      {{ t("app.post.detailEmptyDescription") }}
-    </div>
-  </section>
+    <template v-else-if="resolvedPanelMode === 'delete-confirm' && resolvedSelectedPost">
+      <p>{{ t("app.post.deleteConfirmMessage", { name: resolvedSelectedPost.name ?? resolvedSelectedPost.id }) }}</p>
+    </template>
+
+    <template v-else>
+      <p>{{ t("app.post.detailEmptyDescription") }}</p>
+    </template>
+  </ElyContextPanel>
   </template>

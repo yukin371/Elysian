@@ -250,6 +250,48 @@ describe("ui-enterprise-vue adapters", () => {
     ).toBe('{\n  "foo": "bar",\n  "nested": {\n    "enabled": true\n  }\n}')
   })
 
+  describe("empty state distinction", () => {
+    it("resolves filtered-empty copy when hasActiveQuery is true", () => {
+      const { resolveElyCrudWorkspaceEmptyCopy } = require("./contracts")
+      const copy = resolveElyCrudWorkspaceEmptyCopy({
+        hasActiveQuery: true,
+        canCreate: true,
+      })
+      expect(copy.emptyTitle).toBe("无匹配数据")
+      expect(copy.emptyDescription).toMatch(/清除/)
+    })
+
+    it("resolves initial-empty copy with create hint when canCreate is true", () => {
+      const { resolveElyCrudWorkspaceEmptyCopy } = require("./contracts")
+      const copy = resolveElyCrudWorkspaceEmptyCopy({
+        hasActiveQuery: false,
+        canCreate: true,
+      })
+      expect(copy.emptyTitle).toBe("当前工作区为空")
+      expect(copy.emptyDescription).toMatch(/新增/)
+    })
+
+    it("resolves initial-empty copy without create hint when canCreate is false", () => {
+      const { resolveElyCrudWorkspaceEmptyCopy } = require("./contracts")
+      const copy = resolveElyCrudWorkspaceEmptyCopy({
+        hasActiveQuery: false,
+        canCreate: false,
+      })
+      expect(copy.emptyDescription).toMatch(/暂无|无数据/)
+      expect(copy.emptyDescription).not.toMatch(/新增|创建/)
+    })
+
+    it("allows caller copy to override resolved defaults", () => {
+      const { resolveElyCrudWorkspaceEmptyCopy } = require("./contracts")
+      const copy = resolveElyCrudWorkspaceEmptyCopy({
+        hasActiveQuery: true,
+        canCreate: true,
+        emptyTitle: "自定义空标题",
+      })
+      expect(copy.emptyTitle).toBe("自定义空标题")
+    })
+  })
+
   it("treats directory nodes as expand-only shell entries", () => {
     const navigation = [
       {

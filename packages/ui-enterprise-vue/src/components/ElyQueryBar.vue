@@ -3,7 +3,7 @@ import { Button as TButton } from "tdesign-vue-next/es/button"
 import { DateRangePicker as TDateRangePicker } from "tdesign-vue-next/es/date-picker"
 import { Input as TInput } from "tdesign-vue-next/es/input"
 import { Select as TSelect } from "tdesign-vue-next/es/select"
-import { reactive } from "vue"
+import { reactive, ref } from "vue"
 
 import type {
   ElyQueryBarEmits,
@@ -13,8 +13,15 @@ import type {
 
 const props = defineProps<ElyQueryBarProps>()
 const emit = defineEmits<ElyQueryBarEmits>()
+const barRef = ref<HTMLElement | null>(null)
 
 const values = reactive<ElyQueryValues>({})
+
+const focus = () => {
+  barRef.value?.querySelector<HTMLElement>("input")?.focus()
+}
+
+defineExpose({ focus })
 
 const handleSearch = () => emit("search", { ...values })
 
@@ -27,7 +34,7 @@ const handleReset = () => {
 </script>
 
 <template>
-  <div class="ely-query-bar">
+  <div ref="barRef" class="ely-query-bar">
     <div class="ely-query-fields">
       <div v-for="field in fields" :key="field.key" class="ely-query-field">
         <template v-if="field.kind === 'text'">

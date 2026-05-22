@@ -256,14 +256,78 @@ export interface ElyCrudWorkspaceCopy {
   rowsInScopeSuffix?: string
   emptyTitle?: string
   emptyDescription?: string
+  filteredEmptyTitle?: string
+  filteredEmptyDescription?: string
+  initialEmptyTitle?: string
+  initialEmptyDescription?: string
+  initialEmptyNoCreateDescription?: string
   queryBarCopy?: ElyQueryBarCopy
   tableCopy?: ElyTableCopy
 }
+
+export interface ResolveElyCrudWorkspaceEmptyCopyOptions {
+  hasActiveQuery: boolean
+  canCreate: boolean
+  emptyTitle?: string
+  emptyDescription?: string
+  copy?: ElyCrudWorkspaceCopy
+}
+
+export const resolveElyCrudWorkspaceEmptyCopy = (
+  options: ResolveElyCrudWorkspaceEmptyCopyOptions,
+): { emptyTitle: string; emptyDescription: string } => {
+  const { hasActiveQuery, canCreate } = options
+  const copy = options.copy ?? {}
+
+  if (options.emptyTitle !== undefined) {
+    return {
+      emptyTitle: options.emptyTitle,
+      emptyDescription:
+        options.emptyDescription ??
+        copy.emptyDescription ??
+        (hasActiveQuery
+          ? "尝试清除筛选条件以查看更多数据。"
+          : canCreate
+            ? "当前工作区暂无数据，可新增记录。"
+            : "当前工作区暂无数据。"),
+    }
+  }
+
+  if (hasActiveQuery) {
+    return {
+      emptyTitle: copy.filteredEmptyTitle ?? copy.emptyTitle ?? "无匹配数据",
+      emptyDescription:
+        copy.filteredEmptyDescription ??
+        copy.emptyDescription ??
+        "尝试清除筛选条件以查看更多数据。",
+    }
+  }
+
+  return {
+    emptyTitle: copy.initialEmptyTitle ?? copy.emptyTitle ?? "当前工作区为空",
+    emptyDescription: canCreate
+      ? (copy.initialEmptyDescription ??
+        copy.emptyDescription ??
+        "当前工作区暂无数据，可新增记录。")
+      : (copy.initialEmptyNoCreateDescription ??
+        copy.emptyDescription ??
+        "当前工作区暂无数据。"),
+  }
+}
+
+export type ElyWorkspaceStatus =
+  | "ready"
+  | "module-offline"
+  | "not-authenticated"
+  | "no-permission"
+  | "error"
 
 export interface ElyCrudWorkspaceProps {
   eyebrow: string
   title: string
   description: string
+  status?: ElyWorkspaceStatus
+  statusMessage?: string
   queryFields: ElyQueryField[]
   queryLoading?: boolean
   tableColumns: ElyTableColumn[]
@@ -274,6 +338,8 @@ export interface ElyCrudWorkspaceProps {
   itemCountLabel?: string
   emptyTitle?: string
   emptyDescription?: string
+  hasActiveQuery?: boolean
+  canCreate?: boolean
   copy?: ElyCrudWorkspaceCopy
 }
 
@@ -282,6 +348,25 @@ export interface ElyCrudWorkspaceEmits {
   (e: "reset"): void
   (e: "action", key: string, row: Record<string, unknown>): void
   (e: "row-click", row: Record<string, unknown>): void
+}
+
+// ─── Ely CRUD workbench ────────────────────────────────────────────────────────
+
+export interface ElyPaginationProps {
+  summary: string
+  pageSize: number
+  pageSizeOptions: number[]
+  currentPage: number
+  totalPages: number
+  previousLabel?: string
+  nextLabel?: string
+  pageSizeLabel?: string
+}
+
+export interface ElyPaginationEmits {
+  (e: "previous"): void
+  (e: "next"): void
+  (e: "update-page-size", event: Event): void
 }
 
 // ─── Ely CRUD workbench ────────────────────────────────────────────────────────

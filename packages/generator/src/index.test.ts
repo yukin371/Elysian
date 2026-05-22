@@ -833,3 +833,184 @@ describe("enterprise CRUD templates", () => {
     expect(pageFile?.contents).not.toContain("ElyCrudWorkspace")
   })
 })
+
+describe("generator template BDD: standard CRUD enterprise UX", () => {
+  // ── BDD Scenario: 分页逻辑必须委托给共享 composable，不应内联 ──
+  it("does not inline pagination logic in generated page", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    // 分页逻辑不应在页面内重新声明
+    expect(pageFile?.contents).not.toContain(
+      "const pageSizeOptions = [20, 50, 100]",
+    )
+    expect(pageFile?.contents).not.toContain("const currentPage = ref(1)")
+    expect(pageFile?.contents).not.toContain("const totalPages = computed(()")
+    expect(pageFile?.contents).not.toContain(
+      "const paginatedItems = computed(()",
+    )
+
+    // 应委托给共享 composable
+    expect(pageFile?.contents).toContain("useElyPagination")
+  })
+
+  // ── BDD Scenario: 生成的表格操作必须包含删除，并标记危险色调 ──
+  it("includes delete action with danger tone in table actions", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    // delete 权限控制
+    expect(pageFile?.contents).toContain("canDeletePosts")
+
+    // 删除操作带 danger tone
+    expect(pageFile?.contents).toContain('key: "delete"')
+    expect(pageFile?.contents).toContain('tone: "danger"')
+  })
+
+  // ── BDD Scenario: 生成页面必须提供导出入口 slot ──
+  it("provides export action slot in generated page", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    // 导出权限控制
+    expect(pageFile?.contents).toContain("canExportPosts")
+
+    // 导出按钮
+    expect(pageFile?.contents).toContain("app.post.action.export")
+  })
+
+  // ── BDD Scenario: 支持服务端分页，传递 page/pageSize 给父组件 ──
+  it("emits pagination state for server-side paging", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    // 分页变化需要通知父组件
+    expect(pageFile?.contents).toContain('"page-change"')
+  })
+
+  // ── BDD Scenario: 导出动作必须关联当前筛选条件 ──
+  it("export action emits current query context", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    // export 事件携带当前查询条件
+    expect(pageFile?.contents).toContain('"export", activeQuery.value')
+    // activeQuery 在 search 时更新
+    expect(pageFile?.contents).toContain("activeQuery.value = values")
+    // activeQuery 在 reset 时清空
+    expect(pageFile?.contents).toContain("activeQuery.value = {}")
+  })
+
+  // ── BDD Scenario: 分页 footer 必须使用 ElyPagination 组件，不内联 HTML/CSS ──
+  it("uses ElyPagination component instead of inline pagination footer", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    // 使用 ElyPagination 组件
+    expect(pageFile?.contents).toContain("ElyPagination")
+    expect(pageFile?.contents).toContain(':summary="paginationSummary"')
+    expect(pageFile?.contents).toContain('@previous="goPreviousPage"')
+    expect(pageFile?.contents).toContain('@next="goNextPage"')
+
+    // 不内联分页 HTML
+    expect(pageFile?.contents).not.toContain("post-pagination")
+  })
+
+  // ── BDD Scenario: 守卫链必须委托给 ElyCrudWorkspace，不内联 v-if ──
+  it("delegates guard chain to ElyCrudWorkspace status prop", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    // 使用 status prop 而非内联 v-if 守卫
+    expect(pageFile?.contents).toContain("resolvedStatus")
+    expect(pageFile?.contents).toContain("resolvedStatusMessage")
+    expect(pageFile?.contents).toContain(':status="resolvedStatus"')
+    expect(pageFile?.contents).toContain(
+      ':status-message="resolvedStatusMessage"',
+    )
+
+    // 不内联守卫 v-if
+    expect(pageFile?.contents).not.toContain('v-if="!moduleReady"')
+    expect(pageFile?.contents).not.toContain(
+      'v-else-if="authModuleReady && !isAuthenticated"',
+    )
+    expect(pageFile?.contents).not.toContain(
+      "enterprise-message enterprise-warning",
+    )
+  })
+
+  // ── BDD Scenario: 空状态需区分初始空 / 筛选空 ──
+  it("passes hasActiveQuery and canCreate to ElyCrudWorkspace", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    expect(pageFile?.contents).toContain(":has-active-query")
+    expect(pageFile?.contents).toContain(":can-create")
+    expect(pageFile?.contents).toContain("hasActiveQuery")
+  })
+
+  // ── BDD Scenario: 删除前必须确认对象，确认区应显示对象名称或关键字段 ──
+  it("renders delete-confirm panel with object identity display", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const panelFile = files.find(
+      (f) => f.path === "modules/post/post-panel.vue",
+    )
+
+    expect(panelFile?.contents).toContain("delete-confirm")
+    expect(panelFile?.contents).toContain("confirm-delete")
+    expect(panelFile?.contents).toContain("cancel-delete")
+  })
+
+  // ── BDD Scenario: 导出前应确认范围 ──
+  it("shows export scope confirmation with item count before emitting", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    expect(pageFile?.contents).toContain("exportConfirmVisible")
+    expect(pageFile?.contents).toContain("exportScopeSummary")
+    expect(pageFile?.contents).toContain("confirmExport")
+    expect(pageFile?.contents).toContain("cancelExport")
+    expect(pageFile?.contents).toContain("requestExport")
+  })
+
+  // ── BDD Scenario: 面板守卫链应委托给 status prop，不内联 v-if ──
+  it("delegates panel guard chain to computed status instead of inline v-if", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const panelFile = files.find(
+      (f) => f.path === "modules/post/post-panel.vue",
+    )
+
+    // 使用 resolvedPanelStatus 委托
+    expect(panelFile?.contents).toContain("resolvedPanelStatus")
+    expect(panelFile?.contents).toContain("resolvedPanelStatusMessage")
+
+    // 不内联守卫 v-if
+    expect(panelFile?.contents).not.toContain('v-if="!moduleReady"')
+    expect(panelFile?.contents).not.toContain(
+      'v-else-if="authModuleReady && !isAuthenticated"',
+    )
+    expect(panelFile?.contents).not.toContain("enterprise-inline-warning")
+  })
+
+  // ── BDD Scenario: 面板模板使用 ElyContextPanel 组件，不输出裸 HTML ──
+  it("uses ElyContextPanel component instead of raw section HTML", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const panelFile = files.find(
+      (f) => f.path === "modules/post/post-panel.vue",
+    )
+
+    expect(panelFile?.contents).toContain("ElyContextPanel")
+    expect(panelFile?.contents).toContain(":visible")
+    expect(panelFile?.contents).toContain(":mode")
+    expect(panelFile?.contents).not.toContain("enterprise-card")
+    expect(panelFile?.contents).not.toContain("enterprise-heading")
+  })
+
+  // ── BDD Scenario: 批量操作应显示作用范围 ──
+  it("shows export scope indicator on toolbar actions", () => {
+    const files = renderModuleFiles(postModuleSchema)
+    const pageFile = files.find((f) => f.path === "modules/post/post.page.vue")
+
+    expect(pageFile?.contents).toContain("exportScopeSummary")
+  })
+})

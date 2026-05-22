@@ -16,6 +16,8 @@ import type {
   ElyFormField,
   ElyFormProps,
   ElyFormValues,
+  ElyPaginationEmits,
+  ElyPaginationProps,
   ElyPreviewSkeletonProps,
   ElyQueryBarEmits,
   ElyQueryBarProps,
@@ -38,13 +40,25 @@ import type {
   ElyWorkbenchToolbarAction,
   ElyWorkbenchToolbarEmits,
   ElyWorkbenchToolbarProps,
+  ElyWorkspaceStatus,
+  ResolveElyCrudWorkspaceEmptyCopyOptions,
   ResolvedElyShellCopy,
   ResolvedElyWorkbenchShellCopy,
 } from "./contracts"
-import { resolveElyShellCopy, resolveElyWorkbenchShellCopy } from "./contracts"
+import {
+  resolveElyCrudWorkspaceEmptyCopy,
+  resolveElyShellCopy,
+  resolveElyWorkbenchShellCopy,
+} from "./contracts"
+export {
+  useElyPagination,
+  type UseElyPaginationOptions,
+  type UseElyPaginationReturn,
+} from "./use-ely-pagination"
 
 export { default as ElyForm } from "./components/ElyForm.vue"
 export { default as ElyContextPanel } from "./components/ElyContextPanel.vue"
+export { default as ElyPagination } from "./components/ElyPagination.vue"
 export { default as ElyCrudWorkspace } from "./components/ElyCrudWorkspace.vue"
 export { default as ElyCrudWorkbench } from "./components/ElyCrudWorkbench.vue"
 export { default as ElyNavNodes } from "./components/ElyNavNodes.vue"
@@ -70,6 +84,8 @@ export type {
   ElyFormField,
   ElyFormProps,
   ElyFormValues,
+  ElyPaginationEmits,
+  ElyPaginationProps,
   ElyPreviewSkeletonProps,
   ElyQueryBarEmits,
   ElyQueryBarProps,
@@ -85,6 +101,7 @@ export type {
   ElyTableColumn,
   ElyTableEmits,
   ElyTableProps,
+  ElyWorkspaceStatus,
   ElyWorkbenchShellCopy,
   ElyWorkbenchShellEmits,
   ElyWorkbenchShellProps,
@@ -94,9 +111,14 @@ export type {
   ElyWorkbenchToolbarProps,
   ResolvedElyShellCopy,
   ResolvedElyWorkbenchShellCopy,
+  ResolveElyCrudWorkspaceEmptyCopyOptions,
 }
 
-export { resolveElyShellCopy, resolveElyWorkbenchShellCopy }
+export {
+  resolveElyCrudWorkspaceEmptyCopy,
+  resolveElyShellCopy,
+  resolveElyWorkbenchShellCopy,
+}
 
 export const vueEnterprisePresetManifest: UiPresetManifest = {
   key: "vue-enterprise",
