@@ -1,0 +1,278 @@
+/* Component API Reference helpers. Token-only; no local palette or radius scale. */
+
+.ely-story-api-reference-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-api-reference-hero-panel,
+.ely-story-api-reference-route-panel,
+.ely-story-api-reference-summary-panel,
+.ely-story-api-reference-groups-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface) 92%, transparent),
+    color-mix(in oklab, var(--color-bg-subtle) 44%, transparent)
+  );
+  padding: 24px;
+}
+
+.ely-story-api-reference-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-accent) 13%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 10%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-api-reference-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-api-reference-route,
+.ely-story-api-reference-group-list,
+.ely-story-api-reference-card-list,
+.ely-story-api-reference-section ul,
+.ely-story-api-reference-section dl {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-api-reference-route {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-api-reference-route-step,
+.ely-story-api-reference-group,
+.ely-story-api-reference-card,
+.ely-story-api-reference-prop-row,
+.ely-story-api-reference-section li,
+.ely-story-api-reference-section dl > div {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-api-reference-route-step {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  color: inherit;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.ely-story-api-reference-route-step > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-api-reference-route-step strong,
+.ely-story-api-reference-group h3,
+.ely-story-api-reference-card h4,
+.ely-story-api-reference-section > strong {
+  font-family: var(--ely-public-font-display);
+  line-height: 1.18;
+}
+
+.ely-story-api-reference-route-step p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.ely-story-api-reference-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ely-story-api-reference-group,
+.ely-story-api-reference-card {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.ely-story-api-reference-group {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-api-reference-group-head,
+.ely-story-api-reference-card-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-api-reference-group-head span,
+.ely-story-api-reference-card-head span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-api-reference-group h3,
+.ely-story-api-reference-card h4 {
+  margin: 0.2rem 0 0;
+}
+
+.ely-story-api-reference-card {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 5%, transparent),
+      transparent 62%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-api-reference-section {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-api-reference-section > strong {
+  font-size: 1rem;
+}
+
+.ely-story-api-reference-prop-table {
+  display: grid;
+  gap: 8px;
+}
+
+.ely-story-api-reference-prop-row {
+  display: grid;
+  grid-template-columns:
+    minmax(96px, 0.16fr) minmax(150px, 0.24fr)
+    minmax(96px, 0.16fr) minmax(0, 0.44fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+}
+
+.ely-story-api-reference-prop-row span,
+.ely-story-api-reference-prop-row small,
+.ely-story-api-reference-section li span,
+.ely-story-api-reference-section dt {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-api-reference-prop-row em {
+  display: inline-flex;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-danger-container) 52%,
+    transparent
+  );
+  color: var(--color-on-danger-container);
+  padding: 2px 6px;
+  font-style: normal;
+  letter-spacing: 0.04em;
+}
+
+.ely-story-api-reference-prop-row code {
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-family: var(--ely-public-font-sans);
+  font-size: 0.78rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.ely-story-api-reference-prop-row p,
+.ely-story-api-reference-section li p,
+.ely-story-api-reference-section dd {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.ely-story-api-reference-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.5fr);
+  gap: 12px;
+}
+
+.ely-story-api-reference-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ely-story-api-reference-section li,
+.ely-story-api-reference-section dl > div {
+  padding: 10px;
+}
+
+.ely-story-api-reference-section dl,
+.ely-story-api-reference-section dt,
+.ely-story-api-reference-section dd {
+  margin: 0;
+}
+
+.ely-story-api-reference-route-step:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 34%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+@media (max-width: 920px) {
+  .ely-story-api-reference-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-api-reference-layout,
+  .ely-story-api-reference-route,
+  .ely-story-api-reference-prop-row,
+  .ely-story-api-reference-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-api-reference-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-api-reference-hero-panel,
+  .ely-story-api-reference-route-panel,
+  .ely-story-api-reference-summary-panel,
+  .ely-story-api-reference-groups-panel {
+    padding: 18px;
+  }
+}

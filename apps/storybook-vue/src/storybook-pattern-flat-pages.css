@@ -1,0 +1,153 @@
+/* Flat pattern-page refinements for Storybook-only public-luxe showcases. */
+
+.ely-story-form-setup,
+.ely-story-form-review,
+.ely-story-form-handoff,
+.ely-story-editorial-publishing,
+.ely-story-editorial-lanes,
+.ely-story-editorial-guardrails,
+.ely-story-event-health,
+.ely-story-event-lanes,
+.ely-story-event-guardrails {
+  display: grid;
+  gap: 18px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 22px;
+}
+
+.ely-story-form-setup,
+.ely-story-editorial-publishing,
+.ely-story-event-health {
+  align-content: start;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-form-review {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 6%, transparent),
+      transparent 42%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-form-handoff,
+.ely-story-editorial-lanes,
+.ely-story-editorial-guardrails,
+.ely-story-event-lanes,
+.ely-story-event-guardrails {
+  padding: 24px;
+}
+
+.ely-story-form-setup h2,
+.ely-story-form-review h2,
+.ely-story-form-section-head h2,
+.ely-story-editorial-publishing h2,
+.ely-story-editorial-section-head h2,
+.ely-story-event-health h2,
+.ely-story-event-section-head h2 {
+  max-width: 42rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.05;
+}
+
+.ely-story-form-section-head,
+.ely-story-editorial-section-head,
+.ely-story-event-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.ely-story-form-section-head p,
+.ely-story-editorial-section-head p,
+.ely-story-event-section-head p {
+  max-width: 32rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-form-step {
+  border-right: 0;
+  border-left: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.ely-story-form-step:first-child {
+  border-top: 0;
+}
+
+.ely-story-form-note-grid,
+.ely-story-editorial-rule-grid,
+.ely-story-event-rule-grid {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-form-note,
+.ely-story-editorial-rule,
+.ely-story-event-rule {
+  border: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: inherit;
+  background: transparent;
+  padding: 16px 0;
+}
+
+.ely-story-editorial-card-grid {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  gap: 0;
+}
+
+.ely-story-editorial-card {
+  border: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: inherit;
+  background: transparent;
+  padding: 16px 0;
+}
+
+.ely-story-event-agenda-item,
+.ely-story-event-mini-item {
+  border-right: 0;
+  border-left: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.ely-story-event-agenda-item:first-child,
+.ely-story-event-mini-item:first-child {
+  border-top: 0;
+}
+
+@media (max-width: 560px) {
+  .ely-story-form-setup,
+  .ely-story-form-review,
+  .ely-story-form-handoff,
+  .ely-story-editorial-publishing,
+  .ely-story-editorial-lanes,
+  .ely-story-editorial-guardrails,
+  .ely-story-event-health,
+  .ely-story-event-lanes,
+  .ely-story-event-guardrails {
+    padding: 18px;
+  }
+}

@@ -1,0 +1,201 @@
+/* Action hierarchy governance helpers. Token-only; no local palette. */
+
+.ely-story-action-rule-grid,
+.ely-story-action-lane-grid,
+.ely-story-action-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-action-rule-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-action-principle,
+.ely-story-action-risk-panel,
+.ely-story-action-recovery-panel,
+.ely-story-action-check-panel {
+  display: grid;
+  gap: 18px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 24px;
+}
+
+.ely-story-action-principle {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 46%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+}
+
+.ely-story-action-risk-panel,
+.ely-story-action-recovery-panel,
+.ely-story-action-check-panel {
+  align-content: start;
+}
+
+.ely-story-action-risk-panel h2,
+.ely-story-action-recovery-panel h2,
+.ely-story-action-check-panel h2 {
+  max-width: 38rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.05;
+}
+
+.ely-story-action-rule-card,
+.ely-story-action-lane,
+.ely-story-action-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-action-rule-card {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-action-rule-card strong,
+.ely-story-action-lane strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-action-rule-card p,
+.ely-story-action-lane p {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.ely-story-action-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
+}
+
+.ely-story-action-specimen {
+  display: grid;
+  gap: 16px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 10%, transparent),
+      transparent 42%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-action-specimen h2 {
+  max-width: 42rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  line-height: 0.98;
+}
+
+.ely-story-action-state-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ely-story-action-lane-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-action-lane span {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-action-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-right: 0;
+  border-left: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.ely-story-action-checklist {
+  gap: 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-action-check {
+  border-top: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-action-check > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 74%,
+    var(--color-secondary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+@media (max-width: 920px) {
+  .ely-story-action-rule-grid,
+  .ely-story-action-lane-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-action-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-action-principle,
+  .ely-story-action-risk-panel,
+  .ely-story-action-recovery-panel,
+  .ely-story-action-check-panel {
+    padding: 18px;
+  }
+
+  .ely-story-action-rule-grid,
+  .ely-story-action-lane-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-action-specimen {
+    padding: 18px;
+  }
+}

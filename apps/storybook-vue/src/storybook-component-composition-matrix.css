@@ -1,0 +1,257 @@
+.ely-story-component-composition-hero-panel,
+.ely-story-component-composition-lane-panel,
+.ely-story-component-composition-recipe-panel,
+.ely-story-component-composition-approval-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 24px;
+}
+
+.ely-story-component-composition-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-accent) 11%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-component-composition-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-component-composition-route {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-component-composition-route-step,
+.ely-story-component-composition-lane,
+.ely-story-component-composition-recipe,
+.ely-story-component-composition-gate,
+.ely-story-component-composition-proof {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-component-composition-route-step {
+  display: grid;
+  gap: 10px;
+  color: inherit;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.ely-story-component-composition-route-step:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+}
+
+.ely-story-component-composition-route-step span,
+.ely-story-component-composition-lane > div > span,
+.ely-story-component-composition-recipe-head span,
+.ely-story-component-composition-proof strong {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-component-composition-route-step strong,
+.ely-story-component-composition-lane h3,
+.ely-story-component-composition-recipe h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  line-height: 1.12;
+}
+
+.ely-story-component-composition-route-step strong {
+  font-size: 1.08rem;
+}
+
+.ely-story-component-composition-route-step p,
+.ely-story-component-composition-lane p,
+.ely-story-component-composition-proof p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.ely-story-component-composition-lanes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ely-story-component-composition-lane {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-component-composition-lane h3 {
+  margin-top: 0.25rem;
+  font-size: 1.12rem;
+}
+
+.ely-story-component-composition-lane small {
+  color: color-mix(in oklab, var(--color-secondary) 74%, var(--color-text));
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.ely-story-component-composition-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ely-story-component-composition-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.34fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-component-composition-recipes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ely-story-component-composition-recipe {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 16px;
+}
+
+.ely-story-component-composition-recipe-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-component-composition-recipe h3 {
+  margin-top: 0.25rem;
+  font-size: clamp(1.12rem, 2vw, 1.36rem);
+}
+
+.ely-story-component-composition-order,
+.ely-story-component-composition-gates {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-component-composition-order {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: composition-order;
+}
+
+.ely-story-component-composition-order li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  counter-increment: composition-order;
+}
+
+.ely-story-component-composition-order li::before,
+.ely-story-component-composition-gate > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-accent) 26%, var(--color-line));
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-accent) 9%, transparent);
+  color: color-mix(in oklab, var(--color-accent) 74%, var(--color-text));
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.ely-story-component-composition-order li::before {
+  content: counter(composition-order);
+}
+
+.ely-story-component-composition-proof {
+  display: grid;
+  gap: 6px;
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-success) 7%, transparent);
+  padding: 11px 12px;
+}
+
+.ely-story-component-composition-proof[data-kind="blocker"] {
+  background: color-mix(in oklab, var(--color-warning) 8%, transparent);
+}
+
+.ely-story-component-composition-gate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 8%, transparent),
+      transparent 56%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-component-composition-gate > span::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+@media (max-width: 980px) {
+  .ely-story-component-composition-stats,
+  .ely-story-component-composition-route,
+  .ely-story-component-composition-lanes,
+  .ely-story-component-composition-layout,
+  .ely-story-component-composition-recipes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-component-composition-hero-panel,
+  .ely-story-component-composition-lane-panel,
+  .ely-story-component-composition-recipe-panel,
+  .ely-story-component-composition-approval-panel {
+    padding: 18px;
+  }
+}

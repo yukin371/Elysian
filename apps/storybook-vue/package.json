@@ -1,0 +1,21 @@
+{
+  "name": "@elysian/storybook-vue",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build"
+  },
+  "dependencies": {
+    "@elysian/ui-public-vue": "workspace:*",
+    "vue": "^3.5.18"
+  },
+  "devDependencies": {
+    "@storybook/vue3-vite": "^10.4.1",
+    "@tailwindcss/vite": "^4.1.12",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "storybook": "^10.4.1",
+    "tailwindcss": "^4.1.12",
+    "vite": "^7.1.3"
+  }
+}

@@ -1,0 +1,200 @@
+.ely-story-mobile-review {
+  gap: 24px;
+}
+
+.ely-story-mobile-review-proof,
+.ely-story-mobile-review-actions,
+.ely-story-mobile-review-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ely-story-mobile-review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-mobile-review-phone {
+  display: grid;
+  gap: 12px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 55%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  box-shadow: var(--shadow-soft);
+  padding: 12px;
+}
+
+.ely-story-mobile-review-phone[data-density="compact"] {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-mobile-review-phone[data-density="ceremonial"] {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-accent) 9%, transparent),
+      transparent 56%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-mobile-review-phone-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-mobile-review-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-mobile-review-surface,
+.ely-story-mobile-review-board-panel {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.ely-story-mobile-review-board-panel {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-surface) 70%, transparent);
+}
+
+.ely-story-mobile-review-surface {
+  padding: 4px 2px 0;
+}
+
+.ely-story-mobile-review-surface > p:not(.ely-public-eyebrow),
+.ely-story-mobile-review-board-panel > p:not(.ely-public-eyebrow) {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.ely-story-mobile-review-surface h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  line-height: 1.12;
+}
+
+.ely-story-mobile-review-surface .ely-story-mobile-review-stack {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 76%, transparent);
+  padding-top: 12px;
+}
+
+.ely-story-mobile-review-panel {
+  display: grid;
+  gap: 5px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 14%, var(--color-line));
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-bg-subtle) 76%, transparent);
+  padding: 12px;
+}
+
+.ely-story-mobile-review-panel strong {
+  font-family: var(--ely-public-font-display);
+}
+
+.ely-story-mobile-review-panel span {
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.ely-story-mobile-review-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-mobile-review-board-panel {
+  padding: clamp(16px, 3vw, 24px);
+}
+
+.ely-story-mobile-review-checks span {
+  border: 1px solid
+    color-mix(in oklab, var(--color-success) 24%, var(--color-line));
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-success) 8%, transparent);
+  color: color-mix(in oklab, var(--color-success) 78%, var(--color-text));
+  padding: 7px 10px;
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+
+.ely-story-mobile-review-routes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ely-story-mobile-review-routes a {
+  display: grid;
+  gap: 6px;
+  border-top: 1px solid
+    color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+  color: inherit;
+  min-height: 94px;
+  padding: 12px 0 0;
+  text-decoration: none;
+}
+
+.ely-story-mobile-review-routes a:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 36%, var(--color-line));
+}
+
+.ely-story-mobile-review-routes small,
+.ely-story-mobile-review-routes span,
+.ely-story-mobile-review-summary span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-mobile-review-routes strong {
+  font-family: var(--ely-public-font-display);
+  line-height: 1.16;
+}
+
+.ely-story-mobile-review-summary {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.45fr) minmax(0, 0.55fr);
+  gap: 10px 12px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 76%, transparent);
+  padding-top: 13px;
+}
+
+.ely-story-mobile-review-summary strong {
+  font-family: var(--ely-public-font-display);
+  line-height: 1.15;
+}
+
+@media (max-width: 980px) {
+  .ely-story-mobile-review-grid,
+  .ely-story-mobile-review-board,
+  .ely-story-mobile-review-routes {
+    grid-template-columns: 1fr;
+  }
+}

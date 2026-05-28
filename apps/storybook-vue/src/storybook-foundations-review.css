@@ -1,0 +1,556 @@
+/* Design review checklist helpers. Token-only; no local palette. */
+
+.ely-story-review-gate-grid,
+.ely-story-review-theme-list,
+.ely-story-review-component-list,
+.ely-story-foundation-index-lanes,
+.ely-story-foundation-index-questions,
+.ely-story-release-sequence {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-review-gate-hero,
+.ely-story-review-theme-panel,
+.ely-story-review-component-panel,
+.ely-story-review-approval-panel,
+.ely-story-foundation-index-hero,
+.ely-story-foundation-index-lane-panel,
+.ely-story-foundation-index-question-panel,
+.ely-story-foundation-index-map-panel,
+.ely-story-release-hero-panel,
+.ely-story-release-chain-panel,
+.ely-story-release-sequence-panel,
+.ely-story-release-sentence-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface) 92%, transparent),
+    color-mix(in oklab, var(--color-bg-subtle) 42%, transparent)
+  );
+  padding: 24px;
+}
+
+.ely-story-review-gate-hero {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-secondary) 13%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 9%, transparent),
+      color-mix(in oklab, var(--color-surface) 88%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 58%, transparent)
+    );
+}
+
+.ely-story-foundation-index-hero,
+.ely-story-release-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-accent) 12%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-foundation-index-lane-panel,
+.ely-story-foundation-index-question-panel,
+.ely-story-foundation-index-map-panel,
+.ely-story-release-chain-panel,
+.ely-story-release-sequence-panel,
+.ely-story-release-sentence-panel {
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-foundation-index-stats,
+.ely-story-foundation-index-layout,
+.ely-story-foundation-index-entry-grid,
+.ely-story-release-hero,
+.ely-story-release-stat-grid,
+.ely-story-release-grid,
+.ely-story-release-layout,
+.ely-story-release-chain {
+  display: grid;
+  gap: 16px;
+}
+
+.ely-story-review-gate-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+}
+
+.ely-story-foundation-index-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 22px;
+}
+
+.ely-story-review-gate-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  gap: 20px;
+}
+
+.ely-story-foundation-index-layout {
+  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+}
+
+.ely-story-foundation-index-entry-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ely-story-release-hero {
+  grid-template-columns: minmax(240px, 0.6fr) minmax(0, 1.4fr);
+  align-items: stretch;
+}
+
+.ely-story-release-stat-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-release-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ely-story-release-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.82fr);
+}
+
+.ely-story-release-chain {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.ely-story-foundation-index-question,
+.ely-story-foundation-index-entry,
+.ely-story-release-score,
+.ely-story-release-gate,
+.ely-story-release-blocker,
+.ely-story-release-chain-item {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-review-gate-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  border-left: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  padding: 16px 18px 0;
+}
+
+.ely-story-review-gate-card:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.ely-story-review-gate-card h2,
+.ely-story-review-gate-card p,
+.ely-story-review-theme-row p,
+.ely-story-review-component-row ul,
+.ely-story-review-approval p,
+.ely-story-foundation-index-lane h3,
+.ely-story-foundation-index-lane p,
+.ely-story-foundation-index-entry p,
+.ely-story-release-gate h2,
+.ely-story-release-gate p,
+.ely-story-release-chain-item p {
+  margin: 0;
+}
+
+.ely-story-review-gate-card h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+}
+
+.ely-story-review-gate-card p,
+.ely-story-review-theme-row p,
+.ely-story-review-component-row li,
+.ely-story-review-approval p,
+.ely-story-foundation-index-lane p,
+.ely-story-foundation-index-entry p,
+.ely-story-release-chain-item p {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.ely-story-release-score {
+  display: grid;
+  gap: 14px;
+  align-content: center;
+  padding: 18px;
+}
+
+.ely-story-release-score > span {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2.4rem, 8vw, 4.6rem);
+  line-height: 0.92;
+}
+
+.ely-story-release-gate {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 16px;
+}
+
+.ely-story-release-gate[data-tone="success"] {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-success) 10%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 91%, transparent);
+}
+
+.ely-story-release-gate[data-tone="warning"] {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-warning) 10%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 91%, transparent);
+}
+
+.ely-story-release-gate[data-tone="danger"] {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-danger) 10%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 91%, transparent);
+}
+
+.ely-story-release-gate-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-release-gate-head span {
+  display: block;
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.ely-story-release-gate h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.08rem, 2vw, 1.3rem);
+  line-height: 1.15;
+}
+
+.ely-story-release-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.ely-story-release-step,
+.ely-story-release-blocker {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+}
+
+.ely-story-release-step > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-accent) 30%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-accent) 78%, var(--color-text));
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-release-blocker {
+  margin-top: 12px;
+}
+
+.ely-story-release-chain-item {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  color: inherit;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.ely-story-release-chain-item > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-release-chain-item strong {
+  display: block;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.02rem;
+  line-height: 1.18;
+}
+
+.ely-story-release-chain-item:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 34%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+.ely-story-review-gate-status,
+.ely-story-review-approval span {
+  width: fit-content;
+  border: 1px solid
+    color-mix(in oklab, var(--color-secondary) 32%, var(--color-line));
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-secondary) 12%, transparent);
+  color: color-mix(in oklab, var(--color-secondary) 72%, var(--color-text));
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  padding: 7px 10px;
+  text-transform: uppercase;
+}
+
+.ely-story-review-gate-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 1.05rem;
+}
+
+.ely-story-review-theme-row,
+.ely-story-review-component-row {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  padding: 14px 0;
+}
+
+.ely-story-review-theme-row:first-child,
+.ely-story-review-component-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ely-story-review-theme-row {
+  grid-template-columns: minmax(160px, 0.72fr) minmax(0, 1.28fr);
+}
+
+.ely-story-review-theme-row strong,
+.ely-story-review-component-row strong {
+  display: block;
+}
+
+.ely-story-review-theme-row span,
+.ely-story-review-component-row span {
+  display: block;
+  margin-top: 0.32rem;
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.ely-story-review-component-row ul {
+  display: grid;
+  gap: 6px;
+  padding-left: 1rem;
+}
+
+.ely-story-review-approval {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 48%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 18px 0 0;
+}
+
+.ely-story-foundation-index-question,
+.ely-story-foundation-index-entry {
+  padding: 16px;
+}
+
+.ely-story-foundation-index-lane {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  padding: 16px 0 0;
+}
+
+.ely-story-foundation-index-lane:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ely-story-foundation-index-lane-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.ely-story-foundation-index-lane-head > span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-foundation-index-lane h3,
+.ely-story-foundation-index-entry strong {
+  display: block;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.ely-story-foundation-index-link-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.ely-story-foundation-index-question {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.ely-story-foundation-index-question > span {
+  width: 10px;
+  height: 10px;
+  margin-top: 0.42rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 5px
+    color-mix(in oklab, var(--color-accent) 16%, transparent);
+}
+
+.ely-story-foundation-index-entry {
+  display: grid;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ely-story-foundation-index-entry span,
+.ely-story-foundation-index-entry em {
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.ely-story-foundation-index-entry:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 34%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+.ely-story-release-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  padding: 14px 0;
+}
+
+.ely-story-release-step:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+@media (max-width: 1120px) {
+  .ely-story-review-gate-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-review-gate-card {
+    border-top: 1px solid
+      color-mix(in oklab, var(--color-line) 72%, transparent);
+    border-left: 0;
+    padding: 14px 0 0;
+  }
+
+  .ely-story-review-gate-card:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .ely-story-review-gate-layout,
+  .ely-story-foundation-index-layout,
+  .ely-story-foundation-index-entry-grid,
+  .ely-story-release-hero,
+  .ely-story-release-grid,
+  .ely-story-release-layout,
+  .ely-story-release-chain {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-release-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .ely-story-review-gate-grid,
+  .ely-story-review-theme-row,
+  .ely-story-foundation-index-stats,
+  .ely-story-release-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-review-approval {
+    display: grid;
+  }
+
+  .ely-story-review-gate-hero,
+  .ely-story-review-theme-panel,
+  .ely-story-review-component-panel,
+  .ely-story-review-approval-panel {
+    padding: 18px;
+  }
+}

@@ -1,0 +1,234 @@
+/* Component Scenario Atlas helpers. Token-only; no local palette or radius scale. */
+
+.ely-story-scenario-atlas-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-scenario-atlas-hero-panel,
+.ely-story-scenario-route-panel,
+.ely-story-scenario-approval-panel,
+.ely-story-scenario-focus-panel,
+.ely-story-scenario-family-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 24px;
+}
+
+.ely-story-scenario-atlas-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-secondary) 11%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-scenario-atlas-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-scenario-route,
+.ely-story-scenario-focus-grid,
+.ely-story-scenario-family-list,
+.ely-story-scenario-table {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-scenario-route {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-scenario-focus-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.ely-story-scenario-route-step,
+.ely-story-scenario-focus-card,
+.ely-story-scenario-family,
+.ely-story-scenario-row {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-scenario-route-step {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  color: inherit;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.ely-story-scenario-route-step > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-scenario-route-step strong,
+.ely-story-scenario-focus-card strong,
+.ely-story-scenario-family h3,
+.ely-story-scenario-row strong {
+  font-family: var(--ely-public-font-display);
+  line-height: 1.18;
+}
+
+.ely-story-scenario-route-step p,
+.ely-story-scenario-focus-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.ely-story-scenario-focus-card,
+.ely-story-scenario-family {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 14px;
+}
+
+.ely-story-scenario-focus-card {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-scenario-focus-head,
+.ely-story-scenario-family-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-scenario-mini-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.ely-story-scenario-family {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-scenario-family-head span,
+.ely-story-scenario-row span,
+.ely-story-scenario-row em,
+.ely-story-scenario-row small {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-scenario-family h3 {
+  margin: 0.2rem 0 0;
+  font-size: 1.16rem;
+}
+
+.ely-story-scenario-family-focus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ely-story-scenario-family-focus span {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  border: 1px solid color-mix(in oklab, var(--color-line) 82%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-surface) 82%, transparent);
+  color: var(--color-text-muted);
+  padding: 6px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.ely-story-scenario-family-focus strong {
+  color: color-mix(in oklab, var(--color-accent) 76%, var(--color-text));
+}
+
+.ely-story-scenario-row {
+  display: grid;
+  grid-template-columns:
+    minmax(104px, 0.2fr) minmax(160px, 0.28fr)
+    minmax(160px, 0.28fr) minmax(160px, 0.24fr);
+  gap: 12px;
+  align-items: center;
+  color: inherit;
+  padding: 12px;
+  text-decoration: none;
+}
+
+.ely-story-scenario-row:hover,
+.ely-story-scenario-route-step:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 34%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+.ely-story-scenario-row em,
+.ely-story-scenario-row small {
+  font-style: normal;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+@media (max-width: 920px) {
+  .ely-story-scenario-atlas-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ely-story-scenario-atlas-layout,
+  .ely-story-scenario-route,
+  .ely-story-scenario-focus-grid,
+  .ely-story-scenario-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-scenario-atlas-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-scenario-atlas-hero-panel,
+  .ely-story-scenario-route-panel,
+  .ely-story-scenario-approval-panel,
+  .ely-story-scenario-focus-panel,
+  .ely-story-scenario-family-panel {
+    padding: 18px;
+  }
+}

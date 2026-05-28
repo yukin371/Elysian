@@ -1,0 +1,1669 @@
+﻿.ely-public-button {
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 22%, var(--color-line));
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+    180deg,
+    color-mix(
+      in oklab,
+      var(--color-material-sheen-strong) 26%,
+      var(--color-primary)
+    ),
+    var(--color-primary)
+  );
+  color: var(--color-on-primary);
+  padding: 0.82rem 1.28rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 10px 24px var(--button-glow);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.ely-public-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px var(--button-glow);
+}
+
+.ely-public-button:focus-visible,
+.ely-public-accordion__trigger:focus-visible,
+.ely-public-breadcrumb__link:focus-visible,
+.ely-public-chip__remove:focus-visible,
+.ely-public-checkbox:focus-visible,
+.ely-public-file-input:focus-visible,
+.ely-public-icon-button:focus-visible,
+.ely-public-input:focus-visible,
+.ely-public-number-input:focus-within,
+.ely-public-link:focus-visible,
+.ely-public-list__row:focus-visible,
+.ely-public-menu__item:focus-visible,
+.ely-public-menu__trigger:focus-visible,
+.ely-public-pagination__button:focus-visible,
+.ely-public-pagination__page:focus-visible,
+.ely-public-popover__close:focus-visible,
+.ely-public-popover__panel:focus-visible,
+.ely-public-popover__trigger:focus-visible,
+.ely-public-radio:focus-visible,
+.ely-public-rating__item:focus-visible,
+.ely-public-select:focus-visible,
+.ely-public-segmented__item:focus-visible,
+.ely-public-slider:focus-visible,
+.ely-public-stepper__step:focus-visible,
+.ely-public-switch:focus-visible,
+.ely-public-tabs__trigger:focus-visible,
+.ely-public-textarea:focus-visible,
+.ely-public-tooltip__trigger:focus-visible,
+.ely-public-toast__action:focus-visible,
+.ely-public-toast__dismiss:focus-visible,
+.ely-public-dialog__close:focus-visible {
+  outline: 2px solid
+    color-mix(in oklab, var(--color-primary) 56%, var(--color-surface) 44%);
+  outline-offset: 2px;
+}
+
+.ely-public-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+  box-shadow: none;
+}
+
+.ely-public-button[data-tone="secondary"] {
+  background: linear-gradient(
+    180deg,
+    color-mix(
+      in oklab,
+      var(--color-material-sheen-strong) 26%,
+      var(--color-surface-elevated)
+    ),
+    color-mix(in oklab, var(--color-secondary) 15%, var(--color-surface))
+  );
+  color: var(--color-text);
+  box-shadow: 0 10px 26px
+    color-mix(in oklab, var(--color-secondary) 16%, transparent);
+}
+
+.ely-public-button--ghost {
+  background: color-mix(in oklab, var(--color-surface) 82%, transparent);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.ely-public-button[data-tone="ghost"] {
+  background: color-mix(in oklab, var(--color-surface) 82%, transparent);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.ely-public-button[data-tone="ghost"]:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+}
+
+.ely-public-button[data-tone="secondary"]:hover:not(:disabled) {
+  border-color: color-mix(
+    in oklab,
+    var(--color-secondary) 36%,
+    var(--color-line)
+  );
+}
+
+.ely-public-button[data-block="true"] {
+  width: 100%;
+}
+
+.ely-public-button[data-size="sm"] {
+  min-height: 38px;
+  padding: 0.68rem 1rem;
+  font-size: 0.88rem;
+}
+
+.ely-public-button[data-size="md"] {
+  min-height: 44px;
+}
+
+.ely-public-button[data-size="lg"] {
+  min-height: 50px;
+  padding: 0.95rem 1.42rem;
+  font-size: 0.98rem;
+}
+
+.ely-public-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.ely-public-button__spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid var(--color-material-sheen);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  animation: ely-public-spin 0.8s linear infinite;
+}
+
+.ely-public-icon-button {
+  --ely-public-icon-button-tone: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-public-icon-button-tone) 18%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 86%, transparent);
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  color: color-mix(
+    in oklab,
+    var(--ely-public-icon-button-tone) 34%,
+    var(--color-text)
+  );
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.ely-public-icon-button:hover:not(:disabled) {
+  border-color: color-mix(
+    in oklab,
+    var(--ely-public-icon-button-tone) 32%,
+    var(--color-line)
+  );
+  background: color-mix(
+    in oklab,
+    var(--ely-public-icon-button-tone) 9%,
+    var(--color-surface)
+  );
+  transform: translateY(-1px);
+}
+
+.ely-public-icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+}
+
+.ely-public-icon-button[data-tone="primary"] {
+  --ely-public-icon-button-tone: var(--color-primary);
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 12%,
+    var(--color-surface)
+  );
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), 0 10px 24px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-public-icon-button[data-tone="secondary"] {
+  --ely-public-icon-button-tone: var(--color-secondary);
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 10%,
+    var(--color-surface)
+  );
+}
+
+.ely-public-icon-button[data-tone="danger"] {
+  --ely-public-icon-button-tone: var(--color-danger);
+  background: color-mix(in oklab, var(--color-danger) 9%, var(--color-surface));
+}
+
+.ely-public-icon-button[data-pressed="true"] {
+  border-color: color-mix(
+    in oklab,
+    var(--ely-public-icon-button-tone) 38%,
+    var(--color-line)
+  );
+  background: color-mix(
+    in oklab,
+    var(--ely-public-icon-button-tone) 14%,
+    var(--color-surface)
+  );
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), 0 10px 22px
+    color-mix(in oklab, var(--ely-public-icon-button-tone) 12%, transparent);
+  color: color-mix(
+    in oklab,
+    var(--ely-public-icon-button-tone) 58%,
+    var(--color-text)
+  );
+}
+
+.ely-public-icon-button[data-size="sm"] {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ely-public-radius-sm);
+  font-size: 0.9rem;
+}
+
+.ely-public-icon-button[data-size="lg"] {
+  width: 50px;
+  height: 50px;
+  font-size: 1.08rem;
+}
+
+.ely-public-icon-button__icon,
+.ely-public-icon-button__spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ely-public-icon-button__spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--color-material-sheen);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  animation: ely-public-spin 760ms linear infinite;
+}
+
+.ely-public-field {
+  display: grid;
+  gap: 0.52rem;
+}
+
+.ely-public-field__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.ely-public-fieldset {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  gap: 0.78rem;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 6%, transparent),
+      transparent 46%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 1.05rem;
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+}
+
+.ely-public-fieldset[data-density="compact"] {
+  gap: 0.58rem;
+  border-radius: var(--ely-public-radius-md);
+  padding: 0.82rem;
+}
+
+.ely-public-fieldset:disabled {
+  opacity: 0.64;
+}
+
+.ely-public-fieldset[data-tone="primary"] {
+  border-color: color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 10%, transparent),
+      transparent 48%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-public-fieldset[data-tone="accent"] {
+  border-color: color-mix(in oklab, var(--color-accent) 26%, var(--color-line));
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 10%, transparent),
+      transparent 48%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-public-fieldset[data-invalid="true"],
+.ely-public-fieldset[data-tone="danger"] {
+  border-color: color-mix(in oklab, var(--color-danger) 36%, var(--color-line));
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-danger) 12%, transparent),
+      transparent 48%
+    ), var(--color-danger-container);
+}
+
+.ely-public-fieldset__legend {
+  margin-inline-start: -0.18rem;
+  padding: 0 0.18rem;
+  color: var(--color-text);
+  font-family: var(--ely-public-font-display);
+  font-size: 1rem;
+  font-weight: 760;
+  letter-spacing: 0.01em;
+}
+
+.ely-public-fieldset__description,
+.ely-public-fieldset__message {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.ely-public-fieldset__description {
+  color: var(--color-text-muted);
+}
+
+.ely-public-fieldset__message {
+  color: var(--color-on-danger-container);
+  font-weight: 650;
+}
+
+.ely-public-fieldset__body {
+  display: grid;
+  gap: 0.74rem;
+  min-width: 0;
+}
+
+.ely-public-fieldset[data-density="compact"] .ely-public-fieldset__body {
+  gap: 0.54rem;
+}
+
+.ely-public-field__description,
+.ely-public-field__message,
+.ely-public-card__subtitle,
+.ely-public-tabs__description {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.ely-public-field__message {
+  color: var(--color-on-danger-container);
+}
+
+.ely-public-input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 96%, transparent);
+  color: var(--color-text);
+  padding: 0.9rem 1rem;
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms
+    ease;
+}
+
+.ely-public-input::placeholder {
+  color: color-mix(
+    in oklab,
+    var(--color-text-muted) 86%,
+    var(--color-surface) 14%
+  );
+}
+
+.ely-public-input:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+}
+
+.ely-public-input:focus-visible {
+  border-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-line));
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), var(--focus-ring);
+}
+
+.ely-public-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.ely-public-search {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.ely-public-search__field {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 0.38rem;
+  min-width: 0;
+}
+
+.ely-public-search__label {
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.ely-public-search__description {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.ely-public-search__control {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 46px;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-secondary) 6%, transparent),
+    color-mix(in oklab, var(--color-surface) 96%, transparent)
+  );
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms
+    ease;
+}
+
+.ely-public-search__control:focus-within {
+  border-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-line));
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), var(--focus-ring);
+}
+
+.ely-public-search__icon {
+  padding-inline-start: 0.95rem;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+.ely-public-search__input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.86rem 0.55rem;
+  outline: 0;
+}
+
+.ely-public-search__input::placeholder {
+  color: color-mix(
+    in oklab,
+    var(--color-text-muted) 86%,
+    var(--color-surface) 14%
+  );
+}
+
+.ely-public-search__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-inline-end: 0.35rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-line) 44%, transparent);
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.ely-public-search__clear:hover:not(:disabled) {
+  color: var(--color-text);
+  background: color-mix(in oklab, var(--color-primary) 12%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+.ely-public-search__clear:focus-visible {
+  outline: 2px solid
+    color-mix(in oklab, var(--color-primary) 56%, var(--color-surface) 44%);
+  outline-offset: 2px;
+}
+
+.ely-public-search__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 36%, var(--color-line));
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-secondary) 18%, var(--color-primary)),
+    var(--color-primary)
+  );
+  color: var(--color-on-primary);
+  font-weight: 700;
+  padding: 0.82rem 1rem;
+  box-shadow: 0 10px 22px
+    color-mix(in oklab, var(--color-primary) 14%, transparent);
+  transition: box-shadow 180ms ease, transform 180ms ease;
+  white-space: nowrap;
+}
+
+.ely-public-search__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px
+    color-mix(in oklab, var(--color-primary) 18%, transparent);
+}
+
+.ely-public-search__submit:focus-visible {
+  outline: 2px solid
+    color-mix(in oklab, var(--color-primary) 56%, var(--color-surface) 44%);
+  outline-offset: 2px;
+}
+
+.ely-public-search__input:disabled,
+.ely-public-search__clear:disabled,
+.ely-public-search__submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+@media (max-width: 560px) {
+  .ely-public-search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ely-public-search__submit {
+    width: 100%;
+  }
+}
+
+.ely-public-textarea-field {
+  width: 100%;
+}
+
+.ely-public-textarea {
+  width: 100%;
+  min-height: 7.5rem;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-secondary) 7%, transparent),
+      transparent 46%
+    ), color-mix(in oklab, var(--color-surface) 96%, transparent);
+  color: var(--color-text);
+  font: inherit;
+  line-height: 1.62;
+  padding: 0.92rem 1rem;
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms
+    ease;
+}
+
+.ely-public-textarea::placeholder {
+  color: color-mix(
+    in oklab,
+    var(--color-text-muted) 86%,
+    var(--color-surface) 14%
+  );
+}
+
+.ely-public-textarea:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+}
+
+.ely-public-textarea:focus-visible {
+  border-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-line));
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), var(--focus-ring);
+}
+
+.ely-public-textarea:disabled,
+.ely-public-textarea:read-only {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.ely-public-textarea[data-resize="block"] {
+  resize: vertical;
+}
+
+.ely-public-textarea[data-resize="inline"] {
+  resize: horizontal;
+}
+
+.ely-public-textarea[data-resize="both"] {
+  resize: both;
+}
+
+.ely-public-textarea[data-resize="none"] {
+  resize: none;
+}
+
+.ely-public-textarea__count {
+  justify-self: end;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ely-public-file-field {
+  width: 100%;
+}
+
+.ely-public-file-input__row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.64rem;
+}
+
+.ely-public-file-input {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 96%, transparent);
+  color: var(--color-text-muted);
+  padding: 0.44rem;
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms
+    ease;
+}
+
+.ely-public-file-input::file-selector-button {
+  margin-inline-end: 0.72rem;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.48rem 0.74rem;
+}
+
+.ely-public-file-input:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+}
+
+.ely-public-file-input:focus-visible {
+  border-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-line));
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), var(--focus-ring);
+}
+
+.ely-public-file-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.ely-public-file-input:disabled::file-selector-button {
+  cursor: not-allowed;
+}
+
+.ely-public-file-input__clear {
+  flex: 0 0 auto;
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(
+    in oklab,
+    var(--color-surface-elevated) 84%,
+    transparent
+  );
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 0 0.9rem;
+}
+
+.ely-public-file-input__clear:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+}
+
+.ely-public-file-input__clear:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+.ely-public-file-input__summary {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.ely-public-file-input__list {
+  display: grid;
+  gap: 0.42rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ely-public-file-input__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.72rem;
+  border-block-start: 1px solid var(--color-line);
+  color: var(--color-text);
+  font-size: 0.86rem;
+  padding-block-start: 0.48rem;
+}
+
+.ely-public-file-input__item span:last-child {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.ely-public-number-input {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 46px;
+  overflow: hidden;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 8%, transparent),
+      transparent 42%
+    ), color-mix(in oklab, var(--color-surface) 96%, transparent);
+  color: var(--color-text);
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms
+    ease;
+}
+
+.ely-public-number-input:hover:not(
+    :has(.ely-public-number-input__control:disabled)
+  ) {
+  border-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+}
+
+.ely-public-number-input:focus-within {
+  border-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-line));
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), var(--focus-ring);
+}
+
+.ely-public-number-input__control {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: 0;
+  padding: 0.9rem 1rem;
+}
+
+.ely-public-number-input__control::placeholder {
+  color: color-mix(
+    in oklab,
+    var(--color-text-muted) 86%,
+    var(--color-surface) 14%
+  );
+}
+
+.ely-public-number-input__control:disabled,
+.ely-public-number-input__control:read-only {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.ely-public-number-input__unit {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0 0.75rem;
+  border-inline-start: 1px solid var(--color-line);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ely-public-number-input__steppers {
+  display: grid;
+  flex: 0 0 auto;
+  min-width: 2.5rem;
+  border-inline-start: 1px solid var(--color-line);
+}
+
+.ely-public-number-input__stepper {
+  border: 0;
+  border-block-end: 1px solid var(--color-line);
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ely-public-number-input__stepper:last-child {
+  border-block-end: 0;
+}
+
+.ely-public-number-input__stepper:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--color-accent) 16%, transparent);
+}
+
+.ely-public-number-input__stepper:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.ely-public-select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 96%, transparent);
+  color: var(--color-text);
+  padding: 0.9rem 2.9rem 0.9rem 1rem;
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms
+    ease;
+  appearance: none;
+  background-image: linear-gradient(
+      45deg,
+      transparent 50%,
+      color-mix(in oklab, var(--color-text-muted) 72%, var(--color-surface) 28%)
+        50%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-text-muted) 72%, var(--color-surface) 28%)
+        50%,
+      transparent 50%
+    );
+  background-position: calc(100% - 22px) calc(50% - 2px), calc(100% - 16px)
+    calc(50% - 2px);
+  background-repeat: no-repeat;
+  background-size: 6px 6px, 6px 6px;
+}
+
+.ely-public-select:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+}
+
+.ely-public-select:focus-visible {
+  border-color: color-mix(in oklab, var(--color-primary) 42%, var(--color-line));
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), var(--focus-ring);
+}
+
+.ely-public-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.ely-public-slider-field {
+  display: grid;
+  gap: 0.64rem;
+  width: 100%;
+}
+
+.ely-public-slider-field__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.ely-public-slider-field__value {
+  color: color-mix(in oklab, var(--color-primary) 48%, var(--color-text));
+  font-family: var(--ely-public-font-display);
+  font-size: 0.92rem;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.ely-public-slider {
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+  appearance: none;
+  background: transparent;
+}
+
+.ely-public-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-primary) 82%, var(--color-surface) 18%) 0%,
+    color-mix(in oklab, var(--color-secondary) 62%, var(--color-primary) 38%)
+      var(--ely-public-slider-value),
+    color-mix(in oklab, var(--color-line) 58%, var(--color-surface) 42%)
+      var(--ely-public-slider-value),
+    color-mix(in oklab, var(--color-line) 58%, var(--color-surface) 42%) 100%
+  );
+  box-shadow: inset 0 1px 0 var(--color-material-sheen), 0 8px 18px
+    color-mix(in oklab, var(--color-primary) 10%, transparent);
+}
+
+.ely-public-slider::-moz-range-track {
+  height: 8px;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-line) 58%,
+    var(--color-surface) 42%
+  );
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+}
+
+.ely-public-slider::-moz-range-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-primary) 82%, var(--color-surface) 18%),
+    color-mix(in oklab, var(--color-secondary) 62%, var(--color-primary) 38%)
+  );
+}
+
+.ely-public-slider::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  appearance: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface) 18%, var(--color-primary)),
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 1px
+    color-mix(in oklab, var(--color-primary) 28%, transparent), 0 10px 22px
+    color-mix(in oklab, var(--color-primary) 22%, transparent);
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.ely-public-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface) 18%, var(--color-primary)),
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 1px
+    color-mix(in oklab, var(--color-primary) 28%, transparent), 0 10px 22px
+    color-mix(in oklab, var(--color-primary) 22%, transparent);
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.ely-public-slider:hover:not(:disabled)::-webkit-slider-thumb {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 1px
+    color-mix(in oklab, var(--color-primary) 36%, transparent), 0 12px 26px
+    color-mix(in oklab, var(--color-primary) 28%, transparent);
+}
+
+.ely-public-slider:hover:not(:disabled)::-moz-range-thumb {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 1px
+    color-mix(in oklab, var(--color-primary) 36%, transparent), 0 12px 26px
+    color-mix(in oklab, var(--color-primary) 28%, transparent);
+}
+
+.ely-public-slider:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.ely-public-slider-field__scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.ely-public-field[data-invalid="true"] .ely-public-input {
+  border-color: color-mix(in oklab, var(--color-danger) 42%, var(--color-line));
+  background: var(--color-danger-container);
+}
+
+.ely-public-field[data-invalid="true"] .ely-public-number-input {
+  border-color: color-mix(in oklab, var(--color-danger) 42%, var(--color-line));
+  background: var(--color-danger-container);
+}
+
+.ely-public-field[data-invalid="true"] .ely-public-select {
+  border-color: color-mix(in oklab, var(--color-danger) 42%, var(--color-line));
+  background-color: var(--color-danger-container);
+}
+
+.ely-public-card[data-emphasis="feature"] {
+  border-color: color-mix(in oklab, var(--color-primary) 22%, var(--color-line));
+  box-shadow: var(--ely-public-shadow-card), 0 0 0 1px
+    color-mix(in oklab, var(--color-primary) 10%, transparent);
+}
+
+.ely-public-card[data-emphasis="muted"] {
+  background: color-mix(in oklab, var(--color-surface) 86%, transparent);
+}
+
+.ely-public-card__header,
+.ely-public-dialog__header {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ely-public-card__body,
+.ely-public-dialog__body {
+  display: grid;
+  gap: 1rem;
+}
+
+.ely-public-card__header + .ely-public-card__body,
+.ely-public-dialog__header + .ely-public-dialog__body {
+  margin-top: 1rem;
+}
+
+.ely-public-card__footer,
+.ely-public-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.ely-public-card__eyebrow {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.ely-public-card__title,
+.ely-public-dialog__title {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.44rem;
+  line-height: 1.08;
+}
+
+.ely-public-card__subtitle,
+.ely-public-dialog__description {
+  margin: 0;
+}
+
+.ely-public-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0.38rem 0.72rem;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-sm);
+  font-size: 0.77rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ely-public-badge[data-tone="neutral"] {
+  background: color-mix(
+    in oklab,
+    var(--color-surface-elevated) 88%,
+    transparent
+  );
+  color: var(--color-text);
+}
+
+.ely-public-badge[data-tone="primary"] {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+.ely-public-badge[data-tone="accent"] {
+  background: var(--color-accent-container);
+  color: var(--color-on-accent-container);
+}
+
+.ely-public-badge[data-tone="danger"] {
+  background: var(--color-danger-container);
+  color: var(--color-on-danger-container);
+}
+
+.ely-public-stat {
+  display: grid;
+  gap: 0.55rem;
+  min-height: 100%;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      180deg,
+      var(--color-material-sheen),
+      transparent 34%
+    ), color-mix(in oklab, var(--color-surface) 94%, transparent);
+  padding: 1.15rem 1.2rem;
+  box-shadow: var(--ely-public-shadow-card);
+}
+
+.ely-public-stat[data-align="center"] {
+  justify-items: center;
+  text-align: center;
+}
+
+.ely-public-stat[data-tone="primary"] {
+  border-color: color-mix(in oklab, var(--color-primary) 16%, var(--color-line));
+}
+
+.ely-public-stat[data-tone="accent"] {
+  border-color: color-mix(in oklab, var(--color-accent) 22%, var(--color-line));
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-accent) 8%, transparent),
+      transparent 34%
+    ), color-mix(in oklab, var(--color-surface) 94%, transparent);
+}
+
+.ely-public-stat[data-tone="muted"] {
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-public-stat__eyebrow {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.ely-public-stat__value {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1;
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+}
+
+.ely-public-stat[data-tone="accent"] .ely-public-stat__value {
+  color: color-mix(in oklab, var(--color-accent) 56%, var(--color-text));
+}
+
+.ely-public-stat[data-tone="muted"] .ely-public-stat__value {
+  color: var(--color-text);
+}
+
+.ely-public-stat__body {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.ely-public-stat__label,
+.ely-public-stat__helper {
+  margin: 0;
+}
+
+.ely-public-stat__label {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.ely-public-stat__helper {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.ely-public-stat[data-trend="up"] .ely-public-stat__value::after,
+.ely-public-stat[data-trend="down"] .ely-public-stat__value::after,
+.ely-public-stat[data-trend="flat"] .ely-public-stat__value::after {
+  margin-left: 0.42rem;
+  font-size: 0.46em;
+  vertical-align: middle;
+}
+
+.ely-public-stat[data-trend="up"] .ely-public-stat__value::after {
+  content: "▲";
+  color: var(--color-success);
+}
+
+.ely-public-stat[data-trend="down"] .ely-public-stat__value::after {
+  content: "▼";
+  color: var(--color-danger);
+}
+
+.ely-public-stat[data-trend="flat"] .ely-public-stat__value::after {
+  content: "•";
+  color: var(--color-text-muted);
+}
+
+.ely-public-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  color: color-mix(in oklab, var(--color-primary) 82%, var(--color-text) 18%);
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+  text-decoration-color: color-mix(
+    in oklab,
+    var(--color-primary) 42%,
+    transparent
+  );
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: color 180ms ease, text-decoration-color 180ms ease, transform
+    180ms ease;
+}
+
+.ely-public-link:hover {
+  color: color-mix(in oklab, var(--color-primary) 92%, var(--color-text) 8%);
+  transform: translateY(-1px);
+}
+
+.ely-public-link[data-underline="auto"] {
+  text-decoration: underline;
+  text-decoration-color: color-mix(
+    in oklab,
+    var(--color-primary) 18%,
+    transparent
+  );
+}
+
+.ely-public-link[data-underline="always"] {
+  text-decoration: underline;
+}
+
+.ely-public-link[data-underline="none"] {
+  text-decoration: none;
+}
+
+.ely-public-link[data-tone="accent"] {
+  color: color-mix(in oklab, var(--color-accent) 74%, var(--color-text));
+  text-decoration-color: color-mix(
+    in oklab,
+    var(--color-accent) 32%,
+    transparent
+  );
+}
+
+.ely-public-link[data-tone="muted"] {
+  color: var(--color-text-muted);
+  text-decoration-color: color-mix(
+    in oklab,
+    var(--color-text-muted) 28%,
+    transparent
+  );
+}
+
+.ely-public-link__mark {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.ely-public-text {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+.ely-public-text[data-size="lg"] {
+  font-size: 1.04rem;
+}
+
+.ely-public-text[data-size="md"] {
+  font-size: 0.94rem;
+}
+
+.ely-public-text[data-size="sm"] {
+  font-size: 0.84rem;
+}
+
+.ely-public-text[data-tone="primary"] {
+  color: var(--color-text);
+}
+
+.ely-public-text[data-tone="muted"] {
+  color: var(--color-text-muted);
+}
+
+.ely-public-text[data-tone="subtle"] {
+  color: var(--color-text-soft);
+}
+
+.ely-public-text[data-weight="regular"] {
+  font-weight: 400;
+}
+
+.ely-public-text[data-weight="medium"] {
+  font-weight: 500;
+}
+
+.ely-public-text[data-weight="semibold"] {
+  font-weight: 600;
+}
+
+.ely-public-kbd {
+  --ely-public-kbd-tone: var(--color-text-muted);
+  --ely-public-kbd-container: color-mix(
+    in oklab,
+    var(--color-surface-elevated) 88%,
+    transparent
+  );
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  max-width: 100%;
+  vertical-align: baseline;
+}
+
+.ely-public-kbd[data-tone="primary"] {
+  --ely-public-kbd-tone: var(--color-primary);
+  --ely-public-kbd-container: var(--color-primary-container);
+}
+
+.ely-public-kbd[data-tone="accent"] {
+  --ely-public-kbd-tone: var(--color-accent);
+  --ely-public-kbd-container: var(--color-accent-container);
+}
+
+.ely-public-kbd[data-tone="muted"] {
+  --ely-public-kbd-tone: var(--color-text-muted);
+  --ely-public-kbd-container: color-mix(
+    in oklab,
+    var(--color-bg-subtle) 76%,
+    transparent
+  );
+}
+
+.ely-public-kbd__key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.72rem;
+  min-height: 1.62rem;
+  border: 1px solid
+    color-mix(in oklab, var(--ely-public-kbd-tone) 22%, var(--color-line));
+  border-radius: var(--ely-public-radius-sm);
+  background: linear-gradient(
+      180deg,
+      var(--color-material-sheen),
+      transparent 44%
+    ), var(--ely-public-kbd-container);
+  color: color-mix(in oklab, var(--ely-public-kbd-tone) 68%, var(--color-text));
+  padding: 0.16rem 0.42rem;
+  box-shadow: inset 0 -1px 0
+    color-mix(in oklab, var(--color-line) 72%, transparent), inset 0 1px 0
+    var(--color-material-sheen);
+  font-family: var(--ely-public-font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ely-public-kbd__separator {
+  color: color-mix(
+    in oklab,
+    var(--ely-public-kbd-tone) 54%,
+    var(--color-text-muted)
+  );
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.ely-public-kbd[data-size="sm"] {
+  gap: 0.22rem;
+}
+
+.ely-public-kbd[data-size="sm"] .ely-public-kbd__key {
+  min-width: 1.46rem;
+  min-height: 1.38rem;
+  padding: 0.12rem 0.34rem;
+  font-size: 0.7rem;
+}
+
+.ely-public-progress {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.ely-public-progress__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.ely-public-progress__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.ely-public-progress__value {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ely-public-progress__track {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 10px;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-surface-elevated) 88%,
+    transparent
+  );
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+}
+
+.ely-public-progress__fill {
+  display: block;
+  height: 100%;
+  min-height: 10px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    color-mix(
+      in oklab,
+      var(--color-material-sheen-strong) 20%,
+      var(--color-primary)
+    ),
+    var(--color-primary)
+  );
+  box-shadow: 0 8px 20px
+    color-mix(in oklab, var(--color-primary) 18%, transparent);
+  transition: width 220ms ease;
+}
+
+.ely-public-progress[data-tone="accent"] .ely-public-progress__fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(
+      in oklab,
+      var(--color-material-sheen-strong) 14%,
+      var(--color-accent)
+    ),
+    var(--color-accent)
+  );
+  box-shadow: 0 8px 20px
+    color-mix(in oklab, var(--color-accent) 18%, transparent);
+}
+
+.ely-public-progress[data-tone="success"] .ely-public-progress__fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(
+      in oklab,
+      var(--color-material-sheen-strong) 14%,
+      var(--color-success)
+    ),
+    var(--color-success)
+  );
+  box-shadow: 0 8px 20px
+    color-mix(in oklab, var(--color-success) 18%, transparent);
+}
+
+.ely-public-progress[data-tone="warning"] .ely-public-progress__fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(
+      in oklab,
+      var(--color-material-sheen-strong) 12%,
+      var(--color-warning)
+    ),
+    var(--color-warning)
+  );
+  box-shadow: 0 8px 20px
+    color-mix(in oklab, var(--color-warning) 18%, transparent);
+}
+
+.ely-public-image {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 50%
+    ), color-mix(in oklab, var(--color-surface-elevated) 90%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+}
+
+.ely-public-image[data-shape="square"] {
+  border-radius: var(--ely-public-radius-sm);
+}
+
+.ely-public-image[data-aspect="square"] {
+  aspect-ratio: 1 / 1;
+}
+
+.ely-public-image[data-aspect="landscape"] {
+  aspect-ratio: 4 / 3;
+}
+
+.ely-public-image[data-aspect="portrait"] {
+  aspect-ratio: 3 / 4;
+}
+
+.ely-public-image[data-aspect="wide"] {
+  aspect-ratio: 16 / 9;
+}
+
+.ely-public-image__media,
+.ely-public-image__fallback,
+.ely-public-image__skeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ely-public-image__media {
+  display: block;
+  transition: opacity 180ms ease, transform 220ms ease;
+}
+
+.ely-public-image[data-fit="cover"] .ely-public-image__media {
+  object-fit: cover;
+}
+
+.ely-public-image[data-fit="contain"] .ely-public-image__media {
+  object-fit: contain;
+  padding: 0.85rem;
+}
+
+.ely-public-image__media[data-loaded="false"] {
+  opacity: 0;
+}
+
+.ely-public-image__media[data-loaded="true"] {
+  opacity: 1;
+}
+
+.ely-public-image__skeleton {
+  overflow: hidden;
+  background: color-mix(
+    in oklab,
+    var(--color-surface-elevated) 92%,
+    var(--color-surface)
+  );
+}
+
+.ely-public-image__skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-material-sheen),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: ely-public-skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+.ely-public-image__fallback {
+  display: grid;
+  place-items: center;
+  gap: 0.45rem;
+  padding: 1rem;
+  text-align: center;
+  background: linear-gradient(
+      180deg,
+      var(--color-material-sheen),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface-elevated) 88%, transparent);
+  color: var(--color-text-muted);
+}
+
+.ely-public-image__fallback-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 10%,
+    var(--color-surface)
+  );
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-family: var(--ely-public-font-display);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ely-public-image__fallback-copy {
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.ely-public-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}

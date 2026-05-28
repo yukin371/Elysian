@@ -1,0 +1,143 @@
+/* Data display and summary governance helpers. Token-only; no local palette. */
+
+.ely-story-data-rule-grid,
+.ely-story-data-stat-grid,
+.ely-story-data-progress-grid,
+.ely-story-data-signal-list,
+.ely-story-data-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-data-rule-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-data-rule-card,
+.ely-story-data-signal,
+.ely-story-data-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-data-rule-card {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-data-rule-card strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-data-rule-card p {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.ely-story-data-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 20px;
+}
+
+.ely-story-data-hero {
+  display: grid;
+  gap: 18px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 9%, transparent),
+      transparent 42%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-data-hero h2 {
+  max-width: 42rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  line-height: 0.98;
+}
+
+.ely-story-data-stat-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ely-story-data-progress-grid {
+  gap: 14px;
+}
+
+.ely-story-data-signal {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-data-signal-head,
+.ely-story-data-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ely-story-data-signal-head {
+  justify-content: space-between;
+}
+
+.ely-story-data-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ely-story-data-check > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 74%,
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-secondary) 12%, transparent);
+}
+
+@media (max-width: 920px) {
+  .ely-story-data-rule-grid,
+  .ely-story-data-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-data-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-data-rule-grid,
+  .ely-story-data-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-data-hero {
+    padding: 18px;
+  }
+}

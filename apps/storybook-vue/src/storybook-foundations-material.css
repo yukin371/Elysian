@@ -1,0 +1,366 @@
+/* Material and motion governance helpers. Keep token-only; no static palette or off-scale radii. */
+.ely-story-ornament-tier-grid,
+.ely-story-ornament-layout,
+.ely-story-ornament-surface-list,
+.ely-story-ornament-blockers,
+.ely-story-ornament-questions,
+.ely-story-ornament-specimen-evidence {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-ornament-tier-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-ornament-layout {
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
+}
+
+.ely-story-ornament-tier,
+.ely-story-ornament-surface,
+.ely-story-ornament-blocker,
+.ely-story-ornament-question {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-ornament-tier {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 14px;
+}
+
+.ely-story-ornament-tier span {
+  color: color-mix(in oklab, var(--color-primary) 76%, var(--color-text));
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-ornament-tier strong,
+.ely-story-ornament-surface strong,
+.ely-story-ornament-blocker strong {
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.ely-story-ornament-tier p,
+.ely-story-ornament-tier em,
+.ely-story-ornament-surface p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-ornament-tier em {
+  font-style: normal;
+}
+
+.ely-story-ornament-specimen {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 16px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 20%, var(--color-line));
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 12%, transparent),
+      color-mix(in oklab, var(--color-accent) 8%, transparent) 58%,
+      transparent
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-ornament-specimen h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.8rem, 4.6vw, 3.1rem);
+  line-height: 1;
+}
+
+.ely-story-ornament-specimen-mark {
+  position: absolute;
+  inset: 18px 18px auto auto;
+  display: grid;
+  gap: 8px;
+  width: 126px;
+  opacity: 0.72;
+}
+
+.ely-story-ornament-specimen-mark span {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 40%, transparent);
+}
+
+.ely-story-ornament-specimen-mark span:last-child {
+  width: 72%;
+  margin-left: auto;
+  background: color-mix(in oklab, var(--color-accent) 40%, transparent);
+}
+
+.ely-story-ornament-specimen-evidence {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.ely-story-ornament-surface {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+}
+
+.ely-story-ornament-blocker,
+.ely-story-ornament-question {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+}
+
+.ely-story-ornament-blocker > span,
+.ely-story-ornament-question > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+}
+
+.ely-story-ornament-blocker > span {
+  background: color-mix(in oklab, var(--color-warning) 70%, var(--color-danger));
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-warning-container) 36%, transparent);
+}
+
+.ely-story-ornament-question > span {
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 74%,
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-secondary) 12%, transparent);
+}
+
+.ely-story-material-layer-grid,
+.ely-story-material-intensity-list,
+.ely-story-material-rule-grid,
+.ely-story-material-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-material-layer-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-material-layer,
+.ely-story-material-intensity,
+.ely-story-material-rule,
+.ely-story-material-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-material-layer {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 50%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-material-layer > span {
+  display: block;
+  width: 34px;
+  height: 6px;
+  margin-bottom: 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-primary) 62%, transparent),
+    color-mix(in oklab, var(--color-secondary) 62%, transparent),
+    color-mix(in oklab, var(--color-accent) 58%, transparent)
+  );
+}
+
+.ely-story-material-layer strong,
+.ely-story-material-intensity strong,
+.ely-story-material-rule strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-material-layer p,
+.ely-story-material-intensity p,
+.ely-story-material-rule p {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.ely-story-material-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
+}
+
+.ely-story-material-specimen {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 16px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 20%, var(--color-line));
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 12%, transparent),
+      transparent 42%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-material-specimen h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 42rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  line-height: 0.98;
+}
+
+.ely-story-material-orbit {
+  position: absolute;
+  inset: auto 18px 18px auto;
+  display: grid;
+  gap: 8px;
+  width: 112px;
+  opacity: 0.72;
+}
+
+.ely-story-material-orbit span {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 38%, transparent);
+}
+
+.ely-story-material-orbit span:nth-child(2) {
+  margin-left: 22px;
+  background: color-mix(in oklab, var(--color-secondary) 42%, transparent);
+}
+
+.ely-story-material-orbit span:nth-child(3) {
+  margin-left: 44px;
+  background: color-mix(in oklab, var(--color-accent) 38%, transparent);
+}
+
+.ely-story-material-intensity span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-material-rule-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-material-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ely-story-material-checklist {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-material-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ely-story-material-check > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 74%,
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-secondary) 12%, transparent);
+}
+
+@media (max-width: 920px) {
+  .ely-story-ornament-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-ornament-tier-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-material-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-material-layer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-ornament-tier-grid,
+  .ely-story-ornament-specimen-evidence {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-ornament-specimen-mark {
+    display: none;
+  }
+
+  .ely-story-material-layer-grid,
+  .ely-story-material-rule-grid,
+  .ely-story-material-checklist {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-material-orbit {
+    display: none;
+  }
+}

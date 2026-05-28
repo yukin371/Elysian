@@ -1,6 +1,6 @@
 # roadmap
 
-更新时间：`2026-05-21`（Generator module handoff manifest 已完成最小实现并提交；新增对标与 UX first 自我优化计划，作为功能强化的支持性轨道）
+更新时间：`2026-05-23`（Generator module handoff manifest 已完成最小实现并提交；新增对标与 UX first 自我优化计划；Elysian 主题系统第一阶段已启动，补齐 public preset 与 Storybook 最小骨架）
 
 本文件只记录当前活跃工作轨道，不重复定义完整阶段体系。完整阶段与依赖关系见 [06-phased-implementation-plan.md](./06-phased-implementation-plan.md)。
 
@@ -34,6 +34,66 @@
 - 当前结论：后续功能强化默认先补 `Parity`，再打磨 `Better`，最后放大 `Unique`；任何 UX 改动都要先回答“用户第一步是什么、首屏是否先服务这一步”
 - 计划文档：[2026-05-21-gva-ruoyi-elysia-admin-benchmark-and-ux-first-plan.md](./plans/2026-05-21-gva-ruoyi-elysia-admin-benchmark-and-ux-first-plan.md)
 - 模块级矩阵：[2026-05-21-module-level-benchmark-matrix.md](./plans/2026-05-21-module-level-benchmark-matrix.md)
+
+### Supporting Track: Elysian 主题系统与 Storybook 设计 🚧
+
+- 当前目标：把“默认品牌气质 + 企业可选预设 + Storybook 验收面”收敛成明确边界，避免后续把品牌主题、组件库切换和页面原型混成一层实现
+- 当前范围：第一阶段只新增 `packages/ui-public-vue` 与 `apps/storybook-vue` 的最小骨架，先锁定 theme runtime、theme pack 和 Storybook 验收面，不把品牌预设外扩成完整业务应用
+- 当前 owner：`packages/ui-public-vue` 负责 `public-luxe` 品牌预设与主题 runtime，`apps/storybook-vue` 负责展示与回归；`packages/ui-enterprise-vue`、`packages/ui-core` 与 `packages/frontend-vue` 保持既有 owner 不变
+- 当前已推进：已明确后续设计应采用 `preset + theme` 的双维模型，而不是只做一套换色主题；企业预设与个性化默认预设共享协议，但不共享具体视觉实现
+- 当前已推进：已明确 `ui-enterprise-vue` 不承担华美个性化默认预设，候选个性化 owner 应单独承接；`demohub` 继续只承接 prototype 页面，不承接基础组件 canonical owner
+- 当前已推进：已创建 `ui-public-vue` 第一阶段骨架，固定 `preset + theme + mode` 契约，并落下 `elysia-default / rose-nocturne / azure-aria / enterprise-calm` 四个首批主题家族
+- 当前已推进：已创建 `storybook-vue` 最小预览入口，通过 toolbar 驱动 `public-luxe` 主题切换与 light / dark / system 模式对照
+- 当前已推进：已把 Storybook 信息架构收敛为 `Foundations / Components / Patterns / Showcase` 四层，让主题基础、组件级验收、页面组合样机与导览入口各归其位，不再让 page showcase 压过组件浏览
+- 当前已推进：已补 `Button / Avatar / Input / Card / Badge / Tabs / Dialog` 高频组件基线，并为它们及后续扩展组件建立独立 `Components` stories，转向更接近官方组件驱动的浏览方式
+- 当前已推进：已扩第二批受控组件 `Select / Switch / Empty State`，用于补齐表单控制与空态引导的最小公共面
+- 当前已推进：已扩第三批受控组件 `Checkbox / Radio Group / Skeleton`，用于补齐选择控件与加载占位的最小公共面
+- 当前已推进：已扩第四批轻量反馈组件 `Alert / Divider`，并补齐精确数字输入组件 `NumberInput` 与 `Radio Group` 的方向键、`Home`、`End` 键盘路径，继续压实可达性基线
+- 当前已推进：已补 `DateInput`，用于活动日期、会员有效期、发布时间和恢复截止日等单日期输入，不把 public primitive 扩成日历弹层、日期范围、时区或排期系统。
+- 当前已推进：已补 `FileInput`，用于头像、凭证、投稿附件和支持证据等本地文件选择，不把 public primitive 扩成上传传输、拖拽队列、预览编辑、病毒扫描或存储策略。
+- 当前已推进：已补 `Fieldset`，用于把 Checkbox、Radio Group、Input、Textarea、Select、FileInput 等相关表单控件收束为原生语义分组，减少用嵌套卡片承接表单结构，不把 public primitive 扩成表单模型、校验框架或布局系统。
+- 当前已推进：已补 `Textarea`，用于评论、简介、投稿说明和支持消息等长文本输入，并提供字数提示、行数和 resize 约束，不把 public primitive 扩成富文本编辑器、评论线程、AI 写作或发布工作流。
+- 当前已推进：已补 `Spinner`，用于局部动作、短等待和无确定百分比的紧凑加载反馈，不把 public primitive 扩成全页遮罩、上传进度、骨架替代或装饰动效。
+- 当前已推进：已补 `Popover`，用于局部结构化上下文、小预览和少量支持动作，不把 public primitive 扩成全局导航、命令菜单、模态确认、表单抽屉或完整帮助中心。
+- 当前已推进：已补 `Meter`，用于容量、健康度、质量、契合度等有界指标表达，不把 public primitive 扩成任务进度、等待状态、单数字摘要、排行榜或图表。
+- 当前已推进：已补 `Segmented Control`，用于紧凑视图、密度、语气或模式切换，不把 public primitive 扩成 Tabs 内容分区、Radio Group 表单说明、路由导航、长选项列表或提交确认。
+- 当前已推进：已补 `Search Input`，用于单行查询输入、显式提交和清空恢复，不把 public primitive 扩成 autocomplete、filter builder、命令面板、全局搜索或结果系统。
+- 当前已推进：已补 `Icon Button`，用于局部工具栏、媒体控制、低频紧凑动作和有限的开关式图标动作，并强制可访问名称；当前 `pressed / aria-pressed` 只表达收藏、静音、固定等本地 on/off 状态，不把 public primitive 扩成隐藏主 CTA、全局导航、命令面板、收藏系统或装饰按钮。
+- 当前已推进：已补局部动作溢出组件 `Menu`，用于把低频次级动作收束到单层菜单，不把公共预设扩成全局导航、命令面板或多级菜单体系
+- 当前已推进：已补局部动作编排组件 `Toolbar`，用于把同一 surface 内的主动作、次级动作、视图偏好和支持出口收束为扁平 action lane，不把公共预设扩成应用壳层、全局导航、表格命令栏或完整表单布局
+- 当前已推进：已补 `Progress`，用于表达上传、阶段完成度与前台任务推进，不让公共主题系统停留在“按钮和表单”层
+- 当前已推进：已补 `Image`，用于受控比例、加载骨架与失败回退的媒体展示，不让图文内容重新退回原始 `img` 标签与不稳定布局
+- 当前已推进：已补 `Link`，用于正文内导航、支持动作与外链语义，让前台内容层拥有统一的轻量交互语言
+- 当前已推进：已补 `List`，用于设置项、内容索引、活动摘要和轻量导航行，减少为了重复信息继续堆叠卡片
+- 当前已推进：已补 `DescriptionList`，用于资料事实、订单摘要、活动规则和规格说明的 label/value 信息块，不把每个事实拆成独立小卡片
+- 当前已推进：已补 `Table`，用于只读规格、权益、对照和紧凑审查矩阵，不把 public preset 扩成排序、筛选、编辑、选择或行操作的数据网格
+- 当前已推进：已补 `Slider`，用于主题强度、装饰预算、密度/音量一类有界连续偏好调节，不把 public preset 扩成范围滑块、价格输入、颜色选择器或主题编辑器
+- 当前已推进：已补 `Rating`，用于内容质量、满意度、主题契合度等小规模有序反馈，不把 public preset 扩成评论系统、评分聚合、情绪分析或游戏化奖励机制
+- 当前已推进：已补 `Stat`，用于摘要数据、概览指标和卡片信息块，让主题系统开始拥有稳定的信息摘要 primitive
+- 当前已推进：已补 `Text`，用于正文、说明文和低强调语句的统一排版 primitive，让内容层不再退回零散段落样式
+- 当前已推进：已补 `Timeline`，用于发布记录、活动日程、会员历程和内容编年，不把时间叙事误用为 `Stepper`、`Progress` 或嵌套卡片流
+- 当前已推进：已补 Storybook 浏览器烟测脚本，验证 `Tabs / Radio Group / Dialog` 的 iframe 级真实交互路径
+- 当前已推进：已补 `Theme System Spec` 浏览器烟测脚本，验证语义 token 说明、launch theme light/dark 预览条、root 主题切换后的 CSS token 变化与 live 组件 token 消费路径
+- 当前已推进：已补 `Patterns` stories，把现有主题与组件拼成 `Creator Center / Member Rewards / Editorial Collection / Event Landing / Theme Atelier` 等前台样机，验证页面级组织是否成立
+- 当前已推进：已补 `Member Rewards` pattern，把会员权益、领取动作、tier progress、稀缺提示和历史恢复路径串成一个公共会员权益样机，验证 public-luxe 能承载华美但克制的 C 端权益场景；该入口不拥有生产会员业务模型、权益规则或计费流程真相
+- 当前已推进：已补 `Editorial Collection` pattern，把内容专题、受控媒体比例、阅读顺序、内容分区、support link 与 archive recovery 串成一个公共内容专题样机，验证 public-luxe 能承载图文叙事场景；该入口不拥有生产内容 CMS、业务路由或发布流程真相
+- 当前已推进：已补 `Event Landing` pattern，把活动发布、主报名动作、席位进度、日程节奏、政策链接与 access recovery 串成一个公共活动落地页样机，验证 public-luxe 能承载有仪式感但不压迫的 C 端发布场景；该入口不拥有生产活动 CMS、票务、计费、直播或日历集成真相
+- 当前已推进：已补 `Forms & Feedback` pattern，把标签、说明、校验、同意/确认、进度、状态反馈和空态恢复串成一个公共表单反馈样机，验证 public-luxe 不只停留在展示页和偏好页
+- 当前已推进：已补 `Pattern Failure Gallery`，把多主按钮、恢复路径消失、表单修复文案缺失、装饰越界和主题角色漂移收敛成 pattern 层失败案例，帮助评审者先打回错误组合而不是继续叠加装饰
+- 当前已推进：已补 `Pattern Evidence Atlas`，把现有页面级 pattern 按 user job、主动作、主题证明、移动端顺序、恢复路径与 blocker 汇总成跨场景证据地图；该入口只服务 Storybook 评审推进，不拥有生产业务模型、页面路由、主题 token、组件 API 或真实发布流程真相
+- 当前已推进：已补 `Pattern Readiness Board`，把现有页面级 pattern 按主题证明、组件证据、移动端顺序、恢复路径、handoff checklist 与 blocker 汇总成交付前证据板；该入口只服务 Storybook 评审推进，不拥有生产业务验收、页面路由、主题 token、组件 API 或真实发布流程真相
+- 当前已推进：已把 `Patterns` stories 拆成独立 story 文件，并补 `Patterns` 浏览器烟测，验证 `Theme Atelier` 的主题选择、密度和同步开关，以及 `Creator Center` 的 tabs、开关与输入编辑路径
+- 当前已推进：已补 `Theme Gallery / Showcase Hub` stories，作为 `Foundations` 与 `Showcase` 的辅助入口，用于承接主题预览与系统导览，不把主题真相反向放进 Storybook
+- 当前已推进：已补 `Design Principles / Design Review Checklist / Release Gate Dashboard / Radius & Color Discipline / Theme Failure Gallery / Theme System Spec / Token Pairing Ledger / Theme Role Matrix / Theme Family Dossier / Theme Selection Playbook / Theme Composition / Theme Readiness / Theme Customization Guardrails / Mode Pairing Lab / Theme Application Recipes / Component Anatomy / Component Usage Matrix / Pattern Composition / Surface Rhythm / Interaction States / Action Hierarchy / Navigation & Wayfinding / Data Display & Summary / Typography & Voice / Material & Motion / Ornament Budget / Layout & Density / Imagery & Iconography / Accessibility & Inclusion` Foundations 治理 stories，用于把优雅原则、批准前评审门禁、发布证据驾驶舱、圆角与色彩纪律、失败案例、主题系统规格、token 配对账本、主题角色矩阵、主题族档案、主题选择手册、主题组合、主题批准矩阵、用户自定义主题护栏、明暗模式配对、主题应用配方、token/组件结构、组件选择矩阵、页面组合语法、容器节奏、统一圆角、交互状态、动作层级、导航导览、数据摘要、排版文案、材质动效、装饰预算、响应式密度、视觉资产语法与无障碍验收显式化；当前已进一步把 `Token Pairing Ledger`、`Theme Role Matrix`、`Theme Family Dossier`、`Theme Selection Playbook`、`Component Operability Board` 与 `Pattern Evidence Atlas / Pattern Readiness Board` 接入 `Foundations / Index` 和 `Release Gate Dashboard` 的证据链，避免 token 配对、主题角色、主题族交付档案、主题选择路径、组件行为证据和 pattern 交付证据彼此孤立；这些入口只消费 public preset 规则、theme pack 元数据与组件，不成为第二份 token、API、业务文案、生产动效、自定义主题编辑器、生产设置模型、业务布局、生产路由、生产数据模型、版权素材、生产发布流程或生产可访问性测试平台真相
+- 当前已推进：已把 `packages/ui-public-vue` 组件文档元数据扩展为 `usage / decision / composition / antiPatterns / props / states / accessibility`，让 story 和 markdown 都能从同一份 owner 真相里读出“何时使用、如何组合、哪些用法应拒绝”
+- 当前已推进：已把单组件 `Anatomy` stories 升级为展示 `decision / composition / antiPatterns`，让组件详情页不再只停留在 props、状态和 a11y 的浅层文档
+- 当前已推进：已补 `Component Failure Gallery`，把 Button 装饰化、Badge CTA 化、Input 缺少 label、Dialog 承接整页流程、Tabs 替代路由、Skeleton 变成最终内容收敛成组件层打回样本，帮助评审者先修正 primitive 语义而不是继续增加变体
+- 当前已推进：已按 Qingyu 参考项目的组件验收颗粒度加厚全部四十七个 public 组件 stories；每个组件至少保留两个详细场景 story，覆盖 tones、sizes、variants、placements、route-depth scenarios、icon-button toolbar/media/toggle/boundary scenarios、menu action-overflow/keyboard/boundary scenarios、toolbar action-lane/preference/boundary scenarios、search query/recovery/boundary scenarios、table comparison/compact-audit/boundary scenarios、slider intensity/budget/boundary scenarios、rating feedback/read-only/boundary scenarios、meter capacity/quality/boundary scenarios、segmented view-mode/density/boundary scenarios、popover context-preview/support-action/boundary scenarios、spinner inline/local wait/boundary scenarios、fieldset preference/consent/boundary scenarios、textarea creator/support/boundary scenarios、date event/validity/boundary scenarios、file verification/multi-attachment/boundary scenarios、number quantity/precision/boundary scenarios、list collection/navigation scenarios、description profile/policy scenarios、kbd shortcut/inline-help scenarios、page-range scenarios、flow-state scenarios、disclosure scenarios、chronology/schedule scenarios、selection/removal scenarios、dismissal scenarios、field/option sets、validation scenarios、composition scenarios、keyboard review、product/recovery scenarios、media scenarios、loading scenarios 与 section scenarios，并把这些 story 名称纳入静态契约测试
+- 当前已推进：已把详细组件场景清单收敛为 `component-story-coverage.ts`，由 `Components / Index`、`Components / Acceptance Board`、`Components / Handoff Dossier`、`Components / API Reference`、`Component Composition Matrix`、`Components / Variant Matrix`、`Components / State Matrix`、`Components / Scenario Atlas`、静态契约测试和 `e2e:storybook:public` 共同消费；组件索引现在能展示每个组件的文档覆盖、详细场景入口与 `state / interaction / accessibility / composition / content / density / feedback` 评审焦点分布，并支持按评审焦点过滤组件和场景入口，还会通过 review lane snapshot 摘要当前焦点下的组件清单与代表性场景；Acceptance Board 会把每个 public primitive 按 owner docs、scenario depth、risk focus、state+a11y 与 misuse boundary 汇总成验收总板；Handoff Dossier 会把每个 public primitive 按 intent、contract、story proof、risk focus 与 reject line 组织成 reviewer-ready packet，帮助评审者像组件档案一样逐项交接；API Reference 会把 `ui-public-vue` owner docs 中的 props、states、accessibility、decision 与 anti-patterns 组织成组件契约表，帮助评审者先横向扫描 API 再进入单组件 story；Component Composition Matrix 会把 owner-documented primitives 组织成 action、form、recovery、editorial、identity、loading 与 confirmation 组合配方，帮助评审者从“选对组件”继续检查“拼对组件”；Variant Matrix 会把 owner-documented variant props、runtime state props、scenario proof 与 anti-pattern blocker 组织成新增变体前的审批矩阵；State Matrix 会把 owner-documented states、accessibility notes、risk-focused scenarios 与 state blocker 组织成状态可用性矩阵；Scenario Atlas 进一步把全部详细场景按 review focus、组件家族和风险路线组织成可直接审查的场景地图，避免 Storybook 只像治理页而不像可逐项验收的设计系统
+- 当前已推进：已补 `Component Operability Board`，把 Dialog focus、Alert repair、Input invalid、Select option、Switch runtime、Tabs keyboard、Skeleton loading 与 Progress bounded 等高风险状态收敛成组件行为证据板；该入口只服务 Storybook 评审推进，不拥有第二份组件 API、状态机、表单模型或生产交互平台真相
+- 当前已推进：已扩 `e2e:storybook:public` 浏览器烟测，打开组件 Anatomy story 验证 `Decision guidance / Composition / Anti-patterns`，并打开组件索引、场景评审焦点条、评审焦点过滤交互、review lane snapshot 与第二批详细场景 story 验证真实 iframe 可见性
+- 当前结论：下一步优先继续补更多组件真实交互覆盖，并按需补少量高价值 pattern；Storybook 继续保持组件系统优先、showcase 退居辅助，不把其反向升级成主题真相 owner，也不把企业预设边界重新混回 public preset
+- 计划文档：[2026-05-23-elysian-theme-system-and-storybook-design.md](./plans/2026-05-23-elysian-theme-system-and-storybook-design.md)
 
 ### Recent Mainline: Phase H Generator 可发布闭环硬化 ✅
 

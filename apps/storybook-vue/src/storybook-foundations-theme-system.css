@@ -1,0 +1,989 @@
+/* Theme system spec helpers. Token-only; no local palette. */
+
+.ely-story-theme-failure-order,
+.ely-story-theme-failure-grid,
+.ely-story-theme-failure-layout,
+.ely-story-theme-failure-checklist,
+.ely-story-theme-failure-repair {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-theme-failure-order {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-theme-failure-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ely-story-theme-failure-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+}
+
+.ely-story-theme-failure-step,
+.ely-story-theme-failure-card,
+.ely-story-theme-failure-check,
+.ely-story-theme-failure-repair {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-theme-failure-step {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 14px;
+}
+
+.ely-story-theme-failure-step span {
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-failure-step strong,
+.ely-story-theme-failure-card-head h2 {
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.ely-story-theme-failure-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 16px;
+}
+
+.ely-story-theme-failure-card-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-theme-failure-card-head h2,
+.ely-story-theme-failure-card-head p {
+  margin: 0;
+}
+
+.ely-story-theme-failure-card-head h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+}
+
+.ely-story-theme-failure-specimen {
+  display: grid;
+  gap: 8px;
+  min-height: 94px;
+  align-content: end;
+  overflow: hidden;
+  border: 1px solid
+    color-mix(in oklab, var(--color-warning) 28%, var(--color-line));
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-warning-container) 54%, transparent),
+      color-mix(in oklab, var(--color-danger-container) 34%, transparent)
+    ), color-mix(in oklab, var(--color-surface-elevated) 84%, transparent);
+  padding: 12px;
+}
+
+.ely-story-theme-failure-specimen span {
+  display: block;
+  height: 10px;
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-warning) 42%, transparent);
+}
+
+.ely-story-theme-failure-specimen span:first-child {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-danger) 34%, transparent);
+}
+
+.ely-story-theme-failure-specimen span:nth-child(2) {
+  width: 78%;
+}
+
+.ely-story-theme-failure-specimen span:nth-child(3) {
+  width: 56%;
+}
+
+.ely-story-theme-failure-repair {
+  padding: 16px;
+}
+
+.ely-story-theme-failure-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+}
+
+.ely-story-theme-failure-check span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 68%,
+    var(--color-secondary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-story-mode-lab-check-grid,
+.ely-story-mode-lab-family-grid,
+.ely-story-mode-lab-pair,
+.ely-story-mode-lab-layout,
+.ely-story-mode-lab-specimen,
+.ely-story-mode-lab-question-list {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-mode-lab-check-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-mode-lab-family-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-mode-lab-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.88fr);
+}
+
+.ely-story-mode-lab-check,
+.ely-story-mode-lab-family,
+.ely-story-mode-lab-question,
+.ely-story-mode-lab-specimen {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-mode-lab-check {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 14px;
+}
+
+.ely-story-mode-lab-check strong,
+.ely-story-mode-lab-family-head h2 {
+  color: var(--color-text);
+}
+
+.ely-story-mode-lab-check span {
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-mode-lab-family {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.ely-story-mode-lab-family-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-mode-lab-family-head h2,
+.ely-story-mode-lab-family-head p {
+  margin: 0;
+}
+
+.ely-story-mode-lab-family-head h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  line-height: 1.08;
+}
+
+.ely-story-mode-lab-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-mode-lab-preview {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  align-content: end;
+  min-height: 150px;
+  overflow: hidden;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 24%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      var(--ely-story-theme-preview-from),
+      var(--ely-story-theme-preview-to)
+    ), var(--ely-story-theme-preview-surface);
+  padding: 12px;
+}
+
+.ely-story-mode-lab-preview span {
+  position: relative;
+  z-index: 1;
+  width: max-content;
+  padding: 0.26rem 0.5rem;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 30%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+  color: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 40%,
+    var(--color-text)
+  );
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-mode-lab-preview i,
+.ely-story-mode-lab-preview b,
+.ely-story-mode-lab-preview em {
+  position: relative;
+  z-index: 1;
+  display: block;
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 38%,
+    var(--ely-story-theme-preview-surface)
+  );
+}
+
+.ely-story-mode-lab-preview i {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+}
+
+.ely-story-mode-lab-preview b {
+  width: 72%;
+  height: 10px;
+}
+
+.ely-story-mode-lab-preview em {
+  width: 52%;
+  height: 10px;
+}
+
+.ely-story-mode-lab-specimen {
+  padding: 16px;
+}
+
+.ely-story-mode-lab-specimen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ely-story-mode-lab-question {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+}
+
+.ely-story-mode-lab-question span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 68%,
+    var(--color-secondary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-story-theme-recipes-lanes,
+.ely-story-theme-recipes-layout,
+.ely-story-theme-recipes-checks,
+.ely-story-theme-recipes-family-grid,
+.ely-story-theme-recipes-family-preview,
+.ely-story-theme-recipes-specimen-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-theme-recipes-lanes {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-theme-recipes-layout {
+  grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+}
+
+.ely-story-theme-recipes-family-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-recipes-lane,
+.ely-story-theme-recipes-check,
+.ely-story-theme-recipes-family,
+.ely-story-theme-recipes-specimen {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-theme-recipes-lane {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 14px;
+}
+
+.ely-story-theme-recipes-lane strong,
+.ely-story-theme-recipes-check strong,
+.ely-story-theme-recipes-family-copy dt {
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.ely-story-theme-recipes-lane span,
+.ely-story-theme-recipes-lane em,
+.ely-story-theme-recipes-family-copy dd {
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-theme-recipes-lane em {
+  font-style: normal;
+}
+
+.ely-story-theme-recipes-specimen {
+  overflow: hidden;
+}
+
+.ely-story-theme-recipes-specimen-hero {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 12%, transparent),
+      color-mix(in oklab, var(--color-accent) 8%, transparent)
+    ), color-mix(in oklab, var(--color-surface-elevated) 78%, transparent);
+}
+
+.ely-story-theme-recipes-specimen-hero h3,
+.ely-story-theme-recipes-family-copy h3,
+.ely-story-theme-recipes-family-copy dl,
+.ely-story-theme-recipes-family-copy dd {
+  margin: 0;
+}
+
+.ely-story-theme-recipes-specimen-hero h3 {
+  max-width: 760px;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.35rem, 2.8vw, 2.1rem);
+  line-height: 1.06;
+}
+
+.ely-story-theme-recipes-specimen-grid {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.85fr) minmax(0, 1fr);
+  padding: 16px;
+}
+
+.ely-story-theme-recipes-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+}
+
+.ely-story-theme-recipes-check span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 68%,
+    var(--color-secondary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-story-theme-recipes-risks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ely-story-theme-recipes-family {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.62fr) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.ely-story-theme-recipes-family-preview {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  padding: 14px;
+  background: color-mix(in oklab, var(--color-bg-subtle) 68%, transparent);
+}
+
+.ely-story-theme-recipes-family-swatch {
+  min-height: 92px;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 24%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      var(--ely-story-theme-preview-from),
+      var(--ely-story-theme-preview-to)
+    ), var(--ely-story-theme-preview-surface);
+  display: grid;
+  align-items: end;
+  padding: 10px;
+}
+
+.ely-story-theme-recipes-family-swatch span {
+  width: max-content;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 30%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+  color: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 40%,
+    var(--color-text)
+  );
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-recipes-family-copy {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+}
+
+.ely-story-theme-recipes-family-copy h3 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.08;
+}
+
+.ely-story-theme-recipes-family-copy dl {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-theme-recipes-family-copy div {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-bg-subtle) 70%, transparent);
+}
+
+.ely-story-theme-recipes-family-copy dt {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-readiness-hero-grid,
+.ely-story-theme-readiness-grid,
+.ely-story-theme-readiness-preview-pair,
+.ely-story-theme-readiness-gates {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-theme-readiness-hero-grid {
+  grid-template-columns: minmax(220px, 1fr) repeat(4, minmax(0, 0.82fr));
+  margin-top: 24px;
+}
+
+.ely-story-theme-readiness-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-readiness-check,
+.ely-story-theme-readiness-card,
+.ely-story-theme-readiness-gate {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-theme-readiness-check {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 14px;
+}
+
+.ely-story-theme-readiness-check strong,
+.ely-story-theme-readiness-gate span {
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-readiness-check span,
+.ely-story-theme-readiness-copy,
+.ely-story-theme-readiness-list dd {
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-theme-readiness-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.ely-story-theme-readiness-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.ely-story-theme-readiness-head h2,
+.ely-story-theme-readiness-head p,
+.ely-story-theme-readiness-copy,
+.ely-story-theme-readiness-list,
+.ely-story-theme-readiness-list dd {
+  margin: 0;
+}
+
+.ely-story-theme-readiness-head h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  line-height: 1.08;
+}
+
+.ely-story-theme-readiness-preview-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-readiness-preview {
+  position: relative;
+  min-height: 88px;
+  overflow: hidden;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 26%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      var(--ely-story-theme-preview-from),
+      var(--ely-story-theme-preview-to)
+    ), var(--ely-story-theme-preview-surface);
+  padding: 12px;
+}
+
+.ely-story-theme-readiness-preview::before,
+.ely-story-theme-readiness-preview::after {
+  position: absolute;
+  content: "";
+  border-radius: 999px;
+}
+
+.ely-story-theme-readiness-preview::before {
+  inset: 16px auto auto 16px;
+  width: 42px;
+  height: 42px;
+  background: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 36%,
+    transparent
+  );
+}
+
+.ely-story-theme-readiness-preview::after {
+  right: 14px;
+  bottom: 14px;
+  width: 58%;
+  height: 10px;
+  background: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 46%,
+    var(--ely-story-theme-preview-surface)
+  );
+}
+
+.ely-story-theme-readiness-preview span {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  padding: 0.26rem 0.5rem;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 30%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+  color: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 40%,
+    var(--color-text)
+  );
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-readiness-list {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-theme-readiness-list div {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-bg-subtle) 70%, transparent);
+}
+
+.ely-story-theme-readiness-list dt {
+  color: var(--color-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-readiness-gates {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-theme-readiness-gate {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.ely-story-theme-readiness-gate strong {
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.ely-story-theme-system-family-grid,
+.ely-story-theme-system-group-list,
+.ely-story-theme-system-checklist,
+.ely-story-theme-system-token-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-theme-system-family-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-theme-system-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(360px, 1.14fr);
+  gap: 20px;
+}
+
+.ely-story-theme-system-token-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-system-family,
+.ely-story-theme-system-group,
+.ely-story-theme-system-check,
+.ely-story-theme-system-token {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-theme-system-family {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  background: linear-gradient(
+      150deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 46%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 16px;
+}
+
+.ely-story-theme-system-family h2,
+.ely-story-theme-system-family p,
+.ely-story-theme-system-token p {
+  margin: 0;
+}
+
+.ely-story-theme-system-family h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+}
+
+.ely-story-theme-system-preview-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ely-story-theme-system-preview-pair span {
+  min-height: 48px;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 24%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      var(--ely-story-theme-preview-from),
+      var(--ely-story-theme-preview-to)
+    ), var(--ely-story-theme-preview-surface);
+  color: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 34%,
+    var(--color-text)
+  );
+  display: grid;
+  place-items: end start;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  padding: 10px;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-system-family p,
+.ely-story-theme-system-group span,
+.ely-story-theme-system-token p {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.ely-story-theme-system-group,
+.ely-story-theme-system-check {
+  padding: 14px;
+}
+
+.ely-story-theme-system-group strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.ely-story-theme-system-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ely-story-theme-system-check > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 68%,
+    var(--color-secondary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-story-theme-system-token {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px;
+}
+
+.ely-story-theme-system-swatch {
+  width: 52px;
+  min-height: 52px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 84%, var(--color-surface) 16%);
+  border-radius: var(--ely-public-radius-md);
+  background: var(--ely-story-token-swatch);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--color-surface) 42%, transparent);
+}
+
+.ely-story-theme-system-token-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ely-story-theme-system-token-head span,
+.ely-story-theme-system-token code {
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-system-token code {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+  font-family: var(--ely-public-font-sans);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+@media (max-width: 1120px) {
+  .ely-story-theme-failure-order,
+  .ely-story-theme-failure-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-theme-failure-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-mode-lab-check-grid,
+  .ely-story-mode-lab-family-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-mode-lab-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-recipes-lanes,
+  .ely-story-theme-recipes-family-grid,
+  .ely-story-theme-recipes-specimen-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-theme-recipes-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-readiness-hero-grid,
+  .ely-story-theme-readiness-gates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-theme-system-family-grid,
+  .ely-story-theme-system-token-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-theme-system-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ely-story-theme-failure-order,
+  .ely-story-theme-failure-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-failure-card-head {
+    flex-direction: column;
+  }
+
+  .ely-story-mode-lab-check-grid,
+  .ely-story-mode-lab-family-grid,
+  .ely-story-mode-lab-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-mode-lab-family-head {
+    flex-direction: column;
+  }
+
+  .ely-story-theme-recipes-lanes,
+  .ely-story-theme-recipes-family-grid,
+  .ely-story-theme-recipes-family,
+  .ely-story-theme-recipes-specimen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-readiness-hero-grid,
+  .ely-story-theme-readiness-grid,
+  .ely-story-theme-readiness-preview-pair,
+  .ely-story-theme-readiness-gates {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-readiness-head {
+    flex-direction: column;
+  }
+
+  .ely-story-theme-system-family-grid,
+  .ely-story-theme-system-token-grid {
+    grid-template-columns: 1fr;
+  }
+}

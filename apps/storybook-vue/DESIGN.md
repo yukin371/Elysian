@@ -1,0 +1,107 @@
+# storybook-vue DESIGN
+
+## 角色定位
+
+- 本应用只负责展示、对照和验收 `ui-public-vue` 的 public preset。
+- 它是设计评审面，不是主题真相 owner，也不是生产业务页原型站。
+
+## 展示规则
+
+- Storybook 默认以 `public-luxe` 预设展示，不混入 enterprise 组件实现。
+- 侧边栏主导航固定为 `Foundations / Components / Patterns / Showcase`，优先支持按基础设计和单组件浏览，而不是先把用户带进整页展示。
+- 所有 stories 都应支持 toolbar 切换主题家族与 light / dark / system 模式。
+- 页面级 stories 优先展示气质、层次和组件协同，而不是只排成冷冰冰的矩阵。
+- `Showcase` 只作为品牌入口、导览页和系统总览，不应压过组件 stories 成为默认主入口。
+- `Showcase Hub` 应像 DemoHub 式评审驾驶舱：先展示 Storybook 覆盖、批准入口、阻断风险和推荐路径，再进入品牌、组件或 pattern 页面；它只能消费 Storybook 入口元数据和 theme preview 解析结果，不维护第二份 token、组件 API 或业务页面真相。
+- 页面级 pattern stories 应尽量接近真实前台场景，例如会员、内容专题、Creator Center、Theme Atelier、权益面板，而不是只做抽象展示板。
+- `Patterns / Index` 应作为页面级 pattern 的审批地图，按主动作、可用性证据、恢复路径和阻断风险组织入口；它只消费 Storybook 入口元数据，不维护生产业务模型、路由、计费、CMS 或表单真相。
+- `Patterns / Index` 必须额外展示 pattern 之间的选择矩阵，例如 Creator Center vs Theme Atelier、Member Rewards vs Event Landing、Editorial Collection vs Forms & Feedback，以及 pattern page vs foundation rule 的边界；它解释页面语法选择，不维护生产业务路由或页面模型真相。
+- `Patterns / Readiness Board` 应作为页面级 pattern 的交付前证据板，按主题证明、组件证据、移动端顺序、恢复路径、handoff blocker 和 watch item 组织现有 pattern；它只消费 Storybook pattern 入口与评审事实，不维护生产业务验收、页面路由、主题 token、组件 API 或真实发布流程。
+- `Patterns / Evidence Atlas` 应作为页面级 pattern 的跨场景证据地图，按 user job、primary action、theme proof、mobile order、recovery path 和 blocker 组织现有 pattern；它只消费 Storybook pattern 入口与评审事实，不维护生产业务模型、页面路由、主题 token、组件 API 或真实发布流程。
+- `Pattern Failure Gallery` 应展示页面组合层的失败案例，例如多主按钮、恢复路径消失、表单修复文案缺失、装饰越界和主题角色漂移；它只作为 pattern 评审面，不拥有生产缺陷库、业务流程或第二份主题规则。
+- 表单类 pattern 必须展示标签、说明、校验、同意/确认、进度、反馈和恢复路径的完整节奏；不能只展示漂亮输入框。
+- 会员权益类 pattern 必须展示一个主领取动作、权益摘要、tier progress、稀缺提示、历史/失败恢复路径和 support link；华美感应来自受控 accent 与 surface rhythm，不得把整页做成高饱和金色或多主按钮促销页。
+- 内容专题类 pattern 必须展示受控媒体比例、主阅读顺序、内容分区、support link、进度/状态和 archive recovery；专题氛围应复用 theme artwork 与 public token，不得新增独立 CMS 配色或页面级视觉真相。
+- 活动落地页 pattern 必须展示一个主报名动作、席位/进度解释、日程节奏、低强调政策链接和 access recovery；仪式感应来自 hero、受控媒体和排版节奏，不得变成多主按钮促销页或倒计时压迫页。
+- 组件级 stories 仍要保留可扫描的对照布局，方便快速比较 tone、size、state。
+- 展示页自用布局类必须使用 `ely-public-preview-*` 或 `ely-public-showcase-*` 前缀，不得占用真实组件 class 命名空间。
+- 静态布局节奏必须沉淀为展示辅助类，不得在 stories 中继续使用 `style="..."` 手调间距、列数或对齐；仅允许 `:style` 绑定主题元数据、CSS 变量或组件运行态数值。
+- Theme Gallery、Showcase Hub 等主题预览卡必须按当前 `data-resolved-mode` 选择 light/dark preview 元数据，不能在暗色模式继续展示 light preview 色卡。
+- 全局 preview 顶部条必须同时提供主题 / 模式切换和 `Review map` 页内切换；当用户直接打开 `iframe.html` 时，也应能从当前 story 进入 `Showcase Hub / Foundations Index / Theme Chooser / Component Index / Component Theme Specimen Wall / Component Operability Board / Component Failure Gallery / Pattern Index` 等核心评审页，不依赖人工修改 URL 或 Storybook 侧栏。
+- `Foundations / Theme Chooser` 应像用户可见的主题设置面板：先展示主题 personality、表达强度、适用场景、light/dark 配对证明和“先选身份再选颜色”的选择节奏，再提供应用到 Storybook toolbar 的入口；首次渲染应读取当前 toolbar 写入根节点的 `data-theme / data-mode / data-resolved-mode` 作为本地选择器初始状态，避免暗色或其他主题下的本地预览与当前上下文错位；它只能消费 `ui-public-vue` theme pack 元数据，不维护第二套主题色或生产设置模型。
+- 高频组件 stories 必须优先提供组件文档入口，而不是只放展示页面；第一层至少包含 `autodocs`、可调 controls、状态矩阵、props 表、选择依据、反模式和可访问性说明。
+- 高频组件 stories 不应停留在 `Playground / Anatomy / States` 三页；所有 public 组件都应至少提供两个可扫描的能力矩阵场景，例如 tones、variants、sizes、placements、type scale、field types、selection/removal scenarios、validation scenarios、option sets、dialog sizes、dismissal rules、keyboard review、label help scenarios、media scenarios、loading scenarios、section scenarios、product/recovery scenarios 等，让 Storybook 能回答“组件是否真的可用”，而不只是“组件是否存在”。
+- Storybook 中的组件文档应消费 `ui-public-vue` 暴露的组件文档元数据，避免展示层和组件包各维护一套不一致的说明。
+- `Components / Index` 应作为元数据驱动的覆盖总览，展示组件数量、props、状态、可访问性覆盖、详细场景 story 链接与场景评审焦点分布，并允许按评审焦点过滤组件和详细场景入口；索引应提供当前评审焦点的 review lane snapshot、review readiness gates 和 category readiness board，让评审者先看到组件清单、代表性场景入口、owner docs 完整度、场景深度、高风险评审面、story link 可达性，以及 Actions / Form / Feedback / Navigation / Content 各组件家族的证据密度，再进入单组件细看；组件条目应采用扁平的 `identity / contract / proof` ledger 节奏，把描述、选择依据、反模式、gate 和详细 story 链接并列组织，避免把每个组件做成多层卡片塔；`Components / Scenario Atlas` 应把详细场景按 review focus、组件家族和风险路线重新编排成直接审查路径，帮助评审者快速定位“哪个 story 真正证明了哪个风险”；这些详细场景清单只能描述 Storybook 入口和评审焦点，不维护第二份 API 说明。
+- `Components / Theme Specimen Wall` 应作为组件实物墙，把当前 toolbar 选中的 active theme 显示在真实组件组合里，并以更扁平的 identity lane 展示 launch family 的 light/dark 入口和主题人格，不应把主题证明堆成多层 layout-only card；窄屏暗色下应优先压缩为 compact evidence lane，减少竖向卡片塔、保留主题色谱与关键证据入口；它只能消费现有组件、theme pack 元数据、owner docs 与 scenario coverage，不维护第二份 token、组件 API、主题算法或生产主题选择模型。
+- `Components / Decision Workshop` 应作为组件选择工作坊，把 public primitives 按 `Act / Decide / Recover / Author / Orient` 用户任务组织成可操作评审面，展示推荐组件、详细场景 proof、reject line 与一个 live specimen；它只能消费 `ui-public-vue` owner docs、`component-story-coverage.ts` 和 Storybook 入口元数据，不维护第二份组件 API、业务流程、主题 token 或生产组件选择模型。
+- `Components / Mobile Density Review` 应作为窄屏组件密度评审面，把现有 public primitives 放进 compact / balanced / ceremonial 三种移动节奏，验证标签、主动作、恢复路径、状态说明和装饰裁剪是否仍然成立；它只能消费现有组件、owner docs 与 Storybook 入口元数据，不维护第二份组件 API、响应式布局真相、生产设置模型或主题 token。
+- `Components / Acceptance Board` 应把每个 public primitive 按 owner docs、scenario depth、risk focus、state+a11y、misuse boundary 五类 gate 汇总成验收总板；它只能作为 Storybook 评审面，不维护第二份组件 API、生产质量指标或发布平台门禁真相。
+- `Components / Handoff Dossier` 应把每个 public primitive 组织成 reviewer-ready packet，按 intent、contract、story proof、risk focus 与 reject line 汇总 owner docs 和 detailed scenarios；它只能作为 Storybook 交接评审面，不维护第二份组件 API、默认值、状态机、生产 QA 指标或发布平台门禁真相。
+- `Components / API Reference` 应把 `ui-public-vue` owner docs 中的 props、states、accessibility、decision 与 anti-patterns 组织成可快速扫描的组件契约表；它只负责排序、分组与链接到单组件 docs，不维护第二份组件 API、默认值、状态机、表单语义或生产交互真相。
+- `Component Composition Matrix` 应把 owner-documented primitives 组织成 action、form、recovery、editorial、identity、loading 与 confirmation 组合配方，解释从“选对组件”到“拼对组件”的审查路径；它只能消费 `ui-public-vue` owner docs 与 Storybook scenario coverage，不维护第二份组件 API、页面 pattern 真相、token 或生产流程。
+- `Components / Variant Matrix` 应把 owner-documented variant props、runtime state props、详细 scenario proof 与 anti-pattern blocker 组织成新增变体前的审批矩阵；它只能解释“现有契约是否足以支持扩展”，不维护第二份 prop 类型、默认值、视觉变体策略或生产组件路线图。
+- `Components / State Matrix` 应把 owner-documented states、accessibility notes、risk-focused detailed scenarios 与 state blocker 组织成状态可用性矩阵；它只能解释现有组件状态是否具备恢复、焦点、语义和场景证明，不维护第二份状态机、可访问性测试平台或生产交互验收结果。
+- `Components / Operability Board` 应作为高风险组件状态的行为证据板，覆盖 dialog focus、alert repair、form invalid、selection、runtime toggle、tabs keyboard、loading skeleton 与 bounded progress；它只消费 `ui-public-vue` 组件文档元数据和 Storybook detailed scenario，不维护第二份组件 API、状态机、表单模型或生产交互平台真相。
+- `Components / Scenario Atlas` 应作为详细场景的跨组件路线图，按 review focus、component family 与 risky user job 组织场景入口；它只能消费 `component-story-coverage.ts` 与 owner docs，不维护第二份组件 API、token、状态机或业务模型真相。
+- `Component Failure Gallery` 应展示 primitive 误用案例，例如把 Button 当装饰、Badge 当 CTA、Input 缺少 label、Dialog 承接整页流程、Tabs 替代路由、Skeleton 变成最终内容；它只作为组件评审面，不维护第二份组件 API、token 或组件实现。
+- `Foundations / Index` 应作为 Foundations 层的审批地图，按 `Contract and theme / Component review / Composition rhythm / Expression and access` 四条风险 lane 组织治理页、组件证据板与 pattern 证据板入口、阻断风险与下一步证据；它只能消费 Storybook 入口元数据和 owner 文档，不维护第二份 token、组件 API 或生产页面规则。
+- 高频组件 stories 应显式展示键盘可达性、错误态和对话层等高风险交互面。
+- `Tooltip` stories 必须证明短上下文解释、placement、键盘焦点和“不可隐藏关键指令”的边界；它只能补充可见文案，不能替代 Alert、Input invalid message、法律同意或长帮助内容。
+- `Breadcrumb` stories 必须证明路线层级、当前页 `aria-current`、窄屏换行和 Tabs/Link 边界；Breadcrumb 只表达稳定父级路径，不承接全局导航、筛选条件、进度步骤或主动作。
+- `Pagination` stories 必须证明当前页 `aria-current`、previous/next 边界禁用、长页码折叠、集合范围说明和窄屏无溢出；Pagination 只表达有界集合翻页，不承接进度、步骤、筛选或局部 section 切换。
+- `Chip` stories 必须证明 selected/removable token、remove button 可达性和 Badge/Button 边界；Chip 只能表示局部选中上下文或可移除筛选，不承接状态标签、主动作或路由导航。
+- `Toast` stories 必须证明短时反馈、语义 tone、dismiss button 可达性和 Alert 边界；Toast 只能确认已完成或非阻断动作，不能隐藏校验修复、法律说明、持久通知或必读恢复路径。
+- `Action Hierarchy` 必须展示 primary / secondary / ghost / link / badge / alert / empty-state action 的职责边界，确保一个 surface 只有一个主下一步，避免页面靠多个强按钮制造决策噪音。
+- `Navigation & Wayfinding` 必须展示 global lane、local section、breadcrumb、support link、tabs 和 route recovery 的职责边界，确保导航帮助定位而不是抢走页面主行动层级。
+- `Data Display & Summary` 必须展示 `Stat / Badge / Progress / Divider / Text` 在摘要面板中的职责边界，确保数据先服务判断，不退化成装饰性数字海报。
+- 第二批表单与状态组件应额外展示 placeholder、checked/unchecked、empty-state CTA 等真实使用姿态。
+- 第三批选择与加载组件应显式展示 checked/unchecked、single-choice decision 和 loading placeholder 节奏。
+- 第四批反馈与分隔组件应显式展示 `info / success / warning / danger` 语义，以及带标签 divider 的章节节奏。
+- Foundations 层必须覆盖 `Design Principles / Design Review Checklist / Release Gate Dashboard / Radius & Color Discipline / Theme Failure Gallery / Theme Tokens / Theme System Spec / Token Pairing Ledger / Theme Role Matrix / Theme Family Dossier / Theme Selection Playbook / Theme Chooser / Theme Composition / Theme Readiness / Theme Customization Guardrails / Mode Pairing Lab / Theme Application Recipes / Component Anatomy / Component Usage Matrix / Surface Rhythm / Interaction States / Typography & Voice / Material & Motion / Ornament Budget / Layout & Density / Imagery & Iconography / Accessibility & Inclusion` 治理入口：先看设计原则、评审门禁、发布证据驾驶舱、圆角与色彩纪律、失败案例、token、主题系统规格、token 配对账本、主题角色矩阵、主题族档案、主题选择手册和用户可见选择体验，再看主题组合、主题批准矩阵、用户自定义主题护栏、明暗模式配对、主题应用配方、组件结构、组件选择矩阵、容器节奏、交互状态、排版文案、材质动效、装饰预算、响应式密度、视觉资产语法与无障碍验收。
+- `Design Review Checklist` 必须把 theme family、圆角尺度、材质强度、动作层级、owner 文档和可访问状态收敛成批准前检查项；它只能消费 `ui-public-vue` 的 theme pack 与组件文档元数据，不维护第二份 token 或组件 API。
+- `Release Gate Dashboard` 必须把 theme proof、visual discipline、component evidence、pattern readiness 与 operability blockers 汇总为发布前门禁，并显式给出 `theme contract -> theme readiness -> component operability -> pattern readiness -> failure repair` 证据链；它只能链接已有 Storybook 证据、theme pack 元数据和组件文档，不拥有第二份 token、组件 API、生产发布流程或业务验收平台真相。
+- `Radius & Color Discipline` 必须把 primary / secondary / accent / status 的职责边界和 `--ely-public-radius-sm/md/lg` / `999px` 的使用边界显式化；它只能消费 public token 语义和展示辅助 CSS，不新增静态色值或临时半径刻度。
+- `Theme Failure Gallery` 必须展示 color drift、mode mismatch、ornament overspend、action conflict、radius drift 等应被打回的失败样本和修复清单；它只能作为 Storybook 评审面，不拥有第二份 token、组件 API、业务页面或生产缺陷库。
+- `Theme System Spec` 必须消费 `ui-public-vue` 的 `publicThemeSemanticTokenDefinitions`，展示语义 token 分组、成对文本 token、状态语义和材质职责；不得在 Storybook 里另写一套 theme slot 解释。
+- `Token Pairing Ledger` 必须消费 `ui-public-vue` 的 `publicThemeSemanticTokenDefinitions`，展示 paired token、base token、on-container text partner、审查路线和 live component specimen；它只作为可读性配对账本，不维护第二份色板、token、对比算法、主题审批真相或生产可访问性测试平台。
+- `Theme Role Matrix` 必须消费 `ui-public-vue` 的 theme pack 元数据与 `publicThemeSemanticTokenDefinitions`，按 surface / content / emphasis / status / material 对比各 launch family 在 light / dark 模式下的职责稳定性；它只作为主题角色审查入口，不维护第二份色板、token、对比算法、主题审批真相或生产自定义主题模型。
+- `Theme Family Dossier` 必须消费 `ui-public-vue` 的 theme pack 元数据，把每个 launch family 组织为 intent、best-fit surfaces、light/dark proof、role promises、ornament budget、blocker、reject line 与 review routes；它只作为主题族交付档案，不维护第二份色板、token、对比算法、主题审批真相或生产自定义主题模型。
+- `Theme Selection Playbook` 必须消费 `ui-public-vue` 的 theme pack 元数据，把主题选择组织为 user job、recommended family、alternate family、blocked misuse、family fit、selection checks 与 review routes；它只作为主题选择评审手册，不维护第二份色板、token、对比算法、生产路由、生产个性化设置或主题审批真相。
+- `Theme Composition` 必须按 theme family 展示 light/dark 配对预览、适用场景和风险提醒，帮助评审者先选择完整主题家族，而不是在页面里自由拼主色、辅色和点缀色。
+- `Theme Readiness` 必须把 theme family 选择收敛成批准矩阵，展示 family fit、mode pair、role discipline、surface majority 和阻断项；它只能消费 `ui-public-vue` theme pack 元数据，不维护第二份 token、色值或主题算法。
+- `Theme Customization Guardrails` 必须展示用户可安全调整的范围、需要补证明的范围、不可局部化的 token / radius / API 语义，以及应提前打回的主题漂移；它只能消费 `ui-public-vue` theme pack 元数据和公共组件，不维护第二份 token、色值、主题算法、自定义主题编辑器或生产设置模型。
+- `Mode Pairing Lab` 必须展示每个 launch theme family 在 light / dark preview 下的主行动、状态证据、surface majority 与 recovery path 验收；它只能消费 `ui-public-vue` theme pack 元数据和公共组件，不维护第二份 token、色值、主题算法或暗色模式实现。
+- `Theme Application Recipes` 必须展示主题家族落到 hero、data summary、form recovery 与 editorial glint surface 时的 primary / secondary / accent / neutral / status 职责分配；它只能消费 `ui-public-vue` theme pack 元数据和公共组件，不维护第二份 token、页面路由、业务流程或组件 API。
+- `Component Anatomy` 只解释 token、组件外壳、局部状态和 pattern 装配关系，不维护第二份组件 API；组件 API 仍来自 `ui-public-vue` 文档元数据。
+- `Component Usage Matrix` 必须展示组件选择依据、Button vs Link / Checkbox vs Switch / Select vs Radio Group 等二选一决策、风险面、pattern 组合食谱与审批问题；它只解释“什么时候用哪个 primitive”，不维护第二份 props/API 说明。
+- `Component Operability Board` 必须展示每个高风险 primitive 的 user job、evidence、blocker、owner decision、anti-pattern、detailed scenario link 和行为评分；它只能推动评审，不应把评分解释为生产质量指标。
+- `Pattern Composition` 必须展示 hero、media、signal、action、recovery 的组合语法；页面级 pattern 可以有不同主题气质，但不能脱离同一套组合顺序、主题角色、圆角尺度和恢复路径规则。
+- `Pattern Evidence Atlas` 必须展示每个 pattern 的 user job、primary action、proof、theme proof、mobile order、recovery 和 blocker，并给出 Index -> Evidence Atlas -> Readiness Board -> Failure Gallery 的评审路线；它只用于评审推进，不应被解释为生产 release gate、业务页面模型或业务验收结果。
+- `Pattern Readiness Board` 必须展示每个 pattern 的 evidence score、theme family、light/dark watch/pass、mobile watch/pass、proof、recovery 和 blocker；它只用于评审推进，不应被解释为生产 release gate 或业务验收结果。
+- `Surface Rhythm` 必须展示背景层、主面层、局部分组、状态层和密度选择，用来约束页面不要靠卡片套卡片、重阴影或更响的颜色解决层级问题。
+- `Interaction States` 必须展示 hover/focus/loading/invalid/disabled/selected/feedback 的统一验收口径，避免只看静态截图就批准视觉效果。
+- `Action Hierarchy` 必须展示动作、导航、状态标记和反馈区的决策顺序；主按钮、次按钮、ghost、link、badge、alert 和 empty-state CTA 不得互相抢职责。
+- `Navigation & Wayfinding` 必须展示全局 lane、局部 section、breadcrumb、support link、tabs 和 route recovery 的导览语法；tabs 只表达同一 surface 内的平级 section，link 才负责跨 route 或跨 owner 的跳转。
+- `Data Display & Summary` 必须展示摘要数字、状态标签、进度、说明文本和分隔节奏的统一验收口径；统计和进度必须可解释，badge 只做辅助状态证据。
+- `Typography & Voice` 必须展示 display / sans / eyebrow 的角色、标题/正文/辅助文案/链接的层级和可见文案转换规则，避免华美主题退化成晦涩、研发态或不可执行的表达。
+- `Material & Motion` 必须展示晶面、丝绸感、轻辉光、shimmer、reveal 和 reduced-motion 的验收口径；材质和动效只能服务层级、状态或仪式感，不得变成独立装饰系统。
+- `Ornament Budget` 必须把 quiet / luminous / ceremonial / blocked 的装饰强度预算显式化，并展示 hero、form、data、recovery、editorial surface 的允许强度；它只能作为评审门禁，不拥有主题 token、生产动效、业务页面或资产真相。
+- `Layout & Density` 必须展示桌面与移动端的决策顺序、密度带、移动端堆叠和装饰裁剪规则；响应式变化只能改变节奏，不能改变主题色职责、圆角尺度或组件语义。
+- `Imagery & Iconography` 必须展示图像角色、媒体比例、头像 fallback、图标语法和资产边界；允许抽象化月光、晶面、丝绸和乐章感，不允许复制游戏角色、服装、UI 框架或专有视觉资产。
+- `Accessibility & Inclusion` 必须展示键盘路径、焦点可见性、对比纪律、非颜色状态提示、校验文案、reduced-motion 与辅助技术语义；华美主题必须先可用再讨论装饰强度。
+- Storybook 展示 CSS 拆分为通用 showcase、Showcase Hub、组件索引、组件实物墙、组件选择工作坊、组件验收总板、组件交接档案、组件 API 参考、组件组合矩阵、组件变体矩阵、组件状态矩阵、组件场景地图、组件可操作性证据板、组件失败案例、Foundations 治理、Patterns 索引、Patterns 证据地图与 Patterns 页面辅助样式；`Showcase Hub` 驾驶舱、入口卡片、审批路径和风险列表样式应优先落在 `storybook-showcase-hub.css`，`Components / Index` 专属样式应优先落在 `storybook-component-index.css`，`Components / Theme Specimen Wall` 专属样式应优先落在 `storybook-component-theme-specimen-wall.css`，`Components / Decision Workshop` 专属样式应优先落在 `storybook-component-decision-workshop.css`，`Components / Operability Board` 专属样式应优先落在 `storybook-component-operability-board.css`，`Component Failure Gallery` 专属样式应优先落在 `storybook-component-failure-gallery.css`，`Components / Acceptance Board` 专属样式应优先落在 `storybook-component-acceptance-board.css`，`Components / Handoff Dossier` 专属样式应优先落在 `storybook-component-handoff-dossier.css`，`Components / API Reference` 专属样式应优先落在 `storybook-component-api-reference.css`，`Component Composition Matrix` 专属样式应优先落在 `storybook-component-composition-matrix.css`，`Components / Variant Matrix` 专属样式应优先落在 `storybook-component-variant-matrix.css`，`Components / State Matrix` 专属样式应优先落在 `storybook-component-state-matrix.css`，`Components / Scenario Atlas` 专属样式应优先落在 `storybook-component-scenario-atlas.css`，`Token Pairing Ledger` 专属样式应优先落在 `storybook-foundations-token-pairing-ledger.css`，`Theme Role Matrix` 专属样式应优先落在 `storybook-foundations-theme-role-matrix.css`，`Theme Family Dossier` 专属样式应优先落在 `storybook-foundations-theme-family-dossier.css`，`Theme Selection Playbook` 专属样式应优先落在 `storybook-foundations-theme-selection-playbook.css`，`Theme Chooser` 专属样式应优先落在 `storybook-foundations-theme-chooser.css`，`Patterns / Index` 专属样式应优先落在 `storybook-pattern-index.css`，`Patterns / Evidence Atlas` 专属样式应优先落在 `storybook-pattern-evidence-atlas.css`，Pattern 页面通用组合样式应优先落在 `storybook-patterns.css`，若是为减少 layout-only card nesting 而提供的扁平化页面修正，应优先落在 `storybook-pattern-flat-pages.css`；Typography / Material 治理页样式应优先落在对应专用文件，新增治理页样式应优先落在 foundations 专用文件，避免单文件继续膨胀。
+
+## 视觉约束
+
+- 保持珍珠白、花瓣粉、薄蓝与少量香槟金的默认角色转译气质；`rose-nocturne` 可更华丽，`azure-aria` 可更清透简约，`enterprise-calm` 可更克制，但都不能退回蓝灰企业后台模板感。
+- 默认 `elysia-default` 应体现二次元角色主题的活力、明亮、花瓣感和轻舞台感；只能抽象转译角色色彩印象，不复制角色服装、图形、UI 框架或专有资产。
+- 展示页必须保持优雅克制：一个画面只突出一个主要视觉焦点，其余卡片、色卡和说明区应降低装饰层级。
+- 避免过大圆角、过度玻璃、过度厚阴影。
+- 避免独立光球、漂浮 bokeh 和过度饱和的紫色渐变；展示层应复用 public preset token，而不是另造一套装饰语言。
+- 展示辅助 CSS 也必须遵守 public preset 的 token 与圆角尺度；不得在 Storybook 层新增静态主题色或超过 `14px` 的普通圆角。
+- 展示辅助 CSS 不得新增临时圆角刻度；只能复用 `--ely-public-radius-sm/md/lg`、`999px` 或 `inherit`。
+- 展示页不得自由拼色；`primary` 只承接主路径，`secondary` 做辅助层次，`accent` 只做点睛，状态色只表达状态。
+- 不为了“看起来丰富”同时堆叠强渐变、强阴影、强纹理和强高光；展示层只放大组件系统本身已有的层级。
+- 展示页标题应保持系统入口尺度，不做过大的营销封面字；移动端优先保证换行、按钮和统计块不挤压。
+- story 封面和展示页应更像“品牌样机”或“组件陈列”而不是表格式文档。

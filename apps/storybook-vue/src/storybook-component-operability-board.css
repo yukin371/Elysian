@@ -1,0 +1,174 @@
+.ely-story-operability-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-operability-hero-panel,
+.ely-story-operability-board-panel,
+.ely-story-operability-gate-panel,
+.ely-story-operability-sequence-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 24px;
+}
+
+.ely-story-operability-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-secondary) 11%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-operability-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.14fr) minmax(320px, 0.86fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-operability-list,
+.ely-story-operability-gates,
+.ely-story-operability-sequence,
+.ely-story-operability-links {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-operability-row,
+.ely-story-operability-gate,
+.ely-story-operability-step {
+  display: grid;
+  gap: 14px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+  color: inherit;
+  padding: 14px;
+}
+
+.ely-story-operability-row {
+  grid-template-columns:
+    minmax(132px, 0.18fr) minmax(160px, 0.18fr)
+    minmax(0, 0.34fr) minmax(220px, 0.3fr);
+  align-items: start;
+  text-decoration: none;
+}
+
+.ely-story-operability-row:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+}
+
+.ely-story-operability-name,
+.ely-story-operability-score,
+.ely-story-operability-row dl,
+.ely-story-operability-doc {
+  display: grid;
+  gap: 8px;
+}
+
+.ely-story-operability-name span,
+.ely-story-operability-name em,
+.ely-story-operability-row dt,
+.ely-story-operability-step span {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-operability-name strong {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.14rem;
+  line-height: 1.12;
+}
+
+.ely-story-operability-name em {
+  font-style: normal;
+}
+
+.ely-story-operability-score span {
+  color: color-mix(in oklab, var(--color-primary) 74%, var(--color-text));
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.ely-story-operability-row dl {
+  margin: 0;
+}
+
+.ely-story-operability-row dd {
+  margin: 3px 0 0;
+  color: var(--color-text);
+  line-height: 1.55;
+}
+
+.ely-story-operability-doc {
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-bg-subtle) 72%, transparent);
+  padding: 12px;
+}
+
+.ely-story-operability-gate {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-operability-step {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-operability-links {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 920px) {
+  .ely-story-operability-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ely-story-operability-layout,
+  .ely-story-operability-row,
+  .ely-story-operability-links {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-operability-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-operability-hero-panel,
+  .ely-story-operability-board-panel,
+  .ely-story-operability-gate-panel,
+  .ely-story-operability-sequence-panel {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .ely-story-operability-stats {
+    grid-template-columns: 1fr;
+  }
+}

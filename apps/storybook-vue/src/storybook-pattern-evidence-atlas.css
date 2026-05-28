@@ -1,0 +1,234 @@
+/* Pattern Evidence Atlas helpers. Token-only; no local palette or radius scale. */
+
+.ely-story-pattern-atlas-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-pattern-atlas-hero,
+.ely-story-pattern-atlas-route-panel,
+.ely-story-pattern-atlas-approval-panel,
+.ely-story-pattern-atlas-focus-panel,
+.ely-story-pattern-atlas-evidence-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 24px;
+}
+
+.ely-story-pattern-atlas-hero {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-accent) 11%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-pattern-atlas-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-pattern-atlas-route,
+.ely-story-pattern-atlas-focus-grid,
+.ely-story-pattern-atlas-family-list {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-pattern-atlas-route {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-pattern-atlas-focus-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-pattern-atlas-route-step,
+.ely-story-pattern-atlas-focus-card,
+.ely-story-pattern-atlas-family,
+.ely-story-pattern-atlas-row {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-pattern-atlas-route-step {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  color: inherit;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.ely-story-pattern-atlas-route-step > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-pattern-atlas-route-step strong,
+.ely-story-pattern-atlas-focus-card strong,
+.ely-story-pattern-atlas-family h3,
+.ely-story-pattern-atlas-row strong {
+  font-family: var(--ely-public-font-display);
+  line-height: 1.18;
+}
+
+.ely-story-pattern-atlas-route-step p,
+.ely-story-pattern-atlas-focus-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.ely-story-pattern-atlas-focus-card,
+.ely-story-pattern-atlas-family {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 14px;
+}
+
+.ely-story-pattern-atlas-focus-card {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-pattern-atlas-focus-head,
+.ely-story-pattern-atlas-family-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-pattern-atlas-mini-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.ely-story-pattern-atlas-family {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-pattern-atlas-family h3 {
+  margin: 0;
+  font-size: 1.16rem;
+}
+
+.ely-story-pattern-atlas-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.24fr) minmax(0, 0.76fr);
+  gap: 14px;
+  color: inherit;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.ely-story-pattern-atlas-row:hover,
+.ely-story-pattern-atlas-route-step:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 34%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+.ely-story-pattern-atlas-row-title {
+  display: grid;
+  gap: 7px;
+  align-content: start;
+}
+
+.ely-story-pattern-atlas-row-title span,
+.ely-story-pattern-atlas-row-title em,
+.ely-story-pattern-atlas-row dt {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-pattern-atlas-row-title em {
+  font-style: normal;
+  text-transform: none;
+}
+
+.ely-story-pattern-atlas-row dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.ely-story-pattern-atlas-row div {
+  min-width: 0;
+}
+
+.ely-story-pattern-atlas-row dt,
+.ely-story-pattern-atlas-row dd {
+  margin: 0;
+}
+
+.ely-story-pattern-atlas-row dd {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 920px) {
+  .ely-story-pattern-atlas-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ely-story-pattern-atlas-layout,
+  .ely-story-pattern-atlas-route,
+  .ely-story-pattern-atlas-focus-grid,
+  .ely-story-pattern-atlas-row,
+  .ely-story-pattern-atlas-row dl {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-pattern-atlas-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-pattern-atlas-hero,
+  .ely-story-pattern-atlas-route-panel,
+  .ely-story-pattern-atlas-approval-panel,
+  .ely-story-pattern-atlas-focus-panel,
+  .ely-story-pattern-atlas-evidence-panel {
+    padding: 18px;
+  }
+}

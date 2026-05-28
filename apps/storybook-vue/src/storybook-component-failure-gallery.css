@@ -1,0 +1,150 @@
+.ely-story-component-failure-step,
+.ely-story-component-failure-card,
+.ely-story-component-failure-specimen,
+.ely-story-component-failure-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-component-failure-order,
+.ely-story-component-failure-checks,
+.ely-story-component-failure-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-component-failure-grid,
+.ely-story-component-failure-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.ely-story-component-failure-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ely-story-component-failure-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.84fr);
+}
+
+.ely-story-component-failure-step,
+.ely-story-component-failure-check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+}
+
+.ely-story-component-failure-step > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-danger) 24%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-danger) 74%, var(--color-text));
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-component-failure-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-danger) 8%, transparent),
+      transparent 54%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 14px;
+}
+
+.ely-story-component-failure-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-component-failure-head span {
+  display: block;
+  color: color-mix(in oklab, var(--color-danger) 70%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.ely-story-component-failure-head h2 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.08rem, 2vw, 1.3rem);
+  line-height: 1.15;
+}
+
+.ely-story-component-failure-specimen {
+  display: grid;
+  gap: 12px;
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-warning) 8%, transparent),
+      transparent 54%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 12px;
+}
+
+.ely-story-component-failure-field,
+.ely-story-component-failure-modal,
+.ely-story-component-failure-tabs,
+.ely-story-component-failure-skeleton {
+  display: grid;
+  gap: 8px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-warning) 22%, var(--color-line));
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-warning) 7%, transparent);
+  padding: 12px;
+}
+
+.ely-story-component-failure-field span,
+.ely-story-component-failure-modal span,
+.ely-story-component-failure-tabs span {
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.ely-story-component-failure-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ely-story-component-failure-tabs span,
+.ely-story-component-failure-skeleton span {
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-warning) 16%, transparent);
+  padding: 8px 10px;
+}
+
+.ely-story-component-failure-skeleton span {
+  min-height: 12px;
+}
+
+@media (max-width: 920px) {
+  .ely-story-component-failure-grid,
+  .ely-story-component-failure-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-component-failure-tabs {
+    grid-template-columns: 1fr;
+  }
+}

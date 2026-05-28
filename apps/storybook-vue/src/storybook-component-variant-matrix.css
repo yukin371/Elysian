@@ -1,0 +1,265 @@
+/* Component Variant Matrix helpers. Token-only; no local palette or radius scale. */
+
+.ely-story-variant-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-variant-hero-panel,
+.ely-story-variant-route-panel,
+.ely-story-variant-gate-panel,
+.ely-story-variant-family-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 24px;
+}
+
+.ely-story-variant-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-accent) 11%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-variant-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ely-story-variant-route,
+.ely-story-variant-gates,
+.ely-story-variant-group-list,
+.ely-story-variant-card-list,
+.ely-story-variant-chip-list,
+.ely-story-variant-scenario-list {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-variant-route {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ely-story-variant-route-step,
+.ely-story-variant-gate,
+.ely-story-variant-group,
+.ely-story-variant-card,
+.ely-story-variant-chip,
+.ely-story-variant-warning {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 91%, transparent);
+}
+
+.ely-story-variant-route-step {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  color: inherit;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.ely-story-variant-route-step > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-variant-route-step strong,
+.ely-story-variant-group h3,
+.ely-story-variant-card h4,
+.ely-story-variant-section > strong,
+.ely-story-variant-proof strong {
+  font-family: var(--ely-public-font-display);
+  line-height: 1.18;
+}
+
+.ely-story-variant-route-step p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.ely-story-variant-gate,
+.ely-story-variant-group,
+.ely-story-variant-card {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.ely-story-variant-group {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-secondary) 7%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-variant-card {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 5%, transparent),
+      transparent 62%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-variant-group-head,
+.ely-story-variant-card-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-variant-group-head span,
+.ely-story-variant-card-head span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-variant-group h3,
+.ely-story-variant-card h4 {
+  margin: 0.2rem 0 0;
+}
+
+.ely-story-variant-columns,
+.ely-story-variant-proof {
+  display: grid;
+  grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.5fr);
+  gap: 12px;
+}
+
+.ely-story-variant-section,
+.ely-story-variant-proof > div {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.ely-story-variant-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ely-story-variant-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary-container) 32%,
+    transparent
+  );
+  color: var(--color-on-primary-container);
+  padding: 6px 9px;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ely-story-variant-chip[data-tone="quiet"] {
+  background: color-mix(in oklab, var(--color-surface-muted) 72%, transparent);
+  color: var(--color-text-muted);
+}
+
+.ely-story-variant-chip[data-tone="state"] {
+  background: color-mix(
+    in oklab,
+    var(--color-success-container) 42%,
+    transparent
+  );
+  color: var(--color-on-success-container);
+}
+
+.ely-story-variant-chip[data-tone="focus"] {
+  background: color-mix(
+    in oklab,
+    var(--color-accent-container) 38%,
+    transparent
+  );
+  color: var(--color-on-accent-container);
+}
+
+.ely-story-variant-scenario-list {
+  align-content: start;
+}
+
+.ely-story-variant-warning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: color-mix(
+    in oklab,
+    var(--color-danger-container) 16%,
+    transparent
+  );
+}
+
+.ely-story-variant-route-step:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 34%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1040px) {
+  .ely-story-variant-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .ely-story-variant-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-variant-layout,
+  .ely-story-variant-columns,
+  .ely-story-variant-proof,
+  .ely-story-variant-warning {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-variant-stats,
+  .ely-story-variant-route {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-variant-hero-panel,
+  .ely-story-variant-route-panel,
+  .ely-story-variant-gate-panel,
+  .ely-story-variant-family-panel {
+    padding: 18px;
+  }
+}

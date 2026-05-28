@@ -1,6 +1,6 @@
 # PROJECT_PROFILE
 
-更新时间：`2026-05-13`
+更新时间：`2026-05-23`
 
 ## 项目类型
 
@@ -50,8 +50,30 @@
 - 服务端已启用 CORS，可直接支撑本地 `dev:server` + `dev:vue` 双端口开发；当前也已补 `dev:uniapp` / `build:uniapp` 骨架脚本，供 `uniapp` H5 空壳验证使用。
 - 服务端已支持基于环境变量的最小 CORS 白名单和内存限流策略（生产环境默认启用限流）。
 - 限流开启时服务端会返回 `x-ratelimit-limit`、`x-ratelimit-remaining`、`x-ratelimit-reset` 响应头，并在超限时保留 `retry-after`。
-- 已存在前端应用：`apps/example-vue`（首个参考发行版与主线企业后台验证）与 `apps/example-uniapp`（首轮 C 端骨架验证与设计储备）。
-- 已存在共享包：`packages/core`、`packages/schema`、`packages/persistence`、`packages/generator`、`packages/frontend-vue`、`packages/frontend-react`、`packages/ui-core`、`packages/ui-enterprise-vue`。
+- 已存在前端应用：`apps/example-vue`（首个参考发行版与主线企业后台验证）、`apps/example-uniapp`（首轮 C 端骨架验证与设计储备）与 `apps/storybook-vue`（第一阶段 public preset 展示与视觉回归入口）。
+- 已存在共享包：`packages/core`、`packages/schema`、`packages/persistence`、`packages/generator`、`packages/frontend-vue`、`packages/frontend-react`、`packages/ui-core`、`packages/ui-enterprise-vue` 与 `packages/ui-public-vue`。
+- `packages/ui-public-vue` 当前已提供第一阶段 `public-luxe` 品牌预设基线，包含主题 pack 元数据、`data-theme` 运行时契约，以及 `Accordion / Button / Icon Button / Link / Menu / Toolbar / List / DescriptionList / Table / Breadcrumb / Pagination / Stepper / Timeline / Tooltip / Popover / Stat / Meter / Text / Kbd / Avatar / Image / Input / Search Input / Fieldset / Textarea / NumberInput / DateInput / FileInput / Card / Badge / Chip / Toast / Tabs / Dialog / Progress / Spinner / Select / Slider / Rating / Switch / Empty State / Checkbox / Radio Group / Segmented Control / Skeleton / Alert / Divider` 四十七个受控公共组件。
+- `apps/storybook-vue` 当前已接入第一阶段 Storybook 入口，用于预览 `public-luxe` 的多主题家族、light / dark / system 模式，并按 `Foundations / Components / Patterns / Showcase` 四层组织公共主题系统的浏览与验收。
+- `apps/storybook-vue` 当前已为 `Accordion / Button / Icon Button / Link / Menu / Toolbar / List / DescriptionList / Table / Breadcrumb / Pagination / Stepper / Timeline / Tooltip / Popover / Stat / Meter / Text / Kbd / Avatar / Image / Input / Search Input / Fieldset / Textarea / NumberInput / DateInput / FileInput / Card / Badge / Chip / Toast / Tabs / Dialog / Progress / Spinner / Select / Slider / Rating / Switch / Empty State / Checkbox / Radio Group / Segmented Control / Skeleton / Alert / Divider` 四十七个受控公共组件补齐独立 `Components` stories，便于按组件粒度浏览与回归，不把页面 showcase 当作主入口。
+- `apps/storybook-vue` 当前单组件 `Anatomy` stories 已展示来自 `ui-public-vue` 的组件选择依据、组合建议和反模式，帮助评审者在组件详情页直接判断“何时用/如何用/不要怎么用”。
+- `apps/storybook-vue` 当前已按 Qingyu 参考项目的组件验收颗粒度加厚全部四十七个 public 组件 stories；每个组件至少保留两个详细场景 story，覆盖 tones、sizes、variants、placements、route-depth scenarios、icon-button toolbar/media/toggle/boundary scenarios、menu action-overflow/keyboard/boundary scenarios、toolbar action-lane/preference/boundary scenarios、search query/recovery/boundary scenarios、table comparison/compact-audit/boundary scenarios、slider intensity/budget/boundary scenarios、rating feedback/read-only/boundary scenarios、meter capacity/quality/boundary scenarios、segmented view-mode/density/boundary scenarios、popover context-preview/support-action/boundary scenarios、spinner inline/local wait/boundary scenarios、fieldset preference/consent/boundary scenarios、textarea creator/support/boundary scenarios、date event/validity/boundary scenarios、file verification/multi-attachment/boundary scenarios、number quantity/precision/boundary scenarios、list collection/navigation scenarios、description profile/policy scenarios、kbd shortcut/inline-help scenarios、page-range scenarios、flow-state scenarios、disclosure scenarios、chronology/schedule scenarios、selection/removal scenarios、dismissal scenarios、field/option sets、validation scenarios、composition scenarios、keyboard review、product/recovery scenarios、media scenarios、loading scenarios 与 section scenarios，并纳入静态契约测试。
+- `apps/storybook-vue` 当前已把详细组件场景清单收敛到 `component-story-coverage.ts`，并由 `Components / Index`、`Components / Acceptance Board`、`Components / Handoff Dossier`、`Components / API Reference`、`Component Composition Matrix`、`Components / Variant Matrix`、`Components / State Matrix`、`Components / Scenario Atlas`、静态契约测试与 `e2e:storybook:public` 共同消费；索引页会展示每个组件的文档覆盖、详细场景 story 链接和场景评审焦点分布，并支持按评审焦点过滤组件与场景入口，同时提供 review lane snapshot 摘要当前焦点下的组件清单和代表性场景；Acceptance Board 会把每个 public primitive 按 owner docs、scenario depth、risk focus、state+a11y 与 misuse boundary 汇总成验收总板；Handoff Dossier 会把每个 public primitive 按 intent、contract、story proof、risk focus 与 reject line 组织成 reviewer-ready packet；API Reference 会把 `ui-public-vue` owner docs 的 props、states、accessibility、decision 与 anti-patterns 组织成组件契约表；Component Composition Matrix 会把 owner-documented primitives 组织成 action、form、recovery、editorial、identity、loading 与 confirmation 组合配方；Variant Matrix 会把 owner-documented variant props、runtime state props、scenario proof 与 anti-pattern blocker 组织成新增变体前的审批矩阵；State Matrix 会把 owner-documented states、accessibility notes、risk-focused scenarios 与 state blocker 组织成状态可用性矩阵；Scenario Atlas 会把全部详细场景按 review focus、组件家族和风险路线组织成可直接审查的场景地图，避免 Storybook 导览只剩治理页或页面 showcase。
+- `apps/storybook-vue` 当前已补 `Component Operability Board`，用于把 Dialog focus、Alert repair、Input invalid、Select option、Switch runtime、Tabs keyboard、Skeleton loading 与 Progress bounded 等高风险状态汇总成组件行为证据板；该入口只作为展示与评审面，不拥有第二份组件 API、状态机、表单模型或生产交互平台真相。
+- `apps/storybook-vue` 当前已补 `Component Failure Gallery`，用于展示 Button 装饰化、Badge CTA 化、Input 缺少 label、Dialog 承接整页流程、Tabs 替代路由、Skeleton 变成最终内容等 primitive 误用案例；该入口只作为展示与评审面，不拥有第二份组件 API、token 或组件实现真相。
+- `packages/ui-public-vue` 当前已为 launch theme pack 元数据补充预览色卡信息，供 `Theme Gallery` 一类展示层复用，不把第二套主题描述写回 Storybook。
+- `packages/ui-public-vue` 当前已把公共组件文档元数据扩展为 `usage / decision / composition / antiPatterns / props / states / accessibility` 契约，确保组件说明不仅覆盖 API，也覆盖何时使用、如何组合与哪些用法应拒绝。
+- `apps/storybook-vue` 当前已补页面级 `Patterns` stories，用于验证 `public-luxe` 在 `Creator Center / Member Rewards / Editorial Collection / Event Landing / Theme Atelier` 一类前台样机场景中的结构与气质，并已补 `Pattern Evidence Atlas / Pattern Readiness Board` 用 user job、主动作、主题证明、移动端顺序、恢复路径与 handoff blocker 汇总 pattern 交付前评审证据。
+- `apps/storybook-vue` 当前已补 `Member Rewards` pattern，用于验证 public-luxe 在会员权益、领取动作、tier progress、稀缺提示和历史恢复路径中的组合节奏；该入口只作为展示与评审面，不拥有生产会员业务模型、权益规则或计费流程真相。
+- `apps/storybook-vue` 当前已补 `Editorial Collection` pattern，用于验证 public-luxe 在内容专题、受控媒体比例、阅读顺序、内容分区、support link 与 archive recovery 中的组合节奏；该入口只作为展示与评审面，不拥有生产内容 CMS、业务路由或发布流程真相。
+- `apps/storybook-vue` 当前已补 `Event Landing` pattern，用于验证 public-luxe 在活动发布、主报名动作、席位进度、日程节奏、政策链接与 access recovery 中的组合节奏；该入口只作为展示与评审面，不拥有生产活动 CMS、票务、计费、直播或日历集成真相。
+- `apps/storybook-vue` 当前已补 `Forms & Feedback` pattern，用于验证 `public-luxe` 在标签、说明、校验、同意/确认、进度、状态反馈和空态恢复中的组合节奏；该入口只作为展示与评审面，不拥有业务表单模型或生产流程真相。
+- `apps/storybook-vue` 当前已补 `Pattern Failure Gallery`，用于展示多主按钮、恢复路径消失、表单修复文案缺失、装饰越界和主题角色漂移等页面组合失败案例；该入口只作为展示与评审面，不拥有生产缺陷库、业务流程或第二份主题规则。
+- `apps/storybook-vue` 当前已把页面级 `Patterns` stories 拆成独立 story 文件，并补 `Patterns` 浏览器烟测，用于验证 `Theme Atelier` 的主题选择、密度决策与同步开关，以及 `Creator Center` 的 tabs、开关与输入编辑联动。
+- `apps/storybook-vue` 当前已补 `Theme Gallery / Showcase Hub` 两个 story，作为 `Foundations` 与 `Showcase` 层的辅助入口，帮助从主题预览与系统导览进入组件和 pattern，而不是替代组件级信息架构。
+- `apps/storybook-vue` 当前已补 `Design Principles / Design Review Checklist / Release Gate Dashboard / Radius & Color Discipline / Theme Failure Gallery / Theme System Spec / Token Pairing Ledger / Theme Role Matrix / Theme Family Dossier / Theme Selection Playbook / Theme Composition / Theme Readiness / Theme Customization Guardrails / Mode Pairing Lab / Theme Application Recipes / Component Anatomy / Component Usage Matrix / Pattern Composition / Surface Rhythm / Interaction States / Action Hierarchy / Navigation & Wayfinding / Data Display & Summary / Typography & Voice / Material & Motion / Ornament Budget / Layout & Density / Imagery & Iconography / Accessibility & Inclusion` Foundations 治理入口，用于把 public preset 的优雅原则、批准前评审门禁、发布证据驾驶舱、圆角与色彩纪律、失败案例、主题系统规格、token 配对账本、主题角色矩阵、主题族档案、主题选择手册、主题组合、主题批准矩阵、用户自定义主题护栏、明暗模式配对、主题应用配方、组件结构、组件选择矩阵、页面组合语法、容器节奏、圆角/色彩规则、交互状态、动作层级、导航导览、数据摘要、排版文案、材质动效、装饰预算、响应式密度、视觉资产语法与无障碍验收显式化；其中 `Foundations / Index` 已把组件证据板和 pattern 证据板纳入审批地图，`Release Gate Dashboard` 已把主题契约、token 配对、主题角色、主题族档案、主题选择手册、主题批准、组件可操作性、pattern readiness 与失败修复入口串成发布前证据链；这些入口只作为展示与评审面，不拥有主题 token、组件 API、业务文案、生产动效、自定义主题编辑器、生产设置模型、业务布局、生产路由、生产数据模型、版权素材、生产发布流程或生产可访问性测试平台真相。
+- `apps/storybook-vue` 当前已补一条浏览器烟测脚本入口，用于验证 `Tabs / Radio Group / Dialog` 在 Storybook iframe 中的真实键盘与焦点路径。
+- `apps/storybook-vue` 当前已补主题系统浏览器烟测脚本入口，用于验证 `Theme System Spec` 在真实 Storybook iframe 中的语义 token 可见性、light/dark 预览条、root 主题切换与 live component token 消费，并覆盖 `Token Pairing Ledger` 的 paired token、base token、review route、live specimen，`Theme Role Matrix` 的 role group、theme family、light/dark preview、review route 与 live specimen，`Theme Family Dossier` 的 launch family packet、light/dark proof、role promises、blocker、review route 与 live specimen，以及 `Theme Selection Playbook` 的 decision lane、recommended/alternate choice、family fit、selection checks、review route 与 live specimen。
+- `apps/storybook-vue` 当前浏览器烟测已覆盖组件详情页中 `Decision guidance / Composition / Anti-patterns`、组件索引详细场景链接，以及第二批详细场景 story 的真实 iframe 可见性，确保组件深度文档不只停留在静态结构测试。
 - persistence 路线已确定为 `PostgreSQL + Drizzle ORM + Bun SQL + drizzle-kit`。
 - `packages/persistence` 已定义首个真实表：`customers`。
 - `packages/persistence` 已提供 `customer` 查询、插入、更新、删除 helper。
@@ -177,7 +199,7 @@
 
 - 运行入口：本地开发入口已确认 `bun run dev:server` / `bun run server`；容器运行入口已确认 `apps/server/Dockerfile`
   确认路径：若后续新增 worker、job 或多进程运行面，再补充更多运行入口。
-- 构建命令：已存在 `bun run build:vue`、`bun run build:uniapp` 与 `bun run server:image:build`
+- 构建命令：已存在 `bun run build:vue`、`bun run build:uniapp`、`bun run build:storybook:vue` 与 `bun run server:image:build`
   补充：已存在 `bun run server:image:smoke` 与 `bun run server:image:verify`，用于镜像构建后的本机容器烟测。
   补充：已存在 `bun run go-live:report`、`bun run go-live:handoff`、`bun run go-live:gate` 与 `bun run go-live:finalize`，用于把 go-live 阻断项收敛成统一报告、按角色拆分交接包与门禁结论。
   确认路径：若后续需要 server bundle、签名产物或多架构镜像，再补充更正式的 build matrix。
@@ -253,9 +275,13 @@
 - `bun run e2e:generator:cli`
 - `bun run e2e:generator:studio`
 - `bun run e2e:generator:browser`
+- `bun run e2e:storybook:public`
+- `bun run e2e:storybook:theme-system`
+- `bun run e2e:storybook:patterns`
 - `bun run e2e:generator:reports:index`
 - `bun run e2e:generator:reports:gate`
 - `bun run build:vue`
+- `bun run build:storybook:vue`
 - `bun run db:migrate`（需配置 `DATABASE_URL`）
 - `bun run tenant:init -- --code <tenant-code> --name <tenant-name> --admin-password <password>`（需配置 `DATABASE_URL`）
 - `bun run server`
@@ -277,8 +303,10 @@
 - 启动服务端：`bun run server`
 - 服务端热更新：`bun run dev:server`
 - 启动 Vue 示例：`bun run dev:vue`
+- 启动 Vue Storybook：`bun run dev:storybook:vue`
 - 启动 uniapp H5 骨架：`bun run dev:uniapp`
 - 构建 Vue 示例：`bun run build:vue`
+- 构建 Vue Storybook：`bun run build:storybook:vue`
 - 生成 example-vue workspace registry artifact：`bun run example-vue:workspace-registry:generate`
 - 校验 example-vue workspace registry artifact：`bun run example-vue:workspace-registry:verify`
 - 生成 example-vue 标准 CRUD surface：`bun run example-vue:standard-crud-surfaces:generate`
@@ -328,6 +356,9 @@
 - Generator CLI 回归：`bun run e2e:generator:cli`
 - Generator workspace guided 回归：`bun run e2e:generator:studio`
 - Generator 浏览器 smoke：`bun run e2e:generator:browser`
+- Storybook 公共组件浏览器烟测：`bun run e2e:storybook:public`
+- Storybook 主题系统浏览器烟测：`bun run e2e:storybook:theme-system`
+- Storybook 页面样机浏览器烟测：`bun run e2e:storybook:patterns`
 - Generator 报告索引：`bun run e2e:generator:reports:index`
 - Generator 报告门禁：`bun run e2e:generator:reports:gate`
 - 生成数据库迁移：`bun run db:generate`

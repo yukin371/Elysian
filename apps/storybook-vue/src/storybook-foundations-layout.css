@@ -1,0 +1,192 @@
+/* Layout and density governance story helpers. Keep token-only; no local palette. */
+
+.ely-story-layout-principle-grid,
+.ely-story-layout-band-list,
+.ely-story-layout-rule-list,
+.ely-story-layout-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-layout-principle-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-layout-principle,
+.ely-story-layout-band,
+.ely-story-layout-rule,
+.ely-story-layout-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-layout-principle {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-layout-principle strong,
+.ely-story-layout-band strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-layout-principle p,
+.ely-story-layout-band p,
+.ely-story-layout-desktop p {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.ely-story-layout-principle p,
+.ely-story-layout-band p {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+}
+
+.ely-story-layout-comparison {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.62fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.ely-story-layout-desktop,
+.ely-story-layout-phone {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 10%, transparent),
+      transparent 42%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-layout-desktop {
+  display: grid;
+  gap: 16px;
+}
+
+.ely-story-layout-desktop h2,
+.ely-story-layout-phone h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  line-height: 1;
+}
+
+.ely-story-layout-desktop h2 {
+  max-width: 40rem;
+  font-size: clamp(2rem, 5vw, 3.35rem);
+}
+
+.ely-story-layout-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-layout-phone {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  max-width: 360px;
+  margin-inline: auto;
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 10%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 94%, transparent);
+}
+
+.ely-story-layout-phone-bar {
+  width: 44px;
+  height: 5px;
+  margin: 0 auto 4px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-line-strong) 44%, transparent);
+}
+
+.ely-story-layout-phone h3 {
+  font-size: clamp(1.5rem, 8vw, 2.25rem);
+}
+
+.ely-story-layout-phone-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ely-story-layout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.92fr);
+  gap: 20px;
+}
+
+.ely-story-layout-band span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-layout-rule,
+.ely-story-layout-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ely-story-layout-rule > span,
+.ely-story-layout-check > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 72%, var(--color-accent));
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-story-layout-checklist {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 920px) {
+  .ely-story-layout-principle-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-layout-comparison,
+  .ely-story-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-layout-principle-grid,
+  .ely-story-layout-stat-grid,
+  .ely-story-layout-checklist {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-layout-desktop,
+  .ely-story-layout-phone {
+    padding: 18px;
+  }
+}

@@ -1,0 +1,464 @@
+.ely-story-theme-chooser-hero,
+.ely-story-theme-chooser-layout,
+.ely-story-theme-chooser-gallery,
+.ely-story-theme-chooser-checks {
+  display: grid;
+  gap: 18px;
+}
+
+.ely-story-theme-chooser-hero {
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1.16fr) minmax(300px, 0.56fr);
+}
+
+.ely-story-theme-chooser-hero__copy,
+.ely-story-theme-chooser-stage,
+.ely-story-theme-chooser-selector,
+.ely-story-theme-chooser-detail,
+.ely-story-theme-chooser-gallery,
+.ely-story-theme-chooser-checks {
+  border: 1px solid color-mix(in oklab, var(--color-line) 82%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+}
+
+.ely-story-theme-chooser-hero__copy,
+.ely-story-theme-chooser-selector,
+.ely-story-theme-chooser-detail,
+.ely-story-theme-chooser-gallery,
+.ely-story-theme-chooser-checks {
+  background: color-mix(in oklab, var(--color-surface) 78%, transparent);
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.ely-story-theme-chooser-hero__copy {
+  align-content: center;
+  background: radial-gradient(
+      circle at 9% 14%,
+      color-mix(in oklab, var(--color-primary) 9%, transparent),
+      transparent 30%
+    ), color-mix(in oklab, var(--color-surface) 80%, transparent);
+}
+
+.ely-story-theme-chooser-stage {
+  background: radial-gradient(
+      ellipse at 82% 16%,
+      color-mix(
+        in oklab,
+        var(--ely-story-theme-chooser-accent) 54%,
+        transparent
+      ),
+      transparent 36%
+    ),
+    linear-gradient(
+      138deg,
+      var(--ely-story-theme-chooser-from),
+      var(--ely-story-theme-chooser-surface) 52%,
+      var(--ely-story-theme-chooser-to)
+    );
+  display: grid;
+  gap: 18px;
+  min-height: 360px;
+  overflow: hidden;
+  padding: clamp(18px, 3vw, 28px);
+  position: relative;
+}
+
+.ely-story-theme-chooser-stage::before,
+.ely-story-theme-chooser-stage::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+.ely-story-theme-chooser-stage::before {
+  border-block: 1px solid
+    color-mix(in oklab, var(--ely-story-theme-chooser-surface) 68%, transparent);
+  height: 42%;
+  inset: 18% -12% auto;
+  transform: rotate(-8deg);
+}
+
+.ely-story-theme-chooser-stage::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--ely-story-theme-chooser-surface) 58%, transparent),
+    transparent
+  );
+  height: 1px;
+  inset: auto 24px 72px;
+}
+
+.ely-story-theme-chooser-stage h2,
+.ely-story-theme-chooser-stage p,
+.ely-story-theme-chooser-stage__footer,
+.ely-story-theme-chooser-stage .ely-public-badge {
+  position: relative;
+  z-index: 1;
+}
+
+.ely-story-theme-chooser-stage h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2.2rem, 5vw, 4.8rem);
+  line-height: 0.92;
+  margin: 0.65rem 0 0;
+  max-width: 8ch;
+}
+
+.ely-story-theme-chooser-stage p {
+  color: color-mix(in oklab, var(--color-text) 72%, var(--color-surface));
+  line-height: 1.62;
+  margin: 0.85rem 0 0;
+  max-width: 25rem;
+}
+
+.ely-story-theme-chooser-stage__orb {
+  background: radial-gradient(
+      circle at 36% 28%,
+      color-mix(
+        in oklab,
+        var(--ely-story-theme-chooser-surface) 72%,
+        transparent
+      ),
+      transparent 38%
+    ), var(--ely-story-theme-chooser-accent);
+  border: 1px solid
+    color-mix(in oklab, var(--ely-story-theme-chooser-surface) 76%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 0 0 12px
+    color-mix(in oklab, var(--ely-story-theme-chooser-accent) 10%, transparent),
+    0 24px 54px
+    color-mix(in oklab, var(--ely-story-theme-chooser-accent) 24%, transparent);
+  height: clamp(76px, 12vw, 118px);
+  justify-self: end;
+  width: clamp(76px, 12vw, 118px);
+}
+
+.ely-story-theme-chooser-stage__footer {
+  align-self: end;
+  border-top: 1px solid
+    color-mix(in oklab, var(--ely-story-theme-chooser-surface) 62%, transparent);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: space-between;
+  padding-top: 14px;
+}
+
+.ely-story-theme-chooser-stage__footer span,
+.ely-story-theme-chooser-stage__footer strong {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-chooser-stage__footer span {
+  color: color-mix(in oklab, var(--color-text-muted) 72%, var(--color-surface));
+}
+
+.ely-story-theme-chooser-layout {
+  grid-template-columns: minmax(260px, 0.34fr) minmax(0, 1fr);
+}
+
+.ely-story-theme-chooser-selector,
+.ely-story-theme-chooser-detail {
+  align-content: start;
+}
+
+.ely-story-theme-chooser-selector,
+.ely-story-theme-chooser-detail,
+.ely-story-theme-chooser-option,
+.ely-story-theme-chooser-check-list,
+.ely-story-theme-chooser-mode-pair {
+  display: grid;
+}
+
+.ely-story-theme-chooser-selector {
+  gap: 10px;
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 5%, transparent),
+      transparent 38%
+    ), color-mix(in oklab, var(--color-surface) 72%, transparent);
+}
+
+.ely-story-theme-chooser-detail {
+  border-color: color-mix(in oklab, var(--color-line) 60%, transparent);
+  gap: 16px;
+}
+
+.ely-story-theme-chooser-detail__head {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.ely-story-theme-chooser-option {
+  align-items: center;
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--ely-story-theme-chooser-from) 22%, transparent),
+      color-mix(
+        in oklab,
+        var(--ely-story-theme-chooser-surface) 76%,
+        transparent
+      )
+    ), color-mix(in oklab, var(--color-surface) 86%, transparent);
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--color-line) 78%,
+      var(--ely-story-theme-chooser-accent)
+    );
+  border-radius: var(--ely-public-radius-md);
+  color: var(--color-text);
+  cursor: pointer;
+  gap: 12px;
+  grid-template-columns: 5px minmax(0, 1fr) auto;
+  padding: 10px;
+  text-align: left;
+  transition: background-color var(--ely-public-duration-fast)
+    var(--ely-public-ease-standard), border-color
+    var(--ely-public-duration-fast) var(--ely-public-ease-standard), transform
+    var(--ely-public-duration-fast) var(--ely-public-ease-standard);
+}
+
+.ely-story-theme-chooser-option:hover,
+.ely-story-theme-chooser-option.is-selected {
+  border-color: color-mix(
+    in oklab,
+    var(--ely-story-theme-chooser-accent) 62%,
+    var(--color-line)
+  );
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--ely-story-theme-chooser-from) 28%, transparent),
+      color-mix(in oklab, var(--color-surface) 78%, transparent)
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  transform: translateY(-1px);
+}
+
+.ely-story-theme-chooser-option__sample {
+  background: linear-gradient(
+    145deg,
+    var(--ely-story-theme-chooser-from),
+    var(--ely-story-theme-chooser-to)
+  );
+  border: 1px solid
+    color-mix(in oklab, var(--ely-story-theme-chooser-surface) 70%, transparent);
+  border-radius: 999px;
+  height: 54px;
+  width: 5px;
+}
+
+.ely-story-theme-chooser-option strong,
+.ely-story-theme-chooser-option small {
+  display: block;
+}
+
+.ely-story-theme-chooser-option strong,
+.ely-story-theme-chooser-mode-pair h3 {
+  font-family: var(--ely-public-font-display);
+  line-height: 1.12;
+}
+
+.ely-story-theme-chooser-option small,
+.ely-story-theme-chooser-mode-pair small {
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  margin-top: 0.18rem;
+}
+
+.ely-story-theme-chooser-mode-pair small {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.ely-story-theme-chooser-proof-grid,
+.ely-story-theme-chooser-copy-grid,
+.ely-story-theme-chooser-mode-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-theme-chooser-proof-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-chooser-copy-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-chooser-copy-grid div {
+  border-block-start: 1px solid
+    color-mix(in oklab, var(--color-line) 76%, transparent);
+  padding-top: 10px;
+}
+
+.ely-story-theme-chooser-copy-grid span {
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  display: block;
+  font-size: 0.72rem;
+  font-weight: var(--ely-public-font-weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-chooser-copy-grid p,
+.ely-story-theme-chooser-mode-pair p {
+  color: var(--color-text-muted);
+  line-height: 1.62;
+  margin: 0.45rem 0 0;
+}
+
+.ely-story-theme-chooser-mode-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-theme-chooser-mode-pair {
+  align-content: space-between;
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-line) 58%, transparent);
+  border-radius: var(--ely-public-radius-md);
+  gap: 14px;
+  min-height: 214px;
+  padding: 14px;
+}
+
+.ely-story-theme-chooser-mode-pair h3 {
+  margin: 0;
+}
+
+.ely-story-theme-chooser-mode-pair__previews {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-chooser-mode-pair__previews span {
+  align-content: end;
+  background: radial-gradient(
+      circle at 78% 18%,
+      color-mix(
+        in oklab,
+        var(--ely-story-theme-chooser-accent) 56%,
+        transparent
+      ),
+      transparent 36%
+    ),
+    linear-gradient(
+      135deg,
+      var(--ely-story-theme-chooser-from),
+      var(--ely-story-theme-chooser-to)
+    );
+  border: 1px solid
+    color-mix(in oklab, var(--ely-story-theme-chooser-surface) 64%, transparent);
+  border-radius: var(--ely-public-radius-sm);
+  color: color-mix(in oklab, var(--color-text) 82%, var(--color-surface));
+  display: grid;
+  font-size: 0.72rem;
+  font-weight: var(--ely-public-font-weight-bold);
+  letter-spacing: 0.1em;
+  min-height: 88px;
+  padding: 10px;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-chooser-checks {
+  grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
+  background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      transparent 48%
+    ), color-mix(in oklab, var(--color-surface) 76%, transparent);
+}
+
+.ely-story-theme-chooser-check-list {
+  gap: 0;
+}
+
+.ely-story-theme-chooser-check-list span {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 76%, transparent);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  padding: 11px 0;
+}
+
+.ely-story-theme-chooser-check-list span:first-child {
+  border-top: 0;
+}
+
+@media (max-width: 1040px) {
+  .ely-story-theme-chooser-hero,
+  .ely-story-theme-chooser-layout,
+  .ely-story-theme-chooser-checks {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-chooser-mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .ely-story-theme-chooser-hero,
+  .ely-story-theme-chooser-layout,
+  .ely-story-theme-chooser-gallery,
+  .ely-story-theme-chooser-checks {
+    gap: 10px;
+  }
+
+  .ely-story-theme-chooser-hero__copy,
+  .ely-story-theme-chooser-stage,
+  .ely-story-theme-chooser-selector,
+  .ely-story-theme-chooser-detail,
+  .ely-story-theme-chooser-gallery,
+  .ely-story-theme-chooser-checks {
+    border-radius: var(--ely-public-radius-md);
+  }
+
+  .ely-story-theme-chooser-hero__copy,
+  .ely-story-theme-chooser-selector,
+  .ely-story-theme-chooser-detail,
+  .ely-story-theme-chooser-gallery,
+  .ely-story-theme-chooser-checks {
+    padding: 16px;
+  }
+
+  .ely-story-theme-chooser-stage {
+    gap: 12px;
+    min-height: 268px;
+    padding: 16px;
+  }
+
+  .ely-story-theme-chooser-stage h2 {
+    font-size: clamp(2.1rem, 15vw, 3.45rem);
+  }
+
+  .ely-story-theme-chooser-stage__orb {
+    height: 58px;
+    width: 58px;
+  }
+
+  .ely-story-theme-chooser-detail__head {
+    display: grid;
+  }
+
+  .ely-story-theme-chooser-proof-grid,
+  .ely-story-theme-chooser-copy-grid,
+  .ely-story-theme-chooser-mode-grid,
+  .ely-story-theme-chooser-mode-pair__previews {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-chooser-option {
+    grid-template-columns: 5px minmax(0, 1fr);
+  }
+
+  .ely-story-theme-chooser-option .ely-public-badge {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}

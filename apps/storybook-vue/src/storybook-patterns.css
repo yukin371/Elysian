@@ -1,0 +1,957 @@
+/* Page-pattern helpers. These are Storybook-only layout classes, not component API. */
+
+.ely-story-creator-layout,
+.ely-story-creator-lanes {
+  display: grid;
+  gap: 20px;
+}
+
+.ely-story-creator-layout {
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+}
+
+.ely-story-creator-command,
+.ely-story-creator-preferences,
+.ely-story-creator-lanes {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-creator-command,
+.ely-story-creator-preferences {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 22px;
+}
+
+.ely-story-creator-command {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-creator-preferences {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      transparent 42%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-creator-lanes {
+  padding: 24px;
+}
+
+.ely-story-creator-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.ely-story-creator-section-head h2,
+.ely-story-creator-section-head p {
+  margin: 0;
+}
+
+.ely-story-creator-section-head h2 {
+  max-width: 34rem;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.05;
+}
+
+.ely-story-creator-section-head > p {
+  max-width: 31rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-creator-task-list,
+.ely-story-creator-lane-list {
+  display: grid;
+}
+
+.ely-story-creator-task-list {
+  gap: 0;
+}
+
+.ely-story-creator-task,
+.ely-story-creator-lane-item {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  padding: 16px 0;
+}
+
+.ely-story-creator-task:first-child,
+.ely-story-creator-lane-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ely-story-creator-task:last-child,
+.ely-story-creator-lane-item:last-child {
+  padding-bottom: 0;
+}
+
+.ely-story-creator-task h3,
+.ely-story-creator-task p,
+.ely-story-creator-lane-item h3,
+.ely-story-creator-lane-item p {
+  margin: 0;
+}
+
+.ely-story-creator-task h3,
+.ely-story-creator-lane-item h3 {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.12rem;
+}
+
+.ely-story-creator-task p,
+.ely-story-creator-lane-item p {
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-creator-lane-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 22px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  padding-top: 16px;
+}
+
+.ely-story-creator-lane-item {
+  border-top: 0;
+  padding: 0;
+}
+
+.ely-story-atelier-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 20px;
+}
+
+.ely-story-atelier-studio,
+.ely-story-atelier-preview {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 22px;
+}
+
+.ely-story-atelier-studio {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-atelier-preview {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 42%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-atelier-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.ely-story-atelier-section-head h2,
+.ely-story-atelier-section-head p {
+  margin: 0;
+}
+
+.ely-story-atelier-section-head h2 {
+  max-width: 34rem;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.05;
+}
+
+.ely-story-atelier-section-head > p {
+  max-width: 30rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-atelier-preview-list {
+  display: grid;
+  gap: 0;
+}
+
+.ely-story-atelier-preview-item {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  padding: 16px 0;
+}
+
+.ely-story-atelier-preview-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ely-story-atelier-preview-item:last-child {
+  padding-bottom: 0;
+}
+
+.ely-story-atelier-preview-item h3,
+.ely-story-atelier-preview-item p {
+  margin: 0;
+}
+
+.ely-story-atelier-preview-item h3 {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.12rem;
+}
+
+.ely-story-atelier-preview-item p {
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
+}
+
+.ely-story-form-side {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.ely-story-form-status {
+  display: grid;
+  gap: 14px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 10%, transparent),
+      transparent 42%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-form-status strong {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(3rem, 7vw, 5.4rem);
+  line-height: 0.9;
+}
+
+.ely-story-form-step-list,
+.ely-story-form-note-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-form-step {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 12px;
+}
+
+.ely-story-form-note-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-form-note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-form-note > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 74%,
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-secondary) 12%, transparent);
+}
+
+@media (max-width: 920px) {
+  .ely-story-creator-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-atelier-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-form-note-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-creator-lane-list {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .ely-story-creator-lane-item + .ely-story-creator-lane-item {
+    border-top: 1px solid
+      color-mix(in oklab, var(--color-line) 78%, transparent);
+    padding-top: 16px;
+  }
+
+  .ely-story-creator-command,
+  .ely-story-creator-preferences,
+  .ely-story-creator-lanes {
+    padding: 18px;
+  }
+
+  .ely-story-atelier-studio,
+  .ely-story-atelier-preview {
+    padding: 18px;
+  }
+
+  .ely-story-form-note-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-form-status {
+    padding: 18px;
+  }
+}
+
+.ely-story-rewards-hero {
+  align-items: stretch;
+}
+
+.ely-story-rewards-pass,
+.ely-story-rewards-feature,
+.ely-story-rewards-claim,
+.ely-story-rewards-lanes,
+.ely-story-rewards-guardrails {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-rewards-pass {
+  display: grid;
+  gap: 14px;
+  align-content: end;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-accent) 12%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-rewards-pass strong {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(3rem, 7vw, 5.25rem);
+  line-height: 0.9;
+}
+
+.ely-story-rewards-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 20px;
+}
+
+.ely-story-rewards-feature {
+  display: grid;
+  gap: 18px;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 10%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-rewards-claim,
+.ely-story-rewards-lanes,
+.ely-story-rewards-guardrails {
+  display: grid;
+  gap: 18px;
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 22px;
+}
+
+.ely-story-rewards-claim {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      transparent 42%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-rewards-lanes,
+.ely-story-rewards-guardrails {
+  padding: 24px;
+}
+
+.ely-story-rewards-feature-head,
+.ely-story-rewards-card-head,
+.ely-story-rewards-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-rewards-section-head h2,
+.ely-story-rewards-section-head p {
+  margin: 0;
+}
+
+.ely-story-rewards-feature h2 {
+  max-width: 42rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  line-height: 0.98;
+}
+
+.ely-story-rewards-section-head h2 {
+  max-width: 40rem;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.05;
+}
+
+.ely-story-rewards-section-head > p {
+  max-width: 32rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-rewards-stat-grid,
+.ely-story-rewards-benefit-list,
+.ely-story-rewards-rule-list {
+  display: grid;
+}
+
+.ely-story-rewards-stat-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ely-story-rewards-rule {
+  padding: 14px;
+}
+
+.ely-story-rewards-benefit-list {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-rewards-benefit {
+  display: grid;
+  gap: 10px;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+  padding: 16px 0;
+}
+
+.ely-story-rewards-card-head span {
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-rewards-benefit h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.2rem;
+}
+
+.ely-story-rewards-panel,
+.ely-story-rewards-progress {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-rewards-rule-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 22px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-rewards-rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+  background: transparent;
+  padding: 16px 0;
+}
+
+.ely-story-rewards-rule > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-accent) 72%, var(--color-primary));
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-accent) 12%, transparent);
+}
+
+@media (max-width: 920px) {
+  .ely-story-rewards-layout,
+  .ely-story-rewards-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-rewards-rule-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-rewards-rule-list {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-rewards-feature,
+  .ely-story-rewards-pass,
+  .ely-story-rewards-claim,
+  .ely-story-rewards-lanes,
+  .ely-story-rewards-guardrails {
+    padding: 18px;
+  }
+}
+
+.ely-story-editorial-hero,
+.ely-story-editorial-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.ely-story-editorial-hero {
+  grid-template-columns: minmax(0, 0.96fr) minmax(340px, 1.04fr);
+  align-items: stretch;
+}
+
+.ely-story-editorial-copy,
+.ely-story-editorial-media,
+.ely-story-editorial-feature,
+.ely-story-editorial-card,
+.ely-story-editorial-rule {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-editorial-copy {
+  display: grid;
+  gap: 18px;
+  align-content: center;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 9%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 26px;
+}
+
+.ely-story-editorial-media {
+  display: grid;
+  min-height: 100%;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.ely-story-editorial-layout {
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+}
+
+.ely-story-editorial-feature {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.42fr) minmax(0, 0.58fr);
+  gap: 20px;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 18px;
+}
+
+.ely-story-editorial-feature-copy {
+  display: grid;
+  gap: 14px;
+  align-content: center;
+}
+
+.ely-story-editorial-feature-copy h2 {
+  max-width: 32rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  line-height: 0.98;
+}
+
+.ely-story-editorial-stat-grid,
+.ely-story-editorial-card-grid,
+.ely-story-editorial-rule-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-editorial-stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-editorial-card-grid,
+.ely-story-editorial-rule-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ely-story-editorial-card,
+.ely-story-editorial-rule {
+  padding: 14px;
+}
+
+.ely-story-editorial-card {
+  display: grid;
+  gap: 10px;
+  border-radius: var(--ely-public-radius-md);
+}
+
+.ely-story-editorial-card span {
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-editorial-card h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.2rem;
+}
+
+.ely-story-editorial-panel,
+.ely-story-editorial-drops {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-editorial-rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-editorial-rule > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 72%,
+    var(--color-secondary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+@media (max-width: 920px) {
+  .ely-story-editorial-hero,
+  .ely-story-editorial-layout,
+  .ely-story-editorial-feature {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-editorial-card-grid,
+  .ely-story-editorial-rule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-editorial-card-grid,
+  .ely-story-editorial-rule-grid,
+  .ely-story-editorial-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-editorial-copy {
+    padding: 20px;
+  }
+}
+
+.ely-story-event-hero,
+.ely-story-event-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.ely-story-event-hero {
+  grid-template-columns: minmax(0, 0.98fr) minmax(340px, 1.02fr);
+  align-items: stretch;
+}
+
+.ely-story-event-copy,
+.ely-story-event-ticket,
+.ely-story-event-agenda,
+.ely-story-event-agenda-item,
+.ely-story-event-mini-item,
+.ely-story-event-rule {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-event-copy {
+  display: grid;
+  gap: 18px;
+  align-content: center;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 9%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 26px;
+}
+
+.ely-story-event-ticket {
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.ely-story-event-ticket-panel {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.ely-story-event-ticket-panel strong {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  line-height: 0.9;
+}
+
+.ely-story-event-layout {
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+}
+
+.ely-story-event-agenda {
+  display: grid;
+  gap: 18px;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 9%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-event-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-event-section-head h2 {
+  max-width: 42rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  line-height: 0.98;
+}
+
+.ely-story-event-agenda-list,
+.ely-story-event-panel,
+.ely-story-event-overview,
+.ely-story-event-mini-agenda {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-event-agenda-item,
+.ely-story-event-mini-item,
+.ely-story-event-rule {
+  padding: 14px;
+}
+
+.ely-story-event-agenda-item {
+  display: grid;
+  grid-template-columns: minmax(58px, auto) minmax(0, 1fr);
+  gap: 14px;
+  border-radius: var(--ely-public-radius-md);
+}
+
+.ely-story-event-agenda-item > span {
+  color: var(--color-primary);
+  font-family: var(--ely-public-font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.ely-story-event-agenda-item p {
+  margin: 0 0 6px;
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-event-agenda-item h3,
+.ely-story-event-mini-item h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.2rem;
+}
+
+.ely-story-event-stat-grid,
+.ely-story-event-rule-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-event-stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-event-rule-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-event-mini-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border-radius: var(--ely-public-radius-md);
+}
+
+.ely-story-event-rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-event-rule > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 72%,
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-secondary) 12%, transparent);
+}
+
+@media (max-width: 920px) {
+  .ely-story-event-hero,
+  .ely-story-event-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-event-rule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-event-rule-grid,
+  .ely-story-event-stat-grid,
+  .ely-story-event-agenda-item {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-event-copy,
+  .ely-story-event-agenda {
+    padding: 20px;
+  }
+}

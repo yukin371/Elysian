@@ -1,0 +1,132 @@
+/* Accessibility and inclusion governance helpers. Token-only; no local palette. */
+
+.ely-story-a11y-rule-grid,
+.ely-story-a11y-control-stack,
+.ely-story-a11y-contrast-list,
+.ely-story-a11y-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-a11y-rule-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-a11y-rule-card,
+.ely-story-a11y-contrast,
+.ely-story-a11y-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-a11y-rule-card {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-a11y-rule-card strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-a11y-rule-card p {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.ely-story-a11y-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.92fr);
+  gap: 20px;
+}
+
+.ely-story-a11y-flow {
+  display: grid;
+  gap: 16px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 10%, transparent),
+      transparent 42%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-a11y-flow h2 {
+  max-width: 42rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  line-height: 0.98;
+}
+
+.ely-story-a11y-control-stack {
+  gap: 14px;
+}
+
+.ely-story-a11y-contrast-list,
+.ely-story-a11y-checklist {
+  grid-template-columns: 1fr;
+}
+
+.ely-story-a11y-contrast,
+.ely-story-a11y-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ely-story-a11y-contrast > span,
+.ely-story-a11y-check > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-primary) 74%,
+    var(--color-secondary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-story-a11y-state-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 920px) {
+  .ely-story-a11y-rule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-a11y-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-a11y-rule-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-a11y-flow {
+    padding: 18px;
+  }
+}

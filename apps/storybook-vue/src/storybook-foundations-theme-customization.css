@@ -1,0 +1,237 @@
+/* Theme customization guardrails. Token-only; no local palette. */
+
+.ely-story-theme-custom-stats,
+.ely-story-theme-custom-grid,
+.ely-story-theme-custom-layout,
+.ely-story-theme-custom-family-grid,
+.ely-story-theme-custom-preview-pair,
+.ely-story-theme-custom-flow,
+.ely-story-theme-custom-role-grid,
+.ely-story-theme-custom-radius-list,
+.ely-story-theme-custom-specimen {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-theme-custom-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-theme-custom-hero-panel,
+.ely-story-theme-custom-family-panel,
+.ely-story-theme-custom-flow-panel,
+.ely-story-theme-custom-role-panel,
+.ely-story-theme-custom-radius-panel,
+.ely-story-theme-custom-live-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface) 92%, transparent),
+    color-mix(in oklab, var(--color-bg-subtle) 44%, transparent)
+  );
+  padding: 24px;
+}
+
+.ely-story-theme-custom-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-accent) 13%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 9%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-theme-custom-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-theme-custom-layout {
+  grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+}
+
+.ely-story-theme-custom-family-grid,
+.ely-story-theme-custom-role-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-custom-lane,
+.ely-story-theme-custom-family,
+.ely-story-theme-custom-step,
+.ely-story-theme-custom-role,
+.ely-story-theme-custom-radius,
+.ely-story-theme-custom-specimen {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-theme-custom-lane {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  background: linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 48%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 16px;
+}
+
+.ely-story-theme-custom-lane strong,
+.ely-story-theme-custom-role strong {
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.ely-story-theme-custom-lane p,
+.ely-story-theme-custom-family-copy p,
+.ely-story-theme-custom-role p,
+.ely-story-theme-custom-radius p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.ely-story-theme-custom-family {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.78fr) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.ely-story-theme-custom-preview-pair {
+  padding: 14px;
+  background: color-mix(in oklab, var(--color-bg-subtle) 68%, transparent);
+}
+
+.ely-story-theme-custom-preview-pair span {
+  min-height: 92px;
+  border: 1px solid
+    color-mix(
+      in oklab,
+      var(--ely-story-theme-preview-accent) 24%,
+      var(--color-line)
+    );
+  border-radius: var(--ely-public-radius-md);
+  display: grid;
+  align-items: end;
+  padding: 10px;
+  color: color-mix(
+    in oklab,
+    var(--ely-story-theme-preview-accent) 38%,
+    var(--color-text)
+  );
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-custom-preview-pair span[data-mode="light"] {
+  background: linear-gradient(
+      135deg,
+      var(--ely-story-theme-preview-from),
+      var(--ely-story-theme-preview-to)
+    ), var(--ely-story-theme-preview-surface);
+}
+
+.ely-story-theme-custom-preview-pair span[data-mode="dark"] {
+  background: linear-gradient(
+      135deg,
+      var(--ely-story-theme-preview-dark-from),
+      var(--ely-story-theme-preview-dark-to)
+    ), var(--ely-story-theme-preview-dark-surface);
+}
+
+.ely-story-theme-custom-family-copy,
+.ely-story-theme-custom-role {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 16px;
+}
+
+.ely-story-theme-custom-family-copy h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.12rem, 2vw, 1.42rem);
+  line-height: 1.08;
+}
+
+.ely-story-theme-custom-step,
+.ely-story-theme-custom-radius {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.ely-story-theme-custom-step span,
+.ely-story-theme-custom-role code,
+.ely-story-theme-custom-radius code {
+  color: color-mix(in oklab, var(--color-primary) 72%, var(--color-text));
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.ely-story-theme-custom-role code,
+.ely-story-theme-custom-radius code {
+  font-family: var(--ely-public-font-sans);
+}
+
+.ely-story-theme-custom-specimen {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 10%, transparent),
+      color-mix(in oklab, var(--color-accent) 8%, transparent)
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface-elevated) 86%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 18px;
+}
+
+.ely-story-theme-custom-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (max-width: 1120px) {
+  .ely-story-theme-custom-grid,
+  .ely-story-theme-custom-family-grid,
+  .ely-story-theme-custom-role-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-theme-custom-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ely-story-theme-custom-stats,
+  .ely-story-theme-custom-grid,
+  .ely-story-theme-custom-family-grid,
+  .ely-story-theme-custom-family,
+  .ely-story-theme-custom-role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-custom-hero-panel,
+  .ely-story-theme-custom-family-panel,
+  .ely-story-theme-custom-flow-panel,
+  .ely-story-theme-custom-role-panel,
+  .ely-story-theme-custom-radius-panel,
+  .ely-story-theme-custom-live-panel {
+    padding: 18px;
+  }
+}

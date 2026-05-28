@@ -1,0 +1,160 @@
+/* Token Pairing Ledger helpers. Token-only; no local palette or radius scale. */
+
+.ely-story-token-ledger-hero-grid {
+  display: grid;
+  gap: var(--ely-public-space-md);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-token-ledger-layout {
+  display: grid;
+  gap: var(--ely-public-space-lg);
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+}
+
+.ely-story-token-ledger-gate-list,
+.ely-story-token-ledger-route-list,
+.ely-story-token-ledger-base-list,
+.ely-story-token-ledger-surface-stack {
+  display: grid;
+  gap: var(--ely-public-space-sm);
+}
+
+.ely-story-token-ledger-gate,
+.ely-story-token-ledger-route,
+.ely-story-token-ledger-base {
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in srgb, var(--color-surface-elevated) 92%, transparent);
+  display: grid;
+  gap: var(--ely-public-space-xs);
+  padding: var(--ely-public-space-md);
+}
+
+.ely-story-token-ledger-gate strong,
+.ely-story-token-ledger-route strong,
+.ely-story-token-ledger-base strong,
+.ely-story-token-ledger-surface strong,
+.ely-story-token-ledger-sample strong {
+  color: inherit;
+  font-family: var(--ely-public-font-display);
+  line-height: 1.2;
+}
+
+.ely-story-token-ledger-gate p,
+.ely-story-token-ledger-base p,
+.ely-story-token-ledger-pair-copy p {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.ely-story-token-ledger-route {
+  align-items: center;
+  color: var(--color-text);
+  grid-template-columns: auto 1fr;
+  text-decoration: none;
+  transition: border-color var(--ely-public-duration-fast)
+    var(--ely-public-ease-standard), transform var(--ely-public-duration-fast)
+    var(--ely-public-ease-standard);
+}
+
+.ely-story-token-ledger-route:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 44%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+.ely-story-token-ledger-route span {
+  align-items: center;
+  background: color-mix(
+    in srgb,
+    var(--color-primary-container) 72%,
+    transparent
+  );
+  border-radius: 999px;
+  color: var(--color-on-primary-container);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: var(--ely-public-font-weight-bold);
+  height: 1.75rem;
+  justify-content: center;
+  width: 1.75rem;
+}
+
+.ely-story-token-ledger-pair-grid {
+  display: grid;
+  gap: var(--ely-public-space-md);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-token-ledger-pair {
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  background: var(--color-surface);
+  display: grid;
+  gap: var(--ely-public-space-md);
+  padding: var(--ely-public-space-md);
+}
+
+.ely-story-token-ledger-sample,
+.ely-story-token-ledger-surface {
+  border: 1px solid
+    color-mix(in srgb, var(--ely-story-token-ledger-fg) 24%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: var(--ely-story-token-ledger-bg);
+  color: var(--ely-story-token-ledger-fg);
+  display: grid;
+  gap: var(--ely-public-space-xs);
+  padding: var(--ely-public-space-md);
+}
+
+.ely-story-token-ledger-sample span,
+.ely-story-token-ledger-surface span {
+  color: color-mix(in srgb, var(--ely-story-token-ledger-fg) 78%, transparent);
+}
+
+.ely-story-token-ledger-pair-copy {
+  display: grid;
+  gap: var(--ely-public-space-xs);
+}
+
+.ely-story-token-ledger-pair-copy code,
+.ely-story-token-ledger-base code {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+.ely-story-token-ledger-base {
+  align-items: start;
+  grid-template-columns: auto 1fr;
+}
+
+.ely-story-token-ledger-base > span {
+  background: var(--ely-story-token-ledger-chip);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  box-shadow: var(--ely-public-shadow-soft);
+  height: 1.1rem;
+  margin-top: var(--ely-public-space-2xs);
+  width: 1.1rem;
+}
+
+.ely-story-token-ledger-specimen {
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  background: radial-gradient(
+      circle at 12% 8%,
+      color-mix(in srgb, var(--color-material-sheen) 72%, transparent),
+      transparent 32%
+    ), var(--color-surface);
+  display: grid;
+  gap: var(--ely-public-space-md);
+  padding: var(--ely-public-space-lg);
+}
+
+@media (max-width: 960px) {
+  .ely-story-token-ledger-hero-grid,
+  .ely-story-token-ledger-layout,
+  .ely-story-token-ledger-pair-grid {
+    grid-template-columns: 1fr;
+  }
+}

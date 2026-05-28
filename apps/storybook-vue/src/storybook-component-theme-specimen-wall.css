@@ -1,0 +1,415 @@
+.ely-story-theme-specimen-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.38fr);
+  gap: 20px;
+  align-items: center;
+  min-height: 0;
+}
+
+.ely-story-theme-specimen-hero__facts,
+.ely-story-theme-specimen-section {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-theme-specimen-hero__facts {
+  align-content: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-specimen-section {
+  margin-top: 26px;
+}
+
+.ely-story-theme-specimen-theme-grid,
+.ely-story-theme-specimen-live-grid,
+.ely-story-theme-specimen-family-grid,
+.ely-story-theme-specimen-personality-grid,
+.ely-story-theme-specimen-route {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-theme-specimen-theme-grid,
+.ely-story-theme-specimen-personality-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-specimen-live-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-specimen-lab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 14px;
+  margin-top: 26px;
+  align-items: start;
+}
+
+.ely-story-theme-specimen-family-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-theme-specimen-route {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.ely-story-theme-specimen-theme-card,
+.ely-story-theme-specimen-surface,
+.ely-story-theme-specimen-lab-panel,
+.ely-story-theme-specimen-panel,
+.ely-story-theme-specimen-family-card,
+.ely-story-theme-specimen-route a,
+.ely-story-theme-specimen-tab-panel {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 89%, transparent);
+}
+
+.ely-story-theme-specimen-theme-card,
+.ely-story-theme-specimen-surface,
+.ely-story-theme-specimen-lab-panel,
+.ely-story-theme-specimen-family-card,
+.ely-story-theme-specimen-route a {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 16px;
+}
+
+.ely-story-theme-specimen-panel {
+  display: grid;
+  gap: 14px;
+  padding: clamp(18px, 3vw, 26px);
+}
+
+.ely-story-theme-specimen-theme-card {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-theme-specimen-theme-card h3,
+.ely-story-theme-specimen-surface h3,
+.ely-story-theme-specimen-lab-panel h3,
+.ely-story-theme-specimen-family-card h3,
+.ely-story-theme-specimen-personality-card h3,
+.ely-story-theme-specimen-route strong {
+  margin: 0.2rem 0 0;
+  font-family: var(--ely-public-font-display);
+  line-height: 1.12;
+}
+
+.ely-story-theme-specimen-theme-card p,
+.ely-story-theme-specimen-surface > p:not(.ely-public-eyebrow),
+.ely-story-theme-specimen-lab-panel > p:not(.ely-public-eyebrow),
+.ely-story-theme-specimen-family-card p,
+.ely-story-theme-specimen-personality-card p {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.ely-story-theme-specimen-personality {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 76%, transparent);
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.ely-story-theme-specimen-personality span,
+.ely-story-theme-specimen-personality small {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.ely-story-theme-specimen-personality span {
+  color: color-mix(in oklab, var(--color-accent) 68%, var(--color-text));
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-specimen-personality strong {
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.ely-story-theme-specimen-personality-card {
+  border-block: 1px solid
+    color-mix(in oklab, var(--color-line) 62%, transparent);
+  border-radius: var(--ely-public-radius-sm);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 14px 0;
+}
+
+.ely-story-theme-specimen-personality-card:first-child {
+  border-block-start: 0;
+}
+
+.ely-story-theme-specimen-personality-card:last-child {
+  border-block-end: 0;
+}
+
+.ely-story-theme-specimen-surface,
+.ely-story-theme-specimen-lab-panel {
+  border-radius: var(--ely-public-radius-sm);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 6%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 68%, transparent);
+}
+
+.ely-story-theme-specimen-surface .ely-public-stack,
+.ely-story-theme-specimen-lab-panel .ely-public-stack {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 76%, transparent);
+  padding-top: 14px;
+}
+
+.ely-story-theme-specimen-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ely-story-theme-specimen-mode-card {
+  min-height: 118px;
+  border: 1px solid
+    color-mix(in oklab, var(--ely-story-theme-specimen-accent) 28%, transparent);
+  border-radius: var(--ely-public-radius-sm);
+  background: linear-gradient(
+      140deg,
+      var(--ely-story-theme-specimen-hero-from),
+      var(--ely-story-theme-specimen-hero-to)
+    ), var(--ely-story-theme-specimen-surface);
+  color: var(--color-on-primary);
+  display: grid;
+  gap: 8px;
+  align-content: end;
+  overflow: hidden;
+  padding: 12px;
+  position: relative;
+}
+
+.ely-story-theme-specimen-mode-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 10px 10px auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--ely-story-theme-specimen-accent);
+  opacity: 0.82;
+}
+
+.ely-story-theme-specimen-mode-card span,
+.ely-story-theme-specimen-route span,
+.ely-story-theme-specimen-route small {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-theme-specimen-mode-card strong {
+  max-width: 12rem;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  position: relative;
+  z-index: 1;
+}
+
+.ely-story-theme-specimen-stat-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-theme-specimen-tab-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 14px;
+}
+
+.ely-story-theme-specimen-chip-list,
+.ely-story-theme-specimen-focus-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ely-story-theme-specimen-chip-list span,
+.ely-story-theme-specimen-focus-list span {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 6px 9px;
+}
+
+.ely-story-theme-specimen-focus-list span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  background: color-mix(in oklab, var(--color-accent) 8%, transparent);
+}
+
+.ely-story-theme-specimen-focus-list strong {
+  color: color-mix(in oklab, var(--color-accent) 70%, var(--color-text));
+}
+
+.ely-story-theme-specimen-route a {
+  color: inherit;
+  min-height: 104px;
+  text-decoration: none;
+}
+
+.ely-story-theme-specimen-route a:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 28%, var(--color-line));
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-theme-specimen-route span,
+.ely-story-theme-specimen-route small {
+  color: var(--color-text-muted);
+}
+
+.ely-story-theme-specimen-lab-checks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ely-story-theme-specimen-lab-checks span {
+  border: 1px solid
+    color-mix(in oklab, var(--color-success) 22%, var(--color-line));
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-success) 8%, transparent);
+  color: color-mix(in oklab, var(--color-success) 70%, var(--color-text));
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 9px 11px;
+  text-align: center;
+}
+
+@media (max-width: 1080px) {
+  .ely-story-theme-specimen-theme-grid,
+  .ely-story-theme-specimen-family-grid,
+  .ely-story-theme-specimen-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .ely-story-theme-specimen-hero,
+  .ely-story-theme-specimen-hero__facts,
+  .ely-story-theme-specimen-live-grid,
+  .ely-story-theme-specimen-lab-grid,
+  .ely-story-theme-specimen-stat-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .ely-story-theme-specimen-section {
+    margin-top: 18px;
+  }
+
+  .ely-story-theme-specimen-hero {
+    gap: 12px;
+  }
+
+  .ely-story-theme-specimen-hero__facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .ely-story-theme-specimen-hero__facts > .ely-public-badge {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .ely-story-theme-specimen-theme-grid,
+  .ely-story-theme-specimen-family-grid,
+  .ely-story-theme-specimen-personality-grid,
+  .ely-story-theme-specimen-lab-checks {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-theme-specimen-theme-card,
+  .ely-story-theme-specimen-surface,
+  .ely-story-theme-specimen-family-card,
+  .ely-story-theme-specimen-panel {
+    padding: 14px;
+  }
+
+  .ely-story-theme-specimen-theme-card {
+    border-inline-start-color: color-mix(
+      in oklab,
+      var(--color-primary) 42%,
+      var(--color-line)
+    );
+  }
+
+  .ely-story-theme-specimen-theme-card p,
+  .ely-story-theme-specimen-surface > p:not(.ely-public-eyebrow),
+  .ely-story-theme-specimen-family-card p {
+    line-height: 1.46;
+  }
+
+  .ely-story-theme-specimen-personality {
+    gap: 4px;
+    margin-top: 10px;
+    padding-top: 8px;
+  }
+
+  .ely-story-theme-specimen-mode-card {
+    min-height: 76px;
+    padding: 10px;
+  }
+
+  .ely-story-theme-specimen-mode-card::after {
+    height: 24px;
+    width: 24px;
+  }
+
+  .ely-story-theme-specimen-personality-card {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .ely-story-theme-specimen-live-grid,
+  .ely-story-theme-specimen-family-grid {
+    gap: 10px;
+  }
+
+  .ely-story-theme-specimen-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .ely-story-theme-specimen-route a {
+    min-height: 88px;
+    padding: 12px;
+  }
+}

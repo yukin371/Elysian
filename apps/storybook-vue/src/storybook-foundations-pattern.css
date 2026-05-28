@@ -1,0 +1,302 @@
+/* Pattern composition governance helpers. Storybook-only, token-only. */
+
+.ely-story-pattern-slot-grid,
+.ely-story-pattern-rule-list,
+.ely-story-pattern-matrix {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-pattern-slot-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-pattern-principle,
+.ely-story-pattern-rule-panel,
+.ely-story-pattern-matrix-panel,
+.ely-story-pattern-recovery-panel,
+.ely-story-pattern-support-panel {
+  display: grid;
+  gap: 18px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 24px;
+}
+
+.ely-story-pattern-principle {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 46%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+}
+
+.ely-story-pattern-rule-panel,
+.ely-story-pattern-matrix-panel,
+.ely-story-pattern-recovery-panel,
+.ely-story-pattern-support-panel {
+  align-content: start;
+}
+
+.ely-story-pattern-rule-panel h2,
+.ely-story-pattern-section-head h2,
+.ely-story-pattern-recovery-panel h2,
+.ely-story-pattern-support-panel h2 {
+  max-width: 38rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.05;
+}
+
+.ely-story-pattern-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.ely-story-pattern-section-head p {
+  max-width: 32rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.ely-story-pattern-slot,
+.ely-story-pattern-rule,
+.ely-story-pattern-matrix-card {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-pattern-slot {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-pattern-slot span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  min-height: 28px;
+  border-radius: 999px;
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-pattern-slot strong,
+.ely-story-pattern-matrix-card h3 {
+  display: block;
+  margin: 0.8rem 0 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.12rem;
+  line-height: 1.08;
+}
+
+.ely-story-pattern-slot p {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.ely-story-pattern-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 20px;
+}
+
+.ely-story-pattern-specimen {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(260px, 1.05fr);
+  gap: 18px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 10%, transparent),
+      transparent 44%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 22px;
+}
+
+.ely-story-pattern-specimen-copy {
+  display: grid;
+  gap: 16px;
+  align-content: center;
+}
+
+.ely-story-pattern-specimen-copy h2 {
+  max-width: 38rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  line-height: 0.98;
+}
+
+.ely-story-pattern-specimen-media {
+  display: grid;
+  align-content: stretch;
+  overflow: hidden;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 10px;
+}
+
+.ely-story-pattern-signal-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-pattern-specimen > .ely-public-divider,
+.ely-story-pattern-specimen > .ely-public-alert {
+  grid-column: 1 / -1;
+}
+
+.ely-story-pattern-rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-right: 0;
+  border-left: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.ely-story-pattern-rule-list {
+  gap: 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-pattern-rule {
+  border-top: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-pattern-rule > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 74%,
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-secondary) 12%, transparent);
+}
+
+.ely-story-pattern-matrix {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 20px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-pattern-matrix-card {
+  border: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: inherit;
+  background: transparent;
+  padding: 16px 0;
+}
+
+.ely-story-pattern-matrix-card h3 {
+  margin-top: 0;
+}
+
+.ely-story-pattern-matrix-card dl {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.ely-story-pattern-matrix-card div {
+  display: grid;
+  gap: 2px;
+}
+
+.ely-story-pattern-matrix-card dt {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-pattern-matrix-card dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.ely-story-pattern-link-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 1080px) {
+  .ely-story-pattern-slot-grid,
+  .ely-story-pattern-matrix {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .ely-story-pattern-layout,
+  .ely-story-pattern-specimen {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-pattern-principle,
+  .ely-story-pattern-rule-panel,
+  .ely-story-pattern-matrix-panel,
+  .ely-story-pattern-recovery-panel,
+  .ely-story-pattern-support-panel {
+    padding: 18px;
+  }
+
+  .ely-story-pattern-slot-grid,
+  .ely-story-pattern-matrix,
+  .ely-story-pattern-signal-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-pattern-specimen {
+    padding: 20px;
+  }
+}

@@ -21,6 +21,7 @@
       "@elysian/schema": ["packages/schema/src/index.ts"],
       "@elysian/ui-core": ["packages/ui-core/src/index.ts"],
       "@elysian/ui-enterprise-vue": ["packages/ui-enterprise-vue/src/index.ts"],
+      "@elysian/ui-public-vue": ["packages/ui-public-vue/src/index.ts"],
       "@elysian/persistence": ["packages/persistence/src/index.ts"],
       "@elysian/generator": ["packages/generator/src/index.ts"],
       "@elysian/generator/browser": ["packages/generator/src/browser.ts"],

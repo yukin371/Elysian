@@ -1,0 +1,343 @@
+.ely-story-dossier-hero-panel,
+.ely-story-dossier-focus-panel,
+.ely-story-dossier-family-panel,
+.ely-story-dossier-boundary-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  padding: 24px;
+}
+
+.ely-story-dossier-hero-panel {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-secondary) 11%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 56%, transparent)
+    );
+}
+
+.ely-story-dossier-hero {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.36fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.ely-story-dossier-score,
+.ely-story-dossier-route-step,
+.ely-story-dossier-focus-card,
+.ely-story-dossier-family,
+.ely-story-dossier-card,
+.ely-story-dossier-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-dossier-score {
+  display: grid;
+  gap: 12px;
+  align-content: center;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 10%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 18px;
+}
+
+.ely-story-dossier-score > span {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  line-height: 0.9;
+}
+
+.ely-story-dossier-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-dossier-route {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ely-story-dossier-route-step {
+  display: grid;
+  gap: 8px;
+  color: inherit;
+  padding: 12px;
+  text-decoration: none;
+}
+
+.ely-story-dossier-route-step:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+}
+
+.ely-story-dossier-route-step span,
+.ely-story-dossier-family > span,
+.ely-story-dossier-card-head span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-dossier-route-step strong,
+.ely-story-dossier-family h3,
+.ely-story-dossier-card-head h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  line-height: 1.12;
+}
+
+.ely-story-dossier-route-step p,
+.ely-story-dossier-focus-card p,
+.ely-story-dossier-family p,
+.ely-story-dossier-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.ely-story-dossier-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ely-story-dossier-focus-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 12px;
+}
+
+.ely-story-dossier-focus-card > div:first-child {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.ely-story-dossier-focus-card > div:first-child strong {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.4rem;
+}
+
+.ely-story-dossier-focus-card > div:last-child,
+.ely-story-dossier-focus-list,
+.ely-story-dossier-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ely-story-dossier-focus-card > div:last-child span,
+.ely-story-dossier-focus-list span {
+  border: 1px solid color-mix(in oklab, var(--color-line) 82%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-surface) 84%, transparent);
+  color: var(--color-text-muted);
+  padding: 6px 9px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.ely-story-dossier-family-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ely-story-dossier-family {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-accent) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-dossier-group,
+.ely-story-dossier-list,
+.ely-story-dossier-card {
+  display: grid;
+  gap: 14px;
+}
+
+.ely-story-dossier-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-dossier-card {
+  align-content: start;
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 16px;
+}
+
+.ely-story-dossier-card[data-status="watch"] {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-warning) 8%, transparent),
+      transparent 58%
+    ), color-mix(in oklab, var(--color-surface) 90%, transparent);
+}
+
+.ely-story-dossier-card-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ely-story-dossier-card-head h3 {
+  margin-top: 0.25rem;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+}
+
+.ely-story-dossier-meter {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.ely-story-dossier-meter > strong {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.45rem;
+}
+
+.ely-story-dossier-meter > span {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-dossier-evidence {
+  display: grid;
+  gap: 8px;
+}
+
+.ely-story-dossier-evidence div,
+.ely-story-dossier-contract div {
+  border: 1px solid color-mix(in oklab, var(--color-line) 82%, transparent);
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-surface) 84%, transparent);
+  padding: 10px;
+}
+
+.ely-story-dossier-evidence strong,
+.ely-story-dossier-evidence span,
+.ely-story-dossier-contract strong,
+.ely-story-dossier-contract span {
+  display: block;
+}
+
+.ely-story-dossier-evidence strong,
+.ely-story-dossier-check strong {
+  color: var(--color-text);
+  font-size: 0.74rem;
+}
+
+.ely-story-dossier-evidence span,
+.ely-story-dossier-check span {
+  margin-top: 0.24rem;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.ely-story-dossier-contract {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ely-story-dossier-contract strong {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.25rem;
+}
+
+.ely-story-dossier-contract span {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-dossier-checks {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ely-story-dossier-check {
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(in oklab, var(--color-warning) 7%, transparent);
+  padding: 9px;
+}
+
+.ely-story-dossier-check[data-passed="true"] {
+  background: color-mix(in oklab, var(--color-success) 7%, transparent);
+}
+
+.ely-story-dossier-links a {
+  color: color-mix(in oklab, var(--color-primary) 76%, var(--color-text));
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1180px) {
+  .ely-story-dossier-focus-grid,
+  .ely-story-dossier-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .ely-story-dossier-hero,
+  .ely-story-dossier-stats,
+  .ely-story-dossier-route,
+  .ely-story-dossier-focus-grid,
+  .ely-story-dossier-family-grid,
+  .ely-story-dossier-list,
+  .ely-story-dossier-contract,
+  .ely-story-dossier-checks {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-dossier-meter {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-dossier-hero-panel,
+  .ely-story-dossier-focus-panel,
+  .ely-story-dossier-family-panel,
+  .ely-story-dossier-boundary-panel {
+    padding: 18px;
+  }
+}

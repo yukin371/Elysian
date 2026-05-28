@@ -1,0 +1,288 @@
+.ely-story-link-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.ely-story-review-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.ely-story-review-step {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 78%, transparent);
+  padding: 12px;
+}
+
+.ely-story-review-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--ely-public-radius-sm);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.ely-story-review-label {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.ely-story-review-copy {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.ely-story-hub-cockpit {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.ely-story-hub-review,
+.ely-story-hub-lane {
+  display: grid;
+  gap: 20px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 24px;
+}
+
+.ely-story-hub-review {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 46%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+}
+
+.ely-story-hub-coverage,
+.ely-story-hub-gateways {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-hub-gateways {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.ely-story-hub-panel {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  padding-top: 16px;
+}
+
+.ely-story-hub-panel[data-tone="risk"] {
+  border-top-color: color-mix(
+    in oklab,
+    var(--color-warning) 24%,
+    var(--color-line)
+  );
+}
+
+.ely-story-hub-panel p {
+  margin: 0;
+}
+
+.ely-story-hub-route-list,
+.ely-story-hub-risk-list {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-hub-route {
+  display: grid;
+  gap: 4px;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+  color: inherit;
+  padding: 0 0 12px;
+  text-decoration: none;
+}
+
+.ely-story-hub-route:hover {
+  border-color: color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+}
+
+.ely-story-hub-route span,
+.ely-story-hub-route em {
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-style: normal;
+}
+
+.ely-story-hub-route span {
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ely-story-hub-route strong {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.02rem;
+  line-height: 1.18;
+}
+
+.ely-story-hub-risk {
+  display: grid;
+  gap: 8px;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-warning) 20%, var(--color-line));
+  padding: 0 0 12px;
+}
+
+.ely-story-link-card {
+  display: grid;
+  gap: 14px;
+  min-height: 198px;
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface-elevated) 10%, transparent),
+    transparent 44%
+  );
+  color: inherit;
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms
+    ease;
+}
+
+.ely-story-link-card[data-category="pattern"] {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-accent) 9%, transparent),
+      transparent 46%
+    ), color-mix(in oklab, var(--color-surface) 95%, transparent);
+}
+
+.ely-story-link-card[data-category="system"] {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-secondary) 9%, transparent),
+      transparent 46%
+    ), color-mix(in oklab, var(--color-surface) 95%, transparent);
+}
+
+.ely-story-link-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--color-primary) 22%, var(--color-line));
+}
+
+.ely-story-link-top,
+.ely-story-link-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.ely-story-link-eyebrow,
+.ely-story-link-badge,
+.ely-story-preview-eyebrow {
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ely-story-link-eyebrow,
+.ely-story-preview-eyebrow {
+  color: var(--color-text-muted);
+}
+
+.ely-story-link-badge {
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--ely-public-radius-sm);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+.ely-story-link-card h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.ely-story-link-card p,
+.ely-story-preview-copy {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.ely-story-link-stat {
+  font-weight: 600;
+}
+
+.ely-story-link-route {
+  max-width: 210px;
+  font-family: var(--ely-public-font-sans);
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.ely-story-theme-strip {
+  display: grid;
+  gap: 18px;
+}
+
+@media (max-width: 920px) {
+  .ely-story-hub-cockpit,
+  .ely-story-hub-gateways {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-review-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ely-story-link-top,
+  .ely-story-link-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ely-story-link-route {
+    max-width: none;
+    text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-link-grid,
+  .ely-story-hub-cockpit,
+  .ely-story-hub-gateways,
+  .ely-story-review-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-hub-review,
+  .ely-story-hub-lane {
+    padding: 18px;
+  }
+}

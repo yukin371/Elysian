@@ -1,0 +1,231 @@
+.ely-story-theme-role-hero-grid {
+  display: grid;
+  gap: var(--ely-public-space-md);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-theme-role-layout,
+.ely-story-theme-role-bottom {
+  display: grid;
+  gap: var(--ely-public-space-lg);
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+}
+
+.ely-story-theme-role-group-list,
+.ely-story-theme-role-route-list,
+.ely-story-theme-role-guidance {
+  display: grid;
+  gap: var(--ely-public-space-sm);
+}
+
+.ely-story-theme-role-group {
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary-container) 20%, transparent),
+    color-mix(in srgb, var(--color-surface-elevated) 94%, transparent)
+  );
+  box-shadow: var(--ely-public-shadow-soft);
+  display: grid;
+  gap: var(--ely-public-space-sm);
+  padding: var(--ely-public-space-md);
+}
+
+.ely-story-theme-role-group-head,
+.ely-story-theme-role-family-head {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--ely-public-space-sm);
+  justify-content: space-between;
+}
+
+.ely-story-theme-role-group-head strong,
+.ely-story-theme-role-family h3,
+.ely-story-theme-role-specimen h3 {
+  color: var(--color-text);
+  font-family: var(--ely-public-font-display);
+  font-size: 1.1rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.ely-story-theme-role-group p,
+.ely-story-theme-role-family p {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.ely-story-theme-role-token-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ely-public-space-xs);
+}
+
+.ely-story-theme-role-token-row span {
+  align-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  font-size: 0.78rem;
+  gap: var(--ely-public-space-xs);
+  padding: var(--ely-public-space-2xs) var(--ely-public-space-sm);
+}
+
+.ely-story-theme-role-token-row span::before {
+  background: var(--ely-story-role-token);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  content: "";
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.ely-story-theme-role-route-step {
+  align-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  color: var(--color-text);
+  display: grid;
+  gap: var(--ely-public-space-sm);
+  grid-template-columns: auto 1fr;
+  padding: var(--ely-public-space-sm);
+  text-decoration: none;
+  transition: border-color var(--ely-public-duration-fast)
+    var(--ely-public-ease-standard), transform var(--ely-public-duration-fast)
+    var(--ely-public-ease-standard);
+}
+
+.ely-story-theme-role-route-step:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 44%, var(--color-line));
+  transform: translateY(-1px);
+}
+
+.ely-story-theme-role-route-step span {
+  align-items: center;
+  background: color-mix(
+    in srgb,
+    var(--color-primary-container) 70%,
+    transparent
+  );
+  border-radius: 999px;
+  color: var(--color-on-primary-container);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: var(--ely-public-font-weight-bold);
+  height: 1.75rem;
+  justify-content: center;
+  width: 1.75rem;
+}
+
+.ely-story-theme-role-family-grid {
+  display: grid;
+  gap: var(--ely-public-space-md);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-role-family {
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  background: radial-gradient(
+      circle at 12% 8%,
+      color-mix(in srgb, var(--color-material-sheen) 72%, transparent),
+      transparent 34%
+    ), var(--color-surface);
+  display: grid;
+  gap: var(--ely-public-space-md);
+  padding: var(--ely-public-space-lg);
+}
+
+.ely-story-theme-role-preview-pair {
+  display: grid;
+  gap: var(--ely-public-space-sm);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ely-story-theme-role-preview {
+  align-items: end;
+  background: radial-gradient(
+      circle at 82% 18%,
+      var(--ely-story-theme-preview-accent),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      var(--ely-story-theme-preview-from),
+      var(--ely-story-theme-preview-to)
+    );
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-surface) 42%, transparent);
+  display: flex;
+  min-height: 5.25rem;
+  padding: var(--ely-public-space-sm);
+}
+
+.ely-story-theme-role-preview span {
+  background: color-mix(
+    in srgb,
+    var(--ely-story-theme-preview-surface) 90%,
+    transparent
+  );
+  border: 1px solid color-mix(in srgb, var(--color-line) 72%, transparent);
+  border-radius: 999px;
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: var(--ely-public-font-weight-semibold);
+  padding: var(--ely-public-space-2xs) var(--ely-public-space-sm);
+}
+
+.ely-story-theme-role-guidance {
+  margin: 0;
+}
+
+.ely-story-theme-role-guidance div {
+  border-top: 1px solid var(--color-line);
+  display: grid;
+  gap: var(--ely-public-space-xs);
+  grid-template-columns: minmax(7.5rem, 0.35fr) 1fr;
+  padding-top: var(--ely-public-space-sm);
+}
+
+.ely-story-theme-role-guidance dt {
+  color: var(--color-text);
+  font-weight: var(--ely-public-font-weight-semibold);
+}
+
+.ely-story-theme-role-guidance dd {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.ely-story-theme-role-specimen {
+  border: 1px solid var(--color-line);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary-container) 26%, transparent),
+      color-mix(in srgb, var(--color-accent-container) 18%, transparent)
+    ), var(--color-surface);
+  display: grid;
+  gap: var(--ely-public-space-md);
+  padding: var(--ely-public-space-lg);
+}
+
+@media (max-width: 960px) {
+  .ely-story-theme-role-hero-grid,
+  .ely-story-theme-role-layout,
+  .ely-story-theme-role-bottom,
+  .ely-story-theme-role-family-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .ely-story-theme-role-preview-pair,
+  .ely-story-theme-role-guidance div {
+    grid-template-columns: 1fr;
+  }
+}

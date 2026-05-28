@@ -1,0 +1,755 @@
+﻿/* Foundation governance story helpers. Keep token-only; no static palette or off-scale radii. */
+  .ely-story-principle-hero,
+.ely-story-principle-role-panel,
+.ely-story-principle-radius-panel,
+.ely-story-principle-checklist-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface) 92%, transparent),
+    color-mix(in oklab, var(--color-bg-subtle) 42%, transparent)
+  );
+  padding: 24px;
+}
+
+.ely-story-principle-hero {
+  background: radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--color-accent) 13%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 9%, transparent),
+      color-mix(in oklab, var(--color-surface) 88%, transparent) 58%,
+      color-mix(in oklab, var(--color-bg-subtle) 58%, transparent)
+    );
+}
+
+.ely-story-principle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+}
+
+.ely-story-principle-card {
+  border-left: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  padding: 16px 18px 0;
+}
+
+.ely-story-principle-card:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.ely-story-principle-card strong,
+.ely-story-role-item strong,
+.ely-story-radius-item strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-principle-card span,
+.ely-story-role-item span,
+.ely-story-radius-item p {
+  display: block;
+  margin: 0.42rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.ely-story-principle-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
+}
+
+.ely-story-role-list,
+.ely-story-radius-list,
+.ely-story-review-checklist {
+  display: grid;
+  gap: 0;
+}
+
+.ely-story-role-item,
+.ely-story-radius-item,
+.ely-story-review-question {
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  padding: 14px 0;
+}
+
+.ely-story-role-item:first-child,
+.ely-story-radius-item:first-child,
+.ely-story-review-question:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ely-story-role-item code,
+.ely-story-radius-item code {
+  display: inline-block;
+  margin-top: 0.35rem;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.78rem;
+}
+
+.ely-story-radius-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.ely-story-radius-mark {
+  width: 34px;
+  height: 34px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 24%, var(--color-line));
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--color-primary) 18%, transparent),
+    color-mix(in oklab, var(--color-secondary) 12%, var(--color-surface))
+  );
+}
+
+.ely-story-review-question {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ely-story-review-checklist {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ely-story-review-question {
+  border-top: 0;
+  border-left: 1px solid color-mix(in oklab, var(--color-line) 72%, transparent);
+  padding: 0 16px;
+}
+
+.ely-story-review-question:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.ely-story-review-question span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  font-weight: 700;
+}
+
+.ely-story-token-rule-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-token-rule {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-secondary) 7%, transparent),
+      transparent 48%
+    ), color-mix(in oklab, var(--color-surface) 86%, transparent);
+  padding: 14px;
+}
+
+.ely-story-token-rule strong,
+.ely-story-token-group strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.ely-story-token-rule span,
+.ely-story-token-group span {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.ely-story-token-group-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-token-group {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-composition-roles,
+.ely-story-composition-review {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-composition-roles {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-composition-role,
+.ely-story-composition-step {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-secondary) 7%, transparent),
+      transparent 50%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-composition-role strong,
+.ely-story-composition-step strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-composition-role span,
+.ely-story-composition-copy,
+.ely-story-composition-lists li {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.ely-story-composition-role span {
+  display: block;
+  margin-top: 0.42rem;
+  font-size: 0.8rem;
+}
+
+.ely-story-composition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.ely-story-composition-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 6%, transparent),
+      transparent 46%
+    ), color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 20px;
+}
+
+.ely-story-composition-card[data-theme-key="enterprise-calm"] {
+  background: color-mix(in oklab, var(--color-surface) 94%, transparent);
+}
+
+.ely-story-composition-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.ely-story-composition-head h2,
+.ely-story-composition-copy {
+  margin: 0;
+}
+
+.ely-story-composition-head h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.42rem;
+  line-height: 1.08;
+}
+
+.ely-story-composition-preview-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-composition-preview {
+  overflow: hidden;
+  border: 1px solid
+    color-mix(in oklab, var(--ely-story-preview-accent) 24%, var(--color-line));
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+    135deg,
+    var(--ely-story-preview-from),
+    var(--ely-story-preview-to)
+  );
+}
+
+.ely-story-composition-preview > span {
+  display: block;
+  padding: 10px 12px 0;
+  color: color-mix(
+    in oklab,
+    var(--ely-story-preview-surface) 78%,
+    var(--color-text)
+  );
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-story-composition-stage {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.ely-story-composition-stage i,
+.ely-story-composition-stage b,
+.ely-story-composition-stage em {
+  display: block;
+  border: 1px solid
+    color-mix(in oklab, var(--ely-story-preview-surface) 72%, transparent);
+  border-radius: var(--ely-public-radius-sm);
+  background: color-mix(
+    in oklab,
+    var(--ely-story-preview-surface) 76%,
+    transparent
+  );
+}
+
+.ely-story-composition-stage i {
+  width: 58%;
+  height: 36px;
+}
+
+.ely-story-composition-stage b {
+  width: 84%;
+  height: 12px;
+}
+
+.ely-story-composition-stage em {
+  width: 42%;
+  height: 12px;
+  background: color-mix(
+    in oklab,
+    var(--ely-story-preview-accent) 70%,
+    var(--ely-story-preview-surface) 30%
+  );
+}
+
+.ely-story-composition-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ely-story-composition-lists strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.ely-story-composition-lists ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.ely-story-composition-lists li + li {
+  margin-top: 6px;
+}
+
+.ely-story-composition-review {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-composition-step span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 0.75rem;
+  border-radius: var(--ely-public-radius-sm);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  font-weight: 700;
+}
+
+.ely-story-surface-layer-grid,
+.ely-story-surface-density-list,
+.ely-story-surface-rule-list,
+.ely-story-surface-review {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-surface-principle,
+.ely-story-surface-density-panel,
+.ely-story-surface-rule-panel,
+.ely-story-surface-review-panel,
+.ely-story-surface-anti-pattern {
+  display: grid;
+  gap: 18px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 24px;
+}
+
+.ely-story-surface-principle {
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 8%, transparent),
+      transparent 46%
+    ), var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+}
+
+.ely-story-surface-density-panel,
+.ely-story-surface-rule-panel,
+.ely-story-surface-review-panel,
+.ely-story-surface-anti-pattern {
+  align-content: start;
+}
+
+.ely-story-surface-density-panel h2,
+.ely-story-surface-rule-panel h2,
+.ely-story-surface-review-panel h2,
+.ely-story-surface-anti-pattern h2 {
+  max-width: 36rem;
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.05;
+}
+
+.ely-story-surface-layer-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.ely-story-surface-layer,
+.ely-story-surface-density,
+.ely-story-surface-rule,
+.ely-story-surface-question {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-surface-layer {
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+}
+
+.ely-story-surface-layer strong,
+.ely-story-surface-density strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.ely-story-surface-layer span,
+.ely-story-surface-density p,
+.ely-story-surface-demo-hero p {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.ely-story-surface-layer span {
+  display: block;
+  margin-top: 0.42rem;
+  font-size: 0.8rem;
+}
+
+.ely-story-surface-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
+}
+
+.ely-story-surface-demo {
+  overflow: hidden;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-secondary) 10%, transparent),
+      transparent 44%
+    ), color-mix(in oklab, var(--color-bg-subtle) 90%, transparent);
+  padding: 18px;
+}
+
+.ely-story-surface-demo-shell {
+  display: grid;
+  gap: 16px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
+  border-radius: var(--ely-public-radius-lg);
+  background: var(--card-overlay),
+    color-mix(in oklab, var(--color-surface) 94%, transparent);
+  box-shadow: var(--ely-public-shadow-card);
+  padding: 20px;
+}
+
+.ely-story-surface-demo-hero h2,
+.ely-story-surface-demo-hero p {
+  margin: 0;
+}
+
+.ely-story-surface-demo-hero h2 {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.8rem, 4vw, 2.65rem);
+  line-height: 1;
+}
+
+.ely-story-surface-demo-hero p {
+  max-width: 36rem;
+  margin-top: 0.85rem;
+}
+
+.ely-story-surface-demo-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-surface-demo-local {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ely-story-surface-density span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: color-mix(in oklab, var(--color-primary) 78%, var(--color-text));
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-story-surface-density p {
+  margin: 0.42rem 0 0;
+  font-size: 0.8rem;
+}
+
+.ely-story-surface-rule,
+.ely-story-surface-question {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-right: 0;
+  border-left: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.ely-story-surface-rule-list,
+.ely-story-surface-review {
+  gap: 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-surface-rule,
+.ely-story-surface-question {
+  border-top: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 78%, transparent);
+}
+
+.ely-story-surface-rule > span,
+.ely-story-surface-question > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--color-secondary) 74%,
+    var(--color-primary)
+  );
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-secondary) 12%, transparent);
+}
+
+.ely-story-anatomy-layers,
+.ely-story-state-rule-grid,
+.ely-story-state-checklist {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ely-story-anatomy-layers {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ely-story-anatomy-layer,
+.ely-story-state-rule,
+.ely-story-state-check {
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-primary) 7%, transparent),
+      transparent 52%
+    ), color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-anatomy-layer > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 22%, var(--color-line));
+  border-radius: var(--ely-public-radius-sm);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.ely-story-anatomy-layer strong,
+.ely-story-state-rule strong {
+  display: block;
+  margin-top: 0.85rem;
+  font-size: 0.92rem;
+}
+
+.ely-story-anatomy-layer p,
+.ely-story-state-rule span {
+  display: block;
+  margin: 0.42rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.ely-story-anatomy-layout,
+.ely-story-state-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  gap: 20px;
+}
+
+.ely-story-anatomy-example,
+.ely-story-anatomy-progress {
+  display: grid;
+  gap: 16px;
+}
+
+.ely-story-anatomy-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ely-story-anatomy-field,
+.ely-story-anatomy-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.ely-story-anatomy-rule-list {
+  display: grid;
+  gap: 10px;
+}
+
+.ely-story-anatomy-rule,
+.ely-story-state-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 14px;
+}
+
+.ely-story-anatomy-rule > span,
+.ely-story-state-check > span {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 72%, var(--color-accent));
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-story-state-rule-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ely-story-state-checklist {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 920px) {
+  .ely-story-principle-grid,
+  .ely-story-principle-layout,
+  .ely-story-review-checklist {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-story-principle-card,
+  .ely-story-review-question {
+    border-top: 1px solid
+      color-mix(in oklab, var(--color-line) 72%, transparent);
+    border-left: 0;
+    padding: 14px 0 0;
+  }
+
+  .ely-story-principle-card:first-child,
+  .ely-story-review-question:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-story-principle-hero,
+  .ely-story-principle-role-panel,
+  .ely-story-principle-radius-panel,
+  .ely-story-principle-checklist-panel {
+    padding: 18px;
+  }
+}

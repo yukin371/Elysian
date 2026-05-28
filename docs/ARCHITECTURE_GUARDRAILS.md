@@ -1,6 +1,6 @@
 # ARCHITECTURE_GUARDRAILS
 
-更新时间：`2026-05-12`
+更新时间：`2026-05-23`
 
 本文件定义仓库初始化阶段的目标边界。若实际工程实现偏离这些边界，必须先更新本文件或补 ADR，再继续实现。
 
@@ -18,8 +18,16 @@
   owner: Vue 适配层、Vue 侧 API 封装、权限指令、页面渲染约定
 - `packages/frontend-react`
   owner: React 适配层、React 侧 API 封装、权限组件、页面渲染约定
+- `packages/ui-core`
+  owner: 中立 UI 协议、页面动作与导航结构契约
+- `packages/ui-enterprise-vue`
+  owner: 企业 TDesign 预设、后台壳层与 CRUD 工作区组件
+- `packages/ui-public-vue`
+  owner: `public-luxe` 品牌预设、主题 token 与 preset-scoped theme runtime
 - `packages/core`
   owner: 平台级无业务语义的核心装配能力
+- `apps/storybook-vue`
+  owner: Vue 侧 Storybook 展示与视觉回归入口
 
 ## 允许的依赖方向
 
@@ -28,6 +36,7 @@
 - `packages/generator` 可以依赖 `packages/schema`
 - `packages/persistence` 可以依赖 `packages/core`
 - `packages/core` 可以被其他 package 依赖
+- `packages/ui-enterprise-vue` 和 `packages/ui-public-vue` 可以依赖 `packages/ui-core`
 - 前端适配层不得直接依赖对方的实现
 
 ## 当前禁止事项
@@ -47,7 +56,9 @@
 - migration proposal snapshot artifacts: `packages/persistence`
 - HTTP / API client: 前端适配层各自实现，契约来源统一为 `apps/server` 输出的 API/schema
 - shared utilities: `packages/core`
-- UI primitives: 各前端适配层自己拥有，不放进通用无差别 shared 包
+- UI primitives: 各预设 owner 自己拥有，不放进通用无差别 shared 包
+- preset-scoped theme tokens / runtime: 各预设 owner 自己拥有
+- Storybook preview harness: `apps/storybook-vue`
 - error mapping: `apps/server` 与前端适配层各自拥有本侧映射，不共享业务语义不明的错误工具
 - file / path helpers: `packages/core`
 - binary file storage adapters: `apps/server`
@@ -66,6 +77,10 @@
   HTTP 路由、前端状态、页面 schema DSL、业务鉴权规则
 - 前端适配层 must not own:
   后端持久化、通用 schema 定义、生成器模板主逻辑
+- `packages/ui-public-vue` must not own:
+  企业 TDesign runtime、业务页面路由、跨应用主题真相以外的业务状态
+- `apps/storybook-vue` must not own:
+  生产运行时页面、主题 token 真相、企业预设实现
 - `apps/server` must not own:
   某一个前端框架特有的页面实现细节
 
