@@ -33,6 +33,7 @@ Native select wrapped in the public field language for governed theme, density, 
 | --- | --- |
 | Selected | Controlled value maps to one of the provided options. |
 | Placeholder | Empty value uses a disabled placeholder option. |
+| Empty options | When no options exist, the field explains that absence instead of inviting interaction with an empty dropdown. |
 | Invalid | Validation uses the same message language as Input. |
 | Disabled | Keeps field hierarchy visible while blocking changes. |
 
@@ -46,11 +47,13 @@ Native select wrapped in the public field language for governed theme, density, 
 | `label` | `string` | - | No | Visible field label. |
 | `description` | `string` | - | No | Helper copy linked through aria-describedby. |
 | `invalidMessage` | `string` | - | No | Validation copy linked through aria-describedby. |
+| `emptyMessage` | `string` | 'No options available yet.' | No | Visible copy shown when options is empty; the control becomes disabled in that state. |
 
 ## Accessibility
 
 - Keeps native select semantics and keyboard behavior.
 - Description and validation copy are linked to the control.
+- Empty option sets disable the select and explain the absence through visible text instead of leaving a hollow control.
 - Invalid state sets aria-invalid.
 
 ## Storybook Contract

@@ -35,6 +35,7 @@ Flat structured list primitive for settings rows, content indexes, activity summ
 | Linked row | Rows with href render as anchors with a trailing affordance while preserving list semantics. |
 | Current and disabled | Current rows expose aria-current for links, while disabled rows stay visible but are not navigable. |
 | Comfortable and compact | Density changes spacing only; it does not change the row contract or turn the list into navigation tabs. |
+| Empty | A lightweight empty message explains missing rows inside the same list surface instead of forcing another EmptyState card. |
 
 ## Props
 
@@ -43,12 +44,14 @@ Flat structured list primitive for settings rows, content indexes, activity summ
 | `items` | `ElyPublicListItem[]` | - | Yes | Ordered row items with key, title, optional meta, optional description, optional href, optional current/disabled flags, and optional tone. |
 | `density` | `'comfortable' \| 'compact'` | 'comfortable' | No | Controls row rhythm for normal content lanes or denser review/history lanes. |
 | `divided` | `boolean` | true | No | Shows subtle separators between rows instead of making every row a separate card. |
+| `emptyMessage` | `string` | 'No items to show yet.' | No | Visible copy shown when items is empty; use EmptyState only when a recovery action is needed. |
 | `ariaLabel` | `string` | 'List' | No | Accessible label for the structured list section. |
 
 ## Accessibility
 
 - Uses a semantic list so repeated rows remain understandable as one grouped collection.
 - Rows with href render as native anchors; current linked rows expose aria-current=page.
+- Empty copy is visible in the owning section so absence does not require a nested card or decorative placeholder.
 - Tone and marker are supplemental; row title and description must carry status or destination meaning.
 
 ## Storybook Contract

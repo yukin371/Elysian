@@ -31,11 +31,21 @@ const meta = {
       control: "text",
       description: "Supporting copy under the label.",
     },
+    invalidMessage: {
+      control: "text",
+      description: "Actionable repair copy linked through aria-describedby.",
+    },
+    id: {
+      control: "text",
+      description: "Optional id for the switch button.",
+    },
     disabled: { control: "boolean", description: "Disables state changes." },
   },
   args: {
     description: "Keep highlight layers and curated gradients enabled.",
     disabled: false,
+    id: undefined,
+    invalidMessage: undefined,
     label: "Polished mode",
     modelValue: true,
   },
@@ -215,6 +225,12 @@ export const States: Story = {
                 disabled
                 label="Experimental override"
                 description="Disabled here to show an unavailable runtime path."
+              />
+              <ElyPublicSwitch
+                :model-value="false"
+                label="Sync across devices"
+                description="Only enable after the account has a verified recovery method."
+                invalid-message="Add a recovery email before enabling sync."
               />
             </div>
           </section>

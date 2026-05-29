@@ -5,11 +5,13 @@ withDefaults(
   defineProps<{
     ariaLabel?: string
     density?: "comfortable" | "compact"
+    emptyMessage?: string
     items: ElyPublicTimelineItem[]
   }>(),
   {
     ariaLabel: "Timeline",
     density: "comfortable",
+    emptyMessage: "No timeline events to show yet.",
   },
 )
 </script>
@@ -20,7 +22,10 @@ withDefaults(
     :aria-label="ariaLabel"
     :data-density="density"
   >
-    <ol class="ely-public-timeline__list">
+    <p v-if="items.length === 0" class="ely-public-timeline__empty">
+      {{ emptyMessage }}
+    </p>
+    <ol v-else class="ely-public-timeline__list">
       <li
         v-for="item in items"
         :key="item.key"

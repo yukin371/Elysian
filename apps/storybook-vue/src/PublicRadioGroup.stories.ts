@@ -44,13 +44,31 @@ const meta = {
     },
   },
   argTypes: {
-    items: { control: "object", description: "Radio option definitions." },
-    modelValue: { control: "text", description: "Controlled selected value." },
     ariaLabel: { control: "text", description: "Accessible group label." },
+    description: {
+      control: "text",
+      description: "Visible group helper copy.",
+    },
+    disabled: {
+      control: "boolean",
+      description: "Disable every radio option.",
+    },
+    invalidMessage: {
+      control: "text",
+      description: "Visible group repair copy.",
+    },
+    items: { control: "object", description: "Radio option definitions." },
+    label: { control: "text", description: "Visible group label." },
+    modelValue: { control: "text", description: "Controlled selected value." },
   },
   args: {
     ariaLabel: "Density preset",
+    description:
+      "Choose one density for the current public surface; each option keeps the same theme contract.",
+    disabled: false,
+    invalidMessage: undefined,
     items,
+    label: "Density preset",
     modelValue: "balanced",
   },
 } satisfies Meta<typeof ElyPublicRadioGroup>

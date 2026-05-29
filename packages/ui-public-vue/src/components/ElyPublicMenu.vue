@@ -39,6 +39,10 @@ const isOpen = computed(() => props.open ?? internalOpen.value)
 const enabledItems = computed(() =>
   props.items.filter((item) => !item.disabled),
 )
+const canOpenMenu = computed(
+  () => !props.disabled && enabledItems.value.length > 0,
+)
+const isPanelVisible = computed(() => isOpen.value && canOpenMenu.value)
 
 const setOpen = (open: boolean) => {
   if (props.open === undefined) {
@@ -53,7 +57,7 @@ const closeMenu = () => {
 }
 
 const openMenu = async (focus: "first" | "last" = "first") => {
-  if (props.disabled || enabledItems.value.length === 0) {
+  if (!canOpenMenu.value) {
     return
   }
 
@@ -222,7 +226,7 @@ onUnmounted(() => {
       class="ely-public-menu__trigger"
       type="button"
       :aria-controls="menuId"
-      :aria-expanded="isOpen"
+      :aria-expanded="isPanelVisible"
       aria-haspopup="menu"
       :disabled="disabled"
       @click="toggleMenu"
@@ -233,7 +237,7 @@ onUnmounted(() => {
     </button>
 
     <div
-      v-if="isOpen"
+      v-if="isPanelVisible"
       :id="menuId"
       ref="menuRef"
       class="ely-public-menu__panel"

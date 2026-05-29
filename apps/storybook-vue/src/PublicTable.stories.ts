@@ -101,6 +101,10 @@ const meta = {
       control: "text",
       description: "Supporting copy above the table.",
     },
+    emptyMessage: {
+      control: "text",
+      description: "Visible lightweight copy when no rows are available.",
+    },
     rows: {
       control: "object",
       description: "Ordered read-only rows.",
@@ -112,6 +116,7 @@ const meta = {
     density: "comfortable",
     description:
       "Use Table when comparison across rows and columns is the main reading job.",
+    emptyMessage: "No comparison rows are available yet.",
     rows: defaultRows,
   },
 } satisfies Meta<typeof ElyPublicTable>
@@ -267,6 +272,13 @@ export const States: Story = {
                 density="compact"
                 :columns="defaultColumns"
                 :rows="stateRows"
+              />
+              <ElyPublicTable
+                caption="Empty comparison rows"
+                description="The table keeps its caption, headers, and reading purpose without requiring an extra empty-state card."
+                :columns="defaultColumns"
+                :rows="[]"
+                empty-message="No theme checks have been added yet."
               />
             </div>
           </section>

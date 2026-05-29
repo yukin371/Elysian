@@ -42,6 +42,10 @@ const meta = {
       description: "Controlled exact numeric value.",
     },
     placeholder: { control: "text", description: "Placeholder hint." },
+    rangeText: {
+      control: "text",
+      description: "Visible range hint linked through aria-describedby.",
+    },
     readOnly: { control: "boolean", description: "Prevents editing." },
     step: { control: "number", description: "Native and stepper increment." },
     unit: { control: "text", description: "Visible unit suffix." },
@@ -55,6 +59,7 @@ const meta = {
     min: 0,
     modelValue: 36,
     placeholder: "0",
+    rangeText: "Allowed range: 0 to 120 credits.",
     readOnly: false,
     step: 1,
     unit: "credits",

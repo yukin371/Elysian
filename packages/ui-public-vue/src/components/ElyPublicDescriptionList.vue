@@ -6,12 +6,14 @@ withDefaults(
     ariaLabel?: string
     columns?: "single" | "double"
     density?: "comfortable" | "compact"
+    emptyMessage?: string
     items: ElyPublicDescriptionItem[]
   }>(),
   {
     ariaLabel: "Details",
     columns: "double",
     density: "comfortable",
+    emptyMessage: "No details to show yet.",
   },
 )
 </script>
@@ -23,7 +25,10 @@ withDefaults(
     :data-columns="columns"
     :data-density="density"
   >
-    <dl class="ely-public-description-list__grid">
+    <p v-if="items.length === 0" class="ely-public-description-list__empty">
+      {{ emptyMessage }}
+    </p>
+    <dl v-else class="ely-public-description-list__grid">
       <div
         v-for="item in items"
         :key="item.key"

@@ -35,6 +35,7 @@ Sequential journey primitive for onboarding, checkout, publishing, and review fl
 | Complete | Completed steps use success semantics so finished work is visible without becoming another primary action. |
 | Upcoming | Future steps stay quiet and readable, preserving the user's focus on the current decision. |
 | Error and disabled | Error marks the step that needs repair while disabled blocks unreachable steps through native disabled behavior. |
+| Empty | A lightweight empty message explains that no journey steps exist yet without adding a separate card or fake progress state. |
 
 ## Props
 
@@ -44,6 +45,7 @@ Sequential journey primitive for onboarding, checkout, publishing, and review fl
 | `modelValue` | `string` | - | No | Controlled active step key; defaults to the first item when omitted. |
 | `interactive` | `boolean` | false | No | Allows safe step selection and emits update:modelValue from step buttons. |
 | `orientation` | `'horizontal' \| 'vertical'` | 'horizontal' | No | Controls compact horizontal lanes or vertical review rhythm. |
+| `emptyMessage` | `string` | 'No steps to show yet.' | No | Visible copy shown when items is empty; keep it factual and avoid implying progress exists. |
 | `ariaLabel` | `string` | 'Steps' | No | Accessible label for the step navigation region. |
 
 ## Accessibility
@@ -51,6 +53,7 @@ Sequential journey primitive for onboarding, checkout, publishing, and review fl
 - Uses a nav landmark with an ordered list so the flow order is available to assistive technology.
 - The current step exposes aria-current=step rather than relying on color or ornament alone.
 - Interactive steps use native buttons and disabled steps use native disabled behavior.
+- Empty copy remains visible in the labeled navigation region so users do not encounter an unlabeled blank flow.
 
 ## Storybook Contract
 

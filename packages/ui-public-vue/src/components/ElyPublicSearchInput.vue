@@ -8,6 +8,7 @@ const props = withDefaults(
     description?: string
     disabled?: boolean
     id?: string
+    invalidMessage?: string
     label?: string
     modelValue?: string
     name?: string
@@ -19,6 +20,7 @@ const props = withDefaults(
     description: undefined,
     disabled: false,
     id: undefined,
+    invalidMessage: undefined,
     label: "Search",
     modelValue: "",
     name: undefined,
@@ -38,6 +40,14 @@ const resolvedInputId = computed(
 )
 const resolvedDescriptionId = computed(() =>
   props.description ? `${resolvedInputId.value}-description` : undefined,
+)
+const resolvedMessageId = computed(() =>
+  props.invalidMessage ? `${resolvedInputId.value}-message` : undefined,
+)
+const describedBy = computed(() =>
+  [resolvedDescriptionId.value, resolvedMessageId.value]
+    .filter(Boolean)
+    .join(" "),
 )
 const hasValue = computed(() => props.modelValue.trim().length > 0)
 
@@ -68,6 +78,7 @@ const clearSearch = () => {
   <form
     class="ely-public-search"
     :data-has-value="hasValue ? 'true' : 'false'"
+    :data-invalid="invalidMessage ? 'true' : 'false'"
     role="search"
     @submit.prevent="submitSearch"
   >
@@ -84,7 +95,8 @@ const clearSearch = () => {
         <span class="ely-public-search__icon" aria-hidden="true">⌕</span>
         <input
           :id="resolvedInputId"
-          :aria-describedby="resolvedDescriptionId"
+          :aria-describedby="describedBy || undefined"
+          :aria-invalid="invalidMessage ? 'true' : 'false'"
           class="ely-public-search__input"
           :disabled="disabled"
           :name="name"
@@ -103,6 +115,13 @@ const clearSearch = () => {
         >
           ×
         </button>
+      </span>
+      <span
+        v-if="invalidMessage"
+        :id="resolvedMessageId"
+        class="ely-public-field__message"
+      >
+        {{ invalidMessage }}
       </span>
     </label>
     <button

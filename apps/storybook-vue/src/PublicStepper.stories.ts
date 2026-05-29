@@ -50,6 +50,10 @@ const meta = {
       control: "text",
       description: "Accessible label for the ordered step navigation.",
     },
+    emptyMessage: {
+      control: "text",
+      description: "Visible lightweight copy when no ordered steps exist.",
+    },
     interactive: {
       control: "boolean",
       description: "Allows users to revisit safe steps.",
@@ -66,6 +70,7 @@ const meta = {
   },
   args: {
     ariaLabel: "Publish flow",
+    emptyMessage: "No publish steps have been defined yet.",
     interactive: false,
     items: publishSteps,
     modelValue: "theme",
@@ -190,6 +195,11 @@ export const States: Story = {
             <div class="ely-public-stack ely-story-offset-md">
               <ElyPublicStepper :items="publishSteps" model-value="review" aria-label="Derived publish steps" />
               <ElyPublicStepper :items="repairSteps" aria-label="Repair steps" orientation="vertical" />
+              <ElyPublicStepper
+                :items="[]"
+                aria-label="Empty stepper"
+                empty-message="No ordered journey exists yet. Keep the lane flat until the workflow is real."
+              />
             </div>
           </section>
 

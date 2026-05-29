@@ -40,6 +40,10 @@ const meta = {
       control: "text",
       description: "Validation message linked through aria-describedby.",
     },
+    emptyMessage: {
+      control: "text",
+      description: "Visible copy when the option list is empty.",
+    },
     placeholder: {
       control: "text",
       description: "Disabled empty option copy.",
@@ -49,6 +53,7 @@ const meta = {
   args: {
     description: "Choose a governed family before custom overrides.",
     disabled: false,
+    emptyMessage: "No governed options are available yet.",
     invalidMessage: undefined,
     label: "Theme family",
     modelValue: "elysia-default",
@@ -247,6 +252,12 @@ export const States: Story = {
                 :options="options"
                 label="Locked family"
                 model-value="enterprise-calm"
+              />
+              <ElyPublicSelect
+                :options="[]"
+                label="Reserved family"
+                description="Use the empty copy when the current surface has no valid choices."
+                empty-message="No launch families are available for this audience yet."
               />
             </div>
           </section>

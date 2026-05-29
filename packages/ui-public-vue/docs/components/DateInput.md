@@ -47,13 +47,14 @@ Native date entry primitive for event dates, validity windows, publishing schedu
 | `invalidMessage` | `string` | - | No | Actionable validation message linked through aria-describedby. |
 | `min` | `string` | - | No | Optional inclusive lower bound in native YYYY-MM-DD format. |
 | `max` | `string` | - | No | Optional inclusive upper bound in native YYYY-MM-DD format. |
+| `rangeText` | `string` | - | No | Optional visible date-window copy; when omitted, min and max generate a compact readable hint. |
 | `readOnly` | `boolean` | false | No | Prevents editing while keeping the selected date visible for review. |
 | `disabled` | `boolean` | false | No | Disables the native date control when date editing is unavailable. |
 
 ## Accessibility
 
 - Uses a native date input so browser keyboard, mobile date entry, and platform semantics remain available.
-- Generated ids connect helper and invalid copy through aria-describedby.
+- Generated ids connect helper, date-window copy, and invalid copy through aria-describedby.
 - Invalid state exposes visible correction text and sets aria-invalid without relying on color alone.
 
 ## Storybook Contract

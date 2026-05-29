@@ -35,6 +35,7 @@ Chronological content primitive for release notes, member history, event agendas
 | Accent ceremony | Accent items mark rare brand or editorial highlights without turning the whole sequence into decoration. |
 | Success and warning | Success and warning tones communicate completed or attention-worthy moments through semantic tokens. |
 | Compact density | Compact density reduces vertical rhythm for account history, changelogs, and narrow review panels. |
+| Empty | A flat empty message keeps missing chronology readable inside the timeline surface without turning absence into a card stack. |
 
 ## Props
 
@@ -42,11 +43,13 @@ Chronological content primitive for release notes, member history, event agendas
 | --- | --- | --- | --- | --- |
 | `items` | `ElyPublicTimelineItem[]` | - | Yes | Ordered timeline items with key, title, optional meta, optional description, and optional semantic tone. |
 | `density` | `'comfortable' \| 'compact'` | 'comfortable' | No | Controls spacious editorial rhythm or denser history rhythm without changing item semantics. |
+| `emptyMessage` | `string` | 'No timeline events to show yet.' | No | Visible copy shown when items is empty; use EmptyState only when the user can recover or create an event. |
 | `ariaLabel` | `string` | 'Timeline' | No | Accessible label for the chronological section. |
 
 ## Accessibility
 
 - Uses an ordered list so assistive technology receives the same chronological order as visual users.
+- Empty copy stays in the labeled section so absence is explicit rather than being represented by decorative markers alone.
 - Tone is supplemental; item title, meta, and description must carry the meaning without relying on color.
 - The component has no hidden interaction, so links, buttons, or repair actions should remain outside or inside explicit item content owned by the surrounding surface.
 

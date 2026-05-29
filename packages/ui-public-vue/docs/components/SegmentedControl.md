@@ -35,6 +35,8 @@ Compact single-choice control for nearby view, density, tone, or mode preference
 | Unselected | Inactive segments remain visible and reachable through roving focus. |
 | Keyboard | Arrow keys, Home, and End move selection without leaving the compact group. |
 | Compact | Short labels keep the control readable in toolbars, preview lanes, and preference panels. |
+| Invalid | Group-level repair copy stays attached to the compact radiogroup through aria-describedby. |
+| Disabled | Every segment stops accepting selection while preserving the current compact choice. |
 
 ## Props
 
@@ -42,12 +44,18 @@ Compact single-choice control for nearby view, density, tone, or mode preference
 | --- | --- | --- | --- | --- |
 | `items` | `ElyPublicSegmentedItem[]` | - | Yes | Segment key, value, label, and optional assistive description definitions. |
 | `modelValue` | `string` | '' | No | Controlled selected segment value. |
-| `ariaLabel` | `string` | 'Segmented options' | No | Accessible label for the compact radiogroup. |
+| `ariaLabel` | `string` | 'Segmented options' | No | Accessible fallback label for the compact radiogroup when no visible label is provided. |
+| `label` | `string` | - | No | Visible group label; when present it becomes the radiogroup accessible name. |
+| `description` | `string` | - | No | Visible helper copy linked to the radiogroup through aria-describedby. |
+| `invalidMessage` | `string` | - | No | Actionable compact-choice repair message linked through aria-describedby. |
+| `disabled` | `boolean` | false | No | Disables every segment in the control. |
+| `id` | `string` | - | No | Optional id for the segmented radiogroup and generated helper ids. |
 
 ## Accessibility
 
 - Uses role=radiogroup and role=radio for single-choice semantics.
 - aria-checked reflects the selected segment.
+- Visible label, helper copy, and invalid copy are connected with aria-labelledby and aria-describedby.
 - Roving tabindex keeps focus movement predictable with Arrow, Home, and End keys.
 
 ## Storybook Contract

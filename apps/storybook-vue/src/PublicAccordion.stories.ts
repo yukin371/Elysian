@@ -52,6 +52,11 @@ const meta = {
       control: "text",
       description: "Accessible label for the disclosure group.",
     },
+    emptyMessage: {
+      control: "text",
+      description:
+        "Visible lightweight copy when no disclosure sections exist.",
+    },
     idBase: {
       control: "text",
       description: "Stable id prefix for trigger and panel linkage.",
@@ -67,6 +72,7 @@ const meta = {
   },
   args: {
     ariaLabel: "Theme FAQ",
+    emptyMessage: "No disclosure sections are available yet.",
     items: defaultItems,
     modelValue: ["theme"],
     multiple: false,
@@ -186,6 +192,11 @@ export const States: Story = {
             <div class="ely-public-stack ely-story-offset-md">
               <ElyPublicAccordion v-model="singleOpen" :items="defaultItems" aria-label="Single open example" />
               <ElyPublicAccordion v-model="multiOpen" multiple :items="defaultItems" aria-label="Multiple open example" />
+              <ElyPublicAccordion
+                :items="[]"
+                aria-label="Empty disclosure example"
+                empty-message="No optional guidance yet. Keep required repair visible outside Accordion."
+              />
             </div>
           </section>
 

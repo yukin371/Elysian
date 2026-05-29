@@ -7,12 +7,14 @@ withDefaults(
     columns: ElyPublicTableColumn[]
     density?: "comfortable" | "compact"
     description?: string
+    emptyMessage?: string
     rows: ElyPublicTableRow[]
   }>(),
   {
     caption: undefined,
     density: "comfortable",
     description: undefined,
+    emptyMessage: "No rows to compare yet.",
   },
 )
 </script>
@@ -54,19 +56,29 @@ withDefaults(
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="row in rows"
-            :key="row.key"
-            :data-tone="row.tone ?? 'muted'"
-          >
+          <tr v-if="rows.length === 0">
             <td
-              v-for="column in columns"
-              :key="column.key"
-              :data-align="column.align ?? 'start'"
+              class="ely-public-table__empty"
+              :colspan="Math.max(columns.length, 1)"
             >
-              {{ row.cells[column.key] ?? "" }}
+              {{ emptyMessage }}
             </td>
           </tr>
+          <template v-else>
+            <tr
+              v-for="row in rows"
+              :key="row.key"
+              :data-tone="row.tone ?? 'muted'"
+            >
+              <td
+                v-for="column in columns"
+                :key="column.key"
+                :data-align="column.align ?? 'start'"
+              >
+                {{ row.cells[column.key] ?? "" }}
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>

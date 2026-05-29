@@ -35,6 +35,8 @@ Single-choice decision group for density, style, or preference options with rovi
 | Unselected | Available but inactive options remain focusable by roving logic. |
 | Keyboard | Arrow keys, Home, and End move selection and focus. |
 | Descriptions | Optional item descriptions support decision clarity. |
+| Invalid | Group-level repair copy is linked through aria-describedby without turning options into separate cards. |
+| Disabled | All radio options stop accepting selection while preserving the visible decision context. |
 
 ## Props
 
@@ -42,13 +44,18 @@ Single-choice decision group for density, style, or preference options with rovi
 | --- | --- | --- | --- | --- |
 | `items` | `ElyPublicRadioItem[]` | - | Yes | Radio item key, value, label, and optional description definitions. |
 | `modelValue` | `string` | '' | No | Controlled selected value. |
-| `ariaLabel` | `string` | 'Options' | No | Accessible label for the radiogroup. |
+| `label` | `string` | - | No | Visible group label; when present it becomes the radiogroup accessible name. |
+| `description` | `string` | - | No | Visible helper copy linked to the radiogroup through aria-describedby. |
+| `invalidMessage` | `string` | - | No | Actionable group-level repair message linked through aria-describedby. |
+| `disabled` | `boolean` | false | No | Disables every radio option in the group. |
+| `ariaLabel` | `string` | 'Options' | No | Accessible fallback label for the radiogroup when no visible label is provided. |
 
 ## Accessibility
 
 - Uses role=radiogroup and role=radio.
 - aria-checked reflects the selected item.
-- Roving tabindex keeps keyboard focus within the group.
+- Visible label, helper copy, and invalid copy are connected with aria-labelledby and aria-describedby.
+- Roving tabindex keeps keyboard focus within the group when enabled.
 
 ## Storybook Contract
 

@@ -8,6 +8,7 @@ const props = withDefaults(
     description?: string
     disabled?: boolean
     id?: string
+    invalidMessage?: string
     label?: string
     max?: number
     modelValue?: number
@@ -20,6 +21,7 @@ const props = withDefaults(
     description: undefined,
     disabled: false,
     id: undefined,
+    invalidMessage: undefined,
     label: undefined,
     max: 5,
     modelValue: 0,
@@ -39,6 +41,14 @@ const resolvedRatingId = computed(
 )
 const resolvedDescriptionId = computed(() =>
   props.description ? `${resolvedRatingId.value}-description` : undefined,
+)
+const resolvedMessageId = computed(() =>
+  props.invalidMessage ? `${resolvedRatingId.value}-message` : undefined,
+)
+const describedBy = computed(() =>
+  [resolvedDescriptionId.value, resolvedMessageId.value]
+    .filter(Boolean)
+    .join(" "),
 )
 const resolvedMax = computed(() =>
   Math.max(1, Math.min(10, Math.floor(props.max))),
@@ -95,7 +105,10 @@ const handleOptionKeydown = (event: KeyboardEvent, index: number) => {
 </script>
 
 <template>
-  <div class="ely-public-field ely-public-rating-field">
+  <div
+    class="ely-public-field ely-public-rating-field"
+    :data-invalid="invalidMessage ? 'true' : 'false'"
+  >
     <div class="ely-public-rating-field__header">
       <label
         v-if="label"
@@ -121,7 +134,8 @@ const handleOptionKeydown = (event: KeyboardEvent, index: number) => {
     </p>
     <div
       :id="resolvedRatingId"
-      :aria-describedby="resolvedDescriptionId"
+      :aria-describedby="describedBy || undefined"
+      :aria-invalid="invalidMessage ? 'true' : 'false'"
       :aria-label="ariaLabel ?? (label || 'Rating')"
       :aria-labelledby="label ? `${resolvedRatingId}-label` : undefined"
       :aria-readonly="readOnly ? 'true' : undefined"
@@ -153,6 +167,13 @@ const handleOptionKeydown = (event: KeyboardEvent, index: number) => {
         <span class="ely-public-sr-only">{{ value }}</span>
       </button>
     </div>
+    <span
+      v-if="invalidMessage"
+      :id="resolvedMessageId"
+      class="ely-public-field__message"
+    >
+      {{ invalidMessage }}
+    </span>
     <input v-if="name" type="hidden" :name="name" :value="resolvedValue" />
   </div>
 </template>

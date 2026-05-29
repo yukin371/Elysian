@@ -68,6 +68,11 @@ const publicComponentBaseDocs = {
         description:
           "Multiple mode allows several sections to remain open for FAQ, policy, or comparison contexts.",
       },
+      {
+        name: "Empty",
+        description:
+          "A lightweight empty message explains that there is no optional disclosure content without creating another card.",
+      },
     ],
     props: [
       {
@@ -90,6 +95,13 @@ const publicComponentBaseDocs = {
         description: "Allows more than one section to stay open.",
       },
       {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No sections to show yet.'",
+        description:
+          "Visible copy shown when items is empty; reserve EmptyState for actionable recovery.",
+      },
+      {
         name: "ariaLabel",
         type: "string",
         defaultValue: "'Disclosure sections'",
@@ -105,6 +117,7 @@ const publicComponentBaseDocs = {
     accessibility: [
       "Each trigger is a native button with aria-expanded and aria-controls.",
       "Each expanded panel is a labelled region connected back to its trigger.",
+      "Empty copy remains visible in the labelled group so assistive users do not encounter a silent disclosure shell.",
       "Disclosure state is not represented by color alone; expanded content remains structurally available.",
     ],
   },
@@ -366,6 +379,11 @@ const publicComponentBaseDocs = {
           "Disabled items remain visible but cannot be focused or selected; current links expose aria-current.",
       },
       {
+        name: "Unavailable",
+        description:
+          "A disabled trigger or a menu with no enabled actions does not render an empty panel, even when open is controlled.",
+      },
+      {
         name: "Keyboard review",
         description:
           "Arrow keys, Home, End, Escape, Enter, and Space support basic menu operation without a command-palette abstraction.",
@@ -419,6 +437,7 @@ const publicComponentBaseDocs = {
     accessibility: [
       "The trigger is a native button with aria-haspopup=menu, aria-expanded, and aria-controls.",
       "The panel uses role=menu and items use role=menuitem while preserving native button or anchor behavior.",
+      "Empty or fully disabled action sets keep the trigger closed instead of exposing a hollow menu to keyboard or screen-reader users.",
       "Keyboard support includes open from Enter/Space/Arrow keys, item movement with arrows, Home/End, Escape close, and outside-click dismissal.",
     ],
   },
@@ -511,6 +530,11 @@ const publicComponentBaseDocs = {
         description:
           "Density changes spacing only; it does not change the row contract or turn the list into navigation tabs.",
       },
+      {
+        name: "Empty",
+        description:
+          "A lightweight empty message explains missing rows inside the same list surface instead of forcing another EmptyState card.",
+      },
     ],
     props: [
       {
@@ -535,6 +559,13 @@ const publicComponentBaseDocs = {
           "Shows subtle separators between rows instead of making every row a separate card.",
       },
       {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No items to show yet.'",
+        description:
+          "Visible copy shown when items is empty; use EmptyState only when a recovery action is needed.",
+      },
+      {
         name: "ariaLabel",
         type: "string",
         defaultValue: "'List'",
@@ -544,6 +575,7 @@ const publicComponentBaseDocs = {
     accessibility: [
       "Uses a semantic list so repeated rows remain understandable as one grouped collection.",
       "Rows with href render as native anchors; current linked rows expose aria-current=page.",
+      "Empty copy is visible in the owning section so absence does not require a nested card or decorative placeholder.",
       "Tone and marker are supplemental; row title and description must carry status or destination meaning.",
     ],
   },
@@ -578,6 +610,11 @@ const publicComponentBaseDocs = {
         description:
           "Primary, accent, muted, success, and warning tones can highlight fact importance without becoming status badges.",
       },
+      {
+        name: "Empty",
+        description:
+          "A flat empty message keeps missing facts inside the detail block without introducing a replacement card.",
+      },
     ],
     props: [
       {
@@ -602,6 +639,13 @@ const publicComponentBaseDocs = {
           "Controls spacing for editorial detail blocks or compact account summaries.",
       },
       {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No details to show yet.'",
+        description:
+          "Visible copy shown when items is empty; keep it short and reserve EmptyState for actionable recovery.",
+      },
+      {
         name: "ariaLabel",
         type: "string",
         defaultValue: "'Details'",
@@ -610,6 +654,7 @@ const publicComponentBaseDocs = {
     ],
     accessibility: [
       "Uses native dl, dt, and dd elements so label-value relationships remain available to assistive technology.",
+      "Empty copy remains visible in the labeled section so users understand that details are absent, not loading.",
       "Tone is supplemental; labels and values must communicate meaning without relying on color.",
       "Do not place interactive controls inside value text unless the surrounding pattern owns that interaction and labels it clearly.",
     ],
@@ -644,6 +689,11 @@ const publicComponentBaseDocs = {
         name: "Semantic rows",
         description:
           "Row tone can flag one bounded outcome, but the cell text must still name success, risk, or warning.",
+      },
+      {
+        name: "Empty rows",
+        description:
+          "An empty row preserves caption, headers, and table structure while explaining that there is nothing to compare yet.",
       },
     ],
     props: [
@@ -680,10 +730,18 @@ const publicComponentBaseDocs = {
         description:
           "Controls cell rhythm for default comparison surfaces or compact review snapshots.",
       },
+      {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No rows to compare yet.'",
+        description:
+          "Visible copy shown in a single table row when rows is empty; keep it factual and non-decorative.",
+      },
     ],
     accessibility: [
       "Uses native table, thead, tbody, th, td, and caption semantics for structured reading.",
       "The scroll wrapper is focusable so keyboard users can reach horizontally overflowing tables on narrow screens.",
+      "Empty rows use one cell spanning the available columns, preserving table context for screen-reader and keyboard users.",
       "Row tone is supplemental; cells must contain text that names the status or consequence without relying on color.",
     ],
   },
@@ -888,6 +946,11 @@ const publicComponentBaseDocs = {
         description:
           "Error marks the step that needs repair while disabled blocks unreachable steps through native disabled behavior.",
       },
+      {
+        name: "Empty",
+        description:
+          "A lightweight empty message explains that no journey steps exist yet without adding a separate card or fake progress state.",
+      },
     ],
     props: [
       {
@@ -918,6 +981,13 @@ const publicComponentBaseDocs = {
           "Controls compact horizontal lanes or vertical review rhythm.",
       },
       {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No steps to show yet.'",
+        description:
+          "Visible copy shown when items is empty; keep it factual and avoid implying progress exists.",
+      },
+      {
         name: "ariaLabel",
         type: "string",
         defaultValue: "'Steps'",
@@ -928,6 +998,7 @@ const publicComponentBaseDocs = {
       "Uses a nav landmark with an ordered list so the flow order is available to assistive technology.",
       "The current step exposes aria-current=step rather than relying on color or ornament alone.",
       "Interactive steps use native buttons and disabled steps use native disabled behavior.",
+      "Empty copy remains visible in the labeled navigation region so users do not encounter an unlabeled blank flow.",
     ],
   },
   Timeline: {
@@ -961,6 +1032,11 @@ const publicComponentBaseDocs = {
         description:
           "Compact density reduces vertical rhythm for account history, changelogs, and narrow review panels.",
       },
+      {
+        name: "Empty",
+        description:
+          "A flat empty message keeps missing chronology readable inside the timeline surface without turning absence into a card stack.",
+      },
     ],
     props: [
       {
@@ -978,6 +1054,13 @@ const publicComponentBaseDocs = {
           "Controls spacious editorial rhythm or denser history rhythm without changing item semantics.",
       },
       {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No timeline events to show yet.'",
+        description:
+          "Visible copy shown when items is empty; use EmptyState only when the user can recover or create an event.",
+      },
+      {
         name: "ariaLabel",
         type: "string",
         defaultValue: "'Timeline'",
@@ -986,6 +1069,7 @@ const publicComponentBaseDocs = {
     ],
     accessibility: [
       "Uses an ordered list so assistive technology receives the same chronological order as visual users.",
+      "Empty copy stays in the labeled section so absence is explicit rather than being represented by decorative markers alone.",
       "Tone is supplemental; item title, meta, and description must carry the meaning without relying on color.",
       "The component has no hidden interaction, so links, buttons, or repair actions should remain outside or inside explicit item content owned by the surrounding surface.",
     ],
@@ -1825,6 +1909,11 @@ const publicComponentBaseDocs = {
           "Submit emits the trimmed query while the component does not own result rendering.",
       },
       {
+        name: "Invalid",
+        description:
+          "Invalid state keeps the visible submit path while linking repair copy through aria-describedby.",
+      },
+      {
         name: "Disabled",
         description:
           "Input, clear, and submit actions are disabled together while preserving layout.",
@@ -1847,6 +1936,12 @@ const publicComponentBaseDocs = {
         name: "description",
         type: "string",
         description: "Helper copy linked to the native search input.",
+      },
+      {
+        name: "invalidMessage",
+        type: "string",
+        description:
+          "Actionable query repair message linked to the native search input.",
       },
       {
         name: "placeholder",
@@ -1875,7 +1970,7 @@ const publicComponentBaseDocs = {
     ],
     accessibility: [
       "Uses form role=search and a native input type=search.",
-      "The visible label names the searchable scope and helper copy is linked through aria-describedby.",
+      "The visible label names the searchable scope, while helper and invalid copy are linked through aria-describedby.",
       "Clear and submit are native buttons with separate labels so keyboard users can recover or submit intentionally.",
     ],
   },
@@ -2146,6 +2241,12 @@ const publicComponentBaseDocs = {
         description: "Native number increment and local stepper amount.",
       },
       {
+        name: "rangeText",
+        type: "string",
+        description:
+          "Optional visible range copy; when omitted, min and max generate a compact readable hint.",
+      },
+      {
         name: "unit",
         type: "string",
         description:
@@ -2161,7 +2262,7 @@ const publicComponentBaseDocs = {
     ],
     accessibility: [
       "Uses a native number input so keyboard, mobile numeric entry, and browser value semantics remain intact.",
-      "Description and invalid message ids are joined in aria-describedby when present.",
+      "Description, generated range hint, and invalid message ids are joined in aria-describedby when present.",
       "Stepper buttons have explicit increase and decrease labels, while invalid state exposes a visible correction message.",
     ],
   },
@@ -2240,6 +2341,12 @@ const publicComponentBaseDocs = {
           "Optional inclusive upper bound in native YYYY-MM-DD format.",
       },
       {
+        name: "rangeText",
+        type: "string",
+        description:
+          "Optional visible date-window copy; when omitted, min and max generate a compact readable hint.",
+      },
+      {
         name: "readOnly",
         type: "boolean",
         defaultValue: "false",
@@ -2256,7 +2363,7 @@ const publicComponentBaseDocs = {
     ],
     accessibility: [
       "Uses a native date input so browser keyboard, mobile date entry, and platform semantics remain available.",
-      "Generated ids connect helper and invalid copy through aria-describedby.",
+      "Generated ids connect helper, date-window copy, and invalid copy through aria-describedby.",
       "Invalid state exposes visible correction text and sets aria-invalid without relying on color alone.",
     ],
   },
@@ -2274,7 +2381,7 @@ const publicComponentBaseDocs = {
       {
         name: "Empty",
         description:
-          "Empty state shows stable no-file copy while the native control remains available.",
+          "Empty state shows stable no-file copy, links that summary to the native control, and keeps the picker available.",
       },
       {
         name: "Selected file",
@@ -2350,7 +2457,8 @@ const publicComponentBaseDocs = {
     ],
     accessibility: [
       "Uses a native file input so platform picker semantics and keyboard access remain intact.",
-      "Generated ids connect helper copy, selected filenames, and invalid copy through aria-describedby.",
+      "Generated ids connect helper copy, selection summary, selected filenames, and invalid copy through aria-describedby.",
+      "Selection summary uses a polite live region so selected or cleared files are announced without adding an upload queue.",
       "Selected filenames are displayed as text and invalid state does not rely on color alone.",
     ],
   },
@@ -2505,6 +2613,11 @@ const publicComponentBaseDocs = {
         description: "Empty value uses a disabled placeholder option.",
       },
       {
+        name: "Empty options",
+        description:
+          "When no options exist, the field explains that absence instead of inviting interaction with an empty dropdown.",
+      },
+      {
         name: "Invalid",
         description: "Validation uses the same message language as Input.",
       },
@@ -2547,10 +2660,18 @@ const publicComponentBaseDocs = {
         type: "string",
         description: "Validation copy linked through aria-describedby.",
       },
+      {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No options available yet.'",
+        description:
+          "Visible copy shown when options is empty; the control becomes disabled in that state.",
+      },
     ],
     accessibility: [
       "Keeps native select semantics and keyboard behavior.",
       "Description and validation copy are linked to the control.",
+      "Empty option sets disable the select and explain the absence through visible text instead of leaving a hollow control.",
       "Invalid state sets aria-invalid.",
     ],
   },
@@ -2584,6 +2705,11 @@ const publicComponentBaseDocs = {
         name: "Disabled",
         description:
           "Unavailable ranges remain visible while blocking pointer and keyboard updates.",
+      },
+      {
+        name: "Invalid",
+        description:
+          "Repair copy is linked to the native range input without hiding the current value.",
       },
     ],
     props: [
@@ -2622,6 +2748,12 @@ const publicComponentBaseDocs = {
         description: "Helper copy linked through aria-describedby.",
       },
       {
+        name: "invalidMessage",
+        type: "string",
+        description:
+          "Actionable range repair message linked through aria-describedby.",
+      },
+      {
         name: "unit",
         type: "string",
         defaultValue: "''",
@@ -2642,7 +2774,8 @@ const publicComponentBaseDocs = {
     ],
     accessibility: [
       "Uses native input type=range so keyboard and assistive technology semantics are preserved.",
-      "Description copy is linked to the control when provided.",
+      "Description and invalid copy are linked to the control when provided.",
+      "Invalid state sets aria-invalid while preserving the visible range value and min/max scale.",
       "Visible labels and units must explain the scale because color alone cannot communicate intensity.",
     ],
   },
@@ -2677,6 +2810,11 @@ const publicComponentBaseDocs = {
         description:
           "Unavailable feedback paths remain visible while blocking interaction.",
       },
+      {
+        name: "Invalid",
+        description:
+          "Repair copy is linked to the radiogroup when a required score or feedback rule is not satisfied.",
+      },
     ],
     props: [
       {
@@ -2702,6 +2840,12 @@ const publicComponentBaseDocs = {
         description: "Helper copy linked through aria-describedby.",
       },
       {
+        name: "invalidMessage",
+        type: "string",
+        description:
+          "Actionable rating repair message linked through aria-describedby.",
+      },
+      {
         name: "readOnly",
         type: "boolean",
         defaultValue: "false",
@@ -2723,6 +2867,7 @@ const publicComponentBaseDocs = {
     accessibility: [
       "Uses radiogroup and radio roles so the discrete scale has familiar keyboard semantics.",
       "Arrow keys, Home, and End move selection when the rating is interactive.",
+      "Description and invalid copy are connected through aria-describedby when present.",
       "Visible copy must explain the scale because filled marks alone do not communicate meaning.",
     ],
   },
@@ -2754,6 +2899,11 @@ const publicComponentBaseDocs = {
         name: "With description",
         description: "Supports explanatory copy beside the control.",
       },
+      {
+        name: "Invalid",
+        description:
+          "Repair copy is linked through aria-describedby when a preference cannot be accepted.",
+      },
     ],
     props: [
       {
@@ -2770,7 +2920,20 @@ const publicComponentBaseDocs = {
       {
         name: "description",
         type: "string",
-        description: "Supporting copy under the label.",
+        description:
+          "Supporting copy under the label linked through aria-describedby.",
+      },
+      {
+        name: "invalidMessage",
+        type: "string",
+        description:
+          "Actionable preference repair message linked through aria-describedby.",
+      },
+      {
+        name: "id",
+        type: "string",
+        description:
+          "Optional id for the switch button and generated helper ids.",
       },
       {
         name: "disabled",
@@ -2782,6 +2945,7 @@ const publicComponentBaseDocs = {
     accessibility: [
       "Uses role=switch and aria-checked.",
       "Keyboard activation is inherited from the native button.",
+      "Description and invalid copy are connected through aria-describedby when present.",
       "Visible labels should explain the setting without relying on color.",
     ],
   },
@@ -3087,6 +3251,11 @@ const publicComponentBaseDocs = {
         name: "With description",
         description: "Clarifies why the option exists or what it affects.",
       },
+      {
+        name: "Invalid",
+        description:
+          "Actionable repair copy is linked through aria-describedby without changing the inclusion choice.",
+      },
     ],
     props: [
       {
@@ -3103,7 +3272,20 @@ const publicComponentBaseDocs = {
       {
         name: "description",
         type: "string",
-        description: "Supporting copy under the label.",
+        description:
+          "Supporting copy under the label linked through aria-describedby.",
+      },
+      {
+        name: "invalidMessage",
+        type: "string",
+        description:
+          "Actionable validation or consent repair message linked through aria-describedby.",
+      },
+      {
+        name: "id",
+        type: "string",
+        description:
+          "Optional id for the checkbox button and generated helper ids.",
       },
       {
         name: "disabled",
@@ -3115,6 +3297,7 @@ const publicComponentBaseDocs = {
     accessibility: [
       "Uses role=checkbox and aria-checked.",
       "Keyboard activation is inherited from the native button.",
+      "Description and invalid copy are connected through aria-describedby when present.",
       "The check icon is hidden from assistive technology.",
     ],
   },
@@ -3146,6 +3329,16 @@ const publicComponentBaseDocs = {
         name: "Descriptions",
         description: "Optional item descriptions support decision clarity.",
       },
+      {
+        name: "Invalid",
+        description:
+          "Group-level repair copy is linked through aria-describedby without turning options into separate cards.",
+      },
+      {
+        name: "Disabled",
+        description:
+          "All radio options stop accepting selection while preserving the visible decision context.",
+      },
     ],
     props: [
       {
@@ -3162,16 +3355,42 @@ const publicComponentBaseDocs = {
         description: "Controlled selected value.",
       },
       {
+        name: "label",
+        type: "string",
+        description:
+          "Visible group label; when present it becomes the radiogroup accessible name.",
+      },
+      {
+        name: "description",
+        type: "string",
+        description:
+          "Visible helper copy linked to the radiogroup through aria-describedby.",
+      },
+      {
+        name: "invalidMessage",
+        type: "string",
+        description:
+          "Actionable group-level repair message linked through aria-describedby.",
+      },
+      {
+        name: "disabled",
+        type: "boolean",
+        defaultValue: "false",
+        description: "Disables every radio option in the group.",
+      },
+      {
         name: "ariaLabel",
         type: "string",
         defaultValue: "'Options'",
-        description: "Accessible label for the radiogroup.",
+        description:
+          "Accessible fallback label for the radiogroup when no visible label is provided.",
       },
     ],
     accessibility: [
       "Uses role=radiogroup and role=radio.",
       "aria-checked reflects the selected item.",
-      "Roving tabindex keeps keyboard focus within the group.",
+      "Visible label, helper copy, and invalid copy are connected with aria-labelledby and aria-describedby.",
+      "Roving tabindex keeps keyboard focus within the group when enabled.",
     ],
   },
   SegmentedControl: {
@@ -3205,6 +3424,16 @@ const publicComponentBaseDocs = {
         description:
           "Short labels keep the control readable in toolbars, preview lanes, and preference panels.",
       },
+      {
+        name: "Invalid",
+        description:
+          "Group-level repair copy stays attached to the compact radiogroup through aria-describedby.",
+      },
+      {
+        name: "Disabled",
+        description:
+          "Every segment stops accepting selection while preserving the current compact choice.",
+      },
     ],
     props: [
       {
@@ -3224,12 +3453,44 @@ const publicComponentBaseDocs = {
         name: "ariaLabel",
         type: "string",
         defaultValue: "'Segmented options'",
-        description: "Accessible label for the compact radiogroup.",
+        description:
+          "Accessible fallback label for the compact radiogroup when no visible label is provided.",
+      },
+      {
+        name: "label",
+        type: "string",
+        description:
+          "Visible group label; when present it becomes the radiogroup accessible name.",
+      },
+      {
+        name: "description",
+        type: "string",
+        description:
+          "Visible helper copy linked to the radiogroup through aria-describedby.",
+      },
+      {
+        name: "invalidMessage",
+        type: "string",
+        description:
+          "Actionable compact-choice repair message linked through aria-describedby.",
+      },
+      {
+        name: "disabled",
+        type: "boolean",
+        defaultValue: "false",
+        description: "Disables every segment in the control.",
+      },
+      {
+        name: "id",
+        type: "string",
+        description:
+          "Optional id for the segmented radiogroup and generated helper ids.",
       },
     ],
     accessibility: [
       "Uses role=radiogroup and role=radio for single-choice semantics.",
       "aria-checked reflects the selected segment.",
+      "Visible label, helper copy, and invalid copy are connected with aria-labelledby and aria-describedby.",
       "Roving tabindex keeps focus movement predictable with Arrow, Home, and End keys.",
     ],
   },
@@ -3437,6 +3698,11 @@ const publicComponentBaseDocs = {
         name: "Panel",
         description: "Default slot receives activeItem and activeKey.",
       },
+      {
+        name: "Empty",
+        description:
+          "A flat empty message replaces the tablist and panel when there are no sections, avoiding invalid tab semantics.",
+      },
     ],
     props: [
       {
@@ -3449,6 +3715,13 @@ const publicComponentBaseDocs = {
         name: "modelValue",
         type: "string",
         description: "Controlled active tab key.",
+      },
+      {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "'No sections to show yet.'",
+        description:
+          "Visible copy shown when items is empty; use it for absent local sections, not loading or route errors.",
       },
       {
         name: "ariaLabel",
@@ -3466,6 +3739,7 @@ const publicComponentBaseDocs = {
       "Uses role=tablist, role=tab, and role=tabpanel.",
       "Tabs and panels are connected with aria-controls and aria-labelledby.",
       "Roving tabindex keeps keyboard focus predictable.",
+      "When no tabs exist, the component avoids rendering an empty tablist or orphaned panel.",
     ],
   },
 } satisfies Record<string, ElyPublicComponentBaseDoc>

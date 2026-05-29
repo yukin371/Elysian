@@ -35,6 +35,7 @@ Progressive disclosure primitive for FAQ, policy notes, settings explanations, a
 | Expanded | Open sections expose a region linked to the trigger through aria-controls and aria-labelledby. |
 | Single open | Default behavior keeps one section open at a time so disclosure does not become another page layout. |
 | Multiple open | Multiple mode allows several sections to remain open for FAQ, policy, or comparison contexts. |
+| Empty | A lightweight empty message explains that there is no optional disclosure content without creating another card. |
 
 ## Props
 
@@ -43,6 +44,7 @@ Progressive disclosure primitive for FAQ, policy notes, settings explanations, a
 | `items` | `ElyPublicAccordionItem[]` | - | Yes | Ordered disclosure items with key, title, content, and optional eyebrow. |
 | `modelValue` | `string[]` | [] | No | Controlled list of open item keys. |
 | `multiple` | `boolean` | false | No | Allows more than one section to stay open. |
+| `emptyMessage` | `string` | 'No sections to show yet.' | No | Visible copy shown when items is empty; reserve EmptyState for actionable recovery. |
 | `ariaLabel` | `string` | 'Disclosure sections' | No | Accessible label for the accordion group. |
 | `idBase` | `string` | - | No | Optional stable id prefix for linking triggers and panels. |
 
@@ -50,6 +52,7 @@ Progressive disclosure primitive for FAQ, policy notes, settings explanations, a
 
 - Each trigger is a native button with aria-expanded and aria-controls.
 - Each expanded panel is a labelled region connected back to its trigger.
+- Empty copy remains visible in the labelled group so assistive users do not encounter a silent disclosure shell.
 - Disclosure state is not represented by color alone; expanded content remains structurally available.
 
 ## Storybook Contract

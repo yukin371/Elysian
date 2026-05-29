@@ -29,6 +29,14 @@ const meta = {
       description: "Helper copy linked to the radiogroup.",
     },
     disabled: { control: "boolean", description: "Disables rating changes." },
+    invalidMessage: {
+      control: "text",
+      description: "Actionable repair copy linked through aria-describedby.",
+    },
+    id: {
+      control: "text",
+      description: "Optional id for the rating group.",
+    },
     label: { control: "text", description: "Visible rating label." },
     max: { control: "number", description: "Maximum item count." },
     modelValue: {
@@ -47,6 +55,8 @@ const meta = {
   args: {
     description: "Rate how well this public surface matches your expectation.",
     disabled: false,
+    id: undefined,
+    invalidMessage: undefined,
     label: "Surface delight",
     max: 5,
     modelValue: 4,
@@ -191,6 +201,12 @@ export const States: Story = {
                 disabled
                 label="Closed feedback"
                 description="Disabled ratings explain that the feedback window is unavailable."
+              />
+              <ElyPublicRating
+                :model-value="0"
+                label="Required fit score"
+                description="A score is required before this handoff can be submitted."
+                invalid-message="Choose a fit score before continuing."
               />
             </div>
           </section>

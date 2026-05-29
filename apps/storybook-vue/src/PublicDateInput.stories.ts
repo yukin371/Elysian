@@ -43,6 +43,10 @@ const meta = {
       description: "Controlled native YYYY-MM-DD date value.",
     },
     placeholder: { control: "text", description: "Native placeholder hint." },
+    rangeText: {
+      control: "text",
+      description: "Visible date-window hint linked through aria-describedby.",
+    },
     readOnly: { control: "boolean", description: "Prevents editing." },
   },
   args: {
@@ -55,6 +59,7 @@ const meta = {
     min: "2026-06-01",
     modelValue: "2026-07-18",
     placeholder: "YYYY-MM-DD",
+    rangeText: "Allowed event window: 2026-06-01 to 2026-09-30.",
     readOnly: false,
   },
 } satisfies Meta<typeof ElyPublicDateInput>

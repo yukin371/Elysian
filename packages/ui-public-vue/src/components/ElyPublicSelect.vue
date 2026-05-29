@@ -6,6 +6,7 @@ const props = withDefaults(
   defineProps<{
     description?: string
     disabled?: boolean
+    emptyMessage?: string
     id?: string
     invalidMessage?: string
     label?: string
@@ -17,6 +18,7 @@ const props = withDefaults(
   {
     description: undefined,
     disabled: false,
+    emptyMessage: "No options available yet.",
     id: undefined,
     invalidMessage: undefined,
     label: undefined,
@@ -40,13 +42,22 @@ const resolvedDescriptionId = computed(() =>
 const resolvedMessageId = computed(() =>
   props.invalidMessage ? `${resolvedInputId.value}-message` : undefined,
 )
+const resolvedEmptyId = computed(() =>
+  props.options.length === 0 ? `${resolvedInputId.value}-empty` : undefined,
+)
 const describedBy = computed(() =>
-  [resolvedDescriptionId.value, resolvedMessageId.value]
+  [resolvedDescriptionId.value, resolvedEmptyId.value, resolvedMessageId.value]
     .filter(Boolean)
     .join(" "),
 )
+const hasOptions = computed(() => props.options.length > 0)
+const isDisabled = computed(() => props.disabled || !hasOptions.value)
 
 const updateValue = (event: Event) => {
+  if (!hasOptions.value) {
+    return
+  }
+
   const target = event.target as HTMLSelectElement
   emit("update:modelValue", target.value)
 }
@@ -68,12 +79,14 @@ const updateValue = (event: Event) => {
       :aria-describedby="describedBy || undefined"
       :aria-invalid="invalidMessage ? 'true' : 'false'"
       class="ely-public-select"
-      :disabled="disabled"
+      :disabled="isDisabled"
       :name="name"
       :value="modelValue"
       @change="updateValue"
     >
-      <option value="" disabled>{{ placeholder }}</option>
+      <option value="" disabled>
+        {{ hasOptions ? placeholder : emptyMessage }}
+      </option>
       <option
         v-for="option in options"
         :key="option.value"
@@ -82,6 +95,14 @@ const updateValue = (event: Event) => {
         {{ option.label }}
       </option>
     </select>
+
+    <span
+      v-if="!hasOptions"
+      :id="resolvedEmptyId"
+      class="ely-public-field__meta"
+    >
+      {{ emptyMessage }}
+    </span>
 
     <span
       v-if="invalidMessage"

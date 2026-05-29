@@ -6,12 +6,14 @@ import { getDirectionalSelectionIndex } from "./interaction"
 const props = withDefaults(
   defineProps<{
     ariaLabel?: string
+    emptyMessage?: string
     idBase?: string
     items: ElyPublicTabItem[]
     modelValue?: string
   }>(),
   {
     ariaLabel: "Tabs",
+    emptyMessage: "No sections to show yet.",
     idBase: undefined,
     modelValue: undefined,
   },
@@ -71,7 +73,12 @@ const handleTriggerKeydown = (event: KeyboardEvent, index: number) => {
 
 <template>
   <div class="ely-public-tabs">
-    <div class="ely-public-tabs__list" role="tablist" :aria-label="ariaLabel">
+    <p v-if="items.length === 0" class="ely-public-tabs__empty">
+      {{ emptyMessage }}
+    </p>
+
+    <template v-else>
+      <div class="ely-public-tabs__list" role="tablist" :aria-label="ariaLabel">
       <button
         v-for="(item, index) in items"
         :key="item.key"
@@ -95,16 +102,17 @@ const handleTriggerKeydown = (event: KeyboardEvent, index: number) => {
           {{ item.description }}
         </span>
       </button>
-    </div>
+      </div>
 
-    <div
-      :id="getPanelId(activeItem?.key ?? 'panel')"
-      :aria-labelledby="getTabId(activeItem?.key ?? 'panel')"
-      class="ely-public-tabs__panel"
-      role="tabpanel"
-      tabindex="0"
-    >
-      <slot :active-item="activeItem" :active-key="activeKey" />
-    </div>
+      <div
+        :id="getPanelId(activeItem?.key ?? 'panel')"
+        :aria-labelledby="getTabId(activeItem?.key ?? 'panel')"
+        class="ely-public-tabs__panel"
+        role="tabpanel"
+        tabindex="0"
+      >
+        <slot :active-item="activeItem" :active-key="activeKey" />
+      </div>
+    </template>
   </div>
 </template>

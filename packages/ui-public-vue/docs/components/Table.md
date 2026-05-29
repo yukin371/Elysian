@@ -35,6 +35,7 @@ Read-only structured table primitive for public comparisons, specifications, rew
 | Comfortable and compact | Density changes cell padding only; it does not add data-grid behavior or hidden controls. |
 | Aligned columns | Column alignment can support numeric or short status cells while preserving native table semantics. |
 | Semantic rows | Row tone can flag one bounded outcome, but the cell text must still name success, risk, or warning. |
+| Empty rows | An empty row preserves caption, headers, and table structure while explaining that there is nothing to compare yet. |
 
 ## Props
 
@@ -45,11 +46,13 @@ Read-only structured table primitive for public comparisons, specifications, rew
 | `caption` | `string` | - | No | Visible table title that is also exposed through a native caption. |
 | `description` | `string` | - | No | Supporting copy that explains the table's review purpose. |
 | `density` | `'comfortable' \| 'compact'` | 'comfortable' | No | Controls cell rhythm for default comparison surfaces or compact review snapshots. |
+| `emptyMessage` | `string` | 'No rows to compare yet.' | No | Visible copy shown in a single table row when rows is empty; keep it factual and non-decorative. |
 
 ## Accessibility
 
 - Uses native table, thead, tbody, th, td, and caption semantics for structured reading.
 - The scroll wrapper is focusable so keyboard users can reach horizontally overflowing tables on narrow screens.
+- Empty rows use one cell spanning the available columns, preserving table context for screen-reader and keyboard users.
 - Row tone is supplemental; cells must contain text that names the status or consequence without relying on color.
 
 ## Storybook Contract

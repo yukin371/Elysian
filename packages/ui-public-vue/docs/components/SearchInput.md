@@ -34,6 +34,7 @@ Single-line search entry for public content discovery, local list filtering, and
 | Empty | The query field and submit action remain visible without implying a result state. |
 | Has value | Clear action appears only when there is a query to remove. |
 | Submitted | Submit emits the trimmed query while the component does not own result rendering. |
+| Invalid | Invalid state keeps the visible submit path while linking repair copy through aria-describedby. |
 | Disabled | Input, clear, and submit actions are disabled together while preserving layout. |
 
 ## Props
@@ -43,6 +44,7 @@ Single-line search entry for public content discovery, local list filtering, and
 | `modelValue` | `string` | '' | No | Controlled search query value. |
 | `label` | `string` | 'Search' | No | Visible label naming the searchable content scope. |
 | `description` | `string` | - | No | Helper copy linked to the native search input. |
+| `invalidMessage` | `string` | - | No | Actionable query repair message linked to the native search input. |
 | `placeholder` | `string` | 'Search' | No | Example query or short input hint. |
 | `buttonLabel` | `string` | 'Search' | No | Visible submit button label. |
 | `clearLabel` | `string` | 'Clear search' | No | Accessible label for the clear query button. |
@@ -51,7 +53,7 @@ Single-line search entry for public content discovery, local list filtering, and
 ## Accessibility
 
 - Uses form role=search and a native input type=search.
-- The visible label names the searchable scope and helper copy is linked through aria-describedby.
+- The visible label names the searchable scope, while helper and invalid copy are linked through aria-describedby.
 - Clear and submit are native buttons with separate labels so keyboard users can recover or submit intentionally.
 
 ## Storybook Contract

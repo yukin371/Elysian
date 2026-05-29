@@ -45,11 +45,17 @@ const resolvedDescriptionId = computed(() =>
 const resolvedMessageId = computed(() =>
   props.invalidMessage ? `${resolvedInputId.value}-message` : undefined,
 )
+const selectedSummaryId = computed(() => `${resolvedInputId.value}-summary`)
 const selectedFilesId = computed(() =>
   selectedFiles.value.length > 0 ? `${resolvedInputId.value}-files` : undefined,
 )
 const describedBy = computed(() =>
-  [resolvedDescriptionId.value, selectedFilesId.value, resolvedMessageId.value]
+  [
+    resolvedDescriptionId.value,
+    selectedSummaryId.value,
+    selectedFilesId.value,
+    resolvedMessageId.value,
+  ]
     .filter(Boolean)
     .join(" "),
 )
@@ -140,7 +146,11 @@ const clearFiles = () => {
       </button>
     </div>
 
-    <span class="ely-public-file-input__summary">
+    <span
+      :id="selectedSummaryId"
+      aria-live="polite"
+      class="ely-public-file-input__summary"
+    >
       {{ selectedSummary }}
     </span>
 

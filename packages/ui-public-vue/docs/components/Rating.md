@@ -35,6 +35,7 @@ Discrete single-value feedback control for public preference, content quality, s
 | Selected | The chosen value owns aria-checked=true and lower values render as filled evidence. |
 | Read only | Displays an existing score without allowing pointer or keyboard changes. |
 | Disabled | Unavailable feedback paths remain visible while blocking interaction. |
+| Invalid | Repair copy is linked to the radiogroup when a required score or feedback rule is not satisfied. |
 
 ## Props
 
@@ -44,6 +45,7 @@ Discrete single-value feedback control for public preference, content quality, s
 | `max` | `number` | 5 | No | Maximum rating item count, clamped to a compact range. |
 | `label` | `string` | - | No | Visible rating label. |
 | `description` | `string` | - | No | Helper copy linked through aria-describedby. |
+| `invalidMessage` | `string` | - | No | Actionable rating repair message linked through aria-describedby. |
 | `readOnly` | `boolean` | false | No | Shows the score without permitting changes. |
 | `showValue` | `boolean` | true | No | Shows the current value as value/max beside the label. |
 | `disabled` | `boolean` | false | No | Disables rating changes. |
@@ -52,6 +54,7 @@ Discrete single-value feedback control for public preference, content quality, s
 
 - Uses radiogroup and radio roles so the discrete scale has familiar keyboard semantics.
 - Arrow keys, Home, and End move selection when the rating is interactive.
+- Description and invalid copy are connected through aria-describedby when present.
 - Visible copy must explain the scale because filled marks alone do not communicate meaning.
 
 ## Storybook Contract

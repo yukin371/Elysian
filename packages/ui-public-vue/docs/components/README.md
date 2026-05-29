@@ -12,7 +12,7 @@ bun run ui-public:docs:generate
 | --- | --- | --- | --- | --- | --- |
 | [Button](./Button.md) | Primary public-facing action surface with restrained radii, luminous tone, loading feedback, and clear disabled semantics. | 6 | 4 | 2 | 2 |
 | [Icon Button](./IconButton.md) | Compact icon-only action control for local toolbars, media controls, quick recovery, and small support exits with a required accessible label. | 7 | 5 | 2 | 3 |
-| [Menu](./Menu.md) | Lightweight action-menu primitive for secondary actions, local item operations, support exits, and compact overflow choices that should not become another row of primary buttons. | 7 | 4 | 2 | 2 |
+| [Menu](./Menu.md) | Lightweight action-menu primitive for secondary actions, local item operations, support exits, and compact overflow choices that should not become another row of primary buttons. | 7 | 5 | 2 | 2 |
 | [Toolbar](./Toolbar.md) | Flat local action lane for grouping primary actions, secondary actions, compact view controls, and support exits without adding another card layer. | 3 | 4 | 2 | 2 |
 
 ## Form
@@ -20,19 +20,19 @@ bun run ui-public:docs:generate
 | Component | Purpose | Props | States | Decisions | Anti-patterns |
 | --- | --- | --- | --- | --- | --- |
 | [Input](./Input.md) | Governed single-line text field for search, editing, and settings flows with label, help text, and invalid state. | 6 | 4 | 2 | 2 |
-| [Search Input](./SearchInput.md) | Single-line search entry for public content discovery, local list filtering, and support lookup with visible submit and clear actions. | 7 | 4 | 2 | 2 |
+| [Search Input](./SearchInput.md) | Single-line search entry for public content discovery, local list filtering, and support lookup with visible submit and clear actions. | 8 | 5 | 2 | 2 |
 | [Fieldset](./Fieldset.md) | Semantic field grouping primitive for public forms, consent clusters, preference sections, and repair lanes that need structure without another card layer. | 7 | 5 | 2 | 2 |
 | [Textarea](./Textarea.md) | Long-text entry primitive for comments, profile descriptions, support notes, and creator submission copy that need visible guidance and optional character count. | 9 | 5 | 2 | 2 |
-| [NumberInput](./NumberInput.md) | Exact numeric entry primitive for quantities, seats, limits, budgets, and threshold fields that need typed precision rather than approximate slider tuning. | 9 | 5 | 2 | 2 |
-| [DateInput](./DateInput.md) | Native date entry primitive for event dates, validity windows, publishing schedules, and recovery deadlines that need one exact calendar day without a heavy picker. | 8 | 5 | 2 | 2 |
+| [NumberInput](./NumberInput.md) | Exact numeric entry primitive for quantities, seats, limits, budgets, and threshold fields that need typed precision rather than approximate slider tuning. | 10 | 5 | 2 | 2 |
+| [DateInput](./DateInput.md) | Native date entry primitive for event dates, validity windows, publishing schedules, and recovery deadlines that need one exact calendar day without a heavy picker. | 9 | 5 | 2 | 2 |
 | [FileInput](./FileInput.md) | Native file selection primitive for avatars, proof documents, creator attachments, and support evidence that need clear filenames without owning upload transport. | 8 | 5 | 2 | 2 |
-| [Select](./Select.md) | Native select wrapped in the public field language for governed theme, density, and preference choices. | 6 | 4 | 2 | 2 |
-| [Slider](./Slider.md) | Single-value range control for theme intensity, ornament budget, volume, and other bounded public preferences that benefit from continuous adjustment. | 9 | 4 | 2 | 2 |
-| [Rating](./Rating.md) | Discrete single-value feedback control for public preference, content quality, satisfaction, and lightweight evaluation moments. | 7 | 4 | 2 | 2 |
-| [Switch](./Switch.md) | Binary runtime toggle for public settings where the state changes immediately and must be visually obvious. | 4 | 4 | 2 | 2 |
-| [Checkbox](./Checkbox.md) | Explicit inclusion control for independent yes/no choices that should not feel like a runtime switch. | 4 | 4 | 2 | 2 |
-| [Radio Group](./RadioGroup.md) | Single-choice decision group for density, style, or preference options with roving keyboard selection. | 3 | 4 | 2 | 2 |
-| [Segmented Control](./SegmentedControl.md) | Compact single-choice control for nearby view, density, tone, or mode preferences without opening a menu or switching panels. | 3 | 4 | 2 | 2 |
+| [Select](./Select.md) | Native select wrapped in the public field language for governed theme, density, and preference choices. | 7 | 5 | 2 | 2 |
+| [Slider](./Slider.md) | Single-value range control for theme intensity, ornament budget, volume, and other bounded public preferences that benefit from continuous adjustment. | 10 | 5 | 2 | 2 |
+| [Rating](./Rating.md) | Discrete single-value feedback control for public preference, content quality, satisfaction, and lightweight evaluation moments. | 8 | 5 | 2 | 2 |
+| [Switch](./Switch.md) | Binary runtime toggle for public settings where the state changes immediately and must be visually obvious. | 6 | 5 | 2 | 2 |
+| [Checkbox](./Checkbox.md) | Explicit inclusion control for independent yes/no choices that should not feel like a runtime switch. | 6 | 5 | 2 | 2 |
+| [Radio Group](./RadioGroup.md) | Single-choice decision group for density, style, or preference options with roving keyboard selection. | 7 | 6 | 2 | 2 |
+| [Segmented Control](./SegmentedControl.md) | Compact single-choice control for nearby view, density, tone, or mode preferences without opening a menu or switching panels. | 8 | 6 | 2 | 2 |
 
 ## Navigation
 
@@ -41,8 +41,8 @@ bun run ui-public:docs:generate
 | [Link](./Link.md) | Inline navigation surface for public copy, support actions, and lightweight escapes with governed tone, underline behavior, and external-link handling. | 4 | 4 | 2 | 2 |
 | [Breadcrumb](./Breadcrumb.md) | Compact route hierarchy primitive for public pages that need orientation, quiet backtracking, and a visible current location without turning local sections into tabs. | 5 | 5 | 3 | 2 |
 | [Pagination](./Pagination.md) | Paged collection navigation primitive for public lists, archives, reviews, and search results where users need bounded movement without confusing pagination with progress. | 8 | 4 | 3 | 2 |
-| [Stepper](./Stepper.md) | Sequential journey primitive for onboarding, checkout, publishing, and review flows where users need to understand current step, completed work, and blocked repair without mistaking the flow for tabs or pagination. | 5 | 4 | 2 | 2 |
-| [Tabs](./Tabs.md) | Section switcher for compact public surfaces with roving focus, active panel linkage, and item descriptions. | 4 | 4 | 2 | 2 |
+| [Stepper](./Stepper.md) | Sequential journey primitive for onboarding, checkout, publishing, and review flows where users need to understand current step, completed work, and blocked repair without mistaking the flow for tabs or pagination. | 6 | 5 | 2 | 2 |
+| [Tabs](./Tabs.md) | Section switcher for compact public surfaces with roving focus, active panel linkage, and item descriptions. | 5 | 5 | 2 | 2 |
 
 ## Feedback
 
@@ -64,11 +64,11 @@ bun run ui-public:docs:generate
 
 | Component | Purpose | Props | States | Decisions | Anti-patterns |
 | --- | --- | --- | --- | --- | --- |
-| [Accordion](./Accordion.md) | Progressive disclosure primitive for FAQ, policy notes, settings explanations, and compact editorial details that should stay readable without adding nested cards. | 5 | 4 | 2 | 2 |
-| [List](./List.md) | Flat structured list primitive for settings rows, content indexes, activity summaries, and lightweight navigation where repeated information should stay readable without becoming a stack of cards. | 4 | 4 | 2 | 2 |
-| [DescriptionList](./DescriptionList.md) | Semantic description-list primitive for profile facts, order summaries, event rules, and compact specification blocks where label-value pairs should read as one information surface instead of many tiny cards. | 4 | 4 | 2 | 2 |
-| [Table](./Table.md) | Read-only structured table primitive for public comparisons, specifications, reward matrices, and compact audit snapshots that need rows and columns without becoming an enterprise data grid. | 5 | 4 | 2 | 2 |
-| [Timeline](./Timeline.md) | Chronological content primitive for release notes, member history, event agendas, and editorial sequences where order matters but the user is not moving through a live stepper. | 3 | 4 | 2 | 2 |
+| [Accordion](./Accordion.md) | Progressive disclosure primitive for FAQ, policy notes, settings explanations, and compact editorial details that should stay readable without adding nested cards. | 6 | 5 | 2 | 2 |
+| [List](./List.md) | Flat structured list primitive for settings rows, content indexes, activity summaries, and lightweight navigation where repeated information should stay readable without becoming a stack of cards. | 5 | 5 | 2 | 2 |
+| [DescriptionList](./DescriptionList.md) | Semantic description-list primitive for profile facts, order summaries, event rules, and compact specification blocks where label-value pairs should read as one information surface instead of many tiny cards. | 5 | 5 | 2 | 2 |
+| [Table](./Table.md) | Read-only structured table primitive for public comparisons, specifications, reward matrices, and compact audit snapshots that need rows and columns without becoming an enterprise data grid. | 6 | 5 | 2 | 2 |
+| [Timeline](./Timeline.md) | Chronological content primitive for release notes, member history, event agendas, and editorial sequences where order matters but the user is not moving through a live stepper. | 4 | 5 | 2 | 2 |
 | [Stat](./Stat.md) | Compact summary block for public dashboards, hero strips, and content cards where one headline metric needs supporting context without reverting to ad hoc markup. | 6 | 4 | 2 | 2 |
 | [Text](./Text.md) | Governed body-copy primitive for paragraphs, compact notes, and inline emphasis so public pages can reuse the same reading rhythm instead of scattering one-off text styles. | 4 | 4 | 2 | 2 |
 | [Kbd](./Kbd.md) | Inline keyboard-hint primitive for shortcuts, command hints, review steps, and keyboard affordances where key labels should stay consistent without becoming decorative badges. | 4 | 4 | 2 | 2 |

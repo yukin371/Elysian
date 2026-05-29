@@ -48,13 +48,14 @@ Exact numeric entry primitive for quantities, seats, limits, budgets, and thresh
 | `min` | `number` | - | No | Optional lower bound used by the native input and stepper clamp. |
 | `max` | `number` | - | No | Optional upper bound used by the native input and stepper clamp. |
 | `step` | `number` | 1 | No | Native number increment and local stepper amount. |
+| `rangeText` | `string` | - | No | Optional visible range copy; when omitted, min and max generate a compact readable hint. |
 | `unit` | `string` | - | No | Visible suffix for units such as seats, minutes, days, or credits. |
 | `readOnly` | `boolean` | false | No | Prevents editing while preserving the value for review surfaces. |
 
 ## Accessibility
 
 - Uses a native number input so keyboard, mobile numeric entry, and browser value semantics remain intact.
-- Description and invalid message ids are joined in aria-describedby when present.
+- Description, generated range hint, and invalid message ids are joined in aria-describedby when present.
 - Stepper buttons have explicit increase and decrease labels, while invalid state exposes a visible correction message.
 
 ## Storybook Contract

@@ -35,6 +35,7 @@ Semantic description-list primitive for profile facts, order summaries, event ru
 | Double column | Double column supports compact profile or summary surfaces when facts are short and comparable. |
 | Comfortable and compact | Density changes spacing and value type scale while preserving the same semantic dl contract. |
 | Semantic tones | Primary, accent, muted, success, and warning tones can highlight fact importance without becoming status badges. |
+| Empty | A flat empty message keeps missing facts inside the detail block without introducing a replacement card. |
 
 ## Props
 
@@ -43,11 +44,13 @@ Semantic description-list primitive for profile facts, order summaries, event ru
 | `items` | `ElyPublicDescriptionItem[]` | - | Yes | Ordered description items with key, label, value, optional description, and optional semantic tone. |
 | `columns` | `'single' \| 'double'` | 'double' | No | Controls one-column reading rhythm or two-column compact summary layout. |
 | `density` | `'comfortable' \| 'compact'` | 'comfortable' | No | Controls spacing for editorial detail blocks or compact account summaries. |
+| `emptyMessage` | `string` | 'No details to show yet.' | No | Visible copy shown when items is empty; keep it short and reserve EmptyState for actionable recovery. |
 | `ariaLabel` | `string` | 'Details' | No | Accessible label for the detail section. |
 
 ## Accessibility
 
 - Uses native dl, dt, and dd elements so label-value relationships remain available to assistive technology.
+- Empty copy remains visible in the labeled section so users understand that details are absent, not loading.
 - Tone is supplemental; labels and values must communicate meaning without relying on color.
 - Do not place interactive controls inside value text unless the surrounding pattern owns that interaction and labels it clearly.
 

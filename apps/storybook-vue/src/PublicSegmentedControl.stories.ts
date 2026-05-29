@@ -59,10 +59,36 @@ const meta = {
       control: "text",
       description: "Accessible label for the compact radiogroup.",
     },
+    label: {
+      control: "text",
+      description: "Visible segmented group label.",
+    },
+    description: {
+      control: "text",
+      description: "Helper copy linked through aria-describedby.",
+    },
+    invalidMessage: {
+      control: "text",
+      description: "Actionable repair copy linked through aria-describedby.",
+    },
+    disabled: {
+      control: "boolean",
+      description: "Disables all segment changes.",
+    },
+    id: {
+      control: "text",
+      description: "Optional id for the segmented radiogroup.",
+    },
   },
   args: {
     ariaLabel: "View mode",
+    description:
+      "Changes the nearby preview rhythm without leaving the surface.",
+    disabled: false,
+    id: undefined,
+    invalidMessage: undefined,
     items: viewItems,
+    label: "View mode",
     modelValue: "gallery",
   },
 } satisfies Meta<typeof ElyPublicSegmentedControl>
@@ -187,8 +213,23 @@ export const States: Story = {
             <p class="ely-public-copy">Try Arrow keys, Home, and End. The selected badge mirrors the active segment.</p>
             <div class="ely-public-stack ely-story-offset-md">
               <ElyPublicSegmentedControl
-                aria-label="View state"
+                label="View state"
+                description="Keyboard focus stays inside the compact choice group."
                 v-model="selected"
+                :items="viewItems"
+              />
+              <ElyPublicSegmentedControl
+                label="Locked view"
+                description="Disabled groups keep the current choice visible."
+                disabled
+                model-value="proof"
+                :items="viewItems"
+              />
+              <ElyPublicSegmentedControl
+                label="Required review lane"
+                description="Choose the lane that matches the evidence being reviewed."
+                invalid-message="Select a review lane before approving the surface."
+                model-value=""
                 :items="viewItems"
               />
               <div class="ely-public-inline">

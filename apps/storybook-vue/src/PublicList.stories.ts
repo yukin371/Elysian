@@ -69,6 +69,10 @@ const meta = {
       control: "boolean",
       description: "Shows subtle separators between rows.",
     },
+    emptyMessage: {
+      control: "text",
+      description: "Visible lightweight copy when the list has no rows.",
+    },
     items: {
       control: "object",
       description: "Ordered list rows.",
@@ -78,6 +82,7 @@ const meta = {
     ariaLabel: "Theme review list",
     density: "comfortable",
     divided: true,
+    emptyMessage: "No review rows are available yet.",
     items: defaultItems,
   },
 } satisfies Meta<typeof ElyPublicList>
@@ -192,6 +197,11 @@ export const States: Story = {
             <div class="ely-public-stack ely-story-offset-md">
               <ElyPublicList :items="defaultItems" aria-label="Comfortable list states" />
               <ElyPublicList :items="defaultItems" density="compact" aria-label="Compact list states" />
+              <ElyPublicList
+                :items="[]"
+                aria-label="Empty list state"
+                empty-message="No saved routes yet. Keep the surface flat until a recovery action is needed."
+              />
             </div>
           </section>
 

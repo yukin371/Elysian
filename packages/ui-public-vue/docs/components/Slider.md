@@ -35,6 +35,7 @@ Single-value range control for theme intensity, ornament budget, volume, and oth
 | Step | step controls the native keyboard and pointer increment for coarse or fine tuning. |
 | With value | showValue exposes the current numeric value and optional unit beside the label. |
 | Disabled | Unavailable ranges remain visible while blocking pointer and keyboard updates. |
+| Invalid | Repair copy is linked to the native range input without hiding the current value. |
 
 ## Props
 
@@ -46,6 +47,7 @@ Single-value range control for theme intensity, ornament budget, volume, and oth
 | `step` | `number` | 1 | No | Native increment used by pointer and keyboard changes. |
 | `label` | `string` | - | No | Visible range label. |
 | `description` | `string` | - | No | Helper copy linked through aria-describedby. |
+| `invalidMessage` | `string` | - | No | Actionable range repair message linked through aria-describedby. |
 | `unit` | `string` | '' | No | Optional suffix shown with the current value and scale. |
 | `showValue` | `boolean` | true | No | Shows the current numeric value beside the label. |
 | `disabled` | `boolean` | false | No | Disables range changes. |
@@ -53,7 +55,8 @@ Single-value range control for theme intensity, ornament budget, volume, and oth
 ## Accessibility
 
 - Uses native input type=range so keyboard and assistive technology semantics are preserved.
-- Description copy is linked to the control when provided.
+- Description and invalid copy are linked to the control when provided.
+- Invalid state sets aria-invalid while preserving the visible range value and min/max scale.
 - Visible labels and units must explain the scale because color alone cannot communicate intensity.
 
 ## Storybook Contract

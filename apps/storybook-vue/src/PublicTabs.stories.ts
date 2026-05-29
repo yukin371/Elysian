@@ -42,10 +42,15 @@ const meta = {
     items: { control: "object", description: "Tab item definitions." },
     modelValue: { control: "text", description: "Controlled active key." },
     ariaLabel: { control: "text", description: "Accessible tablist label." },
+    emptyMessage: {
+      control: "text",
+      description: "Visible lightweight copy when no local sections exist.",
+    },
     idBase: { control: "text", description: "Stable id prefix." },
   },
   args: {
     ariaLabel: "Creation stages",
+    emptyMessage: "No local sections are available yet.",
     items,
     modelValue: "discover",
   },
@@ -253,6 +258,11 @@ export const States: Story = {
                   </div>
                 </template>
               </ElyPublicTabs>
+              <ElyPublicTabs
+                :items="[]"
+                aria-label="Empty tabs"
+                empty-message="No peer sections yet. Use Text or EmptyState only when there is a recovery action."
+              />
             </div>
           </section>
           <section class="ely-story-doc-panel">

@@ -68,6 +68,10 @@ const meta = {
       options: ["comfortable", "compact"],
       description: "Visual rhythm for editorial or dense history timelines.",
     },
+    emptyMessage: {
+      control: "text",
+      description: "Visible lightweight copy when there are no timeline items.",
+    },
     items: {
       control: "object",
       description: "Ordered timeline items.",
@@ -76,6 +80,7 @@ const meta = {
   args: {
     ariaLabel: "Theme release history",
     density: "comfortable",
+    emptyMessage: "No timeline events have been recorded yet.",
     items: releaseItems,
   },
 } satisfies Meta<typeof ElyPublicTimeline>
@@ -190,6 +195,11 @@ export const States: Story = {
             <div class="ely-public-stack ely-story-offset-md">
               <ElyPublicTimeline :items="releaseItems" aria-label="Comfortable timeline states" />
               <ElyPublicTimeline :items="releaseItems" density="compact" aria-label="Compact timeline states" />
+              <ElyPublicTimeline
+                :items="[]"
+                aria-label="Empty timeline"
+                empty-message="No milestones yet. Let the surface explain absence without a second card."
+              />
             </div>
           </section>
 

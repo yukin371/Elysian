@@ -192,6 +192,18 @@
   grid-template-columns: 1fr;
 }
 
+.ely-public-stepper__empty {
+  margin: 0;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  padding: 0.92rem 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
+}
+
 .ely-public-stepper__item {
   position: relative;
   min-width: 0;
@@ -302,6 +314,30 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.ely-public-timeline__empty {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 1.76rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
+}
+
+.ely-public-timeline__empty::before {
+  position: absolute;
+  top: 0.38rem;
+  left: 0;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid
+    color-mix(in oklab, var(--color-primary) 42%, var(--color-line));
+  border-radius: 999px;
+  background: var(--color-primary-container);
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--color-primary) 8%, transparent);
+  content: "";
 }
 
 .ely-public-timeline__item {
@@ -438,6 +474,17 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.ely-public-list__empty {
+  margin: 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 76%, transparent);
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 62%, transparent);
+  padding: 0.92rem 0.9rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
 }
 
 .ely-public-list__item {
@@ -588,6 +635,26 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   margin: 0;
+}
+
+.ely-public-description-list__empty {
+  position: relative;
+  margin: 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 76%, transparent);
+  padding: 0.94rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
+}
+
+.ely-public-description-list__empty::before {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 2.6rem;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-primary) 48%, transparent);
+  content: "";
 }
 
 .ely-public-description-list[data-columns="single"]
@@ -888,6 +955,13 @@
   );
 }
 
+.ely-public-table .ely-public-table__empty {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
+  text-align: center;
+}
+
 .ely-public-table tbody tr[data-tone]:not([data-tone="muted"]) td:first-child {
   box-shadow: inset 3px 0 0
     color-mix(in oklab, var(--ely-public-table-row-tone) 72%, transparent);
@@ -1104,6 +1178,18 @@
   gap: 0.7rem;
 }
 
+.ely-public-accordion__empty {
+  margin: 0;
+  border: 1px solid var(--color-material-line-glint);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+  box-shadow: inset 0 1px 0 var(--color-material-sheen);
+  padding: 1rem 1.05rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
 .ely-public-accordion__item {
   overflow: hidden;
   border: 1px solid var(--color-material-line-glint);
@@ -1295,14 +1381,33 @@
 }
 
 .ely-public-checkbox:hover:not(:disabled),
-.ely-public-radio:hover {
+.ely-public-radio:hover:not(:disabled) {
   transform: translateY(-1px);
   border-color: color-mix(in oklab, var(--color-primary) 18%, var(--color-line));
 }
 
-.ely-public-checkbox:disabled {
+.ely-public-checkbox:disabled,
+.ely-public-radio:disabled {
   cursor: not-allowed;
   opacity: 0.62;
+}
+
+.ely-public-field[data-invalid="true"] .ely-public-checkbox {
+  border-color: color-mix(in oklab, var(--color-danger) 30%, var(--color-line));
+  background: color-mix(
+    in oklab,
+    var(--color-danger-container) 22%,
+    var(--color-surface)
+  );
+}
+
+.ely-public-field[data-invalid="true"]
+  .ely-public-checkbox[data-state="checked"]
+  .ely-public-checkbox__control {
+  border-color: color-mix(in oklab, var(--color-danger) 42%, var(--color-line));
+  background: var(--color-danger-container);
+  box-shadow: 0 8px 18px
+    color-mix(in oklab, var(--color-danger) 14%, transparent);
 }
 
 .ely-public-checkbox__control,
@@ -1415,6 +1520,20 @@
   opacity: 0.62;
 }
 
+.ely-public-field[data-invalid="true"] .ely-public-switch {
+  border-color: color-mix(in oklab, var(--color-danger) 30%, var(--color-line));
+  background: color-mix(
+    in oklab,
+    var(--color-danger-container) 22%,
+    var(--color-surface)
+  );
+}
+
+.ely-public-field[data-invalid="true"] .ely-public-switch__control {
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--color-danger) 32%, var(--color-line));
+}
+
 .ely-public-switch__control {
   display: inline-flex;
   align-items: center;
@@ -1469,6 +1588,15 @@
   gap: 0.9rem;
 }
 
+.ely-public-field[data-invalid="true"] .ely-public-radio {
+  border-color: color-mix(in oklab, var(--color-danger) 26%, var(--color-line));
+}
+
+.ely-public-field[data-invalid="true"] .ely-public-radio[data-state="checked"] {
+  border-color: color-mix(in oklab, var(--color-danger) 42%, var(--color-line));
+  background: var(--color-danger-container);
+}
+
 .ely-public-segmented {
   display: inline-grid;
   grid-auto-flow: column;
@@ -1512,6 +1640,37 @@
   );
 }
 
+.ely-public-segmented__item:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.ely-public-segmented__item:hover:disabled {
+  color: var(--color-text-muted);
+  background: transparent;
+}
+
+.ely-public-field[data-invalid="true"] .ely-public-segmented {
+  border-color: color-mix(in oklab, var(--color-danger) 30%, var(--color-line));
+  background: color-mix(
+    in oklab,
+    var(--color-danger-container) 18%,
+    var(--color-surface)
+  );
+}
+
+.ely-public-field[data-invalid="true"]
+  .ely-public-segmented__item[data-state="checked"] {
+  color: var(--color-danger);
+  background: color-mix(
+    in oklab,
+    var(--color-danger-container) 46%,
+    var(--color-surface)
+  );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--color-danger) 34%, var(--color-line));
+}
+
 .ely-public-segmented__item[data-state="checked"] {
   color: var(--color-primary);
   background: color-mix(
@@ -1547,6 +1706,18 @@
 .ely-public-tabs {
   display: grid;
   gap: 1rem;
+}
+
+.ely-public-tabs__empty {
+  margin: 0;
+  border: 1px solid
+    color-mix(in oklab, var(--color-line) 82%, var(--color-surface) 18%);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 90%, transparent);
+  padding: 0.9rem 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
 }
 
 .ely-public-tabs__list {

@@ -13,6 +13,7 @@ const props = withDefaults(
     modelValue?: number | null
     name?: string
     placeholder?: string
+    rangeText?: string
     readOnly?: boolean
     step?: number
     unit?: string
@@ -28,6 +29,7 @@ const props = withDefaults(
     modelValue: null,
     name: undefined,
     placeholder: "",
+    rangeText: undefined,
     readOnly: false,
     step: 1,
     unit: undefined,
@@ -48,13 +50,37 @@ const resolvedDescriptionId = computed(() =>
 const resolvedMessageId = computed(() =>
   props.invalidMessage ? `${resolvedInputId.value}-message` : undefined,
 )
+const resolvedRangeId = computed(() =>
+  displayedRangeText.value ? `${resolvedInputId.value}-range` : undefined,
+)
 const describedBy = computed(() =>
-  [resolvedDescriptionId.value, resolvedMessageId.value]
+  [resolvedDescriptionId.value, resolvedRangeId.value, resolvedMessageId.value]
     .filter(Boolean)
     .join(" "),
 )
 const displayedValue = computed(() => props.modelValue ?? "")
 const canStep = computed(() => !props.disabled && !props.readOnly)
+const formatBoundary = (value: number) =>
+  props.unit ? `${value} ${props.unit}` : String(value)
+const displayedRangeText = computed(() => {
+  if (props.rangeText) {
+    return props.rangeText
+  }
+
+  if (props.min !== undefined && props.max !== undefined) {
+    return `Allowed range: ${formatBoundary(props.min)} to ${formatBoundary(props.max)}.`
+  }
+
+  if (props.min !== undefined) {
+    return `Minimum: ${formatBoundary(props.min)}.`
+  }
+
+  if (props.max !== undefined) {
+    return `Maximum: ${formatBoundary(props.max)}.`
+  }
+
+  return undefined
+})
 
 const parseInputValue = (value: string) => {
   if (value.trim() === "") {
@@ -148,6 +174,14 @@ const stepValue = (direction: -1 | 1) => {
           -
         </button>
       </span>
+    </span>
+
+    <span
+      v-if="displayedRangeText"
+      :id="resolvedRangeId"
+      class="ely-public-field__meta"
+    >
+      {{ displayedRangeText }}
     </span>
 
     <span

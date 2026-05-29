@@ -5,6 +5,7 @@ import type { ElyPublicStepItem, ElyPublicStepStatus } from "./contracts"
 const props = withDefaults(
   defineProps<{
     ariaLabel?: string
+    emptyMessage?: string
     interactive?: boolean
     items: ElyPublicStepItem[]
     modelValue?: string
@@ -12,6 +13,7 @@ const props = withDefaults(
   }>(),
   {
     ariaLabel: "Steps",
+    emptyMessage: "No steps to show yet.",
     interactive: false,
     modelValue: undefined,
     orientation: "horizontal",
@@ -63,7 +65,10 @@ const selectStep = (item: ElyPublicStepItem, index: number) => {
     :data-interactive="interactive ? 'true' : 'false'"
     :data-orientation="orientation"
   >
-    <ol class="ely-public-stepper__list">
+    <p v-if="items.length === 0" class="ely-public-stepper__empty">
+      {{ emptyMessage }}
+    </p>
+    <ol v-else class="ely-public-stepper__list">
       <li
         v-for="(item, index) in items"
         :key="item.key"

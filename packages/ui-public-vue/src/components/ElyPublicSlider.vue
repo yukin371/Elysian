@@ -6,6 +6,7 @@ const props = withDefaults(
     description?: string
     disabled?: boolean
     id?: string
+    invalidMessage?: string
     label?: string
     max?: number
     min?: number
@@ -19,6 +20,7 @@ const props = withDefaults(
     description: undefined,
     disabled: false,
     id: undefined,
+    invalidMessage: undefined,
     label: undefined,
     max: 100,
     min: 0,
@@ -40,6 +42,14 @@ const resolvedInputId = computed(
 )
 const resolvedDescriptionId = computed(() =>
   props.description ? `${resolvedInputId.value}-description` : undefined,
+)
+const resolvedMessageId = computed(() =>
+  props.invalidMessage ? `${resolvedInputId.value}-message` : undefined,
+)
+const describedBy = computed(() =>
+  [resolvedDescriptionId.value, resolvedMessageId.value]
+    .filter(Boolean)
+    .join(" "),
 )
 const percentage = computed(() => {
   const range = props.max - props.min
@@ -65,7 +75,10 @@ const updateValue = (event: Event) => {
 </script>
 
 <template>
-  <label class="ely-public-field ely-public-slider-field">
+  <label
+    class="ely-public-field ely-public-slider-field"
+    :data-invalid="invalidMessage ? 'true' : 'false'"
+  >
     <span class="ely-public-slider-field__header">
       <span v-if="label" class="ely-public-field__label">{{ label }}</span>
       <output
@@ -85,7 +98,8 @@ const updateValue = (event: Event) => {
     </span>
     <input
       :id="resolvedInputId"
-      :aria-describedby="resolvedDescriptionId"
+      :aria-describedby="describedBy || undefined"
+      :aria-invalid="invalidMessage ? 'true' : 'false'"
       class="ely-public-slider"
       :disabled="disabled"
       :max="max"
@@ -100,6 +114,13 @@ const updateValue = (event: Event) => {
     <span class="ely-public-slider-field__scale" aria-hidden="true">
       <span>{{ min }}{{ unit }}</span>
       <span>{{ max }}{{ unit }}</span>
+    </span>
+    <span
+      v-if="invalidMessage"
+      :id="resolvedMessageId"
+      class="ely-public-field__message"
+    >
+      {{ invalidMessage }}
     </span>
   </label>
 </template>

@@ -57,6 +57,10 @@ const meta = {
       control: "text",
       description: "Helper copy linked through aria-describedby.",
     },
+    invalidMessage: {
+      control: "text",
+      description: "Visible query repair copy linked through aria-describedby.",
+    },
     placeholder: { control: "text", description: "Example query hint." },
     buttonLabel: { control: "text", description: "Submit button label." },
     clearLabel: {
@@ -70,6 +74,7 @@ const meta = {
     clearLabel: "Clear archive search",
     description: "Search titles, theme notes, and public handoff evidence.",
     disabled: false,
+    invalidMessage: undefined,
     label: "Search archive",
     modelValue: "",
     placeholder: "Try Elysia or reward",

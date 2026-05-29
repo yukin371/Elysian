@@ -219,8 +219,24 @@ export const States: Story = {
           meta: "Locked",
         },
       ] satisfies ElyPublicMenuItem[]
+      const unavailableItems = [
+        {
+          key: "export",
+          label: "Export locked",
+          description: "Complete review before export becomes available.",
+          disabled: true,
+          meta: "Locked",
+        },
+        {
+          key: "publish",
+          label: "Publish locked",
+          description: "Resolve contrast findings before publishing.",
+          disabled: true,
+          meta: "Blocked",
+        },
+      ] satisfies ElyPublicMenuItem[]
 
-      return { currentItems, doc, menuItems }
+      return { currentItems, doc, menuItems, unavailableItems }
     },
     template: `
       <section class="ely-public-stage">
@@ -233,9 +249,10 @@ export const States: Story = {
                 <ElyPublicMenu trigger-label="Start aligned" aria-label="Start aligned actions" :items="menuItems" />
                 <ElyPublicMenu trigger-label="End aligned" align="end" aria-label="End aligned actions" :items="currentItems" />
                 <ElyPublicMenu trigger-label="Disabled menu" aria-label="Disabled menu" :items="menuItems" disabled />
+                <ElyPublicMenu trigger-label="Unavailable actions" aria-label="Unavailable actions" :items="unavailableItems" open />
               </div>
               <ElyPublicText tone="muted">
-                Current and disabled states carry structural meaning; tone only reinforces the text and native control state.
+                Current and disabled states carry structural meaning; a fully unavailable controlled menu stays closed instead of exposing an empty panel.
               </ElyPublicText>
             </div>
           </section>

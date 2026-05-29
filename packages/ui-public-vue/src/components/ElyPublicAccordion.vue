@@ -5,6 +5,7 @@ import type { ElyPublicAccordionItem } from "./contracts"
 const props = withDefaults(
   defineProps<{
     ariaLabel?: string
+    emptyMessage?: string
     idBase?: string
     items: ElyPublicAccordionItem[]
     modelValue?: string[]
@@ -12,6 +13,7 @@ const props = withDefaults(
   }>(),
   {
     ariaLabel: "Disclosure sections",
+    emptyMessage: "No sections to show yet.",
     idBase: undefined,
     modelValue: () => [],
     multiple: false,
@@ -47,7 +49,11 @@ const toggleItem = (key: string) => {
 
 <template>
   <div class="ely-public-accordion" :aria-label="ariaLabel">
+    <p v-if="items.length === 0" class="ely-public-accordion__empty">
+      {{ emptyMessage }}
+    </p>
     <section
+      v-else
       v-for="item in items"
       :key="item.key"
       class="ely-public-accordion__item"

@@ -13,6 +13,7 @@ const props = withDefaults(
     modelValue?: string
     name?: string
     placeholder?: string
+    rangeText?: string
     readOnly?: boolean
   }>(),
   {
@@ -26,6 +27,7 @@ const props = withDefaults(
     modelValue: "",
     name: undefined,
     placeholder: "",
+    rangeText: undefined,
     readOnly: false,
   },
 )
@@ -44,8 +46,30 @@ const resolvedDescriptionId = computed(() =>
 const resolvedMessageId = computed(() =>
   props.invalidMessage ? `${resolvedInputId.value}-message` : undefined,
 )
+const displayedRangeText = computed(() => {
+  if (props.rangeText) {
+    return props.rangeText
+  }
+
+  if (props.min && props.max) {
+    return `Allowed dates: ${props.min} to ${props.max}.`
+  }
+
+  if (props.min) {
+    return `Earliest date: ${props.min}.`
+  }
+
+  if (props.max) {
+    return `Latest date: ${props.max}.`
+  }
+
+  return undefined
+})
+const resolvedRangeId = computed(() =>
+  displayedRangeText.value ? `${resolvedInputId.value}-range` : undefined,
+)
 const describedBy = computed(() =>
-  [resolvedDescriptionId.value, resolvedMessageId.value]
+  [resolvedDescriptionId.value, resolvedRangeId.value, resolvedMessageId.value]
     .filter(Boolean)
     .join(" "),
 )
@@ -84,6 +108,14 @@ const updateValue = (event: Event) => {
       :value="modelValue"
       @input="updateValue"
     />
+
+    <span
+      v-if="displayedRangeText"
+      :id="resolvedRangeId"
+      class="ely-public-field__meta"
+    >
+      {{ displayedRangeText }}
+    </span>
 
     <span
       v-if="invalidMessage"

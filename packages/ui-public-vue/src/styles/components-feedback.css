@@ -528,6 +528,29 @@
   cursor: default;
 }
 
+.ely-public-field[data-invalid="true"] .ely-public-rating__item {
+  --ely-public-rating-color: color-mix(
+    in oklab,
+    var(--color-danger) 56%,
+    var(--color-line-strong)
+  );
+}
+
+.ely-public-field[data-invalid="true"]
+  .ely-public-rating__item[data-active="true"] {
+  --ely-public-rating-color: var(--color-danger);
+}
+
+.ely-public-field[data-invalid="true"]
+  .ely-public-rating__item[data-state="checked"] {
+  border-color: color-mix(in oklab, var(--color-danger) 34%, var(--color-line));
+  background: color-mix(
+    in oklab,
+    var(--color-danger-container) 34%,
+    transparent
+  );
+}
+
 .ely-public-rating__mark {
   display: block;
   width: 1rem;

@@ -35,6 +35,7 @@ Section switcher for compact public surfaces with roving focus, active panel lin
 | Keyboard | Arrow keys, Home, and End move selection and focus. |
 | Descriptions | Optional descriptions help distinguish adjacent workflow stages. |
 | Panel | Default slot receives activeItem and activeKey. |
+| Empty | A flat empty message replaces the tablist and panel when there are no sections, avoiding invalid tab semantics. |
 
 ## Props
 
@@ -42,6 +43,7 @@ Section switcher for compact public surfaces with roving focus, active panel lin
 | --- | --- | --- | --- | --- |
 | `items` | `ElyPublicTabItem[]` | - | Yes | Tab key, label, and optional description definitions. |
 | `modelValue` | `string` | - | No | Controlled active tab key. |
+| `emptyMessage` | `string` | 'No sections to show yet.' | No | Visible copy shown when items is empty; use it for absent local sections, not loading or route errors. |
 | `ariaLabel` | `string` | 'Tabs' | No | Accessible label for the tablist. |
 | `idBase` | `string` | - | No | Optional stable id prefix for tab and panel linkage. |
 
@@ -50,6 +52,7 @@ Section switcher for compact public surfaces with roving focus, active panel lin
 - Uses role=tablist, role=tab, and role=tabpanel.
 - Tabs and panels are connected with aria-controls and aria-labelledby.
 - Roving tabindex keeps keyboard focus predictable.
+- When no tabs exist, the component avoids rendering an empty tablist or orphaned panel.
 
 ## Storybook Contract
 

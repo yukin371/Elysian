@@ -71,6 +71,10 @@ const meta = {
       options: ["comfortable", "compact"],
       description: "Spacing rhythm for comfortable or compact detail groups.",
     },
+    emptyMessage: {
+      control: "text",
+      description: "Visible lightweight copy when no detail facts are present.",
+    },
     items: {
       control: "object",
       description: "Ordered label-value detail items.",
@@ -80,6 +84,7 @@ const meta = {
     ariaLabel: "Theme details",
     columns: "double",
     density: "comfortable",
+    emptyMessage: "No details have been recorded yet.",
     items: defaultItems,
   },
 } satisfies Meta<typeof ElyPublicDescriptionList>
@@ -194,6 +199,11 @@ export const States: Story = {
             <div class="ely-public-stack ely-story-offset-md">
               <ElyPublicDescriptionList :items="defaultItems" aria-label="Double-column detail states" />
               <ElyPublicDescriptionList :items="defaultItems" columns="single" density="compact" aria-label="Compact detail states" />
+              <ElyPublicDescriptionList
+                :items="[]"
+                aria-label="Empty detail state"
+                empty-message="No profile facts yet. Do not add a second card just to explain absence."
+              />
             </div>
           </section>
 

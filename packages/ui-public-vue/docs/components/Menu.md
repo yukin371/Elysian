@@ -34,6 +34,7 @@ Lightweight action-menu primitive for secondary actions, local item operations, 
 | Closed and open | The trigger owns aria-expanded and controls a single menu panel that appears only while open. |
 | Action and link items | Items can render as buttons for local actions or anchors for lightweight exits without becoming global navigation. |
 | Disabled and current | Disabled items remain visible but cannot be focused or selected; current links expose aria-current. |
+| Unavailable | A disabled trigger or a menu with no enabled actions does not render an empty panel, even when open is controlled. |
 | Keyboard review | Arrow keys, Home, End, Escape, Enter, and Space support basic menu operation without a command-palette abstraction. |
 
 ## Props
@@ -52,6 +53,7 @@ Lightweight action-menu primitive for secondary actions, local item operations, 
 
 - The trigger is a native button with aria-haspopup=menu, aria-expanded, and aria-controls.
 - The panel uses role=menu and items use role=menuitem while preserving native button or anchor behavior.
+- Empty or fully disabled action sets keep the trigger closed instead of exposing a hollow menu to keyboard or screen-reader users.
 - Keyboard support includes open from Enter/Space/Arrow keys, item movement with arrows, Home/End, Escape close, and outside-click dismissal.
 
 ## Storybook Contract

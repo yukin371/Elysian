@@ -6,12 +6,14 @@ withDefaults(
     ariaLabel?: string
     density?: "comfortable" | "compact"
     divided?: boolean
+    emptyMessage?: string
     items: ElyPublicListItem[]
   }>(),
   {
     ariaLabel: "List",
     density: "comfortable",
     divided: true,
+    emptyMessage: "No items to show yet.",
   },
 )
 
@@ -26,7 +28,10 @@ const getItemTag = (item: ElyPublicListItem) =>
     :data-density="density"
     :data-divided="divided ? 'true' : 'false'"
   >
-    <ul class="ely-public-list__items">
+    <p v-if="items.length === 0" class="ely-public-list__empty">
+      {{ emptyMessage }}
+    </p>
+    <ul v-else class="ely-public-list__items">
       <li
         v-for="item in items"
         :key="item.key"

@@ -29,6 +29,14 @@ const meta = {
       description: "Helper copy linked to the range input.",
     },
     disabled: { control: "boolean", description: "Disables range changes." },
+    invalidMessage: {
+      control: "text",
+      description: "Actionable repair copy linked through aria-describedby.",
+    },
+    id: {
+      control: "text",
+      description: "Optional id for the range input.",
+    },
     label: { control: "text", description: "Visible range label." },
     max: { control: "number", description: "Upper range bound." },
     min: { control: "number", description: "Lower range bound." },
@@ -46,6 +54,8 @@ const meta = {
   args: {
     description: "Adjust the theme expression without changing component API.",
     disabled: false,
+    id: undefined,
+    invalidMessage: undefined,
     label: "Ornament intensity",
     max: 100,
     min: 0,
@@ -198,6 +208,13 @@ export const States: Story = {
                 disabled
                 label="Locked campaign glow"
                 description="Disabled range keeps the current setting visible."
+                unit="%"
+              />
+              <ElyPublicSlider
+                :model-value="92"
+                label="Motion intensity"
+                description="Higher values require reduced-motion evidence before approval."
+                invalid-message="Lower motion intensity or attach reduced-motion proof."
                 unit="%"
               />
             </div>

@@ -31,7 +31,7 @@ Native file selection primitive for avatars, proof documents, creator attachment
 
 | State | Description |
 | --- | --- |
-| Empty | Empty state shows stable no-file copy while the native control remains available. |
+| Empty | Empty state shows stable no-file copy, links that summary to the native control, and keeps the picker available. |
 | Selected file | Single selection exposes the filename and keeps native file picker semantics intact. |
 | Multiple files | Multiple selection summarizes count and lists filenames without becoming an upload queue. |
 | Invalid | Invalid state links visible repair copy through aria-describedby and sets aria-invalid. |
@@ -53,7 +53,8 @@ Native file selection primitive for avatars, proof documents, creator attachment
 ## Accessibility
 
 - Uses a native file input so platform picker semantics and keyboard access remain intact.
-- Generated ids connect helper copy, selected filenames, and invalid copy through aria-describedby.
+- Generated ids connect helper copy, selection summary, selected filenames, and invalid copy through aria-describedby.
+- Selection summary uses a polite live region so selected or cleared files are announced without adding an upload queue.
 - Selected filenames are displayed as text and invalid state does not rely on color alone.
 
 ## Storybook Contract

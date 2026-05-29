@@ -35,6 +35,7 @@ Binary runtime toggle for public settings where the state changes immediately an
 | Unchecked | Off state with subdued control treatment. |
 | Disabled | Preserves state visibility while blocking interaction. |
 | With description | Supports explanatory copy beside the control. |
+| Invalid | Repair copy is linked through aria-describedby when a preference cannot be accepted. |
 
 ## Props
 
@@ -42,13 +43,16 @@ Binary runtime toggle for public settings where the state changes immediately an
 | --- | --- | --- | --- | --- |
 | `modelValue` | `boolean` | false | No | Controlled checked state. |
 | `label` | `string` | - | No | Visible switch label. |
-| `description` | `string` | - | No | Supporting copy under the label. |
+| `description` | `string` | - | No | Supporting copy under the label linked through aria-describedby. |
+| `invalidMessage` | `string` | - | No | Actionable preference repair message linked through aria-describedby. |
+| `id` | `string` | - | No | Optional id for the switch button and generated helper ids. |
 | `disabled` | `boolean` | false | No | Disables state changes. |
 
 ## Accessibility
 
 - Uses role=switch and aria-checked.
 - Keyboard activation is inherited from the native button.
+- Description and invalid copy are connected through aria-describedby when present.
 - Visible labels should explain the setting without relying on color.
 
 ## Storybook Contract

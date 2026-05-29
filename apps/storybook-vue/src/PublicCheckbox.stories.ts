@@ -31,6 +31,14 @@ const meta = {
       control: "text",
       description: "Supporting copy under the label.",
     },
+    invalidMessage: {
+      control: "text",
+      description: "Actionable repair copy linked through aria-describedby.",
+    },
+    id: {
+      control: "text",
+      description: "Optional id for the checkbox button.",
+    },
     disabled: {
       control: "boolean",
       description: "Disables selection changes.",
@@ -39,6 +47,8 @@ const meta = {
   args: {
     description: "Use compact density for denser review surfaces.",
     disabled: false,
+    id: undefined,
+    invalidMessage: undefined,
     label: "Enable compact control density",
     modelValue: false,
   },
@@ -218,6 +228,12 @@ export const States: Story = {
                 disabled
                 label="Locked editorial sync"
                 description="An already-governed setting can appear read-only."
+              />
+              <ElyPublicCheckbox
+                :model-value="false"
+                label="I reviewed the dark mode snapshot"
+                description="Required before the theme evidence can move forward."
+                invalid-message="Review the dark mode snapshot before continuing."
               />
             </div>
           </section>
