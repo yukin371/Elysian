@@ -7,6 +7,7 @@ export const PUBLIC_THEME_NAMES = [
   "rose-nocturne",
   "azure-aria",
   "enterprise-calm",
+  "dreamy-sakura",
 ] as const
 
 export type PublicThemeName = (typeof PUBLIC_THEME_NAMES)[number]
@@ -162,6 +163,32 @@ export const publicThemePacks: PublicThemePack[] = [
       heroTo: "#6c7f9e",
       accent: "#9aaac2",
       surface: "#f6f8fb",
+    },
+  },
+  {
+    key: "dreamy-sakura",
+    displayName: "Dreamy Sakura",
+    description:
+      "A kawaii dreamy theme with cherry-blossom pink actions, lavender ribbons, peach warmth, and pearl-petal surfaces that feel like an anime morning.",
+    mood: "Dreamy, kawaii, pastel, gentle",
+    accentLabel: "Sakura petal",
+    personality: "Dreamy sakura theme",
+    bestFor:
+      "Anime-leaning creator spaces, kawaii brand identity, member rewards, playful onboarding, and fan-community surfaces.",
+    designCue:
+      "Sakura pink leads action with soft warmth, lavender adds dreamy depth, peach keeps accents lively without shouting.",
+    expressionLevel: "Vivid",
+    preview: {
+      dark: {
+        heroFrom: "#1e1230",
+        heroTo: "#e8a0bf",
+        accent: "#ffcc80",
+        surface: "#2a1a3e",
+      },
+      heroFrom: "#fff0f6",
+      heroTo: "#e8a0bf",
+      accent: "#c9a0dc",
+      surface: "#fff8fa",
     },
   },
 ]
