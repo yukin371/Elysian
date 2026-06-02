@@ -306,6 +306,52 @@ export const InteractiveScenarios: Story = {
   }),
 }
 
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicStepper, ElyPublicText },
+    setup() {
+      const currentStep = ref("details")
+
+      const steps = [
+        {
+          key: "details",
+          label: "Details",
+          description: "Submission metadata",
+        },
+        { key: "evidence", label: "Evidence", description: "Attach proof" },
+        { key: "review", label: "Review", description: "Final checks" },
+        { key: "release", label: "Release", description: "Publish" },
+      ]
+
+      return { currentStep, steps }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Stepper keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Tab to focus, Enter or Space to navigate steps</h1>
+            <p class="ely-public-copy">
+              When interactive mode is enabled, Tab focuses the stepper and Enter or Space activates the focused step. Disabled steps are skipped in the tab order.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicStepper
+                v-model="currentStep"
+                aria-label="Keyboard navigation steps"
+                interactive
+                :items="steps"
+              />
+              <ElyPublicText>
+                Current step: {{ currentStep }}. Tab into the stepper, then use Tab to move between steps. Press Enter or Space to select a step.
+              </ElyPublicText>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicAlert, ElyPublicButton, ElyPublicStepper },

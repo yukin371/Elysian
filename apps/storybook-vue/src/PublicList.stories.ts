@@ -330,6 +330,68 @@ export const NavigationScenarios: Story = {
   }),
 }
 
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicList, ElyPublicText },
+    setup() {
+      const items = [
+        {
+          key: "profile",
+          title: "Profile settings",
+          description: "Display name, avatar, and public bio",
+          meta: "Settings",
+          href: "#profile",
+        },
+        {
+          key: "notifications",
+          title: "Notification preferences",
+          description: "Email and in-app alert rules",
+          meta: "Settings",
+          href: "#notifications",
+        },
+        {
+          key: "privacy",
+          title: "Privacy controls",
+          description: "Visibility and data sharing rules",
+          meta: "Settings",
+          href: "#privacy",
+        },
+        {
+          key: "locked",
+          title: "Organization policy",
+          description: "Managed by your organization",
+          meta: "Locked",
+          disabled: true,
+        },
+      ]
+
+      return { items }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">List keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Tab to links, Enter to activate, disabled items are skipped</h1>
+            <p class="ely-public-copy">
+              Linked list items are focusable. Tab moves between them, and Enter activates the link. Disabled items are not focusable and aria-disabled is set.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicList
+                aria-label="Keyboard navigation list"
+                :items="items"
+              />
+              <ElyPublicText>
+                Linked items render as anchor elements with native keyboard behavior. Disabled items use aria-disabled and are excluded from the tab order.
+              </ElyPublicText>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicAlert, ElyPublicList },
