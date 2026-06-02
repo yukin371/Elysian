@@ -347,6 +347,41 @@ export const BudgetScenarios: Story = {
   }),
 }
 
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicSlider, ElyPublicText },
+    setup() {
+      const ornament = ref(50)
+
+      return { ornament }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Slider keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Arrow keys adjust one bounded value at a time</h1>
+            <p class="ely-public-copy">
+              Tab into a slider, then use ArrowRight to increase, ArrowLeft to decrease, Home for minimum, and End for maximum.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicSlider
+                v-model="ornament"
+                label="Keyboard-controlled intensity"
+                description="Focus this slider and use arrow keys. Each press moves the value by one step."
+                unit="%"
+              />
+              <ElyPublicText>
+                Step size follows the step prop. When step is 1, each arrow press moves the value by 1. When step is 5, each press moves by 5.
+              </ElyPublicText>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicAlert, ElyPublicSlider },

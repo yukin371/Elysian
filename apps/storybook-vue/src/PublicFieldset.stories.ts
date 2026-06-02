@@ -373,6 +373,79 @@ export const ConsentGroupScenarios: Story = {
   }),
 }
 
+export const TonesMatrix: Story = {
+  render: () => ({
+    components: { ElyPublicCheckbox, ElyPublicFieldset },
+    setup() {
+      const checked = ref(true)
+
+      return { checked }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Fieldset tones</p>
+            <h1 class="ely-public-section-title">Neutral, primary, accent, and danger change semantic emphasis</h1>
+            <p class="ely-public-copy">
+              Each tone adjusts the fieldset border and legend color. Use neutral for standard groups, primary for key decisions, accent for preference groups, and danger for required consent or warning groups.
+            </p>
+            <div class="ely-public-card-grid ely-story-offset-md">
+              <ElyPublicFieldset
+                legend="Neutral (default)"
+                tone="neutral"
+                description="Standard grouping without extra emphasis."
+              >
+                <ElyPublicCheckbox
+                  v-model="checked"
+                  label="Standard option"
+                  description="Neutral tone keeps focus on content."
+                />
+              </ElyPublicFieldset>
+
+              <ElyPublicFieldset
+                legend="Primary"
+                tone="primary"
+                description="Emphasizes an important grouped decision."
+              >
+                <ElyPublicCheckbox
+                  v-model="checked"
+                  label="Key decision"
+                  description="Primary draws attention to the group."
+                />
+              </ElyPublicFieldset>
+
+              <ElyPublicFieldset
+                legend="Accent"
+                tone="accent"
+                description="Highlights preference or personalisation groups."
+              >
+                <ElyPublicCheckbox
+                  v-model="checked"
+                  label="Preference option"
+                  description="Accent signals personalisation context."
+                />
+              </ElyPublicFieldset>
+
+              <ElyPublicFieldset
+                legend="Danger"
+                tone="danger"
+                description="Warns about required or irreversible consent."
+                invalid-message="This consent group requires explicit confirmation."
+              >
+                <ElyPublicCheckbox
+                  label="Required consent"
+                  description="Danger tone signals the group needs attention."
+                />
+              </ElyPublicFieldset>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: {

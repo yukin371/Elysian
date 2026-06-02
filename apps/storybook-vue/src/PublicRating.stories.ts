@@ -307,6 +307,83 @@ export const ReadOnlyScenarios: Story = {
   }),
 }
 
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicRating, ElyPublicText },
+    setup() {
+      const score = ref(0)
+
+      return { score }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Rating keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Arrow keys set the score one step at a time</h1>
+            <p class="ely-public-copy">
+              Focus a rating item and use ArrowRight or ArrowUp to increase, ArrowLeft or ArrowDown to decrease. Home sets the minimum, End sets the maximum.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicRating
+                v-model="score"
+                label="Keyboard-accessible score"
+                description="Use arrow keys after tabbing into the rating group."
+              />
+              <ElyPublicText>
+                Each arrow press moves the score by one. The visual fill and accessible value label update immediately.
+              </ElyPublicText>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
+export const MaxVariations: Story = {
+  render: () => ({
+    components: { ElyPublicRating },
+    setup() {
+      const score3 = ref(2)
+      const score5 = ref(4)
+      const score7 = ref(5)
+
+      return { score3, score5, score7 }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Rating max variations</p>
+            <h1 class="ely-public-section-title">Max adjusts the number of items from 1 to 10</h1>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicRating
+                v-model="score3"
+                label="Quick rating (3)"
+                description="Shorter scales reduce decision effort."
+                :max="3"
+              />
+              <ElyPublicRating
+                v-model="score5"
+                label="Standard rating (5)"
+                description="Five items is the default and most familiar scale."
+                :max="5"
+              />
+              <ElyPublicRating
+                v-model="score7"
+                label="Detailed rating (7)"
+                description="Longer scales allow more granularity but increase cognitive load."
+                :max="7"
+              />
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicAlert, ElyPublicRating },

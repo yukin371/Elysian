@@ -331,6 +331,45 @@ export const KeyboardScenarios: Story = {
   }),
 }
 
+export const ValidationScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicAlert, ElyPublicButton, ElyPublicRadioGroup },
+    setup() {
+      const selectedTier = ref("")
+
+      return { items, selectedTier }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Radio validation scenarios</p>
+            <h1 class="ely-public-section-title">Invalid state explains what is missing before the user submits</h1>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicRadioGroup
+                aria-label="Required tier selection"
+                v-model="selectedTier"
+                :items="items"
+                label="Choose a density tier"
+                description="Selection is required before the preference can be saved."
+                :invalid-message="selectedTier ? undefined : 'Select one density tier to continue.'"
+              />
+              <ElyPublicAlert
+                tone="info"
+                title="Validation stays visible and recoverable"
+                description="The invalid message names the missing action. Nearby copy keeps the recovery path clear without hiding the options."
+              />
+              <ElyPublicButton :disabled="!selectedTier">
+                Save density preference
+              </ElyPublicButton>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const DecisionBoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicAlert, ElyPublicButton, ElyPublicRadioGroup },

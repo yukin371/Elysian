@@ -363,6 +363,53 @@ export const PrecisionScenarios: Story = {
   }),
 }
 
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicNumberInput, ElyPublicText },
+    setup() {
+      const typed = ref(42)
+      const stepped = ref(10)
+
+      return { stepped, typed }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Number input keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Type exact values or use stepper buttons for small changes</h1>
+            <p class="ely-public-copy">
+              Tab to focus, type a number, or use the stepper buttons (+/-) beside the field. ArrowUp and ArrowDown also increment and decrement by the step value.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicNumberInput
+                v-model="typed"
+                label="Typed value"
+                description="Direct keyboard entry keeps the exact value the user intended."
+                :min="0"
+                :max="100"
+                unit="units"
+              />
+              <ElyPublicNumberInput
+                v-model="stepped"
+                label="Stepped value"
+                description="Stepper buttons and arrow keys change the value by the step amount."
+                :min="0"
+                :max="50"
+                :step="5"
+                unit="items"
+              />
+              <ElyPublicText>
+                The stepper buttons provide small adjustments. For large changes, direct typing is more efficient. Both approaches update the same model value.
+              </ElyPublicText>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicAlert, ElyPublicNumberInput },

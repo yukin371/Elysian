@@ -288,6 +288,40 @@ export const LocalizedLabelScenarios: Story = {
   }),
 }
 
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicPagination, ElyPublicText },
+    setup() {
+      const page = ref(4)
+
+      return { page }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Pagination keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Tab to focus, Enter or Space to navigate</h1>
+            <p class="ely-public-copy">
+              Each page button is focusable. Tab moves between buttons, and Enter or Space activates the page change. Previous and Next buttons work the same way.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicPagination
+                v-model="page"
+                aria-label="Keyboard navigation example"
+                :page-count="12"
+              />
+              <ElyPublicText>
+                Current page is {{ page }}. Focus any page button and press Enter to navigate. The active page is indicated with aria-current="page".
+              </ElyPublicText>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicPagination },

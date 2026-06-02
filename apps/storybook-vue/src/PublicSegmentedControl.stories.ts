@@ -4,6 +4,7 @@ import {
   ElyPublicButton,
   ElyPublicLink,
   ElyPublicSegmentedControl,
+  ElyPublicText,
   publicComponentDocs,
 } from "@elysian/ui-public-vue"
 import type { ElyPublicSegmentedControlItem } from "@elysian/ui-public-vue"
@@ -360,6 +361,40 @@ export const DensityToggleScenarios: Story = {
                 title="Density is not a new visual language"
                 :description="'Current density is ' + selectedDensity + '. It may change spacing, not color roles, radius, or action hierarchy.'"
               />
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicSegmentedControl, ElyPublicText },
+    setup() {
+      const selectedView = ref("gallery")
+
+      return { selectedView, viewItems }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Segmented keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Arrow keys move through segments without submitting</h1>
+            <p class="ely-public-copy">
+              Focus a segment and use ArrowRight or ArrowLeft to move between options. Home selects the first, End selects the last.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicSegmentedControl
+                aria-label="Keyboard view mode"
+                v-model="selectedView"
+                :items="viewItems"
+              />
+              <ElyPublicText>
+                Keyboard selection is immediate but local. The choice only affects the nearby surface, not the route or a committed action.
+              </ElyPublicText>
             </div>
           </section>
         </div>

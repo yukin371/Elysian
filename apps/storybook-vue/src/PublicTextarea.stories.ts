@@ -343,6 +343,99 @@ export const SupportMessageScenarios: Story = {
   }),
 }
 
+export const ResizeBehavior: Story = {
+  render: () => ({
+    components: { ElyPublicTextarea, ElyPublicText },
+    setup() {
+      const block = ref(
+        "Resize vertically only (block). This is the default behavior.",
+      )
+      const both = ref(
+        "Resize in both directions. Use only when the user might need wider text.",
+      )
+      const none = ref(
+        "No resize handle. Fixed dimensions for controlled layouts.",
+      )
+
+      return { block, both, none }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Resize behavior</p>
+            <h1 class="ely-public-section-title">Block, both, inline, and none control resize direction</h1>
+            <ElyPublicText class="ely-story-offset-sm">
+              Default resize is block (vertical only). Use none when the layout must stay fixed, and both only when the user genuinely needs horizontal expansion.
+            </ElyPublicText>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicTextarea
+                v-model="block"
+                label="Block resize (default)"
+                description="Vertical resize keeps the page rhythm stable."
+                resize="block"
+                :rows="3"
+              />
+              <ElyPublicTextarea
+                v-model="both"
+                label="Both directions"
+                description="Use sparingly. Horizontal expansion can disrupt nearby layouts."
+                resize="both"
+                :rows="3"
+              />
+              <ElyPublicTextarea
+                v-model="none"
+                label="No resize"
+                description="Fixed dimensions keep the textarea size predictable."
+                resize="none"
+                :rows="3"
+              />
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicTextarea, ElyPublicText },
+    setup() {
+      const draft = ref(
+        "Focus this field and use Tab to move between textareas.",
+      )
+
+      return { draft }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Textarea keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Native text editing with character count feedback</h1>
+            <p class="ely-public-copy">
+              Textarea keeps native text selection, cursor movement, and keyboard shortcuts. The character counter updates as the user types.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicTextarea
+                v-model="draft"
+                label="Keyboard-accessible note"
+                description="Native textarea behavior is preserved: Ctrl+A to select all, arrow keys to move cursor, Shift+Arrow to select."
+                :max-length="180"
+                show-count
+              />
+              <ElyPublicText>
+                Character count feedback helps users stay within limits before submission, not after. The count is visible but does not interrupt the writing flow.
+              </ElyPublicText>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
 export const BoundaryScenarios: Story = {
   render: () => ({
     components: { ElyPublicAlert, ElyPublicTextarea },
