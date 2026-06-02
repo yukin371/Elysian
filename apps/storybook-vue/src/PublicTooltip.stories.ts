@@ -3,6 +3,7 @@ import {
   ElyPublicInput,
   ElyPublicStat,
   ElyPublicSwitch,
+  ElyPublicText,
   ElyPublicTooltip,
   publicComponentDocs,
 } from "@elysian/ui-public-vue"
@@ -283,6 +284,35 @@ export const LabelHelpScenarios: Story = {
                 label="Invitation title"
                 description="The visible description still carries the required instruction."
               />
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicTooltip, ElyPublicText },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Tooltip keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Focus the trigger to reveal the tooltip</h1>
+            <p class="ely-public-copy">
+              Tab to focus the tooltip trigger. The tooltip appears on focus and dismisses when focus moves away. Escape also closes the tooltip.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <ElyPublicTooltip
+                trigger-label="Keyboard-accessible tooltip"
+                title="Focus-triggered tooltip"
+                description="This tooltip appears when the trigger receives keyboard focus."
+              />
+              <ElyPublicText>
+                Tooltips follow the same pattern as Popover for keyboard interaction: focus opens, blur or Escape closes. Screen readers announce the title and description.
+              </ElyPublicText>
             </div>
           </section>
         </div>

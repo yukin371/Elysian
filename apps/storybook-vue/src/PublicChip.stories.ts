@@ -3,6 +3,7 @@ import {
   ElyPublicChip,
   ElyPublicInput,
   ElyPublicSelect,
+  ElyPublicText,
   publicComponentDocs,
 } from "@elysian/ui-public-vue"
 import type { Meta, StoryObj } from "@storybook/vue3-vite"
@@ -246,6 +247,39 @@ export const RemovableFilterScenarios: Story = {
                   {{ filter }}
                 </ElyPublicChip>
               </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicChip, ElyPublicText },
+    setup() {
+      const selected = ref(false)
+
+      return { selected }
+    },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Chip keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Tab to focus, Enter or Space to toggle selection</h1>
+            <p class="ely-public-copy">
+              Selectable chips respond to keyboard interaction. Tab moves focus between chips, and Enter or Space toggles the selected state.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <div class="ely-public-inline">
+                <ElyPublicChip>Unselected chip</ElyPublicChip>
+                <ElyPublicChip selected>Selected chip</ElyPublicChip>
+              </div>
+              <ElyPublicText>
+                Selectable chips use roving tabindex or standard button keyboard patterns. Removable chips add a separate focus target for the remove action.
+              </ElyPublicText>
             </div>
           </section>
         </div>

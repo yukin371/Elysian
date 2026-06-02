@@ -1,4 +1,8 @@
-import { ElyPublicLink, publicComponentDocs } from "@elysian/ui-public-vue"
+import {
+  ElyPublicLink,
+  ElyPublicText,
+  publicComponentDocs,
+} from "@elysian/ui-public-vue"
 import type { Meta, StoryObj } from "@storybook/vue3-vite"
 
 const doc = publicComponentDocs.Link
@@ -240,6 +244,35 @@ export const NavigationScenarios: Story = {
                 <ElyPublicLink href="https://example.com/reference">use a link</ElyPublicLink>.
               </p>
             </article>
+          </section>
+        </div>
+      </section>
+    `,
+  }),
+}
+
+export const KeyboardScenarios: Story = {
+  render: () => ({
+    components: { ElyPublicLink, ElyPublicText },
+    template: `
+      <section class="ely-public-stage">
+        <div class="ely-public-shell">
+          <section class="ely-public-card">
+            <p class="ely-public-eyebrow">Link keyboard scenarios</p>
+            <h1 class="ely-public-section-title">Tab to focus, Enter to activate</h1>
+            <p class="ely-public-copy">
+              Links use native anchor keyboard behavior. Tab moves focus between links, and Enter activates the navigation. External links include a visual indicator and security attributes.
+            </p>
+            <div class="ely-public-stack ely-story-offset-md">
+              <div class="ely-public-inline">
+                <ElyPublicLink href="#">Internal link</ElyPublicLink>
+                <ElyPublicLink href="#" external>External link</ElyPublicLink>
+                <ElyPublicLink href="#" tone="muted">Muted reference</ElyPublicLink>
+              </div>
+              <ElyPublicText>
+                Internal links navigate in the same tab. External links add rel="noreferrer noopener" and open in a new tab. Screen readers announce external indicators.
+              </ElyPublicText>
+            </div>
           </section>
         </div>
       </section>
