@@ -1,0 +1,680 @@
+/* Anime-styled page template utilities.
+   These classes demonstrate how to build visually dramatic
+   anime / gaming brand pages using the existing theme token system. */
+
+/* ── Hero Section ─────────────────────────────────────────── */
+
+.ely-anime-hero {
+  position: relative;
+  display: grid;
+  gap: 24px;
+  min-height: 420px;
+  overflow: hidden;
+  border-radius: var(--ely-public-radius-lg);
+  background: var(--hero-gradient),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 14%, transparent),
+      color-mix(in oklab, var(--color-surface) 80%, transparent) 56%
+    ), var(--color-surface);
+  padding: 48px 40px 40px;
+}
+
+.ely-anime-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      ellipse 80% 60% at 20% 30%,
+      color-mix(in oklab, var(--color-primary) 18%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 80% 70%,
+      color-mix(in oklab, var(--color-accent) 12%, transparent),
+      transparent
+    );
+  pointer-events: none;
+}
+
+.ely-anime-hero-content {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  align-content: center;
+  max-width: 560px;
+}
+
+.ely-anime-hero-badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 14%, transparent);
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ely-anime-hero h1 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+
+.ely-anime-hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ely-anime-hero-desc {
+  max-width: 440px;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.ely-anime-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.ely-anime-hero-aside {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  align-content: center;
+}
+
+.ely-anime-hero-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 60%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 60%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px
+    color-mix(in oklab, var(--color-shadow) 10%, transparent), 0 0 0 1px
+    color-mix(in oklab, var(--color-surface) 40%, transparent);
+  padding: 24px;
+}
+
+.ely-anime-hero-card h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.15rem;
+}
+
+.ely-anime-hero-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.ely-anime-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+.ely-anime-hero-stat {
+  display: grid;
+  gap: 2px;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.ely-anime-hero-stat + .ely-anime-hero-stat {
+  border-left: 1px solid color-mix(in oklab, var(--color-line) 60%, transparent);
+}
+
+.ely-anime-hero-stat strong {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1;
+}
+
+.ely-anime-hero-stat span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Glassmorphism Panels ─────────────────────────────────── */
+
+.ely-anime-glass {
+  border: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 55%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px
+    color-mix(in oklab, var(--color-shadow) 8%, transparent);
+}
+
+.ely-anime-glass--strong {
+  background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.ely-anime-glass--accent {
+  border-color: color-mix(in oklab, var(--color-primary) 24%, transparent);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 10%, transparent),
+      transparent 50%
+    ), color-mix(in oklab, var(--color-surface) 55%, transparent);
+}
+
+/* ── Glow Effects ─────────────────────────────────────────── */
+
+.ely-anime-glow {
+  box-shadow: 0 0 20px
+    color-mix(in oklab, var(--color-primary) 16%, transparent), 0 0 40px
+    color-mix(in oklab, var(--color-primary) 8%, transparent);
+}
+
+.ely-anime-glow--accent {
+  box-shadow: 0 0 20px color-mix(in oklab, var(--color-accent) 16%, transparent),
+    0 0 40px color-mix(in oklab, var(--color-accent) 8%, transparent);
+}
+
+.ely-anime-glow--inline {
+  display: inline-flex;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  box-shadow: 0 0 16px
+    color-mix(in oklab, var(--color-primary) 14%, transparent);
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Card Grid Layout ─────────────────────────────────────── */
+
+.ely-anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.ely-anime-grid--featured {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.ely-anime-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  border: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 60%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+}
+
+.ely-anime-card:hover {
+  box-shadow: 0 8px 28px
+    color-mix(in oklab, var(--color-shadow) 12%, transparent), 0 0 20px
+    color-mix(in oklab, var(--color-primary) 8%, transparent);
+  transform: translateY(-2px);
+}
+
+.ely-anime-card-image {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-primary) 18%, var(--color-surface)),
+    color-mix(in oklab, var(--color-accent) 12%, var(--color-surface))
+  );
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 40%, transparent);
+}
+
+.ely-anime-card-image--portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.ely-anime-card-body {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.ely-anime-card-tag {
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ely-anime-card-body h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.ely-anime-card-body p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.ely-anime-card-footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid color-mix(in oklab, var(--color-line) 40%, transparent);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+/* ── Profile Layout ───────────────────────────────────────── */
+
+.ely-anime-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+  gap: 20px;
+}
+
+.ely-anime-profile-sidebar {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.ely-anime-profile-avatar {
+  display: grid;
+  gap: 16px;
+  place-items: center;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.ely-anime-avatar-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  padding: 3px;
+  box-shadow: 0 0 24px
+    color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+
+.ely-anime-avatar-ring > span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-family: var(--ely-public-font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.ely-anime-profile-avatar h2 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.35rem;
+}
+
+.ely-anime-profile-avatar p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.ely-anime-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  text-align: center;
+}
+
+.ely-anime-profile-stat {
+  padding: 12px 0;
+}
+
+.ely-anime-profile-stat + .ely-anime-profile-stat {
+  border-left: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+}
+
+.ely-anime-profile-stat strong {
+  display: block;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.ely-anime-profile-stat span {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ely-anime-profile-main {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.ely-anime-section {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.ely-anime-section h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.15rem;
+}
+
+.ely-anime-achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.ely-anime-achievement {
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  padding: 16px 10px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+  text-align: center;
+  transition: box-shadow 0.2s ease;
+}
+
+.ely-anime-achievement:hover {
+  box-shadow: 0 0 16px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-anime-achievement-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-primary) 16%, var(--color-surface)),
+    color-mix(in oklab, var(--color-accent) 10%, var(--color-surface))
+  );
+  box-shadow: 0 0 12px
+    color-mix(in oklab, var(--color-primary) 10%, transparent);
+}
+
+.ely-anime-achievement strong {
+  font-size: 0.82rem;
+}
+
+.ely-anime-achievement span {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+/* ── Event Campaign ────────────────────────────────────────── */
+
+.ely-anime-campaign-hero {
+  position: relative;
+  display: grid;
+  gap: 20px;
+  min-height: 340px;
+  overflow: hidden;
+  border-radius: var(--ely-public-radius-lg);
+  padding: 40px;
+}
+
+.ely-anime-campaign-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 22%, transparent),
+      transparent 50%
+    ),
+    linear-gradient(
+      225deg,
+      color-mix(in oklab, var(--color-accent) 14%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 70% 40%,
+      color-mix(in oklab, var(--color-secondary) 12%, transparent),
+      transparent
+    );
+  pointer-events: none;
+}
+
+.ely-anime-campaign-content {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  align-content: center;
+}
+
+.ely-anime-campaign-hero h1 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1.02;
+}
+
+.ely-anime-campaign-hero p {
+  max-width: 420px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.ely-anime-countdown {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ely-anime-countdown-block {
+  display: grid;
+  gap: 4px;
+  place-items: center;
+  min-width: 68px;
+  padding: 12px 8px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 40%, transparent);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ely-anime-countdown-block strong {
+  font-family: var(--ely-public-font-display);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.ely-anime-countdown-block span {
+  color: var(--color-text-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ely-anime-countdown-sep {
+  color: var(--color-text-muted);
+  font-family: var(--ely-public-font-display);
+  font-size: 1.6rem;
+}
+
+.ely-anime-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.ely-anime-tier-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 24px;
+  transition: box-shadow 0.2s ease;
+}
+
+.ely-anime-tier-card:hover {
+  box-shadow: 0 0 24px
+    color-mix(in oklab, var(--color-primary) 12%, transparent);
+}
+
+.ely-anime-tier-card h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.2rem;
+}
+
+.ely-anime-tier-price {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1;
+}
+
+.ely-anime-tier-price small {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.ely-anime-tier-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ely-anime-tier-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.ely-anime-tier-item::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--color-primary) 30%, transparent);
+}
+
+/* ── Decorative Elements ──────────────────────────────────── */
+
+.ely-anime-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-primary) 30%, transparent) 20%,
+    color-mix(in oklab, var(--color-accent) 20%, transparent) 80%,
+    transparent
+  );
+}
+
+.ely-anime-shimmer-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-primary) 12%, transparent),
+    color-mix(in oklab, var(--color-accent) 16%, transparent),
+    color-mix(in oklab, var(--color-primary) 12%, transparent)
+  );
+}
+
+/* ── Stage + Shell extensions ──────────────────────────────── */
+
+.ely-anime-stage {
+  display: grid;
+  gap: 24px;
+  max-width: var(--page-max-width, 1120px);
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+
+@media (max-width: 920px) {
+  .ely-anime-hero {
+    grid-template-columns: 1fr;
+    padding: 32px 24px;
+  }
+
+  .ely-anime-profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-anime-hero-aside {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .ely-anime-hero {
+    min-height: 320px;
+    padding: 24px 18px;
+  }
+
+  .ely-anime-hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-anime-hero-stat + .ely-anime-hero-stat {
+    border-left: 0;
+    border-top: 1px solid
+      color-mix(in oklab, var(--color-line) 60%, transparent);
+  }
+
+  .ely-anime-countdown {
+    flex-wrap: wrap;
+  }
+
+  .ely-anime-tier-grid {
+    grid-template-columns: 1fr;
+  }
+}
