@@ -668,6 +668,397 @@
   );
 }
 
+/* ── Entrance Animations ───────────────────────────────────── */
+
+@keyframes ely-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ely-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ely-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ely-animate-fade-in {
+  animation: ely-fade-in 0.5s ease-out both;
+}
+
+.ely-animate-slide-up {
+  animation: ely-slide-up 0.5s ease-out both;
+}
+
+.ely-animate-scale-in {
+  animation: ely-scale-in 0.4s ease-out both;
+}
+
+.ely-animate-delay-1 {
+  animation-delay: 0.08s;
+}
+.ely-animate-delay-2 {
+  animation-delay: 0.16s;
+}
+.ely-animate-delay-3 {
+  animation-delay: 0.24s;
+}
+.ely-animate-delay-4 {
+  animation-delay: 0.32s;
+}
+.ely-animate-delay-5 {
+  animation-delay: 0.4s;
+}
+
+/* ── Floating & Pulsing ────────────────────────────────────── */
+
+@keyframes ely-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes ely-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 12px
+      color-mix(in oklab, var(--color-primary) 10%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 24px
+      color-mix(in oklab, var(--color-primary) 22%, transparent);
+  }
+}
+
+.ely-animate-float {
+  animation: ely-float 4s ease-in-out infinite;
+}
+
+.ely-animate-pulse {
+  animation: ely-pulse-glow 3s ease-in-out infinite;
+}
+
+.ely-anime-orb {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-primary) 18%, transparent),
+    transparent 70%
+  );
+  animation: ely-float 6s ease-in-out infinite;
+}
+
+.ely-anime-orb--accent {
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-accent) 18%, transparent),
+    transparent 70%
+  );
+}
+
+.ely-anime-orb--sm {
+  width: 80px;
+  height: 80px;
+}
+
+.ely-anime-orb--md {
+  width: 140px;
+  height: 140px;
+}
+
+.ely-anime-orb--lg {
+  width: 220px;
+  height: 220px;
+}
+
+/* ── Animated Backgrounds ──────────────────────────────────── */
+
+@keyframes ely-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.ely-anime-bg-gradient-animated {
+  background-size: 200% 200%;
+  animation: ely-gradient-shift 8s ease infinite;
+}
+
+.ely-anime-bg-aurora {
+  background: linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--color-primary) 14%, var(--color-surface)),
+    color-mix(in oklab, var(--color-accent) 10%, var(--color-surface)),
+    color-mix(in oklab, var(--color-secondary) 12%, var(--color-surface)),
+    var(--color-surface)
+  );
+  background-size: 300% 300%;
+  animation: ely-gradient-shift 12s ease infinite;
+}
+
+.ely-anime-bg-dots {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-primary) 12%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+.ely-anime-bg-dots--accent {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-accent) 10%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+.ely-anime-bg-dots--dense {
+  background-size: 14px 14px;
+}
+
+/* ── Enhanced Shimmer & Glow ───────────────────────────────── */
+
+@keyframes ely-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.ely-anime-shimmer-bar--animated {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-primary) 8%, transparent),
+    color-mix(in oklab, var(--color-accent) 22%, transparent),
+    color-mix(in oklab, var(--color-primary) 8%, transparent)
+  );
+  background-size: 200% 100%;
+  animation: ely-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes ely-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ely-anime-glow--breathe {
+  animation: ely-glow-breathe 2.5s ease-in-out infinite;
+}
+
+/* ── Reduced Motion ────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ely-animate-fade-in,
+  .ely-animate-slide-up,
+  .ely-animate-scale-in,
+  .ely-animate-float,
+  .ely-animate-pulse,
+  .ely-anime-bg-gradient-animated,
+  .ely-anime-bg-aurora,
+  .ely-anime-shimmer-bar--animated,
+  .ely-anime-glow--breathe,
+  .ely-anime-orb {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Work Detail Layout ────────────────────────────────────── */
+
+.ely-anime-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 20px;
+}
+
+.ely-anime-detail-hero-image {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 340px;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--ely-public-radius-lg);
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-primary) 16%, var(--color-surface)),
+    color-mix(in oklab, var(--color-accent) 10%, var(--color-surface))
+  );
+}
+
+.ely-anime-detail-hero-image svg {
+  filter: drop-shadow(
+    0 0 12px color-mix(in oklab, var(--color-primary) 30%, transparent)
+  );
+}
+
+.ely-anime-detail-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ely-anime-detail-creator {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 55%, transparent);
+}
+
+.ely-anime-related-scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(180px, 1fr);
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+/* ── Community Forum Layout ────────────────────────────────── */
+
+.ely-anime-community-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+  gap: 20px;
+}
+
+.ely-anime-thread-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 60%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ely-anime-thread-card:hover {
+  box-shadow: 0 4px 20px
+    color-mix(in oklab, var(--color-shadow) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+.ely-anime-thread-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ely-anime-thread-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ely-anime-thread-stats {
+  display: flex;
+  gap: 16px;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+.ely-anime-contributor-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: var(--ely-public-radius-md);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+}
+
+/* ── Settings / Profile Edit Layout ────────────────────────── */
+
+.ely-anime-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 0.4fr) minmax(0, 1.6fr);
+  gap: 20px;
+}
+
+.ely-anime-settings-nav {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  position: sticky;
+  top: 24px;
+}
+
+.ely-anime-settings-nav-item {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: var(--ely-public-radius-md);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ely-anime-settings-nav-item:hover {
+  background: color-mix(in oklab, var(--color-primary) 6%, transparent);
+}
+
+.ely-anime-settings-nav-item--active {
+  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.ely-anime-settings-avatar-edit {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.ely-anime-settings-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
 /* ── Stage + Shell extensions ──────────────────────────────── */
 
 .ely-anime-stage {
@@ -693,6 +1084,25 @@
   .ely-anime-hero-aside {
     display: none;
   }
+
+  .ely-anime-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-anime-community-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-anime-settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-anime-settings-nav {
+    position: static;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 560px) {
@@ -716,6 +1126,14 @@
   }
 
   .ely-anime-tier-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-anime-detail-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-anime-settings-form-grid {
     grid-template-columns: 1fr;
   }
 }
