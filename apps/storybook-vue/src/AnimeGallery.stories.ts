@@ -144,6 +144,7 @@ export const GalleryWithFilter: Story = {
                 >
                   <ElyPublicBadge tone="primary">Featured</ElyPublicBadge>
                 </div>
+                  <svg viewBox="0 0 160 100" fill="none" style="width:72px;opacity:.5"><circle cx="55" cy="38" r="20" stroke="white" stroke-width="2" opacity=".5"/><circle cx="100" cy="28" r="10" stroke="white" stroke-width="1.5" opacity=".35"/><path d="M20 72L50 48L80 60L110 40L145 52" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/></svg>
               </div>
               <div class="ely-anime-card-body">
                 <span class="ely-anime-card-tag">{{ card.tag }}</span>
@@ -197,7 +198,7 @@ export const CharacterShowcaseGrid: Story = {
               :key="char.name"
               class="ely-anime-card ely-anime-glass"
             >
-              <div class="ely-anime-card-image ely-anime-card-image--portrait" />
+              <div class="ely-anime-card-image ely-anime-card-image--portrait"><svg viewBox="0 0 100 120" fill="none" style="width:56px;opacity:.5"><circle cx="50" cy="35" r="18" stroke="white" stroke-width="2" opacity=".5"/><path d="M30 60C30 52 40 47 50 47C60 47 70 52 70 60L72 85H28L30 60Z" stroke="white" stroke-width="2" stroke-linecap="round" opacity=".35"/><circle cx="65" cy="75" r="4" fill="white" opacity=".2"/></svg></div>
               <div class="ely-anime-card-body">
                 <span class="ely-anime-card-tag">{{ char.element }}</span>
                 <h3>{{ char.name }}</h3>

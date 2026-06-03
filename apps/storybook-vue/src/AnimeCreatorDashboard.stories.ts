@@ -130,7 +130,7 @@ export const FullDashboard: Story = {
                     :key="work.title"
                     class="ely-anime-card"
                   >
-                    <div class="ely-anime-card-image" style="aspect-ratio: 4/3;" />
+                    <div class="ely-anime-card-image" style="aspect-ratio: 4/3;"><svg viewBox="0 0 160 100" fill="none" style="width:72px;opacity:.5"><circle cx="55" cy="38" r="20" stroke="white" stroke-width="2" opacity=".5"/><circle cx="100" cy="28" r="10" stroke="white" stroke-width="1.5" opacity=".35"/><path d="M20 72L50 48L80 60L110 40L145 52" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/><circle cx="125" cy="65" r="5" fill="white" opacity=".2"/></svg></div>
                     <div class="ely-anime-card-body">
                       <span class="ely-anime-card-tag">{{ work.tag }}</span>
                       <h3 style="font-size: 0.95rem;">{{ work.title }}</h3>

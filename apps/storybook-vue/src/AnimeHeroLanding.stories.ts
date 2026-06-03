@@ -102,7 +102,7 @@ export const HeroWithFeaturedContent: Story = {
                 { title: 'Sakura Dreams', tag: 'Illustration', desc: 'Delicate ink and watercolor pieces capturing spring.', stat: '580 collectors' },
                 { title: 'Neon Chronicle', tag: 'Photography', desc: 'City nights captured in vivid color and texture.', stat: '210 collectors' },
               ]" :key="card.title">
-                <div class="ely-anime-card-image" />
+                <div class="ely-anime-card-image"><svg viewBox="0 0 160 100" fill="none" style="width:80px;opacity:.55"><circle cx="55" cy="38" r="22" stroke="white" stroke-width="2" opacity=".5"/><circle cx="105" cy="30" r="12" stroke="white" stroke-width="1.5" opacity=".4"/><path d="M20 72L55 45L85 62L120 42L145 55" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/><circle cx="130" cy="70" r="5" fill="white" opacity=".25"/><circle cx="35" cy="55" r="3" fill="white" opacity=".3"/></svg></div>
                 <div class="ely-anime-card-body">
                   <span class="ely-anime-card-tag">{{ card.tag }}</span>
                   <h3>{{ card.title }}</h3>
