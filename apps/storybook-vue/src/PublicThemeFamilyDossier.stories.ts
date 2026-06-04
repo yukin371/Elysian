@@ -110,6 +110,28 @@ const familyDossierCopy: Record<
       "Editorial warmth never replaces labels.",
     ],
   },
+  "dreamy-sakura": {
+    bestFit: [
+      "Anime-inspired landing pages and whimsical creative showcases.",
+      "Playful onboarding flows that benefit from a soft, inviting tone.",
+      "Celebration or seasonal surfaces where pastel warmth feels intentional.",
+    ],
+    blockers:
+      "Reject if pastel pinks wash out interactive hierarchy or reduce readability.",
+    intent:
+      "A dreamy, sakura-kissed family for surfaces that celebrate whimsy with discipline.",
+    ornamentBudget:
+      "Petal-soft gradients on one focal surface, then let blush accents mark interaction without flooding.",
+    rejectLine:
+      "If the page looks like a cotton candy explosion instead of a product, the theme has drifted.",
+    rolePromises: [
+      "Soft cream and blossom surfaces carry the majority of the view.",
+      "Primary action remains legible against pastel backgrounds.",
+      "Sakura pink stays a memory accent, not a universal fill.",
+      "Status containers remain crisp and unmistakable.",
+      "Whimsy never compromises the information hierarchy.",
+    ],
+  },
 }
 
 const dossierChecks = [

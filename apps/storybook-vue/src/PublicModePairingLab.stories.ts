@@ -41,6 +41,8 @@ const familyModeRisks: Record<PublicThemePack["key"], string> = {
     "Do not flatten the public preset into enterprise gray; keep a small crafted edge.",
   "rose-nocturne":
     "Rose atmosphere must not reduce text contrast or make danger/warning ambiguous.",
+  "dreamy-sakura":
+    "Pastel gradients must not wash out interactive contrast in dark mode or hide status meaning.",
 }
 
 const approvalQuestions = [

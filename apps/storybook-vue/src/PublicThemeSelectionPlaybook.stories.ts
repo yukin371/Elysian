@@ -109,6 +109,16 @@ const familySelectionGuidance: Record<
     reviewerCue:
       "If romance reduces readability, switch family or reduce saturation.",
   },
+  "dreamy-sakura": {
+    chooseWhen:
+      "The surface should feel whimsical, anime-inspired, or playfully inviting.",
+    doNotChooseWhen:
+      "The job is data-heavy comparison, serious transaction, or urgent error handling.",
+    memoryPoint:
+      "Sakura blossom pink as a gentle accent over soft cream surfaces.",
+    reviewerCue:
+      "If pastel tones wash out the primary action or hide status meaning, pull back.",
+  },
 }
 
 const selectionChecks = [

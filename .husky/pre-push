@@ -93,5 +93,63 @@ if [ "$HAS_ERROR" -gt 0 ]; then
     exit 1
 fi
 
+# ── 单元测试 ────────────────────────────────────────────────
+
+if ! bun test 2>&1; then
+    error "单元测试失败，请修复后再推送"
+fi
+
+# ── Storybook 渲染检测 (仅当模板文件变更时) ──────────────────
+
+STORY_PATTERN='\.(stories\.ts|template-i18n\.ts)$|storybook-template-pages\.css'
+
+HAS_STORY_CHANGES=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [ -z "$local_ref" ] && continue
+    [ "$local_sha" = "$ZERO_SHA" ] && continue
+
+    if [ "$remote_sha" = "$ZERO_SHA" ]; then
+        CHANGED=$(git diff --name-only --remotes "$local_sha" 2>/dev/null || true)
+    else
+        CHANGED=$(git diff --name-only "$remote_sha" "$local_sha" 2>/dev/null || true)
+    fi
+
+    if echo "$CHANGED" | grep -qE "$STORY_PATTERN"; then
+        HAS_STORY_CHANGES=1
+        break
+    fi
+done
+
+if [ "$HAS_STORY_CHANGES" -eq 1 ]; then
+    echo -e "${GREEN}[..]${NC} 检测到 Story 模板变更，启动渲染检测..."
+
+    if ! bun run build:storybook:vue 2>&1; then
+        error "Storybook 构建失败"
+    fi
+
+    # 用静态构建服务跑 Playwright 渲染测试
+    STORYBOOK_PID=""
+    cleanup() {
+        [ -n "$STORYBOOK_PID" ] && kill "$STORYBOOK_PID" 2>/dev/null || true
+    }
+    trap cleanup EXIT
+
+    npx serve apps/storybook-vue/storybook-static -l 6006 -s &
+    STORYBOOK_PID=$!
+    sleep 3
+
+    cd apps/storybook-vue
+    if ! npx playwright test --reporter=list 2>&1; then
+        cd "$OLDPWD"
+        error "Storybook 渲染测试失败，请检查模板页面"
+    fi
+    cd "$OLDPWD"
+fi
+
+if [ "$HAS_ERROR" -gt 0 ]; then
+    echo -e "${RED}推送检查失败${NC}"
+    exit 1
+fi
+
 echo -e "${GREEN}[OK] 推送检查通过${NC}"
 exit 0

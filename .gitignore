@@ -40,3 +40,14 @@ Thumbs.db
 .worktrees/
 .tmp/
 test-results/
+
+# Storybook build output
+storybook-static/
+
+# Screenshots & debug artifacts
+screenshots/
+tmp/
+
+# Stray screenshots at repo root
+*.png
+!apps/*/public/*.png

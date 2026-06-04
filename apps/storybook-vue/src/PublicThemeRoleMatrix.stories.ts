@@ -104,6 +104,17 @@ const familyRoleGuidance: Record<
     surface:
       "Use rose ivory and wine-dark grounding as a composed editorial stage.",
   },
+  "dreamy-sakura": {
+    content:
+      "Keep text legible against pastel gradients so whimsy never blurs meaning.",
+    emphasis:
+      "Sakura pink highlights the primary path; soft blush stays supporting trim.",
+    material:
+      "Use petal-soft shimmer on focal elements, then let the rest breathe.",
+    status: "Status cues must stay crisp and unmistakable beside dreamy tones.",
+    surface:
+      "Soft cream and blossom surfaces own the majority so accents remain restrained.",
+  },
 }
 
 const routeSteps = [

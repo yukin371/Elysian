@@ -77,6 +77,15 @@ const familyGuidance: Record<
       "Editorial campaigns, seasonal moments, high-touch content collections.",
     lane: "Editorial lane",
   },
+  "dreamy-sakura": {
+    approvalQuestion:
+      "Does the pastel whimsy still guide the user to one clear next step?",
+    avoid:
+      "Letting sakura pink flood every surface until interactive elements disappear.",
+    bestFor:
+      "Anime-inspired showcases, playful onboarding, soft celebration surfaces.",
+    lane: "Whimsy lane",
+  },
 }
 
 const approvalOutcomes = [

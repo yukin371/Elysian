@@ -49,6 +49,11 @@ const familyUseCases: Record<PublicThemePack["key"], string[]> = {
     "Romantic event or seasonal pages",
     "High-touch content collections",
   ],
+  "dreamy-sakura": [
+    "Whimsical anime-inspired landing pages",
+    "Soft pastel creative showcases and portfolios",
+    "Playful onboarding or celebration surfaces",
+  ],
 }
 
 const familyRisks: Record<PublicThemePack["key"], string[]> = {
@@ -67,6 +72,10 @@ const familyRisks: Record<PublicThemePack["key"], string[]> = {
   "rose-nocturne": [
     "Do not fill the page with saturated pink or purple.",
     "Let neutral mauve surfaces carry most of the view.",
+  ],
+  "dreamy-sakura": [
+    "Do not let pastel tones wash out interactive elements.",
+    "Keep sakura pink as accent, not as surface fill.",
   ],
 }
 
