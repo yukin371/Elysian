@@ -4,10 +4,12 @@ import {
   ElyPublicChip,
   ElyPublicInput,
   ElyPublicLink,
+  ElyPublicSegmentedControl,
   ElyPublicText,
 } from "@elysian/ui-public-vue"
 import type { Meta, StoryObj } from "@storybook/vue3-vite"
-import { ref } from "vue"
+import { computed, ref } from "vue"
+import { type Locale, animeGalleryI18n, localeItems } from "./template-i18n"
 
 const meta = {
   title: "Public Luxe/Showcase/Anime Content Gallery",
@@ -27,51 +29,6 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const collections = [
-  {
-    title: "Midnight Aurora",
-    tag: "Digital Art",
-    desc: "A visual journey through light and darkness.",
-    collectors: "340 collectors",
-    featured: true,
-  },
-  {
-    title: "Sakura Dreams",
-    tag: "Illustration",
-    desc: "Delicate ink and watercolor pieces capturing spring.",
-    collectors: "580 collectors",
-    featured: false,
-  },
-  {
-    title: "Neon Chronicle",
-    tag: "Photography",
-    desc: "City nights captured in vivid color and texture.",
-    collectors: "210 collectors",
-    featured: false,
-  },
-  {
-    title: "Stellar Archive",
-    tag: "3D Render",
-    desc: "Cosmic scenes rendered with volumetric light.",
-    collectors: "425 collectors",
-    featured: true,
-  },
-  {
-    title: "Ceramic Garden",
-    tag: "Craft",
-    desc: "Handmade pottery with organic glazing techniques.",
-    collectors: "190 collectors",
-    featured: false,
-  },
-  {
-    title: "Pixel Memoir",
-    tag: "Pixel Art",
-    desc: "Retro-inspired scenes with modern composition.",
-    collectors: "310 collectors",
-    featured: false,
-  },
-]
-
 export const GalleryWithFilter: Story = {
   name: "Gallery with filter bar",
   render: () => ({
@@ -81,44 +38,41 @@ export const GalleryWithFilter: Story = {
       ElyPublicChip,
       ElyPublicInput,
       ElyPublicLink,
+      ElyPublicSegmentedControl,
       ElyPublicText,
     },
     setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeGalleryI18n[locale.value])
       const search = ref("")
       const activeFilter = ref("All")
-      const filters = [
-        "All",
-        "Digital Art",
-        "Illustration",
-        "Photography",
-        "3D Render",
-        "Craft",
-        "Pixel Art",
-      ]
 
-      return { search, activeFilter, filters, collections }
+      return { locale, t, localeItems, search, activeFilter }
     },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
           <section style="display: grid; gap: 14px;">
             <div>
               <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                Creator collections
+                {{ t.sectionLabel }}
               </p>
               <h1 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.05;">
-                Browse curated works
+                {{ t.title }}
               </h1>
             </div>
 
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
               <ElyPublicInput
                 v-model="search"
-                placeholder="Search collections..."
+                :placeholder="t.searchPlaceholder"
                 style="max-width: 280px;"
               />
               <ElyPublicChip
-                v-for="filter in filters"
+                v-for="filter in t.filters"
                 :key="filter"
                 :active="activeFilter === filter"
                 style="cursor: pointer;"
@@ -133,7 +87,7 @@ export const GalleryWithFilter: Story = {
 
           <div class="ely-anime-grid--featured">
             <div
-              v-for="card in collections"
+              v-for="card in t.collections"
               :key="card.title"
               class="ely-anime-card ely-anime-glass"
             >
@@ -142,7 +96,7 @@ export const GalleryWithFilter: Story = {
                   v-if="card.featured"
                   style="position: absolute; top: 12px; right: 12px;"
                 >
-                  <ElyPublicBadge tone="primary">Featured</ElyPublicBadge>
+                  <ElyPublicBadge tone="primary">{{ t.featured }}</ElyPublicBadge>
                 </div>
                   <svg viewBox="0 0 160 100" fill="none" style="width:72px;opacity:.5"><circle cx="55" cy="38" r="20" stroke="white" stroke-width="2" opacity=".5"/><circle cx="100" cy="28" r="10" stroke="white" stroke-width="1.5" opacity=".35"/><path d="M20 72L50 48L80 60L110 40L145 52" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/></svg>
               </div>
@@ -153,13 +107,13 @@ export const GalleryWithFilter: Story = {
               </div>
               <div class="ely-anime-card-footer">
                 <span>{{ card.collectors }}</span>
-                <ElyPublicLink style="margin-left: auto;">View</ElyPublicLink>
+                <ElyPublicLink style="margin-left: auto;">{{ t.view }}</ElyPublicLink>
               </div>
             </div>
           </div>
 
           <div style="display: flex; justify-content: center; padding: 16px 0;">
-            <ElyPublicButton tone="ghost">Load more collections</ElyPublicButton>
+            <ElyPublicButton tone="ghost">{{ t.loadMore }}</ElyPublicButton>
           </div>
         </div>
       </section>
@@ -170,31 +124,35 @@ export const GalleryWithFilter: Story = {
 export const CharacterShowcaseGrid: Story = {
   name: "Character showcase grid",
   render: () => ({
-    components: { ElyPublicBadge, ElyPublicButton },
+    components: {
+      ElyPublicBadge,
+      ElyPublicButton,
+      ElyPublicSegmentedControl,
+    },
+    setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeGalleryI18n[locale.value])
+
+      return { locale, t, localeItems }
+    },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
           <section style="display: grid; gap: 14px;">
             <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-              Character roster
+              {{ t.charLabel }}
             </p>
             <h1 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.05;">
-              Meet the cast
+              {{ t.charTitle }}
             </h1>
           </section>
 
           <div class="ely-anime-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
             <div
-              v-for="char in [
-                { name: 'Aoi', role: 'Protagonist', element: 'Water' },
-                { name: 'Hikari', role: 'Guide', element: 'Light' },
-                { name: 'Ren', role: 'Rival', element: 'Fire' },
-                { name: 'Sakuya', role: 'Ally', element: 'Wind' },
-                { name: 'Yuki', role: 'Mentor', element: 'Ice' },
-                { name: 'Kuro', role: 'Shadow', element: 'Void' },
-                { name: 'Mei', role: 'Healer', element: 'Earth' },
-                { name: 'Sora', role: 'Wanderer', element: 'Sky' },
-              ]"
+              v-for="char in t.characters"
               :key="char.name"
               class="ely-anime-card ely-anime-glass"
             >

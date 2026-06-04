@@ -7,6 +7,7 @@ import {
   ElyPublicLink,
   ElyPublicMeter,
   ElyPublicRating,
+  ElyPublicSegmentedControl,
   ElyPublicText,
   ElyPublicTimeline,
 } from "@elysian/ui-public-vue"
@@ -15,7 +16,8 @@ import type {
   ElyPublicTimelineItem,
 } from "@elysian/ui-public-vue"
 import type { Meta, StoryObj } from "@storybook/vue3-vite"
-import { ref } from "vue"
+import { computed, ref } from "vue"
+import { type Locale, animeWorkDetailI18n, localeItems } from "./template-i18n"
 
 const meta = {
   title: "Public Luxe/Showcase/Anime Work Detail",
@@ -35,57 +37,6 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const breadcrumbs = [
-  { label: "Home", href: "#" },
-  { label: "Collections", href: "#" },
-  { label: "Midnight Aurora" },
-]
-
-const metadata: ElyPublicDescriptionItem[] = [
-  { key: "medium", label: "Medium", value: "Digital Illustration" },
-  { key: "dimensions", label: "Dimensions", value: "3840 × 2160 px" },
-  { key: "created", label: "Created", value: "March 2026" },
-  { key: "edition", label: "Edition", value: "7 of 50", tone: "accent" },
-  { key: "category", label: "Category", value: "Fantasy" },
-  { key: "license", label: "License", value: "Personal Use" },
-]
-
-const activity: ElyPublicTimelineItem[] = [
-  {
-    key: "1",
-    title: "Yukina Studio published this work",
-    meta: "2 days ago",
-    tone: "primary",
-  },
-  {
-    key: "2",
-    title: "StellarArchive collected this piece",
-    meta: "1 day ago",
-    tone: "accent",
-  },
-  {
-    key: "3",
-    title: "New comment from AoiArt",
-    description: "Incredible use of light and shadow!",
-    meta: "5 hours ago",
-    tone: "success",
-  },
-  {
-    key: "4",
-    title: 'Added to "Dreamy Picks" curated list',
-    meta: "3 hours ago",
-    tone: "primary",
-  },
-]
-
-const relatedWorks = [
-  { title: "First Light", tag: "Illustration" },
-  { title: "Quiet Garden", tag: "Watercolor" },
-  { title: "Lantern Festival", tag: "Digital Art" },
-  { title: "Winter Bloom", tag: "Photography" },
-  { title: "Crystal Dawn", tag: "3D Render" },
-]
-
 export const WorkDetailWithMetadata: Story = {
   name: "Work detail with metadata",
   render: () => ({
@@ -98,17 +49,31 @@ export const WorkDetailWithMetadata: Story = {
       ElyPublicLink,
       ElyPublicMeter,
       ElyPublicRating,
+      ElyPublicSegmentedControl,
       ElyPublicText,
       ElyPublicTimeline,
     },
     setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeWorkDetailI18n[locale.value])
       const rating = ref(4)
-      return { breadcrumbs, metadata, activity, relatedWorks, rating }
+      const breadcrumbItems = computed(() =>
+        t.value.breadcrumb.map((label: string, i: number) =>
+          i < t.value.breadcrumb.length - 1 ? { label, href: "#" } : { label },
+        ),
+      )
+      const timelineItems = computed(
+        () => t.value.timeline as ElyPublicTimelineItem[],
+      )
+      return { locale, t, localeItems, rating, breadcrumbItems, timelineItems }
     },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
-          <ElyPublicBreadcrumb :items="breadcrumbs" />
+          <ElyPublicBreadcrumb :items="breadcrumbItems" />
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
 
           <div class="ely-anime-detail-layout ely-animate-fade-in">
             <div style="display: grid; gap: 20px;">
@@ -120,27 +85,25 @@ export const WorkDetailWithMetadata: Story = {
 
               <div style="display: grid; gap: 18px;">
                 <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
-                  <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.4rem;">Activity</h2>
+                  <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.4rem;">{{ t.activityTitle }}</h2>
                 </div>
-                <ElyPublicTimeline :items="activity" />
+                <ElyPublicTimeline :items="timelineItems" />
               </div>
             </div>
 
             <div style="display: grid; gap: 18px; align-content: start;">
               <div class="ely-anime-glass ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.3rem;">Midnight Aurora</h2>
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.3rem;">{{ t.workTitle }}</h2>
                 <p style="margin: 0; color: var(--color-text-muted); line-height: 1.6;">
-                  A visual journey through light and darkness. This piece captures the
-                  ethereal beauty of aurora borealis reflected on still water at midnight.
+                  {{ t.workDesc }}
                 </p>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <ElyPublicBadge tone="primary">Digital Art</ElyPublicBadge>
-                  <ElyPublicBadge tone="accent">Featured</ElyPublicBadge>
+                  <ElyPublicBadge v-for="badge in t.badges" :key="badge" tone="primary">{{ badge }}</ElyPublicBadge>
                 </div>
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <ElyPublicRating v-model="rating" :max="5" label="Rating" />
+                <ElyPublicRating v-model="rating" :max="5" :label="t.ratingLabel" />
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
@@ -148,21 +111,21 @@ export const WorkDetailWithMetadata: Story = {
                   <ElyPublicAvatar name="Yukina Studio" size="lg" status="online" />
                   <div style="display: grid; gap: 2px;">
                     <strong style="font-family: var(--ely-public-font-display);">Yukina Studio</strong>
-                    <span style="color: var(--color-text-muted); font-size: 0.82rem;">Creator · Illustrator · Collector</span>
+                    <span style="color: var(--color-text-muted); font-size: 0.82rem;">{{ t.creatorRole }}</span>
                   </div>
-                  <ElyPublicButton size="sm" style="margin-left: auto;">Follow</ElyPublicButton>
+                  <ElyPublicButton size="sm" style="margin-left: auto;">{{ t.followBtn }}</ElyPublicButton>
                 </div>
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <h3 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.05rem;">Details</h3>
-                <ElyPublicDescriptionList :items="metadata" />
+                <h3 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.05rem;">{{ t.detailsTitle }}</h3>
+                <ElyPublicDescriptionList :items="t.metadata" />
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <h3 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.05rem;">Availability</h3>
-                <ElyPublicMeter :value="43" :max="50" tone="primary" label="Editions claimed" helper="7 of 50 remaining" />
-                <ElyPublicButton block>Collect this work</ElyPublicButton>
+                <h3 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.05rem;">{{ t.availabilityTitle }}</h3>
+                <ElyPublicMeter :value="43" :max="50" tone="primary" :label="t.editionsLabel" :helper="t.editionsHelper" />
+                <ElyPublicButton block>{{ t.collectBtn }}</ElyPublicButton>
               </div>
             </div>
           </div>
@@ -173,17 +136,17 @@ export const WorkDetailWithMetadata: Story = {
             <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
               <div>
                 <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                  More from this creator
+                  {{ t.moreLabel }}
                 </p>
                 <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.3rem, 2.5vw, 1.8rem);">
-                  Related works
+                  {{ t.relatedTitle }}
                 </h2>
               </div>
-              <ElyPublicLink>View all</ElyPublicLink>
+              <ElyPublicLink>{{ t.viewAll }}</ElyPublicLink>
             </div>
             <div class="ely-anime-related-scroll">
               <div
-                v-for="work in relatedWorks"
+                v-for="work in t.relatedWorks"
                 :key="work.title"
                 class="ely-anime-card ely-anime-glass"
               >
@@ -215,17 +178,31 @@ export const WorkDetailDarkMode: Story = {
       ElyPublicLink,
       ElyPublicMeter,
       ElyPublicRating,
+      ElyPublicSegmentedControl,
       ElyPublicText,
       ElyPublicTimeline,
     },
     setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeWorkDetailI18n[locale.value])
       const rating = ref(5)
-      return { breadcrumbs, metadata, activity, relatedWorks, rating }
+      const breadcrumbItems = computed(() =>
+        t.value.breadcrumb.map((label: string, i: number) =>
+          i < t.value.breadcrumb.length - 1 ? { label, href: "#" } : { label },
+        ),
+      )
+      const timelineItems = computed(
+        () => t.value.timeline as ElyPublicTimelineItem[],
+      )
+      return { locale, t, localeItems, rating, breadcrumbItems, timelineItems }
     },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
-          <ElyPublicBreadcrumb :items="breadcrumbs" />
+          <ElyPublicBreadcrumb :items="breadcrumbItems" />
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
 
           <div class="ely-anime-detail-layout ely-animate-fade-in">
             <div style="display: grid; gap: 20px;">
@@ -236,34 +213,32 @@ export const WorkDetailDarkMode: Story = {
               </div>
 
               <div class="ely-anime-glass ely-anime-glow--breathe ely-anime-section">
-                <ElyPublicTimeline :items="activity" density="compact" />
+                <ElyPublicTimeline :items="timelineItems" density="compact" />
               </div>
             </div>
 
             <div style="display: grid; gap: 18px; align-content: start;">
               <div class="ely-anime-glass ely-anime-glow ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.3rem;">Midnight Aurora</h2>
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.3rem;">{{ t.workTitle }}</h2>
                 <p style="margin: 0; color: var(--color-text-muted); line-height: 1.6;">
-                  A visual journey through light and darkness. This piece captures the
-                  ethereal beauty of aurora borealis reflected on still water at midnight.
+                  {{ t.workDesc }}
                 </p>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  <ElyPublicBadge tone="primary">Digital Art</ElyPublicBadge>
-                  <ElyPublicBadge tone="accent">Featured</ElyPublicBadge>
+                  <ElyPublicBadge v-for="badge in t.badges" :key="badge" tone="primary">{{ badge }}</ElyPublicBadge>
                 </div>
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <ElyPublicRating v-model="rating" :max="5" label="Rating" />
+                <ElyPublicRating v-model="rating" :max="5" :label="t.ratingLabel" />
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <ElyPublicDescriptionList :items="metadata" />
+                <ElyPublicDescriptionList :items="t.metadata" />
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <ElyPublicMeter :value="43" :max="50" tone="accent" label="Editions claimed" helper="7 of 50 remaining" />
-                <ElyPublicButton block>Collect this work</ElyPublicButton>
+                <ElyPublicMeter :value="43" :max="50" tone="accent" :label="t.editionsLabel" :helper="t.editionsHelper" />
+                <ElyPublicButton block>{{ t.collectBtn }}</ElyPublicButton>
               </div>
             </div>
           </div>

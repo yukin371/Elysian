@@ -1,0 +1,746 @@
+/* Common template page utilities — enterprise & website.
+   Clean, professional layouts that work with all 5 theme families. */
+
+/* ── Stage & Page Shell ───────────────────────────────────── */
+
+.ely-tpl-page {
+  display: grid;
+  gap: 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.ely-tpl-page--narrow {
+  max-width: 960px;
+}
+
+.ely-tpl-page-header {
+  display: grid;
+  gap: 8px;
+}
+
+.ely-tpl-page-header h1 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+}
+
+.ely-tpl-page-header p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.ely-tpl-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.ely-tpl-page-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Panel (glass card alias) ─────────────────────────────── */
+
+.ely-tpl-panel {
+  border: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 60%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 24px;
+}
+
+.ely-tpl-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.ely-tpl-panel-header h2,
+.ely-tpl-panel-header h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* ── Data Table Toolbar ───────────────────────────────────── */
+
+.ely-tpl-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.ely-tpl-toolbar-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+}
+
+.ely-tpl-toolbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.ely-tpl-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── Table Wrapper ────────────────────────────────────────── */
+
+.ely-tpl-table-wrap {
+  overflow-x: auto;
+}
+
+.ely-tpl-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.ely-tpl-table-wrap th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 50%, transparent);
+  white-space: nowrap;
+}
+
+.ely-tpl-table-wrap td {
+  padding: 12px 16px;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 30%, transparent);
+  vertical-align: middle;
+}
+
+.ely-tpl-table-wrap tr:hover td {
+  background: color-mix(in oklab, var(--color-primary) 4%, transparent);
+}
+
+/* ── Pagination Bar ───────────────────────────────────────── */
+
+.ely-tpl-pagination-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+}
+
+/* ── Form Layout ──────────────────────────────────────────── */
+
+.ely-tpl-form-layout {
+  display: grid;
+  gap: 24px;
+}
+
+.ely-tpl-form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.ely-tpl-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+/* ── Wizard Layout ────────────────────────────────────────── */
+
+.ely-tpl-wizard {
+  display: grid;
+  gap: 32px;
+}
+
+.ely-tpl-wizard-content {
+  min-height: 320px;
+}
+
+.ely-tpl-wizard-nav {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ── Detail Header ────────────────────────────────────────── */
+
+.ely-tpl-detail-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.ely-tpl-detail-info {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+.ely-tpl-detail-info h1 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+  font-weight: 600;
+}
+
+.ely-tpl-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+}
+
+.ely-tpl-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ── Section Divider ──────────────────────────────────────── */
+
+.ely-tpl-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-line) 60%, transparent) 20%,
+    color-mix(in oklab, var(--color-line) 60%, transparent) 80%,
+    transparent
+  );
+  border: none;
+}
+
+/* ── Website Hero ─────────────────────────────────────────── */
+
+.ely-tpl-hero {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+  min-height: 380px;
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--color-primary) 12%, transparent),
+      color-mix(in oklab, var(--color-surface) 80%, transparent) 56%
+    ), var(--color-surface);
+  padding: 48px 40px;
+}
+
+.ely-tpl-hero-content {
+  display: grid;
+  gap: 20px;
+  max-width: 560px;
+}
+
+.ely-tpl-hero-content h1 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.ely-tpl-hero-content h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ely-tpl-hero-content p {
+  margin: 0;
+  max-width: 480px;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.ely-tpl-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ── Features Grid ────────────────────────────────────────── */
+
+.ely-tpl-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.ely-tpl-feature-card {
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 40%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ely-tpl-feature-card:hover {
+  box-shadow: 0 8px 28px
+    color-mix(in oklab, var(--color-shadow) 10%, transparent);
+  transform: translateY(-2px);
+}
+
+.ely-tpl-feature-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ely-public-radius-md, 10px);
+  background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-size: 1.2rem;
+}
+
+.ely-tpl-feature-card h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.05rem;
+}
+
+.ely-tpl-feature-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+/* ── Pricing Cards ────────────────────────────────────────── */
+
+.ely-tpl-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.ely-tpl-pricing-card {
+  display: grid;
+  gap: 20px;
+  padding: 32px 28px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 50%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 60%, transparent);
+}
+
+.ely-tpl-pricing-card--highlight {
+  border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-primary) 6%, transparent),
+      transparent
+    ), color-mix(in oklab, var(--color-surface) 60%, transparent);
+  box-shadow: 0 0 24px
+    color-mix(in oklab, var(--color-primary) 10%, transparent);
+}
+
+.ely-tpl-pricing-card h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.15rem;
+}
+
+.ely-tpl-price {
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.ely-tpl-price strong {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1;
+}
+
+.ely-tpl-price span {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.ely-tpl-price-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ely-tpl-price-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ely-tpl-price-list li::before {
+  content: "✓";
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ── Team Grid ────────────────────────────────────────────── */
+
+.ely-tpl-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.ely-tpl-team-card {
+  display: grid;
+  gap: 12px;
+  place-items: center;
+  text-align: center;
+  padding: 24px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 40%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+}
+
+.ely-tpl-team-card h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1rem;
+}
+
+.ely-tpl-team-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+}
+
+/* ── Stats Row ────────────────────────────────────────────── */
+
+.ely-tpl-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0;
+  text-align: center;
+}
+
+.ely-tpl-stat {
+  display: grid;
+  gap: 4px;
+  padding: 20px 16px;
+}
+
+.ely-tpl-stat + .ely-tpl-stat {
+  border-left: 1px solid color-mix(in oklab, var(--color-line) 40%, transparent);
+}
+
+.ely-tpl-stat strong {
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1;
+}
+
+.ely-tpl-stat span {
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Contact Layout ───────────────────────────────────────── */
+
+.ely-tpl-contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 32px;
+}
+
+/* ── CTA Section ──────────────────────────────────────────── */
+
+.ely-tpl-cta {
+  display: grid;
+  gap: 16px;
+  place-items: center;
+  text-align: center;
+  padding: 48px 32px;
+  border-radius: var(--ely-public-radius-lg);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-primary) 14%, transparent),
+    color-mix(in oklab, var(--color-accent) 8%, transparent)
+  );
+  border: 1px solid color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+
+.ely-tpl-cta h2 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+.ely-tpl-cta p {
+  margin: 0;
+  max-width: 480px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ── Locale Toggle Bar ────────────────────────────────────── */
+
+.ely-tpl-locale-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .ely-tpl-page {
+    padding: 20px 16px;
+    gap: 20px;
+  }
+
+  .ely-tpl-page-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ely-tpl-page-actions {
+    justify-content: flex-start;
+  }
+
+  .ely-tpl-detail-header {
+    flex-direction: column;
+  }
+
+  .ely-tpl-detail-actions {
+    width: 100%;
+  }
+
+  .ely-tpl-contact-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ely-tpl-hero {
+    padding: 32px 24px;
+    min-height: auto;
+  }
+
+  .ely-tpl-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ely-tpl-stat:nth-child(3) {
+    border-left: none;
+  }
+
+  .ely-tpl-blog-detail-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Blog Grid ──────────────────────────────────────────── */
+
+.ely-tpl-blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.ely-tpl-blog-card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid color-mix(in oklab, var(--color-line) 40%, transparent);
+  border-radius: var(--ely-public-radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 50%, transparent);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ely-tpl-blog-card:hover {
+  box-shadow: 0 8px 28px
+    color-mix(in oklab, var(--color-shadow) 10%, transparent);
+  transform: translateY(-2px);
+}
+
+.ely-tpl-blog-card-image {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--ely-public-radius-md, 10px);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-primary) 8%, transparent),
+    color-mix(in oklab, var(--color-accent) 5%, transparent)
+  );
+  display: grid;
+  place-items: center;
+}
+
+.ely-tpl-blog-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.ely-tpl-blog-card-excerpt {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+/* ── Blog Detail Layout ─────────────────────────────────── */
+
+.ely-tpl-blog-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 40px;
+}
+
+.ely-tpl-blog-article {
+  display: grid;
+  gap: 24px;
+}
+
+.ely-tpl-blog-article h2 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.ely-tpl-blog-article p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.ely-tpl-blog-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 24px;
+}
+
+.ely-tpl-blog-toc {
+  display: grid;
+  gap: 8px;
+}
+
+.ely-tpl-blog-toc a {
+  display: block;
+  padding: 6px 12px;
+  border-radius: var(--ely-public-radius-md, 10px);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ely-tpl-blog-toc a:hover {
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  color: var(--color-primary);
+}
+
+.ely-tpl-blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ely-tpl-blog-related {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* ── FAQ Category ───────────────────────────────────────── */
+
+.ely-tpl-faq-category {
+  display: grid;
+  gap: 16px;
+}
+
+.ely-tpl-faq-category > h3 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-line) 30%, transparent);
+}
+
+/* ── Error 404 Center ───────────────────────────────────── */
+
+.ely-tpl-error-center {
+  display: grid;
+  gap: 24px;
+  place-items: center;
+  text-align: center;
+  min-height: 60vh;
+  place-content: center;
+}
+
+.ely-tpl-error-center h1 {
+  margin: 0;
+  font-family: var(--ely-public-font-display);
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ely-tpl-error-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}

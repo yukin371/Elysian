@@ -4,10 +4,13 @@ import {
   ElyPublicButton,
   ElyPublicLink,
   ElyPublicProgress,
+  ElyPublicSegmentedControl,
   ElyPublicStat,
   ElyPublicText,
 } from "@elysian/ui-public-vue"
 import type { Meta, StoryObj } from "@storybook/vue3-vite"
+import { computed, ref } from "vue"
+import { type Locale, animeEventI18n, localeItems } from "./template-i18n"
 
 const meta = {
   title: "Public Luxe/Showcase/Anime Event Campaign",
@@ -36,50 +39,56 @@ export const CampaignWithCountdown: Story = {
       ElyPublicButton,
       ElyPublicLink,
       ElyPublicProgress,
+      ElyPublicSegmentedControl,
       ElyPublicStat,
       ElyPublicText,
+    },
+    setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeEventI18n[locale.value])
+
+      return { locale, t, localeItems }
     },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
+
           <section class="ely-anime-campaign-hero ely-anime-glass" style="grid-template-columns: 1.1fr 0.9fr;">
             <div class="ely-anime-campaign-content">
               <div class="ely-anime-glow--inline">
-                Limited Time Event
+                {{ t.badge }}
               </div>
-              <h1>
-                Dreamy Sakura
-                Collection Drop
-              </h1>
+              <h1 v-html="t.heading"></h1>
               <p>
-                An exclusive seasonal collection featuring 12 limited-edition
-                creator works. Each piece captures the fleeting beauty of
-                cherry blossom season.
+                {{ t.description }}
               </p>
               <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                <ElyPublicButton size="lg">Reserve your spot</ElyPublicButton>
-                <ElyPublicButton tone="ghost" size="lg">Learn more</ElyPublicButton>
+                <ElyPublicButton size="lg">{{ t.reserveBtn }}</ElyPublicButton>
+                <ElyPublicButton tone="ghost" size="lg">{{ t.learnBtn }}</ElyPublicButton>
               </div>
             </div>
             <div style="position: relative; display: grid; gap: 16px; align-content: center;">
               <div class="ely-anime-hero-card ely-anime-glow" style="text-align: center;">
                 <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                  Event starts in
+                  {{ t.startsIn }}
                 </p>
                 <div class="ely-anime-countdown" style="justify-content: center; margin-top: 8px;">
                   <div class="ely-anime-countdown-block">
                     <strong>03</strong>
-                    <span>Days</span>
+                    <span>{{ t.days }}</span>
                   </div>
                   <span class="ely-anime-countdown-sep">:</span>
                   <div class="ely-anime-countdown-block">
                     <strong>14</strong>
-                    <span>Hours</span>
+                    <span>{{ t.hours }}</span>
                   </div>
                   <span class="ely-anime-countdown-sep">:</span>
                   <div class="ely-anime-countdown-block">
                     <strong>28</strong>
-                    <span>Mins</span>
+                    <span>{{ t.mins }}</span>
                   </div>
                 </div>
               </div>
@@ -87,9 +96,9 @@ export const CampaignWithCountdown: Story = {
                 <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center;">
                   <div>
                     <strong style="font-family: var(--ely-public-font-display); font-size: 1.6rem;">847</strong>
-                    <span style="color: var(--color-text-muted); font-size: 0.78rem;"> / 1,000 spots</span>
+                    <span style="color: var(--color-text-muted); font-size: 0.78rem;">{{ t.spotsLabel }}</span>
                   </div>
-                  <ElyPublicBadge tone="accent">85% claimed</ElyPublicBadge>
+                  <ElyPublicBadge tone="accent">{{ t.claimed }}</ElyPublicBadge>
                 </div>
                 <ElyPublicProgress :value="85" tone="primary" label="Spot availability" />
               </div>
@@ -101,54 +110,25 @@ export const CampaignWithCountdown: Story = {
           <section style="display: grid; gap: 18px;">
             <div>
               <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                Reward tiers
+                {{ t.tierLabel }}
               </p>
               <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.1;">
-                Choose your collection tier
+                {{ t.tierTitle }}
               </h2>
             </div>
             <div class="ely-anime-tier-grid">
-              <div class="ely-anime-tier-card ely-anime-glass">
-                <ElyPublicBadge tone="secondary">Starter</ElyPublicBadge>
-                <div class="ely-anime-tier-price">Free</div>
-                <div class="ely-anime-tier-list">
-                  <div class="ely-anime-tier-item">Browse all 12 works</div>
-                  <div class="ely-anime-tier-item">Community gallery access</div>
-                  <div class="ely-anime-tier-item">Creator profiles</div>
-                </div>
-                <ElyPublicButton tone="ghost" block>Join free</ElyPublicButton>
-              </div>
-
-              <div class="ely-anime-tier-card ely-anime-glass ely-anime-glass--accent ely-anime-glow">
+              <div v-for="(tier, idx) in t.tiers" :key="idx" class="ely-anime-tier-card ely-anime-glass" :class="{ 'ely-anime-glass--accent ely-anime-glow': idx === 1 }">
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <ElyPublicBadge tone="primary">Collector</ElyPublicBadge>
-                  <ElyPublicBadge tone="accent">Popular</ElyPublicBadge>
+                  <ElyPublicBadge :tone="idx === 1 ? 'primary' : 'secondary'">{{ tier.badge }}</ElyPublicBadge>
+                  <ElyPublicBadge v-if="tier.badgeAlt" tone="accent">{{ tier.badgeAlt }}</ElyPublicBadge>
                 </div>
                 <div class="ely-anime-tier-price">
-                  2,400 <small>stars</small>
+                  {{ tier.price }}<small v-if="tier.priceUnit"> {{ tier.priceUnit }}</small>
                 </div>
                 <div class="ely-anime-tier-list">
-                  <div class="ely-anime-tier-item">Collect up to 6 works</div>
-                  <div class="ely-anime-tier-item">Exclusive creator commentary</div>
-                  <div class="ely-anime-tier-item">Early access to future drops</div>
-                  <div class="ely-anime-tier-item">Collector badge on profile</div>
+                  <div v-for="(feat, fi) in tier.features" :key="fi" class="ely-anime-tier-item">{{ feat }}</div>
                 </div>
-                <ElyPublicButton block>Reserve collector tier</ElyPublicButton>
-              </div>
-
-              <div class="ely-anime-tier-card ely-anime-glass">
-                <ElyPublicBadge tone="secondary">Patron</ElyPublicBadge>
-                <div class="ely-anime-tier-price">
-                  6,000 <small>stars</small>
-                </div>
-                <div class="ely-anime-tier-list">
-                  <div class="ely-anime-tier-item">Collect all 12 works</div>
-                  <div class="ely-anime-tier-item">Signed digital prints</div>
-                  <div class="ely-anime-tier-item">Private creator Q&A access</div>
-                  <div class="ely-anime-tier-item">Patron-exclusive variant covers</div>
-                  <div class="ely-anime-tier-item">Lifetime season access</div>
-                </div>
-                <ElyPublicButton tone="secondary" block>Reserve patron tier</ElyPublicButton>
+                <ElyPublicButton :tone="idx === 0 ? 'ghost' : idx === 2 ? 'secondary' : undefined" block>{{ tier.cta }}</ElyPublicButton>
               </div>
             </div>
           </section>
@@ -158,20 +138,15 @@ export const CampaignWithCountdown: Story = {
           <section style="display: grid; gap: 18px;">
             <div>
               <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                Featured works
+                {{ t.featuredLabel }}
               </p>
               <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.1;">
-                Preview the collection
+                {{ t.featuredTitle }}
               </h2>
             </div>
             <div class="ely-anime-grid">
               <div
-                v-for="work in [
-                  { title: 'First Light', tag: 'Illustration', desc: 'Dawn breaks over the petal bridge.' },
-                  { title: 'Quiet Garden', tag: 'Watercolor', desc: 'A peaceful corner in the bamboo grove.' },
-                  { title: 'Lantern Festival', tag: 'Digital Art', desc: 'Floating lights on the evening river.' },
-                  { title: 'Winter Bloom', tag: 'Photography', desc: 'An unexpected flower in the snow.' },
-                ]"
+                v-for="work in t.works"
                 :key="work.title"
                 class="ely-anime-card ely-anime-glass"
               >
@@ -189,11 +164,11 @@ export const CampaignWithCountdown: Story = {
 
           <div style="display: grid; gap: 14px; text-align: center; place-items: center; padding: 16px 0;">
             <ElyPublicText>
-              Questions about the event? Check the FAQ or contact support.
+              {{ t.footerText }}
             </ElyPublicText>
             <div style="display: flex; gap: 12px;">
-              <ElyPublicButton tone="ghost">View FAQ</ElyPublicButton>
-              <ElyPublicLink>Contact support</ElyPublicLink>
+              <ElyPublicButton tone="ghost">{{ t.faqBtn }}</ElyPublicButton>
+              <ElyPublicLink>{{ t.contactLink }}</ElyPublicLink>
             </div>
           </div>
         </div>
@@ -205,57 +180,62 @@ export const CampaignWithCountdown: Story = {
 export const EventDarkMode: Story = {
   name: "Event page (dark mode emphasis)",
   render: () => ({
-    components: { ElyPublicBadge, ElyPublicButton, ElyPublicProgress },
+    components: {
+      ElyPublicBadge,
+      ElyPublicButton,
+      ElyPublicProgress,
+      ElyPublicSegmentedControl,
+    },
+    setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeEventI18n[locale.value])
+
+      return { locale, t, localeItems }
+    },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
+
           <section class="ely-anime-campaign-hero ely-anime-glass" style="min-height: 440px; place-items: center; text-align: center;">
             <div class="ely-anime-campaign-content" style="max-width: 640px; place-items: center;">
               <div class="ely-anime-glow--inline">
-                Season Finale
+                {{ t.darkBadge }}
               </div>
               <h1 style="font-size: clamp(2.2rem, 5vw, 3.4rem);">
-                The Grand Archive Opens
+                {{ t.darkHeading }}
               </h1>
               <p style="max-width: 480px; margin: 0 auto;">
-                After two seasons of creator works, the grand archive
-                unlocks every piece in one ceremonial collection. Only
-                patrons who complete the season journey get permanent access.
+                {{ t.darkDesc }}
               </p>
               <div class="ely-anime-countdown" style="justify-content: center; margin-top: 8px;">
                 <div class="ely-anime-countdown-block">
                   <strong>01</strong>
-                  <span>Day</span>
+                  <span>{{ t.darkDay }}</span>
                 </div>
                 <span class="ely-anime-countdown-sep">:</span>
                 <div class="ely-anime-countdown-block">
                   <strong>08</strong>
-                  <span>Hours</span>
+                  <span>{{ t.hours }}</span>
                 </div>
                 <span class="ely-anime-countdown-sep">:</span>
                 <div class="ely-anime-countdown-block">
                   <strong>42</strong>
-                  <span>Mins</span>
+                  <span>{{ t.mins }}</span>
                 </div>
               </div>
               <div style="display: flex; gap: 12px; margin-top: 8px;">
-                <ElyPublicButton size="lg">Enter the archive</ElyPublicButton>
+                <ElyPublicButton size="lg">{{ t.darkBtn }}</ElyPublicButton>
               </div>
             </div>
           </section>
 
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-            <div class="ely-anime-glass ely-anime-section ely-anime-glow" style="text-align: center;">
-              <strong style="font-family: var(--ely-public-font-display); font-size: 2rem; display: block;">48</strong>
-              <span style="color: var(--color-text-muted); font-size: 0.78rem;">Total works</span>
-            </div>
-            <div class="ely-anime-glass ely-anime-section ely-anime-glow--accent" style="text-align: center;">
-              <strong style="font-family: var(--ely-public-font-display); font-size: 2rem; display: block;">12</strong>
-              <span style="color: var(--color-text-muted); font-size: 0.78rem;">Featured creators</span>
-            </div>
-            <div class="ely-anime-glass ely-anime-section ely-anime-glow" style="text-align: center;">
-              <strong style="font-family: var(--ely-public-font-display); font-size: 2rem; display: block;">3.2k</strong>
-              <span style="color: var(--color-text-muted); font-size: 0.78rem;">Patrons waiting</span>
+            <div v-for="stat in t.darkStats" :key="stat.label" class="ely-anime-glass ely-anime-section ely-anime-glow" style="text-align: center;">
+              <strong style="font-family: var(--ely-public-font-display); font-size: 2rem; display: block;">{{ stat.value }}</strong>
+              <span style="color: var(--color-text-muted); font-size: 0.78rem;">{{ stat.label }}</span>
             </div>
           </div>
         </div>

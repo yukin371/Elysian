@@ -7,6 +7,7 @@ import {
   ElyPublicFieldset,
   ElyPublicInput,
   ElyPublicRadioGroup,
+  ElyPublicSegmentedControl,
   ElyPublicSelect,
   ElyPublicSlider,
   ElyPublicSwitch,
@@ -19,7 +20,8 @@ import type {
   ElyPublicSelectOption,
 } from "@elysian/ui-public-vue"
 import type { Meta, StoryObj } from "@storybook/vue3-vite"
-import { ref } from "vue"
+import { computed, ref } from "vue"
+import { type Locale, animeSettingsI18n, localeItems } from "./template-i18n"
 
 const meta = {
   title: "Public Luxe/Showcase/Anime Settings & Profile",
@@ -39,62 +41,6 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const navSections = [
-  { key: "profile", label: "Profile" },
-  { key: "appearance", label: "Appearance" },
-  { key: "notifications", label: "Notifications" },
-  { key: "account", label: "Account" },
-]
-
-const themeItems: ElyPublicRadioGroupItem[] = [
-  {
-    key: "default",
-    label: "Elysian Default",
-    value: "elysian-default",
-  },
-  {
-    key: "rose",
-    label: "Rose Nocturne",
-    value: "rose-nocturne",
-  },
-  {
-    key: "azure",
-    label: "Azure Aria",
-    value: "azure-aria",
-  },
-  {
-    key: "enterprise",
-    label: "Enterprise Calm",
-    value: "enterprise-calm",
-  },
-  {
-    key: "sakura",
-    label: "Dreamy Sakura",
-    value: "dreamy-sakura",
-  },
-]
-
-const languageOptions: ElyPublicSelectOption[] = [
-  { label: "English", value: "en" },
-  { label: "Japanese", value: "ja" },
-  { label: "Korean", value: "ko" },
-  { label: "Chinese (Simplified)", value: "zh" },
-]
-
-const timezoneOptions: ElyPublicSelectOption[] = [
-  { label: "UTC+9 (JST)", value: "asia-tokyo" },
-  { label: "UTC+8 (CST)", value: "asia-shanghai" },
-  { label: "UTC-5 (EST)", value: "us-eastern" },
-  { label: "UTC-8 (PST)", value: "us-pacific" },
-]
-
-const accountItems: ElyPublicDescriptionItem[] = [
-  { key: "member", label: "Member since", value: "January 2026" },
-  { key: "plan", label: "Plan", value: "Collector Pro", tone: "accent" },
-  { key: "id", label: "Account ID", value: "ELY-2026-04821" },
-  { key: "storage", label: "Storage used", value: "2.4 GB of 10 GB" },
-]
-
 export const SettingsEditor: Story = {
   name: "Profile and settings editor",
   render: () => ({
@@ -107,6 +53,7 @@ export const SettingsEditor: Story = {
       ElyPublicFieldset,
       ElyPublicInput,
       ElyPublicRadioGroup,
+      ElyPublicSegmentedControl,
       ElyPublicSelect,
       ElyPublicSlider,
       ElyPublicSwitch,
@@ -114,6 +61,8 @@ export const SettingsEditor: Story = {
       ElyPublicTextarea,
     },
     setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeSettingsI18n[locale.value])
       const activeNav = ref("profile")
       const displayName = ref("Yukina Studio")
       const email = ref("yukina@example.com")
@@ -131,37 +80,39 @@ export const SettingsEditor: Story = {
       const density = ref(50)
 
       return {
+        locale,
+        t,
+        localeItems,
         activeNav,
         displayName,
         email,
         bio,
         language,
         timezone,
-        languageOptions,
-        timezoneOptions,
         theme,
-        themeItems,
         darkMode,
         emailNotifs,
         pushNotifs,
         activityDigest,
         publicProfile,
         density,
-        navSections,
-        accountItems,
       }
     },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
           <h1 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.5rem, 3vw, 2rem);">
-            Settings
+            {{ t.pageTitle }}
           </h1>
+
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
 
           <div class="ely-anime-settings-layout">
             <nav class="ely-anime-glass ely-anime-settings-nav">
               <div
-                v-for="section in navSections"
+                v-for="section in t.navSections"
                 :key="section.key"
                 class="ely-anime-settings-nav-item"
                 :class="{ 'ely-anime-settings-nav-item--active': activeNav === section.key }"
@@ -173,67 +124,67 @@ export const SettingsEditor: Story = {
 
             <div style="display: grid; gap: 24px;">
               <div class="ely-anime-glass ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">Profile</h2>
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">{{ t.profileSection }}</h2>
 
                 <div class="ely-anime-settings-avatar-edit">
                   <ElyPublicAvatar name="Yukina Studio" size="lg" status="online" />
                   <div style="display: grid; gap: 8px;">
-                    <ElyPublicButton size="sm">Change avatar</ElyPublicButton>
+                    <ElyPublicButton size="sm">{{ t.changeAvatar }}</ElyPublicButton>
                     <ElyPublicText>
                       <span style="color: var(--color-text-muted); font-size: 0.78rem;">
-                        JPG, PNG or GIF. Max 2 MB.
+                        {{ t.avatarHint }}
                       </span>
                     </ElyPublicText>
                   </div>
                 </div>
 
-                <ElyPublicFieldset legend="Personal information">
+                <ElyPublicFieldset :legend="t.personalInfo">
                   <div class="ely-anime-settings-form-grid">
-                    <ElyPublicInput v-model="displayName" label="Display name" />
-                    <ElyPublicInput v-model="email" label="Email" />
+                    <ElyPublicInput v-model="displayName" :label="t.displayName" />
+                    <ElyPublicInput v-model="email" :label="t.email" />
                   </div>
-                  <ElyPublicTextarea v-model="bio" label="Bio" />
+                  <ElyPublicTextarea v-model="bio" :label="t.bio" />
                   <div class="ely-anime-settings-form-grid">
-                    <ElyPublicSelect v-model="language" :options="languageOptions" label="Language" />
-                    <ElyPublicSelect v-model="timezone" :options="timezoneOptions" label="Timezone" />
+                    <ElyPublicSelect v-model="language" :options="t.languageOptions" :label="t.language" />
+                    <ElyPublicSelect v-model="timezone" :options="t.timezoneOptions" :label="t.timezone" />
                   </div>
                 </ElyPublicFieldset>
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">Appearance</h2>
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">{{ t.appearanceSection }}</h2>
 
-                <ElyPublicFieldset legend="Theme">
-                  <ElyPublicRadioGroup v-model="theme" :items="themeItems" label="Select theme" />
+                <ElyPublicFieldset :legend="t.themeLabel">
+                  <ElyPublicRadioGroup v-model="theme" :items="t.themeOptions" :label="t.selectTheme" />
                 </ElyPublicFieldset>
 
-                <ElyPublicSwitch v-model="darkMode" label="Dark mode" description="Use dark color scheme across the platform" />
+                <ElyPublicSwitch v-model="darkMode" :label="t.darkMode" :description="t.darkModeDesc" />
 
-                <ElyPublicSlider v-model="density" :min="0" :max="100" :step="10" label="Content density" description="Adjust spacing and compactness" unit="%" />
+                <ElyPublicSlider v-model="density" :min="0" :max="100" :step="10" :label="t.contentDensity" :description="t.densityDesc" unit="%" />
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">Notifications</h2>
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">{{ t.notificationsSection }}</h2>
 
-                <ElyPublicFieldset legend="Notification preferences">
-                  <ElyPublicSwitch v-model="emailNotifs" label="Email notifications" description="Receive updates via email" />
-                  <ElyPublicSwitch v-model="pushNotifs" label="Push notifications" description="Browser push alerts for new activity" />
-                  <ElyPublicSwitch v-model="activityDigest" label="Weekly digest" description="Get a summary of community activity every Monday" />
+                <ElyPublicFieldset :legend="t.notifPrefs">
+                  <ElyPublicSwitch v-model="emailNotifs" :label="t.emailNotifs" :description="t.emailNotifsDesc" />
+                  <ElyPublicSwitch v-model="pushNotifs" :label="t.pushNotifs" :description="t.pushNotifsDesc" />
+                  <ElyPublicSwitch v-model="activityDigest" :label="t.weeklyDigest" :description="t.weeklyDigestDesc" />
                 </ElyPublicFieldset>
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">Account</h2>
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">{{ t.accountSection }}</h2>
 
-                <ElyPublicSwitch v-model="publicProfile" label="Public profile" description="Allow others to see your profile and collections" />
+                <ElyPublicSwitch v-model="publicProfile" :label="t.publicProfile" :description="t.publicProfileDesc" />
 
                 <ElyPublicDivider />
 
-                <ElyPublicDescriptionList :items="accountItems" />
+                <ElyPublicDescriptionList :items="t.accountItems" />
 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                  <ElyPublicButton tone="ghost">Cancel</ElyPublicButton>
-                  <ElyPublicButton>Save changes</ElyPublicButton>
+                  <ElyPublicButton tone="ghost">{{ t.cancelBtn }}</ElyPublicButton>
+                  <ElyPublicButton>{{ t.saveBtn }}</ElyPublicButton>
                 </div>
               </div>
             </div>
@@ -256,6 +207,7 @@ export const SettingsDarkMode: Story = {
       ElyPublicFieldset,
       ElyPublicInput,
       ElyPublicRadioGroup,
+      ElyPublicSegmentedControl,
       ElyPublicSelect,
       ElyPublicSlider,
       ElyPublicSwitch,
@@ -263,6 +215,8 @@ export const SettingsDarkMode: Story = {
       ElyPublicTextarea,
     },
     setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeSettingsI18n[locale.value])
       const activeNav = ref("profile")
       const displayName = ref("Yukina Studio")
       const email = ref("yukina@example.com")
@@ -278,37 +232,38 @@ export const SettingsDarkMode: Story = {
       const density = ref(70)
 
       return {
+        locale,
+        t,
+        localeItems,
         activeNav,
         displayName,
         email,
         bio,
         language,
         timezone,
-        languageOptions,
-        timezoneOptions,
         theme,
-        themeItems,
         darkMode,
         emailNotifs,
         pushNotifs,
-        activityDigest,
         publicProfile,
         density,
-        navSections,
-        accountItems,
       }
     },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage ely-anime-bg-dots">
           <h1 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.5rem, 3vw, 2rem);">
-            Settings
+            {{ t.pageTitle }}
           </h1>
+
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
 
           <div class="ely-anime-settings-layout">
             <nav class="ely-anime-glass ely-anime-settings-nav">
               <div
-                v-for="section in navSections"
+                v-for="section in t.navSections"
                 :key="section.key"
                 class="ely-anime-settings-nav-item"
                 :class="{ 'ely-anime-settings-nav-item--active': activeNav === section.key }"
@@ -320,41 +275,43 @@ export const SettingsDarkMode: Story = {
 
             <div style="display: grid; gap: 24px;">
               <div class="ely-anime-glass ely-anime-glow ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">Profile</h2>
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">{{ t.profileSection }}</h2>
 
                 <div class="ely-anime-settings-avatar-edit">
                   <ElyPublicAvatar name="Yukina Studio" size="lg" status="online" />
                   <div style="display: grid; gap: 8px;">
-                    <ElyPublicButton size="sm">Change avatar</ElyPublicButton>
+                    <ElyPublicButton size="sm">{{ t.changeAvatar }}</ElyPublicButton>
                   </div>
                 </div>
 
-                <ElyPublicFieldset legend="Personal information">
+                <ElyPublicFieldset :legend="t.personalInfo">
                   <div class="ely-anime-settings-form-grid">
-                    <ElyPublicInput v-model="displayName" label="Display name" />
-                    <ElyPublicInput v-model="email" label="Email" />
+                    <ElyPublicInput v-model="displayName" :label="t.displayName" />
+                    <ElyPublicInput v-model="email" :label="t.email" />
                   </div>
-                  <ElyPublicTextarea v-model="bio" label="Bio" />
+                  <ElyPublicTextarea v-model="bio" :label="t.bio" />
                   <div class="ely-anime-settings-form-grid">
-                    <ElyPublicSelect v-model="language" :options="languageOptions" label="Language" />
-                    <ElyPublicSelect v-model="timezone" :options="timezoneOptions" label="Timezone" />
+                    <ElyPublicSelect v-model="language" :options="t.languageOptions" :label="t.language" />
+                    <ElyPublicSelect v-model="timezone" :options="t.timezoneOptions" :label="t.timezone" />
                   </div>
                 </ElyPublicFieldset>
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">Appearance</h2>
-                <ElyPublicRadioGroup v-model="theme" :items="themeItems" label="Select theme" />
-                <ElyPublicSwitch v-model="darkMode" label="Dark mode" description="Use dark color scheme" />
-                <ElyPublicSlider v-model="density" :min="0" :max="100" :step="10" label="Content density" unit="%" />
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">{{ t.appearanceSection }}</h2>
+                <ElyPublicRadioGroup v-model="theme" :items="t.themeOptions" :label="t.selectTheme" />
+                <ElyPublicSwitch v-model="darkMode" :label="t.darkMode" :description="t.darkModeDesc" />
+                <ElyPublicSlider v-model="density" :min="0" :max="100" :step="10" :label="t.contentDensity" :description="t.densityDesc" unit="%" />
               </div>
 
               <div class="ely-anime-glass ely-anime-section">
-                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">Account</h2>
-                <ElyPublicDescriptionList :items="accountItems" />
+                <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: 1.2rem;">{{ t.accountSection }}</h2>
+                <ElyPublicSwitch v-model="publicProfile" :label="t.publicProfile" :description="t.publicProfileDesc" />
+                <ElyPublicDivider />
+                <ElyPublicDescriptionList :items="t.accountItems" />
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                  <ElyPublicButton tone="ghost">Cancel</ElyPublicButton>
-                  <ElyPublicButton>Save changes</ElyPublicButton>
+                  <ElyPublicButton tone="ghost">{{ t.cancelBtn }}</ElyPublicButton>
+                  <ElyPublicButton>{{ t.saveBtn }}</ElyPublicButton>
                 </div>
               </div>
             </div>

@@ -2,9 +2,12 @@ import {
   ElyPublicBadge,
   ElyPublicButton,
   ElyPublicLink,
+  ElyPublicSegmentedControl,
   ElyPublicText,
 } from "@elysian/ui-public-vue"
 import type { Meta, StoryObj } from "@storybook/vue3-vite"
+import { computed, ref } from "vue"
+import { type Locale, animeHeroI18n, localeItems } from "./template-i18n"
 
 const meta = {
   title: "Public Luxe/Showcase/Anime Hero Landing",
@@ -31,51 +34,55 @@ export const HeroWithFeaturedContent: Story = {
       ElyPublicBadge,
       ElyPublicButton,
       ElyPublicLink,
+      ElyPublicSegmentedControl,
       ElyPublicText,
+    },
+    setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeHeroI18n[locale.value])
+      return { locale, t, localeItems }
     },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
           <section class="ely-anime-hero" style="grid-template-columns: 1.1fr 0.9fr;">
             <div class="ely-anime-hero-content">
               <div class="ely-anime-hero-badge">
-                New Season — Limited Edition
+                {{ t.badge }}
               </div>
-              <h1>
-                Welcome to the
-                <em>Elysian Collection</em>
-              </h1>
+              <h1 v-html="t.heading"></h1>
               <p class="ely-anime-hero-desc">
-                Discover curated creator collections with ceremonial elegance.
-                Every piece tells a story worth preserving.
+                {{ t.description }}
               </p>
               <div class="ely-anime-hero-actions">
-                <ElyPublicButton size="lg">Explore collection</ElyPublicButton>
-                <ElyPublicButton tone="ghost" size="lg">Watch trailer</ElyPublicButton>
+                <ElyPublicButton size="lg">{{ t.exploreBtn }}</ElyPublicButton>
+                <ElyPublicButton tone="ghost" size="lg">{{ t.watchBtn }}</ElyPublicButton>
               </div>
             </div>
             <div class="ely-anime-hero-aside">
               <div class="ely-anime-hero-card ely-anime-glow">
                 <div class="ely-anime-hero-badge" style="background: color-mix(in oklab, var(--color-accent) 14%, transparent); color: var(--color-accent);">
-                  Featured Creator
+                  {{ t.featuredBadge }}
                 </div>
-                <h3>Spring Bloom Archive</h3>
+                <h3>{{ t.featuredTitle }}</h3>
                 <p>
-                  A hand-curated collection of 24 creator works celebrating
-                  the season of renewal and cherry blossoms.
+                  {{ t.featuredDesc }}
                 </p>
                 <div class="ely-anime-hero-stats">
                   <div class="ely-anime-hero-stat">
                     <strong>24</strong>
-                    <span>Works</span>
+                    <span>{{ t.statWorks }}</span>
                   </div>
                   <div class="ely-anime-hero-stat">
                     <strong>1.2k</strong>
-                    <span>Collectors</span>
+                    <span>{{ t.statCollectors }}</span>
                   </div>
                   <div class="ely-anime-hero-stat">
                     <strong>98%</strong>
-                    <span>Rating</span>
+                    <span>{{ t.statRating }}</span>
                   </div>
                 </div>
               </div>
@@ -88,20 +95,16 @@ export const HeroWithFeaturedContent: Story = {
             <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
               <div>
                 <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-                  Trending Collections
+                  {{ t.trendingLabel }}
                 </p>
                 <h2 style="margin: 0; font-family: var(--ely-public-font-display); font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.1;">
-                  Curated picks from the community
+                  {{ t.trendingTitle }}
                 </h2>
               </div>
-              <ElyPublicLink>View all collections</ElyPublicLink>
+              <ElyPublicLink>{{ t.viewAll }}</ElyPublicLink>
             </div>
             <div class="ely-anime-grid--featured">
-              <div class="ely-anime-card ely-anime-glass" v-for="card in [
-                { title: 'Midnight Aurora', tag: 'Digital Art', desc: 'A visual journey through light and darkness by creator Aoi.', stat: '340 collectors' },
-                { title: 'Sakura Dreams', tag: 'Illustration', desc: 'Delicate ink and watercolor pieces capturing spring.', stat: '580 collectors' },
-                { title: 'Neon Chronicle', tag: 'Photography', desc: 'City nights captured in vivid color and texture.', stat: '210 collectors' },
-              ]" :key="card.title">
+              <div class="ely-anime-card ely-anime-glass" v-for="card in t.cards" :key="card.title">
                 <div class="ely-anime-card-image"><svg viewBox="0 0 160 100" fill="none" style="width:80px;opacity:.55"><circle cx="55" cy="38" r="22" stroke="white" stroke-width="2" opacity=".5"/><circle cx="105" cy="30" r="12" stroke="white" stroke-width="1.5" opacity=".4"/><path d="M20 72L55 45L85 62L120 42L145 55" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/><circle cx="130" cy="70" r="5" fill="white" opacity=".25"/><circle cx="35" cy="55" r="3" fill="white" opacity=".3"/></svg></div>
                 <div class="ely-anime-card-body">
                   <span class="ely-anime-card-tag">{{ card.tag }}</span>
@@ -119,9 +122,9 @@ export const HeroWithFeaturedContent: Story = {
 
           <section style="display: grid; gap: 14px; text-align: center; place-items: center; padding: 24px 0;">
             <ElyPublicText>
-              Ready to create your own collection? Start building with the theme system.
+              {{ t.ctaText }}
             </ElyPublicText>
-            <ElyPublicButton>Get started</ElyPublicButton>
+            <ElyPublicButton>{{ t.ctaBtn }}</ElyPublicButton>
           </section>
         </div>
       </section>
@@ -132,26 +135,33 @@ export const HeroWithFeaturedContent: Story = {
 export const MinimalHeroDark: Story = {
   name: "Minimal hero (dark mode)",
   render: () => ({
-    components: { ElyPublicButton },
+    components: {
+      ElyPublicButton,
+      ElyPublicSegmentedControl,
+    },
+    setup() {
+      const locale = ref<Locale>("en")
+      const t = computed(() => animeHeroI18n[locale.value])
+      return { locale, t, localeItems }
+    },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
           <section class="ely-anime-hero" style="min-height: 500px; text-align: center; place-items: center;">
             <div class="ely-anime-hero-content" style="max-width: 680px; place-items: center;">
               <div class="ely-anime-glow--inline">
-                Season 02 is here
+                {{ t.darkBadge }}
               </div>
-              <h1 style="font-size: clamp(2.4rem, 6vw, 4rem);">
-                Create worlds that <em>feel alive</em>
-              </h1>
+              <h1 style="font-size: clamp(2.4rem, 6vw, 4rem);" v-html="t.darkHeading"></h1>
               <p class="ely-anime-hero-desc" style="max-width: 520px; margin: 0 auto;">
-                The Elysian platform gives creators the tools to build
-                immersive, branded experiences with ceremonial polish and
-                anime-inspired aesthetics.
+                {{ t.darkDesc }}
               </p>
               <div class="ely-anime-hero-actions" style="justify-content: center;">
-                <ElyPublicButton size="lg">Start creating</ElyPublicButton>
-                <ElyPublicButton tone="ghost" size="lg">See examples</ElyPublicButton>
+                <ElyPublicButton size="lg">{{ t.darkStartBtn }}</ElyPublicButton>
+                <ElyPublicButton tone="ghost" size="lg">{{ t.darkExamplesBtn }}</ElyPublicButton>
               </div>
             </div>
           </section>
@@ -167,9 +177,19 @@ export const MinimalHeroDark: Story = {
 export const DesignTokens: Story = {
   name: "Design tokens and techniques",
   render: () => ({
+    components: {
+      ElyPublicSegmentedControl,
+    },
+    setup() {
+      const locale = ref<Locale>("en")
+      return { locale, localeItems }
+    },
     template: `
       <section class="ely-public-stage">
         <div class="ely-anime-stage">
+          <div class="ely-tpl-locale-bar">
+            <ElyPublicSegmentedControl v-model="locale" :items="localeItems" />
+          </div>
           <p style="margin: 0; color: var(--color-text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
             Template reference
           </p>
