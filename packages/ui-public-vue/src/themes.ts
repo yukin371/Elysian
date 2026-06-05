@@ -181,7 +181,7 @@ export const publicThemePacks: PublicThemePack[] = [
     preview: {
       dark: {
         heroFrom: "#1e1230",
-        heroTo: "#e8a0bf",
+        heroTo: "#c4708e",
         accent: "#ffcc80",
         surface: "#2a1a3e",
       },

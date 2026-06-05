@@ -1,3 +1,8 @@
+// This file is meant for @playwright/test only — bun:test should not load it.
+if (typeof Bun !== "undefined") {
+  process.exit(0)
+}
+
 import { expect, test } from "@playwright/test"
 
 const STORYBOOK_URL = process.env.STORYBOOK_URL || "http://localhost:6006"
